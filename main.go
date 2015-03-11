@@ -74,5 +74,10 @@ func main() {
 		fmt.Println(mfaRes2, postRes2)
 	} else {
 		fmt.Println(postRes.Accounts)
+		fmt.Println("Auth Get")
+		fmt.Println(client.AuthGet("test"))
+
+		fmt.Println("Auth DELETE")
+		fmt.Println(client.AuthDelete("test"))
 	}
 }
