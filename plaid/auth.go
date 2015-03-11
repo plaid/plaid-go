@@ -63,6 +63,38 @@ func (c client) AuthStep(accessToken, answer string) (postRes *postResponse,
 		bytes.NewReader(jsonText))
 }
 
+// POST /auth/get
+// Retrieves account data for an access token
+func (c client) AuthGet(accessToken string) (postRes *postResponse,
+	mfaRes *mfaResponse, err error) {
+
+	jsonText, err := json.Marshal(authGetJson{
+		c.clientID,
+		c.secret,
+		accessToken,
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+	return postAndUnmarshal(c.environment, "/auth/get",
+		bytes.NewReader(jsonText))
+}
+
+// DELETE /auth
+// Deletes data associated with an access token
+func (c client) AuthDelete(accessToken string) (deleteRes *deleteResponse, err error) {
+	jsonText, err := json.Marshal(authDeleteJson{
+		c.clientID,
+		c.secret,
+		accessToken,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return deleteAndUnmarshal(c.environment, "/auth",
+		bytes.NewReader(jsonText))
+}
+
 type AuthOptions struct {
 	List bool `json:"list"`
 }
@@ -73,8 +105,8 @@ type authJson struct {
 
 	Username string       `json:"username"`
 	Password string       `json:"password"`
-	PIN      string       `json:"pin"`
-	Options  *AuthOptions `json:"options"`
+	PIN      string       `json:"pin,omitempty"`
+	Options  *AuthOptions `json:"options,omitempty"`
 }
 
 type authStepOptions struct {
@@ -94,4 +126,16 @@ type authStepJson struct {
 	AccessToken string `json:"access_token"`
 
 	MFA string `json:"mfa"`
+}
+
+type authGetJson struct {
+	ClientID    string `json:"client_id"`
+	Secret      string `json:"secret"`
+	AccessToken string `json:"access_token"`
+}
+
+type authDeleteJson struct {
+	ClientID    string `json:"client_id"`
+	Secret      string `json:"secret"`
+	AccessToken string `json:"access_token"`
 }

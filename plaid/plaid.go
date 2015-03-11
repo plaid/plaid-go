@@ -84,6 +84,10 @@ type postResponse struct {
 	MFA         string    `json:"mfa"`
 }
 
+type deleteResponse struct {
+	Message string `json:"message"`
+}
+
 func getAndUnmarshal(environment environmentURL, endpoint string, structure interface{}) error {
 	res, err := http.Get(string(environment) + endpoint)
 	if err != nil {
@@ -235,4 +239,40 @@ func postAndUnmarshal(environment environmentURL, endpoint string,
 		return nil, nil, plaidErr
 	}
 	return nil, nil, errors.New("Unknown Plaid Error - Status:" + string(res.StatusCode))
+}
+
+func deleteAndUnmarshal(environment environmentURL, endpoint string,
+	body io.Reader) (*deleteResponse, error) {
+
+	httpClient := &http.Client{}
+	req, err := http.NewRequest("DELETE", string(environment)+endpoint, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Content-Type", "application/json")
+	res, err := httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	raw, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+	res.Body.Close()
+
+	// Successful response
+	var deleteRes deleteResponse
+	if res.StatusCode == 200 {
+		if err = json.Unmarshal(raw, &deleteRes); err != nil {
+			return nil, err
+		}
+		return &deleteRes, nil
+	}
+	// Attempt to unmarshal into Plaid error format
+	var plaidErr plaidError
+	if err = json.Unmarshal(raw, &plaidErr); err != nil {
+		return nil, err
+	}
+	plaidErr.StatusCode = res.StatusCode
+	return nil, plaidErr
 }
