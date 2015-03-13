@@ -80,4 +80,50 @@ func main() {
 		fmt.Println("Auth DELETE")
 		fmt.Println(client.AuthDelete("test"))
 	}
+
+	// POST /connect
+	postRes, mfaRes, err =
+		client.ConnectAddUser("plaid_test", "plaid_good", "", "citi", nil)
+	if err != nil {
+		fmt.Println(err)
+	} else if mfaRes != nil {
+		switch mfaRes.Type {
+		case "device":
+			fmt.Println("--Device MFA--")
+			fmt.Println("Message:", mfaRes.Device.Message)
+		case "list":
+			fmt.Println("--List MFA--")
+			fmt.Println("Mask:", mfaRes.List[0].Mask, "\nType:", mfaRes.List[0].Type)
+		case "questions":
+			fmt.Println("--Questions MFA--")
+			fmt.Println("Question:", mfaRes.Questions[0].Question)
+		case "selections":
+			fmt.Println("--Selections MFA--")
+			fmt.Println("Question:", mfaRes.Selections[1].Question)
+			fmt.Println("Answers:", mfaRes.Selections[1].Answers)
+		}
+
+		postRes2, mfaRes2, err := client.ConnectStepSendMethod(mfaRes.AccessToken, "type", "email")
+		if err != nil {
+			fmt.Println("Error submitting send_method", err)
+		}
+		fmt.Println(mfaRes2, postRes2)
+
+		postRes2, mfaRes2, err = client.ConnectStep(mfaRes.AccessToken, "tomato")
+		if err != nil {
+			fmt.Println("Error submitting mfa", err)
+		}
+		fmt.Println(mfaRes2, postRes2)
+	} else {
+		fmt.Println(postRes.Accounts)
+		fmt.Println("Connect GET")
+		connectRes, _, _ := client.ConnectGet("test", &plaid.ConnectGetOptions{true, "", "", ""})
+		fmt.Println(len(connectRes.Transactions))
+		fmt.Println(connectRes.Transactions)
+		// fmt.Println(client.ConnectGet("test", nil))
+
+		fmt.Println("Connect DELETE")
+		fmt.Println(client.ConnectDelete("test"))
+	}
+
 }

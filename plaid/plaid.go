@@ -45,6 +45,50 @@ type account struct {
 	InstitutionType string `json:"institution_type"`
 }
 
+type transaction struct {
+	ID        string `json:"_id"`
+	AccountID string `json:"_account"`
+
+	Amount float64 `json:"amount"`
+	Date   string  `json:"date"`
+	Name   string  `json:"name"`
+	Meta   struct {
+		AccountOwner string `json:"account_owner"`
+
+		Location struct {
+			Address string `json:"address"`
+			City    string `json:"city"`
+
+			Coordinates struct {
+				Lat float64 `json:"lat"`
+				Lon float64 `json:"lon"`
+			} `json:"coordinates"`
+
+			State string `json:"state"`
+			Zip   string `json:"zip"`
+		} `json:"location"`
+	} `json:"meta"`
+
+	Pending bool `json:"pending"`
+
+	Type struct {
+		Primary string `json:"primary"`
+	} `json:"type"`
+
+	Category   []string `json:"category"`
+	CategoryID string   `json:"category_id"`
+
+	Score struct {
+		Location struct {
+			Address float64 `json:"address"`
+			City    float64 `json:"city"`
+			State   float64 `json:"state"`
+			Zip     float64 `json:"zip"`
+		}
+		Name float64 `json:"name"`
+	} `json:"score"`
+}
+
 type mfaIntermediate struct {
 	AccessToken string      `json:"access_token"`
 	MFA         interface{} `json:"mfa"`
@@ -79,9 +123,10 @@ type mfaResponse struct {
 
 type postResponse struct {
 	// Normal response fields
-	AccessToken string    `json:"access_token"`
-	Accounts    []account `json:"accounts"`
-	MFA         string    `json:"mfa"`
+	AccessToken  string        `json:"access_token"`
+	Accounts     []account     `json:"accounts"`
+	MFA          string        `json:"mfa"`
+	Transactions []transaction `json:"transactions"`
 }
 
 type deleteResponse struct {
