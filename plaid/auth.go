@@ -65,19 +65,19 @@ func (c client) AuthStep(accessToken, answer string) (postRes *postResponse,
 
 // POST /auth/get
 // Retrieves account data for an access token
-func (c client) AuthGet(accessToken string) (postRes *postResponse,
-	mfaRes *mfaResponse, err error) {
-
+func (c client) AuthGet(accessToken string) (postRes *postResponse, err error) {
 	jsonText, err := json.Marshal(authGetJson{
 		c.clientID,
 		c.secret,
 		accessToken,
 	})
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	return postAndUnmarshal(c.environment, "/auth/get",
+	// /auth/get will never return an MFA response
+	postRes, _, err = postAndUnmarshal(c.environment, "/auth/get",
 		bytes.NewReader(jsonText))
+	return postRes, err
 }
 
 // DELETE /auth
