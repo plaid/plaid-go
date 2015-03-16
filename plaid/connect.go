@@ -81,6 +81,47 @@ func (c client) ConnectGet(accessToken string, options *ConnectGetOptions) (post
 		bytes.NewReader(jsonText))
 }
 
+// PATCH /connect
+// Update a users credentials
+func (c client) ConnectUpdate(username, password, pin, accessToken string) (postRes *postResponse,
+	mfaRes *mfaResponse, err error) {
+
+	jsonText, err := json.Marshal(connectUpdateJson{
+		c.clientID,
+		c.secret,
+		username,
+		password,
+		pin,
+		accessToken,
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+	return patchAndUnmarshal(c.environment, "/connect",
+		bytes.NewReader(jsonText))
+}
+
+// PATCH /connect/step
+// Send MFA for updating a user
+func (c client) ConnectUpdateStep(username, password, pin, mfa, accessToken string) (postRes *postResponse,
+	mfaRes *mfaResponse, err error) {
+
+	jsonText, err := json.Marshal(connectUpdateStepJson{
+		c.clientID,
+		c.secret,
+		username,
+		password,
+		pin,
+		mfa,
+		accessToken,
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+	return patchAndUnmarshal(c.environment, "/connect/step",
+		bytes.NewReader(jsonText))
+}
+
 // DELETE /connect
 // Deletes data associated with an access token
 func (c client) ConnectDelete(accessToken string) (deleteRes *deleteResponse, err error) {
@@ -145,6 +186,27 @@ type connectGetJson struct {
 	AccessToken string `json:"access_token"`
 
 	Options *ConnectGetOptions `json:"options,omitempty"`
+}
+
+type connectUpdateJson struct {
+	ClientID string `json:"client_id"`
+	Secret   string `json:"secret"`
+
+	Username    string `json:"username"`
+	Password    string `json:"password"`
+	PIN         string `json:"pin,omitempty"`
+	AccessToken string `json:"access_token"`
+}
+
+type connectUpdateStepJson struct {
+	ClientID string `json:"client_id"`
+	Secret   string `json:"secret"`
+
+	Username    string `json:"username"`
+	Password    string `json:"password"`
+	PIN         string `json:"pin,omitempty"`
+	MFA         string `json:"mfa"`
+	AccessToken string `json:"access_token"`
 }
 
 type connectDeleteJson struct {

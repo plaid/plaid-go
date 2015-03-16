@@ -80,6 +80,47 @@ func (c client) AuthGet(accessToken string) (postRes *postResponse, err error) {
 	return postRes, err
 }
 
+// PATCH /auth
+// Update a users credentials
+func (c client) AuthUpdate(username, password, pin, accessToken string) (postRes *postResponse,
+	mfaRes *mfaResponse, err error) {
+
+	jsonText, err := json.Marshal(authUpdateJson{
+		c.clientID,
+		c.secret,
+		username,
+		password,
+		pin,
+		accessToken,
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+	return patchAndUnmarshal(c.environment, "/auth",
+		bytes.NewReader(jsonText))
+}
+
+// PATCH /auth/step
+// Send MFA for updating a user
+func (c client) AuthUpdateStep(username, password, pin, mfa, accessToken string) (postRes *postResponse,
+	mfaRes *mfaResponse, err error) {
+
+	jsonText, err := json.Marshal(authUpdateStepJson{
+		c.clientID,
+		c.secret,
+		username,
+		password,
+		pin,
+		mfa,
+		accessToken,
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+	return patchAndUnmarshal(c.environment, "/auth/step",
+		bytes.NewReader(jsonText))
+}
+
 // DELETE /auth
 // Deletes data associated with an access token
 func (c client) AuthDelete(accessToken string) (deleteRes *deleteResponse, err error) {
@@ -131,6 +172,27 @@ type authStepJson struct {
 type authGetJson struct {
 	ClientID    string `json:"client_id"`
 	Secret      string `json:"secret"`
+	AccessToken string `json:"access_token"`
+}
+
+type authUpdateJson struct {
+	ClientID string `json:"client_id"`
+	Secret   string `json:"secret"`
+
+	Username    string `json:"username"`
+	Password    string `json:"password"`
+	PIN         string `json:"pin,omitempty"`
+	AccessToken string `json:"access_token"`
+}
+
+type authUpdateStepJson struct {
+	ClientID string `json:"client_id"`
+	Secret   string `json:"secret"`
+
+	Username    string `json:"username"`
+	Password    string `json:"password"`
+	PIN         string `json:"pin,omitempty"`
+	MFA         string `json:"mfa"`
 	AccessToken string `json:"access_token"`
 }
 

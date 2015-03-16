@@ -75,15 +75,18 @@ func main() {
 	} else {
 		fmt.Println(postRes.Accounts)
 		fmt.Println("Auth Get")
-		fmt.Println(client.AuthGet("test"))
+		fmt.Println(client.AuthGet("test_citi"))
 
 		fmt.Println("Auth DELETE")
-		fmt.Println(client.AuthDelete("test"))
+		fmt.Println(client.AuthDelete("test_citi"))
 	}
 
 	// POST /connect
 	postRes, mfaRes, err =
-		client.ConnectAddUser("plaid_test", "plaid_good", "", "citi", nil)
+		// client.ConnectAddUser("plaid_test", "plaid_good", "", "citi", nil)
+		// client.ConnectUpdate("plaid_selections", "plaid_good", "", "test")
+		client.AuthUpdate("plaid_test", "plaid_good", "", "test_chase")
+		// client.ConnectUpdateStep("plaid_test", "plaid_good", "", "tomato", "test")
 	if err != nil {
 		fmt.Println(err)
 	} else if mfaRes != nil {
@@ -109,7 +112,7 @@ func main() {
 		}
 		fmt.Println(mfaRes2, postRes2)
 
-		postRes2, mfaRes2, err = client.ConnectStep(mfaRes.AccessToken, "tomato")
+		postRes2, mfaRes2, err = client.ConnectStep(mfaRes.AccessToken, "1234")
 		if err != nil {
 			fmt.Println("Error submitting mfa", err)
 		}
@@ -125,5 +128,22 @@ func main() {
 		fmt.Println("Connect DELETE")
 		fmt.Println(client.ConnectDelete("test"))
 	}
+
+	// POST /balance
+	fmt.Println("Balance")
+	postRes, err = client.Balance("test_citi")
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(postRes)
+
+	// POST /upgrade
+	fmt.Println("Upgrade")
+	postRes, mfaRes, err = client.Upgrade("test_bofa", "connect", nil)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(mfaRes)
+	fmt.Println(postRes)
 
 }
