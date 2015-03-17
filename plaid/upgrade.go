@@ -5,9 +5,10 @@ import (
 	"encoding/json"
 )
 
-// POST /upgrade
-// Upgrade an access token to an additional product
-func (c client) Upgrade(accessToken, upgradeTo string,
+// Upgrade (POST /upgrade) upgrades an access token to an additional product.
+//
+// See https://plaid.com/docs/#upgrade-user.
+func (c *Client) Upgrade(accessToken, upgradeTo string,
 	options *UpgradeOptions) (postRes *postResponse, mfaRes *mfaResponse, err error) {
 
 	jsonText, err := json.Marshal(upgradeJson{
@@ -23,9 +24,11 @@ func (c client) Upgrade(accessToken, upgradeTo string,
 	return c.postAndUnmarshal("/upgrade", bytes.NewReader(jsonText))
 }
 
-// POST /upgrade/step
-// Submits an mfa "send_method", e.g. {"mask":"xxx-xxx-5309"}
-func (c client) UpgradeStepSendMethod(accessToken, key, value string) (postRes *postResponse,
+// UpgradeStepSendMethod (POST /upgrade/step) specifies a particular send method for MFA,
+// e.g. {"mask":"xxx-xxx-5309"}.
+//
+// See https://plaid.com/docs/#upgrade-user.
+func (c *Client) UpgradeStepSendMethod(accessToken, key, value string) (postRes *postResponse,
 	mfaRes *mfaResponse, err error) {
 
 	sendMethod := map[string]string{key: value}
@@ -41,9 +44,11 @@ func (c client) UpgradeStepSendMethod(accessToken, key, value string) (postRes *
 	return c.postAndUnmarshal("/upgrade/step", bytes.NewReader(jsonText))
 }
 
-// POST /upgrade/step
-// Submits an mfa answer
-func (c client) UpgradeStep(accessToken, answer string) (postRes *postResponse,
+// UpgradeStep (POST /upgrade/step) submits an MFA answer for a given access token.
+//
+// See https://plaid.com/docs/#mfa-authentication for upgrades to Connect.
+// See https://plaid.com/docs/#mfa-auth for upgrades to Auth.
+func (c *Client) UpgradeStep(accessToken, answer string) (postRes *postResponse,
 	mfaRes *mfaResponse, err error) {
 
 	jsonText, err := json.Marshal(upgradeStepJson{
@@ -58,6 +63,10 @@ func (c client) UpgradeStep(accessToken, answer string) (postRes *postResponse,
 	return c.postAndUnmarshal("/upgrade/step", bytes.NewReader(jsonText))
 }
 
+// UpgradeOptions represents options associated with upgrading a user.
+//
+// See https://plaid.com/docs/#add-user for upgrades to Connect.
+// See https://plaid.com/docs/#add-auth-user for upgrades to Auth.
 type UpgradeOptions struct {
 	Webhook string `json:"webhook,omitempty"`
 }

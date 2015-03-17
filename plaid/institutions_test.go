@@ -1,6 +1,7 @@
 package plaid
 
 import (
+	"fmt"
 	"testing"
 
 	. "github.com/onsi/ginkgo"
@@ -42,3 +43,13 @@ var _ = Describe("institutions", func() {
 	})
 
 })
+
+func ExampleGetInstitution() {
+	institution, err := GetInstitution(Tartan, "5301a9d704977c52b60000db")
+	fmt.Println(err)
+	fmt.Println(institution.Name)
+	fmt.Println(institution.Type)
+	// Output: <nil>
+	// American Express
+	// amex
+}

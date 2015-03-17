@@ -1,6 +1,7 @@
 package plaid
 
 import (
+	"fmt"
 	"testing"
 
 	. "github.com/onsi/ginkgo"
@@ -39,3 +40,13 @@ var _ = Describe("categories", func() {
 	})
 
 })
+
+func ExampleGetCategory() {
+	category, err := GetCategory(Tartan, "13005006")
+	fmt.Println(err)
+	fmt.Println(category.Hierarchy[2])
+	fmt.Println(category.Type)
+	// Output: <nil>
+	// Sushi
+	// place
+}
