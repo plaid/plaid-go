@@ -173,20 +173,84 @@ func postAndUnmarshal(environment environmentURL, endpoint string,
 	}
 	res.Body.Close()
 
+	return unmarshalPostMFA(res, raw)
+}
+
+func patchAndUnmarshal(environment environmentURL, endpoint string,
+	body io.Reader) (*postResponse, *mfaResponse, error) {
+
+	httpClient := &http.Client{}
+	req, err := http.NewRequest("PATCH", string(environment)+endpoint, body)
+	if err != nil {
+		return nil, nil, err
+	}
+	req.Header.Add("Content-Type", "application/json")
+	res, err := httpClient.Do(req)
+	if err != nil {
+		return nil, nil, err
+	}
+	raw, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, nil, err
+	}
+	res.Body.Close()
+
+	return unmarshalPostMFA(res, raw)
+}
+
+func deleteAndUnmarshal(environment environmentURL, endpoint string,
+	body io.Reader) (*deleteResponse, error) {
+
+	httpClient := &http.Client{}
+	req, err := http.NewRequest("DELETE", string(environment)+endpoint, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Content-Type", "application/json")
+	res, err := httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	raw, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+	res.Body.Close()
+
+	// Successful response
+	var deleteRes deleteResponse
+	if res.StatusCode == 200 {
+		if err = json.Unmarshal(raw, &deleteRes); err != nil {
+			return nil, err
+		}
+		return &deleteRes, nil
+	}
+	// Attempt to unmarshal into Plaid error format
+	var plaidErr plaidError
+	if err = json.Unmarshal(raw, &plaidErr); err != nil {
+		return nil, err
+	}
+	plaidErr.StatusCode = res.StatusCode
+	return nil, plaidErr
+}
+
+// Unmarshals response into postResponse, mfaResponse, or plaidError
+func unmarshalPostMFA(res *http.Response, body []byte) (*postResponse, *mfaResponse, error) {
 	// Different marshaling cases
 	var mfaInter mfaIntermediate
 	var postRes postResponse
+	var err error
 	switch {
 	// Successful response
 	case res.StatusCode == 200:
-		if err = json.Unmarshal(raw, &postRes); err != nil {
+		if err = json.Unmarshal(body, &postRes); err != nil {
 			return nil, nil, err
 		}
 		return &postRes, nil, nil
 
 	// MFA case
 	case res.StatusCode == 201:
-		if err = json.Unmarshal(raw, &mfaInter); err != nil {
+		if err = json.Unmarshal(body, &mfaInter); err != nil {
 			return nil, nil, err
 		}
 		mfaRes := mfaResponse{Type: mfaInter.Type, AccessToken: mfaInter.AccessToken}
@@ -277,47 +341,11 @@ func postAndUnmarshal(environment environmentURL, endpoint string,
 	// Error case, attempt to unmarshal into Plaid error format
 	case res.StatusCode >= 400:
 		var plaidErr plaidError
-		if err = json.Unmarshal(raw, &plaidErr); err != nil {
+		if err = json.Unmarshal(body, &plaidErr); err != nil {
 			return nil, nil, err
 		}
 		plaidErr.StatusCode = res.StatusCode
 		return nil, nil, plaidErr
 	}
 	return nil, nil, errors.New("Unknown Plaid Error - Status:" + string(res.StatusCode))
-}
-
-func deleteAndUnmarshal(environment environmentURL, endpoint string,
-	body io.Reader) (*deleteResponse, error) {
-
-	httpClient := &http.Client{}
-	req, err := http.NewRequest("DELETE", string(environment)+endpoint, body)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Add("Content-Type", "application/json")
-	res, err := httpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	raw, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-	res.Body.Close()
-
-	// Successful response
-	var deleteRes deleteResponse
-	if res.StatusCode == 200 {
-		if err = json.Unmarshal(raw, &deleteRes); err != nil {
-			return nil, err
-		}
-		return &deleteRes, nil
-	}
-	// Attempt to unmarshal into Plaid error format
-	var plaidErr plaidError
-	if err = json.Unmarshal(raw, &plaidErr); err != nil {
-		return nil, err
-	}
-	plaidErr.StatusCode = res.StatusCode
-	return nil, plaidErr
 }
