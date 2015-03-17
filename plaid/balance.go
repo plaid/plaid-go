@@ -5,9 +5,10 @@ import (
 	"encoding/json"
 )
 
-// POST /balance
-// Retrieves real-time balance for an access token
-func (c client) Balance(accessToken string) (postRes *postResponse, err error) {
+// Balance (POST /balance) retrieves real-time balance for a given access token.
+//
+// See https://plaid.com/docs/#balance.
+func (c *Client) Balance(accessToken string) (postRes *postResponse, err error) {
 	jsonText, err := json.Marshal(balanceJson{
 		c.clientID,
 		c.secret,

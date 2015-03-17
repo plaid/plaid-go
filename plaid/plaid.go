@@ -1,3 +1,4 @@
+// Package plaid implements a Go client for the Plaid API (https://plaid.com/docs)
 package plaid
 
 import (
@@ -8,23 +9,26 @@ import (
 	"net/http"
 )
 
-func NewClient(clientID, secret string, environment environmentURL) client {
-	return client{clientID, secret, environment, &http.Client{}}
+// NewClient instantiates a Client associated with a client id, secret and environment.
+// See https://plaid.com/docs/#gaining-access.
+func NewClient(clientID, secret string, environment environmentURL) *Client {
+	return &Client{clientID, secret, environment, &http.Client{}}
 }
 
-type client struct {
+// Note: Client is only exported for method documentation purposes.
+// Instances should only be created through the 'NewClient' function.
+//
+// See https://github.com/golang/go/issues/7823.
+type Client struct {
 	clientID    string
 	secret      string
 	environment environmentURL
 	httpClient  *http.Client
 }
 
-var userAgent = "plaid-go"
-
 type environmentURL string
 
 var Tartan environmentURL = "https://tartan.plaid.com"
-var TartanSandbox environmentURL = "https://tartan.plaid.com"
 var Production environmentURL = "https://api.plaid.com"
 
 type account struct {
@@ -164,7 +168,7 @@ func getAndUnmarshal(environment environmentURL, endpoint string, structure inte
 	return plaidErr
 }
 
-func (c client) postAndUnmarshal(endpoint string,
+func (c *Client) postAndUnmarshal(endpoint string,
 	body io.Reader) (*postResponse, *mfaResponse, error) {
 	// Read response body
 	req, err := http.NewRequest("POST", string(c.environment)+endpoint, body)
@@ -186,7 +190,7 @@ func (c client) postAndUnmarshal(endpoint string,
 	return unmarshalPostMFA(res, raw)
 }
 
-func (c client) patchAndUnmarshal(endpoint string,
+func (c *Client) patchAndUnmarshal(endpoint string,
 	body io.Reader) (*postResponse, *mfaResponse, error) {
 
 	req, err := http.NewRequest("PATCH", string(c.environment)+endpoint, body)
@@ -208,7 +212,7 @@ func (c client) patchAndUnmarshal(endpoint string,
 	return unmarshalPostMFA(res, raw)
 }
 
-func (c client) deleteAndUnmarshal(endpoint string,
+func (c *Client) deleteAndUnmarshal(endpoint string,
 	body io.Reader) (*deleteResponse, error) {
 
 	req, err := http.NewRequest("DELETE", string(c.environment)+endpoint, body)

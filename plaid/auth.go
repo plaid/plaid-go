@@ -5,9 +5,10 @@ import (
 	"encoding/json"
 )
 
-// POST /auth
-// Submits a new user given a set of credentials
-func (c client) AuthAddUser(username, password, pin, institutionType string,
+// AuthAddUser (POST /auth) submits a set of user credentials to add an Auth user.
+//
+// See https://plaid.com/docs/#add-auth-user.
+func (c *Client) AuthAddUser(username, password, pin, institutionType string,
 	options *AuthOptions) (postRes *postResponse, mfaRes *mfaResponse, err error) {
 
 	jsonText, err := json.Marshal(authJson{
@@ -25,9 +26,11 @@ func (c client) AuthAddUser(username, password, pin, institutionType string,
 	return c.postAndUnmarshal("/auth", bytes.NewReader(jsonText))
 }
 
-// POST /auth/step
-// Submits an mfa "send_method", e.g. {"mask":"xxx-xxx-5309"}
-func (c client) AuthStepSendMethod(accessToken, key, value string) (postRes *postResponse,
+// AuthStepSendMethod (POST /auth/step) specifies a particular send method for MFA,
+// e.g. `{"mask":"xxx-xxx-5309"}`.
+//
+// See https://plaid.com/docs/#mfa-auth.
+func (c *Client) AuthStepSendMethod(accessToken, key, value string) (postRes *postResponse,
 	mfaRes *mfaResponse, err error) {
 
 	sendMethod := map[string]string{key: value}
@@ -43,9 +46,10 @@ func (c client) AuthStepSendMethod(accessToken, key, value string) (postRes *pos
 	return c.postAndUnmarshal("/auth/step", bytes.NewReader(jsonText))
 }
 
-// POST /auth/step
-// Submits an mfa answer
-func (c client) AuthStep(accessToken, answer string) (postRes *postResponse,
+// AuthStep (POST /auth/step) submits an MFA answer for a given access token.
+//
+// See https://plaid.com/docs/#mfa-auth.
+func (c *Client) AuthStep(accessToken, answer string) (postRes *postResponse,
 	mfaRes *mfaResponse, err error) {
 
 	jsonText, err := json.Marshal(authStepJson{
@@ -60,9 +64,10 @@ func (c client) AuthStep(accessToken, answer string) (postRes *postResponse,
 	return c.postAndUnmarshal("/auth/step", bytes.NewReader(jsonText))
 }
 
-// POST /auth/get
-// Retrieves account data for an access token
-func (c client) AuthGet(accessToken string) (postRes *postResponse, err error) {
+// AuthGet (POST /auth/get) retrieves account data for a given access token.
+//
+// See https://plaid.com/docs/#retrieve-data.
+func (c *Client) AuthGet(accessToken string) (postRes *postResponse, err error) {
 	jsonText, err := json.Marshal(authGetJson{
 		c.clientID,
 		c.secret,
@@ -76,9 +81,10 @@ func (c client) AuthGet(accessToken string) (postRes *postResponse, err error) {
 	return postRes, err
 }
 
-// PATCH /auth
-// Update a users credentials
-func (c client) AuthUpdate(username, password, pin, accessToken string) (postRes *postResponse,
+// AuthUpdate (PATCH /auth) updates user credentials for a given access token.
+//
+// See https://plaid.com/docs/#update-auth-user.
+func (c *Client) AuthUpdate(username, password, pin, accessToken string) (postRes *postResponse,
 	mfaRes *mfaResponse, err error) {
 
 	jsonText, err := json.Marshal(authUpdateJson{
@@ -95,9 +101,10 @@ func (c client) AuthUpdate(username, password, pin, accessToken string) (postRes
 	return c.patchAndUnmarshal("/auth", bytes.NewReader(jsonText))
 }
 
-// PATCH /auth/step
-// Send MFA for updating a user
-func (c client) AuthUpdateStep(username, password, pin, mfa, accessToken string) (postRes *postResponse,
+// AuthUpdateStep (PATCH /auth/step) updates user credentials and MFA for a given access token.
+//
+// See https://plaid.com/docs/#update-auth-user.
+func (c *Client) AuthUpdateStep(username, password, pin, mfa, accessToken string) (postRes *postResponse,
 	mfaRes *mfaResponse, err error) {
 
 	jsonText, err := json.Marshal(authUpdateStepJson{
@@ -115,9 +122,10 @@ func (c client) AuthUpdateStep(username, password, pin, mfa, accessToken string)
 	return c.patchAndUnmarshal("/auth/step", bytes.NewReader(jsonText))
 }
 
-// DELETE /auth
-// Deletes data associated with an access token
-func (c client) AuthDelete(accessToken string) (deleteRes *deleteResponse, err error) {
+// AuthDelete (DELETE /auth) deletes data for a given access token.
+//
+// See https://plaid.com/docs/#delete-auth-user.
+func (c *Client) AuthDelete(accessToken string) (deleteRes *deleteResponse, err error) {
 	jsonText, err := json.Marshal(authDeleteJson{
 		c.clientID,
 		c.secret,
@@ -129,6 +137,9 @@ func (c client) AuthDelete(accessToken string) (deleteRes *deleteResponse, err e
 	return c.deleteAndUnmarshal("/auth", bytes.NewReader(jsonText))
 }
 
+// AuthOptions represents options associated with adding an Auth user.
+//
+// See https://plaid.com/docs/#add-auth-user.
 type AuthOptions struct {
 	List bool `json:"list"`
 }
