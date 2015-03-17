@@ -20,8 +20,7 @@ func (c client) Upgrade(accessToken, upgradeTo string,
 	if err != nil {
 		return nil, nil, err
 	}
-	return postAndUnmarshal(c.environment, "/upgrade",
-		bytes.NewReader(jsonText))
+	return c.postAndUnmarshal("/upgrade", bytes.NewReader(jsonText))
 }
 
 // POST /upgrade/step
@@ -39,8 +38,7 @@ func (c client) UpgradeStepSendMethod(accessToken, key, value string) (postRes *
 	if err != nil {
 		return nil, nil, err
 	}
-	return postAndUnmarshal(c.environment, "/upgrade/step",
-		bytes.NewReader(jsonText))
+	return c.postAndUnmarshal("/upgrade/step", bytes.NewReader(jsonText))
 }
 
 // POST /upgrade/step
@@ -57,8 +55,7 @@ func (c client) UpgradeStep(accessToken, answer string) (postRes *postResponse,
 	if err != nil {
 		return nil, nil, err
 	}
-	return postAndUnmarshal(c.environment, "/upgrade/step",
-		bytes.NewReader(jsonText))
+	return c.postAndUnmarshal("/upgrade/step", bytes.NewReader(jsonText))
 }
 
 type UpgradeOptions struct {

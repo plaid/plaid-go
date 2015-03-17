@@ -82,11 +82,7 @@ func main() {
 	}
 
 	// POST /connect
-	postRes, mfaRes, err =
-		// client.ConnectAddUser("plaid_test", "plaid_good", "", "citi", nil)
-		// client.ConnectUpdate("plaid_selections", "plaid_good", "", "test")
-		client.AuthUpdate("plaid_test", "plaid_good", "", "test_chase")
-		// client.ConnectUpdateStep("plaid_test", "plaid_good", "", "tomato", "test")
+	postRes, mfaRes, err = client.ConnectAddUser("plaid_test", "plaid_good", "", "citi", nil)
 	if err != nil {
 		fmt.Println(err)
 	} else if mfaRes != nil {
@@ -120,13 +116,13 @@ func main() {
 	} else {
 		fmt.Println(postRes.Accounts)
 		fmt.Println("Connect GET")
-		connectRes, _, _ := client.ConnectGet("test", &plaid.ConnectGetOptions{true, "", "", ""})
+		connectRes, _, _ := client.ConnectGet("test_citi", &plaid.ConnectGetOptions{true, "", "", ""})
 		fmt.Println(len(connectRes.Transactions))
 		fmt.Println(connectRes.Transactions)
 		// fmt.Println(client.ConnectGet("test", nil))
 
 		fmt.Println("Connect DELETE")
-		fmt.Println(client.ConnectDelete("test"))
+		fmt.Println(client.ConnectDelete("test_citi"))
 	}
 
 	// POST /balance

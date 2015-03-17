@@ -22,8 +22,7 @@ func (c client) ConnectAddUser(username, password, pin, institutionType string,
 	if err != nil {
 		return nil, nil, err
 	}
-	return postAndUnmarshal(c.environment, "/connect",
-		bytes.NewReader(jsonText))
+	return c.postAndUnmarshal("/connect", bytes.NewReader(jsonText))
 }
 
 // POST /connect/step
@@ -41,8 +40,7 @@ func (c client) ConnectStepSendMethod(accessToken, key, value string) (postRes *
 	if err != nil {
 		return nil, nil, err
 	}
-	return postAndUnmarshal(c.environment, "/connect/step",
-		bytes.NewReader(jsonText))
+	return c.postAndUnmarshal("/connect/step", bytes.NewReader(jsonText))
 }
 
 // POST /connect/step
@@ -59,8 +57,7 @@ func (c client) ConnectStep(accessToken, answer string) (postRes *postResponse,
 	if err != nil {
 		return nil, nil, err
 	}
-	return postAndUnmarshal(c.environment, "/connect/step",
-		bytes.NewReader(jsonText))
+	return c.postAndUnmarshal("/connect", bytes.NewReader(jsonText))
 }
 
 // POST /connect/get
@@ -77,8 +74,7 @@ func (c client) ConnectGet(accessToken string, options *ConnectGetOptions) (post
 	if err != nil {
 		return nil, nil, err
 	}
-	return postAndUnmarshal(c.environment, "/connect/get",
-		bytes.NewReader(jsonText))
+	return c.postAndUnmarshal("/connect/get", bytes.NewReader(jsonText))
 }
 
 // PATCH /connect
@@ -97,8 +93,7 @@ func (c client) ConnectUpdate(username, password, pin, accessToken string) (post
 	if err != nil {
 		return nil, nil, err
 	}
-	return patchAndUnmarshal(c.environment, "/connect",
-		bytes.NewReader(jsonText))
+	return c.patchAndUnmarshal("/connect", bytes.NewReader(jsonText))
 }
 
 // PATCH /connect/step
@@ -118,8 +113,7 @@ func (c client) ConnectUpdateStep(username, password, pin, mfa, accessToken stri
 	if err != nil {
 		return nil, nil, err
 	}
-	return patchAndUnmarshal(c.environment, "/connect/step",
-		bytes.NewReader(jsonText))
+	return c.patchAndUnmarshal("/connect/step", bytes.NewReader(jsonText))
 }
 
 // DELETE /connect
@@ -133,8 +127,7 @@ func (c client) ConnectDelete(accessToken string) (deleteRes *deleteResponse, er
 	if err != nil {
 		return nil, err
 	}
-	return deleteAndUnmarshal(c.environment, "/connect",
-		bytes.NewReader(jsonText))
+	return c.deleteAndUnmarshal("/connect", bytes.NewReader(jsonText))
 }
 
 type ConnectOptions struct {

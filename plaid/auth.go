@@ -22,8 +22,7 @@ func (c client) AuthAddUser(username, password, pin, institutionType string,
 	if err != nil {
 		return nil, nil, err
 	}
-	return postAndUnmarshal(c.environment, "/auth",
-		bytes.NewReader(jsonText))
+	return c.postAndUnmarshal("/auth", bytes.NewReader(jsonText))
 }
 
 // POST /auth/step
@@ -41,8 +40,7 @@ func (c client) AuthStepSendMethod(accessToken, key, value string) (postRes *pos
 	if err != nil {
 		return nil, nil, err
 	}
-	return postAndUnmarshal(c.environment, "/auth/step",
-		bytes.NewReader(jsonText))
+	return c.postAndUnmarshal("/auth/step", bytes.NewReader(jsonText))
 }
 
 // POST /auth/step
@@ -59,8 +57,7 @@ func (c client) AuthStep(accessToken, answer string) (postRes *postResponse,
 	if err != nil {
 		return nil, nil, err
 	}
-	return postAndUnmarshal(c.environment, "/auth/step",
-		bytes.NewReader(jsonText))
+	return c.postAndUnmarshal("/auth/step", bytes.NewReader(jsonText))
 }
 
 // POST /auth/get
@@ -75,8 +72,7 @@ func (c client) AuthGet(accessToken string) (postRes *postResponse, err error) {
 		return nil, err
 	}
 	// /auth/get will never return an MFA response
-	postRes, _, err = postAndUnmarshal(c.environment, "/auth/get",
-		bytes.NewReader(jsonText))
+	postRes, _, err = c.postAndUnmarshal("/auth/get", bytes.NewReader(jsonText))
 	return postRes, err
 }
 
@@ -96,8 +92,7 @@ func (c client) AuthUpdate(username, password, pin, accessToken string) (postRes
 	if err != nil {
 		return nil, nil, err
 	}
-	return patchAndUnmarshal(c.environment, "/auth",
-		bytes.NewReader(jsonText))
+	return c.patchAndUnmarshal("/auth", bytes.NewReader(jsonText))
 }
 
 // PATCH /auth/step
@@ -117,8 +112,7 @@ func (c client) AuthUpdateStep(username, password, pin, mfa, accessToken string)
 	if err != nil {
 		return nil, nil, err
 	}
-	return patchAndUnmarshal(c.environment, "/auth/step",
-		bytes.NewReader(jsonText))
+	return c.patchAndUnmarshal("/auth/step", bytes.NewReader(jsonText))
 }
 
 // DELETE /auth
@@ -132,8 +126,7 @@ func (c client) AuthDelete(accessToken string) (deleteRes *deleteResponse, err e
 	if err != nil {
 		return nil, err
 	}
-	return deleteAndUnmarshal(c.environment, "/auth",
-		bytes.NewReader(jsonText))
+	return c.deleteAndUnmarshal("/auth", bytes.NewReader(jsonText))
 }
 
 type AuthOptions struct {
