@@ -9,14 +9,17 @@ import (
 )
 
 func NewClient(clientID, secret string, environment environmentURL) client {
-	return client{clientID, secret, environment}
+	return client{clientID, secret, environment, &http.Client{}}
 }
 
 type client struct {
 	clientID    string
 	secret      string
 	environment environmentURL
+	httpClient  *http.Client
 }
+
+var userAgent = "plaid-go"
 
 type environmentURL string
 
@@ -133,6 +136,7 @@ type deleteResponse struct {
 	Message string `json:"message"`
 }
 
+// getAndUnmarshal is not a method because no client authentication is required
 func getAndUnmarshal(environment environmentURL, endpoint string, structure interface{}) error {
 	res, err := http.Get(string(environment) + endpoint)
 	if err != nil {
@@ -160,32 +164,16 @@ func getAndUnmarshal(environment environmentURL, endpoint string, structure inte
 	return plaidErr
 }
 
-func postAndUnmarshal(environment environmentURL, endpoint string,
+func (c client) postAndUnmarshal(endpoint string,
 	body io.Reader) (*postResponse, *mfaResponse, error) {
 	// Read response body
-	res, err := http.Post(string(environment)+endpoint, "application/json", body)
-	if err != nil {
-		return nil, nil, err
-	}
-	raw, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, nil, err
-	}
-	res.Body.Close()
-
-	return unmarshalPostMFA(res, raw)
-}
-
-func patchAndUnmarshal(environment environmentURL, endpoint string,
-	body io.Reader) (*postResponse, *mfaResponse, error) {
-
-	httpClient := &http.Client{}
-	req, err := http.NewRequest("PATCH", string(environment)+endpoint, body)
+	req, err := http.NewRequest("POST", string(c.environment)+endpoint, body)
 	if err != nil {
 		return nil, nil, err
 	}
 	req.Header.Add("Content-Type", "application/json")
-	res, err := httpClient.Do(req)
+	req.Header.Add("User-Agent", "plaid-go")
+	res, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -198,16 +186,38 @@ func patchAndUnmarshal(environment environmentURL, endpoint string,
 	return unmarshalPostMFA(res, raw)
 }
 
-func deleteAndUnmarshal(environment environmentURL, endpoint string,
+func (c client) patchAndUnmarshal(endpoint string,
+	body io.Reader) (*postResponse, *mfaResponse, error) {
+
+	req, err := http.NewRequest("PATCH", string(c.environment)+endpoint, body)
+	if err != nil {
+		return nil, nil, err
+	}
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("User-Agent", "plaid-go")
+	res, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, nil, err
+	}
+	raw, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, nil, err
+	}
+	res.Body.Close()
+
+	return unmarshalPostMFA(res, raw)
+}
+
+func (c client) deleteAndUnmarshal(endpoint string,
 	body io.Reader) (*deleteResponse, error) {
 
-	httpClient := &http.Client{}
-	req, err := http.NewRequest("DELETE", string(environment)+endpoint, body)
+	req, err := http.NewRequest("DELETE", string(c.environment)+endpoint, body)
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Add("Content-Type", "application/json")
-	res, err := httpClient.Do(req)
+	req.Header.Add("User-Agent", "plaid-go")
+	res, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
