@@ -63,6 +63,24 @@ if err != nil {
 }
 ```
 
+### Exchange a Plaid Link public_token for an access_token
+
+```go
+client := plaid.NewClient("test_id", "test_secret", plaid.Tartan)
+
+// POST /exchange_token
+postRes, err := client.ExchangeToken(public_token)
+if err != nil {
+    fmt.Println(err)
+} else {
+    // Use the returned Plaid API access_token to retrieve
+    // account information.
+    fmt.Println(postRes.AccessToken)
+    fmt.Println("Auth Get")
+    fmt.Println(client.AuthGet(postRes.AccessToken))
+}
+```
+
 ### Querying a category
 ```go
 // GET /categories/13001001
