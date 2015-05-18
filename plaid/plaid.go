@@ -31,28 +31,28 @@ type environmentURL string
 var Tartan environmentURL = "https://tartan.plaid.com"
 var Production environmentURL = "https://api.plaid.com"
 
-type account struct {
+type Account struct {
 	ID      string `json:"_id"`
 	ItemID  string `json:"_item"`
 	UserID  string `json:"_user"`
 	Balance struct {
 		Available float64 `json:"available"`
 		Current   float64 `json:"current"`
-	}
+	} `json:"balance"`
 	Meta struct {
 		Number string `json:"number"`
 		Name   string `json:"name"`
-	}
+	} `json:"meta"`
 	Numbers struct {
 		Account     string `json:"account"`
 		Routing     string `json:"routing"`
 		WireRouting string `json:"wireRouting"`
-	}
+	} `json:"numbers"`
 	Type            string `json:"type"`
 	InstitutionType string `json:"institution_type"`
 }
 
-type transaction struct {
+type Transaction struct {
 	ID        string `json:"_id"`
 	AccountID string `json:"_account"`
 
@@ -131,9 +131,9 @@ type mfaResponse struct {
 type postResponse struct {
 	// Normal response fields
 	AccessToken  string        `json:"access_token"`
-	Accounts     []account     `json:"accounts"`
+	Accounts     []Account     `json:"accounts"`
 	MFA          string        `json:"mfa"`
-	Transactions []transaction `json:"transactions"`
+	Transactions []Transaction `json:"transactions"`
 }
 
 type deleteResponse struct {
