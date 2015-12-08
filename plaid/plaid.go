@@ -130,10 +130,12 @@ type mfaResponse struct {
 
 type postResponse struct {
 	// Normal response fields
-	AccessToken  string        `json:"access_token"`
-	Accounts     []Account     `json:"accounts"`
-	MFA          string        `json:"mfa"`
-	Transactions []Transaction `json:"transactions"`
+	AccessToken      string        `json:"access_token"`
+	AccountId        string        `json:"account_id"`
+	Accounts         []Account     `json:"accounts"`
+	BankAccountToken string        `json:"stripe_bank_account_token"`
+	MFA              string        `json:"mfa"`
+	Transactions     []Transaction `json:"transactions"`
 }
 
 type deleteResponse struct {
