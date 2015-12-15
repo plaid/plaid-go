@@ -65,13 +65,15 @@ func main() {
 		if err != nil {
 			fmt.Println("Error submitting send_method", err)
 		}
-		fmt.Println(mfaRes2, postRes2)
+		fmt.Printf("%+v\n", mfaRes2)
+		fmt.Printf("%+v\n", postRes2)
 
 		postRes2, mfaRes2, err = client.AuthStep(mfaRes.AccessToken, "tomato")
 		if err != nil {
 			fmt.Println("Error submitting mfa", err)
 		}
-		fmt.Println(mfaRes2, postRes2)
+		fmt.Printf("%+v\n", mfaRes2)
+		fmt.Printf("%+v\n", postRes2)
 	} else {
 		fmt.Println(postRes.Accounts)
 		fmt.Println("Auth Get")
@@ -106,20 +108,21 @@ func main() {
 		if err != nil {
 			fmt.Println("Error submitting send_method", err)
 		}
-		fmt.Println(mfaRes2, postRes2)
+		fmt.Printf("%+v\n", mfaRes2)
+		fmt.Printf("%+v\n", postRes2)
 
 		postRes2, mfaRes2, err = client.ConnectStep(mfaRes.AccessToken, "1234")
 		if err != nil {
 			fmt.Println("Error submitting mfa", err)
 		}
-		fmt.Println(mfaRes2, postRes2)
+		fmt.Printf("%+v\n", mfaRes2)
+		fmt.Printf("%+v\n", postRes2)
 	} else {
 		fmt.Println(postRes.Accounts)
 		fmt.Println("Connect GET")
 		connectRes, _, _ := client.ConnectGet("test_citi", &plaid.ConnectGetOptions{true, "", "", ""})
 		fmt.Println(len(connectRes.Transactions))
 		fmt.Println(connectRes.Transactions)
-		// fmt.Println(client.ConnectGet("test", nil))
 
 		fmt.Println("Connect DELETE")
 		fmt.Println(client.ConnectDelete("test_citi"))
@@ -131,7 +134,7 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(postRes)
+	fmt.Printf("%+v\n", postRes)
 
 	// POST /upgrade
 	fmt.Println("Upgrade")
@@ -139,7 +142,11 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(mfaRes)
-	fmt.Println(postRes)
+	fmt.Printf("%+v\n", mfaRes)
+	fmt.Printf("%+v\n", postRes)
 
+	// POST exchange_token
+	fmt.Println("ExchangeToken")
+	postRes, err = client.ExchangeToken("test,chase,connected")
+	fmt.Printf("%+v\n", postRes)
 }
