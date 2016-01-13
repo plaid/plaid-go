@@ -63,7 +63,9 @@ if err != nil {
 }
 ```
 
-### Exchange a Plaid Link public_token for an access_token
+### Plaid Link Exchange Token Process
+
+Exchange a [Plaid Link][1] `public_token` for an API `access_token`:
 
 ```go
 client := plaid.NewClient("test_id", "test_secret", plaid.Tartan)
@@ -81,6 +83,24 @@ if err != nil {
 }
 ```
 
+With the [Plaid + Stripe ACH integration][2], exchange a Link `public_token`
+and `account_id` for an API `access_token` and Stripe `bank_account_token`:
+
+```go
+client := plaid.NewClient(CLIENT_ID, SECRET, plaid.Tartan)
+
+// POST /exchange_token
+postRes, err := client.ExchangeTokenAccount(public_token, account_id)
+if err != nil {
+    fmt.Println(err)
+} else {
+    // Use the returned Plaid access_token to make Plaid API requests and the
+    // Stripe bank account token to make Stripe ACH API requests.
+    fmt.Println(postRes.AccessToken)
+    fmt.Println(postRes.BankAccountToken)
+}
+```
+
 ### Querying a category
 ```go
 // GET /categories/13001001
@@ -91,3 +111,6 @@ if err != nil {
     fmt.Println("category", category.ID, "is", strings.Join(category.Hierarchy, ", "))
 }
 ```
+
+[1]: https://plaid.com/docs/link
+[2]: https://plaid.com/docs/link/stripe
