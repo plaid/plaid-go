@@ -15,6 +15,12 @@ func NewClient(clientID, secret string, environment environmentURL) *Client {
 	return &Client{clientID, secret, environment, &http.Client{}}
 }
 
+// Same as above but with additional parameter to pass http.Client. This is required
+// if you want to run the code on Google AppEngine which prohibits use of http.DefaultClient
+func NewCustomClient(clientID, secret string, environment environmentURL, httpClient *http.Client) *Client {
+	return &Client{clientID, secret, environment, httpClient}
+}
+
 // Note: Client is only exported for method documentation purposes.
 // Instances should only be created through the 'NewClient' function.
 //
