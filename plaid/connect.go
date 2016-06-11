@@ -7,7 +7,7 @@ import (
 
 // ConnectAddUser (POST /connect) submits a set of user credentials to add a Connect user.
 //
-// See https://plaid.com/docs/#add-user.
+// See https://plaid.com/docs/api/#add-user.
 func (c *Client) ConnectAddUser(username, password, pin, institutionType string,
 	options *ConnectOptions) (postRes *postResponse, mfaRes *mfaResponse, err error) {
 
@@ -29,7 +29,7 @@ func (c *Client) ConnectAddUser(username, password, pin, institutionType string,
 // ConnectStepSendMethod (POST /connect/step) specifies a particular send method for MFA,
 // e.g. `{"mask":"xxx-xxx-5309"}`.
 //
-// See https://plaid.com/docs/#mfa-authentication.
+// See https://plaid.com/docs/api/#mfa-authentication.
 func (c *Client) ConnectStepSendMethod(accessToken, key, value string) (postRes *postResponse,
 	mfaRes *mfaResponse, err error) {
 
@@ -48,7 +48,7 @@ func (c *Client) ConnectStepSendMethod(accessToken, key, value string) (postRes 
 
 // ConnectStep (POST /connect/step) submits an MFA answer for a given access token.
 //
-// See https://plaid.com/docs/#mfa-authentication.
+// See https://plaid.com/docs/api/#mfa-authentication.
 func (c *Client) ConnectStep(accessToken, answer string) (postRes *postResponse,
 	mfaRes *mfaResponse, err error) {
 
@@ -66,7 +66,7 @@ func (c *Client) ConnectStep(accessToken, answer string) (postRes *postResponse,
 
 // ConnectGet (POST /connect/get) retrieves account and transaction data for a given access token.
 //
-// See https://plaid.com/docs/#retrieve-transactions.
+// See https://plaid.com/docs/api/#get-transactions.
 func (c *Client) ConnectGet(accessToken string, options *ConnectGetOptions) (postRes *postResponse,
 	mfaRes *mfaResponse, err error) {
 
@@ -84,7 +84,7 @@ func (c *Client) ConnectGet(accessToken string, options *ConnectGetOptions) (pos
 
 // ConnectUpdate (PATCH /connect) updates user credentials for a given access token.
 //
-// See https://plaid.com/docs/#update-user.
+// See https://plaid.com/docs/api/#update-user.
 func (c *Client) ConnectUpdate(username, password, pin, accessToken string) (postRes *postResponse,
 	mfaRes *mfaResponse, err error) {
 
@@ -104,7 +104,7 @@ func (c *Client) ConnectUpdate(username, password, pin, accessToken string) (pos
 
 // ConnectUpdateStep (PATCH /connect/step) updates user credentials and MFA for a given access token.
 //
-// See https://plaid.com/docs/#update-user.
+// See https://plaid.com/docs/api/#update-user.
 func (c *Client) ConnectUpdateStep(username, password, pin, mfa, accessToken string) (postRes *postResponse,
 	mfaRes *mfaResponse, err error) {
 
@@ -125,7 +125,7 @@ func (c *Client) ConnectUpdateStep(username, password, pin, mfa, accessToken str
 
 // ConnectDelete (DELETE /connect) deletes data for a given access token.
 //
-// See https://plaid.com/docs/#delete-user.
+// See https://plaid.com/docs/api/#delete-user.
 func (c *Client) ConnectDelete(accessToken string) (deleteRes *deleteResponse, err error) {
 	jsonText, err := json.Marshal(connectDeleteJson{
 		c.clientID,
@@ -140,7 +140,7 @@ func (c *Client) ConnectDelete(accessToken string) (deleteRes *deleteResponse, e
 
 // ConnectOptions represents options associated with adding an Connect user.
 //
-// See https://plaid.com/docs/#add-user.
+// See https://plaid.com/docs/api/#add-user.
 type ConnectOptions struct {
 	Webhook   string `json:"webhook,omitempty"`
 	Pending   bool   `json:"pending,omitempty"`
@@ -180,7 +180,7 @@ type connectStepJson struct {
 
 // ConnectGetOptions represents options associated with retrieving a Connect user.
 //
-// See https://plaid.com/docs/#retrieve-transactions.
+// See https://plaid.com/docs/api/#retrieve-transactions.
 type ConnectGetOptions struct {
 	Pending bool   `json:"pending,omitempty"`
 	Account string `json:"account,omitempty"`
