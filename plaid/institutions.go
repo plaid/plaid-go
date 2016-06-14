@@ -1,14 +1,14 @@
 package plaid
 
 // GetInstitution returns information for a single institution given an ID.
-// See https://plaid.com/docs/#institutions-by-id.
+// See https://plaid.com/docs/api/#institutions-by-id.
 func GetInstitution(environment environmentURL, id string) (inst institution, err error) {
 	err = getAndUnmarshal(environment, "/institutions/"+id, &inst)
 	return
 }
 
 // GetInstitution returns information for all institutions.
-// See https://plaid.com/docs/#all-institutions.
+// See https://plaid.com/docs/api/#all-institutions.
 func GetInstitutions(environment environmentURL) (institutions []institution, err error) {
 	err = getAndUnmarshal(environment, "/institutions", &institutions)
 	return

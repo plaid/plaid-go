@@ -7,7 +7,7 @@ import (
 
 // Upgrade (POST /upgrade) upgrades an access token to an additional product.
 //
-// See https://plaid.com/docs/#upgrade-user.
+// See https://plaid.com/docs/api/#upgrade-user.
 func (c *Client) Upgrade(accessToken, upgradeTo string,
 	options *UpgradeOptions) (postRes *postResponse, mfaRes *mfaResponse, err error) {
 
@@ -27,7 +27,7 @@ func (c *Client) Upgrade(accessToken, upgradeTo string,
 // UpgradeStepSendMethod (POST /upgrade/step) specifies a particular send method for MFA,
 // e.g. {"mask":"xxx-xxx-5309"}.
 //
-// See https://plaid.com/docs/#upgrade-user.
+// See https://plaid.com/docs/api/#upgrade-user.
 func (c *Client) UpgradeStepSendMethod(accessToken, key, value string) (postRes *postResponse,
 	mfaRes *mfaResponse, err error) {
 
@@ -46,8 +46,8 @@ func (c *Client) UpgradeStepSendMethod(accessToken, key, value string) (postRes 
 
 // UpgradeStep (POST /upgrade/step) submits an MFA answer for a given access token.
 //
-// See https://plaid.com/docs/#mfa-authentication for upgrades to Connect.
-// See https://plaid.com/docs/#mfa-auth for upgrades to Auth.
+// See https://plaid.com/docs/api/#mfa-authentication for upgrades to Connect.
+// See https://plaid.com/docs/api/#mfa-auth for upgrades to Auth.
 func (c *Client) UpgradeStep(accessToken, answer string) (postRes *postResponse,
 	mfaRes *mfaResponse, err error) {
 
@@ -65,8 +65,8 @@ func (c *Client) UpgradeStep(accessToken, answer string) (postRes *postResponse,
 
 // UpgradeOptions represents options associated with upgrading a user.
 //
-// See https://plaid.com/docs/#add-user for upgrades to Connect.
-// See https://plaid.com/docs/#add-auth-user for upgrades to Auth.
+// See https://plaid.com/docs/api/#add-user for upgrades to Connect.
+// See https://plaid.com/docs/api/#add-auth-user for upgrades to Auth.
 type UpgradeOptions struct {
 	Webhook string `json:"webhook,omitempty"`
 }

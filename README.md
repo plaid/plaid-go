@@ -24,7 +24,7 @@ postRes, mfaRes, err := client.AuthAddUser("plaid_test", "plaid_good", "", "bofa
 if err != nil {
     fmt.Println(err)
 } else if mfaRes != nil {
-    // Need to switch on different MFA types. See https://plaid.com/docs/#mfa-auth.
+    // Need to switch on different MFA types. See https://plaid.com/docs/api/#mfa-auth.
     switch mfaRes.Type {
     case "device":
         fmt.Println("--Device MFA--")

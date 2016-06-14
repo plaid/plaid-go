@@ -7,7 +7,7 @@ import (
 
 // Balance (POST /balance) retrieves real-time balance for a given access token.
 //
-// See https://plaid.com/docs/#balance.
+// See https://plaid.com/docs/api/#balance.
 func (c *Client) Balance(accessToken string) (postRes *postResponse, err error) {
 	jsonText, err := json.Marshal(balanceJson{
 		c.clientID,

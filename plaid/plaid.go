@@ -10,7 +10,7 @@ import (
 )
 
 // NewClient instantiates a Client associated with a client id, secret and environment.
-// See https://plaid.com/docs/#gaining-access.
+// See https://plaid.com/docs/api/#gaining-access.
 func NewClient(clientID, secret string, environment environmentURL) *Client {
 	return &Client{clientID, secret, environment, &http.Client{}}
 }
