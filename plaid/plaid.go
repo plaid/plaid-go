@@ -11,13 +11,13 @@ import (
 
 // NewClient instantiates a Client associated with a client id, secret and environment.
 // See https://plaid.com/docs/api/#gaining-access.
-func NewClient(clientID, secret string, environment environmentURL) *Client {
+func NewClient(clientID, secret string, environment string) *Client {
 	return &Client{clientID, secret, environment, &http.Client{}}
 }
 
 // Same as above but with additional parameter to pass http.Client. This is required
 // if you want to run the code on Google AppEngine which prohibits use of http.DefaultClient
-func NewCustomClient(clientID, secret string, environment environmentURL, httpClient *http.Client) *Client {
+func NewCustomClient(clientID, secret string, environment string, httpClient *http.Client) *Client {
 	return &Client{clientID, secret, environment, httpClient}
 }
 
@@ -28,14 +28,12 @@ func NewCustomClient(clientID, secret string, environment environmentURL, httpCl
 type Client struct {
 	clientID    string
 	secret      string
-	environment environmentURL
+	environment string
 	httpClient  *http.Client
 }
 
-type environmentURL string
-
-var Tartan environmentURL = "https://tartan.plaid.com"
-var Production environmentURL = "https://api.plaid.com"
+var Tartan string = "https://tartan.plaid.com"
+var Production string = "https://api.plaid.com"
 
 type Account struct {
 	ID      string `json:"_id"`
@@ -149,7 +147,7 @@ type deleteResponse struct {
 }
 
 // getAndUnmarshal is not a method because no client authentication is required
-func getAndUnmarshal(environment environmentURL, endpoint string, structure interface{}) error {
+func getAndUnmarshal(environment, endpoint string, structure interface{}) error {
 	res, err := http.Get(string(environment) + endpoint)
 	if err != nil {
 		return err
