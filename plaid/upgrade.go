@@ -9,7 +9,7 @@ import (
 //
 // See https://plaid.com/docs/api/#upgrade-user.
 func (c *Client) Upgrade(accessToken, upgradeTo string,
-	options *UpgradeOptions) (postRes *postResponse, mfaRes *mfaResponse, err error) {
+	options *UpgradeOptions) (postRes *PostResponse, mfaRes *MFAResponse, err error) {
 
 	jsonText, err := json.Marshal(upgradeJson{
 		c.clientID,
@@ -28,8 +28,8 @@ func (c *Client) Upgrade(accessToken, upgradeTo string,
 // e.g. {"mask":"xxx-xxx-5309"}.
 //
 // See https://plaid.com/docs/api/#upgrade-user.
-func (c *Client) UpgradeStepSendMethod(accessToken, key, value string) (postRes *postResponse,
-	mfaRes *mfaResponse, err error) {
+func (c *Client) UpgradeStepSendMethod(accessToken, key, value string) (postRes *PostResponse,
+	mfaRes *MFAResponse, err error) {
 
 	sendMethod := map[string]string{key: value}
 	jsonText, err := json.Marshal(upgradeStepSendMethodJson{
@@ -48,8 +48,8 @@ func (c *Client) UpgradeStepSendMethod(accessToken, key, value string) (postRes 
 //
 // See https://plaid.com/docs/api/#mfa-authentication for upgrades to Connect.
 // See https://plaid.com/docs/api/#mfa-auth for upgrades to Auth.
-func (c *Client) UpgradeStep(accessToken, answer string) (postRes *postResponse,
-	mfaRes *mfaResponse, err error) {
+func (c *Client) UpgradeStep(accessToken, answer string) (postRes *PostResponse,
+	mfaRes *MFAResponse, err error) {
 
 	jsonText, err := json.Marshal(upgradeStepJson{
 		c.clientID,
