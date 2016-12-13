@@ -9,7 +9,7 @@ import (
 //
 // See https://plaid.com/docs/api/#add-user.
 func (c *Client) ConnectAddUser(username, password, pin, institutionType string,
-	options *ConnectOptions) (postRes *postResponse, mfaRes *mfaResponse, err error) {
+	options *ConnectOptions) (postRes *PostResponse, mfaRes *MFAResponse, err error) {
 
 	jsonText, err := json.Marshal(connectJson{
 		c.clientID,
@@ -30,8 +30,8 @@ func (c *Client) ConnectAddUser(username, password, pin, institutionType string,
 // e.g. `{"mask":"xxx-xxx-5309"}`.
 //
 // See https://plaid.com/docs/api/#mfa-authentication.
-func (c *Client) ConnectStepSendMethod(accessToken, key, value string) (postRes *postResponse,
-	mfaRes *mfaResponse, err error) {
+func (c *Client) ConnectStepSendMethod(accessToken, key, value string) (postRes *PostResponse,
+	mfaRes *MFAResponse, err error) {
 
 	sendMethod := map[string]string{key: value}
 	jsonText, err := json.Marshal(connectStepSendMethodJson{
@@ -49,8 +49,8 @@ func (c *Client) ConnectStepSendMethod(accessToken, key, value string) (postRes 
 // ConnectStep (POST /connect/step) submits an MFA answer for a given access token.
 //
 // See https://plaid.com/docs/api/#mfa-authentication.
-func (c *Client) ConnectStep(accessToken, answer string) (postRes *postResponse,
-	mfaRes *mfaResponse, err error) {
+func (c *Client) ConnectStep(accessToken, answer string) (postRes *PostResponse,
+	mfaRes *MFAResponse, err error) {
 
 	jsonText, err := json.Marshal(connectStepJson{
 		c.clientID,
@@ -67,8 +67,8 @@ func (c *Client) ConnectStep(accessToken, answer string) (postRes *postResponse,
 // ConnectGet (POST /connect/get) retrieves account and transaction data for a given access token.
 //
 // See https://plaid.com/docs/api/#get-transactions.
-func (c *Client) ConnectGet(accessToken string, options *ConnectGetOptions) (postRes *postResponse,
-	mfaRes *mfaResponse, err error) {
+func (c *Client) ConnectGet(accessToken string, options *ConnectGetOptions) (postRes *PostResponse,
+	mfaRes *MFAResponse, err error) {
 
 	jsonText, err := json.Marshal(connectGetJson{
 		c.clientID,
@@ -85,8 +85,8 @@ func (c *Client) ConnectGet(accessToken string, options *ConnectGetOptions) (pos
 // ConnectUpdate (PATCH /connect) updates user credentials for a given access token.
 //
 // See https://plaid.com/docs/api/#update-user.
-func (c *Client) ConnectUpdate(username, password, pin, accessToken string) (postRes *postResponse,
-	mfaRes *mfaResponse, err error) {
+func (c *Client) ConnectUpdate(username, password, pin, accessToken string) (postRes *PostResponse,
+	mfaRes *MFAResponse, err error) {
 
 	jsonText, err := json.Marshal(connectUpdateJson{
 		c.clientID,
@@ -105,8 +105,8 @@ func (c *Client) ConnectUpdate(username, password, pin, accessToken string) (pos
 // ConnectUpdateStep (PATCH /connect/step) updates user credentials and MFA for a given access token.
 //
 // See https://plaid.com/docs/api/#update-user.
-func (c *Client) ConnectUpdateStep(username, password, pin, mfa, accessToken string) (postRes *postResponse,
-	mfaRes *mfaResponse, err error) {
+func (c *Client) ConnectUpdateStep(username, password, pin, mfa, accessToken string) (postRes *PostResponse,
+	mfaRes *MFAResponse, err error) {
 
 	jsonText, err := json.Marshal(connectUpdateStepJson{
 		c.clientID,
@@ -126,7 +126,7 @@ func (c *Client) ConnectUpdateStep(username, password, pin, mfa, accessToken str
 // ConnectDelete (DELETE /connect) deletes data for a given access token.
 //
 // See https://plaid.com/docs/api/#delete-user.
-func (c *Client) ConnectDelete(accessToken string) (deleteRes *deleteResponse, err error) {
+func (c *Client) ConnectDelete(accessToken string) (deleteRes *DeleteResponse, err error) {
 	jsonText, err := json.Marshal(connectDeleteJson{
 		c.clientID,
 		c.secret,

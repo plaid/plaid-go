@@ -102,39 +102,39 @@ type Transaction struct {
 	} `json:"score"`
 }
 
-type mfaIntermediate struct {
+type MFAIntermediate struct {
 	AccessToken string      `json:"access_token"`
 	MFA         interface{} `json:"mfa"`
 	Type        string      `json:"type"`
 }
-type mfaDevice struct {
-	Message string
+type MFADevice struct {
+	Message string `json:"message"`
 }
-type mfaList struct {
+type MFAList struct {
 	Mask string
 	Type string
 }
-type mfaQuestion struct {
+type MFAQuestion struct {
 	Question string
 }
-type mfaSelection struct {
+type MFASelection struct {
 	Answers  []string
 	Question string
 }
 
 // 'mfa' contains the union of all possible mfa types
 // Users should switch on the 'Type' field
-type mfaResponse struct {
+type MFAResponse struct {
 	AccessToken string
 	Type        string
 
-	Device     mfaDevice
-	List       []mfaList
-	Questions  []mfaQuestion
-	Selections []mfaSelection
+	Device     MFADevice
+	List       []MFAList
+	Questions  []MFAQuestion
+	Selections []MFASelection
 }
 
-type postResponse struct {
+type PostResponse struct {
 	// Normal response fields
 	AccessToken      string        `json:"access_token"`
 	AccountId        string        `json:"account_id"`
@@ -144,7 +144,7 @@ type postResponse struct {
 	Transactions     []Transaction `json:"transactions"`
 }
 
-type deleteResponse struct {
+type DeleteResponse struct {
 	Message string `json:"message"`
 }
 
@@ -177,7 +177,7 @@ func getAndUnmarshal(environment environmentURL, endpoint string, structure inte
 }
 
 func (c *Client) postAndUnmarshal(endpoint string,
-	body io.Reader) (*postResponse, *mfaResponse, error) {
+	body io.Reader) (*PostResponse, *MFAResponse, error) {
 	// Read response body
 	req, err := http.NewRequest("POST", string(c.environment)+endpoint, body)
 	if err != nil {
@@ -199,7 +199,7 @@ func (c *Client) postAndUnmarshal(endpoint string,
 }
 
 func (c *Client) patchAndUnmarshal(endpoint string,
-	body io.Reader) (*postResponse, *mfaResponse, error) {
+	body io.Reader) (*PostResponse, *MFAResponse, error) {
 
 	req, err := http.NewRequest("PATCH", string(c.environment)+endpoint, body)
 	if err != nil {
@@ -221,7 +221,7 @@ func (c *Client) patchAndUnmarshal(endpoint string,
 }
 
 func (c *Client) deleteAndUnmarshal(endpoint string,
-	body io.Reader) (*deleteResponse, error) {
+	body io.Reader) (*DeleteResponse, error) {
 
 	req, err := http.NewRequest("DELETE", string(c.environment)+endpoint, body)
 	if err != nil {
@@ -240,7 +240,7 @@ func (c *Client) deleteAndUnmarshal(endpoint string,
 	res.Body.Close()
 
 	// Successful response
-	var deleteRes deleteResponse
+	var deleteRes DeleteResponse
 	if res.StatusCode == 200 {
 		if err = json.Unmarshal(raw, &deleteRes); err != nil {
 			return nil, err
@@ -256,11 +256,11 @@ func (c *Client) deleteAndUnmarshal(endpoint string,
 	return nil, plaidErr
 }
 
-// Unmarshals response into postResponse, mfaResponse, or plaidError
-func unmarshalPostMFA(res *http.Response, body []byte) (*postResponse, *mfaResponse, error) {
+// Unmarshals response into PostResponse, MFAResponse, or plaidError
+func unmarshalPostMFA(res *http.Response, body []byte) (*PostResponse, *MFAResponse, error) {
 	// Different marshaling cases
-	var mfaInter mfaIntermediate
-	var postRes postResponse
+	var mfaInter MFAIntermediate
+	var postRes PostResponse
 	var err error
 	switch {
 	// Successful response
@@ -275,7 +275,7 @@ func unmarshalPostMFA(res *http.Response, body []byte) (*postResponse, *mfaRespo
 		if err = json.Unmarshal(body, &mfaInter); err != nil {
 			return nil, nil, err
 		}
-		mfaRes := mfaResponse{Type: mfaInter.Type, AccessToken: mfaInter.AccessToken}
+		mfaRes := MFAResponse{Type: mfaInter.Type, AccessToken: mfaInter.AccessToken}
 		switch mfaInter.Type {
 		case "device":
 			temp, ok := mfaInter.MFA.(interface{})
@@ -310,7 +310,7 @@ func unmarshalPostMFA(res *http.Response, body []byte) (*postResponse, *mfaRespo
 				if !ok {
 					return nil, nil, errors.New("Could not decode list mfa")
 				}
-				mfaRes.List = append(mfaRes.List, mfaList{maskText, typeText})
+				mfaRes.List = append(mfaRes.List, MFAList{maskText, typeText})
 			}
 
 		case "questions":
@@ -327,7 +327,7 @@ func unmarshalPostMFA(res *http.Response, body []byte) (*postResponse, *mfaRespo
 				if !ok {
 					return nil, nil, errors.New("Could not decode questions mfa question")
 				}
-				mfaRes.Questions = append(mfaRes.Questions, mfaQuestion{questionText})
+				mfaRes.Questions = append(mfaRes.Questions, MFAQuestion{questionText})
 			}
 
 		case "selections":
@@ -355,7 +355,7 @@ func unmarshalPostMFA(res *http.Response, body []byte) (*postResponse, *mfaRespo
 				if !ok {
 					return nil, nil, errors.New("Could not decode selections questions")
 				}
-				mfaRes.Selections = append(mfaRes.Selections, mfaSelection{answers, question})
+				mfaRes.Selections = append(mfaRes.Selections, MFASelection{answers, question})
 			}
 		}
 		return nil, &mfaRes, nil

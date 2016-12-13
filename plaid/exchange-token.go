@@ -8,7 +8,7 @@ import (
 // ExchangeToken (POST /exchange_token) exchanges a public token for an access token.
 //
 // See https://github.com/plaid/link
-func (c *Client) ExchangeToken(publicToken string) (postRes *postResponse, err error) {
+func (c *Client) ExchangeToken(publicToken string) (postRes *PostResponse, err error) {
 	jsonText, err := json.Marshal(exchangeJson{
 		c.clientID,
 		c.secret,
@@ -23,7 +23,7 @@ func (c *Client) ExchangeToken(publicToken string) (postRes *postResponse, err e
 
 // ExchangeTokenAccount (POST /exchange_token) exchanges a public token and account id to receive a
 // bank account token.
-func (c *Client) ExchangeTokenAccount(publicToken string, accountId string) (postRes *postResponse, err error) {
+func (c *Client) ExchangeTokenAccount(publicToken string, accountId string) (postRes *PostResponse, err error) {
 	jsonText, err := json.Marshal(exchangeAccountJson{
 		c.clientID,
 		c.secret,
