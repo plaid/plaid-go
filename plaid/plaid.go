@@ -310,7 +310,7 @@ func unmarshalPostMFA(res *http.Response, body []byte) (*postResponse, *mfaRespo
 				if !ok {
 					return nil, nil, errors.New("Could not decode list mfa")
 				}
-				mfaRes.List = append(mfaRes.List, mfaList{maskText, typeText})
+				mfaRes.List = append(mfaRes.List, mfaList{Mask: maskText, Type: typeText})
 			}
 
 		case "questions":
@@ -327,7 +327,7 @@ func unmarshalPostMFA(res *http.Response, body []byte) (*postResponse, *mfaRespo
 				if !ok {
 					return nil, nil, errors.New("Could not decode questions mfa question")
 				}
-				mfaRes.Questions = append(mfaRes.Questions, mfaQuestion{questionText})
+				mfaRes.Questions = append(mfaRes.Questions, mfaQuestion{Question: questionText})
 			}
 
 		case "selections":
@@ -355,7 +355,7 @@ func unmarshalPostMFA(res *http.Response, body []byte) (*postResponse, *mfaRespo
 				if !ok {
 					return nil, nil, errors.New("Could not decode selections questions")
 				}
-				mfaRes.Selections = append(mfaRes.Selections, mfaSelection{answers, question})
+				mfaRes.Selections = append(mfaRes.Selections, mfaSelection{Answers: answers, Question: question})
 			}
 		}
 		return nil, &mfaRes, nil

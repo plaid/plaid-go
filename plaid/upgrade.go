@@ -12,11 +12,11 @@ func (c *Client) Upgrade(accessToken, upgradeTo string,
 	options *UpgradeOptions) (postRes *postResponse, mfaRes *mfaResponse, err error) {
 
 	jsonText, err := json.Marshal(upgradeJson{
-		c.clientID,
-		c.secret,
-		accessToken,
-		upgradeTo,
-		options,
+		ClientID:    c.clientID,
+		Secret:      c.secret,
+		AccessToken: accessToken,
+		UpgradeTo:   upgradeTo,
+		Options:     options,
 	})
 	if err != nil {
 		return nil, nil, err
@@ -33,10 +33,10 @@ func (c *Client) UpgradeStepSendMethod(accessToken, key, value string) (postRes 
 
 	sendMethod := map[string]string{key: value}
 	jsonText, err := json.Marshal(upgradeStepSendMethodJson{
-		c.clientID,
-		c.secret,
-		accessToken,
-		upgradeStepOptions{sendMethod},
+		ClientID:    c.clientID,
+		Secret:      c.secret,
+		AccessToken: accessToken,
+		Options:     upgradeStepOptions{sendMethod},
 	})
 	if err != nil {
 		return nil, nil, err
@@ -52,10 +52,10 @@ func (c *Client) UpgradeStep(accessToken, answer string) (postRes *postResponse,
 	mfaRes *mfaResponse, err error) {
 
 	jsonText, err := json.Marshal(upgradeStepJson{
-		c.clientID,
-		c.secret,
-		accessToken,
-		answer,
+		ClientID:    c.clientID,
+		Secret:      c.secret,
+		AccessToken: accessToken,
+		MFA:         answer,
 	})
 	if err != nil {
 		return nil, nil, err
