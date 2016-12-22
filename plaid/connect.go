@@ -12,13 +12,13 @@ func (c *Client) ConnectAddUser(username, password, pin, institutionType string,
 	options *ConnectOptions) (postRes *postResponse, mfaRes *mfaResponse, err error) {
 
 	jsonText, err := json.Marshal(connectJson{
-		c.clientID,
-		c.secret,
-		institutionType,
-		username,
-		password,
-		pin,
-		options,
+		ClientID: c.clientID,
+		Secret:   c.secret,
+		Type:     institutionType,
+		Username: username,
+		Password: password,
+		PIN:      pin,
+		Options:  options,
 	})
 	if err != nil {
 		return nil, nil, err
@@ -35,10 +35,10 @@ func (c *Client) ConnectStepSendMethod(accessToken, key, value string) (postRes 
 
 	sendMethod := map[string]string{key: value}
 	jsonText, err := json.Marshal(connectStepSendMethodJson{
-		c.clientID,
-		c.secret,
-		accessToken,
-		connectStepOptions{sendMethod},
+		ClientID:    c.clientID,
+		Secret:      c.secret,
+		AccessToken: accessToken,
+		Options:     connectStepOptions{sendMethod},
 	})
 	if err != nil {
 		return nil, nil, err
@@ -53,10 +53,10 @@ func (c *Client) ConnectStep(accessToken, answer string) (postRes *postResponse,
 	mfaRes *mfaResponse, err error) {
 
 	jsonText, err := json.Marshal(connectStepJson{
-		c.clientID,
-		c.secret,
-		accessToken,
-		answer,
+		ClientID:    c.clientID,
+		Secret:      c.secret,
+		AccessToken: accessToken,
+		MFA:         answer,
 	})
 	if err != nil {
 		return nil, nil, err
@@ -71,10 +71,10 @@ func (c *Client) ConnectGet(accessToken string, options *ConnectGetOptions) (pos
 	mfaRes *mfaResponse, err error) {
 
 	jsonText, err := json.Marshal(connectGetJson{
-		c.clientID,
-		c.secret,
-		accessToken,
-		options,
+		ClientID:    c.clientID,
+		Secret:      c.secret,
+		AccessToken: accessToken,
+		Options:     options,
 	})
 	if err != nil {
 		return nil, nil, err
@@ -89,12 +89,12 @@ func (c *Client) ConnectUpdate(username, password, pin, accessToken string) (pos
 	mfaRes *mfaResponse, err error) {
 
 	jsonText, err := json.Marshal(connectUpdateJson{
-		c.clientID,
-		c.secret,
-		username,
-		password,
-		pin,
-		accessToken,
+		ClientID:    c.clientID,
+		Secret:      c.secret,
+		Username:    username,
+		Password:    password,
+		PIN:         pin,
+		AccessToken: accessToken,
 	})
 	if err != nil {
 		return nil, nil, err
@@ -109,13 +109,13 @@ func (c *Client) ConnectUpdateStep(username, password, pin, mfa, accessToken str
 	mfaRes *mfaResponse, err error) {
 
 	jsonText, err := json.Marshal(connectUpdateStepJson{
-		c.clientID,
-		c.secret,
-		username,
-		password,
-		pin,
-		mfa,
-		accessToken,
+		ClientID:    c.clientID,
+		Secret:      c.secret,
+		Username:    username,
+		Password:    password,
+		PIN:         pin,
+		MFA:         mfa,
+		AccessToken: accessToken,
 	})
 	if err != nil {
 		return nil, nil, err
@@ -128,9 +128,9 @@ func (c *Client) ConnectUpdateStep(username, password, pin, mfa, accessToken str
 // See https://plaid.com/docs/api/#delete-user.
 func (c *Client) ConnectDelete(accessToken string) (deleteRes *deleteResponse, err error) {
 	jsonText, err := json.Marshal(connectDeleteJson{
-		c.clientID,
-		c.secret,
-		accessToken,
+		ClientID:    c.clientID,
+		Secret:      c.secret,
+		AccessToken: accessToken,
 	})
 	if err != nil {
 		return nil, err

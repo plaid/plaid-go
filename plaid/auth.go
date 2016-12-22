@@ -12,13 +12,13 @@ func (c *Client) AuthAddUser(username, password, pin, institutionType string,
 	options *AuthOptions) (postRes *postResponse, mfaRes *mfaResponse, err error) {
 
 	jsonText, err := json.Marshal(authJson{
-		c.clientID,
-		c.secret,
-		institutionType,
-		username,
-		password,
-		pin,
-		options,
+		ClientID: c.clientID,
+		Secret:   c.secret,
+		Type:     institutionType,
+		Username: username,
+		Password: password,
+		PIN:      pin,
+		Options:  options,
 	})
 	if err != nil {
 		return nil, nil, err
@@ -35,10 +35,10 @@ func (c *Client) AuthStepSendMethod(accessToken, key, value string) (postRes *po
 
 	sendMethod := map[string]string{key: value}
 	jsonText, err := json.Marshal(authStepSendMethodJson{
-		c.clientID,
-		c.secret,
-		accessToken,
-		authStepOptions{sendMethod},
+		ClientID:    c.clientID,
+		Secret:      c.secret,
+		AccessToken: accessToken,
+		Options:     authStepOptions{sendMethod},
 	})
 	if err != nil {
 		return nil, nil, err
@@ -53,10 +53,10 @@ func (c *Client) AuthStep(accessToken, answer string) (postRes *postResponse,
 	mfaRes *mfaResponse, err error) {
 
 	jsonText, err := json.Marshal(authStepJson{
-		c.clientID,
-		c.secret,
-		accessToken,
-		answer,
+		ClientID:    c.clientID,
+		Secret:      c.secret,
+		AccessToken: accessToken,
+		MFA:         answer,
 	})
 	if err != nil {
 		return nil, nil, err
@@ -69,9 +69,9 @@ func (c *Client) AuthStep(accessToken, answer string) (postRes *postResponse,
 // See https://plaid.com/docs/api/#get-auth-data.
 func (c *Client) AuthGet(accessToken string) (postRes *postResponse, err error) {
 	jsonText, err := json.Marshal(authGetJson{
-		c.clientID,
-		c.secret,
-		accessToken,
+		ClientID:    c.clientID,
+		Secret:      c.secret,
+		AccessToken: accessToken,
 	})
 	if err != nil {
 		return nil, err
@@ -88,12 +88,12 @@ func (c *Client) AuthUpdate(username, password, pin, accessToken string) (postRe
 	mfaRes *mfaResponse, err error) {
 
 	jsonText, err := json.Marshal(authUpdateJson{
-		c.clientID,
-		c.secret,
-		username,
-		password,
-		pin,
-		accessToken,
+		ClientID:    c.clientID,
+		Secret:      c.secret,
+		Username:    username,
+		Password:    password,
+		PIN:         pin,
+		AccessToken: accessToken,
 	})
 	if err != nil {
 		return nil, nil, err
@@ -108,13 +108,13 @@ func (c *Client) AuthUpdateStep(username, password, pin, mfa, accessToken string
 	mfaRes *mfaResponse, err error) {
 
 	jsonText, err := json.Marshal(authUpdateStepJson{
-		c.clientID,
-		c.secret,
-		username,
-		password,
-		pin,
-		mfa,
-		accessToken,
+		ClientID:    c.clientID,
+		Secret:      c.secret,
+		Username:    username,
+		Password:    password,
+		PIN:         pin,
+		MFA:         mfa,
+		AccessToken: accessToken,
 	})
 	if err != nil {
 		return nil, nil, err
@@ -127,9 +127,9 @@ func (c *Client) AuthUpdateStep(username, password, pin, mfa, accessToken string
 // See https://plaid.com/docs/api/#delete-auth-user.
 func (c *Client) AuthDelete(accessToken string) (deleteRes *deleteResponse, err error) {
 	jsonText, err := json.Marshal(authDeleteJson{
-		c.clientID,
-		c.secret,
-		accessToken,
+		ClientID:    c.clientID,
+		Secret:      c.secret,
+		AccessToken: accessToken,
 	})
 	if err != nil {
 		return nil, err
