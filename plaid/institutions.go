@@ -1,17 +1,71 @@
 package plaid
 
+import (
+	"errors"
+	"net/url"
+)
+
 // GetInstitution returns information for a single institution given an ID.
-// See https://plaid.com/docs/api/#institutions-by-id.
 func GetInstitution(environment environmentURL, id string) (inst institution, err error) {
-	err = getAndUnmarshal(environment, "/institutions/"+id, &inst)
+	err = getAndUnmarshal(environment, "/institutions/all/"+id, &inst)
 	return
 }
 
-// GetInstitution returns information for all institutions.
-// See https://plaid.com/docs/api/#all-institutions.
-func GetInstitutions(environment environmentURL) (institutions []institution, err error) {
-	err = getAndUnmarshal(environment, "/institutions", &institutions)
+// GetInstitutionsSearch returns all institutions that match the query parameters.
+// If product parameter is included, results are filtered by product.
+// If institution id option is specified, query and product parameters are ignored.
+func GetInstitutionsSearch(environment environmentURL, query, product, id string) (institutions []institutionJson, err error) {
+	if query == "" && id == "" {
+		return nil, errors.New("Query or institution id must be specified")
+	}
+
+	v := url.Values{}
+
+	if query != "" {
+		v.Add("q", query)
+	}
+
+	if product != "" {
+		v.Add("p", product)
+	}
+
+	if id != "" {
+		v.Add("id", id)
+	}
+
+	payload := v.Encode()
+
+	err = getAndUnmarshal(environment, "/institutions/all/search?"+payload, &institutions)
 	return
+}
+
+type institutionJson struct {
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Products struct {
+		Auth    bool `json:"auth"`
+		Balance bool `json:"balance"`
+		Connect bool `json:"connect"`
+		Info    bool `json:"info"`
+	} `json:"products"`
+	ForgottenPassword string `json:"forgottenPassword"`
+	AccountLocked     string `json:"accountLocked"`
+	AccountSetup      string `json:"accountSetup"`
+	Video             string `json:"video"`
+	Fields            []struct {
+		Name  string `json:"name"`
+		Label string `json:"label"`
+		Type  string `json:"type"`
+	} `json:"fields"`
+	Colors struct {
+		Light   string `json:"light"`
+		Primary string `json:"primary"`
+		Dark    string `json:"dark"`
+		Darker  string `json:"darker"`
+	} `json:"colors"`
+	Logo      string `json:"logo"`
+	Namebreak string `json:"nameBreak"`
+	Type      string `json:"type"`
 }
 
 type institution struct {

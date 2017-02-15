@@ -18,9 +18,21 @@ var _ = Describe("institutions", func() {
 	Describe("GetInstitutions", func() {
 
 		It("returns non-empty array", func() {
-			institutions, err := GetInstitutions(Tartan)
+			institutions, err := GetInstitutionsSearch(Tartan, "redwood", "auth", "ins_100042")
 			Expect(err).To(BeNil(), "err should be nil")
 			Expect(institutions).ToNot(BeEmpty())
+		})
+
+		It("returns non-empty array", func() {
+			institutions, err := GetInstitutionsSearch(Tartan, "chase", "connect", "")
+			Expect(err).To(BeNil(), "err should be nil")
+			Expect(institutions).ToNot(BeEmpty())
+		})
+
+		It("returns a query or institution must be specified error", func() {
+			institutions, err := GetInstitutionsSearch(Tartan, "", "connect", "")
+			Expect(err).ToNot(BeNil(), "err should not be nil")
+			Expect(institutions).To(BeEmpty())
 		})
 
 	})
