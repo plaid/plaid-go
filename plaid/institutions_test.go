@@ -15,7 +15,7 @@ func TestInstitutions(t *testing.T) {
 
 var _ = Describe("institutions", func() {
 
-	Describe("GetInstitutions", func() {
+	Describe("GetInstitutionsSearch", func() {
 
 		It("returns non-empty array", func() {
 			institutions, err := GetInstitutionsSearch(Tartan, "redwood", "auth", "ins_100042")
@@ -52,6 +52,24 @@ var _ = Describe("institutions", func() {
 			Expect(i.Products).To(ContainElement("connect"))
 		})
 
+	})
+
+	Describe("GetInstitutions", func() {
+		It("returns non-empty array", func() {
+			c := NewClient("test_id", "test_secret", Tartan)
+			institutions, err := c.GetInstitutions(Tartan, []string{"connect", "auth"}, 20, 0)
+			Expect(err).To(BeNil(), "err should be nil")
+			Expect(institutions).ToNot(BeEmpty())
+		})
+	})
+
+	Describe("GetInstitutions", func() {
+		It("returns non-empty array", func() {
+			c := NewClient("test_id", "test_secret", Tartan)
+			institutions, err := c.GetInstitutions(Tartan, []string{}, 0, 0)
+			Expect(err).To(BeNil(), "err should be nil")
+			Expect(institutions).ToNot(BeEmpty())
+		})
 	})
 
 })

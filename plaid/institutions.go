@@ -1,11 +1,16 @@
 package plaid
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
+	"io/ioutil"
+	"net/http"
 	"net/url"
 )
 
 // GetInstitution returns information for a single institution given an ID.
+// See: https://plaid.com/docs/api/#institutions-by-id
 func GetInstitution(environment environmentURL, id string) (inst institution, err error) {
 	err = getAndUnmarshal(environment, "/institutions/all/"+id, &inst)
 	return
@@ -14,6 +19,7 @@ func GetInstitution(environment environmentURL, id string) (inst institution, er
 // GetInstitutionsSearch returns all institutions that match the query parameters.
 // If product parameter is included, results are filtered by product.
 // If institution id option is specified, query and product parameters are ignored.
+// See: https://plaid.com/docs/api/#institution-search
 func GetInstitutionsSearch(environment environmentURL, query, product, id string) (institutions []institutionJson, err error) {
 	if query == "" && id == "" {
 		return nil, errors.New("Query or institution id must be specified")
@@ -33,10 +39,79 @@ func GetInstitutionsSearch(environment environmentURL, query, product, id string
 		v.Add("id", id)
 	}
 
-	payload := v.Encode()
-
-	err = getAndUnmarshal(environment, "/institutions/all/search?"+payload, &institutions)
+	err = getAndUnmarshal(environment, "/institutions/all/search?"+v.Encode(), &institutions)
 	return
+}
+
+// Returns all financial institutions currently supported by Plaid.
+// See: https://plaid.com/docs/api/#all-institutions
+func (c *Client) GetInstitutions(environment environmentURL, products []string, count int, offset int) (institutions []institution, err error) {
+	// Default to count=50.
+	if count == 0 {
+		count = 50
+	}
+
+	jsonText, err := json.Marshal(institutionsJson{
+		ClientID: c.clientID,
+		Secret:   c.secret,
+		Products: products,
+		Count:    count,
+		Offset:   offset,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", string(c.environment)+"/institutions/all", bytes.NewReader(jsonText))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("User-Agent", "plaid-go")
+
+	res, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	raw, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	switch {
+	case res.StatusCode == 200:
+		// Successful response.
+		var institutionsJsonResp allInstitutionsJson
+		if err = json.Unmarshal(raw, &institutionsJsonResp); err != nil {
+			return nil, err
+		}
+		return institutionsJsonResp.Results, nil
+	case res.StatusCode >= 400:
+		// Attempt to unmarshal into Plaid error format
+		var plaidErr plaidError
+		if err = json.Unmarshal(raw, &plaidErr); err != nil {
+			return nil, err
+		}
+		plaidErr.StatusCode = res.StatusCode
+		return nil, plaidErr
+	}
+
+	return nil, errors.New("Unknown Plaid Error - Status:" + string(res.StatusCode))
+}
+
+type allInstitutionsJson struct {
+	TotalCount int           `json:"total_count"`
+	Results    []institution `json:"results"`
+}
+
+type institutionsJson struct {
+	ClientID string   `json:"client_id"`
+	Secret   string   `json:"secret"`
+	Products []string `json:"products"` // e.g. ["connect", "auth", "info", "income", "risk"]
+	Count    int      `json:"count"`
+	Offset   int      `json:"offset"`
 }
 
 type institutionJson struct {
@@ -58,13 +133,14 @@ type institutionJson struct {
 		Type  string `json:"type"`
 	} `json:"fields"`
 	Colors struct {
-		Light   string `json:"light"`
-		Primary string `json:"primary"`
-		Dark    string `json:"dark"`
-		Darker  string `json:"darker"`
+		Light    string   `json:"light"`
+		Primary  string   `json:"primary"`
+		Dark     string   `json:"dark"`
+		Darker   string   `json:"darker"`
+		Gradient []string `json:"gradient"`
 	} `json:"colors"`
 	Logo      string `json:"logo"`
-	Namebreak string `json:"nameBreak"`
+	Namebreak int    `json:"nameBreak"`
 	Type      string `json:"type"`
 }
 
