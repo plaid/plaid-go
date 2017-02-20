@@ -58,7 +58,7 @@ var _ = Describe("institutions", func() {
 	Describe("GetInstitution", func() {
 
 		It("returns an error", func() {
-			_, err := GetInstitution(Tartan, "") // id not specified.
+			_, err := GetInstitution(Tartan, "")
 			Expect(err).ToNot(BeNil(), "err should not be nil")
 			Expect(err.Error()).To(Equal("/institutions/all/:id - institution id must be specified"))
 		})
