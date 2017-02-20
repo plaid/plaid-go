@@ -12,17 +12,21 @@ import (
 // GetInstitution returns information for a single institution given an ID.
 // See: https://plaid.com/docs/api/#institutions-by-id
 func GetInstitution(environment environmentURL, id string) (inst institution, err error) {
+	if id == "" {
+		return inst, errors.New("/institutions/all/:id - institution id must be specified")
+	}
+
 	err = getAndUnmarshal(environment, "/institutions/all/"+id, &inst)
-	return
+	return inst, err
 }
 
 // GetInstitutionsSearch returns all institutions that match the query parameters.
 // If product parameter is included, results are filtered by product.
 // If institution id option is specified, query and product parameters are ignored.
 // See: https://plaid.com/docs/api/#institution-search
-func GetInstitutionsSearch(environment environmentURL, query, product, id string) (institutions []institutionJson, err error) {
+func GetInstitutionsSearch(environment environmentURL, query, product, id string) (institutions []institutionExtended, err error) {
 	if query == "" && id == "" {
-		return nil, errors.New("Query or institution id must be specified")
+		return nil, errors.New("/institutions/all/ - query or institution id must be specified")
 	}
 
 	v := url.Values{}
@@ -30,11 +34,9 @@ func GetInstitutionsSearch(environment environmentURL, query, product, id string
 	if query != "" {
 		v.Add("q", query)
 	}
-
 	if product != "" {
 		v.Add("p", product)
 	}
-
 	if id != "" {
 		v.Add("id", id)
 	}
@@ -44,6 +46,7 @@ func GetInstitutionsSearch(environment environmentURL, query, product, id string
 }
 
 // Returns all financial institutions currently supported by Plaid.
+// If not specified, count defaults to 50.
 // See: https://plaid.com/docs/api/#all-institutions
 func (c *Client) GetInstitutions(environment environmentURL, products []string, count int, offset int) (institutions []institution, err error) {
 	// Default to count=50.
@@ -114,7 +117,7 @@ type institutionsJson struct {
 	Offset   int      `json:"offset"`
 }
 
-type institutionJson struct {
+type institutionExtended struct {
 	ID       string `json:"id"`
 	Name     string `json:"name"`
 	Products struct {

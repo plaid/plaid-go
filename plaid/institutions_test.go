@@ -29,9 +29,10 @@ var _ = Describe("institutions", func() {
 			Expect(institutions).ToNot(BeEmpty())
 		})
 
-		It("returns a query or institution must be specified error", func() {
+		It("returns an error", func() {
 			institutions, err := GetInstitutionsSearch(Tartan, "", "connect", "")
 			Expect(err).ToNot(BeNil(), "err should not be nil")
+			Expect(err.Error()).To(Equal("/institutions/all/ - query or institution id must be specified"))
 			Expect(institutions).To(BeEmpty())
 		})
 
@@ -50,6 +51,16 @@ var _ = Describe("institutions", func() {
 			Expect(i.Products).ToNot(BeEmpty())
 			Expect(i.Products).To(ContainElement("balance"))
 			Expect(i.Products).To(ContainElement("connect"))
+		})
+
+	})
+
+	Describe("GetInstitution", func() {
+
+		It("returns an error", func() {
+			_, err := GetInstitution(Tartan, "") // id not specified.
+			Expect(err).ToNot(BeNil(), "err should not be nil")
+			Expect(err.Error()).To(Equal("/institutions/all/:id - institution id must be specified"))
 		})
 
 	})
