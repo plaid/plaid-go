@@ -182,10 +182,11 @@ type connectStepJson struct {
 //
 // See https://plaid.com/docs/api/#retrieve-transactions.
 type ConnectGetOptions struct {
-	Pending bool   `json:"pending,omitempty"`
-	Account string `json:"account,omitempty"`
-	GTE     string `json:"gte,omitempty"`
-	LTE     string `json:"lte,omitempty"`
+	Pending                    bool   `json:"pending,omitempty"`
+	Account                    string `json:"account,omitempty"`
+	GTE                        string `json:"gte,omitempty"`
+	LTE                        string `json:"lte,omitempty"`
+	IncludeOriginalDescription bool   `json:"include_original_description,omitempty"`
 }
 type connectGetJson struct {
 	ClientID    string `json:"client_id"`
