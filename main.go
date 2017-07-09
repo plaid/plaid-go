@@ -9,8 +9,11 @@ import (
 
 // main contains example usage of all functions
 func main() {
+	// Create a Plaid client
+	client := plaid.NewClient("test_id", "test_secret", plaid.Tartan)
+
 	// GET /institutions
-	res, err := plaid.GetInstitutions(plaid.Tartan)
+	res, err := client.GetInstitutions(plaid.Tartan, nil, 50, 0)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -36,8 +39,6 @@ func main() {
 		fmt.Println(err)
 	}
 	fmt.Println("category", category.ID, "is", strings.Join(category.Hierarchy, ", "))
-
-	client := plaid.NewClient("test_id", "test_secret", plaid.Tartan)
 
 	// POST /auth
 	postRes, mfaRes, err :=
