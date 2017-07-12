@@ -64,7 +64,7 @@ func (c *Client) ConnectStep(accessToken, answer string) (postRes *postResponse,
 	return c.postAndUnmarshal("/connect/step", bytes.NewReader(jsonText))
 }
 
-// ConnectGet (POST /connect/get) retrieves account and transaction data for a given access token.
+// ConnectGet (GET /connect/get) retrieves account and transaction data for a given access token.
 //
 // See https://plaid.com/docs/api/#get-transactions.
 func (c *Client) ConnectGet(accessToken string, options *ConnectGetOptions) (postRes *postResponse,
