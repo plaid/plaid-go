@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/plaid/plaid-go/plaid"
+	"github.com/matjazgros/plaid-go/plaid"
 )
 
 // main contains example usage of all functions
