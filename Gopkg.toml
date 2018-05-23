@@ -1,0 +1,4 @@
+[metadata]
+  name = "plaid"
+  version = "1.0.0"
+  url = "github.com/plaid/plaid-go"
