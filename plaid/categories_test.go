@@ -32,7 +32,7 @@ var _ = Describe("categories", func() {
 			Expect(err).To(BeNil(), "err should be nil")
 			Expect(c.Hierarchy).ToNot(BeEmpty())
 			Expect(c.Hierarchy[0]).To(Equal("Food and Drink"))
-			Expect(c.Hierarchy[1]).To(Equal("Bar"))
+			Expect(c.Hierarchy[1]).To(Equal("NotBar"))
 			Expect(c.ID).To(Equal("13001000"))
 			Expect(c.Type).To(Equal("place"))
 		})
