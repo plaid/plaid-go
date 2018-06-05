@@ -13,8 +13,8 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
-// LatestAPIVersion holds the latest version of the Plaid API
-const LatestAPIVersion = "2018-05-22"
+// APIVersion holds the latest version of the Plaid API
+const APIVersion = "2018-05-22"
 
 // Client holds information required to interact with the Plaid API.
 // Note: Client is only exported for method documentation purposes.
@@ -27,7 +27,6 @@ type Client struct {
 	publicKey   string
 	environment Environment
 	httpClient  *http.Client
-	_APIVersion string
 }
 
 type ClientOptions struct {
@@ -36,7 +35,6 @@ type ClientOptions struct {
 	PublicKey   string
 	Environment Environment
 	HTTPClient  *http.Client
-	APIVersion  string
 }
 
 // NewClient instantiates a Client associated with a client id, secret and environment.
@@ -49,17 +47,12 @@ func NewClient(options ClientOptions) (client *Client, err error) {
 		options.HTTPClient = &http.Client{}
 	}
 
-	if options.APIVersion == "" {
-		options.APIVersion = LatestAPIVersion
-	}
-
 	return &Client{
 		clientID:    options.ClientID,
 		secret:      options.Secret,
 		publicKey:   options.PublicKey,
 		environment: options.Environment,
 		httpClient:  options.HTTPClient,
-		_APIVersion: options.APIVersion,
 	}, nil
 }
 
@@ -93,8 +86,8 @@ func (c *Client) newRequest(endpoint string, body io.Reader, v interface{}) (*ht
 		req.Header.Add("User-Agent", "Plaid Go")
 	}
 
-	// Add header for version of Plaid API
-	req.Header.Add("Plaid-Version", c._APIVersion)
+	// Add header for Plaid API version
+	req.Header.Add("Plaid-Version", APIVersion)
 
 	return req, nil
 }

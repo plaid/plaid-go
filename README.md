@@ -57,7 +57,6 @@ clientOptions := plaid.ClientOptions{
     os.Getenv("PLAID_PUBLIC_KEY"),
     plaid.Sandbox, // Available environments are Sandbox, Development, and Production
     &http.Client{}, // This parameter is optional
-    plaid.LatestAPIVersion, // e.g. "2018-05-22"
 }
 client, err := plaid.NewClient(clientOptions)
 ```
