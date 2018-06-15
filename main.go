@@ -2,152 +2,86 @@ package main
 
 import (
 	"fmt"
-	"strings"
+	"net/http"
+	"os"
+	"time"
 
 	"github.com/plaid/plaid-go/plaid"
 )
 
-// main contains example usage of all functions
+func handleError(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
 func main() {
-	// Create a Plaid client
-	client := plaid.NewClient("test_id", "test_secret", plaid.Tartan)
-
-	// GET /institutions
-	res, err := client.GetInstitutions(plaid.Tartan, nil, 50, 0)
-	if err != nil {
-		fmt.Println(err)
+	// Creates a new Plaid Client
+	clientOptions := plaid.ClientOptions{
+		os.Getenv("PLAID_CLIENT_ID"),
+		os.Getenv("PLAID_SECRET"),
+		os.Getenv("PLAID_PUBLIC_KEY"),
+		plaid.Sandbox,
+		&http.Client{},
 	}
-	fmt.Println(res[0].Name, "has type:", res[0].Type)
+	client, err := plaid.NewClient(clientOptions)
+	handleError(err)
 
-	// GET /institutions/5301a93ac140de84910000e0
-	inst, err := plaid.GetInstitution(plaid.Tartan, "5301a93ac140de84910000e0")
-	if err != nil {
-		fmt.Println("Institution Error:", err)
-	}
-	fmt.Println(inst.Name, "has mfa:", strings.Join(inst.MFA, ", "))
+	// POST /institutions/get
+	instsResp, err := client.GetInstitutions(5, 0)
+	handleError(err)
+	fmt.Println(instsResp.Institutions[0].Name, "has products:", instsResp.Institutions[0].Products)
 
-	// GET /categories
-	categories, err := plaid.GetCategories(plaid.Tartan)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println("First category:", categories[0])
+	// POST /institutions/get_by_id
+	instResp, err := client.GetInstitutionByID(instsResp.Institutions[0].ID)
+	handleError(err)
+	fmt.Println(instResp.Institution.Name, "has MFA:", instResp.Institution.MFA)
 
-	// GET /categories/13001001
-	category, err := plaid.GetCategory(plaid.Tartan, "13001001")
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println("category", category.ID, "is", strings.Join(category.Hierarchy, ", "))
+	// POST /institutions/search
+	instSearchResp, err := client.SearchInstitutions("Ally", []string{"transactions"})
+	handleError(err)
+	fmt.Println(instSearchResp.Institutions[0].Name, "has ID:", instSearchResp.Institutions[0].ID)
 
-	// POST /auth
-	postRes, mfaRes, err :=
-		client.AuthAddUser("plaid_test", "plaid_good", "", "citi", nil)
-	if err != nil {
-		fmt.Println(err)
-	} else if mfaRes != nil {
-		switch mfaRes.Type {
-		case "device":
-			fmt.Println("--Device MFA--")
-			fmt.Println("Message:", mfaRes.Device.Message)
-		case "list":
-			fmt.Println("--List MFA--")
-			fmt.Println("Mask:", mfaRes.List[0].Mask, "\nType:", mfaRes.List[0].Type)
-		case "questions":
-			fmt.Println("--Questions MFA--")
-			fmt.Println("Question:", mfaRes.Questions[0].Question)
-		case "selections":
-			fmt.Println("--Selections MFA--")
-			fmt.Println("Question:", mfaRes.Selections[1].Question)
-			fmt.Println("Answers:", mfaRes.Selections[1].Answers)
+	// POST /categories/get
+	categoriesResp, err := client.GetCategories()
+	handleError(err)
+	fmt.Println("Category group", categoriesResp.Categories[0].Group, "has items:", categoriesResp.Categories[0].Hierarchy)
+
+	// POST /sandbox/public_token/create
+	publicTokenResp, err := client.CreateSandboxPublicToken(instResp.Institution.ID, []string{"auth", "transactions"})
+	handleError(err)
+	fmt.Println("Created sandbox public token:", publicTokenResp.PublicToken)
+
+	// POST /item/public_token/exchange
+	accessTokenResp, err := client.ExchangePublicToken(publicTokenResp.PublicToken)
+	handleError(err)
+	fmt.Println("Public token -> Access Token", accessTokenResp.AccessToken, "for item:", accessTokenResp.ItemID)
+
+	// POST /accounts/balance/get
+	balanceResp, err := client.GetBalances(accessTokenResp.AccessToken)
+	handleError(err)
+	fmt.Println("Account with name", balanceResp.Accounts[0].Name, "has available balance", balanceResp.Accounts[0].Balances.Available)
+
+	// POST /accounts/get
+	accountsResp, err := client.GetAccounts(accessTokenResp.AccessToken)
+	handleError(err)
+	fmt.Println("Access token is associated with", len(accountsResp.Accounts), "accounts")
+
+	// POST /auth/get
+	authResp, err := client.GetAuth(accessTokenResp.AccessToken)
+	handleError(err)
+	fmt.Println("Account has number:", authResp.Numbers.ACH[0].Account)
+
+	// POST /transactions/get
+	transactionsResp, err := client.GetTransactions(accessTokenResp.AccessToken, "2010-01-01", "2018-01-01")
+	if plaidErr, ok := err.(plaid.Error); ok {
+		// Poll until transactions are ready
+		for ok && plaidErr.ErrorCode == "PRODUCT_NOT_READY" {
+			time.Sleep(5 * time.Second)
+			transactionsResp, err = client.GetTransactions(accessTokenResp.AccessToken, "2010-01-01", "2018-01-01")
+			plaidErr, ok = err.(plaid.Error)
 		}
-
-		postRes2, mfaRes2, err := client.AuthStepSendMethod(mfaRes.AccessToken, "type", "email")
-		if err != nil {
-			fmt.Println("Error submitting send_method", err)
-		}
-		fmt.Printf("%+v\n", mfaRes2)
-		fmt.Printf("%+v\n", postRes2)
-
-		postRes2, mfaRes2, err = client.AuthStep(mfaRes.AccessToken, "tomato")
-		if err != nil {
-			fmt.Println("Error submitting mfa", err)
-		}
-		fmt.Printf("%+v\n", mfaRes2)
-		fmt.Printf("%+v\n", postRes2)
-	} else {
-		fmt.Println(postRes.Accounts)
-		fmt.Println("Auth Get")
-		fmt.Println(client.AuthGet("test_citi"))
-
-		fmt.Println("Auth DELETE")
-		fmt.Println(client.AuthDelete("test_citi"))
+		handleError(err)
 	}
-
-	// POST /connect
-	postRes, mfaRes, err = client.ConnectAddUser("plaid_test", "plaid_good", "", "citi", nil)
-	if err != nil {
-		fmt.Println(err)
-	} else if mfaRes != nil {
-		switch mfaRes.Type {
-		case "device":
-			fmt.Println("--Device MFA--")
-			fmt.Println("Message:", mfaRes.Device.Message)
-		case "list":
-			fmt.Println("--List MFA--")
-			fmt.Println("Mask:", mfaRes.List[0].Mask, "\nType:", mfaRes.List[0].Type)
-		case "questions":
-			fmt.Println("--Questions MFA--")
-			fmt.Println("Question:", mfaRes.Questions[0].Question)
-		case "selections":
-			fmt.Println("--Selections MFA--")
-			fmt.Println("Question:", mfaRes.Selections[1].Question)
-			fmt.Println("Answers:", mfaRes.Selections[1].Answers)
-		}
-
-		postRes2, mfaRes2, err := client.ConnectStepSendMethod(mfaRes.AccessToken, "type", "email")
-		if err != nil {
-			fmt.Println("Error submitting send_method", err)
-		}
-		fmt.Printf("%+v\n", mfaRes2)
-		fmt.Printf("%+v\n", postRes2)
-
-		postRes2, mfaRes2, err = client.ConnectStep(mfaRes.AccessToken, "1234")
-		if err != nil {
-			fmt.Println("Error submitting mfa", err)
-		}
-		fmt.Printf("%+v\n", mfaRes2)
-		fmt.Printf("%+v\n", postRes2)
-	} else {
-		fmt.Println(postRes.Accounts)
-		fmt.Println("Connect GET")
-		connectRes, _, _ := client.ConnectGet("test_citi", &plaid.ConnectGetOptions{true, "", "", ""})
-		fmt.Println(len(connectRes.Transactions))
-		fmt.Println(connectRes.Transactions)
-
-		fmt.Println("Connect DELETE")
-		fmt.Println(client.ConnectDelete("test_citi"))
-	}
-
-	// POST /balance
-	fmt.Println("Balance")
-	postRes, err = client.Balance("test_citi")
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Printf("%+v\n", postRes)
-
-	// POST /upgrade
-	fmt.Println("Upgrade")
-	postRes, mfaRes, err = client.Upgrade("test_bofa", "connect", nil)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Printf("%+v\n", mfaRes)
-	fmt.Printf("%+v\n", postRes)
-
-	// POST exchange_token
-	fmt.Println("ExchangeToken")
-	postRes, err = client.ExchangeToken("test,chase,connected")
-	fmt.Printf("%+v\n", postRes)
+	fmt.Println("Number of transactions:", len(transactionsResp.Transactions))
 }

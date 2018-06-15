@@ -4,17 +4,20 @@ import (
 	"fmt"
 )
 
-type plaidError struct {
-	// List of all errors: https://github.com/plaid/support/blob/master/errors.md
-	ErrorCode int    `json:"code"`
-	Message   string `json:"message"`
-	Resolve   string `json:"resolve"`
+type Error struct {
+	APIResponse
 
-	// StatusCode needs to manually set from the http response
+	// List of all errors: https://github.com/plaid/support/blob/master/errors.md
+	ErrorType      string `json:"error_type"`
+	ErrorCode      string `json:"error_code"`
+	ErrorMessage   string `json:"error_message"`
+	DisplayMessage string `json:"display_message"`
+
+	// StatusCode needs to be manually set from the response
 	StatusCode int
 }
 
-func (e plaidError) Error() string {
-	return fmt.Sprintf("Plaid Error - http status: %d, code: %d, message: %s, resolve: %s",
-		e.StatusCode, e.ErrorCode, e.Message, e.Resolve)
+func (e Error) Error() string {
+	return fmt.Sprintf("Plaid Error - request ID: %s, http status: %d, type: %s, code: %s, message: %s",
+		e.RequestID, e.StatusCode, e.ErrorType, e.ErrorCode, e.ErrorMessage)
 }
