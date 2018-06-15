@@ -1,6 +1,4 @@
-[![CircleCI](https://circleci.com/gh/plaid/plaid-go.svg?style=svg)](https://circleci.com/gh/plaid/plaid-go)
-
-# plaid-go
+# plaid-go [![CircleCI](https://circleci.com/gh/plaid/plaid-go.svg?style=svg)](https://circleci.com/gh/plaid/plaid-go) [![GoDoc](https://godoc.org/github.com/plaid/plaid-go?status.svg)](https://godoc.org/github.com/plaid/plaid-go/plaid)
 
 A Go client library for the [Plaid API](https://plaid.com/docs).
 
@@ -26,8 +24,8 @@ Each major version of `plaid-go` targets a specific version of the Plaid API:
 
 | API version | plaid-go release |
 | ----------- | ------------------ |
-| [`2018-05-22`][api-version-2018-05-22] (**latest**) | `6.x.x` |
-| `2017-03-01` | `5.x.x` |
+| [`2018-05-22`][api-version-2018-05-22] (**latest**) | `1.x.x` |
+| `2017-03-01` | not supported |
 
 For information about what has changed between versions and how to update your integration, head to the [version changelog][version-changelog].
 
@@ -71,9 +69,11 @@ For more information on Plaid response codes, head to the [docs](https://plaid.c
 
 ## Support
 
-Open an [issue](https://github.com/plaid/plaid-python/issues/new)!
+Open an [issue](https://github.com/plaid/plaid-go/issues/new)!
 
 ## License
 
 [MIT](https://github.com/plaid/plaid-go/blob/master/LICENSE)
 
+[version-changelog]: https://plaid.com/docs/api-upgrades/#version-changelog
+[api-version-2018-05-22]: https://plaid.com/docs/api-upgrades/#2018-05-22
