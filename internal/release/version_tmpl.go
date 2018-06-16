@@ -13,7 +13,8 @@ import (
 )
 
 var versionTmpl = template.Must(template.New("var").Parse(strings.TrimSpace(`
-// NOTE - this file is auto-generated.
+// NOTE - this file is auto-generated. DO NOT EDIT.
+
 package internal
 
 // Version is the current version of the plaid-go library

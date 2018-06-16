@@ -41,7 +41,7 @@ func validateArguments(args []string) (releaseType, error) {
 	return releaseType(spec), nil
 }
 
-// Main is the main entry point into the release script
+// Main is the entry point into the release script
 func Main(args []string) error {
 	pkgName := "github.com/plaid/plaid-go"
 	pkg, err := build.Import(pkgName, "", build.FindOnly)

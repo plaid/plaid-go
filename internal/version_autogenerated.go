@@ -1,4 +1,5 @@
 // NOTE - this file is auto-generated.
+
 package internal
 
 // Version is the current version of the plaid-go library

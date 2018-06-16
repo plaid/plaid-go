@@ -8,7 +8,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// mega-main binary
 func main() {
 	rootCmd := &cobra.Command{
 		Use:   "internal",
