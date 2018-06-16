@@ -41,4 +41,8 @@ lint: bin/golint
 # releasing
 .PHONY: release-%
 release-%:
+	@echo "$(BLUE)staging for a new release$(RESET)"
 	go run ./internal/cmd/cmd.go release $(@:release-%=%)
+	@echo "$(BLUE)the package has been prepared for release, please review the changes made to"
+	@echo "the git repo by inspecting 'git log' and 'git tag --list | tail -n 5'"
+	@echo "before pushing the changes with 'git push --all'$(RESET)"
