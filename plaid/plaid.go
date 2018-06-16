@@ -7,10 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"path/filepath"
 	"strings"
-
-	"github.com/BurntSushi/toml"
 )
 
 // APIVersion holds the latest version of the Plaid API
@@ -77,14 +74,7 @@ func (c *Client) newRequest(endpoint string, body io.Reader, v interface{}) (*ht
 	}
 
 	req.Header.Add("Content-Type", "application/json")
-
-	// Add header for version of plaid-go
-	version, err := getLibraryVersion()
-	if err != nil {
-		req.Header.Add("User-Agent", "Plaid Go v"+version)
-	} else {
-		req.Header.Add("User-Agent", "Plaid Go")
-	}
+	req.Header.Add("User-Agent", "Plaid Go v"+internal.Version)
 
 	// Add header for Plaid API version
 	req.Header.Add("Plaid-Version", APIVersion)
@@ -119,22 +109,4 @@ func (c *Client) do(req *http.Request, v interface{}) error {
 	}
 	plaidErr.StatusCode = res.StatusCode
 	return plaidErr
-}
-
-type pkgMetadata struct {
-	Name    string `toml:"name"`
-	Version string `toml:"version"`
-	Branch  string `toml:"branch"`
-}
-
-type pkgConfig struct {
-	Metadata pkgMetadata
-}
-
-// Reads in the plaid-go SDK version from Gopkg.toml
-func getLibraryVersion() (version string, err error) {
-	var conf pkgConfig
-	absPath, _ := filepath.Abs("Gopkg.toml")
-	_, err = toml.DecodeFile(absPath, &conf)
-	return conf.Metadata.Version, err
 }
