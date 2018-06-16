@@ -8,6 +8,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/plaid/plaid-go/internal"
 )
 
 // APIVersion holds the latest version of the Plaid API

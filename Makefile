@@ -35,7 +35,8 @@ test:
 .PHONY: lint
 lint: bin/golint
 	@echo "$(MAGENTA)linting $(GO_SRC_PACKAGES)$(RESET)"
-	@bin/golint -set_exit_status $(GO_SRC_PACKAGES) || true
+	# TODO: lint errors should fail this step (use -set_exit_status)
+	@bin/golint $(GO_SRC_PACKAGES)
 
 # releasing
 .PHONY: release-%
