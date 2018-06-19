@@ -45,4 +45,4 @@ release-%:
 	go run ./internal/cmd/cmd.go release $(@:release-%=%)
 	@echo "$(BLUE)the package has been prepared for release, please review the changes made to"
 	@echo "the git repo by inspecting 'git log' and 'git tag --list | tail -n 5'"
-	@echo "before pushing the changes with 'git push --all'$(RESET)"
+	@echo "before pushing the changes with 'git push --follow-tags'$(RESET)"
