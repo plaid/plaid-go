@@ -17,8 +17,10 @@ var versionTmpl = template.Must(template.New("var").Parse(strings.TrimSpace(`
 
 package internal
 
-// Version is the current version of the plaid-go library
-var Version = "{{.Version}}"
+const (
+	// Version is the current version of the plaid-go library
+	Version = "{{.Version}}"
+)
 `) + "\n"))
 
 func incrementVersion(pkg *build.Package, release releaseType) (string, error) {

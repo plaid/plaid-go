@@ -1,6 +1,8 @@
-// NOTE - this file is auto-generated.
+// NOTE - this file is auto-generated. DO NOT EDIT.
 
 package internal
 
-// Version is the current version of the plaid-go library
-var Version = "1.0.0"
+const (
+	// Version is the current version of the plaid-go library
+	Version = "1.0.0"
+)
