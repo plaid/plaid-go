@@ -12,7 +12,7 @@ type createApexTokenRequest struct {
 	AccountID   string `json:"account_id"`
 }
 
-type createApexTokenResponse struct {
+type CreateApexTokenResponse struct {
 	APIResponse
 	ProcessorToken string `json:"processor_token"`
 }
@@ -24,7 +24,7 @@ type createDwollaTokenRequest struct {
 	AccountID   string `json:"account_id"`
 }
 
-type createDwollaTokenResponse struct {
+type CreateDwollaTokenResponse struct {
 	APIResponse
 	ProcessorToken string `json:"processor_token"`
 }
@@ -36,12 +36,12 @@ type createStripeTokenRequest struct {
 	AccountID   string `json:"account_id"`
 }
 
-type createStripeTokenResponse struct {
+type CreateStripeTokenResponse struct {
 	APIResponse
 	StripeBankAccountToken string `json:"stripe_bank_account_token"`
 }
 
-func (c *Client) CreateApexToken(accessToken, accountID string) (resp createApexTokenResponse, err error) {
+func (c *Client) CreateApexToken(accessToken, accountID string) (resp CreateApexTokenResponse, err error) {
 	if accessToken == "" || accountID == "" {
 		return resp, errors.New("/processor/apex/processor_token/create - access token and account ID must be specified")
 	}
@@ -61,7 +61,7 @@ func (c *Client) CreateApexToken(accessToken, accountID string) (resp createApex
 
 }
 
-func (c *Client) CreateDwollaToken(accessToken, accountID string) (resp createDwollaTokenResponse, err error) {
+func (c *Client) CreateDwollaToken(accessToken, accountID string) (resp CreateDwollaTokenResponse, err error) {
 	if accessToken == "" || accountID == "" {
 		return resp, errors.New("/processor/dwolla/processor_token/create - access token and account ID must be specified")
 	}
@@ -81,7 +81,7 @@ func (c *Client) CreateDwollaToken(accessToken, accountID string) (resp createDw
 
 }
 
-func (c *Client) CreateStripeToken(accessToken, accountID string) (resp createStripeTokenResponse, err error) {
+func (c *Client) CreateStripeToken(accessToken, accountID string) (resp CreateStripeTokenResponse, err error) {
 	if accessToken == "" || accountID == "" {
 		return resp, errors.New("/processor/stripe/bank_account_token/create - access token and account ID must be specified")
 	}
