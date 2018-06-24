@@ -11,7 +11,8 @@ func TestCreateApexToken(t *testing.T) {
 	sandboxResp, err := testClient.CreateSandboxPublicToken(sandboxInstitution, testProducts)
 	assert.Nil(t, err)
 
-	tokenResp, _ := testClient.ExchangePublicToken(sandboxResp.PublicToken)
+	tokenResp, err := testClient.ExchangePublicToken(sandboxResp.PublicToken)
+	assert.Nil(t, err)
 
 	// get test account
 	options := GetAccountsOptions{
@@ -30,7 +31,8 @@ func TestCreateDwollaToken(t *testing.T) {
 	sandboxResp, err := testClient.CreateSandboxPublicToken(sandboxInstitution, testProducts)
 	assert.Nil(t, err)
 
-	tokenResp, _ := testClient.ExchangePublicToken(sandboxResp.PublicToken)
+	tokenResp, err := testClient.ExchangePublicToken(sandboxResp.PublicToken)
+	assert.Nil(t, err)
 
 	// get test account
 	options := GetAccountsOptions{
@@ -48,7 +50,8 @@ func TestCreateStripeToken(t *testing.T) {
 	sandboxResp, err := testClient.CreateSandboxPublicToken(sandboxInstitution, testProducts)
 	assert.Nil(t, err)
 
-	tokenResp, _ := testClient.ExchangePublicToken(sandboxResp.PublicToken)
+	tokenResp, err := testClient.ExchangePublicToken(sandboxResp.PublicToken)
+	assert.Nil(t, err)
 
 	// get test account
 	options := GetAccountsOptions{
