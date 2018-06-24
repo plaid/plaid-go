@@ -8,7 +8,9 @@ import (
 )
 
 func TestCreateApexToken(t *testing.T) {
-	sandboxResp, _ := testClient.CreateSandboxPublicToken(sandboxInstitution, testProducts)
+	sandboxResp, err := testClient.CreateSandboxPublicToken(sandboxInstitution, testProducts)
+	assert.Nil(t, err)
+
 	tokenResp, _ := testClient.ExchangePublicToken(sandboxResp.PublicToken)
 
 	// get test account
@@ -25,7 +27,9 @@ func TestCreateApexToken(t *testing.T) {
 }
 
 func TestCreateDwollaToken(t *testing.T) {
-	sandboxResp, _ := testClient.CreateSandboxPublicToken(sandboxInstitution, testProducts)
+	sandboxResp, err := testClient.CreateSandboxPublicToken(sandboxInstitution, testProducts)
+	assert.Nil(t, err)
+
 	tokenResp, _ := testClient.ExchangePublicToken(sandboxResp.PublicToken)
 
 	// get test account
@@ -41,7 +45,9 @@ func TestCreateDwollaToken(t *testing.T) {
 }
 
 func TestCreateStripeToken(t *testing.T) {
-	sandboxResp, _ := testClient.CreateSandboxPublicToken(sandboxInstitution, testProducts)
+	sandboxResp, err := testClient.CreateSandboxPublicToken(sandboxInstitution, testProducts)
+	assert.Nil(t, err)
+
 	tokenResp, _ := testClient.ExchangePublicToken(sandboxResp.PublicToken)
 
 	// get test account
