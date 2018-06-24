@@ -19,6 +19,7 @@ func TestCreateApexToken(t *testing.T) {
 		AccountIDs: []string{},
 	}
 	accountsResp, err := testClient.GetAccountsWithOptions(tokenResp.AccessToken, options)
+	assert.Nil(t, err)
 	accountID := accountsResp.Accounts[0].AccountID
 
 	apexTokenResp, err := testClient.CreateApexToken(tokenResp.AccessToken, accountID)
@@ -39,6 +40,7 @@ func TestCreateDwollaToken(t *testing.T) {
 		AccountIDs: []string{},
 	}
 	accountsResp, err := testClient.GetAccountsWithOptions(tokenResp.AccessToken, options)
+	assert.Nil(t, err)
 	accountID := accountsResp.Accounts[0].AccountID
 
 	dwollaTokenResp, err := testClient.CreateDwollaToken(tokenResp.AccessToken, accountID)
@@ -58,6 +60,7 @@ func TestCreateStripeToken(t *testing.T) {
 		AccountIDs: []string{},
 	}
 	accountsResp, err := testClient.GetAccountsWithOptions(tokenResp.AccessToken, options)
+	assert.Nil(t, err)
 	accountID := accountsResp.Accounts[0].AccountID
 
 	stripeTokenResp, err := testClient.CreateStripeToken(tokenResp.AccessToken, accountID)
