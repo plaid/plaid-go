@@ -98,7 +98,7 @@ func commitAndTagRepo(r *git.Repository, w *git.Worktree, newVersion string) err
 	now := time.Now()
 	signature := object.Signature{
 		Name:  "Plaid",
-		Email: "api@plaid.com", // todo, what is the best email for this
+		Email: "api@plaid.com",
 		When:  now,
 	}
 
