@@ -3,23 +3,88 @@ package plaid
 import (
 	"encoding/json"
 	"errors"
+	"time"
 )
 
 type AssetReport struct {
 	AssetReportID  string            `json:"asset_report_id"`
 	ClientReportID string            `json:"client_report_id"`
-	DateGenerated  string            `json:"date_generated"`
+	DateGenerated  time.Time         `json:"date_generated"`
 	DaysRequested  int               `json:"days_requested"`
 	Items          []AssetReportItem `json:"items"`
 	User           AssetReportUser   `json:"user"`
 }
 
+func (r AssetReport) MarshalJSON() ([]byte, error) {
+	type Alias AssetReport
+	type Aux struct {
+		Alias
+		DateGenerated string `json:"date_generated"`
+	}
+	aux := Aux{
+		Alias:         Alias(r),
+		DateGenerated: r.DateGenerated.Format(DateLayout),
+	}
+	return json.Marshal(aux)
+}
+
+func (r *AssetReport) UnmarshalJSON(data []byte) error {
+	type Alias AssetReport
+	type Aux struct {
+		Alias
+		DateGenerated string `json:"date_generated"`
+	}
+	var aux Aux
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	date, err := time.Parse(DateLayout, aux.DateGenerated)
+	if err != nil {
+		return err
+	}
+	*r = AssetReport(aux.Alias)
+	r.DateGenerated = date
+	return nil
+}
+
 type AssetReportItem struct {
 	Accounts        []Account `json:"accounts"`
-	DateLastUpdated string    `json:"date_last_updated"`
+	DateLastUpdated time.Time `json:"date_last_updated"`
 	InstitutionID   string    `json:"institution_id"`
 	InstitutionName string    `json:"institution_name"`
 	ItemID          string    `json:"item_id"`
+}
+
+func (i AssetReportItem) MarshalJSON() ([]byte, error) {
+	type Alias AssetReportItem
+	type Aux struct {
+		Alias
+		DateLastUpdated string `json:"date_last_updated"`
+	}
+	aux := Aux{
+		Alias:           Alias(i),
+		DateLastUpdated: i.DateLastUpdated.Format(DateLayout),
+	}
+	return json.Marshal(aux)
+}
+
+func (r *AssetReportItem) UnmarshalJSON(data []byte) error {
+	type Alias AssetReportItem
+	type Aux struct {
+		Alias
+		DateLastUpdated string `json:"date_last_updated"`
+	}
+	var aux Aux
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	date, err := time.Parse(DateLayout, aux.DateLastUpdated)
+	if err != nil {
+		return err
+	}
+	*r = AssetReportItem(aux.Alias)
+	r.DateLastUpdated = date
+	return nil
 }
 
 type AssetReportUser struct {

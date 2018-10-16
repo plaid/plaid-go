@@ -7,25 +7,53 @@ import (
 )
 
 type Transaction struct {
-	AccountID              string   `json:"account_id"`
-	Amount                 float64  `json:"amount"`
-	ISOCurrencyCode        string   `json:"iso_currency_code"`
-	UnofficialCurrencyCode string   `json:"unofficial_currency_code"`
-	Category               []string `json:"category"`
-	CategoryID             string   `json:"category_id"`
-	Date                   string   `json:"date"`
+	AccountID              string      `json:"account_id"`
+	Amount                 float64     `json:"amount"`
+	ISOCurrencyCode        string      `json:"iso_currency_code"`
+	UnofficialCurrencyCode string      `json:"unofficial_currency_code"`
+	Category               []string    `json:"category"`
+	CategoryID             string      `json:"category_id"`
+	Date                   time.Time   `json:"date"`
+	Location               Location    `json:"location"`
+	Name                   string      `json:"name"`
+	PaymentMeta            PaymentMeta `json:"payment_meta"`
+	Pending                bool        `json:"pending"`
+	PendingTransactionID   string      `json:"pending_transaction_id"`
+	AccountOwner           string      `json:"account_owner"`
+	ID                     string      `json:"transaction_id"`
+	Type                   string      `json:"transaction_type"`
+}
 
-	Location Location `json:"location"`
+func (t Transaction) MarshalJSON() ([]byte, error) {
+	type Alias Transaction
+	type Aux struct {
+		Alias
+		Date string `json:"date"`
+	}
+	aux := Aux{
+		Alias: Alias(t),
+		Date:  t.Date.Format(DateLayout),
+	}
+	return json.Marshal(aux)
+}
 
-	Name string `json:"name"`
-
-	PaymentMeta PaymentMeta `json:"payment_meta"`
-
-	Pending              bool   `json:"pending"`
-	PendingTransactionID string `json:"pending_transaction_id"`
-	AccountOwner         string `json:"account_owner"`
-	ID                   string `json:"transaction_id"`
-	Type                 string `json:"transaction_type"`
+func (t *Transaction) UnmarshalJSON(data []byte) error {
+	type Alias Transaction
+	type Aux struct {
+		Alias
+		Date string `json:"date"`
+	}
+	var aux Aux
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	date, err := time.Parse(DateLayout, aux.Date)
+	if err != nil {
+		return err
+	}
+	*t = Transaction(aux.Alias)
+	t.Date = date
+	return nil
 }
 
 type Location struct {
