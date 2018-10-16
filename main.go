@@ -73,12 +73,12 @@ func main() {
 	fmt.Println("Account has number:", authResp.Numbers.ACH[0].Account)
 
 	// POST /transactions/get
-	transactionsResp, err := client.GetTransactions(accessTokenResp.AccessToken, "2010-01-01", "2018-01-01")
+	transactionsResp, err := client.GetTransactions(accessTokenResp.AccessToken, plaid.Date(2010, 1, 1), plaid.Date(2018, 1, 1))
 	if plaidErr, ok := err.(plaid.Error); ok {
 		// Poll until transactions are ready
 		for ok && plaidErr.ErrorCode == "PRODUCT_NOT_READY" {
 			time.Sleep(5 * time.Second)
-			transactionsResp, err = client.GetTransactions(accessTokenResp.AccessToken, "2010-01-01", "2018-01-01")
+			transactionsResp, err = client.GetTransactions(accessTokenResp.AccessToken, plaid.Date(2010, 1, 1), plaid.Date(2018, 1, 1))
 			plaidErr, ok = err.(plaid.Error)
 		}
 		handleError(err)
