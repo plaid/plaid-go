@@ -3,7 +3,7 @@ package plaid
 import "time"
 
 // DateLayout is the time format expected by the api
-const DateLayout = "2012-11-01"
+const DateLayout = "2006-01-02"
 
 // Date returns a time from the specified date
 func Date(year int, month time.Month, day int) time.Time {
