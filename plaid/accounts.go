@@ -31,7 +31,7 @@ type AccountNumber struct {
 }
 
 type getBalancesRequestOptions struct {
-	AccountIDs []string `json:"account_ids"`
+	AccountIDs []string `json:"account_ids,omitempty"`
 }
 
 type getBalancesRequest struct {
@@ -47,7 +47,7 @@ type GetBalancesResponse struct {
 }
 
 type getAccountsRequestOptions struct {
-	AccountIDs []string `json:"account_ids"`
+	AccountIDs []string `json:"account_ids,omitempty"`
 }
 
 type getAccountsRequest struct {
