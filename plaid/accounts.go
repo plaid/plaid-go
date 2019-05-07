@@ -6,13 +6,14 @@ import (
 )
 
 type Account struct {
-	AccountID    string          `json:"account_id"`
-	Balances     AccountBalances `json:"balances"`
-	Mask         string          `json:"mask"`
-	Name         string          `json:"name"`
-	OfficialName string          `json:"official_name"`
-	Subtype      string          `json:"subtype"`
-	Type         string          `json:"type"`
+	AccountID          string          `json:"account_id"`
+	Balances           AccountBalances `json:"balances"`
+	Mask               string          `json:"mask"`
+	Name               string          `json:"name"`
+	OfficialName       string          `json:"official_name"`
+	Subtype            string          `json:"subtype"`
+	Type               string          `json:"type"`
+	VerificationStatus string          `json:"verification_status"`
 }
 
 type AccountBalances struct {
