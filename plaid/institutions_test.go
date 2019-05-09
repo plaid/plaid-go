@@ -1,6 +1,7 @@
 package plaid
 
 import (
+	"sort"
 	"testing"
 
 	assert "github.com/stretchr/testify/require"
@@ -9,8 +10,18 @@ import (
 func TestGetInstitutions(t *testing.T) {
 	instsResp, err := testClient.GetInstitutions(2, 1)
 	assert.Nil(t, err)
-	assert.Equal(t, len(instsResp.Institutions), 2)
-	assert.Equal(t, instsResp.Institutions[0].Name, "American Express")
+
+	expectedNames := []string{
+		"Amegy Bank of Texas",
+		"American Express",
+	}
+	outputNames := []string{}
+	for _, inst := range instsResp.Institutions {
+		outputNames = append(outputNames, inst.Name)
+	}
+	sort.Slice(expectedNames, func(i, j int) bool { return expectedNames[i] < expectedNames[j] })
+	sort.Slice(outputNames, func(i, j int) bool { return outputNames[i] < outputNames[j] })
+	assert.Equal(t, expectedNames, outputNames)
 }
 
 func TestSearchInstitutions(t *testing.T) {
