@@ -19,10 +19,11 @@ type Address struct {
 }
 
 type AddressData struct {
-	City   string `json:"city"`
-	State  string `json:"state"`
-	Street string `json:"street"`
-	Zip    string `json:"zip"`
+	City       string `json:"city"`
+	Region     string `json:"region"`
+	Street     string `json:"street"`
+	PostalCode string `json:"postal_code"`
+	Country    string `json:"country"`
 }
 
 type Email struct {
@@ -43,11 +44,15 @@ type getIdentityRequest struct {
 	AccessToken string `json:"access_token"`
 }
 
+type AccountWithOwners struct {
+	Owners []Identity `json:"owners"`
+	Account
+}
+
 type GetIdentityResponse struct {
 	APIResponse
-	Accounts []Account `json:"accounts"`
-	Identity Identity  `json:"identity"`
-	Item     Item      `json:"item"`
+	Accounts []AccountWithOwners `json:"accounts"`
+	Item     Item                `json:"item"`
 }
 
 // GetIdentity retrieves various account holder information on file with an

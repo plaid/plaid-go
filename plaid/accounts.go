@@ -30,6 +30,18 @@ type AccountNumber struct {
 	WireRouting string `json:"wire_routing"`
 }
 
+type IBANNumber struct {
+	AccountID string `json:"account_id"`
+	IBAN      string `json:"iban"`
+	BIC       string `json:"bic"`
+}
+
+type BACSNumber struct {
+	BACS     string `json:"bacs"`
+	Account  string `json:"account"`
+	SortCode string `json:"sort_code"`
+}
+
 type getBalancesRequestOptions struct {
 	AccountIDs []string `json:"account_ids,omitempty"`
 }
