@@ -12,6 +12,30 @@ type Institution struct {
 	MFA         []string     `json:"mfa"`
 	Name        string       `json:"name"`
 	Products    []string     `json:"products"`
+
+	// included when options.include_status is true
+	InstitutionStatus InstitutionStatus `json:"status"`
+
+	// included when options.include_optional_metadata is true
+	PrimaryColor string `json:"primary_color"`
+	URL          string `json:"url"`
+	Logo         string `json:"logo"`
+}
+
+type InstitutionStatus struct {
+	ItemLogins ItemLogins `json:"item_logins"`
+}
+
+type ItemLogins struct {
+	Status           string                     `json:"status"`
+	LastStatusChange string                     `json:"last_status_change"`
+	Breakdown        InstitutionStatusBreakdown `json:"breakdown"`
+}
+
+type InstitutionStatusBreakdown struct {
+	Success          float64 `json:"success"`
+	ErrorPlaid       float64 `json:"error_plaid"`
+	ErrorInstitution float64 `json:"error_institution"`
 }
 
 type Credential struct {
@@ -34,13 +58,24 @@ type GetInstitutionsResponse struct {
 }
 
 type getInstitutionByIDRequest struct {
-	ID        string `json:"institution_id"`
-	PublicKey string `json:"public_key"`
+	ID        string                           `json:"institution_id"`
+	PublicKey string                           `json:"public_key"`
+	Options   getInstitutionByIDRequestOptions `json:"options,omitempty"`
+}
+
+type getInstitutionByIDRequestOptions struct {
+	IncludeOptionalMetadata bool `json:"include_optional_metadata"`
+	IncludeStatus           bool `json:"include_status"`
 }
 
 type GetInstitutionByIDResponse struct {
 	APIResponse
 	Institution Institution `json:"institution"`
+}
+
+type GetInstitutionByIDOptions struct {
+	IncludeOptionalMetadata bool `json:"include_optional_metadata"`
+	IncludeStatus           bool `json:"include_status"`
 }
 
 type searchInstitutionsRequest struct {
@@ -64,6 +99,31 @@ func (c *Client) GetInstitutionByID(id string) (resp GetInstitutionByIDResponse,
 	jsonBody, err := json.Marshal(getInstitutionByIDRequest{
 		ID:        id,
 		PublicKey: c.publicKey,
+	})
+
+	if err != nil {
+		return resp, err
+	}
+
+	err = c.Call("/institutions/get_by_id", jsonBody, &resp)
+	return resp, err
+}
+
+// GetInstitutionByIDWithOptions returns information for a single institution
+// given an ID.
+// See https://plaid.com/docs/api/#institutions-by-id.
+func (c *Client) GetInstitutionByIDWithOptions(id string, options GetInstitutionByIDOptions) (resp GetInstitutionByIDResponse, err error) {
+	if id == "" {
+		return resp, errors.New("/institutions/get_by_id - institution id must be specified")
+	}
+
+	jsonBody, err := json.Marshal(getInstitutionByIDRequest{
+		ID:        id,
+		PublicKey: c.publicKey,
+		Options: getInstitutionByIDRequestOptions{
+			IncludeOptionalMetadata: options.IncludeOptionalMetadata,
+			IncludeStatus:           options.IncludeStatus,
+		},
 	})
 
 	if err != nil {

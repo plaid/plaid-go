@@ -37,6 +37,14 @@ func main() {
 	handleError(err)
 	fmt.Println(instResp.Institution.Name, "has MFA:", instResp.Institution.MFA)
 
+	// POST /institutions/get_by_id
+	instWithOptsResp, err := client.GetInstitutionByIDWithOptions(
+		instsResp.Institutions[0].ID,
+		plaid.GetInstitutionByIDOptions{IncludeOptionalMetadata: true, IncludeStatus: true},
+	)
+	handleError(err)
+	fmt.Println(instWithOptsResp.Institution.Name, "has Logo:", instWithOptsResp.Institution.Logo)
+
 	// POST /institutions/search
 	instSearchResp, err := client.SearchInstitutions("Ally", []string{"transactions"})
 	handleError(err)

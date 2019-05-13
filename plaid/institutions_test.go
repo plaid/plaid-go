@@ -20,8 +20,18 @@ func TestSearchInstitutions(t *testing.T) {
 	assert.True(t, len(instsResp.Institutions) > 0)
 }
 
-func TestGetInstitutionsByID(t *testing.T) {
+func TestGetInstitutionByID(t *testing.T) {
 	instResp, err := testClient.GetInstitutionByID(sandboxInstitution)
 	assert.Nil(t, err)
 	assert.True(t, len(instResp.Institution.Products) > 0)
+}
+
+func TestGetInstitutionByIDWithOptions(t *testing.T) {
+	opts := GetInstitutionByIDOptions{
+		IncludeOptionalMetadata: true,
+		IncludeStatus:           true,
+	}
+	instResp, err := testClient.GetInstitutionByIDWithOptions(sandboxInstitution, opts)
+	assert.Nil(t, err)
+	assert.True(t, len(instResp.Institution.Logo) > 0)
 }
