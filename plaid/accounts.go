@@ -37,9 +37,9 @@ type IBANNumber struct {
 }
 
 type BACSNumber struct {
-	BACS     string `json:"bacs"`
-	Account  string `json:"account"`
-	SortCode string `json:"sort_code"`
+	AccountID string `json:"account_id"`
+	Account   string `json:"account"`
+	SortCode  string `json:"sort_code"`
 }
 
 type getBalancesRequestOptions struct {
