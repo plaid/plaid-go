@@ -13,9 +13,8 @@ type Identity struct {
 }
 
 type Address struct {
-	Accounts []string    `json:"accounts"`
-	Data     AddressData `json:"data"`
-	Primary  bool        `json:"primary"`
+	Data    AddressData `json:"data"`
+	Primary bool        `json:"primary"`
 }
 
 type AddressData struct {

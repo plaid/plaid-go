@@ -98,7 +98,7 @@
     "require"
   ]
   revision = "f35b8ab0b5a2cef36673838d662e249dd9c94686"
-  version = "v1.3.0"
+  version = "v1.2.2"
 
 [[projects]]
   branch = "master"

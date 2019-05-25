@@ -15,6 +15,6 @@ func TestGetIdentity(t *testing.T) {
 	assert.NotNil(t, identityResp.Accounts)
 	for _, acc := range identityResp.Accounts {
 		assert.NotNil(t, acc.Owners)
-		assert.Greater(t, len(acc.Owners), 0)
+		assert.True(t, len(acc.Owners) > 0)
 	}
 }
