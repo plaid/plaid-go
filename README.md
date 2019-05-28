@@ -24,7 +24,8 @@ Each major version of `plaid-go` targets a specific version of the Plaid API:
 
 | API version | plaid-go release |
 | ----------- | ------------------ |
-| [`2018-05-22`][api-version-2018-05-22] (**latest**) | `1.x.x` |
+| [`2019-05-29`][api-version-2019-05-29] (**latest**) | `2.x.x` |
+| [`2018-05-22`][api-version-2018-05-22] | `1.x.x` |
 | `2017-03-08` | not supported |
 
 For information about what has changed between versions and how to update your integration, head to the [version changelog][version-changelog].
@@ -77,3 +78,4 @@ Open an [issue](https://github.com/plaid/plaid-go/issues/new)!
 
 [version-changelog]: https://plaid.com/docs/api-upgrades/#version-changelog
 [api-version-2018-05-22]: https://plaid.com/docs/api-upgrades/#2018-05-22
+[api-version-2019-05-29]: https://plaid.com/docs/api-upgrades/#2019-05-29

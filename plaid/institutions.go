@@ -6,12 +6,13 @@ import (
 )
 
 type Institution struct {
-	Credentials []Credential `json:"credentials"`
-	HasMFA      bool         `json:"has_mfa"`
-	ID          string       `json:"institution_id"`
-	MFA         []string     `json:"mfa"`
-	Name        string       `json:"name"`
-	Products    []string     `json:"products"`
+	Credentials  []Credential `json:"credentials"`
+	HasMFA       bool         `json:"has_mfa"`
+	ID           string       `json:"institution_id"`
+	MFA          []string     `json:"mfa"`
+	Name         string       `json:"name"`
+	Products     []string     `json:"products"`
+	CountryCodes []string     `json:"country_codes"`
 }
 
 type Credential struct {
