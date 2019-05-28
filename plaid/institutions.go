@@ -18,12 +18,12 @@ type Institution struct {
 	// Included when `options.include_status` is true.
 	InstitutionStatus *InstitutionStatus `json:"status",omitempty`
 
-	// May be included when `options.include_optional_metadata` is true.
-	PrimaryColor *string `json:"primary_color",omitempty`
 	// Included when `options.include_optional_metadata` is true.
-	URL *string `json:"url",omitempty`
-	// May be included when `options.include_optional_metadata` is true.
-	Logo *string `json:"logo",omitempty`
+	PrimaryColor string `json:"primary_color",omitempty`
+	// Included when `options.include_optional_metadata` is true.
+	URL string `json:"url",omitempty`
+	// Included when `options.include_optional_metadata` is true.
+	Logo string `json:"logo",omitempty`
 }
 
 type InstitutionStatus struct {
