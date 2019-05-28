@@ -14,13 +14,15 @@ type Institution struct {
 	Products     []string     `json:"products"`
 	CountryCodes []string     `json:"country_codes"`
 
-	// included when options.include_status is true
+	// Included when `options.include_status` is true.
 	InstitutionStatus InstitutionStatus `json:"status"`
 
-	// included when options.include_optional_metadata is true
+	// Included when `options.include_optional_metadata` is true.
 	PrimaryColor string `json:"primary_color"`
-	URL          string `json:"url"`
-	Logo         string `json:"logo"`
+	// Included when `options.include_optional_metadata` is true.
+	URL string `json:"url"`
+	// Included when `options.include_optional_metadata` is true.
+	Logo string `json:"logo"`
 }
 
 type InstitutionStatus struct {
@@ -102,6 +104,14 @@ type SearchInstitutionsResponse struct {
 // See https://plaid.com/docs/api/#institutions-by-id.
 func (c *Client) GetInstitutionByID(
 	id string,
+) (resp GetInstitutionByIDResponse, err error) {
+	return c.GetInstitutionByIDWithOptions(id, GetInstitutionByIDOptions{})
+}
+
+// GetInstitutionByIDWithOptions returns information for a single institution given an ID.
+// See https://plaid.com/docs/api/#institutions-by-id.
+func (c *Client) GetInstitutionByIDWithOptions(
+	id string,
 	options GetInstitutionByIDOptions,
 ) (resp GetInstitutionByIDResponse, err error) {
 	if id == "" {
@@ -124,7 +134,13 @@ func (c *Client) GetInstitutionByID(
 
 // GetInstitutions returns information for all institutions supported by Plaid.
 // See https://plaid.com/docs/api/#all-institutions.
-func (c *Client) GetInstitutions(
+func (c *Client) GetInstitutions(count, offset int) (resp GetInstitutionsResponse, err error) {
+	return c.GetInstitutionsWithOptions(count, offset, GetInstitutionsOptions{})
+}
+
+// GetInstitutionsWithOptions returns information for all institutions supported by Plaid.
+// See https://plaid.com/docs/api/#all-institutions.
+func (c *Client) GetInstitutionsWithOptions(
 	count int,
 	offset int,
 	options GetInstitutionsOptions,
@@ -153,6 +169,16 @@ func (c *Client) GetInstitutions(
 // supported products.
 // See https://plaid.com/docs/api/#institution-search.
 func (c *Client) SearchInstitutions(
+	query string,
+	products []string,
+) (resp SearchInstitutionsResponse, err error) {
+	return c.SearchInstitutionsWithOptions(query, products, SearchInstitutionsOptions{})
+}
+
+// SearchInstitutionsWithOptions returns institutions corresponding to a query string and
+// supported products.
+// See https://plaid.com/docs/api/#institution-search.
+func (c *Client) SearchInstitutionsWithOptions(
 	query string,
 	products []string,
 	options SearchInstitutionsOptions,

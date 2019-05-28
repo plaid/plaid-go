@@ -14,7 +14,7 @@ func TestGetInstitutions(t *testing.T) {
 		GetInstitutionsOptions{IncludeOptionalMetadata: true},
 	} {
 		t.Run(fmt.Sprintf("%v", options), func(t *testing.T) {
-			instsResp, err := testClient.GetInstitutions(2, 1, options)
+			instsResp, err := testClient.GetInstitutionsWithOptions(2, 1, options)
 			assert.Nil(t, err)
 
 			expectedNames := []string{
@@ -45,7 +45,7 @@ func TestSearchInstitutions(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("%v", options), func(t *testing.T) {
 			p := []string{"transactions"}
-			instsResp, err := testClient.SearchInstitutions(sandboxInstitutionName, p, options)
+			instsResp, err := testClient.SearchInstitutionsWithOptions(sandboxInstitutionName, p, options)
 			assert.Nil(t, err)
 			assert.True(t, len(instsResp.Institutions) > 0)
 
@@ -65,7 +65,7 @@ func TestGetInstitutionsByID(t *testing.T) {
 		GetInstitutionByIDOptions{IncludeOptionalMetadata: true, IncludeStatus: true},
 	} {
 		t.Run(fmt.Sprintf("%v", options), func(t *testing.T) {
-			instResp, err := testClient.GetInstitutionByID(sandboxInstitution, options)
+			instResp, err := testClient.GetInstitutionByIDWithOptions(sandboxInstitution, options)
 			assert.Nil(t, err)
 			assert.True(t, len(instResp.Institution.Products) > 0)
 
