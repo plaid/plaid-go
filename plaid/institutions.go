@@ -3,6 +3,7 @@ package plaid
 import (
 	"encoding/json"
 	"errors"
+	"time"
 )
 
 type Institution struct {
@@ -31,7 +32,7 @@ type InstitutionStatus struct {
 
 type ItemLogins struct {
 	Status           string                     `json:"status"`
-	LastStatusChange string                     `json:"last_status_change"`
+	LastStatusChange time.Time                  `json:"last_status_change"`
 	Breakdown        InstitutionStatusBreakdown `json:"breakdown"`
 }
 
