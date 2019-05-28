@@ -16,14 +16,14 @@ type Institution struct {
 	CountryCodes []string     `json:"country_codes"`
 
 	// Included when `options.include_status` is true.
-	InstitutionStatus *InstitutionStatus `json:"status",omitempty`
+	InstitutionStatus *InstitutionStatus `json:"status,omitempty"`
 
 	// Included when `options.include_optional_metadata` is true.
-	PrimaryColor string `json:"primary_color",omitempty`
+	PrimaryColor string `json:"primary_color,omitempty"`
 	// Included when `options.include_optional_metadata` is true.
-	URL string `json:"url",omitempty`
+	URL string `json:"url,omitempty"`
 	// Included when `options.include_optional_metadata` is true.
-	Logo string `json:"logo",omitempty`
+	Logo string `json:"logo,omitempty"`
 }
 
 type InstitutionStatus struct {
@@ -53,7 +53,7 @@ type getInstitutionsRequest struct {
 	Secret   string                 `json:"secret"`
 	Count    int                    `json:"count"`
 	Offset   int                    `json:"offset"`
-	Options  GetInstitutionsOptions `json:"options",omitempty`
+	Options  GetInstitutionsOptions `json:"options,omitempty"`
 }
 
 type GetInstitutionsOptions struct {
@@ -71,7 +71,7 @@ type GetInstitutionsResponse struct {
 type getInstitutionByIDRequest struct {
 	ID        string                    `json:"institution_id"`
 	PublicKey string                    `json:"public_key"`
-	Options   GetInstitutionByIDOptions `json:"options",omitempty`
+	Options   GetInstitutionByIDOptions `json:"options,omitempty"`
 }
 
 type GetInstitutionByIDOptions struct {
@@ -88,7 +88,7 @@ type searchInstitutionsRequest struct {
 	Query     string                    `json:"query"`
 	Products  []string                  `json:"products"`
 	PublicKey string                    `json:"public_key"`
-	Options   SearchInstitutionsOptions `json:"options",omitempty`
+	Options   SearchInstitutionsOptions `json:"options,omitempty"`
 }
 
 type SearchInstitutionsOptions struct {
