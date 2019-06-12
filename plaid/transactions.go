@@ -32,9 +32,10 @@ type Location struct {
 	City        string  `json:"city"`
 	Lat         float64 `json:"lat"`
 	Lon         float64 `json:"lon"`
-	State       string  `json:"state"`
+	Region      string  `json:"region"`
 	StoreNumber string  `json:"store_number"`
-	Zip         string  `json:"zip"`
+	PostalCode  string  `json:"postal_code"`
+	Country     string  `json:"country"`
 }
 
 type PaymentMeta struct {
