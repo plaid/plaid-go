@@ -6,17 +6,18 @@ import (
 )
 
 type InvestmentTransaction struct {
-	InvestmentTransactionID string  `json:"investment_transaction_id"`
-	AccountID               string  `json:"account_id"`
-	Date                    string  `json:"date"`
-	Name                    string  `json:"name"`
-	Quantity                float64 `json:"quantity"`
+	InvestmentTransactionID string `json:"investment_transaction_id"`
+	AccountID               string `json:"account_id"`
+	SecurityID              string `json:"security_id"`
+	CancelTransactionID     string `json:"cancel_transaction_id"`
 
+	Date                   string  `json:"date"`
+	Name                   string  `json:"name"`
+	Quantity               float64 `json:"quantity"`
 	Amount                 float64 `json:"amount"`
 	Price                  float64 `json:"price"`
 	Fees                   float64 `json:"fees"`
 	Class                  string  `json:"class"`
-	Subclass               string  `json:"subclass"`
 	ISOCurrencyCode        string  `json:"iso_currency_code"`
 	UnofficialCurrencyCode string  `json:"unofficial_currency_code"`
 }
