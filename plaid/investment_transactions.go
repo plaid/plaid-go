@@ -17,7 +17,7 @@ type InvestmentTransaction struct {
 	Amount                 float64 `json:"amount"`
 	Price                  float64 `json:"price"`
 	Fees                   float64 `json:"fees"`
-	Class                  string  `json:"class"`
+	Type                   string  `json:"type"`
 	ISOCurrencyCode        string  `json:"iso_currency_code"`
 	UnofficialCurrencyCode string  `json:"unofficial_currency_code"`
 }
@@ -57,6 +57,9 @@ type getInvestmentTransactionsRequestOptions struct {
 // GetInvestmentTransactionsWithOptions retrieves user-authorized investment transaction data for investment-type accounts.
 // See https://plaid.com/docs/api/#investment-transactions.
 func (c *Client) GetInvestmentTransactionsWithOptions(accessToken string, options GetInvestmentTransactionsOptions) (resp GetInvestmentTransactionsResponse, err error) {
+	if accessToken == "" {
+		return resp, errors.New("/investments/transacstions/get - access token must be specified")
+	}
 	if options.StartDate == "" || options.EndDate == "" {
 		return resp, errors.New("/investment/transactions/get - start date and end date must be specified")
 	}
