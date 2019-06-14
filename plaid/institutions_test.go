@@ -18,7 +18,7 @@ func TestGetInstitutions(t *testing.T) {
 			assert.Nil(t, err)
 
 			expectedNames := []string{
-				"Amegy Bank of Texas",
+				"Amegy Bank of Texas - Personal Banking",
 				"American Express",
 			}
 			outputNames := []string{}
