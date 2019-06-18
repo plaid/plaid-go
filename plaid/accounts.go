@@ -23,11 +23,18 @@ type AccountBalances struct {
 	UnofficialCurrencyCode string  `json:"unofficial_currency_code"`
 }
 
-type AccountNumber struct {
+type ACHNumber struct {
 	Account     string `json:"account"`
 	AccountID   string `json:"account_id"`
 	Routing     string `json:"routing"`
 	WireRouting string `json:"wire_routing"`
+}
+
+type ETFNumber struct {
+	Account     string `json:"account"`
+	AccountID   string `json:"account_id"`
+	Institution string `json:"institution"`
+	Branch      string `json:"branch"`
 }
 
 type IBANNumber struct {
