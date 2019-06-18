@@ -12,5 +12,9 @@ func TestGetIdentity(t *testing.T) {
 	identityResp, err := testClient.GetIdentity(tokenResp.AccessToken)
 
 	assert.Nil(t, err)
-	assert.NotNil(t, identityResp.Identity)
+	assert.NotNil(t, identityResp.Accounts)
+	for _, acc := range identityResp.Accounts {
+		assert.NotNil(t, acc.Owners)
+		assert.True(t, len(acc.Owners) > 0)
+	}
 }
