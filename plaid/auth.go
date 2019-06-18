@@ -18,7 +18,7 @@ type getAuthRequest struct {
 
 type AccountNumberCollection struct {
 	ACH           []ACHNumber  `json:"ach"`
-	EFT           []ETFNumber  `json:"eft"`
+	EFT           []EFTNumber  `json:"eft"`
 	International []IBANNumber `json:"international"`
 	BACS          []BACSNumber `json:"bacs"`
 }

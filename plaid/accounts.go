@@ -30,7 +30,7 @@ type ACHNumber struct {
 	WireRouting string `json:"wire_routing"`
 }
 
-type ETFNumber struct {
+type EFTNumber struct {
 	Account     string `json:"account"`
 	AccountID   string `json:"account_id"`
 	Institution string `json:"institution"`
