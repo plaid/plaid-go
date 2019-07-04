@@ -62,12 +62,12 @@ type InvalidateAccessTokenResponse struct {
 type updateAccessTokenVersionRequest struct {
 	ClientID    string `json:"client_id"`
 	Secret      string `json:"secret"`
-	AccessToken string `json:"access_token"`
+	AccessToken string `json:"access_token_v1"`
 }
 
 type UpdateAccessTokenVersionResponse struct {
 	APIResponse
-	NewAccessToken string `json:"new_access_token"`
+	NewAccessToken string `json:"access_token"`
 	ItemID         string `json:"item_id"`
 }
 
