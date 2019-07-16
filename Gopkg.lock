@@ -135,7 +135,7 @@
     ".",
     "golint"
   ]
-  revision = "470b6b0bb3005eda157f0275e2e4895055396a81"
+  revision = "959b441ac422379a43da2230f62be024250818b0"
 
 [[projects]]
   branch = "master"
@@ -171,7 +171,7 @@
     "go/internal/gcimporter",
     "go/types/typeutil"
   ]
-  revision = "465e6f399236d0ea2466584539d4eab4d3d83720"
+  revision = "c8855242db9c1762032abe33c2dff50de3ec9d05"
 
 [[projects]]
   name = "gopkg.in/src-d/go-billy.v4"
@@ -241,6 +241,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "3f0b8b44ff81eca7308a4aadc6b6ad49395f4973a649a779d3e88c0d5887e20f"
+  inputs-digest = "dc78abf4d607bc4495b3d9f8e6f867c05a3ff017c55153f6fc85f562ef4ebcd8"
   solver-name = "gps-cdcl"
   solver-version = 1
