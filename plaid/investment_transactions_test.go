@@ -10,8 +10,8 @@ import (
 func TestGetInvestmentTransactions(t *testing.T) {
 	sandboxResp, _ := testClient.CreateSandboxPublicToken(sandboxInstitution, []string{"investments"})
 	tokenResp, _ := testClient.ExchangePublicToken(sandboxResp.PublicToken)
-	startDateString := "2018-06-01"
-	endDateString := "2019-06-01"
+	startDateString := time.Now().Add(-365 * 24 * time.Hour).Format(iso8601TimeFormat)
+	endDateString := time.Now().Format(iso8601TimeFormat)
 	investmentTransactionsResp, err := testClient.GetInvestmentTransactions(tokenResp.AccessToken, startDateString, endDateString)
 
 	if plaidErr, ok := err.(Error); ok {
