@@ -80,6 +80,7 @@ type getAccountsRequest struct {
 type GetAccountsResponse struct {
 	APIResponse
 	Accounts []Account `json:"accounts"`
+	Item Item `json:"item"`
 }
 
 type GetAccountsOptions struct {
