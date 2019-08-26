@@ -18,6 +18,7 @@ func TestGetAccounts(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, accountsResp.Accounts)
 	assert.Equal(t, len(accountsResp.Accounts), 8)
+	assert.NotNil(t, accountsResp.Item)
 
 	// get selected accounts
 	options = GetAccountsOptions{
@@ -26,6 +27,7 @@ func TestGetAccounts(t *testing.T) {
 	accountsResp, err = testClient.GetAccountsWithOptions(tokenResp.AccessToken, options)
 	assert.Nil(t, err)
 	assert.Equal(t, len(accountsResp.Accounts), 1)
+	assert.NotNil(t, accountsResp.Item)
 }
 
 func TestGetBalances(t *testing.T) {
