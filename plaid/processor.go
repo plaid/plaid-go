@@ -29,6 +29,18 @@ type CreateDwollaTokenResponse struct {
 	ProcessorToken string `json:"processor_token"`
 }
 
+type createOcrolusTokenRequest struct {
+	ClientID    string `json:"client_id"`
+	Secret      string `json:"secret"`
+	AccessToken string `json:"access_token"`
+	AccountID   string `json:"account_id"`
+}
+
+type CreateOcrolusTokenResponse struct {
+	APIResponse
+	ProcessorToken string `json:"processor_token"`
+}
+
 type createStripeTokenRequest struct {
 	ClientID    string `json:"client_id"`
 	Secret      string `json:"secret"`
@@ -77,6 +89,26 @@ func (c *Client) CreateDwollaToken(accessToken, accountID string) (resp CreateDw
 	}
 
 	err = c.Call("/processor/dwolla/processor_token/create", jsonBody, &resp)
+	return resp, err
+
+}
+
+func (c *Client) CreateOcrolusToken(accessToken, accountID string) (resp CreateOcrolusTokenResponse, err error) {
+	if accessToken == "" || accountID == "" {
+		return resp, errors.New("/processor/ocrolus/processor_token/create - access token and account ID must be specified")
+	}
+
+	jsonBody, err := json.Marshal(createOcrolusTokenRequest{
+		ClientID:    c.clientID,
+		Secret:      c.secret,
+		AccessToken: accessToken,
+		AccountID:   accountID,
+	})
+	if err != nil {
+		return resp, err
+	}
+
+	err = c.Call("/processor/ocrolus/processor_token/create", jsonBody, &resp)
 	return resp, err
 
 }
