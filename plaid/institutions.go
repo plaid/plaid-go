@@ -7,14 +7,13 @@ import (
 )
 
 type Institution struct {
-	Credentials   []Credential           `json:"credentials"`
-	HasMFA        bool                   `json:"has_mfa"`
-	ID            string                 `json:"institution_id"`
-	MFA           []string               `json:"mfa"`
-	Name          string                 `json:"name"`
-	Products      []string               `json:"products"`
-	CountryCodes  []string               `json:"country_codes"`
-	AccountFilter map[string]interface{} `json:"account_filter"`
+	Credentials  []Credential `json:"credentials"`
+	HasMFA       bool         `json:"has_mfa"`
+	ID           string       `json:"institution_id"`
+	MFA          []string     `json:"mfa"`
+	Name         string       `json:"name"`
+	Products     []string     `json:"products"`
+	CountryCodes []string     `json:"country_codes"`
 
 	// Included when `options.include_status` is true.
 	InstitutionStatus *InstitutionStatus `json:"status,omitempty"`
