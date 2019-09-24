@@ -38,9 +38,14 @@ type Holding struct {
 }
 
 type getHoldingsRequest struct {
-	ClientID    string `json:"client_id"`
-	Secret      string `json:"secret"`
-	AccessToken string `json:"access_token"`
+	ClientID    string             `json:"client_id"`
+	Secret      string             `json:"secret"`
+	AccessToken string             `json:"access_token"`
+	Options     GetHoldingsOptions `json:"options,omitempty"`
+}
+
+type GetHoldingsOptions struct {
+	AccountIDs []string `json:"account_ids"`
 }
 
 type GetHoldingsResponse struct {
@@ -54,15 +59,27 @@ type GetHoldingsResponse struct {
 // GetHoldings retrieves various account holdings for investment accounts.
 // See https://plaid.com/docs/api/#holdings.
 func (c *Client) GetHoldings(accessToken string) (resp GetHoldingsResponse, err error) {
+	options := GetHoldingsOptions{
+		AccountIDs: []string{},
+	}
+	return c.GetHoldingsWithOptions(accessToken, options)
+}
+
+// GetHoldingsWithOptions retrieves various account holdings for investment accounts.
+// See https://plaid.com/docs/api/#holdings.
+func (c *Client) GetHoldingsWithOptions(accessToken string, options GetHoldingsOptions) (resp GetHoldingsResponse, err error) {
 	if accessToken == "" {
 		return resp, errors.New("/investments/holdings/get - access token must be specified")
 	}
-
-	jsonBody, err := json.Marshal(getHoldingsRequest{
+	req := getHoldingsRequest{
 		ClientID:    c.clientID,
 		Secret:      c.secret,
 		AccessToken: accessToken,
-	})
+	}
+	if len(options.AccountIDs) > 0 {
+		req.Options.AccountIDs = options.AccountIDs
+	}
+	jsonBody, err := json.Marshal(req)
 
 	if err != nil {
 		return resp, err
