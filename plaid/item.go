@@ -3,6 +3,7 @@ package plaid
 import (
 	"encoding/json"
 	"errors"
+	"time"
 )
 
 type Item struct {
@@ -14,6 +15,21 @@ type Item struct {
 	Webhook           string   `json:"webhook"`
 }
 
+type ItemStatus struct {
+	Transactions ItemTransactionsStatus `json:"transactions"`
+	LastWebhook  ItemLastWebhookStatus  `json:"last_webhook"`
+}
+
+type ItemTransactionsStatus struct {
+	LastSuccessfulUpdate time.Time `json:"last_successful_update"`
+	LastFailedUpdate     time.Time `json:"last_failed_update"`
+}
+
+type ItemLastWebhookStatus struct {
+	SentAt   time.Time `json:"sent_at"`
+	CodeSent string    `json:"code_sent"`
+}
+
 type getItemRequest struct {
 	ClientID    string `json:"client_id"`
 	Secret      string `json:"secret"`
@@ -22,7 +38,8 @@ type getItemRequest struct {
 
 type GetItemResponse struct {
 	APIResponse
-	Item Item `json:"item"`
+	Item   Item       `json:"item"`
+	Status ItemStatus `json:"status"`
 }
 
 type removeItemRequest struct {
