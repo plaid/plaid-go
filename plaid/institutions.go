@@ -27,10 +27,20 @@ type Institution struct {
 }
 
 type InstitutionStatus struct {
-	ItemLogins ItemLogins `json:"item_logins"`
+	ItemLogins          ItemLogins              `json:"item_logins"`
+	TransactionsUpdates InstitutionStatusFields `json:"transactions_updates"`
+	Auth                InstitutionStatusFields `json:"auth"`
+	Balance             InstitutionStatusFields `json:"balance"`
+	Identity            InstitutionStatusFields `json:"identity"`
 }
 
 type ItemLogins struct {
+	Status           string                     `json:"status"`
+	LastStatusChange time.Time                  `json:"last_status_change"`
+	Breakdown        InstitutionStatusBreakdown `json:"breakdown"`
+}
+
+type InstitutionStatusFields struct {
 	Status           string                     `json:"status"`
 	LastStatusChange time.Time                  `json:"last_status_change"`
 	Breakdown        InstitutionStatusBreakdown `json:"breakdown"`
@@ -40,6 +50,7 @@ type InstitutionStatusBreakdown struct {
 	Success          float64 `json:"success"`
 	ErrorPlaid       float64 `json:"error_plaid"`
 	ErrorInstitution float64 `json:"error_institution"`
+	RefreshInterval  string  `json:"refresh_interval"` // only applicable to TransactionsUpdates status
 }
 
 type Credential struct {
