@@ -1,15 +1,16 @@
 package plaid
 
 import (
+	"context"
 	"testing"
 
 	assert "github.com/stretchr/testify/require"
 )
 
 func TestGetIdentity(t *testing.T) {
-	sandboxResp, _ := testClient.CreateSandboxPublicToken(sandboxInstitution, testProducts)
-	tokenResp, _ := testClient.ExchangePublicToken(sandboxResp.PublicToken)
-	identityResp, err := testClient.GetIdentity(tokenResp.AccessToken)
+	sandboxResp, _ := testClient.CreateSandboxPublicToken(context.Background(), sandboxInstitution, testProducts)
+	tokenResp, _ := testClient.ExchangePublicToken(context.Background(), sandboxResp.PublicToken)
+	identityResp, err := testClient.GetIdentity(context.Background(), tokenResp.AccessToken)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, identityResp.Accounts)

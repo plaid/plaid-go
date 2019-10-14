@@ -1,15 +1,16 @@
 package plaid
 
 import (
+	"context"
 	"testing"
 
 	assert "github.com/stretchr/testify/require"
 )
 
 func TestGetLiabilities(t *testing.T) {
-	sandboxResp, _ := testClient.CreateSandboxPublicToken(sandboxInstitution, []string{"liabilities"})
-	tokenResp, _ := testClient.ExchangePublicToken(sandboxResp.PublicToken)
-	liabilitiesResp, err := testClient.GetLiabilities(tokenResp.AccessToken)
+	sandboxResp, _ := testClient.CreateSandboxPublicToken(context.Background(), sandboxInstitution, []string{"liabilities"})
+	tokenResp, _ := testClient.ExchangePublicToken(context.Background(), sandboxResp.PublicToken)
+	liabilitiesResp, err := testClient.GetLiabilities(context.Background(), tokenResp.AccessToken)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, liabilitiesResp.Accounts)
@@ -18,7 +19,7 @@ func TestGetLiabilities(t *testing.T) {
 	assert.Len(t, liabilitiesResp.Liabilities.Student, 1)
 
 	accountID := liabilitiesResp.Accounts[7].AccountID
-	liabilitiesResp, err = testClient.GetLiabilitiesWithOptions(tokenResp.AccessToken, GetLiabilitiesOptions{
+	liabilitiesResp, err = testClient.GetLiabilitiesWithOptions(context.Background(), tokenResp.AccessToken, GetLiabilitiesOptions{
 		AccountIDs: []string{accountID},
 	})
 	assert.Nil(t, err)

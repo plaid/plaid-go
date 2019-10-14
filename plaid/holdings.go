@@ -1,6 +1,7 @@
 package plaid
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 )
@@ -58,16 +59,16 @@ type GetHoldingsResponse struct {
 
 // GetHoldings retrieves various account holdings for investment accounts.
 // See https://plaid.com/docs/api/#holdings.
-func (c *Client) GetHoldings(accessToken string) (resp GetHoldingsResponse, err error) {
+func (c *Client) GetHoldings(ctx context.Context, accessToken string) (resp GetHoldingsResponse, err error) {
 	options := GetHoldingsOptions{
 		AccountIDs: []string{},
 	}
-	return c.GetHoldingsWithOptions(accessToken, options)
+	return c.GetHoldingsWithOptions(ctx, accessToken, options)
 }
 
 // GetHoldingsWithOptions retrieves various account holdings for investment accounts.
 // See https://plaid.com/docs/api/#holdings.
-func (c *Client) GetHoldingsWithOptions(accessToken string, options GetHoldingsOptions) (resp GetHoldingsResponse, err error) {
+func (c *Client) GetHoldingsWithOptions(ctx context.Context, accessToken string, options GetHoldingsOptions) (resp GetHoldingsResponse, err error) {
 	if accessToken == "" {
 		return resp, errors.New("/investments/holdings/get - access token must be specified")
 	}
@@ -85,6 +86,6 @@ func (c *Client) GetHoldingsWithOptions(accessToken string, options GetHoldingsO
 		return resp, err
 	}
 
-	err = c.Call("/investments/holdings/get", jsonBody, &resp)
+	err = c.Call(ctx, "/investments/holdings/get", jsonBody, &resp)
 	return resp, err
 }

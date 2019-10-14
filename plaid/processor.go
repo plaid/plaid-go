@@ -1,6 +1,7 @@
 package plaid
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 )
@@ -33,7 +34,7 @@ type CreateStripeTokenResponse struct {
 	StripeBankAccountToken string `json:"stripe_bank_account_token"`
 }
 
-func (c *Client) createProcessorToken(apiEndpoint, accessToken, accountID string) (resp createProcessorTokenResponse, err error) {
+func (c *Client) createProcessorToken(ctx context.Context, apiEndpoint, accessToken, accountID string) (resp createProcessorTokenResponse, err error) {
 	if accessToken == "" || accountID == "" {
 		return resp, errors.New(apiEndpoint + " - access token and account ID must be specified")
 	}
@@ -48,30 +49,30 @@ func (c *Client) createProcessorToken(apiEndpoint, accessToken, accountID string
 		return resp, err
 	}
 
-	err = c.Call(apiEndpoint, jsonBody, &resp)
+	err = c.Call(ctx, apiEndpoint, jsonBody, &resp)
 	return resp, err
 }
 
 // CreateApexToken is used to create a new Apex processor token.
-func (c *Client) CreateApexToken(accessToken, accountID string) (resp CreateApexTokenResponse, err error) {
-	response, err := c.createProcessorToken("/processor/apex/processor_token/create", accessToken, accountID)
+func (c *Client) CreateApexToken(ctx context.Context, accessToken, accountID string) (resp CreateApexTokenResponse, err error) {
+	response, err := c.createProcessorToken(ctx, "/processor/apex/processor_token/create", accessToken, accountID)
 	return CreateApexTokenResponse(response), err
 }
 
 // CreateDwollaToken is used to create a new Dwolla processor token.
-func (c *Client) CreateDwollaToken(accessToken, accountID string) (resp CreateDwollaTokenResponse, err error) {
-	response, err := c.createProcessorToken("/processor/dwolla/processor_token/create", accessToken, accountID)
+func (c *Client) CreateDwollaToken(ctx context.Context, accessToken, accountID string) (resp CreateDwollaTokenResponse, err error) {
+	response, err := c.createProcessorToken(ctx, "/processor/dwolla/processor_token/create", accessToken, accountID)
 	return CreateDwollaTokenResponse(response), err
 }
 
 // CreateOcrolusToken is used to create a new Ocrolus processor token.
-func (c *Client) CreateOcrolusToken(accessToken, accountID string) (resp CreateOcrolusTokenResponse, err error) {
-	response, err := c.createProcessorToken("/processor/ocrolus/processor_token/create", accessToken, accountID)
+func (c *Client) CreateOcrolusToken(ctx context.Context, accessToken, accountID string) (resp CreateOcrolusTokenResponse, err error) {
+	response, err := c.createProcessorToken(ctx, "/processor/ocrolus/processor_token/create", accessToken, accountID)
 	return CreateOcrolusTokenResponse(response), err
 }
 
 // CreateStripeToken is used to create a new Stripe bank account token.
-func (c *Client) CreateStripeToken(accessToken, accountID string) (resp CreateStripeTokenResponse, err error) {
+func (c *Client) CreateStripeToken(ctx context.Context, accessToken, accountID string) (resp CreateStripeTokenResponse, err error) {
 	if accessToken == "" || accountID == "" {
 		return resp, errors.New("/processor/stripe/bank_account_token/create - access token and account ID must be specified")
 	}
@@ -86,6 +87,6 @@ func (c *Client) CreateStripeToken(accessToken, accountID string) (resp CreateSt
 		return resp, err
 	}
 
-	err = c.Call("/processor/stripe/bank_account_token/create", jsonBody, &resp)
+	err = c.Call(ctx, "/processor/stripe/bank_account_token/create", jsonBody, &resp)
 	return resp, err
 }

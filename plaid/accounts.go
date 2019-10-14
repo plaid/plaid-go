@@ -1,6 +1,7 @@
 package plaid
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 )
@@ -80,7 +81,7 @@ type getAccountsRequest struct {
 type GetAccountsResponse struct {
 	APIResponse
 	Accounts []Account `json:"accounts"`
-	Item Item `json:"item"`
+	Item     Item      `json:"item"`
 }
 
 type GetAccountsOptions struct {
@@ -93,16 +94,16 @@ type GetBalancesOptions struct {
 
 // GetBalances returns the real-time balance for each of an Item's accounts.
 // See https://plaid.com/docs/api/#balance.
-func (c *Client) GetBalances(accessToken string) (resp GetBalancesResponse, err error) {
+func (c *Client) GetBalances(ctx context.Context, accessToken string) (resp GetBalancesResponse, err error) {
 	options := GetBalancesOptions{
 		AccountIDs: []string{},
 	}
-	return c.GetBalancesWithOptions(accessToken, options)
+	return c.GetBalancesWithOptions(ctx, accessToken, options)
 }
 
 // GetBalancesWithOptions returns the real-time balance for each of an Item's accounts.
 // See https://plaid.com/docs/api/#balance.
-func (c *Client) GetBalancesWithOptions(accessToken string, options GetBalancesOptions) (resp GetBalancesResponse, err error) {
+func (c *Client) GetBalancesWithOptions(ctx context.Context, accessToken string, options GetBalancesOptions) (resp GetBalancesResponse, err error) {
 	if accessToken == "" {
 		return resp, errors.New("/accounts/balance/get - access token must be specified")
 	}
@@ -119,13 +120,13 @@ func (c *Client) GetBalancesWithOptions(accessToken string, options GetBalancesO
 		return resp, err
 	}
 
-	err = c.Call("/accounts/balance/get", jsonBody, &resp)
+	err = c.Call(ctx, "/accounts/balance/get", jsonBody, &resp)
 	return resp, err
 }
 
 // GetAccountsWithOptions retrieves accounts associated with an Item.
 // See https://plaid.com/docs/api/#accounts.
-func (c *Client) GetAccountsWithOptions(accessToken string, options GetAccountsOptions) (resp GetAccountsResponse, err error) {
+func (c *Client) GetAccountsWithOptions(ctx context.Context, accessToken string, options GetAccountsOptions) (resp GetAccountsResponse, err error) {
 	if accessToken == "" {
 		return resp, errors.New("/accounts/get - access token must be specified")
 	}
@@ -144,15 +145,15 @@ func (c *Client) GetAccountsWithOptions(accessToken string, options GetAccountsO
 		return resp, err
 	}
 
-	err = c.Call("/accounts/get", jsonBody, &resp)
+	err = c.Call(ctx, "/accounts/get", jsonBody, &resp)
 	return resp, err
 }
 
 // GetAccounts retrieves accounts associated with an Item.
 // See https://plaid.com/docs/api/#accounts.
-func (c *Client) GetAccounts(accessToken string) (resp GetAccountsResponse, err error) {
+func (c *Client) GetAccounts(ctx context.Context, accessToken string) (resp GetAccountsResponse, err error) {
 	options := GetAccountsOptions{
 		AccountIDs: []string{},
 	}
-	return c.GetAccountsWithOptions(accessToken, options)
+	return c.GetAccountsWithOptions(ctx, accessToken, options)
 }

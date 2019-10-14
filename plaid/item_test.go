@@ -1,6 +1,7 @@
 package plaid
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"strings"
@@ -18,27 +19,27 @@ func randomHex(n int) (string, error) {
 }
 
 func TestGetItem(t *testing.T) {
-	sandboxResp, _ := testClient.CreateSandboxPublicToken(sandboxInstitution, testProducts)
-	tokenResp, _ := testClient.ExchangePublicToken(sandboxResp.PublicToken)
-	itemResp, err := testClient.GetItem(tokenResp.AccessToken)
+	sandboxResp, _ := testClient.CreateSandboxPublicToken(context.Background(), sandboxInstitution, testProducts)
+	tokenResp, _ := testClient.ExchangePublicToken(context.Background(), sandboxResp.PublicToken)
+	itemResp, err := testClient.GetItem(context.Background(), tokenResp.AccessToken)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, itemResp.Item)
 }
 
 func TestRemoveItem(t *testing.T) {
-	sandboxResp, _ := testClient.CreateSandboxPublicToken(sandboxInstitution, testProducts)
-	tokenResp, _ := testClient.ExchangePublicToken(sandboxResp.PublicToken)
-	itemResp, err := testClient.RemoveItem(tokenResp.AccessToken)
+	sandboxResp, _ := testClient.CreateSandboxPublicToken(context.Background(), sandboxInstitution, testProducts)
+	tokenResp, _ := testClient.ExchangePublicToken(context.Background(), sandboxResp.PublicToken)
+	itemResp, err := testClient.RemoveItem(context.Background(), tokenResp.AccessToken)
 
 	assert.Nil(t, err)
 	assert.True(t, itemResp.Removed)
 }
 
 func TestUpdateItemWebhook(t *testing.T) {
-	sandboxResp, _ := testClient.CreateSandboxPublicToken(sandboxInstitution, testProducts)
-	tokenResp, _ := testClient.ExchangePublicToken(sandboxResp.PublicToken)
-	itemResp, err := testClient.UpdateItemWebhook(tokenResp.AccessToken, "https://plaid.com/webhook-test")
+	sandboxResp, _ := testClient.CreateSandboxPublicToken(context.Background(), sandboxInstitution, testProducts)
+	tokenResp, _ := testClient.ExchangePublicToken(context.Background(), sandboxResp.PublicToken)
+	itemResp, err := testClient.UpdateItemWebhook(context.Background(), tokenResp.AccessToken, "https://plaid.com/webhook-test")
 
 	assert.Nil(t, err)
 	assert.NotNil(t, itemResp.Item)
@@ -46,9 +47,9 @@ func TestUpdateItemWebhook(t *testing.T) {
 }
 
 func TestInvalidateAccessToken(t *testing.T) {
-	sandboxResp, _ := testClient.CreateSandboxPublicToken(sandboxInstitution, testProducts)
-	tokenResp, _ := testClient.ExchangePublicToken(sandboxResp.PublicToken)
-	newTokenResp, err := testClient.InvalidateAccessToken(tokenResp.AccessToken)
+	sandboxResp, _ := testClient.CreateSandboxPublicToken(context.Background(), sandboxInstitution, testProducts)
+	tokenResp, _ := testClient.ExchangePublicToken(context.Background(), sandboxResp.PublicToken)
+	newTokenResp, err := testClient.InvalidateAccessToken(context.Background(), tokenResp.AccessToken)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, newTokenResp.NewAccessToken)
@@ -56,23 +57,23 @@ func TestInvalidateAccessToken(t *testing.T) {
 
 func TestUpdateAccessTokenVersion(t *testing.T) {
 	invalidToken, _ := randomHex(80)
-	newTokenResp, err := testClient.InvalidateAccessToken(invalidToken)
+	newTokenResp, err := testClient.InvalidateAccessToken(context.Background(), invalidToken)
 	assert.NotNil(t, err)
 	assert.True(t, newTokenResp.NewAccessToken == "")
 }
 
 func TestCreatePublicToken(t *testing.T) {
-	sandboxResp, _ := testClient.CreateSandboxPublicToken(sandboxInstitution, testProducts)
-	tokenResp, _ := testClient.ExchangePublicToken(sandboxResp.PublicToken)
-	publicTokenResp, err := testClient.CreatePublicToken(tokenResp.AccessToken)
+	sandboxResp, _ := testClient.CreateSandboxPublicToken(context.Background(), sandboxInstitution, testProducts)
+	tokenResp, _ := testClient.ExchangePublicToken(context.Background(), sandboxResp.PublicToken)
+	publicTokenResp, err := testClient.CreatePublicToken(context.Background(), tokenResp.AccessToken)
 
 	assert.Nil(t, err)
 	assert.True(t, strings.HasPrefix(publicTokenResp.PublicToken, "public-sandbox"))
 }
 
 func TestExchangePublicToken(t *testing.T) {
-	sandboxResp, _ := testClient.CreateSandboxPublicToken(sandboxInstitution, testProducts)
-	tokenResp, err := testClient.ExchangePublicToken(sandboxResp.PublicToken)
+	sandboxResp, _ := testClient.CreateSandboxPublicToken(context.Background(), sandboxInstitution, testProducts)
+	tokenResp, err := testClient.ExchangePublicToken(context.Background(), sandboxResp.PublicToken)
 
 	assert.Nil(t, err)
 	assert.True(t, strings.HasPrefix(tokenResp.AccessToken, "access-sandbox"))

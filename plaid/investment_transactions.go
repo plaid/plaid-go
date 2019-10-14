@@ -1,6 +1,7 @@
 package plaid
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 )
@@ -56,7 +57,7 @@ type getInvestmentTransactionsRequestOptions struct {
 
 // GetInvestmentTransactionsWithOptions retrieves user-authorized investment transaction data for investment-type accounts.
 // See https://plaid.com/docs/api/#investment-transactions.
-func (c *Client) GetInvestmentTransactionsWithOptions(accessToken string, options GetInvestmentTransactionsOptions) (resp GetInvestmentTransactionsResponse, err error) {
+func (c *Client) GetInvestmentTransactionsWithOptions(ctx context.Context, accessToken string, options GetInvestmentTransactionsOptions) (resp GetInvestmentTransactionsResponse, err error) {
 	if accessToken == "" {
 		return resp, errors.New("/investments/transacstions/get - access token must be specified")
 	}
@@ -84,13 +85,13 @@ func (c *Client) GetInvestmentTransactionsWithOptions(accessToken string, option
 		return resp, err
 	}
 
-	err = c.Call("/investments/transactions/get", jsonBody, &resp)
+	err = c.Call(ctx, "/investments/transactions/get", jsonBody, &resp)
 	return resp, err
 }
 
 // GetInvestmentTransactions retrieves user-authorized transaction data for investment-type accounts.
 // See https://plaid.com/docs/api/#investment-transactions.
-func (c *Client) GetInvestmentTransactions(accessToken, startDate, endDate string) (resp GetInvestmentTransactionsResponse, err error) {
+func (c *Client) GetInvestmentTransactions(ctx context.Context, accessToken, startDate, endDate string) (resp GetInvestmentTransactionsResponse, err error) {
 	options := GetInvestmentTransactionsOptions{
 		StartDate:  startDate,
 		EndDate:    endDate,
@@ -98,5 +99,5 @@ func (c *Client) GetInvestmentTransactions(accessToken, startDate, endDate strin
 		Count:      100,
 		Offset:     0,
 	}
-	return c.GetInvestmentTransactionsWithOptions(accessToken, options)
+	return c.GetInvestmentTransactionsWithOptions(ctx, accessToken, options)
 }

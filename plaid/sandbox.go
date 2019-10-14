@@ -1,6 +1,7 @@
 package plaid
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 )
@@ -27,7 +28,7 @@ type ResetSandboxItemResponse struct {
 	ResetLogin bool `json:"reset_login"`
 }
 
-func (c *Client) CreateSandboxPublicToken(institutionID string, initialProducts []string) (resp CreateSandboxPublicTokenResponse, err error) {
+func (c *Client) CreateSandboxPublicToken(ctx context.Context, institutionID string, initialProducts []string) (resp CreateSandboxPublicTokenResponse, err error) {
 	if institutionID == "" || len(initialProducts) == 0 {
 		return resp, errors.New("/sandbox/public_token/create - institution id and initial products must be specified")
 	}
@@ -42,11 +43,11 @@ func (c *Client) CreateSandboxPublicToken(institutionID string, initialProducts 
 		return resp, err
 	}
 
-	err = c.Call("/sandbox/public_token/create", jsonBody, &resp)
+	err = c.Call(ctx, "/sandbox/public_token/create", jsonBody, &resp)
 	return resp, err
 }
 
-func (c *Client) ResetSandboxItem(accessToken string) (resp ResetSandboxItemResponse, err error) {
+func (c *Client) ResetSandboxItem(ctx context.Context, accessToken string) (resp ResetSandboxItemResponse, err error) {
 	if accessToken == "" {
 		return resp, errors.New("/sandbox/item/reset_login - access token must be specified")
 	}
@@ -61,6 +62,6 @@ func (c *Client) ResetSandboxItem(accessToken string) (resp ResetSandboxItemResp
 		return resp, err
 	}
 
-	err = c.Call("/sandbox/item/reset_login", jsonBody, &resp)
+	err = c.Call(ctx, "/sandbox/item/reset_login", jsonBody, &resp)
 	return resp, err
 }

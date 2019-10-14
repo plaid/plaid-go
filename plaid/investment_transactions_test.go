@@ -1,6 +1,7 @@
 package plaid
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -8,16 +9,16 @@ import (
 )
 
 func TestGetInvestmentTransactions(t *testing.T) {
-	sandboxResp, _ := testClient.CreateSandboxPublicToken(sandboxInstitution, []string{"investments"})
-	tokenResp, _ := testClient.ExchangePublicToken(sandboxResp.PublicToken)
+	sandboxResp, _ := testClient.CreateSandboxPublicToken(context.Background(), sandboxInstitution, []string{"investments"})
+	tokenResp, _ := testClient.ExchangePublicToken(context.Background(), sandboxResp.PublicToken)
 	startDateString := time.Now().Add(-365 * 24 * time.Hour).Format(iso8601TimeFormat)
 	endDateString := time.Now().Format(iso8601TimeFormat)
-	investmentTransactionsResp, err := testClient.GetInvestmentTransactions(tokenResp.AccessToken, startDateString, endDateString)
+	investmentTransactionsResp, err := testClient.GetInvestmentTransactions(context.Background(), tokenResp.AccessToken, startDateString, endDateString)
 
 	if plaidErr, ok := err.(Error); ok {
 		for ok && plaidErr.ErrorCode == "PRODUCT_NOT_READY" {
 			time.Sleep(5 * time.Second)
-			investmentTransactionsResp, err = testClient.GetInvestmentTransactions(tokenResp.AccessToken, startDateString, endDateString)
+			investmentTransactionsResp, err = testClient.GetInvestmentTransactions(context.Background(), tokenResp.AccessToken, startDateString, endDateString)
 			plaidErr, ok = err.(Error)
 		}
 	}

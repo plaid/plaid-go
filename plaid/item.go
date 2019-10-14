@@ -1,6 +1,7 @@
 package plaid
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 )
@@ -96,7 +97,7 @@ type ExchangePublicTokenResponse struct {
 
 // GetItem retrieves an item associated with an access token.
 // See https://plaid.com/docs/api/#retrieve-item.
-func (c *Client) GetItem(accessToken string) (resp GetItemResponse, err error) {
+func (c *Client) GetItem(ctx context.Context, accessToken string) (resp GetItemResponse, err error) {
 	if accessToken == "" {
 		return resp, errors.New("/item/get - access token must be specified")
 	}
@@ -111,13 +112,13 @@ func (c *Client) GetItem(accessToken string) (resp GetItemResponse, err error) {
 		return resp, err
 	}
 
-	err = c.Call("/item/get", jsonBody, &resp)
+	err = c.Call(ctx, "/item/get", jsonBody, &resp)
 	return resp, err
 }
 
 // RemoveItem removes an item associated with an access token.
 // See https://plaid.com/docs/api/#remove-an-item.
-func (c *Client) RemoveItem(accessToken string) (resp RemoveItemResponse, err error) {
+func (c *Client) RemoveItem(ctx context.Context, accessToken string) (resp RemoveItemResponse, err error) {
 	if accessToken == "" {
 		return resp, errors.New("/item/remove - access token must be specified")
 	}
@@ -132,13 +133,13 @@ func (c *Client) RemoveItem(accessToken string) (resp RemoveItemResponse, err er
 		return resp, err
 	}
 
-	err = c.Call("/item/remove", jsonBody, &resp)
+	err = c.Call(ctx, "/item/remove", jsonBody, &resp)
 	return resp, err
 }
 
 // UpdateItemWebhook updates the webhook associated with an Item.
 // See https://plaid.com/docs/api/#update-webhook.
-func (c *Client) UpdateItemWebhook(accessToken, webhook string) (resp UpdateItemWebhookResponse, err error) {
+func (c *Client) UpdateItemWebhook(ctx context.Context, accessToken, webhook string) (resp UpdateItemWebhookResponse, err error) {
 	if accessToken == "" || webhook == "" {
 		return resp, errors.New("/item/webhook/update - access token and webhook must be specified")
 	}
@@ -154,13 +155,13 @@ func (c *Client) UpdateItemWebhook(accessToken, webhook string) (resp UpdateItem
 		return resp, err
 	}
 
-	err = c.Call("/item/webhook/update", jsonBody, &resp)
+	err = c.Call(ctx, "/item/webhook/update", jsonBody, &resp)
 	return resp, err
 }
 
 // InvalidateAccessToken invalidates and rotates an access token.
 // See https://plaid.com/docs/api/#rotate-access-token.
-func (c *Client) InvalidateAccessToken(accessToken string) (resp InvalidateAccessTokenResponse, err error) {
+func (c *Client) InvalidateAccessToken(ctx context.Context, accessToken string) (resp InvalidateAccessTokenResponse, err error) {
 	if accessToken == "" {
 		return resp, errors.New("/item/access_token/invalidate - access token must be specified")
 	}
@@ -175,14 +176,14 @@ func (c *Client) InvalidateAccessToken(accessToken string) (resp InvalidateAcces
 		return resp, err
 	}
 
-	err = c.Call("/item/access_token/invalidate", jsonBody, &resp)
+	err = c.Call(ctx, "/item/access_token/invalidate", jsonBody, &resp)
 	return resp, err
 }
 
 // UpdateAccessTokenVersion generates an updated access token associated with
 // the legacy version of Plaid's API.
 // See https://plaid.com/docs/api/#update-access-token-version.
-func (c *Client) UpdateAccessTokenVersion(accessToken string) (resp UpdateAccessTokenVersionResponse, err error) {
+func (c *Client) UpdateAccessTokenVersion(ctx context.Context, accessToken string) (resp UpdateAccessTokenVersionResponse, err error) {
 	if accessToken == "" {
 		return resp, errors.New("/item/access_token/update_version - access token must be specified")
 	}
@@ -197,14 +198,14 @@ func (c *Client) UpdateAccessTokenVersion(accessToken string) (resp UpdateAccess
 		return resp, err
 	}
 
-	err = c.Call("/item/access_token/update_version", jsonBody, &resp)
+	err = c.Call(ctx, "/item/access_token/update_version", jsonBody, &resp)
 	return resp, err
 }
 
 // CreatePublicToken generates a one-time use public token which expires in
 // 30 minutes to update an Item.
 // See https://plaid.com/docs/api/#creating-public-tokens.
-func (c *Client) CreatePublicToken(accessToken string) (resp CreatePublicTokenResponse, err error) {
+func (c *Client) CreatePublicToken(ctx context.Context, accessToken string) (resp CreatePublicTokenResponse, err error) {
 	if accessToken == "" {
 		return resp, errors.New("/item/public_token/create - access token must be specified")
 	}
@@ -219,13 +220,13 @@ func (c *Client) CreatePublicToken(accessToken string) (resp CreatePublicTokenRe
 		return resp, err
 	}
 
-	err = c.Call("/item/public_token/create", jsonBody, &resp)
+	err = c.Call(ctx, "/item/public_token/create", jsonBody, &resp)
 	return resp, err
 }
 
 // ExchangePublicToken exchanges a public token for an access token.
 // See https://plaid.com/docs/api/#exchange-token-flow.
-func (c *Client) ExchangePublicToken(publicToken string) (resp ExchangePublicTokenResponse, err error) {
+func (c *Client) ExchangePublicToken(ctx context.Context, publicToken string) (resp ExchangePublicTokenResponse, err error) {
 	if publicToken == "" {
 		return resp, errors.New("/item/public_token/exchange - public token must be specified")
 	}
@@ -240,6 +241,6 @@ func (c *Client) ExchangePublicToken(publicToken string) (resp ExchangePublicTok
 		return resp, err
 	}
 
-	err = c.Call("/item/public_token/exchange", jsonBody, &resp)
+	err = c.Call(ctx, "/item/public_token/exchange", jsonBody, &resp)
 	return resp, err
 }

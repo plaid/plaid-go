@@ -1,6 +1,7 @@
 package plaid
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 )
@@ -36,7 +37,7 @@ type GetAuthOptions struct {
 // GetAuthWithOptions retrieves bank account and routing numbers associated with an Item's
 // checking and savings accounts, along with other information.
 // See https://plaid.com/docs/api/#auth.
-func (c *Client) GetAuthWithOptions(accessToken string, options GetAuthOptions) (resp GetAuthResponse, err error) {
+func (c *Client) GetAuthWithOptions(ctx context.Context, accessToken string, options GetAuthOptions) (resp GetAuthResponse, err error) {
 	if accessToken == "" {
 		return resp, errors.New("/auth/get - access token must be specified")
 	}
@@ -55,16 +56,16 @@ func (c *Client) GetAuthWithOptions(accessToken string, options GetAuthOptions) 
 		return resp, err
 	}
 
-	err = c.Call("/auth/get", jsonBody, &resp)
+	err = c.Call(ctx, "/auth/get", jsonBody, &resp)
 	return resp, err
 }
 
 // GetAuth retrieves bank account and routing numbers associated with an Item's
 // checking and savings accounts, along with other information.
 // See https://plaid.com/docs/api/#auth.
-func (c *Client) GetAuth(accessToken string) (resp GetAuthResponse, err error) {
+func (c *Client) GetAuth(ctx context.Context, accessToken string) (resp GetAuthResponse, err error) {
 	options := GetAuthOptions{
 		AccountIDs: []string{},
 	}
-	return c.GetAuthWithOptions(accessToken, options)
+	return c.GetAuthWithOptions(ctx, accessToken, options)
 }

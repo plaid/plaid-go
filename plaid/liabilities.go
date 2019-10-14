@@ -1,6 +1,7 @@
 package plaid
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 )
@@ -95,6 +96,7 @@ type GetLiabilitiesOptions struct {
 // GetLiabilitiesWithOptions retrieves liability data. See
 // https://plaid.com/docs/api/#liabilities.
 func (c *Client) GetLiabilitiesWithOptions(
+	ctx context.Context,
 	accessToken string,
 	options GetLiabilitiesOptions,
 ) (resp GetLiabilitiesResponse, err error) {
@@ -117,14 +119,14 @@ func (c *Client) GetLiabilitiesWithOptions(
 		return resp, err
 	}
 
-	err = c.Call("/liabilities/get", jsonBody, &resp)
+	err = c.Call(ctx, "/liabilities/get", jsonBody, &resp)
 	return resp, err
 }
 
 // GetLiabilities retrieves liability data. See
 // https://plaid.com/docs/api/#liabilities.
-func (c *Client) GetLiabilities(accessToken string) (resp GetLiabilitiesResponse, err error) {
-	return c.GetLiabilitiesWithOptions(accessToken, GetLiabilitiesOptions{
+func (c *Client) GetLiabilities(ctx context.Context, accessToken string) (resp GetLiabilitiesResponse, err error) {
+	return c.GetLiabilitiesWithOptions(ctx, accessToken, GetLiabilitiesOptions{
 		AccountIDs: []string{},
 	})
 }

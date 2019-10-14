@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -28,57 +29,57 @@ func main() {
 	handleError(err)
 
 	// POST /institutions/get
-	instsResp, err := client.GetInstitutions(5, 0)
+	instsResp, err := client.GetInstitutions(context.Background(), 5, 0)
 	handleError(err)
 	fmt.Println(instsResp.Institutions[0].Name, "has products:", instsResp.Institutions[0].Products)
 
 	// POST /institutions/get_by_id
-	instResp, err := client.GetInstitutionByID(instsResp.Institutions[0].ID)
+	instResp, err := client.GetInstitutionByID(context.Background(), instsResp.Institutions[0].ID)
 	handleError(err)
 	fmt.Println(instResp.Institution.Name, "has MFA:", instResp.Institution.MFA)
 
 	// POST /institutions/search
-	instSearchResp, err := client.SearchInstitutions("Ally", []string{"transactions"})
+	instSearchResp, err := client.SearchInstitutions(context.Background(), "Ally", []string{"transactions"})
 	handleError(err)
 	fmt.Println(instSearchResp.Institutions[0].Name, "has ID:", instSearchResp.Institutions[0].ID)
 
 	// POST /categories/get
-	categoriesResp, err := client.GetCategories()
+	categoriesResp, err := client.GetCategories(context.Background())
 	handleError(err)
 	fmt.Println("Category group", categoriesResp.Categories[0].Group, "has items:", categoriesResp.Categories[0].Hierarchy)
 
 	// POST /sandbox/public_token/create
-	publicTokenResp, err := client.CreateSandboxPublicToken(instResp.Institution.ID, []string{"auth", "transactions"})
+	publicTokenResp, err := client.CreateSandboxPublicToken(context.Background(), instResp.Institution.ID, []string{"auth", "transactions"})
 	handleError(err)
 	fmt.Println("Created sandbox public token:", publicTokenResp.PublicToken)
 
 	// POST /item/public_token/exchange
-	accessTokenResp, err := client.ExchangePublicToken(publicTokenResp.PublicToken)
+	accessTokenResp, err := client.ExchangePublicToken(context.Background(), publicTokenResp.PublicToken)
 	handleError(err)
 	fmt.Println("Public token -> Access Token", accessTokenResp.AccessToken, "for item:", accessTokenResp.ItemID)
 
 	// POST /accounts/balance/get
-	balanceResp, err := client.GetBalances(accessTokenResp.AccessToken)
+	balanceResp, err := client.GetBalances(context.Background(), accessTokenResp.AccessToken)
 	handleError(err)
 	fmt.Println("Account with name", balanceResp.Accounts[0].Name, "has available balance", balanceResp.Accounts[0].Balances.Available)
 
 	// POST /accounts/get
-	accountsResp, err := client.GetAccounts(accessTokenResp.AccessToken)
+	accountsResp, err := client.GetAccounts(context.Background(), accessTokenResp.AccessToken)
 	handleError(err)
 	fmt.Println("Access token is associated with", len(accountsResp.Accounts), "accounts")
 
 	// POST /auth/get
-	authResp, err := client.GetAuth(accessTokenResp.AccessToken)
+	authResp, err := client.GetAuth(context.Background(), accessTokenResp.AccessToken)
 	handleError(err)
 	fmt.Println("Account has number:", authResp.Numbers.ACH[0].Account)
 
 	// POST /transactions/get
-	transactionsResp, err := client.GetTransactions(accessTokenResp.AccessToken, "2010-01-01", "2018-01-01")
+	transactionsResp, err := client.GetTransactions(context.Background(), accessTokenResp.AccessToken, "2010-01-01", "2018-01-01")
 	if plaidErr, ok := err.(plaid.Error); ok {
 		// Poll until transactions are ready
 		for ok && plaidErr.ErrorCode == "PRODUCT_NOT_READY" {
 			time.Sleep(5 * time.Second)
-			transactionsResp, err = client.GetTransactions(accessTokenResp.AccessToken, "2010-01-01", "2018-01-01")
+			transactionsResp, err = client.GetTransactions(context.Background(), accessTokenResp.AccessToken, "2010-01-01", "2018-01-01")
 			plaidErr, ok = err.(plaid.Error)
 		}
 		handleError(err)

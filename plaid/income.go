@@ -1,6 +1,7 @@
 package plaid
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 )
@@ -35,7 +36,7 @@ type GetIncomeResponse struct {
 
 // GetIncome retrieves information pertaining to an Item's income.
 // See https://plaid.com/docs/api/#income.
-func (c *Client) GetIncome(accessToken string) (resp GetIncomeResponse, err error) {
+func (c *Client) GetIncome(ctx context.Context, accessToken string) (resp GetIncomeResponse, err error) {
 	if accessToken == "" {
 		return resp, errors.New("/income/get - access token must be specified")
 	}
@@ -50,6 +51,6 @@ func (c *Client) GetIncome(accessToken string) (resp GetIncomeResponse, err erro
 		return resp, err
 	}
 
-	err = c.Call("/income/get", jsonBody, &resp)
+	err = c.Call(ctx, "/income/get", jsonBody, &resp)
 	return resp, err
 }

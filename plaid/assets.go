@@ -1,6 +1,7 @@
 package plaid
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 )
@@ -67,7 +68,7 @@ type CreateAuditCopyTokenResponse struct {
 	AuditCopyToken string `json:"audit_copy_token"`
 }
 
-func (c *Client) GetAssetReport(assetReportToken string) (resp GetAssetReportResponse, err error) {
+func (c *Client) GetAssetReport(ctx context.Context, assetReportToken string) (resp GetAssetReportResponse, err error) {
 	if assetReportToken == "" {
 		return resp, errors.New("/asset_report/get - asset report token must be specified")
 	}
@@ -82,11 +83,11 @@ func (c *Client) GetAssetReport(assetReportToken string) (resp GetAssetReportRes
 		return resp, err
 	}
 
-	err = c.Call("/asset_report/get", jsonBody, &resp)
+	err = c.Call(ctx, "/asset_report/get", jsonBody, &resp)
 	return resp, err
 }
 
-func (c *Client) CreateAuditCopy(assetReportToken, auditorID string) (resp CreateAuditCopyTokenResponse, err error) {
+func (c *Client) CreateAuditCopy(ctx context.Context, assetReportToken, auditorID string) (resp CreateAuditCopyTokenResponse, err error) {
 	if assetReportToken == "" || auditorID == "" {
 		return resp, errors.New("/asset_report/audit_copy/create - asset report token and auditor id must be specified")
 	}
@@ -102,11 +103,11 @@ func (c *Client) CreateAuditCopy(assetReportToken, auditorID string) (resp Creat
 		return resp, err
 	}
 
-	err = c.Call("/asset_report/audit_copy/create", jsonBody, &resp)
+	err = c.Call(ctx, "/asset_report/audit_copy/create", jsonBody, &resp)
 	return resp, err
 }
 
-func (c *Client) RemoveAssetReport(assetReportToken string) (resp RemoveAssetReportResponse, err error) {
+func (c *Client) RemoveAssetReport(ctx context.Context, assetReportToken string) (resp RemoveAssetReportResponse, err error) {
 	if assetReportToken == "" {
 		return resp, errors.New("/asset_report/remove - asset report token must be specified")
 	}
@@ -121,6 +122,6 @@ func (c *Client) RemoveAssetReport(assetReportToken string) (resp RemoveAssetRep
 		return resp, err
 	}
 
-	err = c.Call("/asset_report/remove", jsonBody, &resp)
+	err = c.Call(ctx, "/asset_report/remove", jsonBody, &resp)
 	return resp, err
 }

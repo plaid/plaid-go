@@ -1,15 +1,16 @@
 package plaid
 
 import (
+	"context"
 	"testing"
 
 	assert "github.com/stretchr/testify/require"
 )
 
 func TestGetAuth(t *testing.T) {
-	sandboxResp, _ := testClient.CreateSandboxPublicToken(sandboxInstitution, testProducts)
-	tokenResp, _ := testClient.ExchangePublicToken(sandboxResp.PublicToken)
-	authResp, err := testClient.GetAuth(tokenResp.AccessToken)
+	sandboxResp, _ := testClient.CreateSandboxPublicToken(context.Background(), sandboxInstitution, testProducts)
+	tokenResp, _ := testClient.ExchangePublicToken(context.Background(), sandboxResp.PublicToken)
+	authResp, err := testClient.GetAuth(context.Background(), tokenResp.AccessToken)
 
 	// get auth for all accounts
 	assert.Nil(t, err)
@@ -20,6 +21,6 @@ func TestGetAuth(t *testing.T) {
 	options := GetAccountsOptions{
 		AccountIDs: []string{authResp.Accounts[0].AccountID},
 	}
-	accountsResp, _ := testClient.GetAccountsWithOptions(tokenResp.AccessToken, options)
+	accountsResp, _ := testClient.GetAccountsWithOptions(context.Background(), tokenResp.AccessToken, options)
 	assert.Equal(t, len(accountsResp.Accounts), 1)
 }
