@@ -84,4 +84,32 @@ func main() {
 		handleError(err)
 	}
 	fmt.Println("Number of transactions:", len(transactionsResp.Transactions))
+
+	// POST /payment_initiation/recipient/create
+	paymentRecipientCreateResp, err := client.CreatePaymentRecipient("John Doe", "GB33BUKB20201555555555", plaid.PaymentRecipientAddress{
+		Street:     []string{"Street Name 999"},
+		City:       "City",
+		PostalCode: "99999",
+		Country:    "GB",
+	})
+	handleError(err)
+	fmt.Println("Recipient ID:", paymentRecipientCreateResp.RecipientID)
+
+	// POST /payment_initiation/recipient/get
+	paymentRecipientGetResp, err := client.GetPaymentRecipient(paymentRecipientCreateResp.RecipientID)
+	handleError(err)
+	fmt.Println("Recipient get response:", paymentRecipientGetResp)
+
+	// POST /payment_initiation/payment/create
+	paymentCreateResp, err := client.CreatePayment(paymentRecipientCreateResp.RecipientID, "TestPayment", plaid.PaymentAmount{
+		Currency: "GBP",
+		Value:    100.0,
+	})
+	handleError(err)
+	fmt.Println("Payment ID:", paymentCreateResp.PaymentID)
+
+	// POST /payment_initiation/payment/get
+	paymentGetResp, err := client.GetPayment(paymentCreateResp.PaymentID)
+	handleError(err)
+	fmt.Println("Payment get response:", paymentGetResp)
 }
