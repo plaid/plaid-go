@@ -1,6 +1,3 @@
 .DS_Store
 vendor
 bin
-
-go.mod
-go.sum
