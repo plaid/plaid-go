@@ -6,12 +6,13 @@ import (
 )
 
 type Item struct {
-	AvailableProducts []string `json:"available_products"`
-	BilledProducts    []string `json:"billed_products"`
-	Error             Error    `json:"error"`
-	InstitutionID     string   `json:"institution_id"`
-	ItemID            string   `json:"item_id"`
-	Webhook           string   `json:"webhook"`
+	AvailableProducts     []string `json:"available_products"`
+	BilledProducts        []string `json:"billed_products"`
+	Error                 Error    `json:"error"`
+	InstitutionID         string   `json:"institution_id"`
+	ItemID                string   `json:"item_id"`
+	Webhook               string   `json:"webhook"`
+	ConsentExpirationTime string   `json:"consent_expiration_time"`
 }
 
 type getItemRequest struct {
