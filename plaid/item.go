@@ -3,15 +3,34 @@ package plaid
 import (
 	"encoding/json"
 	"errors"
+	"time"
 )
 
 type Item struct {
-	AvailableProducts []string `json:"available_products"`
-	BilledProducts    []string `json:"billed_products"`
-	Error             Error    `json:"error"`
-	InstitutionID     string   `json:"institution_id"`
-	ItemID            string   `json:"item_id"`
-	Webhook           string   `json:"webhook"`
+	AvailableProducts     []string   `json:"available_products"`
+	BilledProducts        []string   `json:"billed_products"`
+	Error                 Error      `json:"error"`
+	InstitutionID         string     `json:"institution_id"`
+	ItemID                string     `json:"item_id"`
+	Webhook               string     `json:"webhook"`
+	Status                ItemStatus `json:"status"`
+	ConsentExpirationTime time.Time  `json:"consent_expiration_time"`
+}
+
+type ItemStatus struct {
+	Transactions ProductStatus `json:"transactions,omitempty"`
+	Investments  ProductStatus `json:"investments,omitempty"`
+	LastWebhook  WebhookStatus `json:"last_webhook,omitempty"`
+}
+
+type ProductStatus struct {
+	LastFailedUpdate     time.Time `json:"last_failed_update,omitempty"`
+	LastSuccessfulUpdate time.Time `json:"last_successful_update,omitempty"`
+}
+
+type WebhookStatus struct {
+	SentAt   time.Time `json:"sent_at,omitempty"`
+	CodeSent string    `json:"code_sent,omitempty"`
 }
 
 type getItemRequest struct {
