@@ -92,8 +92,9 @@ type searchInstitutionsRequest struct {
 }
 
 type SearchInstitutionsOptions struct {
-	IncludeOptionalMetadata bool     `json:"include_optional_metadata"`
-	CountryCodes            []string `json:"country_codes"`
+	IncludeOptionalMetadata bool                   `json:"include_optional_metadata"`
+	CountryCodes            []string               `json:"country_codes"`
+	AccountFilter           map[string]interface{} `json:"account_filter"`
 }
 
 type SearchInstitutionsResponse struct {
