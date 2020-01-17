@@ -152,7 +152,7 @@ type createPaymentTokenRequest struct {
 
 type CreatePaymentTokenResponse struct {
 	APIResponse
-	PaymentToken               string    `json:"payment_Token"`
+	PaymentToken               string    `json:"payment_token"`
 	PaymentTokenExpirationTime time.Time `json:"payment_token_expiration_time"`
 }
 
