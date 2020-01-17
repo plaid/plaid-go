@@ -56,10 +56,11 @@ func TestPayment(t *testing.T) {
 	count := 10
 	paymentListResp, err := testClient.ListPayments(ListPaymentsOptions{Count: &count})
 	assert.Nil(t, err)
-	assert.NotNil(t, paymentListResp.NextCursor)
 	assert.True(t, len(paymentListResp.Payments) > 0)
 
 	cursor := paymentListResp.NextCursor
-	_, err = testClient.ListPayments(ListPaymentsOptions{Cursor: &cursor})
-	assert.Nil(t, err)
+	if cursor != nil {
+		_, err = testClient.ListPayments(ListPaymentsOptions{Cursor: &cursor})
+		assert.Nil(t, err)
+	}
 }
