@@ -59,7 +59,7 @@ func TestPayment(t *testing.T) {
 	assert.True(t, len(paymentListResp.Payments) > 0)
 
 	cursor := paymentListResp.NextCursor
-	if cursor != nil {
+	if cursor != "" {
 		_, err = testClient.ListPayments(ListPaymentsOptions{Cursor: &cursor})
 		assert.Nil(t, err)
 	}
