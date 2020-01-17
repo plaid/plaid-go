@@ -7,13 +7,14 @@ import (
 )
 
 type Item struct {
-	AvailableProducts []string   `json:"available_products"`
-	BilledProducts    []string   `json:"billed_products"`
-	Error             Error      `json:"error"`
-	InstitutionID     string     `json:"institution_id"`
-	ItemID            string     `json:"item_id"`
-	Webhook           string     `json:"webhook"`
-	Status            ItemStatus `json:"status"`
+	AvailableProducts     []string   `json:"available_products"`
+	BilledProducts        []string   `json:"billed_products"`
+	Error                 Error      `json:"error"`
+	InstitutionID         string     `json:"institution_id"`
+	ItemID                string     `json:"item_id"`
+	Webhook               string     `json:"webhook"`
+	Status                ItemStatus `json:"status"`
+	ConsentExpirationTime time.Time  `json:"consent_expiration_time"`
 }
 
 type ItemStatus struct {
