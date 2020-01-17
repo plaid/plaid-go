@@ -54,7 +54,6 @@ func TestGetInstitutionsByID(t *testing.T) {
 	for _, options := range []GetInstitutionByIDOptions{
 		GetInstitutionByIDOptions{},
 		GetInstitutionByIDOptions{IncludeOptionalMetadata: true},
-		GetInstitutionByIDOptions{IncludeOptionalMetadata: true, IncludeStatus: true},
 	} {
 		t.Run(fmt.Sprintf("%#v", options), func(t *testing.T) {
 			instResp, err := testClient.GetInstitutionByIDWithOptions(sandboxInstitution, options)
@@ -63,11 +62,6 @@ func TestGetInstitutionsByID(t *testing.T) {
 
 			if options.IncludeOptionalMetadata {
 				assert.NotEmpty(t, instResp.Institution.URL)
-			}
-
-			if options.IncludeStatus {
-				assert.NotEmpty(t, instResp.Institution.InstitutionStatus)
-				assert.True(t, instResp.Institution.InstitutionStatus.ItemLogins.LastStatusChange.Unix() > 0)
 			}
 		})
 	}
