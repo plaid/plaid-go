@@ -7,14 +7,13 @@ import (
 )
 
 type Item struct {
-	AvailableProducts     []string   `json:"available_products"`
-	BilledProducts        []string   `json:"billed_products"`
-	Error                 Error      `json:"error"`
-	InstitutionID         string     `json:"institution_id"`
-	ItemID                string     `json:"item_id"`
-	Webhook               string     `json:"webhook"`
-	Status                ItemStatus `json:"status"`
-	ConsentExpirationTime time.Time  `json:"consent_expiration_time"`
+	AvailableProducts     []string  `json:"available_products"`
+	BilledProducts        []string  `json:"billed_products"`
+	Error                 Error     `json:"error"`
+	InstitutionID         string    `json:"institution_id"`
+	ItemID                string    `json:"item_id"`
+	Webhook               string    `json:"webhook"`
+	ConsentExpirationTime time.Time `json:"consent_expiration_time"`
 }
 
 type ItemStatus struct {
@@ -41,7 +40,8 @@ type getItemRequest struct {
 
 type GetItemResponse struct {
 	APIResponse
-	Item Item `json:"item"`
+	Item   Item       `json:"item"`
+	Status ItemStatus `json:"status"`
 }
 
 type removeItemRequest struct {

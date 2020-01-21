@@ -24,6 +24,7 @@ func TestGetItem(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotNil(t, itemResp.Item)
+	assert.NotEmpty(t, itemResp.Status)
 }
 
 func TestRemoveItem(t *testing.T) {
