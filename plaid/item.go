@@ -114,7 +114,7 @@ type ExchangePublicTokenResponse struct {
 }
 
 type importItemRequestOptions struct {
-	Webhook string `json:"webhook"`
+	Webhook string `json:"webhook,omitempty"`
 }
 
 type importItemRequest struct {
@@ -123,7 +123,7 @@ type importItemRequest struct {
 
 	InitialProducts []string                 `json:"products"`
 	UserAuth        map[string]interface{}   `json:"user_auth"`
-	Options         importItemRequestOptions `json:"options"`
+	Options         importItemRequestOptions `json:"options,omitempty"`
 }
 
 // ImportItemResponse is the type of the response returned by item/import.
