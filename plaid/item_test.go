@@ -3,7 +3,6 @@ package plaid
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"fmt"
 	"strings"
 	"testing"
 
@@ -90,6 +89,5 @@ func TestImportItem(t *testing.T) {
 	})
 	assert.Nil(t, err)
 	assert.NotNil(t, accessTokenResp)
-	fmt.Println("grep access token", accessTokenResp)
 	assert.True(t, strings.HasPrefix(accessTokenResp.AccessToken, "access-sandbox"))
 }
