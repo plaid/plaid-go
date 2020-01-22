@@ -113,6 +113,24 @@ type ExchangePublicTokenResponse struct {
 	ItemID      string `json:"item_id"`
 }
 
+type importItemRequestOptions struct {
+	Webhook string `json:"webhook"`
+}
+
+type importItemRequest struct {
+	ClientID string `json:"client_id"`
+	Secret   string `json:"secret"`
+
+	InitialProducts []string                 `json:"products"`
+	UserAuth        map[string]interface{}   `json:"user_auth"`
+	Options         importItemRequestOptions `json:"options"`
+}
+
+// ImportItemResponse is the type of the response returned by item/import.
+type ImportItemResponse struct {
+	AccessToken string `json:"access_token"`
+}
+
 // GetItem retrieves an item associated with an access token.
 // See https://plaid.com/docs/api/#retrieve-item.
 func (c *Client) GetItem(accessToken string) (resp GetItemResponse, err error) {
@@ -260,5 +278,21 @@ func (c *Client) ExchangePublicToken(publicToken string) (resp ExchangePublicTok
 	}
 
 	err = c.Call("/item/public_token/exchange", jsonBody, &resp)
+	return resp, err
+}
+
+// ImportItem generates a Plaid item given user authentication fields.
+func (c *Client) ImportItem(initialProducts []string, userAuth map[string]interface{}, options importItemRequestOptions) (resp ImportItemResponse, err error) {
+	jsonBody, err := json.Marshal(importItemRequest{
+		ClientID:        c.clientID,
+		Secret:          c.secret,
+		InitialProducts: initialProducts,
+		UserAuth:        userAuth,
+		Options:         options,
+	})
+	if err != nil {
+		return resp, err
+	}
+	err = c.Call("/item/import", jsonBody, &resp)
 	return resp, err
 }
