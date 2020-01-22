@@ -32,7 +32,7 @@ type getWebhookVerificationKeyRequest struct {
 // See https://plaid.com/docs/#webhook-verification.
 func (c *Client) GetWebhookVerificationKey(
 	keyID string,
-) (resp GetLiabilitiesResponse, err error) {
+) (resp GetWebhookVerificationKeyResponse, err error) {
 	if keyID == "" {
 		return resp, errors.New("/webhook_verification_key/get - key ID must be specified")
 	}
