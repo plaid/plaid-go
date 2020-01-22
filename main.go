@@ -117,4 +117,9 @@ func main() {
 	paymentGetResp, err := client.GetPayment(paymentCreateResp.PaymentID)
 	handleError(err)
 	fmt.Println("Payment get response:", paymentGetResp)
+
+	// POST /webhook_verification_key/get
+	webhookVerificationKeyGetResp, err := client.GetWebhookVerificationKey("6c5516e1-92dc-479e-a8ff-5a51992e0001")
+	handleError(err)
+	fmt.Println("Webhook verification key response:", webhookVerificationKeyGetResp)
 }
