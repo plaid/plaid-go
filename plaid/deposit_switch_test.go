@@ -44,3 +44,12 @@ func TestGetDepositSwitch(t *testing.T) {
 	assert.True(t, depositSwitch.CreatedDate != "")
 	assert.True(t, depositSwitch.State != "")
 }
+
+func TestCreateDepositSwitchToken(t *testing.T) {
+	id, err := generateDepositSwitchID(t)
+	assert.Nil(t, err)
+	createDepositSwitchTokenResponse, err := testClient.CreateDepositSwitchToken(id)
+	assert.Nil(t, err)
+	assert.True(t, createDepositSwitchTokenResponse.DepositSwitchToken != "")
+	assert.True(t, createDepositSwitchTokenResponse.Expires != "")
+}
