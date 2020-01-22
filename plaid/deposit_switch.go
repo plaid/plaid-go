@@ -5,7 +5,8 @@ import (
 	"errors"
 )
 
-type getDepositSwitchResponse struct {
+// GetDepositSwitchResponse details the response from /deposit_switch/get
+type GetDepositSwitchResponse struct {
 	DepositSwitchID               string  `json:"deposit_switch_id"`
 	TargetItemID                  string  `json:"target_item_id"`
 	TargetAccountID               string  `json:"target_account_id"`
@@ -27,7 +28,7 @@ type getDepositSwitchRequest struct {
 // GetDepositSwitch retrieves deposit switch data.
 func (c *Client) GetDepositSwitch(
 	depositSwitchID string,
-) (resp getDepositSwitchResponse, err error) {
+) (resp GetDepositSwitchResponse, err error) {
 	if depositSwitchID == "" {
 		return resp, errors.New("/deposit_switch/get - deposit switch id must be specified")
 	}
@@ -43,7 +44,7 @@ func (c *Client) GetDepositSwitch(
 
 	err = c.Call("/deposit_switch/get", jsonBody, &resp)
 
-	return getDepositSwitchResponse{}, err
+	return resp, err
 }
 
 // this is exactly the same as getDepositSwitchRequest

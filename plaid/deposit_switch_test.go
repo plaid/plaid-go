@@ -7,7 +7,7 @@ import (
 	assert "github.com/stretchr/testify/require"
 )
 
-func TestCreateDepositSwitch(t *testing.T) {
+func generateDepositSwitchID(t *testing.T) (depositSwitchID string, err error) {
 	accessTokenResp, err := testClient.ImportItem([]string{"identity", "auth"}, map[string]interface{}{
 		"user_id":    "user_good",
 		"auth_token": "pass_good",
@@ -24,4 +24,23 @@ func TestCreateDepositSwitch(t *testing.T) {
 	depositSwitchResp, err := testClient.CreateDepositSwitch(targetAccountID, accessTokenResp.AccessToken)
 	assert.Nil(t, err)
 	assert.True(t, depositSwitchResp.DepositSwitchID != "")
+	return depositSwitchResp.DepositSwitchID, err
+}
+
+func TestCreateDepositSwitch(t *testing.T) {
+	_, err := generateDepositSwitchID(t)
+	assert.Nil(t, err)
+}
+
+func TestGetDepositSwitch(t *testing.T) {
+	id, err := generateDepositSwitchID(t)
+	assert.Nil(t, err)
+	depositSwitch, err := testClient.GetDepositSwitch(id)
+	assert.Nil(t, err)
+	// Check that all of the fields we expect to be non-empty are non-empty.
+	assert.True(t, depositSwitch.DepositSwitchID != "")
+	assert.True(t, depositSwitch.TargetItemID != "")
+	assert.True(t, depositSwitch.TargetAccountID != "")
+	assert.True(t, depositSwitch.CreatedDate != "")
+	assert.True(t, depositSwitch.State != "")
 }

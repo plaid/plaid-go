@@ -80,7 +80,17 @@ func TestExchangePublicToken(t *testing.T) {
 	assert.NotNil(t, tokenResp.ItemID)
 }
 
-func TestImportItem(t *testing.T) {
+func TestImportItemWithoutOptions(t *testing.T) {
+	accessTokenResp, err := testClient.ImportItem([]string{"identity", "auth"}, map[string]interface{}{
+		"user_id":    "user_good",
+		"auth_token": "pass_good",
+	}, importItemRequestOptions{})
+	assert.Nil(t, err)
+	assert.NotNil(t, accessTokenResp)
+	assert.True(t, strings.HasPrefix(accessTokenResp.AccessToken, "access-sandbox"))
+}
+
+func TestImportItemWithOptions(t *testing.T) {
 	accessTokenResp, err := testClient.ImportItem([]string{"identity", "auth"}, map[string]interface{}{
 		"user_id":    "user_good",
 		"auth_token": "pass_good",
