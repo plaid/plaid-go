@@ -11,5 +11,12 @@ func TestGetWebhookVerificationKey(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotNil(t, webhookResp.Key)
+	assert.NotNil(t, webhookResp.Key.Alg)
+	assert.NotNil(t, webhookResp.Key.CreatedAt)
+	assert.NotNil(t, webhookResp.Key.Crv)
 	assert.NotNil(t, webhookResp.Key.Kid)
+	assert.NotNil(t, webhookResp.Key.Kty)
+	assert.NotNil(t, webhookResp.Key.Use)
+	assert.NotNil(t, webhookResp.Key.X)
+	assert.NotNil(t, webhookResp.Key.Y)
 }
