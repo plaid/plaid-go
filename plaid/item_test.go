@@ -88,6 +88,5 @@ func TestImportItem(t *testing.T) {
 		Webhook: "https://plaid.com/webhook-test",
 	})
 	assert.Nil(t, err)
-	assert.NotNil(t, accessTokenResp)
 	assert.True(t, strings.HasPrefix(accessTokenResp.AccessToken, "access-sandbox"))
 }
