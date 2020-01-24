@@ -121,9 +121,9 @@ type importItemRequest struct {
 	ClientID string `json:"client_id"`
 	Secret   string `json:"secret"`
 
-	InitialProducts []string                 `json:"products"`
-	UserAuth        map[string]interface{}   `json:"user_auth"`
-	Options         importItemRequestOptions `json:"options,omitempty"`
+	Products []string                 `json:"products"`
+	UserAuth map[string]interface{}   `json:"user_auth"`
+	Options  importItemRequestOptions `json:"options,omitempty"`
 }
 
 // ImportItemResponse is the type of the response returned by item/import.
@@ -282,13 +282,13 @@ func (c *Client) ExchangePublicToken(publicToken string) (resp ExchangePublicTok
 }
 
 // ImportItem generates a Plaid item given user authentication fields.
-func (c *Client) ImportItem(initialProducts []string, userAuth map[string]interface{}, options importItemRequestOptions) (resp ImportItemResponse, err error) {
+func (c *Client) ImportItem(products []string, userAuth map[string]interface{}, options importItemRequestOptions) (resp ImportItemResponse, err error) {
 	jsonBody, err := json.Marshal(importItemRequest{
-		ClientID:        c.clientID,
-		Secret:          c.secret,
-		InitialProducts: initialProducts,
-		UserAuth:        userAuth,
-		Options:         options,
+		ClientID: c.clientID,
+		Secret:   c.secret,
+		Products: products,
+		UserAuth: userAuth,
+		Options:  options,
 	})
 	if err != nil {
 		return resp, err

@@ -41,7 +41,7 @@ func TestGetDepositSwitch(t *testing.T) {
 	assert.True(t, depositSwitch.DepositSwitchID != "")
 	assert.True(t, depositSwitch.TargetItemID != "")
 	assert.True(t, depositSwitch.TargetAccountID != "")
-	assert.True(t, depositSwitch.CreatedDate != "")
+	assert.True(t, depositSwitch.DateCreated != "")
 	assert.True(t, depositSwitch.State != "")
 }
 

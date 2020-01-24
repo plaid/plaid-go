@@ -12,11 +12,12 @@ type GetDepositSwitchResponse struct {
 	TargetAccountID               string  `json:"target_account_id"`
 	State                         string  `json:"state"`
 	RequestID                     string  `json:"request_id"`
-	CreatedDate                   string  `json:"created_date,omitempty"`
+	DateCreated                   string  `json:"date_created,omitempty"`
 	IsAllocatedRemainder          bool    `json:"is_allocated_remainder,omitempty"`
 	AccountHasMultipleAllocations bool    `json:"account_has_multiple_allocations,omitempty"`
 	PercentAllocated              float64 `json:"percent_allocated,omitempty"`
-	CompletedDate                 string  `json:"completed_date,omitempty"`
+	AmountAllocated               float64 `json:"amount_allocated,omitempty"`
+	DateCompleted                 string  `json:"date_completed,omitempty"`
 }
 
 type getDepositSwitchRequest struct {
