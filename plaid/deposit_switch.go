@@ -5,6 +5,12 @@ import (
 	"errors"
 )
 
+type getDepositSwitchRequest struct {
+	ClientID        string `json:"client_id"`
+	Secret          string `json:"secret"`
+	DepositSwitchID string `json:"deposit_switch_id"`
+}
+
 // GetDepositSwitchResponse details the response from /deposit_switch/get.
 type GetDepositSwitchResponse struct {
 	DepositSwitchID               string  `json:"deposit_switch_id"`
@@ -18,12 +24,6 @@ type GetDepositSwitchResponse struct {
 	PercentAllocated              float64 `json:"percent_allocated,omitempty"`
 	AmountAllocated               float64 `json:"amount_allocated,omitempty"`
 	DateCompleted                 string  `json:"date_completed,omitempty"`
-}
-
-type getDepositSwitchRequest struct {
-	ClientID        string `json:"client_id"`
-	Secret          string `json:"secret"`
-	DepositSwitchID string `json:"deposit_switch_id"`
 }
 
 // GetDepositSwitch retrieves deposit switch data.
