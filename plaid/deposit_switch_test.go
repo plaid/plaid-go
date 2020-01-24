@@ -51,5 +51,5 @@ func TestCreateDepositSwitchToken(t *testing.T) {
 	createDepositSwitchTokenResponse, err := testClient.CreateDepositSwitchToken(id)
 	assert.Nil(t, err)
 	assert.True(t, createDepositSwitchTokenResponse.DepositSwitchToken != "")
-	assert.True(t, createDepositSwitchTokenResponse.Expires != "")
+	assert.True(t, createDepositSwitchTokenResponse.DepositSwitchTokenExpirationTime != "")
 }

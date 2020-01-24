@@ -55,8 +55,8 @@ type createDepositSwitchTokenRequest struct {
 }
 
 type createDepositSwitchTokenResponse struct {
-	DepositSwitchToken string `json:"deposit_switch_token"`
-	Expires            string `json:"deposit_switch_token_expiration_time"`
+	DepositSwitchToken               string `json:"deposit_switch_token"`
+	DepositSwitchTokenExpirationTime string `json:"deposit_switch_token_expiration_time"`
 }
 
 func (c *Client) CreateDepositSwitchToken(
