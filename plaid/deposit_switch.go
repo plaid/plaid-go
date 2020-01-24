@@ -48,38 +48,6 @@ func (c *Client) GetDepositSwitch(
 	return resp, err
 }
 
-type createDepositSwitchTokenRequest struct {
-	ClientID        string `json:"client_id"`
-	Secret          string `json:"secret"`
-	DepositSwitchID string `json:"deposit_switch_id"`
-}
-
-type createDepositSwitchTokenResponse struct {
-	DepositSwitchToken               string `json:"deposit_switch_token"`
-	DepositSwitchTokenExpirationTime string `json:"deposit_switch_token_expiration_time"`
-}
-
-func (c *Client) CreateDepositSwitchToken(
-	depositSwitchID string,
-) (resp createDepositSwitchTokenResponse, err error) {
-	if depositSwitchID == "" {
-		return resp, errors.New("/deposit_switch/token/create - deposit switch id must be specified")
-	}
-	req := createDepositSwitchTokenRequest{
-		ClientID:        c.clientID,
-		Secret:          c.secret,
-		DepositSwitchID: depositSwitchID,
-	}
-	jsonBody, err := json.Marshal(req)
-	if err != nil {
-		return resp, err
-	}
-
-	err = c.Call("/deposit_switch/token/create", jsonBody, &resp)
-
-	return resp, err
-}
-
 type createDepositSwitchRequest struct {
 	ClientID          string `json:"client_id"`
 	Secret            string `json:"secret"`
@@ -110,6 +78,38 @@ func (c *Client) CreateDepositSwitch(targetAccountID string, targetAccessToken s
 	}
 
 	err = c.Call("/deposit_switch/create", jsonBody, &resp)
+
+	return resp, err
+}
+
+type createDepositSwitchTokenRequest struct {
+	ClientID        string `json:"client_id"`
+	Secret          string `json:"secret"`
+	DepositSwitchID string `json:"deposit_switch_id"`
+}
+
+type createDepositSwitchTokenResponse struct {
+	DepositSwitchToken               string `json:"deposit_switch_token"`
+	DepositSwitchTokenExpirationTime string `json:"deposit_switch_token_expiration_time"`
+}
+
+func (c *Client) CreateDepositSwitchToken(
+	depositSwitchID string,
+) (resp createDepositSwitchTokenResponse, err error) {
+	if depositSwitchID == "" {
+		return resp, errors.New("/deposit_switch/token/create - deposit switch id must be specified")
+	}
+	req := createDepositSwitchTokenRequest{
+		ClientID:        c.clientID,
+		Secret:          c.secret,
+		DepositSwitchID: depositSwitchID,
+	}
+	jsonBody, err := json.Marshal(req)
+	if err != nil {
+		return resp, err
+	}
+
+	err = c.Call("/deposit_switch/token/create", jsonBody, &resp)
 
 	return resp, err
 }
