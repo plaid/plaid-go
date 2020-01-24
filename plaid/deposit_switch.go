@@ -5,7 +5,7 @@ import (
 	"errors"
 )
 
-// GetDepositSwitchResponse details the response from /deposit_switch/get
+// GetDepositSwitchResponse details the response from /deposit_switch/get.
 type GetDepositSwitchResponse struct {
 	DepositSwitchID               string  `json:"deposit_switch_id"`
 	TargetItemID                  string  `json:"target_item_id"`
@@ -48,7 +48,6 @@ func (c *Client) GetDepositSwitch(
 	return resp, err
 }
 
-// this is exactly the same as getDepositSwitchRequest
 type createDepositSwitchTokenRequest struct {
 	ClientID        string `json:"client_id"`
 	Secret          string `json:"secret"`
