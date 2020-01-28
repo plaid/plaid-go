@@ -4,5 +4,5 @@ package internal
 
 const (
 	// Version is the current version of the plaid-go library
-	Version = "2.2.0"
+	Version = "2.3.0"
 )
