@@ -13,17 +13,13 @@ type getDepositSwitchRequest struct {
 
 // GetDepositSwitchResponse details the response from /deposit_switch/get.
 type GetDepositSwitchResponse struct {
-	DepositSwitchID               string  `json:"deposit_switch_id"`
-	TargetItemID                  string  `json:"target_item_id"`
-	TargetAccountID               string  `json:"target_account_id"`
-	State                         string  `json:"state"`
-	RequestID                     string  `json:"request_id"`
-	DateCreated                   string  `json:"date_created,omitempty"`
-	IsAllocatedRemainder          bool    `json:"is_allocated_remainder,omitempty"`
-	AccountHasMultipleAllocations bool    `json:"account_has_multiple_allocations,omitempty"`
-	PercentAllocated              float64 `json:"percent_allocated,omitempty"`
-	AmountAllocated               float64 `json:"amount_allocated,omitempty"`
-	DateCompleted                 string  `json:"date_completed,omitempty"`
+	DepositSwitchID string `json:"deposit_switch_id"`
+	TargetItemID    string `json:"target_item_id"`
+	TargetAccountID string `json:"target_account_id"`
+	State           string `json:"state"`
+	RequestID       string `json:"request_id"`
+	DateCreated     string `json:"date_created,omitempty"`
+	DateCompleted   string `json:"date_completed,omitempty"`
 }
 
 // GetDepositSwitch retrieves deposit switch data.
