@@ -1,6 +1,7 @@
 package plaid
 
 import (
+	"context"
 	"encoding/json"
 )
 
@@ -17,9 +18,9 @@ type GetCategoriesResponse struct {
 
 // GetCategories returns information for all categories.
 // See https://plaid.com/docs/api/#category-overview.
-func (c *Client) GetCategories() (resp GetCategoriesResponse, err error) {
+func (c *Client) GetCategories(ctx context.Context) (resp GetCategoriesResponse, err error) {
 	jsonBody, _ := json.Marshal(nil)
 
-	err = c.Call("/categories/get", jsonBody, &resp)
+	err = c.Call(ctx, "/categories/get", jsonBody, &resp)
 	return resp, err
 }

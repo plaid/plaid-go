@@ -1,6 +1,7 @@
 package plaid
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 )
@@ -82,7 +83,7 @@ type GetTransactionsOptions struct {
 
 // GetTransactionsWithOptions retrieves user-authorized transaction data for credit and depository-type accounts.
 // See https://plaid.com/docs/api/#transactions.
-func (c *Client) GetTransactionsWithOptions(accessToken string, options GetTransactionsOptions) (resp GetTransactionsResponse, err error) {
+func (c *Client) GetTransactionsWithOptions(ctx context.Context, accessToken string, options GetTransactionsOptions) (resp GetTransactionsResponse, err error) {
 	if options.StartDate == "" || options.EndDate == "" {
 		return resp, errors.New("/transactions/get - start date and end date must be specified")
 	}
@@ -107,13 +108,13 @@ func (c *Client) GetTransactionsWithOptions(accessToken string, options GetTrans
 		return resp, err
 	}
 
-	err = c.Call("/transactions/get", jsonBody, &resp)
+	err = c.Call(ctx, "/transactions/get", jsonBody, &resp)
 	return resp, err
 }
 
 // GetTransactions retrieves user-authorized transaction data for credit and depository-type accounts.
 // See https://plaid.com/docs/api/#transactions.
-func (c *Client) GetTransactions(accessToken, startDate, endDate string) (resp GetTransactionsResponse, err error) {
+func (c *Client) GetTransactions(ctx context.Context, accessToken, startDate, endDate string) (resp GetTransactionsResponse, err error) {
 	options := GetTransactionsOptions{
 		StartDate:  startDate,
 		EndDate:    endDate,
@@ -121,5 +122,5 @@ func (c *Client) GetTransactions(accessToken, startDate, endDate string) (resp G
 		Count:      100,
 		Offset:     0,
 	}
-	return c.GetTransactionsWithOptions(accessToken, options)
+	return c.GetTransactionsWithOptions(ctx, accessToken, options)
 }

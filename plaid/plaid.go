@@ -2,6 +2,7 @@ package plaid
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
@@ -55,8 +56,8 @@ func NewClient(options ClientOptions) (client *Client, err error) {
 	}, nil
 }
 
-func (c *Client) Call(endpoint string, body []byte, v interface{}) error {
-	req, err := c.newRequest(endpoint, bytes.NewReader(body), v)
+func (c *Client) Call(ctx context.Context, endpoint string, body []byte, v interface{}) error {
+	req, err := c.newRequest(ctx, endpoint, bytes.NewReader(body), v)
 	if err != nil {
 		return err
 	}
@@ -65,7 +66,7 @@ func (c *Client) Call(endpoint string, body []byte, v interface{}) error {
 }
 
 // newRequest is used by Call to generate a http.Request with appropriate headers.
-func (c *Client) newRequest(endpoint string, body io.Reader, v interface{}) (*http.Request, error) {
+func (c *Client) newRequest(ctx context.Context, endpoint string, body io.Reader, v interface{}) (*http.Request, error) {
 	if !strings.HasPrefix(endpoint, "/") {
 		endpoint = "/" + endpoint
 	}
@@ -74,6 +75,9 @@ func (c *Client) newRequest(endpoint string, body io.Reader, v interface{}) (*ht
 	if err != nil {
 		return nil, err
 	}
+
+	// Add context.
+	req = req.WithContext(ctx)
 
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("User-Agent", "Plaid Go v"+internal.Version)

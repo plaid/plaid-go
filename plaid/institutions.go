@@ -1,6 +1,7 @@
 package plaid
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"time"
@@ -105,14 +106,16 @@ type SearchInstitutionsResponse struct {
 // GetInstitutionByID returns information for a single institution given an ID.
 // See https://plaid.com/docs/api/#institutions-by-id.
 func (c *Client) GetInstitutionByID(
+	ctx context.Context,
 	id string,
 ) (resp GetInstitutionByIDResponse, err error) {
-	return c.GetInstitutionByIDWithOptions(id, GetInstitutionByIDOptions{})
+	return c.GetInstitutionByIDWithOptions(ctx, id, GetInstitutionByIDOptions{})
 }
 
 // GetInstitutionByIDWithOptions returns information for a single institution given an ID.
 // See https://plaid.com/docs/api/#institutions-by-id.
 func (c *Client) GetInstitutionByIDWithOptions(
+	ctx context.Context,
 	id string,
 	options GetInstitutionByIDOptions,
 ) (resp GetInstitutionByIDResponse, err error) {
@@ -130,19 +133,20 @@ func (c *Client) GetInstitutionByIDWithOptions(
 		return resp, err
 	}
 
-	err = c.Call("/institutions/get_by_id", jsonBody, &resp)
+	err = c.Call(ctx, "/institutions/get_by_id", jsonBody, &resp)
 	return resp, err
 }
 
 // GetInstitutions returns information for all institutions supported by Plaid.
 // See https://plaid.com/docs/api/#all-institutions.
-func (c *Client) GetInstitutions(count, offset int) (resp GetInstitutionsResponse, err error) {
-	return c.GetInstitutionsWithOptions(count, offset, GetInstitutionsOptions{})
+func (c *Client) GetInstitutions(ctx context.Context, count, offset int) (resp GetInstitutionsResponse, err error) {
+	return c.GetInstitutionsWithOptions(ctx, count, offset, GetInstitutionsOptions{})
 }
 
 // GetInstitutionsWithOptions returns information for all institutions supported by Plaid.
 // See https://plaid.com/docs/api/#all-institutions.
 func (c *Client) GetInstitutionsWithOptions(
+	ctx context.Context,
 	count int,
 	offset int,
 	options GetInstitutionsOptions,
@@ -163,7 +167,7 @@ func (c *Client) GetInstitutionsWithOptions(
 		return resp, err
 	}
 
-	err = c.Call("/institutions/get", jsonBody, &resp)
+	err = c.Call(ctx, "/institutions/get", jsonBody, &resp)
 	return resp, err
 }
 
@@ -171,16 +175,18 @@ func (c *Client) GetInstitutionsWithOptions(
 // supported products.
 // See https://plaid.com/docs/api/#institution-search.
 func (c *Client) SearchInstitutions(
+	ctx context.Context,
 	query string,
 	products []string,
 ) (resp SearchInstitutionsResponse, err error) {
-	return c.SearchInstitutionsWithOptions(query, products, SearchInstitutionsOptions{})
+	return c.SearchInstitutionsWithOptions(ctx, query, products, SearchInstitutionsOptions{})
 }
 
 // SearchInstitutionsWithOptions returns institutions corresponding to a query string and
 // supported products.
 // See https://plaid.com/docs/api/#institution-search.
 func (c *Client) SearchInstitutionsWithOptions(
+	ctx context.Context,
 	query string,
 	products []string,
 	options SearchInstitutionsOptions,
@@ -200,6 +206,6 @@ func (c *Client) SearchInstitutionsWithOptions(
 		return resp, err
 	}
 
-	err = c.Call("/institutions/search", jsonBody, &resp)
+	err = c.Call(ctx, "/institutions/search", jsonBody, &resp)
 	return resp, err
 }

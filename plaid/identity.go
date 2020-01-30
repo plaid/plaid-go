@@ -1,6 +1,7 @@
 package plaid
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 )
@@ -57,7 +58,7 @@ type GetIdentityResponse struct {
 // GetIdentity retrieves various account holder information on file with an
 // associated financial institution.
 // See https://plaid.com/docs/api/#identity.
-func (c *Client) GetIdentity(accessToken string) (resp GetIdentityResponse, err error) {
+func (c *Client) GetIdentity(ctx context.Context, accessToken string) (resp GetIdentityResponse, err error) {
 	if accessToken == "" {
 		return resp, errors.New("/identity/get - access token must be specified")
 	}
@@ -72,6 +73,6 @@ func (c *Client) GetIdentity(accessToken string) (resp GetIdentityResponse, err 
 		return resp, err
 	}
 
-	err = c.Call("/identity/get", jsonBody, &resp)
+	err = c.Call(ctx, "/identity/get", jsonBody, &resp)
 	return resp, err
 }
