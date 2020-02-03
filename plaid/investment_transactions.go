@@ -18,6 +18,7 @@ type InvestmentTransaction struct {
 	Price                  float64 `json:"price"`
 	Fees                   float64 `json:"fees"`
 	Type                   string  `json:"type"`
+	Subtype                string  `json:"subtype"`
 	ISOCurrencyCode        string  `json:"iso_currency_code"`
 	UnofficialCurrencyCode string  `json:"unofficial_currency_code"`
 }
