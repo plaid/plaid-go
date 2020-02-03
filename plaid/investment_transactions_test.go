@@ -25,6 +25,9 @@ func TestGetInvestmentTransactions(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, investmentTransactionsResp.Accounts)
 	assert.NotNil(t, investmentTransactionsResp.InvestmentTransactions)
+	for _, transaction := range investmentTransactionsResp.InvestmentTransactions {
+		assert.NotEmpty(t, transaction.Subtype)
+	}
 	assert.NotNil(t, investmentTransactionsResp.Securities)
 	assert.NotNil(t, investmentTransactionsResp.Item)
 }
