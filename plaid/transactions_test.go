@@ -55,3 +55,12 @@ func TestGetTransactionsWithOptions(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, transactionsResp.Transactions)
 }
+
+func TestRefreshTransactions(t *testing.T) {
+	sandboxResp, _ := testClient.CreateSandboxPublicToken(sandboxInstitution, testProducts)
+	tokenResp, _ := testClient.ExchangePublicToken(sandboxResp.PublicToken)
+	transactionsRefreshResp, err := testClient.RefreshTransactions(tokenResp.AccessToken)
+
+	assert.Nil(t, err)
+	assert.NotNil(t, transactionsRefreshResp)
+}

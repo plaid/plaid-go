@@ -64,6 +64,12 @@ type getTransactionsRequest struct {
 	Options     getTransactionsRequestOptions `json:"options,omitempty"`
 }
 
+type refreshTransactionsRequest struct {
+	AccessToken string `json:"access_token"`
+	ClientID    string `json:"client_id"`
+	Secret      string `json:"secret"`
+}
+
 type GetTransactionsResponse struct {
 	APIResponse
 	Accounts          []Account     `json:"accounts"`
@@ -78,6 +84,10 @@ type GetTransactionsOptions struct {
 	AccountIDs []string
 	Count      int
 	Offset     int
+}
+
+type RefreshTransactionsResponse struct {
+	APIResponse
 }
 
 // GetTransactionsWithOptions retrieves user-authorized transaction data for credit and depository-type accounts.
@@ -122,4 +132,22 @@ func (c *Client) GetTransactions(accessToken, startDate, endDate string) (resp G
 		Offset:     0,
 	}
 	return c.GetTransactionsWithOptions(accessToken, options)
+}
+
+// RefreshTransactions triggers a manual transaction extraction for accounts associated with the
+// AccessToken
+func (c *Client) RefreshTransactions(accessToken string) (resp RefreshTransactionsResponse, err error) {
+	req := refreshTransactionsRequest{
+		AccessToken: accessToken,
+		ClientID:    c.clientID,
+		Secret:      c.secret,
+	}
+
+	jsonBody, err := json.Marshal(req)
+	if err != nil {
+		return resp, err
+	}
+
+	err = c.Call("/transactions/refresh", jsonBody, &resp)
+	return resp, err
 }
