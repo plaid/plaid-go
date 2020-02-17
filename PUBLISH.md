@@ -6,3 +6,5 @@ track releases.
 On the master branch, use `make release-(patch|minor|major)` to prepare the
 repository for release. Verify the changes made to the git repository, and
 then run `git push --follow-tags` to publish the release to github.
+
+Note that you will need write access to the master branch - ask a member of the Plaid team for permissions
