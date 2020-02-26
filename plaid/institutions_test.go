@@ -7,13 +7,15 @@ import (
 	assert "github.com/stretchr/testify/require"
 )
 
+var oauthTrue = true
+
 func TestGetInstitutions(t *testing.T) {
 	for _, options := range []GetInstitutionsOptions{
 		GetInstitutionsOptions{},
 		GetInstitutionsOptions{IncludeOptionalMetadata: true},
 		GetInstitutionsOptions{
 			CountryCodes: []string{"GB"},
-			OAuth:        true,
+			OAuth:        &oauthTrue,
 		},
 	} {
 		t.Run(fmt.Sprintf("%#v", options), func(t *testing.T) {
@@ -30,9 +32,9 @@ func TestGetInstitutions(t *testing.T) {
 					assert.NotEmpty(t, inst.URL)
 				}
 			}
-			if options.OAuth {
+			if options.OAuth != nil {
 				for _, inst := range instsResp.Institutions {
-					assert.True(t, inst.OAuth)
+					assert.Equal(t, inst.OAuth, *options.OAuth)
 				}
 			}
 		})
@@ -45,7 +47,7 @@ func TestSearchInstitutions(t *testing.T) {
 		SearchInstitutionsOptions{IncludeOptionalMetadata: true},
 		SearchInstitutionsOptions{
 			CountryCodes: []string{"GB"},
-			OAuth:        true,
+			OAuth:        &oauthTrue,
 		},
 	} {
 		t.Run(fmt.Sprintf("%#v", options), func(t *testing.T) {
@@ -59,9 +61,9 @@ func TestSearchInstitutions(t *testing.T) {
 					assert.NotEmpty(t, inst.URL)
 				}
 			}
-			if options.OAuth {
+			if options.OAuth != nil {
 				for _, inst := range instsResp.Institutions {
-					assert.True(t, inst.OAuth)
+					assert.Equal(t, inst.OAuth, *options.OAuth)
 				}
 			}
 		})
