@@ -25,6 +25,7 @@ type Transaction struct {
 	AccountOwner         string `json:"account_owner"`
 	ID                   string `json:"transaction_id"`
 	Type                 string `json:"transaction_type"`
+	Code                 string `json:"transaction_code"`
 }
 
 type Location struct {
