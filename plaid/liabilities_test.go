@@ -16,6 +16,8 @@ func TestGetLiabilities(t *testing.T) {
 	assert.NotNil(t, liabilitiesResp.Item)
 	assert.NotNil(t, liabilitiesResp.Liabilities)
 	assert.Len(t, liabilitiesResp.Liabilities.Student, 1)
+	assert.Len(t, liabilitiesResp.Liabilities.Credit, 1)
+
 
 	accountID := liabilitiesResp.Accounts[7].AccountID
 	liabilitiesResp, err = testClient.GetLiabilitiesWithOptions(tokenResp.AccessToken, GetLiabilitiesOptions{
