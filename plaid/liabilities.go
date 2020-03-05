@@ -43,7 +43,7 @@ type CreditLiability struct {
 	LastPaymentDate        string  `json:"last_payment_date"`
 	LastStatementBalance   float64 `json:"last_statement_balance"`
 	LastStatementIssueDate string  `json:"last_statement_issue_date"`
-	MinimumPaymentAmount   int64   `json:"minimum_payment_amount"`
+	MinimumPaymentAmount   float64  `json:"minimum_payment_amount"`
 	NextPaymentDueDate     string  `json:"next_payment_due_date"`
 }
 
