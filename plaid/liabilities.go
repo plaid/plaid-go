@@ -39,7 +39,7 @@ type CreditLiability struct {
 	AccountID              string  `json:"account_id"`
 	APRs                   []APR   `json:"aprs"`
 	IsOverdue              bool    `json:"is_overdue"`
-	LastPaymentAmount      int64   `json:"last_payment_amount"`
+	LastPaymentAmount      float64 `json:"last_payment_amount"`
 	LastPaymentDate        string  `json:"last_payment_date"`
 	LastStatementBalance   float64 `json:"last_statement_balance"`
 	LastStatementIssueDate string  `json:"last_statement_issue_date"`
