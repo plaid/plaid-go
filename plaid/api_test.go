@@ -12,9 +12,9 @@ var (
 	testPublicKey = os.Getenv("PLAID_PUBLIC_KEY")
 	testEnv       = Sandbox
 
-	sandboxInstitution     = "ins_109508"
-	sandboxInstitutionName = "First Platypus Bank"
-	testProducts           = []string{"auth", "identity", "income", "transactions"}
+	sandboxInstitution      = "ins_109508"
+	sandboxInstitutionQuery = "Platypus"
+	testProducts            = []string{"auth", "identity", "income", "transactions"}
 )
 
 var testOptions = ClientOptions{
