@@ -34,6 +34,27 @@ type StudentLoanLiability struct {
 	YTDPrincipalPaid           float64                    `json:"ytd_principal_paid"`
 }
 
+// CreditLiability contains credit card liability data.
+type CreditLiability struct {
+	AccountID              string  `json:"account_id"`
+	APRs                   []APR   `json:"aprs"`
+	IsOverdue              bool    `json:"is_overdue"`
+	LastPaymentAmount      int64   `json:"last_payment_amount"`
+	LastPaymentDate        string  `json:"last_payment_date"`
+	LastStatementBalance   float64 `json:"last_statement_balance"`
+	LastStatementIssueDate string  `json:"last_statement_issue_date"`
+	MinimumPaymentAmount   int64   `json:"minimum_payment_amount"`
+	NextPaymentDueDate     string  `json:"next_payment_due_date"`
+}
+
+// APR contains details about the annual percentage rate of a credit card.
+type APR struct {
+	APRPercentage        float64 `json:"apr_percentage"`
+	APRType              string  `json:"apr_type"`
+	BalanceSubjectToAPR  float64 `json:"balance_subject_to_apr"`
+	InterestChargeAmount float64 `json:"interest_charge_amount"`
+}
+
 // PSLFStatus contains information about the student's eligibility in the
 // Public Service Loan Forgiveness program.
 type PSLFStatus struct {
@@ -81,7 +102,8 @@ type GetLiabilitiesResponse struct {
 	Accounts    []Account `json:"accounts"`
 	Item        Item      `json:"item"`
 	Liabilities struct {
-		Student []StudentLoanLiability `json:"student"`
+		Student         []StudentLoanLiability `json:"student"`
+		Credit          []CreditLiability      `json:"credit"`
 	} `json:"liabilities"`
 }
 
