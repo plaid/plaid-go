@@ -29,16 +29,17 @@ type Client struct {
 }
 
 type ClientOptions struct {
-	ClientID    string
-	Secret      string
-	PublicKey   string
-	Environment Environment
-	HTTPClient  *http.Client
+	ClientID                  string
+	Secret                    string
+	PublicKey                 string
+	Environment               Environment
+	HTTPClient                *http.Client
+	SkipEnvironmentValidation bool
 }
 
 // NewClient instantiates a Client associated with a client id, secret and environment.
 func NewClient(options ClientOptions) (client *Client, err error) {
-	if !options.Environment.Valid() {
+	if !options.SkipEnvironmentValidation && !options.Environment.Valid() {
 		return nil, errors.New("Invalid environment specified: " + string(options.Environment))
 	}
 
