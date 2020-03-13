@@ -3,9 +3,9 @@ package plaid
 type Environment string
 
 const (
-	Sandbox     Environment = "sandbox.plaid.com"
-	Development Environment = "development.plaid.com"
-	Production  Environment = "production.plaid.com"
+	Sandbox     Environment = "https://sandbox.plaid.com"
+	Development Environment = "https://development.plaid.com"
+	Production  Environment = "https://production.plaid.com"
 )
 
 var validEnvironments = [...]Environment{
