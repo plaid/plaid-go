@@ -23,7 +23,6 @@ func main() {
 		os.Getenv("PLAID_PUBLIC_KEY"),
 		plaid.Sandbox,
 		&http.Client{},
-		false,
 	}
 	client, err := plaid.NewClient(clientOptions)
 	handleError(err)

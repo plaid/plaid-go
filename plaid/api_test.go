@@ -23,6 +23,5 @@ var testOptions = ClientOptions{
 	testPublicKey,
 	testEnv,
 	&http.Client{},
-	false,
 }
 var testClient, _ = NewClient(testOptions)
