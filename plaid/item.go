@@ -108,7 +108,8 @@ type createItemAddTokenRequest struct {
 
 type CreateItemAddTokenResponse struct {
 	APIResponse
-	AddToken string `json:"add_token"`
+	AddToken   string    `json:"add_token"`
+	Expiration time.Time `json:"expiration"`
 }
 
 type exchangePublicTokenRequest struct {

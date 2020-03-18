@@ -76,6 +76,7 @@ func TestCreateItemAddToken(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.True(t, strings.HasPrefix(itemAddTokenResp.AddToken, "item-add-sandbox"))
+	assert.NotZero(t, itemAddTokenResp.Expiration)
 }
 
 func TestExchangePublicToken(t *testing.T) {
