@@ -3,7 +3,7 @@ package plaid
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -39,7 +39,7 @@ type ClientOptions struct {
 // NewClient instantiates a Client associated with a client id, secret and environment.
 func NewClient(options ClientOptions) (client *Client, err error) {
 	if !options.Environment.Valid() {
-		return nil, errors.New("Invalid environment specified: " + string(options.Environment))
+		fmt.Printf("WARNING: Invalid environment specified: %s, please use one of: plaid.Sandbox, plaid.Development or plaid.Production\n", string(options.Environment))
 	}
 
 	if options.HTTPClient == nil {
@@ -70,7 +70,7 @@ func (c *Client) newRequest(endpoint string, body io.Reader, v interface{}) (*ht
 		endpoint = "/" + endpoint
 	}
 
-	req, err := http.NewRequest("POST", "https://"+string(c.environment)+endpoint, body)
+	req, err := http.NewRequest("POST", string(c.environment)+endpoint, body)
 	if err != nil {
 		return nil, err
 	}
