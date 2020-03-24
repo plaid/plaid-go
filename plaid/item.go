@@ -102,8 +102,17 @@ type CreatePublicTokenResponse struct {
 }
 
 type createItemAddTokenRequest struct {
-	ClientID string `json:"client_id"`
-	Secret   string `json:"secret"`
+	ClientID   string                  `json:"client_id"`
+	Secret     string                  `json:"secret"`
+	UserFields *ItemAddTokenUserFields `json:"user,omitempty"`
+}
+
+type ItemAddTokenUserFields struct {
+	LegalName              string     `json:"legal_name,omitempty"`
+	EmailAddress           string     `json:"email_address,omitempty"`
+	PhoneNumber            string     `json:"phone_number,omitempty"`
+	EmailAddressVerifiedAt *time.Time `json:"email_address_verified_time,omitempty"`
+	PhoneNumberVerifiedAt  *time.Time `json:"phone_number_verified_time,omitempty"`
 }
 
 type CreateItemAddTokenResponse struct {
@@ -272,11 +281,17 @@ func (c *Client) CreatePublicToken(accessToken string) (resp CreatePublicTokenRe
 }
 
 // CreateItemAddToken generates a token which is used to initialize Link.
+//
+// You can optionally supply identity fields you know, and may have verified,
+// for the user. This will allow us to optimise their experience if we have seen
+// them before.
+//
 // Beta: this endpoint is still in beta.
-func (c *Client) CreateItemAddToken() (resp CreateItemAddTokenResponse, err error) {
+func (c *Client) CreateItemAddToken(userFields *ItemAddTokenUserFields) (resp CreateItemAddTokenResponse, err error) {
 	jsonBody, err := json.Marshal(createItemAddTokenRequest{
-		ClientID: c.clientID,
-		Secret:   c.secret,
+		ClientID:   c.clientID,
+		Secret:     c.secret,
+		UserFields: userFields,
 	})
 
 	if err != nil {

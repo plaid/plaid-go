@@ -72,7 +72,17 @@ func TestCreatePublicToken(t *testing.T) {
 }
 
 func TestCreateItemAddToken(t *testing.T) {
-	itemAddTokenResp, err := testClient.CreateItemAddToken()
+	itemAddTokenResp, err := testClient.CreateItemAddToken(nil)
+
+	assert.Nil(t, err)
+	assert.True(t, strings.HasPrefix(itemAddTokenResp.AddToken, "item-add-sandbox"))
+	assert.NotZero(t, itemAddTokenResp.Expiration)
+}
+
+func TestCreateItemAddTokenWithUserFields(t *testing.T) {
+	itemAddTokenResp, err := testClient.CreateItemAddToken(&ItemAddTokenUserFields{
+		EmailAddress: "hdcase@example.com",
+	})
 
 	assert.Nil(t, err)
 	assert.True(t, strings.HasPrefix(itemAddTokenResp.AddToken, "item-add-sandbox"))
