@@ -9,7 +9,7 @@ A Go client library for the [Plaid API](https://plaid.com/docs).
     * [Versioning](#versioning)
     * [Documentation](#documentation)
     * [Getting Started](#getting-started)
-    * [Contributing](#contributing)
+    * [Developing](#developing)
     * [License](#license)
 
 ## Install
@@ -67,6 +67,21 @@ Each endpoint returns an object which contains the parsed JSON from the HTTP res
 All non-200 responses will return a plaid.Error instance.
 
 For more information on Plaid response codes, head to the [docs](https://plaid.com/docs/api#errors).
+
+## Developing
+
+1. Download this repo into your Go source directory
+2. Run `make setup` pull down all dependencies etc
+
+### Tests
+
+To run the tests you'll need to sign up for a Sandbox account on https://plaid.com as they perform real API requests.
+
+Once you have these you can run `make test`, passing your Sandbox credentials as environment variables:
+
+```shell 
+PLAID_CLIENT_ID=aabbcc PLAID_PUBLIC_KEY=ddeeff PLAID_SECRET=ffeedd make test
+```
 
 ## Support
 
