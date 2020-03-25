@@ -107,6 +107,10 @@ type createItemAddTokenRequest struct {
 	UserFields *ItemAddTokenUserFields `json:"user,omitempty"`
 }
 
+// VerificationDateUnknown indicates that the email/phone was verified, but the
+// time of verification is not known.
+var VerificationDateUnknown = time.Unix(0,0)
+
 type ItemAddTokenUserFields struct {
 	LegalName              string     `json:"legal_name,omitempty"`
 	EmailAddress           string     `json:"email_address,omitempty"`
