@@ -83,7 +83,7 @@ func (c *Client) newRequest(endpoint string, body io.Reader, v interface{}) (*ht
 	return req, nil
 }
 
-// do is used by Call to execute an http.Request and parse its response.
+// do is used by Call to execute an http.Request and parse its response .
 // Also handles parsing of the plaid error format.
 func (c *Client) do(req *http.Request, v interface{}) error {
 	res, err := c.httpClient.Do(req)
