@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strings"
 
@@ -92,21 +91,17 @@ func (c *Client) do(req *http.Request, v interface{}) error {
 	if err != nil {
 		return err
 	}
-	defer res.Body.Close()
-
-	resBody, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return err
-	}
+	defer func() {
+		_ = res.Body.Close()
+	}()
 
 	// Successful response
 	if res.StatusCode == 200 {
-		return json.Unmarshal(resBody, v)
+		return json.NewDecoder(res.Body).Decode(v)
 	}
-
 	// Attempt to unmarshal into Plaid error format
 	var plaidErr Error
-	if err = json.Unmarshal(resBody, &plaidErr); err != nil {
+	if err = json.NewDecoder(res.Body).Decode(&plaidErr); err != nil {
 		return err
 	}
 	plaidErr.StatusCode = res.StatusCode
