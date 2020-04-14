@@ -73,7 +73,10 @@ func TestCreatePublicToken(t *testing.T) {
 }
 
 func TestCreateItemAddToken(t *testing.T) {
-	itemAddTokenResp, err := testClient.CreateItemAddToken(nil)
+	fakeClientUserID, _ := randomHex(12)
+	itemAddTokenResp, err := testClient.CreateItemAddToken(ItemAddTokenUserFields{
+		ClientUserID: fakeClientUserID,
+	})
 
 	assert.Nil(t, err)
 	assert.True(t, strings.HasPrefix(itemAddTokenResp.AddToken, "item-add-sandbox"))
@@ -81,9 +84,11 @@ func TestCreateItemAddToken(t *testing.T) {
 }
 
 func TestCreateItemAddTokenWithUserFields(t *testing.T) {
-	timeA := time.Date(2020, 5, 4, 12, 4, 2, 0, time.UTC, )
+	fakeClientUserID, _ := randomHex(12)
+	timeA := time.Date(2020, 5, 4, 12, 4, 2, 0, time.UTC)
 
-	itemAddTokenResp, err := testClient.CreateItemAddToken(&ItemAddTokenUserFields{
+	itemAddTokenResp, err := testClient.CreateItemAddToken(ItemAddTokenUserFields{
+		ClientUserID:          fakeClientUserID,
 		EmailAddress:          "hdcase@example.com",
 		EmailAddressVerified:  true,
 		PhoneNumber:           "+1 (415) 555-0333",

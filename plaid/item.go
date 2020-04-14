@@ -102,9 +102,9 @@ type CreatePublicTokenResponse struct {
 }
 
 type createItemAddTokenRequest struct {
-	ClientID   string                  `json:"client_id"`
-	Secret     string                  `json:"secret"`
-	UserFields *ItemAddTokenUserFields `json:"user,omitempty"`
+	ClientID   string                 `json:"client_id"`
+	Secret     string                 `json:"secret"`
+	UserFields ItemAddTokenUserFields `json:"user"`
 }
 
 // Indicates that the email/phone was verified, but the
@@ -112,6 +112,7 @@ type createItemAddTokenRequest struct {
 var verificationDateUnknown = time.Unix(0, 0)
 
 type ItemAddTokenUserFields struct {
+	ClientUserID           string     `json:"client_user_id"`
 	LegalName              string     `json:"legal_name,omitempty"`
 	EmailAddress           string     `json:"email_address,omitempty"`
 	PhoneNumber            string     `json:"phone_number,omitempty"`
@@ -296,9 +297,8 @@ func (c *Client) CreatePublicToken(accessToken string) (resp CreatePublicTokenRe
 // for the user. This will allow us to optimise their experience if we have seen
 // them before.
 //
-// Beta: this endpoint is still in beta.
-func (c *Client) CreateItemAddToken(userFields *ItemAddTokenUserFields) (resp CreateItemAddTokenResponse, err error) {
-	prepareUserFieldsForSend(userFields)
+func (c *Client) CreateItemAddToken(userFields ItemAddTokenUserFields) (resp CreateItemAddTokenResponse, err error) {
+	prepareUserFieldsForSend(&userFields)
 
 	jsonBody, err := json.Marshal(createItemAddTokenRequest{
 		ClientID:   c.clientID,
