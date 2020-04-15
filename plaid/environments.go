@@ -1,19 +1,19 @@
 package plaid
 
 type Environment struct {
-	url string
+	URL string
 }
 
 var Sandbox = Environment{
-	url: "https://sandbox.plaid.com",
+	URL: "https://sandbox.plaid.com",
 }
 
 var Development = Environment{
-	url: "https://development.plaid.com",
+	URL: "https://development.plaid.com",
 }
 
 var Production = Environment{
-	url: "https://production.plaid.com",
+	URL: "https://production.plaid.com",
 }
 
 var validEnvironments = [...]Environment{
