@@ -38,7 +38,7 @@ type ClientOptions struct {
 // NewClient instantiates a Client associated with a client id, secret and environment.
 func NewClient(options ClientOptions) (client *Client, err error) {
 	if !options.Environment.Valid() {
-		fmt.Printf("WARNING: Invalid environment specified: %s, please use one of: plaid.Sandbox, plaid.Development or plaid.Production\n", string(options.Environment))
+		fmt.Printf("WARNING: Invalid environment specified: %s, please use one of: plaid.Sandbox, plaid.Development or plaid.Production\n", string(options.Environment.url))
 	}
 
 	if options.HTTPClient == nil {
