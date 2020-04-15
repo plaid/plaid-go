@@ -69,7 +69,7 @@ func (c *Client) newRequest(endpoint string, body io.Reader, v interface{}) (*ht
 		endpoint = "/" + endpoint
 	}
 
-	req, err := http.NewRequest("POST", string(c.environment)+endpoint, body)
+	req, err := http.NewRequest("POST", string(c.environment.url)+endpoint, body)
 	if err != nil {
 		return nil, err
 	}
