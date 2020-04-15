@@ -118,11 +118,11 @@ type ItemAddTokenUserFields struct {
 	EmailAddressVerifiedAt *time.Time `json:"email_address_verified_time,omitempty"`
 	// EmailAddressVerified indicates verification has occurred at an unknown date.
 	// You don't need to set this if you've supplied the verification date
-	EmailAddressVerified   bool
-	PhoneNumberVerifiedAt  *time.Time `json:"phone_number_verified_time,omitempty"`
+	EmailAddressVerified  bool       `json:"-"`
+	PhoneNumberVerifiedAt *time.Time `json:"phone_number_verified_time,omitempty"`
 	// PhoneNumberVerified indicates verification has occurred at an unknown date
 	// You don't need to set this if you've supplied the verification date
-	PhoneNumberVerified    bool       `json:"phone_number_verified_time,omitempty"`
+	PhoneNumberVerified bool `json:"-"`
 }
 
 type CreateItemAddTokenResponse struct {
