@@ -107,23 +107,8 @@ type createItemAddTokenRequest struct {
 	UserFields ItemAddTokenUserFields `json:"user"`
 }
 
-// VerificationDateUnknown indicates that the email/phone was verified,
-// but the time of verification is not known.
-var VerificationDateUnknown = time.Unix(0, 0)
-
 type ItemAddTokenUserFields struct {
-	ClientUserID           string     `json:"client_user_id"`
-	LegalName              string     `json:"legal_name,omitempty"`
-	EmailAddress           string     `json:"email_address,omitempty"`
-	PhoneNumber            string     `json:"phone_number,omitempty"`
-	EmailAddressVerifiedAt *time.Time `json:"email_address_verified_time,omitempty"`
-	// EmailAddressVerified indicates verification has occurred at an unknown date.
-	// You don't need to set this if you've supplied the verification date
-	EmailAddressVerified  bool       `json:"-"`
-	PhoneNumberVerifiedAt *time.Time `json:"phone_number_verified_time,omitempty"`
-	// PhoneNumberVerified indicates verification has occurred at an unknown date
-	// You don't need to set this if you've supplied the verification date
-	PhoneNumberVerified bool `json:"-"`
+	ClientUserID string `json:"client_user_id"`
 }
 
 type CreateItemAddTokenResponse struct {
@@ -292,14 +277,7 @@ func (c *Client) CreatePublicToken(accessToken string) (resp CreatePublicTokenRe
 }
 
 // CreateItemAddToken generates a token which is used to initialize Link.
-//
-// You can optionally supply identity fields you know, and may have verified,
-// for the user. This will allow us to optimise their experience if we have seen
-// them before.
-//
 func (c *Client) CreateItemAddToken(userFields ItemAddTokenUserFields) (resp CreateItemAddTokenResponse, err error) {
-	prepareUserFieldsForSend(&userFields)
-
 	jsonBody, err := json.Marshal(createItemAddTokenRequest{
 		ClientID:   c.clientID,
 		Secret:     c.secret,
@@ -312,18 +290,6 @@ func (c *Client) CreateItemAddToken(userFields ItemAddTokenUserFields) (resp Cre
 
 	err = c.Call("/item/add_token/create", jsonBody, &resp)
 	return resp, err
-}
-
-func prepareUserFieldsForSend(userFields *ItemAddTokenUserFields) {
-	if userFields == nil {
-		return
-	}
-	if userFields.PhoneNumberVerifiedAt == nil && userFields.PhoneNumberVerified {
-		userFields.PhoneNumberVerifiedAt = &VerificationDateUnknown
-	}
-	if userFields.EmailAddressVerifiedAt == nil && userFields.EmailAddressVerified {
-		userFields.EmailAddressVerifiedAt = &VerificationDateUnknown
-	}
 }
 
 // ExchangePublicToken exchanges a public token for an access token.

@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"strings"
 	"testing"
-	"time"
 
 	assert "github.com/stretchr/testify/require"
 )
@@ -83,23 +82,6 @@ func TestCreateItemAddToken(t *testing.T) {
 	assert.NotZero(t, itemAddTokenResp.Expiration)
 }
 
-func TestCreateItemAddTokenWithUserFields(t *testing.T) {
-	fakeClientUserID, _ := randomHex(12)
-	timeA := time.Date(2020, 5, 4, 12, 4, 2, 0, time.UTC)
-
-	itemAddTokenResp, err := testClient.CreateItemAddToken(ItemAddTokenUserFields{
-		ClientUserID:          fakeClientUserID,
-		EmailAddress:          "hdcase@example.com",
-		EmailAddressVerified:  true,
-		PhoneNumber:           "+1 (415) 555-0333",
-		PhoneNumberVerifiedAt: &timeA,
-	})
-
-	assert.Nil(t, err)
-	assert.True(t, strings.HasPrefix(itemAddTokenResp.AddToken, "item-add-sandbox"))
-	assert.NotZero(t, itemAddTokenResp.Expiration)
-}
-
 func TestExchangePublicToken(t *testing.T) {
 	sandboxResp, _ := testClient.CreateSandboxPublicToken(sandboxInstitution, testProducts)
 	tokenResp, err := testClient.ExchangePublicToken(sandboxResp.PublicToken)
@@ -129,19 +111,4 @@ func TestImportItemWithOptions(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, accessTokenResp)
 	assert.True(t, strings.HasPrefix(accessTokenResp.AccessToken, "access-sandbox"))
-}
-
-func Test_prepareUserFieldsForSend(t *testing.T) {
-	// no panic
-	prepareUserFieldsForSend(nil)
-
-	timeA := time.Unix(50, 0)
-	uf := ItemAddTokenUserFields{
-		EmailAddressVerified:  true,
-		PhoneNumberVerifiedAt: &timeA,
-		PhoneNumberVerified:   true,
-	}
-	prepareUserFieldsForSend(&uf)
-	assert.Equal(t, &timeA, uf.PhoneNumberVerifiedAt)
-	assert.Equal(t, &VerificationDateUnknown, uf.EmailAddressVerifiedAt)
 }
