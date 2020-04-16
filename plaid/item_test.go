@@ -143,5 +143,5 @@ func Test_prepareUserFieldsForSend(t *testing.T) {
 	}
 	prepareUserFieldsForSend(&uf)
 	assert.Equal(t, &timeA, uf.PhoneNumberVerifiedAt)
-	assert.Equal(t, &verificationDateUnknown, uf.EmailAddressVerifiedAt)
+	assert.Equal(t, &VerificationDateUnknown, uf.EmailAddressVerifiedAt)
 }

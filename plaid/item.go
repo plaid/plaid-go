@@ -107,9 +107,9 @@ type createItemAddTokenRequest struct {
 	UserFields ItemAddTokenUserFields `json:"user"`
 }
 
-// Indicates that the email/phone was verified, but the
-// time of verification is not known.
-var verificationDateUnknown = time.Unix(0, 0)
+// VerificationDateUnknown indicates that the email/phone was verified,
+// but the time of verification is not known.
+var VerificationDateUnknown = time.Unix(0, 0)
 
 type ItemAddTokenUserFields struct {
 	ClientUserID           string     `json:"client_user_id"`
@@ -319,10 +319,10 @@ func prepareUserFieldsForSend(userFields *ItemAddTokenUserFields) {
 		return
 	}
 	if userFields.PhoneNumberVerifiedAt == nil && userFields.PhoneNumberVerified {
-		userFields.PhoneNumberVerifiedAt = &verificationDateUnknown
+		userFields.PhoneNumberVerifiedAt = &VerificationDateUnknown
 	}
 	if userFields.EmailAddressVerifiedAt == nil && userFields.EmailAddressVerified {
-		userFields.EmailAddressVerifiedAt = &verificationDateUnknown
+		userFields.EmailAddressVerifiedAt = &VerificationDateUnknown
 	}
 }
 
