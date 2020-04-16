@@ -73,7 +73,10 @@ func TestCreatePublicToken(t *testing.T) {
 }
 
 func TestCreateItemAddToken(t *testing.T) {
-	itemAddTokenResp, err := testClient.CreateItemAddToken(nil)
+	fakeClientUserID, _ := randomHex(12)
+	itemAddTokenResp, err := testClient.CreateItemAddToken(ItemAddTokenUserFields{
+		ClientUserID: fakeClientUserID,
+	})
 
 	assert.Nil(t, err)
 	assert.True(t, strings.HasPrefix(itemAddTokenResp.AddToken, "item-add-sandbox"))
@@ -81,13 +84,15 @@ func TestCreateItemAddToken(t *testing.T) {
 }
 
 func TestCreateItemAddTokenWithUserFields(t *testing.T) {
+	fakeClientUserID, _ := randomHex(12)
 	timeA := time.Date(2020, 5, 4, 12, 4, 2, 0, time.UTC, )
 
-	itemAddTokenResp, err := testClient.CreateItemAddToken(&ItemAddTokenUserFields{
+	itemAddTokenResp, err := testClient.CreateItemAddToken(ItemAddTokenUserFields{
 		EmailAddress:          "hdcase@example.com",
 		EmailAddressVerified:  true,
 		PhoneNumber:           "+1 (415) 555-0333",
 		PhoneNumberVerifiedAt: &timeA,
+		ClientUserID: fakeClientUserID,
 	})
 
 	assert.Nil(t, err)
@@ -127,9 +132,6 @@ func TestImportItemWithOptions(t *testing.T) {
 }
 
 func Test_prepareUserFieldsForSend(t *testing.T) {
-	// no panic
-	prepareUserFieldsForSend(nil)
-
 	timeA := time.Unix(50, 0)
 	uf := ItemAddTokenUserFields{
 		EmailAddressVerified:  true,
@@ -137,6 +139,6 @@ func Test_prepareUserFieldsForSend(t *testing.T) {
 		PhoneNumberVerified:   true,
 	}
 	prepareUserFieldsForSend(&uf)
-	assert.Equal(t, &timeA, uf.PhoneNumberVerifiedAt)
-	assert.Equal(t, &verificationDateUnknown, uf.EmailAddressVerifiedAt)
+	assert.Equal(t, &timeA, uf.PhoneNumberVerifiedAt, "doesn't override an explicit date if boolean is set")
+	assert.Equal(t, &verificationDateUnknown, uf.EmailAddressVerifiedAt, "sends signal date if verified boolean is set")
 }

@@ -102,9 +102,9 @@ type CreatePublicTokenResponse struct {
 }
 
 type createItemAddTokenRequest struct {
-	ClientID   string                  `json:"client_id"`
-	Secret     string                  `json:"secret"`
-	UserFields *ItemAddTokenUserFields `json:"user,omitempty"`
+	ClientID   string                 `json:"client_id"`
+	Secret     string                 `json:"secret"`
+	UserFields ItemAddTokenUserFields `json:"user"`
 }
 
 // Indicates that the email/phone was verified, but the
@@ -122,7 +122,8 @@ type ItemAddTokenUserFields struct {
 	PhoneNumberVerifiedAt *time.Time `json:"phone_number_verified_time,omitempty"`
 	// PhoneNumberVerified indicates verification has occurred at an unknown date
 	// You don't need to set this if you've supplied the verification date
-	PhoneNumberVerified bool `json:"-"`
+	PhoneNumberVerified bool   `json:"-"`
+	ClientUserID        string `json:"client_user_id"`
 }
 
 type CreateItemAddTokenResponse struct {
@@ -297,9 +298,8 @@ func (c *Client) CreatePublicToken(accessToken string) (resp CreatePublicTokenRe
 // them before.
 //
 // Beta: this endpoint is still in beta.
-func (c *Client) CreateItemAddToken(userFields *ItemAddTokenUserFields) (resp CreateItemAddTokenResponse, err error) {
-	prepareUserFieldsForSend(userFields)
-
+func (c *Client) CreateItemAddToken(userFields ItemAddTokenUserFields) (resp CreateItemAddTokenResponse, err error) {
+	prepareUserFieldsForSend(&userFields)
 	jsonBody, err := json.Marshal(createItemAddTokenRequest{
 		ClientID:   c.clientID,
 		Secret:     c.secret,
@@ -315,9 +315,6 @@ func (c *Client) CreateItemAddToken(userFields *ItemAddTokenUserFields) (resp Cr
 }
 
 func prepareUserFieldsForSend(userFields *ItemAddTokenUserFields) {
-	if userFields == nil {
-		return
-	}
 	if userFields.PhoneNumberVerifiedAt == nil && userFields.PhoneNumberVerified {
 		userFields.PhoneNumberVerifiedAt = &verificationDateUnknown
 	}
