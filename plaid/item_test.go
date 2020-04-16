@@ -72,7 +72,10 @@ func TestCreatePublicToken(t *testing.T) {
 }
 
 func TestCreateItemAddToken(t *testing.T) {
-	itemAddTokenResp, err := testClient.CreateItemAddToken()
+	fakeClientUserID, _ := randomHex(12)
+	itemAddTokenResp, err := testClient.CreateItemAddToken(ItemAddTokenUserFields{
+		ClientUserID: fakeClientUserID,
+	})
 
 	assert.Nil(t, err)
 	assert.True(t, strings.HasPrefix(itemAddTokenResp.AddToken, "item-add-sandbox"))
