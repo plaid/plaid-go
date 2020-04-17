@@ -3,6 +3,7 @@ package plaid
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/json"
 	"strings"
 	"testing"
 	"time"
@@ -85,14 +86,14 @@ func TestCreateItemAddToken(t *testing.T) {
 
 func TestCreateItemAddTokenWithUserFields(t *testing.T) {
 	fakeClientUserID, _ := randomHex(12)
-	timeA := time.Date(2020, 5, 4, 12, 4, 2, 0, time.UTC, )
+	timeA := time.Date(2020, 5, 4, 12, 4, 2, 0, time.UTC)
 
 	itemAddTokenResp, err := testClient.CreateItemAddToken(ItemAddTokenUserFields{
-		EmailAddress:          "hdcase@example.com",
-		EmailAddressVerified:  true,
-		PhoneNumber:           "+1 (415) 555-0333",
-		PhoneNumberVerifiedAt: &timeA,
-		ClientUserID: fakeClientUserID,
+		EmailAddress:         "hdcase@example.com",
+		EmailAddressVerified: &FieldVerified{},
+		PhoneNumber:          "+1 (415) 555-0333",
+		PhoneNumberVerified:  &FieldVerified{At: &timeA},
+		ClientUserID:         fakeClientUserID,
 	})
 
 	assert.Nil(t, err)
@@ -131,14 +132,50 @@ func TestImportItemWithOptions(t *testing.T) {
 	assert.True(t, strings.HasPrefix(accessTokenResp.AccessToken, "access-sandbox"))
 }
 
-func Test_prepareUserFieldsForSend(t *testing.T) {
-	timeA := time.Unix(50, 0)
-	uf := ItemAddTokenUserFields{
-		EmailAddressVerified:  true,
-		PhoneNumberVerifiedAt: &timeA,
-		PhoneNumberVerified:   true,
+func Test_VerifiedFieldMarshal(t *testing.T) {
+	timeA, err := time.Parse(time.RFC3339, "2020-05-04T17:36:47.706Z")
+	assert.NoError(t, err)
+	zeroUnix := time.Unix(0, 0).UTC()
+
+	cases := []struct {
+		name         string
+		field        *FieldVerified
+		expectedTime *time.Time
+	}{
+		{
+			name:         "not present",
+			field:        nil,
+			expectedTime: nil,
+		},
+		{
+			name: "present with date",
+			field: &FieldVerified{
+				At: &timeA,
+			},
+			expectedTime: &timeA,
+		},
+		{
+			name:         "present without date",
+			field:        &FieldVerified{},
+			expectedTime: &zeroUnix,
+		},
 	}
-	prepareUserFieldsForSend(&uf)
-	assert.Equal(t, &timeA, uf.PhoneNumberVerifiedAt, "doesn't override an explicit date if boolean is set")
-	assert.Equal(t, &verificationDateUnknown, uf.EmailAddressVerifiedAt, "sends signal date if verified boolean is set")
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			fields := ItemAddTokenUserFields{
+				EmailAddressVerified: tc.field,
+			}
+
+			js, err := json.Marshal(fields)
+			assert.NoError(t, err)
+
+			var parsed struct {
+				EmailAddressVerifiedTime *time.Time `json:"email_address_verified_time"`
+			}
+			assert.NoError(t, json.Unmarshal(js, &parsed))
+
+			assert.Equal(t, tc.expectedTime, parsed.EmailAddressVerifiedTime)
+		})
+	}
 }

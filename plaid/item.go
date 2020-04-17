@@ -107,23 +107,33 @@ type createItemAddTokenRequest struct {
 	UserFields ItemAddTokenUserFields `json:"user"`
 }
 
-// Indicates that the email/phone was verified, but the
-// time of verification is not known.
-var verificationDateUnknown = time.Unix(0, 0)
-
 type ItemAddTokenUserFields struct {
-	LegalName              string     `json:"legal_name,omitempty"`
-	EmailAddress           string     `json:"email_address,omitempty"`
-	PhoneNumber            string     `json:"phone_number,omitempty"`
-	EmailAddressVerifiedAt *time.Time `json:"email_address_verified_time,omitempty"`
-	// EmailAddressVerified indicates verification has occurred at an unknown date.
-	// You don't need to set this if you've supplied the verification date
-	EmailAddressVerified  bool       `json:"-"`
-	PhoneNumberVerifiedAt *time.Time `json:"phone_number_verified_time,omitempty"`
-	// PhoneNumberVerified indicates verification has occurred at an unknown date
-	// You don't need to set this if you've supplied the verification date
-	PhoneNumberVerified bool   `json:"-"`
-	ClientUserID        string `json:"client_user_id"`
+	LegalName    string `json:"legal_name,omitempty"`
+	EmailAddress string `json:"email_address,omitempty"`
+	PhoneNumber  string `json:"phone_number,omitempty"`
+	// See FieldVerified
+	EmailAddressVerified *FieldVerified `json:"email_address_verified_time,omitempty"`
+	// See FieldVerified
+	PhoneNumberVerified *FieldVerified `json:"phone_number_verified_time,omitempty"`
+	ClientUserID        string         `json:"client_user_id"`
+}
+
+// FieldVerified indicates that this field has been verified if non-nil (e.g email
+// address ownership verified by user acting on a verification email).
+// Supply a time if the time the verification occurred is known
+type FieldVerified struct {
+	At *time.Time
+}
+
+// signal value that indicates the email/phone was verified, but the
+// time of verification was not supplied.
+var verificationDateUnknown = []byte(`"1970-01-01T00:00:00Z"`)
+
+func (v FieldVerified) MarshalJSON() ([]byte, error) {
+	if v.At == nil {
+		return verificationDateUnknown, nil
+	}
+	return json.Marshal(v.At)
 }
 
 type CreateItemAddTokenResponse struct {
@@ -296,10 +306,7 @@ func (c *Client) CreatePublicToken(accessToken string) (resp CreatePublicTokenRe
 // You can optionally supply identity fields you know, and may have verified,
 // for the user. This will allow us to optimise their experience if we have seen
 // them before.
-//
-// Beta: this endpoint is still in beta.
 func (c *Client) CreateItemAddToken(userFields ItemAddTokenUserFields) (resp CreateItemAddTokenResponse, err error) {
-	prepareUserFieldsForSend(&userFields)
 	jsonBody, err := json.Marshal(createItemAddTokenRequest{
 		ClientID:   c.clientID,
 		Secret:     c.secret,
@@ -312,15 +319,6 @@ func (c *Client) CreateItemAddToken(userFields ItemAddTokenUserFields) (resp Cre
 
 	err = c.Call("/item/add_token/create", jsonBody, &resp)
 	return resp, err
-}
-
-func prepareUserFieldsForSend(userFields *ItemAddTokenUserFields) {
-	if userFields.PhoneNumberVerifiedAt == nil && userFields.PhoneNumberVerified {
-		userFields.PhoneNumberVerifiedAt = &verificationDateUnknown
-	}
-	if userFields.EmailAddressVerifiedAt == nil && userFields.EmailAddressVerified {
-		userFields.EmailAddressVerifiedAt = &verificationDateUnknown
-	}
 }
 
 // ExchangePublicToken exchanges a public token for an access token.
