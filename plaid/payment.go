@@ -15,11 +15,11 @@ type PaymentRecipientAddress struct {
 }
 
 type createPaymentRecipientRequest struct {
-	ClientID string                  `json:"client_id"`
-	Secret   string                  `json:"secret"`
-	Name     string                  `json:"name"`
-	IBAN     string                  `json:"iban"`
-	Address  PaymentRecipientAddress `json:"address"`
+	ClientID string                   `json:"client_id"`
+	Secret   string                   `json:"secret"`
+	Name     string                   `json:"name"`
+	IBAN     string                   `json:"iban"`
+	Address  *PaymentRecipientAddress `json:"address,omitempty"`
 }
 
 type CreatePaymentRecipientResponse struct {
@@ -30,7 +30,7 @@ type CreatePaymentRecipientResponse struct {
 func (c *Client) CreatePaymentRecipient(
 	name string,
 	iban string,
-	address PaymentRecipientAddress,
+	address *PaymentRecipientAddress,
 ) (resp CreatePaymentRecipientResponse, err error) {
 	jsonBody, err := json.Marshal(createPaymentRecipientRequest{
 		ClientID: c.clientID,
@@ -55,10 +55,10 @@ type getPaymentRecipientRequest struct {
 }
 
 type Recipient struct {
-	RecipientID string                  `json:"recipient_id"`
-	Name        string                  `json:"name"`
-	IBAN        string                  `json:"iban"`
-	Address     PaymentRecipientAddress `json:"address"`
+	RecipientID string                   `json:"recipient_id"`
+	Name        string                   `json:"name"`
+	IBAN        string                   `json:"iban"`
+	Address     *PaymentRecipientAddress `json:"address"`
 }
 
 type GetPaymentRecipientResponse struct {
