@@ -22,4 +22,5 @@ func TestGetAuth(t *testing.T) {
 	}
 	accountsResp, _ := testClient.GetAccountsWithOptions(tokenResp.AccessToken, options)
 	assert.Equal(t, len(accountsResp.Accounts), 1)
+	assert.NotNil(t, accountsResp.Item)
 }
