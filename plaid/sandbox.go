@@ -86,9 +86,8 @@ func (c *Client) SetSandboxItemVerificationStatus(accessToken string, accountID 
 		return resp, errors.New("/sandbox/item/set_verification_status - accountID must be specified")
 	}
 
-	if !(verificationStatus == "automatically_verified" ||
-		verificationStatus != "manually_verified") {
-		return resp, errors.New("/sandbox/item/set_verification_status - verification status must be 'automatically_verified' or 'manually_verified'")
+	if verificationStatus == "" {
+		return resp, errors.New("/sandbox/item/set_verification_status - verification status must be specified")
 	}
 
 	jsonBody, err := json.Marshal(setSandboxItemVerificationStatusRequest{
