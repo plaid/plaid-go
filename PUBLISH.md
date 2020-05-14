@@ -13,7 +13,9 @@ git pull origin master
 git fetch --tags
 ```
 
-3. Creating a new release is simple and bundled into a single make command. Use
+3. Create and merge a PR to update `CHANGELOG.md`
+
+4. Creating a new release is simple and bundled into a single make command. Use
 semantic versioning to determine whether a release should be one of the follow
 version bumps:
 - `patch`
