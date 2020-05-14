@@ -78,18 +78,6 @@ type InvalidateAccessTokenResponse struct {
 	NewAccessToken string `json:"new_access_token"`
 }
 
-type updateAccessTokenVersionRequest struct {
-	ClientID    string `json:"client_id"`
-	Secret      string `json:"secret"`
-	AccessToken string `json:"access_token_v1"`
-}
-
-type UpdateAccessTokenVersionResponse struct {
-	APIResponse
-	NewAccessToken string `json:"access_token"`
-	ItemID         string `json:"item_id"`
-}
-
 type createPublicTokenRequest struct {
 	ClientID    string `json:"client_id"`
 	Secret      string `json:"secret"`
@@ -224,28 +212,6 @@ func (c *Client) InvalidateAccessToken(accessToken string) (resp InvalidateAcces
 	}
 
 	err = c.Call("/item/access_token/invalidate", jsonBody, &resp)
-	return resp, err
-}
-
-// UpdateAccessTokenVersion generates an updated access token associated with
-// the legacy version of Plaid's API.
-// See https://plaid.com/docs/api/#update-access-token-version.
-func (c *Client) UpdateAccessTokenVersion(accessToken string) (resp UpdateAccessTokenVersionResponse, err error) {
-	if accessToken == "" {
-		return resp, errors.New("/item/access_token/update_version - access token must be specified")
-	}
-
-	jsonBody, err := json.Marshal(updateAccessTokenVersionRequest{
-		ClientID:    c.clientID,
-		Secret:      c.secret,
-		AccessToken: accessToken,
-	})
-
-	if err != nil {
-		return resp, err
-	}
-
-	err = c.Call("/item/access_token/update_version", jsonBody, &resp)
 	return resp, err
 }
 
