@@ -90,8 +90,13 @@ type CreatePublicTokenResponse struct {
 }
 
 type createItemAddTokenRequest struct {
-	ClientID string `json:"client_id"`
-	Secret   string `json:"secret"`
+	ClientID   string                 `json:"client_id"`
+	Secret     string                 `json:"secret"`
+	UserFields ItemAddTokenUserFields `json:"user"`
+}
+
+type ItemAddTokenUserFields struct {
+	ClientUserID string `json:"client_user_id"`
 }
 
 type CreateItemAddTokenResponse struct {
@@ -238,11 +243,11 @@ func (c *Client) CreatePublicToken(accessToken string) (resp CreatePublicTokenRe
 }
 
 // CreateItemAddToken generates a token which is used to initialize Link.
-// Beta: this endpoint is still in beta.
-func (c *Client) CreateItemAddToken() (resp CreateItemAddTokenResponse, err error) {
+func (c *Client) CreateItemAddToken(userFields ItemAddTokenUserFields) (resp CreateItemAddTokenResponse, err error) {
 	jsonBody, err := json.Marshal(createItemAddTokenRequest{
-		ClientID: c.clientID,
-		Secret:   c.secret,
+		ClientID:   c.clientID,
+		Secret:     c.secret,
+		UserFields: userFields,
 	})
 
 	if err != nil {
