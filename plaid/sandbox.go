@@ -32,7 +32,7 @@ type setSandboxItemVerificationStatusRequest struct {
 	Secret             string `json:"secret"`
 	AccessToken        string `json:"access_token"`
 	AccountID          string `json:"account_id"`
-	VerificationStatus string `json:"access_token"`
+	VerificationStatus string `json:"verification_status"`
 }
 
 type SetSandboxItemVerificationStatusResponse struct {
@@ -77,7 +77,6 @@ func (c *Client) ResetSandboxItem(accessToken string) (resp ResetSandboxItemResp
 	return resp, err
 }
 
-
 func (c *Client) SetSandboxItemVerificationStatus(accessToken string, accountID string, verificationStatus string) (resp SetSandboxItemVerificationStatusResponse, err error) {
 	if accessToken == "" {
 		return resp, errors.New("/sandbox/item/set_verification_status - access token must be specified")
@@ -88,15 +87,15 @@ func (c *Client) SetSandboxItemVerificationStatus(accessToken string, accountID 
 	}
 
 	if !(verificationStatus == "automatically_verified" ||
-		   verificationStatus != "manually_verified") {
+		verificationStatus != "manually_verified") {
 		return resp, errors.New("/sandbox/item/set_verification_status - verification status must be 'automatically_verified' or 'manually_verified'")
 	}
 
 	jsonBody, err := json.Marshal(setSandboxItemVerificationStatusRequest{
-		ClientID:    c.clientID,
-		Secret:      c.secret,
-		AccessToken: accessToken,
-		AccountID: accountID,
+		ClientID:           c.clientID,
+		Secret:             c.secret,
+		AccessToken:        accessToken,
+		AccountID:          accountID,
 		VerificationStatus: verificationStatus,
 	})
 
