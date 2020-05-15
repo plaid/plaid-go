@@ -55,13 +55,6 @@ func TestInvalidateAccessToken(t *testing.T) {
 	assert.NotNil(t, newTokenResp.NewAccessToken)
 }
 
-func TestUpdateAccessTokenVersion(t *testing.T) {
-	invalidToken, _ := randomHex(80)
-	newTokenResp, err := testClient.InvalidateAccessToken(invalidToken)
-	assert.NotNil(t, err)
-	assert.True(t, newTokenResp.NewAccessToken == "")
-}
-
 func TestCreatePublicToken(t *testing.T) {
 	sandboxResp, _ := testClient.CreateSandboxPublicToken(sandboxInstitution, testProducts)
 	tokenResp, _ := testClient.ExchangePublicToken(sandboxResp.PublicToken)
