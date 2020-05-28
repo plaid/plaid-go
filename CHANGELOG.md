@@ -1,3 +1,7 @@
+## 3.1.0
+- Test fix
+- `AuthorizedDate` and `PaymentChannel` added to the `Transaction` struct
+
 ## 3.0.0
 - Adds support for `/sandbox/item/set_verification_status`
 - `PaymentRecipientAddress` can now be null
