@@ -14,7 +14,8 @@ func TestGetAuth(t *testing.T) {
 	// get auth for all accounts
 	assert.Nil(t, err)
 	assert.NotNil(t, authResp.Accounts)
-	assert.NotNil(t, authResp.Numbers)
+	assert.NotEqual(t, AccountNumberCollection{}, authResp.Numbers)
+	assert.NotEqual(t, Item{}, authResp.Item)
 
 	// get auth for selected accounts
 	options := GetAccountsOptions{
@@ -22,5 +23,5 @@ func TestGetAuth(t *testing.T) {
 	}
 	accountsResp, _ := testClient.GetAccountsWithOptions(tokenResp.AccessToken, options)
 	assert.Equal(t, len(accountsResp.Accounts), 1)
-	assert.NotNil(t, accountsResp.Item)
+	assert.NotEqual(t, Item{}, accountsResp.Item)
 }
