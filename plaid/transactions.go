@@ -13,12 +13,14 @@ type Transaction struct {
 	Category               []string `json:"category"`
 	CategoryID             string   `json:"category_id"`
 	Date                   string   `json:"date"`
+	AuthorizedDate         string   `json:"authorized_date"`
 
 	Location Location `json:"location"`
 
 	Name string `json:"name"`
 
-	PaymentMeta PaymentMeta `json:"payment_meta"`
+	PaymentMeta    PaymentMeta `json:"payment_meta"`
+	PaymentChannel string      `json:"payment_channel"`
 
 	Pending              bool   `json:"pending"`
 	PendingTransactionID string `json:"pending_transaction_id"`
