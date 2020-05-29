@@ -23,7 +23,7 @@ func TestGetItem(t *testing.T) {
 	itemResp, err := testClient.GetItem(tokenResp.AccessToken)
 
 	assert.Nil(t, err)
-	assert.NotNil(t, itemResp.Item)
+	assert.NotEqual(t, Item{}, itemResp.Item)
 	assert.NotEmpty(t, itemResp.Status)
 }
 
@@ -42,7 +42,7 @@ func TestUpdateItemWebhook(t *testing.T) {
 	itemResp, err := testClient.UpdateItemWebhook(tokenResp.AccessToken, "https://plaid.com/webhook-test")
 
 	assert.Nil(t, err)
-	assert.NotNil(t, itemResp.Item)
+	assert.NotEqual(t, Item{}, itemResp.Item)
 	assert.Equal(t, itemResp.Item.Webhook, "https://plaid.com/webhook-test")
 }
 
@@ -52,7 +52,7 @@ func TestInvalidateAccessToken(t *testing.T) {
 	newTokenResp, err := testClient.InvalidateAccessToken(tokenResp.AccessToken)
 
 	assert.Nil(t, err)
-	assert.NotNil(t, newTokenResp.NewAccessToken)
+	assert.NotEmpty(t, newTokenResp.NewAccessToken)
 }
 
 func TestCreatePublicToken(t *testing.T) {
@@ -81,7 +81,7 @@ func TestExchangePublicToken(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.True(t, strings.HasPrefix(tokenResp.AccessToken, "access-sandbox"))
-	assert.NotNil(t, tokenResp.ItemID)
+	assert.NotEmpty(t, tokenResp.ItemID)
 }
 
 func TestImportItemWithoutOptions(t *testing.T) {
