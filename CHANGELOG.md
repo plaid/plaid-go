@@ -1,3 +1,7 @@
+## 3.1.0
+- `AuthorizedDate` and `PaymentChannel` added to the `Transaction` struct
+- `Item` added to the `GetAuthResponse` struct
+
 ## 3.0.0
 - Adds support for `/sandbox/item/set_verification_status`
 - `PaymentRecipientAddress` can now be null
