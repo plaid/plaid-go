@@ -27,6 +27,7 @@ type GetAuthResponse struct {
 	APIResponse
 	Accounts []Account               `json:"accounts"`
 	Numbers  AccountNumberCollection `json:"numbers"`
+	Item     Item                    `json:"item"`
 }
 
 type GetAuthOptions struct {
