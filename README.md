@@ -53,7 +53,6 @@ import (
 clientOptions := plaid.ClientOptions{
     os.Getenv("PLAID_CLIENT_ID"),
     os.Getenv("PLAID_SECRET"),
-    os.Getenv("PLAID_PUBLIC_KEY"),
     plaid.Sandbox, // Available environments are Sandbox, Development, and Production
     &http.Client{}, // This parameter is optional
 }

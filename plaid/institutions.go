@@ -82,9 +82,10 @@ type GetInstitutionsResponse struct {
 }
 
 type getInstitutionByIDRequest struct {
-	ID        string                    `json:"institution_id"`
-	PublicKey string                    `json:"public_key"`
-	Options   GetInstitutionByIDOptions `json:"options,omitempty"`
+	ID       string                    `json:"institution_id"`
+	ClientID string                    `json:"client_id"`
+	Secret   string                    `json:"secret"`
+	Options  GetInstitutionByIDOptions `json:"options,omitempty"`
 }
 
 type GetInstitutionByIDOptions struct {
@@ -98,10 +99,11 @@ type GetInstitutionByIDResponse struct {
 }
 
 type searchInstitutionsRequest struct {
-	Query     string                    `json:"query"`
-	Products  []string                  `json:"products"`
-	PublicKey string                    `json:"public_key"`
-	Options   SearchInstitutionsOptions `json:"options,omitempty"`
+	Query    string                    `json:"query"`
+	Products []string                  `json:"products"`
+	ClientID string                    `json:"client_id"`
+	Secret   string                    `json:"secret"`
+	Options  SearchInstitutionsOptions `json:"options,omitempty"`
 }
 
 type SearchInstitutionsOptions struct {
@@ -135,9 +137,10 @@ func (c *Client) GetInstitutionByIDWithOptions(
 	}
 
 	jsonBody, err := json.Marshal(getInstitutionByIDRequest{
-		ID:        id,
-		PublicKey: c.publicKey,
-		Options:   options,
+		ID:       id,
+		ClientID: c.clientID,
+		Secret:   c.secret,
+		Options:  options,
 	})
 
 	if err != nil {
@@ -204,10 +207,11 @@ func (c *Client) SearchInstitutionsWithOptions(
 	}
 
 	jsonBody, err := json.Marshal(searchInstitutionsRequest{
-		Query:     query,
-		Products:  products,
-		PublicKey: c.publicKey,
-		Options:   options,
+		Query:    query,
+		Products: products,
+		ClientID: c.clientID,
+		Secret:   c.secret,
+		Options:  options,
 	})
 
 	if err != nil {
