@@ -9,6 +9,7 @@ type createSandboxPublicTokenRequest struct {
 	InstitutionID   string   `json:"institution_id"`
 	InitialProducts []string `json:"initial_products"`
 	ClientID        string   `json:"client_id"`
+	Secret          string   `json:"secret"`
 }
 
 type CreateSandboxPublicTokenResponse struct {
