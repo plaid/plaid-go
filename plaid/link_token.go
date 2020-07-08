@@ -62,6 +62,6 @@ func (c *Client) CreateLinkToken(configs LinkTokenConfigs) (resp CreateLinkToken
 		return resp, err
 	}
 
-	err = c.Call("", jsonBody, &resp)
+	err = c.Call("/link/token/create", jsonBody, &resp)
 	return resp, err
 }
