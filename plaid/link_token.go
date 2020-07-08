@@ -24,15 +24,15 @@ type PaymentInitiation struct {
 }
 
 type LinkTokenConfigs struct {
-	User                  LinkTokenUser                   `json:"user"`
+	User                  *LinkTokenUser                  `json:"user"`
 	ClientName            string                          `json:"client_name"`
 	Products              []string                        `json:"products,omitempty"`
 	AccessToken           string                          `json:"access_token,omitempty"`
 	CountryCodes          []string                        `json:"country_codes,omitempty"`
 	Webhook               string                          `json:"webhook,omitempty"`
 	AccountFilters        *map[string]map[string][]string `json:"account_filters,omitempty"`
-	CrossAppItemAdd       CrossAppItemAdd                 `json:"cross_app_item_add,omitempty"`
-	PaymentInitiation     PaymentInitiation               `json:"payment_initiation,omitempty"`
+	CrossAppItemAdd       *CrossAppItemAdd                `json:"cross_app_item_add,omitempty"`
+	PaymentInitiation     *PaymentInitiation              `json:"payment_initiation,omitempty"`
 	Language              string                          `json:"language,omitempty"`
 	Locale                string                          `json:"locale,omitempty"`
 	LinkCustomizationName string                          `json:"link_customization_name,omitempty"`

@@ -10,7 +10,7 @@ import (
 
 func TestCreateLinkTokenRequired(t *testing.T) {
 	linkTokenResp, err := testClient.CreateLinkToken(LinkTokenConfigs{
-		User: LinkTokenUser{
+		User: &LinkTokenUser{
 			ClientUserID: time.Now().String(),
 		},
 		ClientName: "Plaid Test",
@@ -24,7 +24,7 @@ func TestCreateLinkTokenRequired(t *testing.T) {
 
 func TestCreateLinkTokenOptional(t *testing.T) {
 	linkTokenResp, err := testClient.CreateLinkToken(LinkTokenConfigs{
-		User: LinkTokenUser{
+		User: &LinkTokenUser{
 			ClientUserID:             time.Now().String(),
 			LegalName:                "Legal Name",
 			PhoneNumber:              "1234567890",
