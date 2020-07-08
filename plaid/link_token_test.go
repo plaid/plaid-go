@@ -40,7 +40,7 @@ func TestCreateLinkTokenOptional(t *testing.T) {
 		LinkCustomizationName: "default",
 		AccountFilters: &map[string]map[string][]string{
 			"depository": map[string][]string{
-				account_subtypes: []string{"checking", "savings"},
+				"account_subtypes": []string{"checking", "savings"},
 			},
 		},
 	})
