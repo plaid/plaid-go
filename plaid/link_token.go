@@ -38,6 +38,7 @@ type LinkTokenConfigs struct {
 	LinkCustomizationName string                          `json:"link_customization_name,omitempty"`
 	RedirectUri           string                          `json:"redirect_uri,omitempty"`
 	InstitutionId         string                          `json:"institution_id,omitempty"`
+	AndroidPackageName    string                          `json:"android_package_name,omitempty"`
 }
 
 type createLinkTokenRequest struct {
