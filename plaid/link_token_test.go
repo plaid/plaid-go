@@ -22,17 +22,17 @@ func TestCreateLinkTokenRequired(t *testing.T) {
 
 func TestCreateLinkTokenOptional(t *testing.T) {
 	linkTokenResp, err := testClient.CreateLinkToken(LinkTokenConfigs{
-		ClientUserID: time.Now().String(),
-		ClientName:   "Plaid Test",
-		Products:     []string{"auth"},
-		CountryCodes: []string{"US"},
-		Language:     "en",
-		Webhook:      "https://webhook-uri.com",
+		ClientUserID:          time.Now().String(),
+		ClientName:            "Plaid Test",
+		Products:              []string{"auth"},
+		CountryCodes:          []string{"US"},
+		Language:              "en",
+		Webhook:               "https://webhook-uri.com",
 		LinkCustomizationName: "default",
 		AccountFilters: map[string]map[string][]string{
 			"depository": map[string][]string{
 				account_subtypes: []string{"checking", "savings"},
-			}
+			},
 		},
 	})
 
