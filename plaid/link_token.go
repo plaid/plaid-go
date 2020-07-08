@@ -2,7 +2,6 @@ package plaid
 
 import (
 	"encoding/json"
-	"errors"
 	"time"
 )
 
