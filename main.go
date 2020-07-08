@@ -20,7 +20,6 @@ func main() {
 	clientOptions := plaid.ClientOptions{
 		os.Getenv("PLAID_CLIENT_ID"),
 		os.Getenv("PLAID_SECRET"),
-		os.Getenv("PLAID_PUBLIC_KEY"),
 		plaid.Sandbox,
 		&http.Client{},
 	}

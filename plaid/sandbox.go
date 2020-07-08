@@ -8,7 +8,8 @@ import (
 type createSandboxPublicTokenRequest struct {
 	InstitutionID   string   `json:"institution_id"`
 	InitialProducts []string `json:"initial_products"`
-	PublicKey       string   `json:"public_key"`
+	ClientID        string   `json:"client_id"`
+	Secret          string   `json:"secret"`
 }
 
 type CreateSandboxPublicTokenResponse struct {
@@ -47,7 +48,8 @@ func (c *Client) CreateSandboxPublicToken(institutionID string, initialProducts 
 	jsonBody, err := json.Marshal(createSandboxPublicTokenRequest{
 		InstitutionID:   institutionID,
 		InitialProducts: initialProducts,
-		PublicKey:       c.publicKey,
+		ClientID:        c.clientID,
+		Secret:          c.secret,
 	})
 
 	if err != nil {

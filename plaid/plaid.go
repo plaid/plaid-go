@@ -22,7 +22,6 @@ const APIVersion = "2019-05-29"
 type Client struct {
 	clientID    string
 	secret      string
-	publicKey   string
 	environment Environment
 	httpClient  *http.Client
 }
@@ -30,7 +29,6 @@ type Client struct {
 type ClientOptions struct {
 	ClientID    string
 	Secret      string
-	PublicKey   string
 	Environment Environment
 	HTTPClient  *http.Client
 }
@@ -48,7 +46,6 @@ func NewClient(options ClientOptions) (client *Client, err error) {
 	return &Client{
 		clientID:    options.ClientID,
 		secret:      options.Secret,
-		publicKey:   options.PublicKey,
 		environment: options.Environment,
 		httpClient:  options.HTTPClient,
 	}, nil

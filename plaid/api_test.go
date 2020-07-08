@@ -7,10 +7,9 @@ import (
 
 // Credentials and parameters to be used for testing.
 var (
-	testClientID  = os.Getenv("PLAID_CLIENT_ID")
-	testSecret    = os.Getenv("PLAID_SECRET")
-	testPublicKey = os.Getenv("PLAID_PUBLIC_KEY")
-	testEnv       = Sandbox
+	testClientID = os.Getenv("PLAID_CLIENT_ID")
+	testSecret   = os.Getenv("PLAID_SECRET")
+	testEnv      = Sandbox
 
 	sandboxInstitution      = "ins_109508"
 	sandboxInstitutionQuery = "Platypus"
@@ -20,7 +19,6 @@ var (
 var testOptions = ClientOptions{
 	testClientID,
 	testSecret,
-	testPublicKey,
 	testEnv,
 	&http.Client{},
 }
