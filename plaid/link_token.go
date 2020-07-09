@@ -34,10 +34,8 @@ type LinkTokenConfigs struct {
 	CrossAppItemAdd       *CrossAppItemAdd                `json:"cross_app_item_add,omitempty"`
 	PaymentInitiation     *PaymentInitiation              `json:"payment_initiation,omitempty"`
 	Language              string                          `json:"language,omitempty"`
-	Locale                string                          `json:"locale,omitempty"`
 	LinkCustomizationName string                          `json:"link_customization_name,omitempty"`
 	RedirectUri           string                          `json:"redirect_uri,omitempty"`
-	InstitutionId         string                          `json:"institution_id,omitempty"`
 	AndroidPackageName    string                          `json:"android_package_name,omitempty"`
 }
 
