@@ -18,7 +18,7 @@ func TestCreateLinkTokenRequired(t *testing.T) {
 	})
 
 	assert.Nil(t, err)
-	assert.True(t, strings.HasPrefix(linkTokenResp.Token, "link-sandbox"))
+	assert.True(t, strings.HasPrefix(linkTokenResp.LinkToken, "link-sandbox"))
 	assert.NotZero(t, linkTokenResp.Expiration)
 }
 
@@ -46,6 +46,6 @@ func TestCreateLinkTokenOptional(t *testing.T) {
 	})
 
 	assert.Nil(t, err)
-	assert.True(t, strings.HasPrefix(linkTokenResp.Token, "link-sandbox"))
+	assert.True(t, strings.HasPrefix(linkTokenResp.LinkToken, "link-sandbox"))
 	assert.NotZero(t, linkTokenResp.Expiration)
 }
