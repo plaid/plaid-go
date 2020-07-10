@@ -1,3 +1,6 @@
+## 3.2.0
+- `MerchantName` added to the `Transaction` struct
+
 ## 3.1.0
 - `AuthorizedDate` and `PaymentChannel` added to the `Transaction` struct
 - `Item` added to the `GetAuthResponse` struct
