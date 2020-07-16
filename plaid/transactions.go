@@ -17,7 +17,8 @@ type Transaction struct {
 
 	Location Location `json:"location"`
 
-	Name string `json:"name"`
+	MerchantName string `json:"merchant_name"`
+	Name         string `json:"name"`
 
 	PaymentMeta    PaymentMeta `json:"payment_meta"`
 	PaymentChannel string      `json:"payment_channel"`
