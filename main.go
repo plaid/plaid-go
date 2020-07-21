@@ -85,7 +85,7 @@ func main() {
 	fmt.Println("Number of transactions:", len(transactionsResp.Transactions))
 
 	// POST /payment_initiation/recipient/create
-	paymentRecipientCreateResp, err := client.CreatePaymentRecipient("John Doe", "GB33BUKB20201555555555", &plaid.PaymentRecipientAddress{
+	paymentRecipientCreateResp, err := client.CreatePaymentRecipientWithIban("John Doe", "GB33BUKB20201555555555", &plaid.PaymentRecipientAddress{
 		Street:     []string{"Street Name 999"},
 		City:       "City",
 		PostalCode: "99999",

@@ -6,8 +6,8 @@ import (
 	assert "github.com/stretchr/testify/require"
 )
 
-func TestPayment(t *testing.T) {
-	paymentRecipientCreateResp, err := testClient.CreatePaymentRecipient("John Doe", "GB33BUKB20201555555555", &PaymentRecipientAddress{
+func TestPaymentWithIban(t *testing.T) {
+	paymentRecipientCreateResp, err := testClient.CreatePaymentRecipientWithIban("John Doe", "GB33BUKB20201555555555", &PaymentRecipientAddress{
 		Street:     []string{"Street Name 999"},
 		City:       "City",
 		PostalCode: "99999",
@@ -24,6 +24,59 @@ func TestPayment(t *testing.T) {
 	assert.NotNil(t, paymentRecipientGetResp.IBAN)
 	assert.NotNil(t, paymentRecipientGetResp.Address)
 
+	commonPaymentTestFlows(t, recipientID)
+}
+
+func TestPaymentWithBacs(t *testing.T) {
+	paymentRecipientCreateResp, err := testClient.CreatePaymentRecipientWithBacs("John Doe", &PaymentRecipientAddress{
+		Street:     []string{"Street Name 999"},
+		City:       "City",
+		PostalCode: "99999",
+		Country:    "GB",
+	}, &PaymentRecipientBacs{
+		Account:  "12345678",
+		SortCode: "01-02-03",
+	})
+	assert.Nil(t, err)
+	assert.NotNil(t, paymentRecipientCreateResp.RecipientID)
+	recipientID := paymentRecipientCreateResp.RecipientID
+
+	paymentRecipientGetResp, err := testClient.GetPaymentRecipient(paymentRecipientCreateResp.RecipientID)
+	assert.Nil(t, err)
+	assert.NotNil(t, paymentRecipientGetResp.RecipientID)
+	assert.NotNil(t, paymentRecipientGetResp.Name)
+	assert.NotNil(t, paymentRecipientGetResp.BACS)
+	assert.NotNil(t, paymentRecipientGetResp.Address)
+
+	commonPaymentTestFlows(t, recipientID)
+}
+
+func TestPaymentWithBacsAndIban(t *testing.T) {
+	paymentRecipientCreateResp, err := testClient.CreatePaymentRecipientWithBacsAndIban("John Doe", "GB33BUKB20201555555555", &PaymentRecipientAddress{
+		Street:     []string{"Street Name 999"},
+		City:       "City",
+		PostalCode: "99999",
+		Country:    "GB",
+	}, &PaymentRecipientBacs{
+		Account:  "12345678",
+		SortCode: "01-02-03",
+	})
+	assert.Nil(t, err)
+	assert.NotNil(t, paymentRecipientCreateResp.RecipientID)
+	recipientID := paymentRecipientCreateResp.RecipientID
+
+	paymentRecipientGetResp, err := testClient.GetPaymentRecipient(paymentRecipientCreateResp.RecipientID)
+	assert.Nil(t, err)
+	assert.NotNil(t, paymentRecipientGetResp.RecipientID)
+	assert.NotNil(t, paymentRecipientGetResp.Name)
+	assert.NotNil(t, paymentRecipientGetResp.IBAN)
+	assert.NotNil(t, paymentRecipientGetResp.BACS)
+	assert.NotNil(t, paymentRecipientGetResp.Address)
+
+	commonPaymentTestFlows(t, recipientID)
+}
+
+func commonPaymentTestFlows(t *testing.T, recipientID string) {
 	paymentRecipientListResp, err := testClient.ListPaymentRecipients()
 	assert.Nil(t, err)
 	assert.True(t, len(paymentRecipientListResp.Recipients) > 0)
