@@ -13,8 +13,10 @@ func TestCreateLinkTokenRequired(t *testing.T) {
 		User: &LinkTokenUser{
 			ClientUserID: time.Now().String(),
 		},
-		ClientName: "Plaid Test",
-		Products:   []string{"auth"},
+		ClientName:   "Plaid Test",
+		Products:     []string{"auth"},
+		CountryCodes: []string{"US"},
+		Language:     "en",
 	})
 
 	assert.Nil(t, err)
