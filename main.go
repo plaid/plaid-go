@@ -84,12 +84,12 @@ func main() {
 	}
 	fmt.Println("Number of transactions:", len(transactionsResp.Transactions))
 
-	params := OptionalRecipientCreateParams{
-		BACS: &PaymentRecipientBacs{
+	params := plaid.OptionalRecipientCreateParams{
+		BACS: &plaid.PaymentRecipientBacs{
 			Account:  "12345678",
 			SortCode: "01-02-03",
 		},
-		Address: &PaymentRecipientAddress{
+		Address: &plaid.PaymentRecipientAddress{
 			Street:     []string{"Street Name 999"},
 			City:       "City",
 			PostalCode: "99999",
