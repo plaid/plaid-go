@@ -45,7 +45,7 @@ func TestPaymentWithBacs(t *testing.T) {
 			Country:    "GB",
 		},
 	}
-	paymentRecipientCreateResp, err := testClient.CreatePaymentRecipientWithBacs("John Doe", params)
+	paymentRecipientCreateResp, err := testClient.CreatePaymentRecipient("John Doe", params)
 	assert.Nil(t, err)
 	assert.NotNil(t, paymentRecipientCreateResp.RecipientID)
 	recipientID := paymentRecipientCreateResp.RecipientID
@@ -76,7 +76,7 @@ func TestPaymentWithBacsAndIban(t *testing.T) {
 		},
 		IBAN: &iban,
 	}
-	paymentRecipientCreateResp, err := testClient.CreatePaymentRecipientWithBacsAndIban("John Doe", params)
+	paymentRecipientCreateResp, err := testClient.CreatePaymentRecipient("John Doe", params)
 	assert.Nil(t, err)
 	assert.NotNil(t, paymentRecipientCreateResp.RecipientID)
 	recipientID := paymentRecipientCreateResp.RecipientID
