@@ -19,8 +19,8 @@ type createPaymentRecipientRequest struct {
 	Secret   string                   `json:"secret"`
 	Name     string                   `json:"name"`
 	IBAN     *string                  `json:"iban",omitempty`
-	Address  *PaymentRecipientAddress `json:"address,omitempty"`
-	BACS     *PaymentRecipientBacs    `json:bacs,omitempty`
+	Address  *PaymentRecipientAddress `json:"address",omitempty`
+	BACS     *PaymentRecipientBacs    `json:"bacs",omitempty`
 }
 
 type OptionalRecipientCreateParams struct {
