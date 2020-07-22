@@ -84,13 +84,21 @@ func main() {
 	}
 	fmt.Println("Number of transactions:", len(transactionsResp.Transactions))
 
+	params := OptionalRecipientCreateParams{
+		BACS: &PaymentRecipientBacs{
+			Account:  "12345678",
+			SortCode: "01-02-03",
+		},
+		Address: &PaymentRecipientAddress{
+			Street:     []string{"Street Name 999"},
+			City:       "City",
+			PostalCode: "99999",
+			Country:    "GB",
+		},
+	}
+
 	// POST /payment_initiation/recipient/create
-	paymentRecipientCreateResp, err := client.CreatePaymentRecipientWithIban("John Doe", "GB33BUKB20201555555555", &plaid.PaymentRecipientAddress{
-		Street:     []string{"Street Name 999"},
-		City:       "City",
-		PostalCode: "99999",
-		Country:    "GB",
-	})
+	paymentRecipientCreateResp, err := client.CreatePaymentRecipient("John Doe", params)
 	handleError(err)
 	fmt.Println("Recipient ID:", paymentRecipientCreateResp.RecipientID)
 

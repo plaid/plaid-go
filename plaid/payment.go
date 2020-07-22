@@ -14,32 +14,24 @@ type PaymentRecipientAddress struct {
 	Country string `json:"country"`
 }
 
-type PaymentRecipientBacs struct {
-	Account  string `json:"account"`
-	SortCode string `json:"sort_code"`
-}
-
-type paymentRecipientRequestWithIban struct {
-	BaseCreatePaymentRecipientRequest
-	IBAN string `json:"iban"`
-}
-
-type paymentRecipientRequestWithBacs struct {
-	BaseCreatePaymentRecipientRequest
-	BACS *PaymentRecipientBacs `json:"bacs"`
-}
-
-type paymentRecipientRequestWithBacsAndIban struct {
-	BaseCreatePaymentRecipientRequest
-	BACS *PaymentRecipientBacs `json:"bacs"`
-	IBAN string                `json:"iban"`
-}
-
-type BaseCreatePaymentRecipientRequest struct {
+type createPaymentRecipientRequest struct {
 	ClientID string                   `json:"client_id"`
 	Secret   string                   `json:"secret"`
 	Name     string                   `json:"name"`
+	IBAN     *string                  `json:"iban",omitempty`
 	Address  *PaymentRecipientAddress `json:"address,omitempty"`
+	BACS     *PaymentRecipientBacs    `json:bacs,omitempty`
+}
+
+type OptionalRecipientCreateParams struct {
+	Address *PaymentRecipientAddress
+	BACS    *PaymentRecipientBacs
+	IBAN    *string
+}
+
+type PaymentRecipientBacs struct {
+	Account  string `json:"account"`
+	SortCode string `json:"sort_code"`
 }
 
 type CreatePaymentRecipientResponse struct {
@@ -47,68 +39,17 @@ type CreatePaymentRecipientResponse struct {
 	RecipientID string `json:"recipient_id"`
 }
 
-func (c *Client) CreatePaymentRecipientWithIban(
+func (c *Client) CreatePaymentRecipient(
 	name string,
-	iban string,
-	address *PaymentRecipientAddress,
+	params OptionalRecipientCreateParams,
 ) (resp CreatePaymentRecipientResponse, err error) {
-	jsonBody, err := json.Marshal(paymentRecipientRequestWithIban{
-		BaseCreatePaymentRecipientRequest: BaseCreatePaymentRecipientRequest{
-			ClientID: c.clientID,
-			Secret:   c.secret,
-			Name:     name,
-			Address:  address,
-		},
-		IBAN: iban,
-	})
-
-	if err != nil {
-		return resp, err
-	}
-
-	err = c.Call("/payment_initiation/recipient/create", jsonBody, &resp)
-	return resp, err
-}
-
-func (c *Client) CreatePaymentRecipientWithBacs(
-	name string,
-	address *PaymentRecipientAddress,
-	bacs *PaymentRecipientBacs,
-) (resp CreatePaymentRecipientResponse, err error) {
-	jsonBody, err := json.Marshal(paymentRecipientRequestWithBacs{
-		BaseCreatePaymentRecipientRequest: BaseCreatePaymentRecipientRequest{
-			ClientID: c.clientID,
-			Secret:   c.secret,
-			Name:     name,
-
-			Address: address,
-		},
-		BACS: bacs},
-	)
-
-	if err != nil {
-		return resp, err
-	}
-
-	err = c.Call("/payment_initiation/recipient/create", jsonBody, &resp)
-	return resp, err
-}
-
-func (c *Client) CreatePaymentRecipientWithBacsAndIban(
-	name string,
-	iban string,
-	address *PaymentRecipientAddress,
-	bacs *PaymentRecipientBacs,
-) (resp CreatePaymentRecipientResponse, err error) {
-	jsonBody, err := json.Marshal(paymentRecipientRequestWithBacsAndIban{
-		BaseCreatePaymentRecipientRequest: BaseCreatePaymentRecipientRequest{
-			ClientID: c.clientID,
-			Secret:   c.secret,
-			Name:     name,
-			Address:  address,
-		},
-		BACS: bacs,
-		IBAN: iban,
+	jsonBody, err := json.Marshal(createPaymentRecipientRequest{
+		ClientID: c.clientID,
+		Secret:   c.secret,
+		Name:     name,
+		Address:  params.Address,
+		IBAN:     params.IBAN,
+		BACS:     params.BACS,
 	})
 
 	if err != nil {
