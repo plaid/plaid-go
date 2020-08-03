@@ -2,7 +2,7 @@
 
 BREAKING CHANGES:
 
-- Add BACS as a parameter to /recipient/create ([#137](https://github.com/plaid/plaid-go/pull/137))
+- Add BACS as a parameter to `/recipient/create` ([#137](https://github.com/plaid/plaid-go/pull/137))
 
 ## 4.0.0
 
