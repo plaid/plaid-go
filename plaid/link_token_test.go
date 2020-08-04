@@ -29,7 +29,7 @@ func TestCreateLinkTokenOptional(t *testing.T) {
 		User: &LinkTokenUser{
 			ClientUserID:             time.Now().String(),
 			LegalName:                "Legal Name",
-			PhoneNumber:              "1234567890",
+			PhoneNumber:              "2025550165",
 			EmailAddress:             "test@email.com",
 			PhoneNumberVerifiedTime:  time.Now(),
 			EmailAddressVerifiedTime: time.Now(),
