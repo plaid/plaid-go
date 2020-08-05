@@ -96,7 +96,32 @@ type createItemAddTokenRequest struct {
 }
 
 type ItemAddTokenUserFields struct {
-	ClientUserID string `json:"client_user_id"`
+	LegalName    string `json:"legal_name,omitempty"`
+	EmailAddress string `json:"email_address,omitempty"`
+	PhoneNumber  string `json:"phone_number,omitempty"`
+	// See FieldVerified
+	EmailAddressVerified *FieldVerified `json:"email_address_verified_time,omitempty"`
+	// See FieldVerified
+	PhoneNumberVerified *FieldVerified `json:"phone_number_verified_time,omitempty"`
+	ClientUserID        string         `json:"client_user_id"`
+}
+
+// FieldVerified indicates that this field has been verified if non-nil (e.g email
+// address ownership verified by user acting on a verification email).
+// Supply a time if the time the verification occurred is known
+type FieldVerified struct {
+	At *time.Time
+}
+
+// signal value that indicates the email/phone was verified, but the
+// time of verification was not supplied.
+var verificationDateUnknown = []byte(`"1970-01-01T00:00:00Z"`)
+
+func (v FieldVerified) MarshalJSON() ([]byte, error) {
+	if v.At == nil {
+		return verificationDateUnknown, nil
+	}
+	return json.Marshal(v.At)
 }
 
 type CreateItemAddTokenResponse struct {
@@ -243,6 +268,10 @@ func (c *Client) CreatePublicToken(accessToken string) (resp CreatePublicTokenRe
 }
 
 // CreateItemAddToken generates a token which is used to initialize Link.
+//
+// You can optionally supply identity fields you know, and may have verified,
+// for the user. This will allow us to optimise their experience if we have seen
+// them before.
 func (c *Client) CreateItemAddToken(userFields ItemAddTokenUserFields) (resp CreateItemAddTokenResponse, err error) {
 	jsonBody, err := json.Marshal(createItemAddTokenRequest{
 		ClientID:   c.clientID,
