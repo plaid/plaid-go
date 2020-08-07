@@ -17,6 +17,9 @@ func TestGetInstitutions(t *testing.T) {
 			CountryCodes: []string{"GB"},
 			OAuth:        &oauthTrue,
 		},
+		GetInstitutionsOptions{
+			RoutingNumbers: []string{"011000138"}, // ins_1
+		},
 	} {
 		t.Run(fmt.Sprintf("%#v", options), func(t *testing.T) {
 			instsResp, err := testClient.GetInstitutionsWithOptions(2, 1, options)
@@ -32,9 +35,16 @@ func TestGetInstitutions(t *testing.T) {
 					assert.NotEmpty(t, inst.URL)
 				}
 			}
+
 			if options.OAuth != nil {
 				for _, inst := range instsResp.Institutions {
 					assert.Equal(t, inst.OAuth, *options.OAuth)
+				}
+			}
+
+			if options.RoutingNumbers != nil {
+				for _, inst := range instsResp.Institutions {
+					assert.Equal(t, inst.ID, "ins_1")
 				}
 			}
 		})
