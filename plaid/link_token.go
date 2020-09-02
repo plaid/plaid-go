@@ -46,6 +46,7 @@ type createLinkTokenRequest struct {
 }
 
 type CreateLinkTokenResponse struct {
+	APIResponse
 	LinkToken  string    `json:"link_token"`
 	Expiration time.Time `json:"expiration"`
 }
