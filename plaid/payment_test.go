@@ -36,7 +36,7 @@ func TestPaymentWithBacs(t *testing.T) {
 	params := OptionalRecipientCreateParams{
 		BACS: &PaymentRecipientBacs{
 			Account:  "12345678",
-			SortCode: "01-02-03",
+			SortCode: "010203",
 		},
 		Address: &PaymentRecipientAddress{
 			Street:     []string{"Street Name 999"},
