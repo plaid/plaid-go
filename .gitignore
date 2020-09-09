@@ -4,3 +4,4 @@ bin
 
 go.mod
 go.sum
+.idea
