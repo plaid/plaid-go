@@ -69,8 +69,8 @@ type GetLinkTokenMetadataResponse struct {
 type GetLinkTokenResponse struct {
 	APIResponse
 	LinkToken  string                       `json:"link_token"`
-	CreatedAt  string                       `json:"created_at"`
-	Expiration string                       `json:"expiration"`
+	CreatedAt  time.Time                    `json:"created_at"`
+	Expiration time.Time                    `json:"expiration"`
 	Metadata   GetLinkTokenMetadataResponse `json:"metadata"`
 }
 
