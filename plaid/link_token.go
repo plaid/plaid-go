@@ -45,10 +45,33 @@ type createLinkTokenRequest struct {
 	LinkTokenConfigs
 }
 
+type getLinkTokenRequest struct {
+	ClientID  string `json:"client_id"`
+	Secret    string `json:"secret"`
+	LinkToken string `json:"link_token"`
+}
+
 type CreateLinkTokenResponse struct {
 	APIResponse
 	LinkToken  string    `json:"link_token"`
 	Expiration time.Time `json:"expiration"`
+}
+
+type GetLinkTokenMetadataResponse struct {
+	InitialProducts []string                        `json:"initial_products"`
+	Webhook         string                          `json:"webhook"`
+	CountryCodes    []string                        `json:"country_codes"`
+	Language        string                          `json:"language"`
+	AccountFilters  *map[string]map[string][]string `json:"account_filters"`
+	RedirectURI     string                          `json:"redirect_uri"`
+	ClientName      string                          `json:"client_name"`
+}
+type GetLinkTokenResponse struct {
+	APIResponse
+	LinkToken  string                       `json:"link_token"`
+	CreatedAt  time.Time                    `json:"created_at"`
+	Expiration time.Time                    `json:"expiration"`
+	Metadata   GetLinkTokenMetadataResponse `json:"metadata"`
 }
 
 func (c *Client) CreateLinkToken(configs LinkTokenConfigs) (resp CreateLinkTokenResponse, err error) {
@@ -63,5 +86,20 @@ func (c *Client) CreateLinkToken(configs LinkTokenConfigs) (resp CreateLinkToken
 	}
 
 	err = c.Call("/link/token/create", jsonBody, &resp)
+	return resp, err
+}
+
+func (c *Client) GetLinkToken(linkToken string) (resp GetLinkTokenResponse, err error) {
+	jsonBody, err := json.Marshal(getLinkTokenRequest{
+		ClientID:  c.clientID,
+		Secret:    c.secret,
+		LinkToken: linkToken,
+	})
+
+	if err != nil {
+		return resp, err
+	}
+
+	err = c.Call("/link/token/get", jsonBody, &resp)
 	return resp, err
 }
