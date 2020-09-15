@@ -43,9 +43,8 @@ func TestGetInstitutions(t *testing.T) {
 			}
 
 			if options.RoutingNumbers != nil {
-				for _, inst := range instsResp.Institutions {
-					assert.Equal(t, inst.ID, "ins_1")
-				}
+				assert.Equal(t, len(instsResp.Institutions), 1)
+				assert.NotEmpty(t, instsResp.Institutions[0].ID)
 			}
 		})
 	}
