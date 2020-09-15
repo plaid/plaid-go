@@ -1,3 +1,8 @@
+## 5.1.0
+
+- Add support for Link Token get endpoint ([#142](https://github.com/plaid/plaid-go/pull/142))
+  - `/link/token/get`
+
 ## 5.0.0
 
 BREAKING CHANGES:
