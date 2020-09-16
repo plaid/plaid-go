@@ -25,6 +25,8 @@ type Institution struct {
 	URL string `json:"url,omitempty"`
 	// Included when `options.include_optional_metadata` is true.
 	Logo string `json:"logo,omitempty"`
+	// Included when `options.routing_numbers` is passed.
+	RoutingNumbers string `json:"routing_numbers,omitempty"`
 }
 
 type InstitutionStatus struct {
@@ -73,6 +75,7 @@ type GetInstitutionsOptions struct {
 	IncludeOptionalMetadata bool     `json:"include_optional_metadata"`
 	CountryCodes            []string `json:"country_codes"`
 	OAuth                   *bool    `json:"oauth"`
+	RoutingNumbers          []string `json:"routing_numbers"`
 }
 
 type GetInstitutionsResponse struct {
