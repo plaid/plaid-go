@@ -107,19 +107,31 @@ func commonPaymentTestFlows(t *testing.T, recipientID string) {
 	paymentID := paymentCreateResp.PaymentID
 
 	paymentTokenCreateResp, err := testClient.CreatePaymentToken(paymentID)
+
+	linkTokenCreateResp, err := testClient.CreateLinkToken(LinkTokenConfigs{
+		User: &LinkTokenUser{
+			ClientUserID: time.Now().String(),
+		},
+		ClientName:   "Plaid Test",
+		Products:     []string{"auth"},
+		CountryCodes: []string{"US"},
+		Language:     "en",
+		PaymentInitiation: PaymentInitiation{
+			PaymentID: paymentID,
+		},
+	})
+
 	assert.Nil(t, err)
-	assert.NotNil(t, paymentTokenCreateResp.PaymentToken)
-	assert.NotNil(t, paymentTokenCreateResp.PaymentTokenExpirationTime)
+	assert.NotNil(t, linkTokenCreateResp.LinkToken)
+	assert.NotNil(t, linkTokenCreateResp.Expiration)
 
 	paymentGetResp, err := testClient.GetPayment(paymentCreateResp.PaymentID)
 	assert.Nil(t, err)
 	assert.NotNil(t, paymentGetResp.PaymentID)
-	assert.NotNil(t, paymentGetResp.PaymentToken)
 	assert.NotNil(t, paymentGetResp.Reference)
 	assert.NotNil(t, paymentGetResp.Amount)
 	assert.NotNil(t, paymentGetResp.Status)
 	assert.NotNil(t, paymentGetResp.LastStatusUpdate)
-	assert.NotNil(t, paymentGetResp.PaymentTokenExpirationTime)
 	assert.NotNil(t, paymentGetResp.RecipientID)
 
 	count := 10

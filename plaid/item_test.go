@@ -33,7 +33,6 @@ func TestRemoveItem(t *testing.T) {
 	itemResp, err := testClient.RemoveItem(tokenResp.AccessToken)
 
 	assert.Nil(t, err)
-	assert.True(t, itemResp.Removed)
 }
 
 func TestUpdateItemWebhook(t *testing.T) {
@@ -53,26 +52,6 @@ func TestInvalidateAccessToken(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, newTokenResp.NewAccessToken)
-}
-
-func TestCreatePublicToken(t *testing.T) {
-	sandboxResp, _ := testClient.CreateSandboxPublicToken(sandboxInstitution, testProducts)
-	tokenResp, _ := testClient.ExchangePublicToken(sandboxResp.PublicToken)
-	publicTokenResp, err := testClient.CreatePublicToken(tokenResp.AccessToken)
-
-	assert.Nil(t, err)
-	assert.True(t, strings.HasPrefix(publicTokenResp.PublicToken, "public-sandbox"))
-}
-
-func TestCreateItemAddToken(t *testing.T) {
-	fakeClientUserID, _ := randomHex(12)
-	itemAddTokenResp, err := testClient.CreateItemAddToken(ItemAddTokenUserFields{
-		ClientUserID: fakeClientUserID,
-	})
-
-	assert.Nil(t, err)
-	assert.True(t, strings.HasPrefix(itemAddTokenResp.AddToken, "item-add-sandbox"))
-	assert.NotZero(t, itemAddTokenResp.Expiration)
 }
 
 func TestExchangePublicToken(t *testing.T) {
