@@ -115,11 +115,6 @@ func main() {
 	handleError(err)
 	fmt.Println("Payment ID:", paymentCreateResp.PaymentID)
 
-	// POST /payment_initiation/payment/token/create
-	paymentTokenCreateResp, err := client.CreatePaymentToken(paymentCreateResp.PaymentID)
-	handleError(err)
-	fmt.Println("Payment Token:", paymentTokenCreateResp.PaymentToken)
-
 	// POST /payment_initiation/payment/get
 	paymentGetResp, err := client.GetPayment(paymentCreateResp.PaymentID)
 	handleError(err)

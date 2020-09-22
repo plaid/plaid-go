@@ -2,6 +2,7 @@ package plaid
 
 import (
 	"testing"
+	"time"
 
 	assert "github.com/stretchr/testify/require"
 )
@@ -106,8 +107,6 @@ func commonPaymentTestFlows(t *testing.T, recipientID string) {
 	assert.NotNil(t, paymentCreateResp.Status)
 	paymentID := paymentCreateResp.PaymentID
 
-	paymentTokenCreateResp, err := testClient.CreatePaymentToken(paymentID)
-
 	linkTokenCreateResp, err := testClient.CreateLinkToken(LinkTokenConfigs{
 		User: &LinkTokenUser{
 			ClientUserID: time.Now().String(),
@@ -116,7 +115,7 @@ func commonPaymentTestFlows(t *testing.T, recipientID string) {
 		Products:     []string{"payment_initiation"},
 		CountryCodes: []string{"US"},
 		Language:     "en",
-		PaymentInitiation: PaymentInitiation{
+		PaymentInitiation: &PaymentInitiation{
 			PaymentID: paymentID,
 		},
 	})
