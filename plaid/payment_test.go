@@ -113,7 +113,7 @@ func commonPaymentTestFlows(t *testing.T, recipientID string) {
 			ClientUserID: time.Now().String(),
 		},
 		ClientName:   "Plaid Test",
-		Products:     []string{"auth"},
+		Products:     []string{"payment_initiation"},
 		CountryCodes: []string{"US"},
 		Language:     "en",
 		PaymentInitiation: PaymentInitiation{
