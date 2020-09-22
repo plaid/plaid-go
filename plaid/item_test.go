@@ -30,7 +30,7 @@ func TestGetItem(t *testing.T) {
 func TestRemoveItem(t *testing.T) {
 	sandboxResp, _ := testClient.CreateSandboxPublicToken(sandboxInstitution, testProducts)
 	tokenResp, _ := testClient.ExchangePublicToken(sandboxResp.PublicToken)
-	itemResp, err := testClient.RemoveItem(tokenResp.AccessToken)
+	_, err := testClient.RemoveItem(tokenResp.AccessToken)
 
 	assert.Nil(t, err)
 }
