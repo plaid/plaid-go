@@ -17,7 +17,7 @@ func TestGetInstitutions(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("%#v", options), func(t *testing.T) {
 			countryCodes := []string{"US"}
-			if options.OAuth == true {
+			if *options.OAuth == true {
 				countryCodes = []string{"GB"}
 			}
 			instsResp, err := testClient.GetInstitutionsWithOptions(2, 1, countryCodes, options)
@@ -47,13 +47,13 @@ func TestSearchInstitutions(t *testing.T) {
 		SearchInstitutionsOptions{},
 		SearchInstitutionsOptions{IncludeOptionalMetadata: true},
 		SearchInstitutionsOptions{
-			OAuth:        &oauthTrue,
+			OAuth: &oauthTrue,
 		},
 	} {
 		t.Run(fmt.Sprintf("%#v", options), func(t *testing.T) {
 			p := []string{"transactions"}
 			countryCodes := []string{"US"}
-			if options.OAuth == true {
+			if *options.OAuth == true {
 				countryCodes = []string{"GB"}
 			}
 			instsResp, err := testClient.SearchInstitutionsWithOptions(sandboxInstitutionQuery, p, countryCodes, options)
