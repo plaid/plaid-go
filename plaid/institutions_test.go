@@ -13,13 +13,14 @@ func TestGetInstitutions(t *testing.T) {
 	for _, options := range []GetInstitutionsOptions{
 		GetInstitutionsOptions{},
 		GetInstitutionsOptions{IncludeOptionalMetadata: true},
-		GetInstitutionsOptions{
-			CountryCodes: []string{"GB"},
-			OAuth:        &oauthTrue,
-		},
+		GetInstitutionsOptions{OAuth: &oauthTrue},
 	} {
 		t.Run(fmt.Sprintf("%#v", options), func(t *testing.T) {
-			instsResp, err := testClient.GetInstitutionsWithOptions(2, 1, options)
+			countryCodes := []string{"US"}
+			if options.OAuth == true {
+				countryCodes = []string["GB"]
+			}
+			instsResp, err := testClient.GetInstitutionsWithOptions(2, 1, countryCodes, options)
 			assert.Nil(t, err)
 
 			assert.Len(t, instsResp.Institutions, 2)
@@ -46,13 +47,16 @@ func TestSearchInstitutions(t *testing.T) {
 		SearchInstitutionsOptions{},
 		SearchInstitutionsOptions{IncludeOptionalMetadata: true},
 		SearchInstitutionsOptions{
-			CountryCodes: []string{"GB"},
 			OAuth:        &oauthTrue,
 		},
 	} {
 		t.Run(fmt.Sprintf("%#v", options), func(t *testing.T) {
 			p := []string{"transactions"}
-			instsResp, err := testClient.SearchInstitutionsWithOptions(sandboxInstitutionQuery, p, options)
+			countryCodes := []string{"US"}
+			if options.OAuth == true {
+				countryCodes = []string["GB"]
+			}
+			instsResp, err := testClient.SearchInstitutionsWithOptions(sandboxInstitutionQuery, p, countryCodes, options)
 			assert.Nil(t, err)
 			assert.True(t, len(instsResp.Institutions) > 0)
 
@@ -78,8 +82,8 @@ func TestGetInstitutionsByID(t *testing.T) {
 		t.Run(fmt.Sprintf("%#v", options), func(t *testing.T) {
 			// can't use the normal sandbox institution because it only returns the ItemLogins status.
 			institutionID := "ins_12"
-
-			instResp, err := testClient.GetInstitutionByIDWithOptions(institutionID, options)
+			countryCodes := []string{"US"}
+			instResp, err := testClient.GetInstitutionByIDWithOptions(institutionID, countryCodes, options)
 			assert.Nil(t, err)
 			assert.True(t, len(instResp.Institution.Products) > 0)
 
