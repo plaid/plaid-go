@@ -137,10 +137,7 @@ func TestGetInstitutionsByID(t *testing.T) {
 			options:      GetInstitutionByIDOptions{},
 		},
 	}
-	for _, options := range []GetInstitutionByIDOptions{
-		GetInstitutionByIDOptions{},
-		GetInstitutionByIDOptions{IncludeOptionalMetadata: true},
-	} {
+	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
 			// can't use the normal sandbox institution because it only returns the ItemLogins status.
 			institutionID := "ins_12"
