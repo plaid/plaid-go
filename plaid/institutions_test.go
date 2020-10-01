@@ -1,7 +1,6 @@
 package plaid
 
 import (
-	"fmt"
 	"testing"
 
 	assert "github.com/stretchr/testify/require"
@@ -37,8 +36,8 @@ func TestGetInstitutions(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
-		t.Run(fmt.Sprintf("%#v", options), func(t *testing.T) {
-			instsResp, err := testClient.GetInstitutionsWithOptions(2, 1, tc.countryCodes, options)
+		t.Run(tc.desc, func(t *testing.T) {
+			instsResp, err := testClient.GetInstitutionsWithOptions(2, 1, tc.countryCodes, tc.options)
 			if len(tc.countryCodes) == 0 {
 				assert.NotNil(t, err)
 			} else {
@@ -92,9 +91,9 @@ func TestSearchInstitutions(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
-		t.Run(fmt.Sprintf("%#v", options), func(t *testing.T) {
+		t.Run(tc.desc, func(t *testing.T) {
 			p := []string{"transactions"}
-			instsResp, err := testClient.SearchInstitutionsWithOptions(sandboxInstitutionQuery, p, tc.countryCodes, options)
+			instsResp, err := testClient.SearchInstitutionsWithOptions(sandboxInstitutionQuery, p, tc.countryCodes, tc.options)
 			if len(tc.countryCodes) == 0 {
 				assert.NotNil(t, err)
 			} else {
@@ -142,10 +141,10 @@ func TestGetInstitutionsByID(t *testing.T) {
 		GetInstitutionByIDOptions{},
 		GetInstitutionByIDOptions{IncludeOptionalMetadata: true},
 	} {
-		t.Run(fmt.Sprintf("%#v", options), func(t *testing.T) {
+		t.Run(tc.desc, func(t *testing.T) {
 			// can't use the normal sandbox institution because it only returns the ItemLogins status.
 			institutionID := "ins_12"
-			instResp, err := testClient.GetInstitutionByIDWithOptions(institutionID, tc.countryCodes, options)
+			instResp, err := testClient.GetInstitutionByIDWithOptions(institutionID, tc.countryCodes, tc.options)
 			if len(tc.countryCodes) == 0 {
 				assert.NotNil(t, err)
 			} else {
