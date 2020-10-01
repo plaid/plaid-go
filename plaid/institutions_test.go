@@ -11,35 +11,35 @@ var oauthTrue = true
 
 func TestGetInstitutions(t *testing.T) {
 	testCases := []struct {
-		desc string
+		desc         string
 		countryCodes []string
-		options GetInstitutionsOptions
+		options      GetInstitutionsOptions
 	}{
 		{
-			desc: "succeeds without options",
+			desc:         "succeeds without options",
 			countryCodes: []string{"US"},
-			options: GetInstitutionsOptions{},
+			options:      GetInstitutionsOptions{},
 		},
 		{
-			desc: "succeeds with optional metadata",
+			desc:         "succeeds with optional metadata",
 			countryCodes: []string{"US"},
-			options: GetInstitutionsOptions{IncludeOptionalMetadata: true},
+			options:      GetInstitutionsOptions{IncludeOptionalMetadata: true},
 		},
 		{
-			desc: "succeeds for oauth institutions",
+			desc:         "succeeds for oauth institutions",
 			countryCodes: []string{"GB"},
-			options: GetInstitutionsOptions{OAuth: &oauthTrue},
+			options:      GetInstitutionsOptions{OAuth: &oauthTrue},
 		},
 		{
-			desc: "errors without country codes",
+			desc:         "errors without country codes",
 			countryCodes: []string{},
-			options: GetInstitutionsOptions{},
-		}
+			options:      GetInstitutionsOptions{},
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("%#v", options), func(t *testing.T) {
 			instsResp, err := testClient.GetInstitutionsWithOptions(2, 1, tc.countryCodes, options)
-			if (len(tc.countryCodes) == 0){
+			if len(tc.countryCodes) == 0 {
 				assert.NotNil(t, err)
 			} else {
 				assert.Nil(t, err)
@@ -66,36 +66,36 @@ func TestGetInstitutions(t *testing.T) {
 
 func TestSearchInstitutions(t *testing.T) {
 	testCases := []struct {
-		desc string
+		desc         string
 		countryCodes []string
-		options SearchInstitutionsOptions
+		options      SearchInstitutionsOptions
 	}{
 		{
-			desc: "succeeds without options",
+			desc:         "succeeds without options",
 			countryCodes: []string{"US"},
-			options: SearchInstitutionsOptions{},
+			options:      SearchInstitutionsOptions{},
 		},
 		{
-			desc: "succeeds with optional metadata",
+			desc:         "succeeds with optional metadata",
 			countryCodes: []string{"US"},
-			options: SearchInstitutionsOptions{IncludeOptionalMetadata: true},
+			options:      SearchInstitutionsOptions{IncludeOptionalMetadata: true},
 		},
 		{
-			desc: "succeeds for oauth institutions",
+			desc:         "succeeds for oauth institutions",
 			countryCodes: []string{"GB"},
-			options: SearchInstitutionsOptions{OAuth: &oauthTrue},
+			options:      SearchInstitutionsOptions{OAuth: &oauthTrue},
 		},
 		{
-			desc: "errors without country codes",
+			desc:         "errors without country codes",
 			countryCodes: []string{},
-			options: SearchInstitutionsOptions{},
-		}
+			options:      SearchInstitutionsOptions{},
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("%#v", options), func(t *testing.T) {
 			p := []string{"transactions"}
 			instsResp, err := testClient.SearchInstitutionsWithOptions(sandboxInstitutionQuery, p, tc.countryCodes, options)
-			if (len(tc.countryCodes) == 0){
+			if len(tc.countryCodes) == 0 {
 				assert.NotNil(t, err)
 			} else {
 				assert.Nil(t, err)
@@ -118,25 +118,25 @@ func TestSearchInstitutions(t *testing.T) {
 
 func TestGetInstitutionsByID(t *testing.T) {
 	testCases := []struct {
-		desc string
+		desc         string
 		countryCodes []string
-		options GetInstitutionByIDOptions
+		options      GetInstitutionByIDOptions
 	}{
 		{
-			desc: "succeeds without options",
+			desc:         "succeeds without options",
 			countryCodes: []string{"US"},
-			options: GetInstitutionByIDOptions{},
+			options:      GetInstitutionByIDOptions{},
 		},
 		{
-			desc: "succeeds with optional metadata",
+			desc:         "succeeds with optional metadata",
 			countryCodes: []string{"US"},
-			options: GetInstitutionByIDOptions{IncludeOptionalMetadata: true},
+			options:      GetInstitutionByIDOptions{IncludeOptionalMetadata: true},
 		},
 		{
-			desc: "errors without country codes",
+			desc:         "errors without country codes",
 			countryCodes: []string{},
-			options: GetInstitutionByIDOptions{},
-		}
+			options:      GetInstitutionByIDOptions{},
+		},
 	}
 	for _, options := range []GetInstitutionByIDOptions{
 		GetInstitutionByIDOptions{},
@@ -146,7 +146,7 @@ func TestGetInstitutionsByID(t *testing.T) {
 			// can't use the normal sandbox institution because it only returns the ItemLogins status.
 			institutionID := "ins_12"
 			instResp, err := testClient.GetInstitutionByIDWithOptions(institutionID, tc.countryCodes, options)
-			if (len(tc.countryCodes) == 0){
+			if len(tc.countryCodes) == 0 {
 				assert.NotNil(t, err)
 			} else {
 				assert.Nil(t, err)
