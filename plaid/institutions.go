@@ -139,10 +139,6 @@ func (c *Client) GetInstitutionByIDWithOptions(
 		return resp, errors.New("/institutions/get_by_id - institution id must be specified")
 	}
 
-	if len(countryCodes) == 0 {
-		return resp, errors.New("/institutions/get_by_id - country codes must be specified")
-	}
-
 	jsonBody, err := json.Marshal(getInstitutionByIDRequest{
 		ID:           id,
 		CountryCodes: countryCodes,
@@ -175,10 +171,6 @@ func (c *Client) GetInstitutionsWithOptions(
 ) (resp GetInstitutionsResponse, err error) {
 	if count == 0 {
 		count = 50
-	}
-
-	if len(countryCodes) == 0 {
-		return resp, errors.New("/institutions/get - country codes must be specified")
 	}
 
 	jsonBody, err := json.Marshal(getInstitutionsRequest{
@@ -220,10 +212,6 @@ func (c *Client) SearchInstitutionsWithOptions(
 ) (resp SearchInstitutionsResponse, err error) {
 	if query == "" {
 		return resp, errors.New("/institutions/search - query must be specified")
-	}
-
-	if len(countryCodes) == 0 {
-		return resp, errors.New("/institutions/search - country codes must be specified")
 	}
 
 	jsonBody, err := json.Marshal(searchInstitutionsRequest{
