@@ -48,14 +48,14 @@ func TestGetInstitutions(t *testing.T) {
 					assert.NotEmpty(t, inst.Name)
 				}
 
-				if options.IncludeOptionalMetadata {
+				if tc.options.IncludeOptionalMetadata {
 					for _, inst := range instsResp.Institutions {
 						assert.NotEmpty(t, inst.URL)
 					}
 				}
-				if options.OAuth != nil {
+				if tc.options.OAuth != nil {
 					for _, inst := range instsResp.Institutions {
-						assert.Equal(t, inst.OAuth, *options.OAuth)
+						assert.Equal(t, inst.OAuth, *tc.options.OAuth)
 					}
 				}
 			}
@@ -100,14 +100,14 @@ func TestSearchInstitutions(t *testing.T) {
 				assert.Nil(t, err)
 				assert.True(t, len(instsResp.Institutions) > 0)
 
-				if options.IncludeOptionalMetadata {
+				if tc.options.IncludeOptionalMetadata {
 					for _, inst := range instsResp.Institutions {
 						assert.NotEmpty(t, inst.URL)
 					}
 				}
-				if options.OAuth != nil {
+				if tc.options.OAuth != nil {
 					for _, inst := range instsResp.Institutions {
-						assert.Equal(t, inst.OAuth, *options.OAuth)
+						assert.Equal(t, inst.OAuth, *tc.options.OAuth)
 					}
 				}
 			}
@@ -151,7 +151,7 @@ func TestGetInstitutionsByID(t *testing.T) {
 				assert.Nil(t, err)
 				assert.True(t, len(instResp.Institution.Products) > 0)
 
-				if options.IncludeOptionalMetadata {
+				if tc.options.IncludeOptionalMetadata {
 					assert.NotEmpty(t, instResp.Institution.URL)
 				}
 			}
