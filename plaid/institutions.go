@@ -7,14 +7,15 @@ import (
 )
 
 type Institution struct {
-	Credentials  []Credential `json:"credentials"`
-	HasMFA       bool         `json:"has_mfa"`
-	ID           string       `json:"institution_id"`
-	MFA          []string     `json:"mfa"`
-	Name         string       `json:"name"`
-	Products     []string     `json:"products"`
-	CountryCodes []string     `json:"country_codes"`
-	OAuth        bool         `json:"oauth"`
+	Credentials    []Credential `json:"credentials"`
+	HasMFA         bool         `json:"has_mfa"`
+	ID             string       `json:"institution_id"`
+	MFA            []string     `json:"mfa"`
+	Name           string       `json:"name"`
+	Products       []string     `json:"products"`
+	CountryCodes   []string     `json:"country_codes"`
+	OAuth          bool         `json:"oauth"`
+	RoutingNumbers []string     `json:"routing_numbers,omitempty"`
 
 	// Included when `options.include_status` is true.
 	InstitutionStatus *InstitutionStatus `json:"status,omitempty"`
@@ -73,6 +74,7 @@ type GetInstitutionsOptions struct {
 	IncludeOptionalMetadata bool     `json:"include_optional_metadata"`
 	CountryCodes            []string `json:"country_codes"`
 	OAuth                   *bool    `json:"oauth"`
+	RoutingNumbers          []string `json:"routing_numbers"`
 }
 
 type GetInstitutionsResponse struct {

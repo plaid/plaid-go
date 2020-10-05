@@ -10,31 +10,41 @@ import (
 var oauthTrue = true
 
 func TestGetInstitutions(t *testing.T) {
-	for _, options := range []GetInstitutionsOptions{
-		GetInstitutionsOptions{},
-		GetInstitutionsOptions{IncludeOptionalMetadata: true},
-		GetInstitutionsOptions{
+	var tests = []struct {
+		options    GetInstitutionsOptions
+		count      int
+		offset     int
+		wantLength int // expected length of results
+	}{
+		{options: GetInstitutionsOptions{}, count: 2, offset: 1, wantLength: 2},
+		{options: GetInstitutionsOptions{IncludeOptionalMetadata: true}, count: 2, offset: 1, wantLength: 2},
+		{options: GetInstitutionsOptions{
 			CountryCodes: []string{"GB"},
 			OAuth:        &oauthTrue,
-		},
-	} {
-		t.Run(fmt.Sprintf("%#v", options), func(t *testing.T) {
-			instsResp, err := testClient.GetInstitutionsWithOptions(2, 1, options)
+		}, count: 2, offset: 1, wantLength: 2},
+		{options: GetInstitutionsOptions{
+			RoutingNumbers: []string{"021200339", "052001633"},
+		}, count: 1, offset: 0, wantLength: 1},
+	}
+
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%#v", tt.options), func(t *testing.T) {
+			instsResp, err := testClient.GetInstitutionsWithOptions(tt.count, tt.offset, tt.options)
 			assert.Nil(t, err)
 
-			assert.Len(t, instsResp.Institutions, 2)
+			assert.Len(t, instsResp.Institutions, tt.wantLength)
 			for _, inst := range instsResp.Institutions {
 				assert.NotEmpty(t, inst.Name)
 			}
 
-			if options.IncludeOptionalMetadata {
+			if tt.options.IncludeOptionalMetadata {
 				for _, inst := range instsResp.Institutions {
 					assert.NotEmpty(t, inst.URL)
 				}
 			}
-			if options.OAuth != nil {
+			if tt.options.OAuth != nil {
 				for _, inst := range instsResp.Institutions {
-					assert.Equal(t, inst.OAuth, *options.OAuth)
+					assert.Equal(t, inst.OAuth, *tt.options.OAuth)
 				}
 			}
 		})
