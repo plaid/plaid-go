@@ -12,7 +12,7 @@ import (
 )
 
 // APIVersion holds the latest version of the Plaid API
-const APIVersion = "2019-05-29"
+const APIVersion = "2020-09-14"
 
 // Client holds information required to interact with the Plaid API.
 // Note: Client is only exported for method documentation purposes.
