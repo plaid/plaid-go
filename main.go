@@ -27,17 +27,17 @@ func main() {
 	handleError(err)
 
 	// POST /institutions/get
-	instsResp, err := client.GetInstitutions(5, 0)
+	instsResp, err := client.GetInstitutions(5, 0, []string{"US"})
 	handleError(err)
 	fmt.Println(instsResp.Institutions[0].Name, "has products:", instsResp.Institutions[0].Products)
 
 	// POST /institutions/get_by_id
-	instResp, err := client.GetInstitutionByID(instsResp.Institutions[0].ID)
+	instResp, err := client.GetInstitutionByID(instsResp.Institutions[0].ID, []string{"US"})
 	handleError(err)
 	fmt.Println(instResp.Institution.Name, "has MFA:", instResp.Institution.MFA)
 
 	// POST /institutions/search
-	instSearchResp, err := client.SearchInstitutions("Ally", []string{"transactions"})
+	instSearchResp, err := client.SearchInstitutions("Ally", []string{"transactions"}, []string{"US"})
 	handleError(err)
 	fmt.Println(instSearchResp.Institutions[0].Name, "has ID:", instSearchResp.Institutions[0].ID)
 
@@ -114,11 +114,6 @@ func main() {
 	})
 	handleError(err)
 	fmt.Println("Payment ID:", paymentCreateResp.PaymentID)
-
-	// POST /payment_initiation/payment/token/create
-	paymentTokenCreateResp, err := client.CreatePaymentToken(paymentCreateResp.PaymentID)
-	handleError(err)
-	fmt.Println("Payment Token:", paymentTokenCreateResp.PaymentToken)
 
 	// POST /payment_initiation/payment/get
 	paymentGetResp, err := client.GetPayment(paymentCreateResp.PaymentID)
