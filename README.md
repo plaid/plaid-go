@@ -91,7 +91,7 @@ Open an [issue](https://github.com/plaid/plaid-go/issues/new)!
 
 [MIT](https://github.com/plaid/plaid-go/blob/master/LICENSE)
 
-[version-changelog]: https://plaid.com/docs/api/changelog/
+[version-changelog]: https://plaid.com/docs/api/versioning/
 [api-version-2018-05-22]: https://plaid.com/docs/api/versioning/#2018-05-22
 [api-version-2019-05-29]: https://plaid.com/docs/api/versioning/#2019-05-29
 [api-version-2020-09-14]: https://plaid.com/docs/api/versioning/#2020-09-14
