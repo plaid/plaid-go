@@ -62,17 +62,17 @@ type Credential struct {
 }
 
 type getInstitutionsRequest struct {
-	ClientID string                 `json:"client_id"`
-	Secret   string                 `json:"secret"`
-	Count    int                    `json:"count"`
-	Offset   int                    `json:"offset"`
-	Options  GetInstitutionsOptions `json:"options,omitempty"`
+	ClientID     string                 `json:"client_id"`
+	Secret       string                 `json:"secret"`
+	Count        int                    `json:"count"`
+	Offset       int                    `json:"offset"`
+	CountryCodes []string               `json:"country_codes"`
+	Options      GetInstitutionsOptions `json:"options,omitempty"`
 }
 
 type GetInstitutionsOptions struct {
 	Products                []string `json:"products"`
 	IncludeOptionalMetadata bool     `json:"include_optional_metadata"`
-	CountryCodes            []string `json:"country_codes"`
 	OAuth                   *bool    `json:"oauth"`
 	RoutingNumbers          []string `json:"routing_numbers"`
 }
@@ -84,10 +84,11 @@ type GetInstitutionsResponse struct {
 }
 
 type getInstitutionByIDRequest struct {
-	ID       string                    `json:"institution_id"`
-	ClientID string                    `json:"client_id"`
-	Secret   string                    `json:"secret"`
-	Options  GetInstitutionByIDOptions `json:"options,omitempty"`
+	ID           string                    `json:"institution_id"`
+	CountryCodes []string                  `json:"country_codes"`
+	ClientID     string                    `json:"client_id"`
+	Secret       string                    `json:"secret"`
+	Options      GetInstitutionByIDOptions `json:"options,omitempty"`
 }
 
 type GetInstitutionByIDOptions struct {
@@ -101,16 +102,16 @@ type GetInstitutionByIDResponse struct {
 }
 
 type searchInstitutionsRequest struct {
-	Query    string                    `json:"query"`
-	Products []string                  `json:"products"`
-	ClientID string                    `json:"client_id"`
-	Secret   string                    `json:"secret"`
-	Options  SearchInstitutionsOptions `json:"options,omitempty"`
+	Query        string                    `json:"query"`
+	CountryCodes []string                  `json:"country_codes"`
+	Products     []string                  `json:"products"`
+	ClientID     string                    `json:"client_id"`
+	Secret       string                    `json:"secret"`
+	Options      SearchInstitutionsOptions `json:"options,omitempty"`
 }
 
 type SearchInstitutionsOptions struct {
 	IncludeOptionalMetadata bool                   `json:"include_optional_metadata"`
-	CountryCodes            []string               `json:"country_codes"`
 	AccountFilter           map[string]interface{} `json:"account_filter"`
 	OAuth                   *bool                  `json:"oauth"`
 }
@@ -124,14 +125,16 @@ type SearchInstitutionsResponse struct {
 // See https://plaid.com/docs/api/#institutions-by-id.
 func (c *Client) GetInstitutionByID(
 	id string,
+	countryCodes []string,
 ) (resp GetInstitutionByIDResponse, err error) {
-	return c.GetInstitutionByIDWithOptions(id, GetInstitutionByIDOptions{})
+	return c.GetInstitutionByIDWithOptions(id, countryCodes, GetInstitutionByIDOptions{})
 }
 
 // GetInstitutionByIDWithOptions returns information for a single institution given an ID.
 // See https://plaid.com/docs/api/#institutions-by-id.
 func (c *Client) GetInstitutionByIDWithOptions(
 	id string,
+	countryCodes []string,
 	options GetInstitutionByIDOptions,
 ) (resp GetInstitutionByIDResponse, err error) {
 	if id == "" {
@@ -139,10 +142,11 @@ func (c *Client) GetInstitutionByIDWithOptions(
 	}
 
 	jsonBody, err := json.Marshal(getInstitutionByIDRequest{
-		ID:       id,
-		ClientID: c.clientID,
-		Secret:   c.secret,
-		Options:  options,
+		ID:           id,
+		CountryCodes: countryCodes,
+		ClientID:     c.clientID,
+		Secret:       c.secret,
+		Options:      options,
 	})
 
 	if err != nil {
@@ -155,8 +159,8 @@ func (c *Client) GetInstitutionByIDWithOptions(
 
 // GetInstitutions returns information for all institutions supported by Plaid.
 // See https://plaid.com/docs/api/#all-institutions.
-func (c *Client) GetInstitutions(count, offset int) (resp GetInstitutionsResponse, err error) {
-	return c.GetInstitutionsWithOptions(count, offset, GetInstitutionsOptions{})
+func (c *Client) GetInstitutions(count, offset int, countryCodes []string) (resp GetInstitutionsResponse, err error) {
+	return c.GetInstitutionsWithOptions(count, offset, countryCodes, GetInstitutionsOptions{})
 }
 
 // GetInstitutionsWithOptions returns information for all institutions supported by Plaid.
@@ -164,6 +168,7 @@ func (c *Client) GetInstitutions(count, offset int) (resp GetInstitutionsRespons
 func (c *Client) GetInstitutionsWithOptions(
 	count int,
 	offset int,
+	countryCodes []string,
 	options GetInstitutionsOptions,
 ) (resp GetInstitutionsResponse, err error) {
 	if count == 0 {
@@ -171,11 +176,12 @@ func (c *Client) GetInstitutionsWithOptions(
 	}
 
 	jsonBody, err := json.Marshal(getInstitutionsRequest{
-		ClientID: c.clientID,
-		Secret:   c.secret,
-		Count:    count,
-		Offset:   offset,
-		Options:  options,
+		ClientID:     c.clientID,
+		Secret:       c.secret,
+		Count:        count,
+		Offset:       offset,
+		CountryCodes: countryCodes,
+		Options:      options,
 	})
 
 	if err != nil {
@@ -192,8 +198,9 @@ func (c *Client) GetInstitutionsWithOptions(
 func (c *Client) SearchInstitutions(
 	query string,
 	products []string,
+	countryCodes []string,
 ) (resp SearchInstitutionsResponse, err error) {
-	return c.SearchInstitutionsWithOptions(query, products, SearchInstitutionsOptions{})
+	return c.SearchInstitutionsWithOptions(query, products, countryCodes, SearchInstitutionsOptions{})
 }
 
 // SearchInstitutionsWithOptions returns institutions corresponding to a query string and
@@ -202,6 +209,7 @@ func (c *Client) SearchInstitutions(
 func (c *Client) SearchInstitutionsWithOptions(
 	query string,
 	products []string,
+	countryCodes []string,
 	options SearchInstitutionsOptions,
 ) (resp SearchInstitutionsResponse, err error) {
 	if query == "" {
@@ -209,11 +217,12 @@ func (c *Client) SearchInstitutionsWithOptions(
 	}
 
 	jsonBody, err := json.Marshal(searchInstitutionsRequest{
-		Query:    query,
-		Products: products,
-		ClientID: c.clientID,
-		Secret:   c.secret,
-		Options:  options,
+		Query:        query,
+		Products:     products,
+		CountryCodes: countryCodes,
+		ClientID:     c.clientID,
+		Secret:       c.secret,
+		Options:      options,
 	})
 
 	if err != nil {

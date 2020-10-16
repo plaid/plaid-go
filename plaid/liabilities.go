@@ -47,6 +47,30 @@ type CreditLiability struct {
 	NextPaymentDueDate     string  `json:"next_payment_due_date"`
 }
 
+// MortgageLiability contains mortgage liability data.
+type MortgageLiability struct {
+	AccountID                  string                  `json:"account_id"`
+	AccountNumber              string                  `json:"account_number"`
+	CurrentLateFee             float64                 `json:"current_late_fee"`
+	EscrowBalance              float64                 `json:"escrow_balance"`
+	HasPmi                     bool                    `json:"has_pmi"`
+	HasPrepaymentPenalty       bool                    `json:"has_prepayment_penalty"`
+	InterestRate               MortgageInterestRate    `json:"interest_rate"`
+	LastPaymentAmount          float64                 `json:"last_payment_amount"`
+	LastPaymentDate            string                  `json:"last_payment_date"`
+	LoanTerm                   string                  `json:"loan_term"`
+	LoanTypeDescription        string                  `json:"loan_type_description"`
+	MaturityDate               string                  `json:"maturity_date"`
+	NextMonthlyPayment         float64                 `json:"next_monthly_payment"`
+	NextPaymentDueDate         string                  `json:"next_payment_due_date"`
+	OriginationDate            string                  `json:"origination_date"`
+	OriginationPrincipalAmount float64                 `json:"origination_principal_amount"`
+	PastDueAmount              float64                 `json:"past_due_amount"`
+	PropertyAddress            MortgagePropertyAddress `json:"property_address"`
+	YtdInterestPaid            float64                 `json:"ytd_interest_paid"`
+	YtdPrincipalPaid           float64                 `json:"ytd_principal_paid"`
+}
+
 // APR contains details about the annual percentage rate of a credit card.
 type APR struct {
 	APRPercentage        float64 `json:"apr_percentage"`
@@ -85,6 +109,21 @@ type StudentLoanRepaymentPlan struct {
 	Description string `json:"description"`
 }
 
+// MortgageInterestRate is the interest rate for the mortgage
+type MortgageInterestRate struct {
+	Percentage float64 `json:"percentage"`
+	Type       string  `json:"type"`
+}
+
+// MortgagePropertyAddress is the address of the property.
+type MortgagePropertyAddress struct {
+	City       string `json:"city"`
+	Country    string `json:"country"`
+	PostalCode string `json:"postal_code"`
+	Region     string `json:"region"`
+	Street     string `json:"street"`
+}
+
 type getLiabilitiesRequestOptions struct {
 	AccountIDs []string `json:"account_ids,omitempty"`
 }
@@ -104,6 +143,7 @@ type GetLiabilitiesResponse struct {
 	Liabilities struct {
 		Student         []StudentLoanLiability `json:"student"`
 		Credit          []CreditLiability      `json:"credit"`
+		Mortgage        []MortgageLiability    `json:"mortgage"`
 	} `json:"liabilities"`
 }
 
