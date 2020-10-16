@@ -15,7 +15,7 @@ type Institution struct {
 	Products       []string     `json:"products"`
 	CountryCodes   []string     `json:"country_codes"`
 	OAuth          bool         `json:"oauth"`
-	RoutingNumbers []string     `json:"routing_numbers,omitempty"`
+	RoutingNumbers []string     `json:"routing_numbers"`
 
 	// Included when `options.include_status` is true.
 	InstitutionStatus *InstitutionStatus `json:"status,omitempty"`
