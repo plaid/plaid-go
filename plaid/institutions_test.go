@@ -12,38 +12,63 @@ func TestGetInstitutions(t *testing.T) {
 	testCases := []struct {
 		desc         string
 		countryCodes []string
+		count        int
+		offset       int
 		options      GetInstitutionsOptions
+		wantLength   int // expected length of results
 	}{
 		{
 			desc:         "succeeds without options",
 			countryCodes: []string{"US"},
+			count:        2,
+			offset:       1,
 			options:      GetInstitutionsOptions{},
+			wantLength:   2,
 		},
 		{
 			desc:         "succeeds with optional metadata",
 			countryCodes: []string{"US"},
+			count:        2,
+			offset:       1,
 			options:      GetInstitutionsOptions{IncludeOptionalMetadata: true},
+			wantLength:   2,
 		},
 		{
 			desc:         "succeeds for oauth institutions",
 			countryCodes: []string{"GB"},
+			count:        2,
+			offset:       1,
 			options:      GetInstitutionsOptions{OAuth: &oauthTrue},
+			wantLength:   2,
 		},
 		{
 			desc:         "errors without country codes",
 			countryCodes: []string{},
+			count:        2,
+			offset:       1,
 			options:      GetInstitutionsOptions{},
+			wantLength:   0,
+		},
+		{
+			desc:         "succeeds with routing numbers",
+			countryCodes: []string{"US"},
+			count:        1,
+			offset:       0,
+			options: GetInstitutionsOptions{
+				RoutingNumbers: []string{"021200339", "052001633"},
+			},
+			wantLength: 1,
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			instsResp, err := testClient.GetInstitutionsWithOptions(2, 1, tc.countryCodes, tc.options)
+			instsResp, err := testClient.GetInstitutionsWithOptions(tc.count, tc.offset, tc.countryCodes, tc.options)
 			if len(tc.countryCodes) == 0 {
 				assert.NotNil(t, err)
 			} else {
 				assert.Nil(t, err)
 
-				assert.Len(t, instsResp.Institutions, 2)
+				assert.Len(t, instsResp.Institutions, tc.wantLength)
 				for _, inst := range instsResp.Institutions {
 					assert.NotEmpty(t, inst.Name)
 				}
