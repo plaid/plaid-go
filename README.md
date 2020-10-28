@@ -24,6 +24,7 @@ Each major version of `plaid-go` targets a specific version of the Plaid API:
 
 | API version | plaid-go release |
 | ----------- | ------------------ |
+| [`2020-09-14`][api-version-2020-09-14] (**latest**) | `6.x.x` |
 | [`2019-05-29`][api-version-2019-05-29] (**latest**) | `2.x.x` |
 | [`2018-05-22`][api-version-2018-05-22] | `1.x.x` |
 | `2017-03-08` | not supported |
@@ -78,7 +79,7 @@ To run the tests you'll need to sign up for a Sandbox account on https://plaid.c
 
 Once you have these you can run `make test`, passing your Sandbox credentials as environment variables:
 
-```shell 
+```shell
 PLAID_CLIENT_ID=aabbcc PLAID_PUBLIC_KEY=ddeeff PLAID_SECRET=ffeedd make test
 ```
 
@@ -90,6 +91,7 @@ Open an [issue](https://github.com/plaid/plaid-go/issues/new)!
 
 [MIT](https://github.com/plaid/plaid-go/blob/master/LICENSE)
 
-[version-changelog]: https://plaid.com/docs/api-upgrades/#version-changelog
-[api-version-2018-05-22]: https://plaid.com/docs/api-upgrades/#2018-05-22
-[api-version-2019-05-29]: https://plaid.com/docs/api-upgrades/#2019-05-29
+[version-changelog]: https://plaid.com/docs/api/versioning/
+[api-version-2018-05-22]: https://plaid.com/docs/api/versioning/#2018-05-22
+[api-version-2019-05-29]: https://plaid.com/docs/api/versioning/#2019-05-29
+[api-version-2020-09-14]: https://plaid.com/docs/api/versioning/#2020-09-14

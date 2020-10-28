@@ -17,6 +17,7 @@ func TestGetLiabilities(t *testing.T) {
 	assert.NotNil(t, liabilitiesResp.Liabilities)
 	assert.Len(t, liabilitiesResp.Liabilities.Student, 1)
 	assert.Len(t, liabilitiesResp.Liabilities.Credit, 1)
+	assert.Len(t, liabilitiesResp.Liabilities.Mortgage, 1)
 
 
 	accountID := liabilitiesResp.Accounts[7].AccountID
@@ -26,4 +27,5 @@ func TestGetLiabilities(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Len(t, liabilitiesResp.Accounts, 1)
 	assert.Len(t, liabilitiesResp.Liabilities.Student, 1)
+	assert.Len(t, liabilitiesResp.Liabilities.Mortgage, 0)
 }
