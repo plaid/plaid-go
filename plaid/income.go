@@ -34,7 +34,7 @@ type GetIncomeResponse struct {
 }
 
 // GetIncome retrieves information pertaining to an Item's income.
-// See https://plaid.com/docs/api/#income.
+// See https://plaid.com/docs/#income.
 func (c *Client) GetIncome(accessToken string) (resp GetIncomeResponse, err error) {
 	if accessToken == "" {
 		return resp, errors.New("/income/get - access token must be specified")

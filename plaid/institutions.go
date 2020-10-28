@@ -122,7 +122,7 @@ type SearchInstitutionsResponse struct {
 }
 
 // GetInstitutionByID returns information for a single institution given an ID.
-// See https://plaid.com/docs/api/#institutions-by-id.
+// See https://plaid.com/docs/api/institutions/#institutionsget_by_id.
 func (c *Client) GetInstitutionByID(
 	id string,
 	countryCodes []string,
@@ -131,7 +131,7 @@ func (c *Client) GetInstitutionByID(
 }
 
 // GetInstitutionByIDWithOptions returns information for a single institution given an ID.
-// See https://plaid.com/docs/api/#institutions-by-id.
+// See https://plaid.com/docs/api/institutions/#institutionsget_by_id.
 func (c *Client) GetInstitutionByIDWithOptions(
 	id string,
 	countryCodes []string,
@@ -158,13 +158,13 @@ func (c *Client) GetInstitutionByIDWithOptions(
 }
 
 // GetInstitutions returns information for all institutions supported by Plaid.
-// See https://plaid.com/docs/api/#all-institutions.
+// See https://plaid.com/docs/api/institutions/#institutionsget.
 func (c *Client) GetInstitutions(count, offset int, countryCodes []string) (resp GetInstitutionsResponse, err error) {
 	return c.GetInstitutionsWithOptions(count, offset, countryCodes, GetInstitutionsOptions{})
 }
 
 // GetInstitutionsWithOptions returns information for all institutions supported by Plaid.
-// See https://plaid.com/docs/api/#all-institutions.
+// See https://plaid.com/docs/api/institutions/#institutionsget.
 func (c *Client) GetInstitutionsWithOptions(
 	count int,
 	offset int,
@@ -194,7 +194,7 @@ func (c *Client) GetInstitutionsWithOptions(
 
 // SearchInstitutions returns institutions corresponding to a query string and
 // supported products.
-// See https://plaid.com/docs/api/#institution-search.
+// See https://plaid.com/docs/api/institutions/#institutionssearch.
 func (c *Client) SearchInstitutions(
 	query string,
 	products []string,
@@ -205,7 +205,7 @@ func (c *Client) SearchInstitutions(
 
 // SearchInstitutionsWithOptions returns institutions corresponding to a query string and
 // supported products.
-// See https://plaid.com/docs/api/#institution-search.
+// See https://plaid.com/docs/api/institutions/#institutionssearch.
 func (c *Client) SearchInstitutionsWithOptions(
 	query string,
 	products []string,

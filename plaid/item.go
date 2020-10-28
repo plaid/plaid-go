@@ -114,7 +114,7 @@ type ImportItemResponse struct {
 }
 
 // GetItem retrieves an item associated with an access token.
-// See https://plaid.com/docs/api/#retrieve-item.
+// See https://plaid.com/docs/api/items/#itemget.
 func (c *Client) GetItem(accessToken string) (resp GetItemResponse, err error) {
 	if accessToken == "" {
 		return resp, errors.New("/item/get - access token must be specified")
@@ -135,7 +135,7 @@ func (c *Client) GetItem(accessToken string) (resp GetItemResponse, err error) {
 }
 
 // RemoveItem removes an item associated with an access token.
-// See https://plaid.com/docs/api/#remove-an-item.
+// See https://plaid.com/docs/api/items/#itemremove.
 func (c *Client) RemoveItem(accessToken string) (resp RemoveItemResponse, err error) {
 	if accessToken == "" {
 		return resp, errors.New("/item/remove - access token must be specified")
@@ -156,7 +156,7 @@ func (c *Client) RemoveItem(accessToken string) (resp RemoveItemResponse, err er
 }
 
 // UpdateItemWebhook updates the webhook associated with an Item.
-// See https://plaid.com/docs/api/#update-webhook.
+// See https://plaid.com/docs/api/items/#itemwebhookupdate.
 func (c *Client) UpdateItemWebhook(accessToken, webhook string) (resp UpdateItemWebhookResponse, err error) {
 	if accessToken == "" || webhook == "" {
 		return resp, errors.New("/item/webhook/update - access token and webhook must be specified")
@@ -178,7 +178,7 @@ func (c *Client) UpdateItemWebhook(accessToken, webhook string) (resp UpdateItem
 }
 
 // InvalidateAccessToken invalidates and rotates an access token.
-// See https://plaid.com/docs/api/#rotate-access-token.
+// See https://plaid.com/docs/api/tokens/#itemaccess_tokeninvalidate.
 func (c *Client) InvalidateAccessToken(accessToken string) (resp InvalidateAccessTokenResponse, err error) {
 	if accessToken == "" {
 		return resp, errors.New("/item/access_token/invalidate - access token must be specified")
@@ -199,7 +199,7 @@ func (c *Client) InvalidateAccessToken(accessToken string) (resp InvalidateAcces
 }
 
 // ExchangePublicToken exchanges a public token for an access token.
-// See https://plaid.com/docs/api/#exchange-token-flow.
+// See https://plaid.com/docs/api/tokens/#itempublic_tokenexchange.
 func (c *Client) ExchangePublicToken(publicToken string) (resp ExchangePublicTokenResponse, err error) {
 	if publicToken == "" {
 		return resp, errors.New("/item/public_token/exchange - public token must be specified")

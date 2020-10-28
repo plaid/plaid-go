@@ -95,7 +95,7 @@ type RefreshTransactionsResponse struct {
 }
 
 // GetTransactionsWithOptions retrieves user-authorized transaction data for credit and depository-type accounts.
-// See https://plaid.com/docs/api/#transactions.
+// See https://plaid.com/docs/transactions/.
 func (c *Client) GetTransactionsWithOptions(accessToken string, options GetTransactionsOptions) (resp GetTransactionsResponse, err error) {
 	if options.StartDate == "" || options.EndDate == "" {
 		return resp, errors.New("/transactions/get - start date and end date must be specified")
@@ -126,7 +126,7 @@ func (c *Client) GetTransactionsWithOptions(accessToken string, options GetTrans
 }
 
 // GetTransactions retrieves user-authorized transaction data for credit and depository-type accounts.
-// See https://plaid.com/docs/api/#transactions.
+// See https://plaid.com/docs/transactions/.
 func (c *Client) GetTransactions(accessToken, startDate, endDate string) (resp GetTransactionsResponse, err error) {
 	options := GetTransactionsOptions{
 		StartDate:  startDate,
