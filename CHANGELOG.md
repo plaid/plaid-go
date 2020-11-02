@@ -1,3 +1,6 @@
+## 6.1.0
+- Add routing numbers to Institution endpoints
+
 ## 6.0.0
 
 BREAKING CHANGES: 
