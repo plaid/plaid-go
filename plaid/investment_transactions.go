@@ -56,7 +56,7 @@ type getInvestmentTransactionsRequestOptions struct {
 }
 
 // GetInvestmentTransactionsWithOptions retrieves user-authorized investment transaction data for investment-type accounts.
-// See https://plaid.com/docs/api/#investment-transactions.
+// See https://plaid.com/docs/#investment-transactions.
 func (c *Client) GetInvestmentTransactionsWithOptions(accessToken string, options GetInvestmentTransactionsOptions) (resp GetInvestmentTransactionsResponse, err error) {
 	if accessToken == "" {
 		return resp, errors.New("/investments/transactions/get - access token must be specified")
@@ -90,7 +90,7 @@ func (c *Client) GetInvestmentTransactionsWithOptions(accessToken string, option
 }
 
 // GetInvestmentTransactions retrieves user-authorized transaction data for investment-type accounts.
-// See https://plaid.com/docs/api/#investment-transactions.
+// See https://plaid.com/docs/#investment-transactions.
 func (c *Client) GetInvestmentTransactions(accessToken, startDate, endDate string) (resp GetInvestmentTransactionsResponse, err error) {
 	options := GetInvestmentTransactionsOptions{
 		StartDate:  startDate,

@@ -16,7 +16,7 @@ type GetCategoriesResponse struct {
 }
 
 // GetCategories returns information for all categories.
-// See https://plaid.com/docs/api/#category-overview.
+// See https://plaid.com/docs/api/products/#categoriesget.
 func (c *Client) GetCategories() (resp GetCategoriesResponse, err error) {
 	jsonBody, _ := json.Marshal(nil)
 

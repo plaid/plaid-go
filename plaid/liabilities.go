@@ -155,7 +155,7 @@ type GetLiabilitiesOptions struct {
 }
 
 // GetLiabilitiesWithOptions retrieves liability data. See
-// https://plaid.com/docs/api/#liabilities.
+// https://plaid.com/docs/liabilities/.
 func (c *Client) GetLiabilitiesWithOptions(
 	accessToken string,
 	options GetLiabilitiesOptions,
@@ -184,7 +184,7 @@ func (c *Client) GetLiabilitiesWithOptions(
 }
 
 // GetLiabilities retrieves liability data. See
-// https://plaid.com/docs/api/#liabilities.
+// https://plaid.com/docs/liabilities/.
 func (c *Client) GetLiabilities(accessToken string) (resp GetLiabilitiesResponse, err error) {
 	return c.GetLiabilitiesWithOptions(accessToken, GetLiabilitiesOptions{
 		AccountIDs: []string{},

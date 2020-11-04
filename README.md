@@ -66,7 +66,7 @@ Each endpoint returns an object which contains the parsed JSON from the HTTP res
 
 All non-200 responses will return a plaid.Error instance.
 
-For more information on Plaid response codes, head to the [docs](https://plaid.com/docs/api#errors).
+For more information on Plaid response codes, head to the [docs](https://plaid.com/docs/errors/).
 
 ## Developing
 
