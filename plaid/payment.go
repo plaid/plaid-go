@@ -157,6 +157,34 @@ func (c *Client) CreatePayment(
 	return resp, err
 }
 
+type createPaymentTokenRequest struct {
+	ClientID  string `json:"client_id"`
+	Secret    string `json:"secret"`
+	PaymentID string `json:"payment_id"`
+}
+
+type CreatePaymentTokenResponse struct {
+	APIResponse
+	PaymentToken               string    `json:"payment_token"`
+	PaymentTokenExpirationTime time.Time `json:"payment_token_expiration_time"`
+}
+
+func (c *Client) CreatePaymentToken(
+	paymentID string,
+) (resp CreatePaymentTokenResponse, err error) {
+	jsonBody, err := json.Marshal(createPaymentTokenRequest{
+		ClientID:  c.clientID,
+		Secret:    c.secret,
+		PaymentID: paymentID,
+	})
+	if err != nil {
+		return resp, err
+	}
+
+	err = c.Call("/payment_initiation/payment/token/create", jsonBody, &resp)
+	return resp, err
+}
+
 type getPaymentRequest struct {
 	ClientID  string `json:"client_id"`
 	Secret    string `json:"secret"`

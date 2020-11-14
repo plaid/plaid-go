@@ -30,7 +30,7 @@ func TestPaymentWithIban(t *testing.T) {
 	assert.NotNil(t, paymentRecipientGetResp.IBAN)
 	assert.NotNil(t, paymentRecipientGetResp.Address)
 
-	commonPaymentTestFlows(t, recipientID)
+	commonPaymentTestFlows(t, recipientID, true)
 }
 
 func TestPaymentWithBacs(t *testing.T) {
@@ -58,7 +58,7 @@ func TestPaymentWithBacs(t *testing.T) {
 	assert.NotNil(t, paymentRecipientGetResp.BACS)
 	assert.NotNil(t, paymentRecipientGetResp.Address)
 
-	commonPaymentTestFlows(t, recipientID)
+	commonPaymentTestFlows(t, recipientID, true)
 }
 
 func TestPaymentWithBacsAndIban(t *testing.T) {
@@ -90,10 +90,14 @@ func TestPaymentWithBacsAndIban(t *testing.T) {
 	assert.NotNil(t, paymentRecipientGetResp.BACS)
 	assert.NotNil(t, paymentRecipientGetResp.Address)
 
-	commonPaymentTestFlows(t, recipientID)
+	// testing common flows with the link_token
+	commonPaymentTestFlows(t, recipientID, true)
+
+	// testing commong flows with the legacy payment_token
+	commonPaymentTestFlows(t, recipientID, false)
 }
 
-func commonPaymentTestFlows(t *testing.T, recipientID string) {
+func commonPaymentTestFlows(t *testing.T, recipientID string, useLinkToken bool) {
 	paymentRecipientListResp, err := testClient.ListPaymentRecipients()
 	assert.Nil(t, err)
 	assert.True(t, len(paymentRecipientListResp.Recipients) > 0)
@@ -107,22 +111,29 @@ func commonPaymentTestFlows(t *testing.T, recipientID string) {
 	assert.NotNil(t, paymentCreateResp.Status)
 	paymentID := paymentCreateResp.PaymentID
 
-	linkTokenCreateResp, err := testClient.CreateLinkToken(LinkTokenConfigs{
-		User: &LinkTokenUser{
-			ClientUserID: time.Now().String(),
-		},
-		ClientName:   "Plaid Test",
-		Products:     []string{"payment_initiation"},
-		CountryCodes: []string{"US"},
-		Language:     "en",
-		PaymentInitiation: &PaymentInitiation{
-			PaymentID: paymentID,
-		},
-	})
+	if useLinkToken {
+		linkTokenCreateResp, err := testClient.CreateLinkToken(LinkTokenConfigs{
+			User: &LinkTokenUser{
+				ClientUserID: time.Now().String(),
+			},
+			ClientName:   "Plaid Test",
+			Products:     []string{"payment_initiation"},
+			CountryCodes: []string{"US"},
+			Language:     "en",
+			PaymentInitiation: &PaymentInitiation{
+				PaymentID: paymentID,
+			},
+		})
 
-	assert.Nil(t, err)
-	assert.NotNil(t, linkTokenCreateResp.LinkToken)
-	assert.NotNil(t, linkTokenCreateResp.Expiration)
+		assert.Nil(t, err)
+		assert.NotNil(t, linkTokenCreateResp.LinkToken)
+		assert.NotNil(t, linkTokenCreateResp.Expiration)
+	} else {
+		paymentTokenCreateResp, err := testClient.CreatePaymentToken(paymentID)
+		assert.Nil(t, err)
+		assert.NotNil(t, paymentTokenCreateResp.PaymentToken)
+		assert.NotNil(t, paymentTokenCreateResp.PaymentTokenExpirationTime)
+	}
 
 	paymentGetResp, err := testClient.GetPayment(paymentCreateResp.PaymentID)
 	assert.Nil(t, err)
