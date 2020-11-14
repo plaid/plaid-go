@@ -3,6 +3,7 @@ package plaid
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -223,6 +224,8 @@ func (c *Client) InvalidateAccessToken(accessToken string) (resp InvalidateAcces
 // 30 minutes to update an Item.
 // See https://plaid.com/docs/api/#creating-public-tokens.
 func (c *Client) CreatePublicToken(accessToken string) (resp CreatePublicTokenResponse, err error) {
+	fmt.Println("Warning: this method will be deprecated in a future version. To replace the public_token for initializing Link, look into the link_token at https://plaid.com/docs/api/tokens/#linktokencreate.")
+
 	if accessToken == "" {
 		return resp, errors.New("/item/public_token/create - access token must be specified")
 	}
@@ -243,9 +246,8 @@ func (c *Client) CreatePublicToken(accessToken string) (resp CreatePublicTokenRe
 
 // CreateItemAddToken generates a token which is used to initialize Link.
 func (c *Client) CreateItemAddToken(userFields ItemAddTokenUserFields) (resp CreateItemAddTokenResponse, err error) {
-	// TODO - Print out message indicating that this endpoints is deprecated
-	// and will be removed in a future version. It should also say to look
-	// into the /link/token/create endpoint instead.
+	fmt.Println("Warning: this method will be deprecated in a future version. To replace the item_add_token, look into the link_token at https://plaid.com/docs/api/tokens/#linktokencreate.")
+
 	jsonBody, err := json.Marshal(createItemAddTokenRequest{
 		ClientID:   c.clientID,
 		Secret:     c.secret,
