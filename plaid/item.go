@@ -89,22 +89,6 @@ type CreatePublicTokenResponse struct {
 	PublicToken string `json:"public_token"`
 }
 
-type createItemAddTokenRequest struct {
-	ClientID   string                 `json:"client_id"`
-	Secret     string                 `json:"secret"`
-	UserFields ItemAddTokenUserFields `json:"user"`
-}
-
-type ItemAddTokenUserFields struct {
-	ClientUserID string `json:"client_user_id"`
-}
-
-type CreateItemAddTokenResponse struct {
-	APIResponse
-	AddToken   string    `json:"add_token"`
-	Expiration time.Time `json:"expiration"`
-}
-
 type exchangePublicTokenRequest struct {
 	ClientID    string `json:"client_id"`
 	Secret      string `json:"secret"`
@@ -241,24 +225,6 @@ func (c *Client) CreatePublicToken(accessToken string) (resp CreatePublicTokenRe
 	}
 
 	err = c.Call("/item/public_token/create", jsonBody, &resp)
-	return resp, err
-}
-
-// CreateItemAddToken generates a token which is used to initialize Link.
-func (c *Client) CreateItemAddToken(userFields ItemAddTokenUserFields) (resp CreateItemAddTokenResponse, err error) {
-	fmt.Println("Warning: this method will be deprecated in a future version. To replace the item_add_token, look into the link_token at https://plaid.com/docs/api/tokens/#linktokencreate.")
-
-	jsonBody, err := json.Marshal(createItemAddTokenRequest{
-		ClientID:   c.clientID,
-		Secret:     c.secret,
-		UserFields: userFields,
-	})
-
-	if err != nil {
-		return resp, err
-	}
-
-	err = c.Call("/item/add_token/create", jsonBody, &resp)
 	return resp, err
 }
 

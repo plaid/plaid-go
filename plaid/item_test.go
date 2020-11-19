@@ -62,17 +62,6 @@ func TestCreatePublicToken(t *testing.T) {
 	assert.True(t, strings.HasPrefix(publicTokenResp.PublicToken, "public-sandbox"))
 }
 
-func TestCreateItemAddToken(t *testing.T) {
-	fakeClientUserID, _ := randomHex(12)
-	itemAddTokenResp, err := testClient.CreateItemAddToken(ItemAddTokenUserFields{
-		ClientUserID: fakeClientUserID,
-	})
-
-	assert.Nil(t, err)
-	assert.True(t, strings.HasPrefix(itemAddTokenResp.AddToken, "item-add-sandbox"))
-	assert.NotZero(t, itemAddTokenResp.Expiration)
-}
-
 func TestExchangePublicToken(t *testing.T) {
 	sandboxResp, _ := testClient.CreateSandboxPublicToken(sandboxInstitution, testProducts)
 	tokenResp, err := testClient.ExchangePublicToken(sandboxResp.PublicToken)
