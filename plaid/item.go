@@ -3,6 +3,7 @@ package plaid
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -81,6 +82,11 @@ type createPublicTokenRequest struct {
 	ClientID    string `json:"client_id"`
 	Secret      string `json:"secret"`
 	AccessToken string `json:"access_token"`
+}
+
+type CreatePublicTokenResponse struct {
+	APIResponse
+	PublicToken string `json:"public_token"`
 }
 
 type exchangePublicTokenRequest struct {
@@ -195,6 +201,30 @@ func (c *Client) InvalidateAccessToken(accessToken string) (resp InvalidateAcces
 	}
 
 	err = c.Call("/item/access_token/invalidate", jsonBody, &resp)
+	return resp, err
+}
+
+// CreatePublicToken generates a one-time use public token which expires in
+// 30 minutes to update an Item.
+// See https://plaid.com/docs/api/#creating-public-tokens.
+func (c *Client) CreatePublicToken(accessToken string) (resp CreatePublicTokenResponse, err error) {
+	fmt.Println("Warning: this method will be deprecated in a future version. To replace the public_token for initializing Link, look into the link_token at https://plaid.com/docs/api/tokens/#linktokencreate.")
+
+	if accessToken == "" {
+		return resp, errors.New("/item/public_token/create - access token must be specified")
+	}
+
+	jsonBody, err := json.Marshal(createPublicTokenRequest{
+		ClientID:    c.clientID,
+		Secret:      c.secret,
+		AccessToken: accessToken,
+	})
+
+	if err != nil {
+		return resp, err
+	}
+
+	err = c.Call("/item/public_token/create", jsonBody, &resp)
 	return resp, err
 }
 

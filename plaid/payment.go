@@ -2,6 +2,7 @@ package plaid
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 )
 
@@ -154,6 +155,36 @@ func (c *Client) CreatePayment(
 	}
 
 	err = c.Call("/payment_initiation/payment/create", jsonBody, &resp)
+	return resp, err
+}
+
+type createPaymentTokenRequest struct {
+	ClientID  string `json:"client_id"`
+	Secret    string `json:"secret"`
+	PaymentID string `json:"payment_id"`
+}
+
+type CreatePaymentTokenResponse struct {
+	APIResponse
+	PaymentToken               string    `json:"payment_token"`
+	PaymentTokenExpirationTime time.Time `json:"payment_token_expiration_time"`
+}
+
+func (c *Client) CreatePaymentToken(
+	paymentID string,
+) (resp CreatePaymentTokenResponse, err error) {
+	fmt.Println("Warning: this method will be deprecated in a future version. To replace the payment_token, look into the link_token at https://plaid.com/docs/api/tokens/#linktokencreate.")
+
+	jsonBody, err := json.Marshal(createPaymentTokenRequest{
+		ClientID:  c.clientID,
+		Secret:    c.secret,
+		PaymentID: paymentID,
+	})
+	if err != nil {
+		return resp, err
+	}
+
+	err = c.Call("/payment_initiation/payment/token/create", jsonBody, &resp)
 	return resp, err
 }
 
