@@ -131,6 +131,14 @@ type PaymentSchedule struct {
 }
 
 type createPaymentRequest struct {
+	ClientID    string        `json:"client_id"`
+	Secret      string        `json:"secret"`
+	RecipientID string        `json:"recipient_id"`
+	Reference   string        `json:"reference"`
+	Amount      PaymentAmount `json:"amount"`
+}
+
+type createStandingOrderRequest struct {
 	ClientID    string           `json:"client_id"`
 	Secret      string           `json:"secret"`
 	RecipientID string           `json:"recipient_id"`
@@ -151,17 +159,25 @@ func (c *Client) CreatePayment(
 	amount PaymentAmount,
 	schedule *PaymentSchedule,
 ) (resp CreatePaymentResponse, err error) {
-	req := createPaymentRequest{
-		ClientID:    c.clientID,
-		Secret:      c.secret,
-		RecipientID: recipientID,
-		Reference:   reference,
-		Amount:      amount,
+	var jsonBody []byte
+	if schedule == nil {
+		jsonBody, err = json.Marshal(createPaymentRequest{
+			ClientID:    c.clientID,
+			Secret:      c.secret,
+			RecipientID: recipientID,
+			Reference:   reference,
+			Amount:      amount,
+		})
+	} else {
+		jsonBody, err = json.Marshal(createStandingOrderRequest{
+			ClientID:    c.clientID,
+			Secret:      c.secret,
+			RecipientID: recipientID,
+			Reference:   reference,
+			Amount:      amount,
+			Schedule:    schedule,
+		})
 	}
-	if schedule != nil {
-		req.Schedule = schedule
-	}
-	jsonBody, err := json.Marshal(req)
 	if err != nil {
 		return resp, err
 	}
