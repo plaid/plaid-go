@@ -151,14 +151,17 @@ func (c *Client) CreatePayment(
 	amount PaymentAmount,
 	schedule *PaymentSchedule,
 ) (resp CreatePaymentResponse, err error) {
-	jsonBody, err := json.Marshal(createPaymentRequest{
+	req := createPaymentRequest{
 		ClientID:    c.clientID,
 		Secret:      c.secret,
 		RecipientID: recipientID,
 		Reference:   reference,
 		Amount:      amount,
-		Schedule:    schedule,
-	})
+	}
+	if schedule != nil {
+		req.Schedule = schedule
+	}
+	jsonBody, err := json.Marshal(req)
 	if err != nil {
 		return resp, err
 	}

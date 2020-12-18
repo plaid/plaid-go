@@ -36,8 +36,8 @@ func TestPaymentWithIban(t *testing.T) {
 func TestPaymentWithBacs(t *testing.T) {
 	params := OptionalRecipientCreateParams{
 		BACS: &PaymentRecipientBacs{
-			Account:  "12345678",
-			SortCode: "010203",
+			Account:  "26207729",
+			SortCode: "560029",
 		},
 		Address: &PaymentRecipientAddress{
 			Street:     []string{"Street Name 999"},
@@ -66,8 +66,8 @@ func TestPaymentWithBacsAndIban(t *testing.T) {
 
 	params := OptionalRecipientCreateParams{
 		BACS: &PaymentRecipientBacs{
-			Account:  "12345678",
-			SortCode: "010203",
+			Account:  "26207729",
+			SortCode: "560029",
 		},
 		Address: &PaymentRecipientAddress{
 			Street:     []string{"Street Name 999"},
