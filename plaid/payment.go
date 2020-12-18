@@ -124,12 +124,19 @@ type PaymentAmount struct {
 	Value    float64 `json:"value"`
 }
 
+type PaymentSchedule struct {
+	Interval             string `json:"interval"`
+	IntervalExecutionDay int    `json:"interval_execution_day"`
+	StartDate            string `json:"start_date"`
+}
+
 type createPaymentRequest struct {
-	ClientID    string        `json:"client_id"`
-	Secret      string        `json:"secret"`
-	RecipientID string        `json:"recipient_id"`
-	Reference   string        `json:"reference"`
-	Amount      PaymentAmount `json:"amount"`
+	ClientID    string           `json:"client_id"`
+	Secret      string           `json:"secret"`
+	RecipientID string           `json:"recipient_id"`
+	Reference   string           `json:"reference"`
+	Amount      PaymentAmount    `json:"amount"`
+	Schedule    *PaymentSchedule `json:"schedule"`
 }
 
 type CreatePaymentResponse struct {
@@ -142,6 +149,7 @@ func (c *Client) CreatePayment(
 	recipientID string,
 	reference string,
 	amount PaymentAmount,
+	schedule *PaymentSchedule,
 ) (resp CreatePaymentResponse, err error) {
 	jsonBody, err := json.Marshal(createPaymentRequest{
 		ClientID:    c.clientID,
@@ -149,6 +157,7 @@ func (c *Client) CreatePayment(
 		RecipientID: recipientID,
 		Reference:   reference,
 		Amount:      amount,
+		Schedule:    schedule,
 	})
 	if err != nil {
 		return resp, err
@@ -195,12 +204,13 @@ type getPaymentRequest struct {
 }
 
 type Payment struct {
-	PaymentID        string        `json:"payment_id"`
-	Reference        string        `json:"reference"`
-	Amount           PaymentAmount `json:"amount"`
-	Status           string        `json:"status"`
-	LastStatusUpdate time.Time     `json:"last_status_update"`
-	RecipientID      string        `json:"recipient_id"`
+	PaymentID        string           `json:"payment_id"`
+	Reference        string           `json:"reference"`
+	Amount           PaymentAmount    `json:"amount"`
+	Schedule         *PaymentSchedule `json:"schedule"`
+	Status           string           `json:"status"`
+	LastStatusUpdate time.Time        `json:"last_status_update"`
+	RecipientID      string           `json:"recipient_id"`
 }
 
 type GetPaymentResponse struct {

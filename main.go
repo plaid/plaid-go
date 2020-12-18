@@ -108,10 +108,15 @@ func main() {
 	fmt.Println("Recipient get response:", paymentRecipientGetResp)
 
 	// POST /payment_initiation/payment/create
-	paymentCreateResp, err := client.CreatePayment(paymentRecipientCreateResp.RecipientID, "TestPayment", plaid.PaymentAmount{
-		Currency: "GBP",
-		Value:    100.0,
-	})
+	paymentCreateResp, err := client.CreatePayment(
+		paymentRecipientCreateResp.RecipientID,
+		"TestPayment",
+		plaid.PaymentAmount{
+			Currency: "GBP",
+			Value:    100.0,
+		},
+		nil,
+	)
 	handleError(err)
 	fmt.Println("Payment ID:", paymentCreateResp.PaymentID)
 

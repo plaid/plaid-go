@@ -102,10 +102,16 @@ func commonPaymentTestFlows(t *testing.T, recipientID string, useLinkToken bool)
 	assert.Nil(t, err)
 	assert.True(t, len(paymentRecipientListResp.Recipients) > 0)
 
-	paymentCreateResp, err := testClient.CreatePayment(recipientID, "TestPayment", PaymentAmount{
-		Currency: "GBP",
-		Value:    100.0,
-	})
+	// Verify that we can create a single immediate payment
+	paymentCreateResp, err := testClient.CreatePayment(
+		recipientID,
+		"TestPayment",
+		PaymentAmount{
+			Currency: "GBP",
+			Value:    100.0,
+		},
+		nil,
+	)
 	assert.Nil(t, err)
 	assert.NotNil(t, paymentCreateResp.PaymentID)
 	assert.NotNil(t, paymentCreateResp.Status)
@@ -135,14 +141,46 @@ func commonPaymentTestFlows(t *testing.T, recipientID string, useLinkToken bool)
 		assert.NotNil(t, paymentTokenCreateResp.PaymentTokenExpirationTime)
 	}
 
-	paymentGetResp, err := testClient.GetPayment(paymentCreateResp.PaymentID)
+	paymentGetResp, err := testClient.GetPayment(paymentID)
 	assert.Nil(t, err)
 	assert.NotNil(t, paymentGetResp.PaymentID)
 	assert.NotNil(t, paymentGetResp.Reference)
 	assert.NotNil(t, paymentGetResp.Amount)
+	assert.Nil(t, paymentGetResp.Schedule)
 	assert.NotNil(t, paymentGetResp.Status)
 	assert.NotNil(t, paymentGetResp.LastStatusUpdate)
 	assert.NotNil(t, paymentGetResp.RecipientID)
+
+	// Verify that we can create a standing order
+	currentDate := time.Now()
+	startDate := currentDate.Add(7 * 24 * time.Hour).Format("2006-01-02")
+	standingOrderPaymentCreateResp, err := testClient.CreatePayment(
+		recipientID,
+		"TestPayment",
+		PaymentAmount{
+			Currency: "GBP",
+			Value:    100.0,
+		},
+		&PaymentSchedule{
+			Interval:             "MONTHLY",
+			IntervalExecutionDay: 1,
+			StartDate:            startDate,
+		},
+	)
+	assert.Nil(t, err)
+	assert.NotNil(t, standingOrderPaymentCreateResp.PaymentID)
+	assert.NotNil(t, standingOrderPaymentCreateResp.Status)
+	standingOrderPaymentID := standingOrderPaymentCreateResp.PaymentID
+
+	staindgOrderPaymentGetResp, err := testClient.GetPayment(standingOrderPaymentID)
+	assert.Nil(t, err)
+	assert.NotNil(t, staindgOrderPaymentGetResp.PaymentID)
+	assert.NotNil(t, staindgOrderPaymentGetResp.Reference)
+	assert.NotNil(t, staindgOrderPaymentGetResp.Amount)
+	assert.NotNil(t, staindgOrderPaymentGetResp.Schedule)
+	assert.NotNil(t, staindgOrderPaymentGetResp.Status)
+	assert.NotNil(t, staindgOrderPaymentGetResp.LastStatusUpdate)
+	assert.NotNil(t, staindgOrderPaymentGetResp.RecipientID)
 
 	count := 10
 	paymentListResp, err := testClient.ListPayments(ListPaymentsOptions{Count: &count})
