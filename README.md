@@ -24,7 +24,7 @@ Each major version of `plaid-go` targets a specific version of the Plaid API:
 
 | API version | plaid-go release |
 | ----------- | ------------------ |
-| [`2020-09-14`][api-version-2020-09-14] (**latest**) | `6.x.x` |
+| [`2020-09-14`][api-version-2020-09-14] (**latest**) | `7.x.x` |
 | [`2019-05-29`][api-version-2019-05-29] (**latest**) | `2.x.x` |
 | [`2018-05-22`][api-version-2018-05-22] | `1.x.x` |
 | `2017-03-08` | not supported |
