@@ -3,7 +3,7 @@
 `github.plaid.com/plaid/plaid-go` uses semantic versioning with git tags to
 track releases.
 
-1. Ensure that you have cloned this repository into `$GOPATH/src/github.com/plaid/plaid-go` and set `GO111MODULE=off`
+1. Ensure that you have cloned this repository into `$GOPATH/src/github.com/plaid/plaid-go`
 
 2. Checkout the `master` branch and pull the latest changes:
 
@@ -23,7 +23,7 @@ version bumps:
 - `major`
 
 ```bash
-make release-(patch|minor|major)
+GO111MODULE=off make release-(patch|minor|major)
 ```
 
 The `make release-%` command will do the following executions automatically:
