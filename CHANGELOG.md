@@ -1,3 +1,12 @@
+## 7.0.0
+
+- Add back (deprecated) `/payment_initiation/payment/token/create` endpoint
+- Add back (deprecated) `/item/public_token/create` endpoint
+
+BREAKING CHANGES:
+
+- Add Standing Order support to the `/payment_initiation/payment/create` endpoint
+
 ## 6.0.0
 
 BREAKING CHANGES: 
