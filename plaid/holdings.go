@@ -57,7 +57,7 @@ type GetHoldingsResponse struct {
 }
 
 // GetHoldings retrieves various account holdings for investment accounts.
-// See https://plaid.com/docs/api/#holdings.
+// See https://plaid.com/docs/#holdings.
 func (c *Client) GetHoldings(accessToken string) (resp GetHoldingsResponse, err error) {
 	options := GetHoldingsOptions{
 		AccountIDs: []string{},
@@ -66,7 +66,7 @@ func (c *Client) GetHoldings(accessToken string) (resp GetHoldingsResponse, err 
 }
 
 // GetHoldingsWithOptions retrieves various account holdings for investment accounts.
-// See https://plaid.com/docs/api/#holdings.
+// See https://plaid.com/docs/#holdings.
 func (c *Client) GetHoldingsWithOptions(accessToken string, options GetHoldingsOptions) (resp GetHoldingsResponse, err error) {
 	if accessToken == "" {
 		return resp, errors.New("/investments/holdings/get - access token must be specified")

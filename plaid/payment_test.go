@@ -30,14 +30,14 @@ func TestPaymentWithIban(t *testing.T) {
 	assert.NotNil(t, paymentRecipientGetResp.IBAN)
 	assert.NotNil(t, paymentRecipientGetResp.Address)
 
-	commonPaymentTestFlows(t, recipientID)
+	commonPaymentTestFlows(t, recipientID, true)
 }
 
 func TestPaymentWithBacs(t *testing.T) {
 	params := OptionalRecipientCreateParams{
 		BACS: &PaymentRecipientBacs{
-			Account:  "12345678",
-			SortCode: "010203",
+			Account:  "26207729",
+			SortCode: "560029",
 		},
 		Address: &PaymentRecipientAddress{
 			Street:     []string{"Street Name 999"},
@@ -58,7 +58,7 @@ func TestPaymentWithBacs(t *testing.T) {
 	assert.NotNil(t, paymentRecipientGetResp.BACS)
 	assert.NotNil(t, paymentRecipientGetResp.Address)
 
-	commonPaymentTestFlows(t, recipientID)
+	commonPaymentTestFlows(t, recipientID, true)
 }
 
 func TestPaymentWithBacsAndIban(t *testing.T) {
@@ -66,8 +66,8 @@ func TestPaymentWithBacsAndIban(t *testing.T) {
 
 	params := OptionalRecipientCreateParams{
 		BACS: &PaymentRecipientBacs{
-			Account:  "12345678",
-			SortCode: "010203",
+			Account:  "26207729",
+			SortCode: "560029",
 		},
 		Address: &PaymentRecipientAddress{
 			Street:     []string{"Street Name 999"},
@@ -90,48 +90,97 @@ func TestPaymentWithBacsAndIban(t *testing.T) {
 	assert.NotNil(t, paymentRecipientGetResp.BACS)
 	assert.NotNil(t, paymentRecipientGetResp.Address)
 
-	commonPaymentTestFlows(t, recipientID)
+	// testing common flows with the link_token
+	commonPaymentTestFlows(t, recipientID, true)
+
+	// testing commong flows with the legacy payment_token
+	commonPaymentTestFlows(t, recipientID, false)
 }
 
-func commonPaymentTestFlows(t *testing.T, recipientID string) {
+func commonPaymentTestFlows(t *testing.T, recipientID string, useLinkToken bool) {
 	paymentRecipientListResp, err := testClient.ListPaymentRecipients()
 	assert.Nil(t, err)
 	assert.True(t, len(paymentRecipientListResp.Recipients) > 0)
 
-	paymentCreateResp, err := testClient.CreatePayment(recipientID, "TestPayment", PaymentAmount{
-		Currency: "GBP",
-		Value:    100.0,
-	})
+	// Verify that we can create a single immediate payment
+	paymentCreateResp, err := testClient.CreatePayment(
+		recipientID,
+		"TestPayment",
+		PaymentAmount{
+			Currency: "GBP",
+			Value:    100.0,
+		},
+		nil,
+	)
 	assert.Nil(t, err)
 	assert.NotNil(t, paymentCreateResp.PaymentID)
 	assert.NotNil(t, paymentCreateResp.Status)
 	paymentID := paymentCreateResp.PaymentID
 
-	linkTokenCreateResp, err := testClient.CreateLinkToken(LinkTokenConfigs{
-		User: &LinkTokenUser{
-			ClientUserID: time.Now().String(),
-		},
-		ClientName:   "Plaid Test",
-		Products:     []string{"payment_initiation"},
-		CountryCodes: []string{"US"},
-		Language:     "en",
-		PaymentInitiation: &PaymentInitiation{
-			PaymentID: paymentID,
-		},
-	})
+	if useLinkToken {
+		linkTokenCreateResp, err := testClient.CreateLinkToken(LinkTokenConfigs{
+			User: &LinkTokenUser{
+				ClientUserID: time.Now().String(),
+			},
+			ClientName:   "Plaid Test",
+			Products:     []string{"payment_initiation"},
+			CountryCodes: []string{"US"},
+			Language:     "en",
+			PaymentInitiation: &PaymentInitiation{
+				PaymentID: paymentID,
+			},
+		})
 
-	assert.Nil(t, err)
-	assert.NotNil(t, linkTokenCreateResp.LinkToken)
-	assert.NotNil(t, linkTokenCreateResp.Expiration)
+		assert.Nil(t, err)
+		assert.NotNil(t, linkTokenCreateResp.LinkToken)
+		assert.NotNil(t, linkTokenCreateResp.Expiration)
+	} else {
+		paymentTokenCreateResp, err := testClient.CreatePaymentToken(paymentID)
+		assert.Nil(t, err)
+		assert.NotNil(t, paymentTokenCreateResp.PaymentToken)
+		assert.NotNil(t, paymentTokenCreateResp.PaymentTokenExpirationTime)
+	}
 
-	paymentGetResp, err := testClient.GetPayment(paymentCreateResp.PaymentID)
+	paymentGetResp, err := testClient.GetPayment(paymentID)
 	assert.Nil(t, err)
 	assert.NotNil(t, paymentGetResp.PaymentID)
 	assert.NotNil(t, paymentGetResp.Reference)
 	assert.NotNil(t, paymentGetResp.Amount)
+	assert.Nil(t, paymentGetResp.Schedule)
 	assert.NotNil(t, paymentGetResp.Status)
 	assert.NotNil(t, paymentGetResp.LastStatusUpdate)
 	assert.NotNil(t, paymentGetResp.RecipientID)
+
+	// Verify that we can create a standing order
+	currentDate := time.Now()
+	startDate := currentDate.Add(7 * 24 * time.Hour).Format("2006-01-02")
+	standingOrderPaymentCreateResp, err := testClient.CreatePayment(
+		recipientID,
+		"TestPayment",
+		PaymentAmount{
+			Currency: "GBP",
+			Value:    100.0,
+		},
+		&PaymentSchedule{
+			Interval:             "MONTHLY",
+			IntervalExecutionDay: 1,
+			StartDate:            startDate,
+		},
+	)
+	assert.Nil(t, err)
+	assert.NotNil(t, standingOrderPaymentCreateResp.PaymentID)
+	assert.NotNil(t, standingOrderPaymentCreateResp.Status)
+	standingOrderPaymentID := standingOrderPaymentCreateResp.PaymentID
+
+	staindgOrderPaymentGetResp, err := testClient.GetPayment(standingOrderPaymentID)
+	assert.Nil(t, err)
+	assert.NotNil(t, staindgOrderPaymentGetResp.PaymentID)
+	assert.NotNil(t, staindgOrderPaymentGetResp.Reference)
+	assert.NotNil(t, staindgOrderPaymentGetResp.Amount)
+	assert.NotNil(t, staindgOrderPaymentGetResp.Schedule)
+	assert.NotNil(t, staindgOrderPaymentGetResp.Status)
+	assert.NotNil(t, staindgOrderPaymentGetResp.LastStatusUpdate)
+	assert.NotNil(t, staindgOrderPaymentGetResp.RecipientID)
 
 	count := 10
 	paymentListResp, err := testClient.ListPayments(ListPaymentsOptions{Count: &count})

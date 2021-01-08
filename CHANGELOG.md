@@ -2,7 +2,7 @@
 
 BREAKING CHANGES: 
 
-- The library has been pinned to the '2020-09-14' API release. Visit the [docs](https://plaid.com/docs/api/versioning/) to see what changed.
+- The library has been pinned to the '2020-09-14' API release. Visit the [docs](https://plaid.com/docs/versioning/) to see what changed.
 - the `/item/public_token/create` endpoint has been disabled in favor of the /link/token/create
     endpoint
 - The `/item/add_token/create endpoint` has been disabled in favor of the /link/token/create

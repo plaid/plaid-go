@@ -53,6 +53,15 @@ func TestInvalidateAccessToken(t *testing.T) {
 	assert.NotEmpty(t, newTokenResp.NewAccessToken)
 }
 
+func TestCreatePublicToken(t *testing.T) {
+	sandboxResp, _ := testClient.CreateSandboxPublicToken(sandboxInstitution, testProducts)
+	tokenResp, _ := testClient.ExchangePublicToken(sandboxResp.PublicToken)
+	publicTokenResp, err := testClient.CreatePublicToken(tokenResp.AccessToken)
+
+	assert.Nil(t, err)
+	assert.True(t, strings.HasPrefix(publicTokenResp.PublicToken, "public-sandbox"))
+}
+
 func TestExchangePublicToken(t *testing.T) {
 	sandboxResp, _ := testClient.CreateSandboxPublicToken(sandboxInstitution, testProducts)
 	tokenResp, err := testClient.ExchangePublicToken(sandboxResp.PublicToken)

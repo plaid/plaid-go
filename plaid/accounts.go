@@ -92,7 +92,7 @@ type GetBalancesOptions struct {
 }
 
 // GetBalances returns the real-time balance for each of an Item's accounts.
-// See https://plaid.com/docs/api/#balance.
+// See https://plaid.com/docs/balance/.
 func (c *Client) GetBalances(accessToken string) (resp GetBalancesResponse, err error) {
 	options := GetBalancesOptions{
 		AccountIDs: []string{},
@@ -101,7 +101,7 @@ func (c *Client) GetBalances(accessToken string) (resp GetBalancesResponse, err 
 }
 
 // GetBalancesWithOptions returns the real-time balance for each of an Item's accounts.
-// See https://plaid.com/docs/api/#balance.
+// See https://plaid.com/docs/balance/.
 func (c *Client) GetBalancesWithOptions(accessToken string, options GetBalancesOptions) (resp GetBalancesResponse, err error) {
 	if accessToken == "" {
 		return resp, errors.New("/accounts/balance/get - access token must be specified")
@@ -124,7 +124,7 @@ func (c *Client) GetBalancesWithOptions(accessToken string, options GetBalancesO
 }
 
 // GetAccountsWithOptions retrieves accounts associated with an Item.
-// See https://plaid.com/docs/api/#accounts.
+// See https://plaid.com/docs/api/accounts/.
 func (c *Client) GetAccountsWithOptions(accessToken string, options GetAccountsOptions) (resp GetAccountsResponse, err error) {
 	if accessToken == "" {
 		return resp, errors.New("/accounts/get - access token must be specified")
@@ -149,7 +149,7 @@ func (c *Client) GetAccountsWithOptions(accessToken string, options GetAccountsO
 }
 
 // GetAccounts retrieves accounts associated with an Item.
-// See https://plaid.com/docs/api/#accounts.
+// See https://plaid.com/docs/api/accounts/.
 func (c *Client) GetAccounts(accessToken string) (resp GetAccountsResponse, err error) {
 	options := GetAccountsOptions{
 		AccountIDs: []string{},

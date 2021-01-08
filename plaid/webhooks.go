@@ -29,7 +29,7 @@ type getWebhookVerificationKeyRequest struct {
 }
 
 // GetWebhookVerificationKey retrieves the verification key for a given webhook verification key ID
-// See https://plaid.com/docs/#webhook-verification.
+// See https://plaid.com/docs/api/webhook-verification/.
 func (c *Client) GetWebhookVerificationKey(
 	keyID string,
 ) (resp GetWebhookVerificationKeyResponse, err error) {

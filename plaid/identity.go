@@ -56,7 +56,7 @@ type GetIdentityResponse struct {
 
 // GetIdentity retrieves various account holder information on file with an
 // associated financial institution.
-// See https://plaid.com/docs/api/#identity.
+// See https://plaid.com/docs/identity/.
 func (c *Client) GetIdentity(accessToken string) (resp GetIdentityResponse, err error) {
 	if accessToken == "" {
 		return resp, errors.New("/identity/get - access token must be specified")
