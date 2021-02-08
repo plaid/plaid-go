@@ -10,6 +10,9 @@ A Go client library for the [Plaid API](https://plaid.com/docs).
     * [Documentation](#documentation)
     * [Getting Started](#getting-started)
     * [Developing](#developing)
+    * [Examples](#examples)
+        * [Payment Initiation](#payment-initiation)
+    * [Support](#support)
     * [License](#license)
 
 ## Install
@@ -81,6 +84,49 @@ Once you have these you can run `make test`, passing your Sandbox credentials as
 
 ```shell
 PLAID_CLIENT_ID=aabbcc PLAID_PUBLIC_KEY=ddeeff PLAID_SECRET=ffeedd make test
+```
+
+## Examples
+
+### Payment Initiation
+For more information about this product, head to the [Payment Initiation docs](https://plaid.com/docs/payment-initiation/).
+
+#### Create payment recipient using BACS with no IBAN or address
+```go
+paymentRecipientCreateResp, err := client.CreatePaymentRecipient("John Doe",
+plaid.OptionalRecipientCreateParams{
+		BACS: &plaid.PaymentRecipientBacs{
+			Account:  "26207729",
+			SortCode: "560029",
+		},
+	})
+recipientID := paymentRecipientCreateResp.RecipientID
+```
+
+#### Create payment
+```go
+paymentCreateResp, err := client.CreatePayment(recipientID, "TestPayment", plaid.PaymentAmount{
+		Currency: "GBP",
+		Value:    100.0,
+}, nil)
+paymentID := paymentCreateResp.PaymentID
+paymentStatus := paymentCreateResp.Status
+```
+
+#### Create Link Token (for Payment Initiation only)
+```go
+linkTokenResp, err := client.CreateLinkToken(plaid.LinkTokenConfigs{
+    User: &plaid.LinkTokenUser{
+        ClientUserID: "123-test-user-id",
+    },
+    ClientName:        "Plaid Test App",
+    Products:          []string{"payment_initiation"},
+    CountryCodes:      []string{"GB"},
+    Language:          "en",
+    Webhook:           "https://webhook-uri.com",
+    PaymentInitiation: &plaid.PaymentInitiation{PaymentID: paymentID},
+})
+linkToken := linkTokenResp.LinkToken
 ```
 
 ## Support
