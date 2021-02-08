@@ -95,19 +95,19 @@ For more information about this product, head to the [Payment Initiation docs](h
 ```go
 paymentRecipientCreateResp, err := client.CreatePaymentRecipient("John Doe",
 plaid.OptionalRecipientCreateParams{
-		BACS: &plaid.PaymentRecipientBacs{
-			Account:  "26207729",
-			SortCode: "560029",
-		},
-	})
+    BACS: &plaid.PaymentRecipientBacs{
+        Account:  "26207729",
+        SortCode: "560029",
+    },
+})
 recipientID := paymentRecipientCreateResp.RecipientID
 ```
 
 #### Create payment
 ```go
 paymentCreateResp, err := client.CreatePayment(recipientID, "TestPayment", plaid.PaymentAmount{
-		Currency: "GBP",
-		Value:    100.0,
+    Currency: "GBP",
+    Value:    100.0,
 }, nil)
 paymentID := paymentCreateResp.PaymentID
 paymentStatus := paymentCreateResp.Status
