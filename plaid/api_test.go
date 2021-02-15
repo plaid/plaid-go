@@ -13,7 +13,7 @@ var (
 
 	sandboxInstitution      = "ins_109508"
 	sandboxInstitutionQuery = "Platypus"
-	testProducts            = []string{"auth", "identity", "income", "transactions"}
+	testProducts            = []string{"auth", "identity", "transactions"}
 )
 
 var testOptions = ClientOptions{
