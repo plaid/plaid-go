@@ -1,3 +1,6 @@
+## 7.1.0
+- Add institution status types for health incidents and investment updates
+
 ## 7.0.0
 
 - Add back (deprecated) `/payment_initiation/payment/token/create` endpoint
@@ -9,7 +12,7 @@ BREAKING CHANGES:
 
 ## 6.0.0
 
-BREAKING CHANGES: 
+BREAKING CHANGES:
 
 - The library has been pinned to the '2020-09-14' API release. Visit the [docs](https://plaid.com/docs/versioning/) to see what changed.
 - the `/item/public_token/create` endpoint has been disabled in favor of the /link/token/create
