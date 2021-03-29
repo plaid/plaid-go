@@ -29,11 +29,13 @@ type Institution struct {
 }
 
 type InstitutionStatus struct {
-	ItemLogins          ItemLogins              `json:"item_logins"`
-	TransactionsUpdates InstitutionStatusFields `json:"transactions_updates"`
-	Auth                InstitutionStatusFields `json:"auth"`
-	Balance             InstitutionStatusFields `json:"balance"`
-	Identity            InstitutionStatusFields `json:"identity"`
+	ItemLogins          ItemLogins                       `json:"item_logins"`
+	TransactionsUpdates InstitutionStatusFields          `json:"transactions_updates"`
+	Auth                InstitutionStatusFields          `json:"auth"`
+	Balance             InstitutionStatusFields          `json:"balance"`
+	Identity            InstitutionStatusFields          `json:"identity"`
+	InvestmentUpdates   InstitutionStatusFields          `json:"investments_updates"`
+	HealthIncidents     []InstitutionStatusHealthIncident `json:"health_incidents"`
 }
 
 type ItemLogins struct {
@@ -53,6 +55,19 @@ type InstitutionStatusBreakdown struct {
 	ErrorPlaid       float64 `json:"error_plaid"`
 	ErrorInstitution float64 `json:"error_institution"`
 	RefreshInterval  string  `json:"refresh_interval"` // only applicable to TransactionsUpdates status
+}
+
+type InstitutionStatusHealthIncident struct {
+	StartDate       time.Time                         `json:"start_date"`
+	EndDate         time.Time                         `json:"end_date"`
+	Title           string                            `json:"title"`
+	IncidentUpdates []InstitutionStatusIncidentUpdate `json:"incident_updates"`
+}
+
+type InstitutionStatusIncidentUpdate struct {
+	Description string    `json:"description"`
+	Status      string    `json:"status"`
+	UpdatedDate time.Time `json:"updated_date"`
 }
 
 type Credential struct {
