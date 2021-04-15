@@ -102,12 +102,11 @@ type getInstitutionsRequest struct {
 }
 
 type GetInstitutionsOptions struct {
-	Products                         []string                  `json:"products"`
-	IncludeOptionalMetadata          bool                      `json:"include_optional_metadata"`
-	IncludePaymentInitiationMetadata bool                      `json:"include_payment_initiation_metadata"`
-	OAuth                            *bool                     `json:"oauth"`
-	RoutingNumbers                   []string                  `json:"routing_numbers"`
-	PaymentInitiation                *PaymentInitiationOptions `json:"payment_initiation,omitempty"`
+	Products                         []string `json:"products"`
+	IncludeOptionalMetadata          bool     `json:"include_optional_metadata"`
+	IncludePaymentInitiationMetadata bool     `json:"include_payment_initiation_metadata"`
+	OAuth                            *bool    `json:"oauth"`
+	RoutingNumbers                   []string `json:"routing_numbers"`
 }
 
 type PaymentInitiationOptions struct {
