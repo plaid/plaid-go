@@ -128,10 +128,9 @@ type getInstitutionByIDRequest struct {
 }
 
 type GetInstitutionByIDOptions struct {
-	IncludeOptionalMetadata          bool                      `json:"include_optional_metadata"`
-	IncludePaymentInitiationMetadata bool                      `json:"include_payment_initiation_metadata"`
-	IncludeStatus                    bool                      `json:"include_status"`
-	PaymentInitiation                *PaymentInitiationOptions `json:"payment_initiation,omitempty"`
+	IncludeOptionalMetadata          bool `json:"include_optional_metadata"`
+	IncludePaymentInitiationMetadata bool `json:"include_payment_initiation_metadata"`
+	IncludeStatus                    bool `json:"include_status"`
 }
 
 type GetInstitutionByIDResponse struct {
