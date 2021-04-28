@@ -11,9 +11,11 @@ var (
 	testSecret   = os.Getenv("PLAID_SECRET")
 	testEnv      = Sandbox
 
-	sandboxInstitution      = "ins_109508"
-	sandboxInstitutionQuery = "Platypus"
-	testProducts            = []string{"auth", "identity", "transactions"}
+	sandboxInstitution                               = "ins_109508"
+	sandboxInstitutionQuery                          = "Platypus"
+	paymentInitiationMetadataSandboxInstitution      = "ins_117650"
+	paymentInitiationMetadataSandboxInstitutionQuery = "Royal Bank of Plaid"
+	testProducts                                     = []string{"auth", "identity", "transactions"}
 )
 
 var testOptions = ClientOptions{

@@ -26,15 +26,31 @@ type Institution struct {
 	URL string `json:"url,omitempty"`
 	// Included when `options.include_optional_metadata` is true.
 	Logo string `json:"logo,omitempty"`
+
+	// Included when `options.include_payment_initiation_metadata` is true.
+	PaymentInitiationMetadata *PaymentInitiationMetadata `json:"payment_initiation_metadata,omitempty"`
+}
+
+type PaymentInitiationMetadata struct {
+	MaximumPaymentAmount          map[string]string      `json:"maximum_payment_amount"`
+	StandingOrderMetadata         *StandingOrderMetadata `json:"standing_order_metadata"`
+	SupportsInternationalPayments bool                   `json:"supports_international_payments"`
+	SupportsRefundDetails         bool                   `json:"supports_refund_details"`
+}
+
+type StandingOrderMetadata struct {
+	SupportsStandingOrderEndDate               bool     `json:"supports_standing_order_end_date"`
+	SupportsStandingOrderNegativeExecutionDays bool     `json:"supports_standing_order_negative_execution_days"`
+	ValidStandingOrderIntervals                []string `json:"valid_standing_order_intervals"`
 }
 
 type InstitutionStatus struct {
-	ItemLogins          ItemLogins                       `json:"item_logins"`
-	TransactionsUpdates InstitutionStatusFields          `json:"transactions_updates"`
-	Auth                InstitutionStatusFields          `json:"auth"`
-	Balance             InstitutionStatusFields          `json:"balance"`
-	Identity            InstitutionStatusFields          `json:"identity"`
-	InvestmentUpdates   InstitutionStatusFields          `json:"investments_updates"`
+	ItemLogins          ItemLogins                        `json:"item_logins"`
+	TransactionsUpdates InstitutionStatusFields           `json:"transactions_updates"`
+	Auth                InstitutionStatusFields           `json:"auth"`
+	Balance             InstitutionStatusFields           `json:"balance"`
+	Identity            InstitutionStatusFields           `json:"identity"`
+	InvestmentUpdates   InstitutionStatusFields           `json:"investments_updates"`
 	HealthIncidents     []InstitutionStatusHealthIncident `json:"health_incidents"`
 }
 
@@ -86,10 +102,15 @@ type getInstitutionsRequest struct {
 }
 
 type GetInstitutionsOptions struct {
-	Products                []string `json:"products"`
-	IncludeOptionalMetadata bool     `json:"include_optional_metadata"`
-	OAuth                   *bool    `json:"oauth"`
-	RoutingNumbers          []string `json:"routing_numbers"`
+	Products                         []string `json:"products"`
+	IncludeOptionalMetadata          bool     `json:"include_optional_metadata"`
+	IncludePaymentInitiationMetadata bool     `json:"include_payment_initiation_metadata"`
+	OAuth                            *bool    `json:"oauth"`
+	RoutingNumbers                   []string `json:"routing_numbers"`
+}
+
+type PaymentInitiationOptions struct {
+	PaymentID string `json:"payment_id"`
 }
 
 type GetInstitutionsResponse struct {
@@ -107,8 +128,9 @@ type getInstitutionByIDRequest struct {
 }
 
 type GetInstitutionByIDOptions struct {
-	IncludeOptionalMetadata bool `json:"include_optional_metadata"`
-	IncludeStatus           bool `json:"include_status"`
+	IncludeOptionalMetadata          bool `json:"include_optional_metadata"`
+	IncludePaymentInitiationMetadata bool `json:"include_payment_initiation_metadata"`
+	IncludeStatus                    bool `json:"include_status"`
 }
 
 type GetInstitutionByIDResponse struct {
@@ -126,9 +148,11 @@ type searchInstitutionsRequest struct {
 }
 
 type SearchInstitutionsOptions struct {
-	IncludeOptionalMetadata bool                   `json:"include_optional_metadata"`
-	AccountFilter           map[string]interface{} `json:"account_filter"`
-	OAuth                   *bool                  `json:"oauth"`
+	IncludeOptionalMetadata          bool                      `json:"include_optional_metadata"`
+	IncludePaymentInitiationMetadata bool                      `json:"include_payment_initiation_metadata"`
+	AccountFilter                    map[string]interface{}    `json:"account_filter"`
+	OAuth                            *bool                     `json:"oauth"`
+	PaymentInitiation                *PaymentInitiationOptions `json:"payment_initiation,omitempty"`
 }
 
 type SearchInstitutionsResponse struct {
