@@ -2,6 +2,7 @@ package plaid
 
 import (
 	"testing"
+	"time"
 
 	assert "github.com/stretchr/testify/require"
 )
@@ -46,4 +47,26 @@ func TestGetBalances(t *testing.T) {
 	balanceResp, err = testClient.GetBalancesWithOptions(tokenResp.AccessToken, options)
 	assert.Nil(t, err)
 	assert.Equal(t, len(balanceResp.Accounts), 1)
+}
+
+func TestGetBalancesWithMinDatetime(t *testing.T) {
+	sandboxResp, _ := testClient.CreateSandboxPublicToken(balanceDatetimeInstitution, testProducts)
+	tokenResp, _ := testClient.ExchangePublicToken(sandboxResp.PublicToken)
+
+	format := "2006-01-02T15:04:05-07:00"
+
+	// get all balances and check for datetime
+	options := GetBalancesOptions{
+		MinLastUpdatedDatetime: time.Now().AddDate(0, 0, -2).UTC().Format(format),
+	}
+	balanceResp, err := testClient.GetBalancesWithOptions(tokenResp.AccessToken, options)
+	assert.Nil(t, err)
+	assert.NotNil(t, balanceResp.Accounts)
+	assert.NotEqual(t, balanceResp.Accounts[0].Balances.LastUpdatedDatetime, "")
+
+	// assert a min last updated datetime that will fail
+	options.MinLastUpdatedDatetime = time.Now().UTC().Format(format)
+	_, err = testClient.GetBalancesWithOptions(tokenResp.AccessToken, options)
+	assert.NotNil(t, err)
+	assert.Equal(t, err.(Error).ErrorCode, "LAST_UPDATED_DATETIME_OUT_OF_RANGE")
 }
