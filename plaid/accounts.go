@@ -22,6 +22,7 @@ type AccountBalances struct {
 	Limit                  float64 `json:"limit"`
 	ISOCurrencyCode        string  `json:"iso_currency_code"`
 	UnofficialCurrencyCode string  `json:"unofficial_currency_code"`
+	LastUpdatedDatetime    string  `json:"last_updated_datetime"`
 }
 
 type ACHNumber struct {
@@ -51,7 +52,8 @@ type BACSNumber struct {
 }
 
 type getBalancesRequestOptions struct {
-	AccountIDs []string `json:"account_ids,omitempty"`
+	AccountIDs             []string `json:"account_ids,omitempty"`
+	MinLastUpdatedDatetime string   `json:"min_last_updated_datetime,omitempty"`
 }
 
 type getBalancesRequest struct {
@@ -80,7 +82,7 @@ type getAccountsRequest struct {
 type GetAccountsResponse struct {
 	APIResponse
 	Accounts []Account `json:"accounts"`
-	Item Item `json:"item"`
+	Item     Item      `json:"item"`
 }
 
 type GetAccountsOptions struct {
@@ -88,7 +90,8 @@ type GetAccountsOptions struct {
 }
 
 type GetBalancesOptions struct {
-	AccountIDs []string
+	AccountIDs             []string
+	MinLastUpdatedDatetime string
 }
 
 // GetBalances returns the real-time balance for each of an Item's accounts.
@@ -113,6 +116,9 @@ func (c *Client) GetBalancesWithOptions(accessToken string, options GetBalancesO
 	}
 	if len(options.AccountIDs) > 0 {
 		req.Options.AccountIDs = options.AccountIDs
+	}
+	if options.MinLastUpdatedDatetime != "" {
+		req.Options.MinLastUpdatedDatetime = options.MinLastUpdatedDatetime
 	}
 	jsonBody, err := json.Marshal(req)
 	if err != nil {
