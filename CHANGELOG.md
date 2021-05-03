@@ -1,3 +1,7 @@
+## 7.2.0
+- Add support for `last_updated_datetime` to `/accounts/balance/get`
+- Add Standing Orders support to Payment Initiation
+
 ## 7.1.0
 - Add institution status types for health incidents and investment updates
 
