@@ -131,11 +131,18 @@ type PaymentSchedule struct {
 }
 
 type createPaymentRequest struct {
-	ClientID    string        `json:"client_id"`
-	Secret      string        `json:"secret"`
-	RecipientID string        `json:"recipient_id"`
-	Reference   string        `json:"reference"`
-	Amount      PaymentAmount `json:"amount"`
+	ClientID    string          `json:"client_id"`
+	Secret      string          `json:"secret"`
+	RecipientID string          `json:"recipient_id"`
+	Reference   string          `json:"reference"`
+	Amount      PaymentAmount   `json:"amount"`
+	Options     *PaymentOptions `json:"options,omitempty"`
+}
+
+type PaymentOptions struct {
+	BACS                 *PaymentRecipientBacs `json:"bacs,omitempty"`
+	IBAN                 *string               `json:"iban,omitempty"`
+	RequestRefundDetails *bool                 `json:"request_refund_details,omitempty"`
 }
 
 type createStandingOrderRequest struct {
@@ -145,6 +152,7 @@ type createStandingOrderRequest struct {
 	Reference   string           `json:"reference"`
 	Amount      PaymentAmount    `json:"amount"`
 	Schedule    *PaymentSchedule `json:"schedule"`
+	Options     *PaymentOptions  `json:"options,omitempty"`
 }
 
 type CreatePaymentResponse struct {
@@ -158,6 +166,7 @@ func (c *Client) CreatePayment(
 	reference string,
 	amount PaymentAmount,
 	schedule *PaymentSchedule,
+	options *PaymentOptions,
 ) (resp CreatePaymentResponse, err error) {
 	var jsonBody []byte
 	if schedule == nil {
@@ -167,6 +176,7 @@ func (c *Client) CreatePayment(
 			RecipientID: recipientID,
 			Reference:   reference,
 			Amount:      amount,
+			Options:     options,
 		})
 	} else {
 		jsonBody, err = json.Marshal(createStandingOrderRequest{
@@ -176,8 +186,10 @@ func (c *Client) CreatePayment(
 			Reference:   reference,
 			Amount:      amount,
 			Schedule:    schedule,
+			Options:     options,
 		})
 	}
+
 	if err != nil {
 		return resp, err
 	}

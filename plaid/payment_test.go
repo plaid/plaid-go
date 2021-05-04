@@ -30,7 +30,7 @@ func TestPaymentWithIban(t *testing.T) {
 	assert.NotNil(t, paymentRecipientGetResp.IBAN)
 	assert.NotNil(t, paymentRecipientGetResp.Address)
 
-	commonPaymentTestFlows(t, recipientID, true)
+	commonPaymentTestFlows(t, recipientID, true, false)
 }
 
 func TestPaymentWithBacs(t *testing.T) {
@@ -58,7 +58,7 @@ func TestPaymentWithBacs(t *testing.T) {
 	assert.NotNil(t, paymentRecipientGetResp.BACS)
 	assert.NotNil(t, paymentRecipientGetResp.Address)
 
-	commonPaymentTestFlows(t, recipientID, true)
+	commonPaymentTestFlows(t, recipientID, true, false)
 }
 
 func TestPaymentWithBacsAndIban(t *testing.T) {
@@ -91,16 +91,28 @@ func TestPaymentWithBacsAndIban(t *testing.T) {
 	assert.NotNil(t, paymentRecipientGetResp.Address)
 
 	// testing common flows with the link_token
-	commonPaymentTestFlows(t, recipientID, true)
+	commonPaymentTestFlows(t, recipientID, true, false)
 
-	// testing commong flows with the legacy payment_token
-	commonPaymentTestFlows(t, recipientID, false)
+	// testing common flows with the legacy payment_token
+	commonPaymentTestFlows(t, recipientID, false, false)
+
+	// testing common flows with options
+	commonPaymentTestFlows(t, recipientID, false, true)
 }
 
-func commonPaymentTestFlows(t *testing.T, recipientID string, useLinkToken bool) {
+func commonPaymentTestFlows(t *testing.T, recipientID string, useLinkToken bool, useOptions bool) {
 	paymentRecipientListResp, err := testClient.ListPaymentRecipients()
 	assert.Nil(t, err)
 	assert.True(t, len(paymentRecipientListResp.Recipients) > 0)
+
+	var options PaymentOptions
+	if useOptions == true {
+		options = PaymentOptions{
+			BACS:                 nil,
+			IBAN:                 nil,
+			RequestRefundDetails: nil,
+		}
+	}
 
 	// Verify that we can create a single immediate payment
 	paymentCreateResp, err := testClient.CreatePayment(
@@ -111,6 +123,7 @@ func commonPaymentTestFlows(t *testing.T, recipientID string, useLinkToken bool)
 			Value:    100.0,
 		},
 		nil,
+		&options,
 	)
 	assert.Nil(t, err)
 	assert.NotNil(t, paymentCreateResp.PaymentID)
@@ -166,6 +179,7 @@ func commonPaymentTestFlows(t *testing.T, recipientID string, useLinkToken bool)
 			IntervalExecutionDay: 1,
 			StartDate:            startDate,
 		},
+		nil,
 	)
 	assert.Nil(t, err)
 	assert.NotNil(t, standingOrderPaymentCreateResp.PaymentID)
