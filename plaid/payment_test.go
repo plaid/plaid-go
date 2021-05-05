@@ -115,7 +115,7 @@ func commonPaymentTestFlows(t *testing.T, recipientID string, useLinkToken bool,
 	}
 
 	// Verify that we can create a single immediate payment
-	paymentCreateResp, err := testClient.CreatePayment(
+	paymentCreateResp, err := testClient.CreatePaymentWithOptions(
 		recipientID,
 		"TestPayment",
 		PaymentAmount{
@@ -179,7 +179,6 @@ func commonPaymentTestFlows(t *testing.T, recipientID string, useLinkToken bool,
 			IntervalExecutionDay: 1,
 			StartDate:            startDate,
 		},
-		nil,
 	)
 	assert.Nil(t, err)
 	assert.NotNil(t, standingOrderPaymentCreateResp.PaymentID)
