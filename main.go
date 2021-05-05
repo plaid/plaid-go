@@ -116,7 +116,6 @@ func main() {
 			Value:    100.0,
 		},
 		nil,
-		nil,
 	)
 	handleError(err)
 	fmt.Println("Payment ID:", paymentCreateResp.PaymentID)
