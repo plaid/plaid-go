@@ -167,7 +167,30 @@ func (c *Client) CreatePayment(
 	amount PaymentAmount,
 	schedule *PaymentSchedule,
 ) (resp CreatePaymentResponse, err error) {
-	return c.CreatePaymentWithOptions(recipientID, reference, amount, schedule, nil)
+	var jsonBody []byte
+	if schedule == nil {
+		jsonBody, err = json.Marshal(createPaymentRequest{
+			ClientID:    c.clientID,
+			Secret:      c.secret,
+			RecipientID: recipientID,
+			Reference:   reference,
+			Amount:      amount,
+		})
+	} else {
+		jsonBody, err = json.Marshal(createStandingOrderRequest{
+			ClientID:    c.clientID,
+			Secret:      c.secret,
+			RecipientID: recipientID,
+			Reference:   reference,
+			Amount:      amount,
+			Schedule:    schedule,
+		})
+	}
+
+	if err != nil {
+		return resp, err
+	}
+	return c.createPayment(jsonBody)
 }
 
 func (c *Client) CreatePaymentWithOptions(
@@ -175,7 +198,7 @@ func (c *Client) CreatePaymentWithOptions(
 	reference string,
 	amount PaymentAmount,
 	schedule *PaymentSchedule,
-	options *PaymentOptions,
+	options PaymentOptions,
 ) (resp CreatePaymentResponse, err error) {
 	paymentRequest := createPaymentRequest{
 		ClientID:    c.clientID,
@@ -183,10 +206,9 @@ func (c *Client) CreatePaymentWithOptions(
 		RecipientID: recipientID,
 		Reference:   reference,
 		Amount:      amount,
+		Options:     &options,
 	}
-	if options != nil {
-		paymentRequest.Options = options
-	}
+
 	var jsonBody []byte
 	if schedule == nil {
 		jsonBody, err = json.Marshal(paymentRequest)
@@ -205,7 +227,10 @@ func (c *Client) CreatePaymentWithOptions(
 	if err != nil {
 		return resp, err
 	}
+	return c.createPayment(jsonBody)
+}
 
+func (c *Client) createPayment(jsonBody []byte) (resp CreatePaymentResponse, err error) {
 	err = c.Call("/payment_initiation/payment/create", jsonBody, &resp)
 	return resp, err
 }
