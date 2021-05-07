@@ -131,20 +131,19 @@ type PaymentSchedule struct {
 }
 
 type createPaymentRequest struct {
-	ClientID    string        `json:"client_id"`
-	Secret      string        `json:"secret"`
-	RecipientID string        `json:"recipient_id"`
-	Reference   string        `json:"reference"`
-	Amount      PaymentAmount `json:"amount"`
-}
-
-type createStandingOrderRequest struct {
 	ClientID    string           `json:"client_id"`
 	Secret      string           `json:"secret"`
 	RecipientID string           `json:"recipient_id"`
 	Reference   string           `json:"reference"`
 	Amount      PaymentAmount    `json:"amount"`
-	Schedule    *PaymentSchedule `json:"schedule"`
+	Schedule    *PaymentSchedule `json:"schedule,omitempty"`
+	Options     *PaymentOptions  `json:"options,omitempty"`
+}
+
+type PaymentOptions struct {
+	BACS                 *PaymentRecipientBacs `json:"bacs,omitempty"`
+	IBAN                 *string               `json:"iban,omitempty"`
+	RequestRefundDetails *bool                 `json:"request_refund_details,omitempty"`
 }
 
 type CreatePaymentResponse struct {
@@ -160,28 +159,48 @@ func (c *Client) CreatePayment(
 	schedule *PaymentSchedule,
 ) (resp CreatePaymentResponse, err error) {
 	var jsonBody []byte
-	if schedule == nil {
-		jsonBody, err = json.Marshal(createPaymentRequest{
-			ClientID:    c.clientID,
-			Secret:      c.secret,
-			RecipientID: recipientID,
-			Reference:   reference,
-			Amount:      amount,
-		})
-	} else {
-		jsonBody, err = json.Marshal(createStandingOrderRequest{
-			ClientID:    c.clientID,
-			Secret:      c.secret,
-			RecipientID: recipientID,
-			Reference:   reference,
-			Amount:      amount,
-			Schedule:    schedule,
-		})
-	}
+	jsonBody, err = json.Marshal(createPaymentRequest{
+		ClientID:    c.clientID,
+		Secret:      c.secret,
+		RecipientID: recipientID,
+		Reference:   reference,
+		Amount:      amount,
+		Schedule:    schedule,
+	})
+
 	if err != nil {
 		return resp, err
 	}
+	return c.createPayment(jsonBody)
+}
 
+func (c *Client) CreatePaymentWithOptions(
+	recipientID string,
+	reference string,
+	amount PaymentAmount,
+	schedule *PaymentSchedule,
+	options PaymentOptions,
+) (resp CreatePaymentResponse, err error) {
+	paymentRequest := createPaymentRequest{
+		ClientID:    c.clientID,
+		Secret:      c.secret,
+		RecipientID: recipientID,
+		Reference:   reference,
+		Amount:      amount,
+		Options:     &options,
+		Schedule:    schedule,
+	}
+
+	var jsonBody []byte
+	jsonBody, err = json.Marshal(paymentRequest)
+
+	if err != nil {
+		return resp, err
+	}
+	return c.createPayment(jsonBody)
+}
+
+func (c *Client) createPayment(jsonBody []byte) (resp CreatePaymentResponse, err error) {
 	err = c.Call("/payment_initiation/payment/create", jsonBody, &resp)
 	return resp, err
 }

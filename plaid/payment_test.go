@@ -30,7 +30,7 @@ func TestPaymentWithIban(t *testing.T) {
 	assert.NotNil(t, paymentRecipientGetResp.IBAN)
 	assert.NotNil(t, paymentRecipientGetResp.Address)
 
-	commonPaymentTestFlows(t, recipientID, true)
+	commonPaymentTestFlows(t, recipientID, true, false)
 }
 
 func TestPaymentWithBacs(t *testing.T) {
@@ -58,7 +58,7 @@ func TestPaymentWithBacs(t *testing.T) {
 	assert.NotNil(t, paymentRecipientGetResp.BACS)
 	assert.NotNil(t, paymentRecipientGetResp.Address)
 
-	commonPaymentTestFlows(t, recipientID, true)
+	commonPaymentTestFlows(t, recipientID, true, false)
 }
 
 func TestPaymentWithBacsAndIban(t *testing.T) {
@@ -91,27 +91,52 @@ func TestPaymentWithBacsAndIban(t *testing.T) {
 	assert.NotNil(t, paymentRecipientGetResp.Address)
 
 	// testing common flows with the link_token
-	commonPaymentTestFlows(t, recipientID, true)
+	commonPaymentTestFlows(t, recipientID, true, false)
 
-	// testing commong flows with the legacy payment_token
-	commonPaymentTestFlows(t, recipientID, false)
+	// testing common flows with the legacy payment_token
+	commonPaymentTestFlows(t, recipientID, false, false)
+
+	// testing common flows with options
+	commonPaymentTestFlows(t, recipientID, false, true)
 }
 
-func commonPaymentTestFlows(t *testing.T, recipientID string, useLinkToken bool) {
+func commonPaymentTestFlows(t *testing.T, recipientID string, useLinkToken bool, useOptions bool) {
 	paymentRecipientListResp, err := testClient.ListPaymentRecipients()
 	assert.Nil(t, err)
 	assert.True(t, len(paymentRecipientListResp.Recipients) > 0)
+	var paymentCreateResp CreatePaymentResponse
+	var options PaymentOptions
+	if useOptions == true {
+		requestRefundDetails := true
+		options = PaymentOptions{
+			BACS: &PaymentRecipientBacs{
+				Account:  "1234567890",
+				SortCode: "000000",
+			},
+			RequestRefundDetails: &requestRefundDetails,
+		}
+		paymentCreateResp, err = testClient.CreatePaymentWithOptions(
+			recipientID,
+			"TestPayment",
+			PaymentAmount{
+				Currency: "GBP",
+				Value:    100.0,
+			},
+			nil,
+			options,
+		)
+	} else {
+		paymentCreateResp, err = testClient.CreatePayment(
+			recipientID,
+			"TestPayment",
+			PaymentAmount{
+				Currency: "GBP",
+				Value:    100.0,
+			},
+			nil,
+		)
+	}
 
-	// Verify that we can create a single immediate payment
-	paymentCreateResp, err := testClient.CreatePayment(
-		recipientID,
-		"TestPayment",
-		PaymentAmount{
-			Currency: "GBP",
-			Value:    100.0,
-		},
-		nil,
-	)
 	assert.Nil(t, err)
 	assert.NotNil(t, paymentCreateResp.PaymentID)
 	assert.NotNil(t, paymentCreateResp.Status)
