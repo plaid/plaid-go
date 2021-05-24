@@ -1,5 +1,7 @@
 # plaid-go [![CircleCI](https://circleci.com/gh/plaid/plaid-go.svg?style=svg)](https://circleci.com/gh/plaid/plaid-go) [![GoDoc](https://godoc.org/github.com/plaid/plaid-go?status.svg)](https://godoc.org/github.com/plaid/plaid-go/plaid)
 
+:warning: After 8/16/21, this major version of the library will only receive critical security patches. We are planning on releasing a generated beta soon.
+
 A Go client library for the [Plaid API](https://plaid.com/docs).
 
 ## Table of Contents
