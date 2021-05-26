@@ -1,12 +1,20 @@
 package plaid
 
-type Environment string
+type Environment struct {
+	URL string
+}
 
-const (
-	Sandbox     Environment = "https://sandbox.plaid.com"
-	Development Environment = "https://development.plaid.com"
-	Production  Environment = "https://production.plaid.com"
-)
+var Sandbox = Environment{
+	URL: "https://sandbox.plaid.com",
+}
+
+var Development = Environment{
+	URL: "https://development.plaid.com",
+}
+
+var Production = Environment{
+	URL: "https://production.plaid.com",
+}
 
 var validEnvironments = [...]Environment{
 	Sandbox,
