@@ -32,6 +32,26 @@ type AssetReportUser struct {
 	SSN         string `json:"ssn"`
 }
 
+type CreateAssetReportOptions struct {
+	ClientReportID string           `json:"client_report_id"`
+	Webhook        string           `json:"webhook"`
+	User           *AssetReportUser `json:"user,omitempty"`
+}
+
+type createAssetReportRequest struct {
+	ClientID      string                    `json:"client_id"`
+	Secret        string                    `json:"secret"`
+	AccessTokens  []string                  `json:"access_tokens"`
+	DaysRequested int                       `json:"days_requested"`
+	Options       *CreateAssetReportOptions `json:"options,omitempty"`
+}
+
+type CreateAssetReportResponse struct {
+	APIResponse
+	AssetReportToken string `json:"asset_report_token"`
+	AssetReportID    string `json:"asset_report_id"`
+}
+
 type getAssetReportRequest struct {
 	ClientID         string `json:"client_id"`
 	Secret           string `json:"secret"`
@@ -65,6 +85,39 @@ type createAuditCopyRequest struct {
 type CreateAuditCopyTokenResponse struct {
 	APIResponse
 	AuditCopyToken string `json:"audit_copy_token"`
+}
+
+type removeAuditCopyRequest struct {
+	ClientID       string `json:"client_id"`
+	Secret         string `json:"secret"`
+	AuditCopyToken string `json:"audit_copy_token"`
+}
+
+type RemoveAuditCopyResponse struct {
+	APIResponse
+	RequestID string `json:"request_id"`
+	Removed   bool   `json:"removed"`
+}
+
+func (c *Client) CreateAssetReport(accessTokens []string, daysRequested int, options *CreateAssetReportOptions) (resp CreateAssetReportResponse, err error) {
+	if len(accessTokens) == 0 || accessTokens[0] == "" || daysRequested == 0 {
+		return resp, errors.New("/asset_report/create - access token and days requested must be specified")
+	}
+
+	jsonBody, err := json.Marshal(createAssetReportRequest{
+		ClientID:      c.clientID,
+		Secret:        c.secret,
+		AccessTokens:  accessTokens,
+		DaysRequested: daysRequested,
+		Options:       options,
+	})
+
+	if err != nil {
+		return resp, err
+	}
+
+	err = c.Call("/asset_report/create", jsonBody, &resp)
+	return resp, err
 }
 
 func (c *Client) GetAssetReport(assetReportToken string) (resp GetAssetReportResponse, err error) {
@@ -122,5 +175,24 @@ func (c *Client) RemoveAssetReport(assetReportToken string) (resp RemoveAssetRep
 	}
 
 	err = c.Call("/asset_report/remove", jsonBody, &resp)
+	return resp, err
+}
+
+func (c *Client) RemoveAuditCopy(auditCopyToken string) (resp RemoveAuditCopyResponse, err error) {
+	if auditCopyToken == "" {
+		return resp, errors.New("/asset_report/audit_copy/remove - audit copy token must be specified")
+	}
+
+	jsonBody, err := json.Marshal(removeAuditCopyRequest{
+		ClientID:       c.clientID,
+		Secret:         c.secret,
+		AuditCopyToken: auditCopyToken,
+	})
+
+	if err != nil {
+		return resp, err
+	}
+
+	err = c.Call("/asset_report/audit_copy/remove", jsonBody, &resp)
 	return resp, err
 }

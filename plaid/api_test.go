@@ -16,7 +16,7 @@ var (
 	paymentInitiationMetadataSandboxInstitution      = "ins_117650"
 	paymentInitiationMetadataSandboxInstitutionQuery = "Royal Bank of Plaid"
 	balanceDatetimeInstitution                       = "ins_130016"
-	testProducts                                     = []string{"auth", "identity", "transactions"}
+	testProducts                                     = []string{"auth", "identity", "transactions", "assets"}
 )
 
 var testOptions = ClientOptions{
