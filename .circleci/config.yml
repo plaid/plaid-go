@@ -1,9 +1,13 @@
 version: 2
+
 jobs:
   build:
-    docker:
-    - image: circleci/golang:1.9
-    working_directory: /go/src/github.com/plaid/plaid-go
+    machine: true
     steps:
-    - checkout
-    - run: make setup test lint
+      - checkout
+      - run:
+        name: Build Docker image for running go trests
+        command: docker build -t plaid-go .
+      - run:
+        name: Run go tests in Docker
+        command: docker run --rm -e CLIENT_ID=$CLIENT_ID -e SECRET=$SECRET plaid-go
