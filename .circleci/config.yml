@@ -6,8 +6,8 @@ jobs:
     steps:
       - checkout
       - run:
-        name: Build Docker image for running go trests
-        command: docker build -t plaid-go .
+          name: Build Docker image for running go trests
+          command: docker build -t plaid-go .
       - run:
-        name: Run go tests in Docker
-        command: docker run --rm -e CLIENT_ID=$CLIENT_ID -e SECRET=$SECRET plaid-go
+          name: Run go tests in Docker
+          command: docker run --rm -e CLIENT_ID=$CLIENT_ID -e SECRET=$SECRET plaid-go
