@@ -2,6 +2,7 @@
 
 :warning: After 8/16/21, this major version of the library will only receive critical security patches. Please consider trying our [beta generated version](https://github.com/plaid/plaid-go/tree/0.1.0-beta-release).
 
+
 A Go client library for the [Plaid API](https://plaid.com/docs).
 
 ## Table of Contents
