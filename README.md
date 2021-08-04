@@ -15,6 +15,8 @@ The official beta Go client library for the [Plaid API](https://plaid.com/docs).
 
 ## Install
 
+Versions look something like `v0.1.0-beta.1`.
+
 Edit your go.mod to include `github.com/plaid/plaid-go {VERSION}`
 
 ```console
