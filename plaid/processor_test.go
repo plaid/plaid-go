@@ -63,6 +63,8 @@ func TestCreateOcrolusToken(t *testing.T) {
 	assert.Nil(t, err)
 	accountID := accountsResp.Accounts[0].AccountID
 
+	t.Skip("CircleCI is not setup to work with ocrolus")
+
 	ocrolusTokenResp, err := testClient.CreateOcrolusToken(tokenResp.AccessToken, accountID)
 	assert.Nil(t, err)
 	assert.True(t, strings.HasPrefix(ocrolusTokenResp.ProcessorToken, "processor-sandbox-"))
