@@ -38,7 +38,7 @@ To call an endpoint, you must create a Plaid API client. Here's how to configure
 configuration := plaid.NewConfiguration()
 configuration.AddDefaultHeader("PLAID-CLIENT-ID", {VALUE})
 configuration.AddDefaultHeader("PLAID-SECRET", {VALUE})
-configuration.UseEnvironment(plaid.Environment.Production)
+configuration.UseEnvironment(plaid.Production)
 client := plaid.NewAPIClient(configuration)
 ```
 
