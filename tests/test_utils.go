@@ -6,13 +6,21 @@ import (
 	"testing"
 
 	plaid "github.com/plaid/plaid-go"
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/assert"
 )
 
 const (
 	FIRST_PLATYPUS_BANK = "ins_109508"
 	PLATYPUS_OAUTH_BANK = "ins_127287"
+	iso8601TimeFormat   = "2006-01-02"
+	RFC3339Nano         = "2006-01-02T15:04:05.999999999Z07:00"
 )
+
+var testProducts = []plaid.Products{
+	plaid.PRODUCTS_AUTH,
+	plaid.PRODUCTS_IDENTITY,
+	plaid.PRODUCTS_TRANSACTIONS,
+}
 
 func NewTestClient() *plaid.APIClient {
 	configuration := plaid.NewConfiguration()
@@ -32,16 +40,29 @@ func createSandboxItem(t *testing.T, ctx context.Context, client *plaid.APIClien
 		),
 	).Execute()
 
-	require.NotNil(t, sandboxPublicTokenResp)
-	require.NoError(t, err)
+	assert.NotNil(t, sandboxPublicTokenResp)
+	assert.NoError(t, err)
 
 	// exchange the public_token for an access_token
 	exchangePublicTokenResp, _, err := client.PlaidApi.ItemPublicTokenExchange(ctx).ItemPublicTokenExchangeRequest(
 		*plaid.NewItemPublicTokenExchangeRequest(sandboxPublicTokenResp.GetPublicToken()),
 	).Execute()
 
-	require.NotNil(t, exchangePublicTokenResp)
-	require.NoError(t, err)
+	assert.NotNil(t, exchangePublicTokenResp)
+	assert.NoError(t, err)
 
 	return exchangePublicTokenResp.GetAccessToken()
+}
+
+func importSandboxItem(t *testing.T, ctx context.Context, client *plaid.APIClient, userID string, authToken string, products []plaid.Products) string {
+	accessTokenResp, _, err := client.PlaidApi.ItemImport(ctx).ItemImportRequest(
+		*plaid.NewItemImportRequest(
+			products,
+			*plaid.NewItemImportRequestUserAuth(userID, authToken),
+		),
+	).Execute()
+
+	assert.NoError(t, err)
+	assert.NotEmpty(t, accessTokenResp.GetAccessToken())
+	return accessTokenResp.GetAccessToken()
 }

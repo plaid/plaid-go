@@ -59,6 +59,7 @@ model_auth_get_request.go
 model_auth_get_request_options.go
 model_auth_get_response.go
 model_automatically_verified_webhook.go
+model_bank_initiated_return_risk.go
 model_bank_transfer.go
 model_bank_transfer_balance.go
 model_bank_transfer_balance_get_request.go
@@ -94,6 +95,7 @@ model_connected_application.go
 model_country_code.go
 model_credit_card_liability.go
 model_credit_filter.go
+model_customer_initiated_return_risk.go
 model_default_update_webhook.go
 model_deposit_switch_address_data.go
 model_deposit_switch_alt_create_request.go
@@ -141,6 +143,8 @@ model_income_verification_documents_download_request.go
 model_income_verification_documents_download_response.go
 model_income_verification_paystubs_get_request.go
 model_income_verification_paystubs_get_response.go
+model_income_verification_refresh_request.go
+model_income_verification_refresh_response.go
 model_income_verification_status_webhook.go
 model_income_verification_summary_get_request.go
 model_income_verification_summary_get_response.go
@@ -192,7 +196,10 @@ model_item_public_token_exchange_response.go
 model_item_remove_request.go
 model_item_remove_response.go
 model_item_status.go
+model_item_status_investments.go
+model_item_status_last_webhook.go
 model_item_status_nullable.go
+model_item_status_transactions.go
 model_item_webhook_update_request.go
 model_item_webhook_update_response.go
 model_jwk_public_key.go
@@ -305,6 +312,7 @@ model_sandbox_item_reset_login_request.go
 model_sandbox_item_reset_login_response.go
 model_sandbox_item_set_verification_status_request.go
 model_sandbox_item_set_verification_status_response.go
+model_sandbox_oauth_select_accounts_request.go
 model_sandbox_processor_token_create_request.go
 model_sandbox_processor_token_create_request_options.go
 model_sandbox_processor_token_create_response.go
@@ -317,6 +325,18 @@ model_scopes_nullable.go
 model_security.go
 model_sender_bacs_nullable.go
 model_servicer_address_data.go
+model_signal_address_data.go
+model_signal_decision_report_request.go
+model_signal_decision_report_response.go
+model_signal_device.go
+model_signal_evaluate_core_attributes.go
+model_signal_evaluate_request.go
+model_signal_evaluate_response.go
+model_signal_person_name.go
+model_signal_return_report_request.go
+model_signal_return_report_response.go
+model_signal_scores.go
+model_signal_user.go
 model_standalone_account_type.go
 model_standalone_currency_code_list.go
 model_standalone_investment_transaction_subtype.go
@@ -326,6 +346,8 @@ model_student_loan_repayment_model.go
 model_student_loan_status.go
 model_student_repayment_plan.go
 model_transaction.go
+model_transaction_all_of.go
+model_transaction_base.go
 model_transaction_code.go
 model_transaction_data.go
 model_transaction_override.go
@@ -338,6 +360,7 @@ model_transactions_removed_webhook.go
 model_user_custom_password.go
 model_user_permission_revoked_webhook.go
 model_verification_expired_webhook.go
+model_verification_refresh_status.go
 model_verification_status.go
 model_warning.go
 model_webhook_update_acknowledged_webhook.go

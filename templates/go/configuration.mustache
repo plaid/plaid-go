@@ -8,8 +8,6 @@ import (
 	"strings"
 )
 
-// kachow
-
 // contextKeys are used to identify the type of value in the context.
 // Since these are string, it is possible to get a short description of the
 // context key for logging and debugging using key.String().
@@ -95,6 +93,11 @@ type ServerConfiguration struct {
 // ServerConfigurations stores multiple ServerConfiguration items
 type ServerConfigurations []ServerConfiguration
 
+{{#withCustomMiddlewareFunction}}
+// MiddlewareFunction provides way to implement custom middleware
+type MiddlewareFunction func(*http.Request)
+
+{{/withCustomMiddlewareFunction}}
 // Configuration stores the configuration of the API client
 type Configuration struct {
 	Host             string            `json:"host,omitempty"`
@@ -105,6 +108,9 @@ type Configuration struct {
 	Servers          ServerConfigurations
 	OperationServers map[string]ServerConfigurations
 	HTTPClient       *http.Client
+    {{#withCustomMiddlewareFunction}}
+	Middleware       MiddlewareFunction
+    {{/withCustomMiddlewareFunction}}
 }
 
 {{! Modified by Plaid - allows environments to be configured via enum }}
@@ -116,8 +122,9 @@ const {{{description}}} Environment = "{{{url}}}"
 // NewConfiguration returns a new Configuration object
 func NewConfiguration() *Configuration {
 	cfg := &Configuration{
-		DefaultHeader:    make(map[string]string),
-		UserAgent:        "{{#httpUserAgent}}{{{.}}}{{/httpUserAgent}}{{^httpUserAgent}}OpenAPI-Generator/{{{packageVersion}}}/go{{/httpUserAgent}}",
+		{{! Modified by Plaid - pins API version }}
+		DefaultHeader:    map[string]string{ "Plaid-Version": "{{{plaidApiVersion}}}" },
+		UserAgent:        "{{#httpUserAgent}}{{{.}}}{{/httpUserAgent}}{{^httpUserAgent}}Plaid Go v{{{packageVersion}}}{{/httpUserAgent}}",
 		Debug:            false,
 		{{#servers}}
 		{{#-first}}
@@ -205,7 +212,6 @@ func (c *Configuration) UseEnvironment(env Environment) {
     {URL: string(env)},
   }
 }
-
 
 // AddDefaultHeader adds a new HTTP header to the default header in the request
 func (c *Configuration) AddDefaultHeader(key string, value string) {

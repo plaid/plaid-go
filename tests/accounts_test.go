@@ -5,10 +5,10 @@ import (
 	"testing"
 
 	plaid "github.com/plaid/plaid-go"
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestGetAccounts(t *testing.T) {
+func TestAccountsGet(t *testing.T) {
 	testClient := NewTestClient()
 	ctx := context.Background()
 
@@ -26,9 +26,9 @@ func TestGetAccounts(t *testing.T) {
 	).Execute()
 
 	item, _ := accountsGetResp.GetItemOk()
-	require.Nil(t, err)
-	require.NotNil(t, item)
-	require.True(t, len(accountsGetResp.GetAccounts()) > 1)
+	assert.NoError(t, err)
+	assert.NotNil(t, item)
+	assert.Greater(t, len(accountsGetResp.GetAccounts()), 1)
 
 	// Get single account
 	accountsGetRequest := plaid.NewAccountsGetRequest(accessToken)
@@ -41,7 +41,7 @@ func TestGetAccounts(t *testing.T) {
 	).Execute()
 
 	item, _ = accountsGetResp.GetItemOk()
-	require.Nil(t, err)
-	require.NotNil(t, item)
-	require.Equal(t, len(accountsGetResp.GetAccounts()), 1)
+	assert.NoError(t, err)
+	assert.NotNil(t, item)
+	assert.Equal(t, len(accountsGetResp.GetAccounts()), 1)
 }

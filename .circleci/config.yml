@@ -6,7 +6,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Build Docker image for running go trests
+          name: Build Docker image for running go tests
           command: docker build -t plaid-go .
       - run:
           name: Run go tests in Docker
