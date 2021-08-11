@@ -1,3 +1,6 @@
+## 0.1.0-beta.2
+- Introduced the `plaid.ToPlaidError` helper function to convert errors returned from the endpoint handlers into Plaid errors when appropriate.
+
 ## 0.1.0-beta-1
 We first are reversioning this package, as we are now using GOMODULES.
 
@@ -70,7 +73,7 @@ response, httpResponse, err := client.PlaidApi.SandboxPublicTokenCreate(context.
     ),
    ).Execute()
 
-plaidErr := err.(plaid.GenericOpenAPIError).Model().(plaid.Error)
+plaidErr, _ := plaid.ToPlaidError(err)
 ```
 
 ## 7.3.0
