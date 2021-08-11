@@ -26,14 +26,15 @@ func TestLinkTokenCreateRequired(t *testing.T) {
 func TestLinkTokenCreateOptional(t *testing.T) {
 	testClient := NewTestClient()
 	ctx := context.Background()
+	now := time.Now()
 
 	user := plaid.LinkTokenCreateRequestUser{
 		ClientUserId:             time.Now().String(),
 		LegalName:                plaid.PtrString("Legal Name"),
 		PhoneNumber:              plaid.PtrString("2025550165"),
-		PhoneNumberVerifiedTime:  plaid.PtrString(time.Now().Format(RFC3339Nano)),
+		PhoneNumberVerifiedTime:  &now,
 		EmailAddress:             plaid.PtrString("test@email.com"),
-		EmailAddressVerifiedTime: plaid.PtrString(time.Now().Format(RFC3339Nano)),
+		EmailAddressVerifiedTime: &now,
 		Ssn:                      plaid.PtrString("123-22-1234"),
 	}
 	request := plaid.NewLinkTokenCreateRequest(
@@ -61,14 +62,15 @@ func TestLinkTokenCreateOptional(t *testing.T) {
 func TestLinkTokenCreateThenGet(t *testing.T) {
 	testClient := NewTestClient()
 	ctx := context.Background()
+	now := time.Now()
 
 	user := plaid.LinkTokenCreateRequestUser{
 		ClientUserId:             time.Now().String(),
 		LegalName:                plaid.PtrString("Legal Name"),
 		PhoneNumber:              plaid.PtrString("2025550165"),
-		PhoneNumberVerifiedTime:  plaid.PtrString(time.Now().Format(RFC3339Nano)),
+		PhoneNumberVerifiedTime:  &now,
 		EmailAddress:             plaid.PtrString("test@email.com"),
-		EmailAddressVerifiedTime: plaid.PtrString(time.Now().Format(RFC3339Nano)),
+		EmailAddressVerifiedTime: &now,
 		Ssn:                      plaid.PtrString("123-22-1234"),
 	}
 
