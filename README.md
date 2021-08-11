@@ -1,100 +1,68 @@
 # plaid-go [![CircleCI](https://circleci.com/gh/plaid/plaid-go.svg?style=svg)](https://circleci.com/gh/plaid/plaid-go) [![GoDoc](https://godoc.org/github.com/plaid/plaid-go?status.svg)](https://godoc.org/github.com/plaid/plaid-go/plaid)
 
-:warning: After 8/16/21, this major version of the library will only receive critical security patches. Please consider trying our [beta generated version](https://github.com/plaid/plaid-go/tree/0.1.0-beta-release).
-
-
-A Go client library for the [Plaid API](https://plaid.com/docs).
+The official beta Go client library for the [Plaid API](https://plaid.com/docs).
 
 ## Table of Contents
 
 - [plaid-go](#plaid-go)
-    * [Install](#install)
-    * [Versioning](#versioning)
-    * [Documentation](#documentation)
-    * [Getting Started](#getting-started)
-    * [Developing](#developing)
-    * [License](#license)
+  * [Install](#install)
+  * [Getting Started](#getting-started)
+    + [Calling Endpoints](#calling-endpoints)
+    + [Errors](#errors)
+  * [Authentication](#authentication)
+  * [Contributing](#contributing)
+  * [License](#license)
 
 ## Install
 
+Versions look something like `v0.1.0-beta.1`.
+
+Edit your go.mod to include `github.com/plaid/plaid-go {VERSION}`
+
 ```console
-$ go get github.com/plaid/plaid-go
+$ go get github.com/plaid/plaid-go@{VERSION}
 ```
-
-## Versioning
-
-Each major version of `plaid-go` targets a specific version of the Plaid API:
-
-| API version | plaid-go release |
-| ----------- | ------------------ |
-| [`2020-09-14`][api-version-2020-09-14] (**latest**) | `7.x.x` |
-| [`2019-05-29`][api-version-2019-05-29] (**latest**) | `2.x.x` |
-| [`2018-05-22`][api-version-2018-05-22] | `1.x.x` |
-| `2017-03-08` | not supported |
-
-For information about what has changed between versions and how to update your integration, head to the [version changelog][version-changelog].
 
 ## Documentation
 
-The module supports all Plaid API endpoints.
-
-GoDoc: [![GoDoc](https://godoc.org/github.com/plaid/plaid-go?status.svg)](https://godoc.org/github.com/plaid/plaid-go/plaid)
+The module supports all Plaid API endpoints.  For complete information about
+the API, head to the [docs][https://plaid.com/docs/api].
 
 ## Getting Started
 
 ### Calling Endpoints
 
-To call an endpoint you must create a `Client` object.
+To call an endpoint, you must create a Plaid API client. Here's how to configure it:
 
 ```go
-import (
-    "net/http"
-    "os"
-
-    "github.com/plaid/plaid-go/plaid"
-)
-
-clientOptions := plaid.ClientOptions{
-    os.Getenv("PLAID_CLIENT_ID"),
-    os.Getenv("PLAID_SECRET"),
-    plaid.Sandbox, // Available environments are Sandbox, Development, and Production
-    &http.Client{}, // This parameter is optional
-}
-client, err := plaid.NewClient(clientOptions)
+configuration := plaid.NewConfiguration()
+configuration.AddDefaultHeader("PLAID-CLIENT-ID", {VALUE})
+configuration.AddDefaultHeader("PLAID-SECRET", {VALUE})
+configuration.UseEnvironment(plaid.Production)
+client := plaid.NewAPIClient(configuration)
 ```
 
-Each endpoint returns an object which contains the parsed JSON from the HTTP response.
+Each endpoint will require an appropriate request model, and will return either the response model or an error.
 
 ### Errors
 
-All non-200 responses will return a plaid.Error instance.
+In the case one of the endpoints you call returns an error, you can get the Plaid error object with the following:
 
-For more information on Plaid response codes, head to the [docs](https://plaid.com/docs/errors/).
-
-## Developing
-
-1. Download this repo into your Go source directory
-2. Run `make setup` pull down all dependencies etc
-
-### Tests
-
-To run the tests you'll need to sign up for a Sandbox account on https://plaid.com as they perform real API requests.
-
-Once you have these you can run `make test`, passing your Sandbox credentials as environment variables:
-
-```shell
-PLAID_CLIENT_ID=aabbcc PLAID_PUBLIC_KEY=ddeeff PLAID_SECRET=ffeedd make test
+```go
+response, httpResponse, err := client.PlaidApi.Endpoint(...)
+plaidErr, err := plaid.ToPlaidError(err)
+fmt.Println(plaidErr.ErrorMessage)
 ```
 
-## Support
+## Authentication
 
-Open an [issue](https://github.com/plaid/plaid-go/issues/new)!
+First, you get your `client_id` and `secret` from your dashboard account. Authentication is handled by setting the `client_id` and `secret` on the configuration object.
+
+## Contributing
+
+Please see [Contributing](CONTRIBUTING.md) for guidelines and instructions for local development.
 
 ## License
 
-[MIT](https://github.com/plaid/plaid-go/blob/master/LICENSE)
+[MIT](LICENSE)
 
-[version-changelog]: https://plaid.com/docs/api/versioning/
-[api-version-2018-05-22]: https://plaid.com/docs/api/versioning/#2018-05-22
-[api-version-2019-05-29]: https://plaid.com/docs/api/versioning/#2019-05-29
-[api-version-2020-09-14]: https://plaid.com/docs/api/versioning/#2020-09-14

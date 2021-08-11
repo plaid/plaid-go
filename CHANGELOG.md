@@ -1,3 +1,81 @@
+## 0.1.0-beta.2
+- Introduced the `plaid.ToPlaidError` helper function to convert errors returned from the endpoint handlers into Plaid errors when appropriate.
+
+## 0.1.0-beta-1
+We first are reversioning this package, as we are now using GOMODULES.
+
+This version represents a transition in how we maintain our external client libraries. We are now using an [API spec](https://github.com/plaid/plaid-openapi) written in `OpenAPI 3.0.0` and running our definition file through [OpenAPITool's `go` generator](https://github.com/OpenAPITools/openapi-generator).
+
+**Go Migration Guide:**
+
+### Client initialization
+From:
+```go
+import (
+  "github.com/plaid/plaid-go/plaid"
+)
+
+client, err := plaid.NewClient(plaid.ClientOptions{
+  os.Getenv("PLAID_CLIENT_ID"),
+  os.Getenv("PLAID_SECRET"),
+  plaid.Sandbox,
+})
+
+```
+
+To:
+```go
+import (
+  "github.com/plaid/plaid-go/plaid"
+)
+
+configuration := plaid.NewConfiguration()
+configuration.AddDefaultHeader("PLAID-CLIENT-ID", os.Getenv("CLIENT_ID"))
+configuration.AddDefaultHeader("PLAID-SECRET", os.Getenv("SECRET"))
+configuration.UseEnvironment(plaid.Sandbox)
+
+client := plaid.NewAPIClient(configuration)
+```
+
+### Endpoints
+All endpoint rquests now take a request model and the functions have been renamed to move the
+verb to the end (e.g. `GetBalances` is now `BalancesGet`). We now accept a `context` object in order to give the caller more control over the [http request](https://pkg.go.dev/net/http#Request.WithContext).
+
+From:
+```go
+response, err := client.CreateSandboxPublicToken(SandboxInstitution, TestProducts)
+```
+
+To:
+```go
+response, httpResponse, err := client.PlaidApi.SandboxPublicTokenCreate(context.Background()).SandboxPublicTokenCreateRequest(
+    *plaid.NewSandboxPublicTokenCreateRequest(
+      SandboxInstitution,
+      TestProducts,
+    ),
+   ).Execute()
+```
+
+### Errors
+From:
+```go
+response, err := client.CreateSandboxPublicToken(SandboxInstitution, TestProducts)
+
+plaidErr := err.(plaid.Error)
+```
+
+To:
+```go
+response, httpResponse, err := client.PlaidApi.SandboxPublicTokenCreate(context.Background()).SandboxPublicTokenCreateRequest(
+    *plaid.NewSandboxPublicTokenCreateRequest(
+      SandboxInstitution,
+      TestProducts,
+    ),
+   ).Execute()
+
+plaidErr, _ := plaid.ToPlaidError(err)
+```
+
 ## 7.3.0
 - Add support for `options` to `/payment_initiation/payment/create`
 
