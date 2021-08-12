@@ -1,3 +1,7 @@
+## 0.1.0-beta-2
+- Introduce the `ToPlaidError` helper function to convert generic errors to the plaid.Error struct
+- Type fixes from `OpenAPI version 2020-09-14_1.20.6`, see full changelog [here](https://github.com/plaid/plaid-openapi/blob/master/CHANGELOG.md#2020-09-14_11912)
+
 ## 0.1.0-beta-1
 We first are reversioning this package, as we are now using GOMODULES.
 
@@ -70,7 +74,7 @@ response, httpResponse, err := client.PlaidApi.SandboxPublicTokenCreate(context.
     ),
    ).Execute()
 
-plaidErr := err.(plaid.GenericOpenAPIError).Model().(plaid.Error)
+plaidErr, _ := plaid.ToPlaidError(err)
 ```
 
 ## 7.3.0

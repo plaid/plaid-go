@@ -7,7 +7,7 @@ info:
     details.
   termsOfService: https://plaid.com/legal/
   title: The Plaid API
-  version: 2020-09-14_1.19.12
+  version: 2020-09-14_1.20.6
 servers:
 - description: Production
   url: https://production.plaid.com
@@ -161,6 +161,8 @@ paths:
         The `/auth/get` endpoint returns the bank account and bank identification numbers (such as routing numbers, for US accounts) associated with an Item's checking and savings accounts, along with high-level account data and balances when available.
 
         Note: This request may take some time to complete if `auth` was not specified as an initial product when creating the Item. This is because Plaid must communicate directly with the institution to retrieve the data.
+
+        Also note that `/auth/get` will not return data for any new accounts opened after the Item was created. To obtain data for new accounts, create a new Item.
       externalDocs:
         url: /api/products/#authget
       operationId: authGet
@@ -586,7 +588,29 @@ paths:
                             success: 0.42
                             error_plaid: 0.08
                             error_institution: 0.5
+                        investments:
+                          status: HEALTHY
+                          last_status_change: 2019-02-15T15:53:00Z
+                          breakdown:
+                            success: 0.89
+                            error_plaid: 0.02
+                            error_institution: 0.09
+                          liabilities:
+                            status: HEALTHY
+                            last_status_change: 2019-02-15T15:53:00Z
+                            breakdown:
+                              success: 0.89
+                              error_plaid: 0.02
+                              error_institution: 0.09
                         investments_updates:
+                          status: HEALTHY
+                          last_status_change: 2019-02-12T08:22:00Z
+                          breakdown:
+                            success: 0.95
+                            error_plaid: 0.02
+                            error_institution: 0.03
+                            refresh_interval: NORMAL
+                        liabilities_updates:
                           status: HEALTHY
                           last_status_change: 2019-02-12T08:22:00Z
                           breakdown:
@@ -2167,7 +2191,7 @@ paths:
   /asset_report/filter:
     post:
       description: |-
-        By default, an Asset Report will contain all of the accounts on a given Item. In some cases, you may not want the Asset Report to contain all accounts. For example, you might have the end user choose which accounts are relevant in Link using the Select Account view, which you can enable in the dashboard. Or, you might always exclude certain account types or subtypes, which you can identify by using the `/accounts/get` endpoint. To narrow an Asset Report to only a subset of accounts, use the `/asset_report/filter` endpoint.
+        By default, an Asset Report will contain all of the accounts on a given Item. In some cases, you may not want the Asset Report to contain all accounts. For example, you might have the end user choose which accounts are relevant in Link using the Account Select view, which you can enable in the dashboard. Or, you might always exclude certain account types or subtypes, which you can identify by using the `/accounts/get` endpoint. To narrow an Asset Report to only a subset of accounts, use the `/asset_report/filter` endpoint.
 
         To exclude certain Accounts from an Asset Report, first use the `/asset_report/create` endpoint to create the report, then send the `asset_report_token` along with a list of `account_ids` to exclude to the `/asset_report/filter` endpoint, to create a new Asset Report which contains only a subset of the original Asset Report's data.
 
@@ -2443,7 +2467,7 @@ paths:
 
         The response to `/asset_report/pdf/get` is the PDF binary data. The `request_id`  is returned in the `Plaid-Request-ID` header.
 
-        [View a sample PDF Asset Report with Insights](https://plaid.com/documents/sample-asset-report.pdf).
+        [View a sample PDF Asset Report](https://plaid.com/documents/sample-asset-report.pdf).
       externalDocs:
         url: /api/products/#asset_reportpdfget
       operationId: assetReportPdfGet
@@ -3873,6 +3897,34 @@ paths:
       summary: Download the original documents used for income verification
       tags:
       - plaid
+  /income/verification/refresh:
+    post:
+      description: '`/income/verification/refresh` refreshes a given income verification.'
+      externalDocs:
+        url: /api/products/#incomeverificationrefresh
+      operationId: incomeVerificationRefresh
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IncomeVerificationRefreshRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncomeVerificationRefreshResponse'
+          description: success
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error response.
+      summary: Refresh an income verification
+      tags:
+      - plaid
   /deposit_switch/alt/create:
     post:
       description: This endpoint provides an alternative to `/deposit_switch/create`
@@ -3969,6 +4021,179 @@ paths:
       summary: Manually fire an Income webhook
       tags:
       - plaid
+  /sandbox/oauth/select_accounts:
+    post:
+      operationId: sandboxOauthSelectAccounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SandboxOauthSelectAccountsRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SandboxOauthSelectAccountsResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error response.
+      summary: Save the selected accounts when connecting to the Platypus Oauth institution
+      tags:
+      - plaid
+  /signal/evaluate:
+    post:
+      description: |-
+        Use `/signal/evaluate` to evaluate a planned ACH transaction to get a return risk assessment (such as a risk score and risk tier) and additional risk signals.
+
+        In order to obtain a valid score for an ACH transaction, Plaid must have an access token for the account, and the Item must be healthy (receiving product updates) or have recently been in a healthy state. If the transaction does not meet eligibility requirements, an error will be returned corresponding to the underlying cause.
+      externalDocs:
+        url: /signal/reference#signalevaluate
+      operationId: signalEvaluate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignalEvaluateRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    scores:
+                      customer_initiated_return_risk:
+                        score: 9
+                        risk_tier: 1
+                      bank_initiated_return_risk:
+                        score: 72
+                        risk_tier: 7
+                    core_attributes:
+                      unauthorized_transactions_count_7d: 0
+                      unauthorized_transactions_count_30d: 0
+                      unauthorized_transactions_count_60d: 0
+                      unauthorized_transactions_count_90d: 0
+                      nsf_overdraft_transactions_count_7d: 1
+                      nsf_overdraft_transactions_count_30d: 1
+                      nsf_overdraft_transactions_count_60d: 2
+                      nsf_overdraft_transactions_count_90d: 2
+                      days_since_first_plaid_connection: 510
+                      plaid_connections_count_7d: 6
+                      plaid_connections_count_30d: 7
+                      total_plaid_connections_count: 15
+                      is_savings_or_money_market_account: false
+                      total_credit_transactions_amount_10d: 507.04
+                      total_debit_transactions_amount_10d: 590.14
+                      p50_credit_transactions_amount_28d: 46.79
+                      p50_debit_transactions_amount_28d: 75
+                      p95_credit_transactions_amount_28d: 155.95
+                      p95_debit_transactions_amount_28d: 799.59
+                      days_with_negative_balance_count_90d: 0
+                      p90_eod_balance_30d: 555.71
+                      p90_eod_balance_60d: 449.96
+                      p90_eod_balance_90d: 434.38
+                      p10_eod_balance_30d: 320.44
+                      p10_eod_balance_60d: 320.46
+                      p10_eod_balance_90d: 320.23
+                      available_balance: 420.22
+                      current_balance: 476
+                      balance_last_updated: 2021-02-25 09:18:21.787082
+                      phone_change_count_28d: 0
+                      phone_change_count_90d: 0
+                      email_change_count_28d: 0
+                      email_change_count_90d: 0
+                      address_change_count_28d: 0
+                      address_change_count_90d: 0
+                    request_id: mdqfuVxeoza6mhu
+              schema:
+                $ref: '#/components/schemas/SignalEvaluateResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error response.
+      summary: Evaluate a planned ACH transaction
+      tags:
+      - plaid
+  /signal/decision/report:
+    post:
+      description: After calling `/signal/evaluate`, call `/signal/decision/report`
+        to report whether the transaction was initiated. This endpoint will return
+        an `INVALID_REQUEST` error if called a second time with a different value
+        for `initiated`.
+      externalDocs:
+        url: /signal/reference#signaldecisionreport
+      operationId: signalDecisionReport
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignalDecisionReportRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    request_id: mdqfuVxeoza6mhu
+              schema:
+                $ref: '#/components/schemas/SignalDecisionReportResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error response.
+      summary: Report whether you initiated an ACH transaction
+      tags:
+      - plaid
+  /signal/return/report:
+    post:
+      description: Call the `/signal/return/report` endpoint to report a returned
+        transaction that was previously sent to the `/signal/evaluate` endpoint. Your
+        feedback will be used by the model to incorporate the latest risk trend in
+        your portfolio.
+      externalDocs:
+        url: /signal/reference#signalreturnreport
+      operationId: signalReturnReport
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignalReturnReportRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    request_id: mdqfuVxeoza6mhu
+              schema:
+                $ref: '#/components/schemas/SignalReturnReportResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error response.
+      summary: Report a return for an ACH transaction
+      tags:
+      - plaid
 components:
   schemas:
     ItemGetRequest:
@@ -4009,7 +4234,7 @@ components:
           billed_products:
           - null
           - null
-          consent_expiration_time: consent_expiration_time
+          consent_expiration_time: 2000-01-23T04:56:07.000+00:00
           error:
             error_message: error_message
             suggested_action: suggested_action
@@ -4100,7 +4325,7 @@ components:
           billed_products:
           - null
           - null
-          consent_expiration_time: consent_expiration_time
+          consent_expiration_time: 2000-01-23T04:56:07.000+00:00
           error:
             error_message: error_message
             suggested_action: suggested_action
@@ -4158,7 +4383,7 @@ components:
             available: 0.8008281904610115
             limit: 1.4658129805029452
             iso_currency_code: iso_currency_code
-            last_updated_datetime: last_updated_datetime
+            last_updated_datetime: 2000-01-23T04:56:07.000+00:00
           account_id: account_id
           name: name
           verification_status: pending_automatic_verification
@@ -4170,7 +4395,7 @@ components:
             available: 0.8008281904610115
             limit: 1.4658129805029452
             iso_currency_code: iso_currency_code
-            last_updated_datetime: last_updated_datetime
+            last_updated_datetime: 2000-01-23T04:56:07.000+00:00
           account_id: account_id
           name: name
           verification_status: pending_automatic_verification
@@ -4365,7 +4590,7 @@ components:
           billed_products:
           - null
           - null
-          consent_expiration_time: consent_expiration_time
+          consent_expiration_time: 2000-01-23T04:56:07.000+00:00
           error:
             error_message: error_message
             suggested_action: suggested_action
@@ -4391,7 +4616,7 @@ components:
             available: 0.8008281904610115
             limit: 1.4658129805029452
             iso_currency_code: iso_currency_code
-            last_updated_datetime: last_updated_datetime
+            last_updated_datetime: 2000-01-23T04:56:07.000+00:00
           account_id: account_id
           name: name
           verification_status: pending_automatic_verification
@@ -4403,7 +4628,7 @@ components:
             available: 0.8008281904610115
             limit: 1.4658129805029452
             iso_currency_code: iso_currency_code
-            last_updated_datetime: last_updated_datetime
+            last_updated_datetime: 2000-01-23T04:56:07.000+00:00
           account_id: account_id
           name: name
           verification_status: pending_automatic_verification
@@ -4616,7 +4841,7 @@ components:
           - null
           status:
             investments_updates:
-              last_status_change: last_status_change
+              last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
                 refresh_interval: NORMAL
@@ -4624,7 +4849,15 @@ components:
                 error_institution: 1.4658129805029452
               status: HEALTHY
             balance:
-              last_status_change: last_status_change
+              last_status_change: 2000-01-23T04:56:07.000+00:00
+              breakdown:
+                error_plaid: 6.027456183070403
+                refresh_interval: NORMAL
+                success: 0.8008281904610115
+                error_institution: 1.4658129805029452
+              status: HEALTHY
+            liabilities_updates:
+              last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
                 refresh_interval: NORMAL
@@ -4632,7 +4865,7 @@ components:
                 error_institution: 1.4658129805029452
               status: HEALTHY
             auth:
-              last_status_change: last_status_change
+              last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
                 refresh_interval: NORMAL
@@ -4640,7 +4873,15 @@ components:
                 error_institution: 1.4658129805029452
               status: HEALTHY
             identity:
-              last_status_change: last_status_change
+              last_status_change: 2000-01-23T04:56:07.000+00:00
+              breakdown:
+                error_plaid: 6.027456183070403
+                refresh_interval: NORMAL
+                success: 0.8008281904610115
+                error_institution: 1.4658129805029452
+              status: HEALTHY
+            liabilities:
+              last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
                 refresh_interval: NORMAL
@@ -4648,7 +4889,7 @@ components:
                 error_institution: 1.4658129805029452
               status: HEALTHY
             item_logins:
-              last_status_change: last_status_change
+              last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
                 refresh_interval: NORMAL
@@ -4656,28 +4897,36 @@ components:
                 error_institution: 1.4658129805029452
               status: HEALTHY
             health_incidents:
-            - end_date: end_date
+            - end_date: 2000-01-23T04:56:07.000+00:00
               incident_updates:
               - description: description
-                updated_date: updated_date
+                updated_date: 2000-01-23T04:56:07.000+00:00
                 status: INVESTIGATING
               - description: description
-                updated_date: updated_date
+                updated_date: 2000-01-23T04:56:07.000+00:00
                 status: INVESTIGATING
               title: title
-              start_date: start_date
-            - end_date: end_date
+              start_date: 2000-01-23T04:56:07.000+00:00
+            - end_date: 2000-01-23T04:56:07.000+00:00
               incident_updates:
               - description: description
-                updated_date: updated_date
+                updated_date: 2000-01-23T04:56:07.000+00:00
                 status: INVESTIGATING
               - description: description
-                updated_date: updated_date
+                updated_date: 2000-01-23T04:56:07.000+00:00
                 status: INVESTIGATING
               title: title
-              start_date: start_date
+              start_date: 2000-01-23T04:56:07.000+00:00
+            investments:
+              last_status_change: 2000-01-23T04:56:07.000+00:00
+              breakdown:
+                error_plaid: 6.027456183070403
+                refresh_interval: NORMAL
+                success: 0.8008281904610115
+                error_institution: 1.4658129805029452
+              status: HEALTHY
             transactions_updates:
-              last_status_change: last_status_change
+              last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
                 refresh_interval: NORMAL
@@ -4712,7 +4961,7 @@ components:
           - null
           status:
             investments_updates:
-              last_status_change: last_status_change
+              last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
                 refresh_interval: NORMAL
@@ -4720,7 +4969,15 @@ components:
                 error_institution: 1.4658129805029452
               status: HEALTHY
             balance:
-              last_status_change: last_status_change
+              last_status_change: 2000-01-23T04:56:07.000+00:00
+              breakdown:
+                error_plaid: 6.027456183070403
+                refresh_interval: NORMAL
+                success: 0.8008281904610115
+                error_institution: 1.4658129805029452
+              status: HEALTHY
+            liabilities_updates:
+              last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
                 refresh_interval: NORMAL
@@ -4728,7 +4985,7 @@ components:
                 error_institution: 1.4658129805029452
               status: HEALTHY
             auth:
-              last_status_change: last_status_change
+              last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
                 refresh_interval: NORMAL
@@ -4736,7 +4993,15 @@ components:
                 error_institution: 1.4658129805029452
               status: HEALTHY
             identity:
-              last_status_change: last_status_change
+              last_status_change: 2000-01-23T04:56:07.000+00:00
+              breakdown:
+                error_plaid: 6.027456183070403
+                refresh_interval: NORMAL
+                success: 0.8008281904610115
+                error_institution: 1.4658129805029452
+              status: HEALTHY
+            liabilities:
+              last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
                 refresh_interval: NORMAL
@@ -4744,7 +5009,7 @@ components:
                 error_institution: 1.4658129805029452
               status: HEALTHY
             item_logins:
-              last_status_change: last_status_change
+              last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
                 refresh_interval: NORMAL
@@ -4752,28 +5017,36 @@ components:
                 error_institution: 1.4658129805029452
               status: HEALTHY
             health_incidents:
-            - end_date: end_date
+            - end_date: 2000-01-23T04:56:07.000+00:00
               incident_updates:
               - description: description
-                updated_date: updated_date
+                updated_date: 2000-01-23T04:56:07.000+00:00
                 status: INVESTIGATING
               - description: description
-                updated_date: updated_date
+                updated_date: 2000-01-23T04:56:07.000+00:00
                 status: INVESTIGATING
               title: title
-              start_date: start_date
-            - end_date: end_date
+              start_date: 2000-01-23T04:56:07.000+00:00
+            - end_date: 2000-01-23T04:56:07.000+00:00
               incident_updates:
               - description: description
-                updated_date: updated_date
+                updated_date: 2000-01-23T04:56:07.000+00:00
                 status: INVESTIGATING
               - description: description
-                updated_date: updated_date
+                updated_date: 2000-01-23T04:56:07.000+00:00
                 status: INVESTIGATING
               title: title
-              start_date: start_date
+              start_date: 2000-01-23T04:56:07.000+00:00
+            investments:
+              last_status_change: 2000-01-23T04:56:07.000+00:00
+              breakdown:
+                error_plaid: 6.027456183070403
+                refresh_interval: NORMAL
+                success: 0.8008281904610115
+                error_institution: 1.4658129805029452
+              status: HEALTHY
             transactions_updates:
-              last_status_change: last_status_change
+              last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
                 refresh_interval: NORMAL
@@ -4930,7 +5203,7 @@ components:
           - null
           status:
             investments_updates:
-              last_status_change: last_status_change
+              last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
                 refresh_interval: NORMAL
@@ -4938,7 +5211,15 @@ components:
                 error_institution: 1.4658129805029452
               status: HEALTHY
             balance:
-              last_status_change: last_status_change
+              last_status_change: 2000-01-23T04:56:07.000+00:00
+              breakdown:
+                error_plaid: 6.027456183070403
+                refresh_interval: NORMAL
+                success: 0.8008281904610115
+                error_institution: 1.4658129805029452
+              status: HEALTHY
+            liabilities_updates:
+              last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
                 refresh_interval: NORMAL
@@ -4946,7 +5227,7 @@ components:
                 error_institution: 1.4658129805029452
               status: HEALTHY
             auth:
-              last_status_change: last_status_change
+              last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
                 refresh_interval: NORMAL
@@ -4954,7 +5235,15 @@ components:
                 error_institution: 1.4658129805029452
               status: HEALTHY
             identity:
-              last_status_change: last_status_change
+              last_status_change: 2000-01-23T04:56:07.000+00:00
+              breakdown:
+                error_plaid: 6.027456183070403
+                refresh_interval: NORMAL
+                success: 0.8008281904610115
+                error_institution: 1.4658129805029452
+              status: HEALTHY
+            liabilities:
+              last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
                 refresh_interval: NORMAL
@@ -4962,7 +5251,7 @@ components:
                 error_institution: 1.4658129805029452
               status: HEALTHY
             item_logins:
-              last_status_change: last_status_change
+              last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
                 refresh_interval: NORMAL
@@ -4970,28 +5259,36 @@ components:
                 error_institution: 1.4658129805029452
               status: HEALTHY
             health_incidents:
-            - end_date: end_date
+            - end_date: 2000-01-23T04:56:07.000+00:00
               incident_updates:
               - description: description
-                updated_date: updated_date
+                updated_date: 2000-01-23T04:56:07.000+00:00
                 status: INVESTIGATING
               - description: description
-                updated_date: updated_date
+                updated_date: 2000-01-23T04:56:07.000+00:00
                 status: INVESTIGATING
               title: title
-              start_date: start_date
-            - end_date: end_date
+              start_date: 2000-01-23T04:56:07.000+00:00
+            - end_date: 2000-01-23T04:56:07.000+00:00
               incident_updates:
               - description: description
-                updated_date: updated_date
+                updated_date: 2000-01-23T04:56:07.000+00:00
                 status: INVESTIGATING
               - description: description
-                updated_date: updated_date
+                updated_date: 2000-01-23T04:56:07.000+00:00
                 status: INVESTIGATING
               title: title
-              start_date: start_date
+              start_date: 2000-01-23T04:56:07.000+00:00
+            investments:
+              last_status_change: 2000-01-23T04:56:07.000+00:00
+              breakdown:
+                error_plaid: 6.027456183070403
+                refresh_interval: NORMAL
+                success: 0.8008281904610115
+                error_institution: 1.4658129805029452
+              status: HEALTHY
             transactions_updates:
-              last_status_change: last_status_change
+              last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
                 refresh_interval: NORMAL
@@ -5026,7 +5323,7 @@ components:
           - null
           status:
             investments_updates:
-              last_status_change: last_status_change
+              last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
                 refresh_interval: NORMAL
@@ -5034,7 +5331,15 @@ components:
                 error_institution: 1.4658129805029452
               status: HEALTHY
             balance:
-              last_status_change: last_status_change
+              last_status_change: 2000-01-23T04:56:07.000+00:00
+              breakdown:
+                error_plaid: 6.027456183070403
+                refresh_interval: NORMAL
+                success: 0.8008281904610115
+                error_institution: 1.4658129805029452
+              status: HEALTHY
+            liabilities_updates:
+              last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
                 refresh_interval: NORMAL
@@ -5042,7 +5347,7 @@ components:
                 error_institution: 1.4658129805029452
               status: HEALTHY
             auth:
-              last_status_change: last_status_change
+              last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
                 refresh_interval: NORMAL
@@ -5050,7 +5355,15 @@ components:
                 error_institution: 1.4658129805029452
               status: HEALTHY
             identity:
-              last_status_change: last_status_change
+              last_status_change: 2000-01-23T04:56:07.000+00:00
+              breakdown:
+                error_plaid: 6.027456183070403
+                refresh_interval: NORMAL
+                success: 0.8008281904610115
+                error_institution: 1.4658129805029452
+              status: HEALTHY
+            liabilities:
+              last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
                 refresh_interval: NORMAL
@@ -5058,7 +5371,7 @@ components:
                 error_institution: 1.4658129805029452
               status: HEALTHY
             item_logins:
-              last_status_change: last_status_change
+              last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
                 refresh_interval: NORMAL
@@ -5066,28 +5379,36 @@ components:
                 error_institution: 1.4658129805029452
               status: HEALTHY
             health_incidents:
-            - end_date: end_date
+            - end_date: 2000-01-23T04:56:07.000+00:00
               incident_updates:
               - description: description
-                updated_date: updated_date
+                updated_date: 2000-01-23T04:56:07.000+00:00
                 status: INVESTIGATING
               - description: description
-                updated_date: updated_date
+                updated_date: 2000-01-23T04:56:07.000+00:00
                 status: INVESTIGATING
               title: title
-              start_date: start_date
-            - end_date: end_date
+              start_date: 2000-01-23T04:56:07.000+00:00
+            - end_date: 2000-01-23T04:56:07.000+00:00
               incident_updates:
               - description: description
-                updated_date: updated_date
+                updated_date: 2000-01-23T04:56:07.000+00:00
                 status: INVESTIGATING
               - description: description
-                updated_date: updated_date
+                updated_date: 2000-01-23T04:56:07.000+00:00
                 status: INVESTIGATING
               title: title
-              start_date: start_date
+              start_date: 2000-01-23T04:56:07.000+00:00
+            investments:
+              last_status_change: 2000-01-23T04:56:07.000+00:00
+              breakdown:
+                error_plaid: 6.027456183070403
+                refresh_interval: NORMAL
+                success: 0.8008281904610115
+                error_institution: 1.4658129805029452
+              status: HEALTHY
             transactions_updates:
-              last_status_change: last_status_change
+              last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
                 refresh_interval: NORMAL
@@ -5210,7 +5531,7 @@ components:
           - null
           status:
             investments_updates:
-              last_status_change: last_status_change
+              last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
                 refresh_interval: NORMAL
@@ -5218,7 +5539,15 @@ components:
                 error_institution: 1.4658129805029452
               status: HEALTHY
             balance:
-              last_status_change: last_status_change
+              last_status_change: 2000-01-23T04:56:07.000+00:00
+              breakdown:
+                error_plaid: 6.027456183070403
+                refresh_interval: NORMAL
+                success: 0.8008281904610115
+                error_institution: 1.4658129805029452
+              status: HEALTHY
+            liabilities_updates:
+              last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
                 refresh_interval: NORMAL
@@ -5226,7 +5555,7 @@ components:
                 error_institution: 1.4658129805029452
               status: HEALTHY
             auth:
-              last_status_change: last_status_change
+              last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
                 refresh_interval: NORMAL
@@ -5234,7 +5563,15 @@ components:
                 error_institution: 1.4658129805029452
               status: HEALTHY
             identity:
-              last_status_change: last_status_change
+              last_status_change: 2000-01-23T04:56:07.000+00:00
+              breakdown:
+                error_plaid: 6.027456183070403
+                refresh_interval: NORMAL
+                success: 0.8008281904610115
+                error_institution: 1.4658129805029452
+              status: HEALTHY
+            liabilities:
+              last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
                 refresh_interval: NORMAL
@@ -5242,7 +5579,7 @@ components:
                 error_institution: 1.4658129805029452
               status: HEALTHY
             item_logins:
-              last_status_change: last_status_change
+              last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
                 refresh_interval: NORMAL
@@ -5250,28 +5587,36 @@ components:
                 error_institution: 1.4658129805029452
               status: HEALTHY
             health_incidents:
-            - end_date: end_date
+            - end_date: 2000-01-23T04:56:07.000+00:00
               incident_updates:
               - description: description
-                updated_date: updated_date
+                updated_date: 2000-01-23T04:56:07.000+00:00
                 status: INVESTIGATING
               - description: description
-                updated_date: updated_date
+                updated_date: 2000-01-23T04:56:07.000+00:00
                 status: INVESTIGATING
               title: title
-              start_date: start_date
-            - end_date: end_date
+              start_date: 2000-01-23T04:56:07.000+00:00
+            - end_date: 2000-01-23T04:56:07.000+00:00
               incident_updates:
               - description: description
-                updated_date: updated_date
+                updated_date: 2000-01-23T04:56:07.000+00:00
                 status: INVESTIGATING
               - description: description
-                updated_date: updated_date
+                updated_date: 2000-01-23T04:56:07.000+00:00
                 status: INVESTIGATING
               title: title
-              start_date: start_date
+              start_date: 2000-01-23T04:56:07.000+00:00
+            investments:
+              last_status_change: 2000-01-23T04:56:07.000+00:00
+              breakdown:
+                error_plaid: 6.027456183070403
+                refresh_interval: NORMAL
+                success: 0.8008281904610115
+                error_institution: 1.4658129805029452
+              status: HEALTHY
             transactions_updates:
-              last_status_change: last_status_change
+              last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
                 refresh_interval: NORMAL
@@ -5392,7 +5737,7 @@ components:
           billed_products:
           - null
           - null
-          consent_expiration_time: consent_expiration_time
+          consent_expiration_time: 2000-01-23T04:56:07.000+00:00
           error:
             error_message: error_message
             suggested_action: suggested_action
@@ -5417,7 +5762,7 @@ components:
             available: 0.8008281904610115
             limit: 1.4658129805029452
             iso_currency_code: iso_currency_code
-            last_updated_datetime: last_updated_datetime
+            last_updated_datetime: 2000-01-23T04:56:07.000+00:00
           account_id: account_id
           name: name
           verification_status: pending_automatic_verification
@@ -5429,7 +5774,7 @@ components:
             available: 0.8008281904610115
             limit: 1.4658129805029452
             iso_currency_code: iso_currency_code
-            last_updated_datetime: last_updated_datetime
+            last_updated_datetime: 2000-01-23T04:56:07.000+00:00
           account_id: account_id
           name: name
           verification_status: pending_automatic_verification
@@ -5580,8 +5925,8 @@ components:
           webhook: webhook
           override_username: user_good
           transactions:
-            end_date: end_date
-            start_date: start_date
+            end_date: 2000-01-23
+            start_date: 2000-01-23
         secret: secret
         initial_products:
         - null
@@ -5624,8 +5969,8 @@ components:
         webhook: webhook
         override_username: user_good
         transactions:
-          end_date: end_date
-          start_date: start_date
+          end_date: 2000-01-23
+          start_date: 2000-01-23
       properties:
         webhook:
           description: Specify a webhook to associate with the new Item.
@@ -5649,17 +5994,20 @@ components:
       description: SandboxPublicTokenCreateRequestOptionsTransactions is an optional
         set of parameters corresponding to transactions options.
       example:
-        end_date: end_date
-        start_date: start_date
+        end_date: 2000-01-23
+        start_date: 2000-01-23
       properties:
         start_date:
           description: The earliest date for which to fetch transaction history. Dates
             should be formatted as YYYY-MM-DD.
+          format: date
           type: string
         end_date:
           description: The most recent date for which to fetch transaction history.
             Dates should be formatted as YYYY-MM-DD.
+          format: date
           type: string
+      title: SandboxPublicTokenCreateRequestOptionsTransactions
       type: object
     SandboxPublicTokenCreateResponse:
       additionalProperties: true
@@ -5858,7 +6206,7 @@ components:
           billed_products:
           - null
           - null
-          consent_expiration_time: consent_expiration_time
+          consent_expiration_time: 2000-01-23T04:56:07.000+00:00
           error:
             error_message: error_message
             suggested_action: suggested_action
@@ -5938,7 +6286,7 @@ components:
             available: 0.8008281904610115
             limit: 1.4658129805029452
             iso_currency_code: iso_currency_code
-            last_updated_datetime: last_updated_datetime
+            last_updated_datetime: 2000-01-23T04:56:07.000+00:00
           account_id: account_id
           name: name
           verification_status: pending_automatic_verification
@@ -6068,7 +6416,7 @@ components:
           amount: amount
           metadata:
             key: metadata
-          created: created
+          created: 2000-01-23T04:56:07.000+00:00
           description: description
           failure_reason:
             ach_return_code: ach_return_code
@@ -6200,7 +6548,7 @@ components:
             available: 0.8008281904610115
             limit: 1.4658129805029452
             iso_currency_code: iso_currency_code
-            last_updated_datetime: last_updated_datetime
+            last_updated_datetime: 2000-01-23T04:56:07.000+00:00
           account_id: account_id
           name: name
           verification_status: pending_automatic_verification
@@ -6260,7 +6608,7 @@ components:
           billed_products:
           - null
           - null
-          consent_expiration_time: consent_expiration_time
+          consent_expiration_time: 2000-01-23T04:56:07.000+00:00
           error:
             error_message: error_message
             suggested_action: suggested_action
@@ -6515,7 +6863,7 @@ components:
           billed_products:
           - null
           - null
-          consent_expiration_time: consent_expiration_time
+          consent_expiration_time: 2000-01-23T04:56:07.000+00:00
           error:
             error_message: error_message
             suggested_action: suggested_action
@@ -6540,9 +6888,9 @@ components:
             loan_type_description: loan_type_description
             escrow_balance: 7.061401241503109
             has_pmi: true
-            last_payment_date: last_payment_date
+            last_payment_date: 2000-01-23
             past_due_amount: 7.386281948385884
-            maturity_date: maturity_date
+            maturity_date: 2000-01-23
             has_prepayment_penalty: true
             current_late_fee: 2.3021358869347655
             last_payment_amount: 3.616076749251911
@@ -6553,23 +6901,23 @@ components:
               postal_code: postal_code
               region: region
             account_id: account_id
-            origination_date: origination_date
+            origination_date: 2000-01-23
             loan_term: loan_term
             interest_rate:
               percentage: 9.301444243932576
               type: type
             ytd_interest_paid: 1.2315135367772556
             ytd_principal_paid: 1.0246457001441578
-            next_payment_due_date: next_payment_due_date
+            next_payment_due_date: 2000-01-23
           - origination_principal_amount: 4.145608029883936
             account_number: account_number
             next_monthly_payment: 2.027123023002322
             loan_type_description: loan_type_description
             escrow_balance: 7.061401241503109
             has_pmi: true
-            last_payment_date: last_payment_date
+            last_payment_date: 2000-01-23
             past_due_amount: 7.386281948385884
-            maturity_date: maturity_date
+            maturity_date: 2000-01-23
             has_prepayment_penalty: true
             current_late_fee: 2.3021358869347655
             last_payment_amount: 3.616076749251911
@@ -6580,41 +6928,41 @@ components:
               postal_code: postal_code
               region: region
             account_id: account_id
-            origination_date: origination_date
+            origination_date: 2000-01-23
             loan_term: loan_term
             interest_rate:
               percentage: 9.301444243932576
               type: type
             ytd_interest_paid: 1.2315135367772556
             ytd_principal_paid: 1.0246457001441578
-            next_payment_due_date: next_payment_due_date
+            next_payment_due_date: 2000-01-23
           student:
           - origination_principal_amount: 1.1730742509559433
             account_number: account_number
             loan_status:
-              end_date: end_date
+              end_date: 2000-01-23
               type: cancelled
             repayment_plan:
               description: description
               type: extended graduated
             payment_reference_number: payment_reference_number
-            last_payment_date: last_payment_date
+            last_payment_date: 2000-01-23
             guarantor: guarantor
             is_overdue: true
-            last_statement_issue_date: last_statement_issue_date
+            last_statement_issue_date: 2000-01-23
             last_payment_amount: 6.84685269835264
-            expected_payoff_date: expected_payoff_date
+            expected_payoff_date: 2000-01-23
             sequence_number: sequence_number
             account_id: account_id
             pslf_status:
               payments_remaining: 9.965781217890562
               payments_made: 5.025004791520295
-              estimated_eligibility_date: estimated_eligibility_date
+              estimated_eligibility_date: 2000-01-23
             interest_rate_percentage: 1.4894159098541704
             disbursement_dates:
-            - disbursement_dates
-            - disbursement_dates
-            origination_date: origination_date
+            - 2000-01-23
+            - 2000-01-23
+            origination_date: 2000-01-23
             outstanding_interest_amount: 4.965218492984954
             servicer_address:
               country: country
@@ -6626,33 +6974,33 @@ components:
             ytd_principal_paid: 6.683562403749608
             loan_name: loan_name
             minimum_payment_amount: 7.457744773683766
-            next_payment_due_date: next_payment_due_date
+            next_payment_due_date: 2000-01-23
           - origination_principal_amount: 1.1730742509559433
             account_number: account_number
             loan_status:
-              end_date: end_date
+              end_date: 2000-01-23
               type: cancelled
             repayment_plan:
               description: description
               type: extended graduated
             payment_reference_number: payment_reference_number
-            last_payment_date: last_payment_date
+            last_payment_date: 2000-01-23
             guarantor: guarantor
             is_overdue: true
-            last_statement_issue_date: last_statement_issue_date
+            last_statement_issue_date: 2000-01-23
             last_payment_amount: 6.84685269835264
-            expected_payoff_date: expected_payoff_date
+            expected_payoff_date: 2000-01-23
             sequence_number: sequence_number
             account_id: account_id
             pslf_status:
               payments_remaining: 9.965781217890562
               payments_made: 5.025004791520295
-              estimated_eligibility_date: estimated_eligibility_date
+              estimated_eligibility_date: 2000-01-23
             interest_rate_percentage: 1.4894159098541704
             disbursement_dates:
-            - disbursement_dates
-            - disbursement_dates
-            origination_date: origination_date
+            - 2000-01-23
+            - 2000-01-23
+            origination_date: 2000-01-23
             outstanding_interest_amount: 4.965218492984954
             servicer_address:
               country: country
@@ -6664,12 +7012,12 @@ components:
             ytd_principal_paid: 6.683562403749608
             loan_name: loan_name
             minimum_payment_amount: 7.457744773683766
-            next_payment_due_date: next_payment_due_date
+            next_payment_due_date: 2000-01-23
           credit:
           - account_id: account_id
-            last_payment_date: last_payment_date
+            last_payment_date: 2000-01-23
             is_overdue: true
-            last_statement_issue_date: last_statement_issue_date
+            last_statement_issue_date: 2000-01-23
             minimum_payment_amount: 5.637376656633329
             aprs:
             - apr_percentage: 0.8008281904610115
@@ -6681,11 +7029,11 @@ components:
               interest_charge_amount: 1.4658129805029452
               balance_subject_to_apr: 6.027456183070403
             last_payment_amount: 5.962133916683182
-            next_payment_due_date: next_payment_due_date
+            next_payment_due_date: 2000-01-23
           - account_id: account_id
-            last_payment_date: last_payment_date
+            last_payment_date: 2000-01-23
             is_overdue: true
-            last_statement_issue_date: last_statement_issue_date
+            last_statement_issue_date: 2000-01-23
             minimum_payment_amount: 5.637376656633329
             aprs:
             - apr_percentage: 0.8008281904610115
@@ -6697,7 +7045,7 @@ components:
               interest_charge_amount: 1.4658129805029452
               balance_subject_to_apr: 6.027456183070403
             last_payment_amount: 5.962133916683182
-            next_payment_due_date: next_payment_due_date
+            next_payment_due_date: 2000-01-23
         accounts:
         - official_name: official_name
           balances:
@@ -6706,7 +7054,7 @@ components:
             available: 0.8008281904610115
             limit: 1.4658129805029452
             iso_currency_code: iso_currency_code
-            last_updated_datetime: last_updated_datetime
+            last_updated_datetime: 2000-01-23T04:56:07.000+00:00
           account_id: account_id
           name: name
           verification_status: pending_automatic_verification
@@ -6718,7 +7066,7 @@ components:
             available: 0.8008281904610115
             limit: 1.4658129805029452
             iso_currency_code: iso_currency_code
-            last_updated_datetime: last_updated_datetime
+            last_updated_datetime: 2000-01-23T04:56:07.000+00:00
           account_id: account_id
           name: name
           verification_status: pending_automatic_verification
@@ -6775,10 +7123,13 @@ components:
           type: string
         name:
           description: The name of the recipient
+          minLength: 1
           type: string
         iban:
           description: The International Bank Account Number (IBAN) for the recipient.
             If BACS data is not provided, an IBAN is required.
+          maxLength: 34
+          minLength: 15
           nullable: true
           type: string
         bacs:
@@ -6830,6 +7181,7 @@ components:
           type: string
         recipient_id:
           description: The ID of the recipient
+          minLength: 1
           type: string
       required:
       - recipient_id
@@ -6889,6 +7241,7 @@ components:
       - iban
       - name
       - recipient_id
+      title: PaymentInitiationRecipient
       type: object
     PaymentInitiationRecipientListRequest:
       description: PaymentInitiationRecipientListRequest defines the request schema
@@ -6983,11 +7336,14 @@ components:
           type: string
         recipient_id:
           description: The ID of the recipient the payment is for.
+          minLength: 1
           type: string
         reference:
           description: A reference for the payment. This must be an alphanumeric string
             with at most 18 characters and must not contain any special characters
             (since not all institutions support them).
+          maxLength: 18
+          minLength: 1
           type: string
         amount:
           $ref: '#/components/schemas/PaymentAmount'
@@ -7007,7 +7363,7 @@ components:
       example:
         payment_id: payment_id
         request_id: request_id
-        status: status
+        status: PAYMENT_STATUS_INPUT_NEEDED
       properties:
         payment_id:
           description: A unique ID identifying the payment
@@ -7017,6 +7373,8 @@ components:
             For a payment returned by this endpoint, there is only one possible value:
 
             `PAYMENT_STATUS_INPUT_NEEDED`: The initial phase of the payment
+          enum:
+          - PAYMENT_STATUS_INPUT_NEEDED
           type: string
         request_id:
           description: A unique identifier for the request, which can be used for
@@ -7258,6 +7616,7 @@ components:
           type: string
         payment_id:
           description: The `payment_id` returned from `/payment_initiation/payment/create`.
+          minLength: 1
           type: string
       required:
       - payment_id
@@ -7365,6 +7724,7 @@ components:
             associated with, if any. This EMI account is used as an intermediary account
             to enable Plaid to reconcile the settlement of funds for Payment Initiation
             requests.
+          minLength: 1
           nullable: true
           type: string
       required:
@@ -7399,6 +7759,7 @@ components:
           type: string
         payment_id:
           description: The `payment_id` returned from `/payment_initiation/payment/create`.
+          minLength: 1
           type: string
       required:
       - payment_id
@@ -7903,7 +8264,7 @@ components:
               documentation_url: documentation_url
               request_id: request_id
               status: 0.8008281904610115
-          warning_code: warning_code
+          warning_code: OWNERS_UNAVAILABLE
         - warning_type: warning_type
           cause:
             item_id: item_id
@@ -7919,9 +8280,9 @@ components:
               documentation_url: documentation_url
               request_id: request_id
               status: 0.8008281904610115
-          warning_code: warning_code
+          warning_code: OWNERS_UNAVAILABLE
         report:
-          date_generated: date_generated
+          date_generated: 2000-01-23T04:56:07.000+00:00
           client_report_id: client_report_id
           user:
             client_user_id: client_user_id
@@ -7938,14 +8299,14 @@ components:
             - null
             institution_name: institution_name
             institution_id: institution_id
-            date_last_updated: date_last_updated
+            date_last_updated: 2000-01-23T04:56:07.000+00:00
           - item_id: item_id
             accounts:
             - null
             - null
             institution_name: institution_name
             institution_id: institution_id
-            date_last_updated: date_last_updated
+            date_last_updated: 2000-01-23T04:56:07.000+00:00
           asset_report_id: asset_report_id
           days_requested: 0.8008281904610115
         request_id: request_id
@@ -8162,7 +8523,7 @@ components:
           billed_products:
           - null
           - null
-          consent_expiration_time: consent_expiration_time
+          consent_expiration_time: 2000-01-23T04:56:07.000+00:00
           error:
             error_message: error_message
             suggested_action: suggested_action
@@ -8187,7 +8548,7 @@ components:
             available: 0.8008281904610115
             limit: 1.4658129805029452
             iso_currency_code: iso_currency_code
-            last_updated_datetime: last_updated_datetime
+            last_updated_datetime: 2000-01-23T04:56:07.000+00:00
           account_id: account_id
           name: name
           verification_status: pending_automatic_verification
@@ -8199,7 +8560,7 @@ components:
             available: 0.8008281904610115
             limit: 1.4658129805029452
             iso_currency_code: iso_currency_code
-            last_updated_datetime: last_updated_datetime
+            last_updated_datetime: 2000-01-23T04:56:07.000+00:00
           account_id: account_id
           name: name
           verification_status: pending_automatic_verification
@@ -8379,7 +8740,7 @@ components:
           billed_products:
           - null
           - null
-          consent_expiration_time: consent_expiration_time
+          consent_expiration_time: 2000-01-23T04:56:07.000+00:00
           error:
             error_message: error_message
             suggested_action: suggested_action
@@ -8404,7 +8765,7 @@ components:
             available: 0.8008281904610115
             limit: 1.4658129805029452
             iso_currency_code: iso_currency_code
-            last_updated_datetime: last_updated_datetime
+            last_updated_datetime: 2000-01-23T04:56:07.000+00:00
           account_id: account_id
           name: name
           verification_status: pending_automatic_verification
@@ -8416,13 +8777,13 @@ components:
             available: 0.8008281904610115
             limit: 1.4658129805029452
             iso_currency_code: iso_currency_code
-            last_updated_datetime: last_updated_datetime
+            last_updated_datetime: 2000-01-23T04:56:07.000+00:00
           account_id: account_id
           name: name
           verification_status: pending_automatic_verification
           mask: mask
         investment_transactions:
-        - date: date
+        - date: 2000-01-23
           unofficial_currency_code: unofficial_currency_code
           amount: 6.027456183070403
           fees: 5.962133916683182
@@ -8436,7 +8797,7 @@ components:
           name: name
           iso_currency_code: iso_currency_code
           security_id: security_id
-        - date: date
+        - date: 2000-01-23
           unofficial_currency_code: unofficial_currency_code
           amount: 6.027456183070403
           fees: 5.962133916683182
@@ -8528,7 +8889,7 @@ components:
         access_token: access_token
         account_id: account_id
         secret: secret
-        processor: processor
+        processor: achq
         client_id: client_id
       properties:
         client_id:
@@ -8552,11 +8913,29 @@ components:
             in Link
           type: string
         processor:
-          description: The processor you are integrating with. Valid values are `"achq"`,
-            `"alpaca"`, `"astra"`, `"check"`, `"checkbook"`, `"circle"`, `"drivewealth"`,
-            `"dwolla"`, `"galileo"`, "`interactive_brokers`", `"lithic"`, `"modern_treasury"`,
-            `"moov"`, `"ocrolus"`, `"prime_trust"`, `"rize"`, `"sila_money"`, `"svb_api"`,
-            `"unit"`, `"vesta"`, `"vopay"`, `"wyre"`
+          description: The processor you are integrating with.
+          enum:
+          - achq
+          - alpaca
+          - astra
+          - check
+          - checkbook
+          - circle
+          - drivewealth
+          - dwolla
+          - galileo
+          - lithic
+          - modern_treasury
+          - moov
+          - ocrolus
+          - prime_trust
+          - rize
+          - sila_money
+          - sbv_api
+          - unit
+          - vesta
+          - vopay
+          - wyre
           type: string
       required:
       - access_token
@@ -8902,7 +9281,7 @@ components:
             Switch product
           type: string
         deposit_switch_token_expiration_time:
-          description: Expiration time of the token, in ISO8601 format
+          description: Expiration time of the token, in ISO 8601 format
           type: string
         request_id:
           description: A unique identifier for the request, which can be used for
@@ -8985,13 +9364,13 @@ components:
         redirect_uri: redirect_uri
         client_name: client_name
         user:
-          phone_number_verified_time: phone_number_verified_time
+          phone_number_verified_time: 2000-01-23T04:56:07.000+00:00
           email_address: email_address
           client_user_id: client_user_id
           date_of_birth: 2000-01-23T04:56:07.000+00:00
           phone_number: phone_number
           legal_name: legal_name
-          email_address_verified_time: email_address_verified_time
+          email_address_verified_time: 2000-01-23T04:56:07.000+00:00
           ssn: ssn
         payment_initiation:
           payment_id: payment_id
@@ -9117,7 +9496,7 @@ components:
     LinkTokenAccountFilters:
       additionalProperties: true
       description: |
-        By default, Link will provide limited account filtering: it will only display Institutions that are compatible with all products supplied in the `products` parameter of `/link/token/create`, and, if `auth` is specified in the `products` array, will also filter out accounts other than `checking` and `savings` accounts on the Select Account pane. You can further limit the accounts shown in Link by using `account_filters` to specify the account subtypes to be shown in Link. Only the specified subtypes will be shown. This filtering applies to both the Account Select view (if enabled) and the Institution Select view. Institutions that do not support the selected subtypes will be omitted from Link. To indicate that all subtypes should be shown, use the value `"all"`. If the `account_filters` filter is used, any account type for which a filter is not specified will be entirely omitted from Link. For a full list of valid types and subtypes, see the [Account schema](https://plaid.com/docs/api/accounts#accounts-schema).
+        By default, Link will provide limited account filtering: it will only display Institutions that are compatible with all products supplied in the `products` parameter of `/link/token/create`, and, if `auth` is specified in the `products` array, will also filter out accounts other than `checking` and `savings` accounts on the Account Select pane. You can further limit the accounts shown in Link by using `account_filters` to specify the account subtypes to be shown in Link. Only the specified subtypes will be shown. This filtering applies to both the Account Select view (if enabled) and the Institution Select view. Institutions that do not support the selected subtypes will be omitted from Link. To indicate that all subtypes should be shown, use the value `"all"`. If the `account_filters` filter is used, any account type for which a filter is not specified will be entirely omitted from Link. For a full list of valid types and subtypes, see the [Account schema](https://plaid.com/docs/api/accounts#accounts-schema).
 
         For institutions using OAuth, the filter will not affect the list of accounts shown by the bank in the OAuth window.
       example:
@@ -9166,6 +9545,7 @@ components:
         payment_id:
           description: The `payment_id` provided by the `/payment_initiation/payment/create`
             endpoint.
+          minLength: 1
           type: string
       required:
       - payment_id
@@ -9204,13 +9584,13 @@ components:
       description: An object specifying information about the end user who will be
         linking their account.
       example:
-        phone_number_verified_time: phone_number_verified_time
+        phone_number_verified_time: 2000-01-23T04:56:07.000+00:00
         email_address: email_address
         client_user_id: client_user_id
         date_of_birth: 2000-01-23T04:56:07.000+00:00
         phone_number: phone_number
         legal_name: legal_name
-        email_address_verified_time: email_address_verified_time
+        email_address_verified_time: 2000-01-23T04:56:07.000+00:00
         ssn: ssn
       properties:
         client_user_id:
@@ -9237,6 +9617,7 @@ components:
              Only pass a verification time for a phone number that you have verified. If you have performed verification but don’t have the time, you may supply a signal value of the start of the UNIX epoch.
 
              Example: `2020-01-01T00:00:00Z`
+          format: date-time
           type: string
         email_address:
           description: The user's email address. This field is optional, but required
@@ -9249,6 +9630,7 @@ components:
              Only pass a verification time for an email address that you have verified. If you have performed verification but don’t have the time, you may supply a signal value of the start of the UNIX epoch.
 
              Example: `2020-01-01T00:00:00Z`
+          format: date-time
           type: string
         ssn:
           description: To be provided in the format "ddd-dd-dddd". This field is optional
@@ -9476,7 +9858,7 @@ components:
         billed_products:
         - null
         - null
-        consent_expiration_time: consent_expiration_time
+        consent_expiration_time: 2000-01-23T04:56:07.000+00:00
         error:
           error_message: error_message
           suggested_action: suggested_action
@@ -9528,6 +9910,7 @@ components:
             The RFC 3339 timestamp after which the consent provided by the end user will expire. Upon consent expiration, the item will enter the `ITEM_LOGIN_REQUIRED` error state. To circumvent the `ITEM_LOGIN_REQUIRED` error and maintain continuous consent, the end user can reauthenticate via Link’s update mode in advance of the consent expiration time.
 
             Note - This is only relevant for certain OAuth-based institutions. For all other institutions, this field will be null.
+          format: date-time
           nullable: true
           type: string
         update_type:
@@ -9649,6 +10032,7 @@ components:
             for the Item. The status will update each time Plaid successfully connects
             with the institution, regardless of whether any new data is available
             in the update.
+          format: date-time
           nullable: true
           type: string
         last_failed_update:
@@ -9656,6 +10040,7 @@ components:
             the Item. The status will update each time Plaid fails an attempt to connect
             with the institution, regardless of whether any new data is available
             in the update.
+          format: date-time
           nullable: true
           type: string
       type: object
@@ -9670,6 +10055,7 @@ components:
             for the Item. The status will update each time Plaid successfully connects
             with the institution, regardless of whether any new data is available
             in the update.
+          format: date-time
           nullable: true
           type: string
         last_failed_update:
@@ -9677,6 +10063,7 @@ components:
             the Item. The status will update each time Plaid fails an attempt to connect
             with the institution, regardless of whether any new data is available
             in the update.
+          format: date-time
           nullable: true
           type: string
       type: object
@@ -9687,6 +10074,7 @@ components:
       properties:
         sent_at:
           description: ISO 8601 timestamp of when the webhook was fired.
+          format: date-time
           nullable: true
           type: string
         code_sent:
@@ -9765,7 +10153,7 @@ components:
           available: 0.8008281904610115
           limit: 1.4658129805029452
           iso_currency_code: iso_currency_code
-          last_updated_datetime: last_updated_datetime
+          last_updated_datetime: 2000-01-23T04:56:07.000+00:00
         account_id: account_id
         name: name
         verification_status: pending_automatic_verification
@@ -9847,7 +10235,7 @@ components:
         available: 0.8008281904610115
         limit: 1.4658129805029452
         iso_currency_code: iso_currency_code
-        last_updated_datetime: last_updated_datetime
+        last_updated_datetime: 2000-01-23T04:56:07.000+00:00
       properties:
         available:
           description: |-
@@ -9900,9 +10288,10 @@ components:
           type: string
         last_updated_datetime:
           description: |-
-            Timestamp in ISO-8601 format (`YYYY-MM-DDTHH:mm:ssZ`) indicating the last time that the balance for the given account has been updated.
+            Timestamp in ISO-8601 format (`YYYY-MM-DDTHH:mm:ssZ`) indicating the last time that the balance for the given account has been updated
 
             This is currently only provided when the `min_last_updated_datetime` is passed when calling `/accounts/balance/get` for `ins_128026` (Capital One).
+          format: date-time
           nullable: true
           type: string
       required:
@@ -10136,9 +10525,13 @@ components:
       properties:
         account:
           description: The account number of the account. Maximum of 10 characters.
+          maxLength: 10
+          minLength: 1
           type: string
         sort_code:
           description: The 6-character sort code of the account.
+          maxLength: 6
+          minLength: 6
           type: string
       title: RecipientBACS
       type: object
@@ -10263,6 +10656,7 @@ components:
           description: For pending transactions, the date that the transaction occurred;
             for posted transactions, the date that the transaction posted. Both dates
             are returned in an ISO 8601 format ( `YYYY-MM-DD` ).
+          format: date
           type: string
         pending:
           description: When `true`, identifies the transaction as pending or unsettled.
@@ -10370,7 +10764,7 @@ components:
         - null
         status:
           investments_updates:
-            last_status_change: last_status_change
+            last_status_change: 2000-01-23T04:56:07.000+00:00
             breakdown:
               error_plaid: 6.027456183070403
               refresh_interval: NORMAL
@@ -10378,7 +10772,15 @@ components:
               error_institution: 1.4658129805029452
             status: HEALTHY
           balance:
-            last_status_change: last_status_change
+            last_status_change: 2000-01-23T04:56:07.000+00:00
+            breakdown:
+              error_plaid: 6.027456183070403
+              refresh_interval: NORMAL
+              success: 0.8008281904610115
+              error_institution: 1.4658129805029452
+            status: HEALTHY
+          liabilities_updates:
+            last_status_change: 2000-01-23T04:56:07.000+00:00
             breakdown:
               error_plaid: 6.027456183070403
               refresh_interval: NORMAL
@@ -10386,7 +10788,7 @@ components:
               error_institution: 1.4658129805029452
             status: HEALTHY
           auth:
-            last_status_change: last_status_change
+            last_status_change: 2000-01-23T04:56:07.000+00:00
             breakdown:
               error_plaid: 6.027456183070403
               refresh_interval: NORMAL
@@ -10394,7 +10796,15 @@ components:
               error_institution: 1.4658129805029452
             status: HEALTHY
           identity:
-            last_status_change: last_status_change
+            last_status_change: 2000-01-23T04:56:07.000+00:00
+            breakdown:
+              error_plaid: 6.027456183070403
+              refresh_interval: NORMAL
+              success: 0.8008281904610115
+              error_institution: 1.4658129805029452
+            status: HEALTHY
+          liabilities:
+            last_status_change: 2000-01-23T04:56:07.000+00:00
             breakdown:
               error_plaid: 6.027456183070403
               refresh_interval: NORMAL
@@ -10402,7 +10812,7 @@ components:
               error_institution: 1.4658129805029452
             status: HEALTHY
           item_logins:
-            last_status_change: last_status_change
+            last_status_change: 2000-01-23T04:56:07.000+00:00
             breakdown:
               error_plaid: 6.027456183070403
               refresh_interval: NORMAL
@@ -10410,28 +10820,36 @@ components:
               error_institution: 1.4658129805029452
             status: HEALTHY
           health_incidents:
-          - end_date: end_date
+          - end_date: 2000-01-23T04:56:07.000+00:00
             incident_updates:
             - description: description
-              updated_date: updated_date
+              updated_date: 2000-01-23T04:56:07.000+00:00
               status: INVESTIGATING
             - description: description
-              updated_date: updated_date
+              updated_date: 2000-01-23T04:56:07.000+00:00
               status: INVESTIGATING
             title: title
-            start_date: start_date
-          - end_date: end_date
+            start_date: 2000-01-23T04:56:07.000+00:00
+          - end_date: 2000-01-23T04:56:07.000+00:00
             incident_updates:
             - description: description
-              updated_date: updated_date
+              updated_date: 2000-01-23T04:56:07.000+00:00
               status: INVESTIGATING
             - description: description
-              updated_date: updated_date
+              updated_date: 2000-01-23T04:56:07.000+00:00
               status: INVESTIGATING
             title: title
-            start_date: start_date
+            start_date: 2000-01-23T04:56:07.000+00:00
+          investments:
+            last_status_change: 2000-01-23T04:56:07.000+00:00
+            breakdown:
+              error_plaid: 6.027456183070403
+              refresh_interval: NORMAL
+              success: 0.8008281904610115
+              error_institution: 1.4658129805029452
+            status: HEALTHY
           transactions_updates:
-            last_status_change: last_status_change
+            last_status_change: 2000-01-23T04:56:07.000+00:00
             breakdown:
               error_plaid: 6.027456183070403
               refresh_interval: NORMAL
@@ -10501,12 +10919,12 @@ components:
     InstitutionStatus:
       additionalProperties: true
       description: |
-        The status of an institution is determined by the health of its Item logins, Transactions updates, Investments updates, Auth requests, Balance requests, and Identity requests. A login attempt is conducted during the initial Item add in Link. If there is not enough traffic to accurately calculate an institution's status, Plaid will return null rather than potentially inaccurate data.
+        The status of an institution is determined by the health of its Item logins, Transactions updates, Investments updates, Liabilities updates, Auth requests, Balance requests, Identity requests, Investments requests, and Liabilities requests. A login attempt is conducted during the initial Item add in Link. If there is not enough traffic to accurately calculate an institution's status, Plaid will return null rather than potentially inaccurate data.
 
         Institution status is accessible in the Dashboard and via the API using the `/institutions/get_by_id` endpoint with the `include_status` option set to true. Note that institution status is not available in the Sandbox environment.
       example:
         investments_updates:
-          last_status_change: last_status_change
+          last_status_change: 2000-01-23T04:56:07.000+00:00
           breakdown:
             error_plaid: 6.027456183070403
             refresh_interval: NORMAL
@@ -10514,7 +10932,15 @@ components:
             error_institution: 1.4658129805029452
           status: HEALTHY
         balance:
-          last_status_change: last_status_change
+          last_status_change: 2000-01-23T04:56:07.000+00:00
+          breakdown:
+            error_plaid: 6.027456183070403
+            refresh_interval: NORMAL
+            success: 0.8008281904610115
+            error_institution: 1.4658129805029452
+          status: HEALTHY
+        liabilities_updates:
+          last_status_change: 2000-01-23T04:56:07.000+00:00
           breakdown:
             error_plaid: 6.027456183070403
             refresh_interval: NORMAL
@@ -10522,7 +10948,7 @@ components:
             error_institution: 1.4658129805029452
           status: HEALTHY
         auth:
-          last_status_change: last_status_change
+          last_status_change: 2000-01-23T04:56:07.000+00:00
           breakdown:
             error_plaid: 6.027456183070403
             refresh_interval: NORMAL
@@ -10530,7 +10956,15 @@ components:
             error_institution: 1.4658129805029452
           status: HEALTHY
         identity:
-          last_status_change: last_status_change
+          last_status_change: 2000-01-23T04:56:07.000+00:00
+          breakdown:
+            error_plaid: 6.027456183070403
+            refresh_interval: NORMAL
+            success: 0.8008281904610115
+            error_institution: 1.4658129805029452
+          status: HEALTHY
+        liabilities:
+          last_status_change: 2000-01-23T04:56:07.000+00:00
           breakdown:
             error_plaid: 6.027456183070403
             refresh_interval: NORMAL
@@ -10538,7 +10972,7 @@ components:
             error_institution: 1.4658129805029452
           status: HEALTHY
         item_logins:
-          last_status_change: last_status_change
+          last_status_change: 2000-01-23T04:56:07.000+00:00
           breakdown:
             error_plaid: 6.027456183070403
             refresh_interval: NORMAL
@@ -10546,28 +10980,36 @@ components:
             error_institution: 1.4658129805029452
           status: HEALTHY
         health_incidents:
-        - end_date: end_date
+        - end_date: 2000-01-23T04:56:07.000+00:00
           incident_updates:
           - description: description
-            updated_date: updated_date
+            updated_date: 2000-01-23T04:56:07.000+00:00
             status: INVESTIGATING
           - description: description
-            updated_date: updated_date
+            updated_date: 2000-01-23T04:56:07.000+00:00
             status: INVESTIGATING
           title: title
-          start_date: start_date
-        - end_date: end_date
+          start_date: 2000-01-23T04:56:07.000+00:00
+        - end_date: 2000-01-23T04:56:07.000+00:00
           incident_updates:
           - description: description
-            updated_date: updated_date
+            updated_date: 2000-01-23T04:56:07.000+00:00
             status: INVESTIGATING
           - description: description
-            updated_date: updated_date
+            updated_date: 2000-01-23T04:56:07.000+00:00
             status: INVESTIGATING
           title: title
-          start_date: start_date
+          start_date: 2000-01-23T04:56:07.000+00:00
+        investments:
+          last_status_change: 2000-01-23T04:56:07.000+00:00
+          breakdown:
+            error_plaid: 6.027456183070403
+            refresh_interval: NORMAL
+            success: 0.8008281904610115
+            error_institution: 1.4658129805029452
+          status: HEALTHY
         transactions_updates:
-          last_status_change: last_status_change
+          last_status_change: 2000-01-23T04:56:07.000+00:00
           breakdown:
             error_plaid: 6.027456183070403
             refresh_interval: NORMAL
@@ -10586,6 +11028,12 @@ components:
         identity:
           $ref: '#/components/schemas/ProductStatus'
         investments_updates:
+          $ref: '#/components/schemas/ProductStatus'
+        liabilities_updates:
+          $ref: '#/components/schemas/ProductStatus'
+        liabilities:
+          $ref: '#/components/schemas/ProductStatus'
+        investments:
           $ref: '#/components/schemas/ProductStatus'
         health_incidents:
           description: Details of recent health incidents associated with the institution.
@@ -10641,7 +11089,29 @@ components:
                 success: 0.42
                 error_plaid: 0.08
                 error_institution: 0.5
+            investments:
+              status: HEALTHY
+              last_status_change: 2019-02-15T15:53:00Z
+              breakdown:
+                success: 0.89
+                error_plaid: 0.02
+                error_institution: 0.09
+            liabilities:
+              status: HEALTHY
+              last_status_change: 2019-02-15T15:53:00Z
+              breakdown:
+                success: 0.89
+                error_plaid: 0.02
+                error_institution: 0.09
             investments_updates:
+              status: HEALTHY
+              last_status_change: 2019-02-12T08:22:00Z
+              breakdown:
+                success: 0.95
+                error_plaid: 0.02
+                error_institution: 0.03
+                refresh_interval: NORMAL
+            liabilities_updates:
               status: HEALTHY
               last_status_change: 2019-02-12T08:22:00Z
               breakdown:
@@ -10711,7 +11181,7 @@ components:
       - ppd_id
       - reason
       - reference_number
-      title: payment_meta
+      title: PaymentMeta
       type: object
     TransactionCode:
       description: |-
@@ -11084,6 +11554,7 @@ components:
         date:
           description: The date of the calculated historical balance, in an ISO 8601
             format (YYYY-MM-DD)
+          format: date
           type: string
         current:
           description: |-
@@ -11197,9 +11668,9 @@ components:
           loan_type_description: loan_type_description
           escrow_balance: 7.061401241503109
           has_pmi: true
-          last_payment_date: last_payment_date
+          last_payment_date: 2000-01-23
           past_due_amount: 7.386281948385884
-          maturity_date: maturity_date
+          maturity_date: 2000-01-23
           has_prepayment_penalty: true
           current_late_fee: 2.3021358869347655
           last_payment_amount: 3.616076749251911
@@ -11210,23 +11681,23 @@ components:
             postal_code: postal_code
             region: region
           account_id: account_id
-          origination_date: origination_date
+          origination_date: 2000-01-23
           loan_term: loan_term
           interest_rate:
             percentage: 9.301444243932576
             type: type
           ytd_interest_paid: 1.2315135367772556
           ytd_principal_paid: 1.0246457001441578
-          next_payment_due_date: next_payment_due_date
+          next_payment_due_date: 2000-01-23
         - origination_principal_amount: 4.145608029883936
           account_number: account_number
           next_monthly_payment: 2.027123023002322
           loan_type_description: loan_type_description
           escrow_balance: 7.061401241503109
           has_pmi: true
-          last_payment_date: last_payment_date
+          last_payment_date: 2000-01-23
           past_due_amount: 7.386281948385884
-          maturity_date: maturity_date
+          maturity_date: 2000-01-23
           has_prepayment_penalty: true
           current_late_fee: 2.3021358869347655
           last_payment_amount: 3.616076749251911
@@ -11237,41 +11708,41 @@ components:
             postal_code: postal_code
             region: region
           account_id: account_id
-          origination_date: origination_date
+          origination_date: 2000-01-23
           loan_term: loan_term
           interest_rate:
             percentage: 9.301444243932576
             type: type
           ytd_interest_paid: 1.2315135367772556
           ytd_principal_paid: 1.0246457001441578
-          next_payment_due_date: next_payment_due_date
+          next_payment_due_date: 2000-01-23
         student:
         - origination_principal_amount: 1.1730742509559433
           account_number: account_number
           loan_status:
-            end_date: end_date
+            end_date: 2000-01-23
             type: cancelled
           repayment_plan:
             description: description
             type: extended graduated
           payment_reference_number: payment_reference_number
-          last_payment_date: last_payment_date
+          last_payment_date: 2000-01-23
           guarantor: guarantor
           is_overdue: true
-          last_statement_issue_date: last_statement_issue_date
+          last_statement_issue_date: 2000-01-23
           last_payment_amount: 6.84685269835264
-          expected_payoff_date: expected_payoff_date
+          expected_payoff_date: 2000-01-23
           sequence_number: sequence_number
           account_id: account_id
           pslf_status:
             payments_remaining: 9.965781217890562
             payments_made: 5.025004791520295
-            estimated_eligibility_date: estimated_eligibility_date
+            estimated_eligibility_date: 2000-01-23
           interest_rate_percentage: 1.4894159098541704
           disbursement_dates:
-          - disbursement_dates
-          - disbursement_dates
-          origination_date: origination_date
+          - 2000-01-23
+          - 2000-01-23
+          origination_date: 2000-01-23
           outstanding_interest_amount: 4.965218492984954
           servicer_address:
             country: country
@@ -11283,33 +11754,33 @@ components:
           ytd_principal_paid: 6.683562403749608
           loan_name: loan_name
           minimum_payment_amount: 7.457744773683766
-          next_payment_due_date: next_payment_due_date
+          next_payment_due_date: 2000-01-23
         - origination_principal_amount: 1.1730742509559433
           account_number: account_number
           loan_status:
-            end_date: end_date
+            end_date: 2000-01-23
             type: cancelled
           repayment_plan:
             description: description
             type: extended graduated
           payment_reference_number: payment_reference_number
-          last_payment_date: last_payment_date
+          last_payment_date: 2000-01-23
           guarantor: guarantor
           is_overdue: true
-          last_statement_issue_date: last_statement_issue_date
+          last_statement_issue_date: 2000-01-23
           last_payment_amount: 6.84685269835264
-          expected_payoff_date: expected_payoff_date
+          expected_payoff_date: 2000-01-23
           sequence_number: sequence_number
           account_id: account_id
           pslf_status:
             payments_remaining: 9.965781217890562
             payments_made: 5.025004791520295
-            estimated_eligibility_date: estimated_eligibility_date
+            estimated_eligibility_date: 2000-01-23
           interest_rate_percentage: 1.4894159098541704
           disbursement_dates:
-          - disbursement_dates
-          - disbursement_dates
-          origination_date: origination_date
+          - 2000-01-23
+          - 2000-01-23
+          origination_date: 2000-01-23
           outstanding_interest_amount: 4.965218492984954
           servicer_address:
             country: country
@@ -11321,12 +11792,12 @@ components:
           ytd_principal_paid: 6.683562403749608
           loan_name: loan_name
           minimum_payment_amount: 7.457744773683766
-          next_payment_due_date: next_payment_due_date
+          next_payment_due_date: 2000-01-23
         credit:
         - account_id: account_id
-          last_payment_date: last_payment_date
+          last_payment_date: 2000-01-23
           is_overdue: true
-          last_statement_issue_date: last_statement_issue_date
+          last_statement_issue_date: 2000-01-23
           minimum_payment_amount: 5.637376656633329
           aprs:
           - apr_percentage: 0.8008281904610115
@@ -11338,11 +11809,11 @@ components:
             interest_charge_amount: 1.4658129805029452
             balance_subject_to_apr: 6.027456183070403
           last_payment_amount: 5.962133916683182
-          next_payment_due_date: next_payment_due_date
+          next_payment_due_date: 2000-01-23
         - account_id: account_id
-          last_payment_date: last_payment_date
+          last_payment_date: 2000-01-23
           is_overdue: true
-          last_statement_issue_date: last_statement_issue_date
+          last_statement_issue_date: 2000-01-23
           minimum_payment_amount: 5.637376656633329
           aprs:
           - apr_percentage: 0.8008281904610115
@@ -11354,7 +11825,7 @@ components:
             interest_charge_amount: 1.4658129805029452
             balance_subject_to_apr: 6.027456183070403
           last_payment_amount: 5.962133916683182
-          next_payment_due_date: next_payment_due_date
+          next_payment_due_date: 2000-01-23
       properties:
         credit:
           description: The credit accounts returned.
@@ -11387,29 +11858,29 @@ components:
         origination_principal_amount: 1.1730742509559433
         account_number: account_number
         loan_status:
-          end_date: end_date
+          end_date: 2000-01-23
           type: cancelled
         repayment_plan:
           description: description
           type: extended graduated
         payment_reference_number: payment_reference_number
-        last_payment_date: last_payment_date
+        last_payment_date: 2000-01-23
         guarantor: guarantor
         is_overdue: true
-        last_statement_issue_date: last_statement_issue_date
+        last_statement_issue_date: 2000-01-23
         last_payment_amount: 6.84685269835264
-        expected_payoff_date: expected_payoff_date
+        expected_payoff_date: 2000-01-23
         sequence_number: sequence_number
         account_id: account_id
         pslf_status:
           payments_remaining: 9.965781217890562
           payments_made: 5.025004791520295
-          estimated_eligibility_date: estimated_eligibility_date
+          estimated_eligibility_date: 2000-01-23
         interest_rate_percentage: 1.4894159098541704
         disbursement_dates:
-        - disbursement_dates
-        - disbursement_dates
-        origination_date: origination_date
+        - 2000-01-23
+        - 2000-01-23
+        origination_date: 2000-01-23
         outstanding_interest_amount: 4.965218492984954
         servicer_address:
           country: country
@@ -11421,7 +11892,7 @@ components:
         ytd_principal_paid: 6.683562403749608
         loan_name: loan_name
         minimum_payment_amount: 7.457744773683766
-        next_payment_due_date: next_payment_due_date
+        next_payment_due_date: 2000-01-23
       properties:
         account_id:
           description: The ID of the account that this liability belongs to.
@@ -11438,6 +11909,7 @@ components:
             These are often in the past. Dates are returned in an ISO 8601 format
             (YYYY-MM-DD).
           items:
+            format: date
             type: string
           nullable: true
           type: array
@@ -11445,6 +11917,7 @@ components:
           description: The date when the student loan is expected to be paid off.
             Availability for this field is limited. Dates are returned in an ISO 8601
             format (YYYY-MM-DD).
+          format: date
           nullable: true
           type: string
         guarantor:
@@ -11466,11 +11939,13 @@ components:
         last_payment_date:
           description: The date of the last payment. Dates are returned in an ISO
             8601 format (YYYY-MM-DD).
+          format: date
           nullable: true
           type: string
         last_statement_issue_date:
           description: The date of the last statement. Dates are returned in an ISO
             8601 format (YYYY-MM-DD).
+          format: date
           nullable: true
           type: string
         loan_name:
@@ -11491,11 +11966,13 @@ components:
             a payment is not expected. A payment is not expected if `loan_status.type`
             is `deferment`, `in_school`, `consolidated`, `paid in full`, or `transferred`.
             Dates are returned in an ISO 8601 format (YYYY-MM-DD).
+          format: date
           nullable: true
           type: string
         origination_date:
           description: |
             The date on which the loan was initially lent. Dates are returned in an ISO 8601 format (YYYY-MM-DD).
+          format: date
           nullable: true
           type: string
         origination_principal_amount:
@@ -11568,9 +12045,9 @@ components:
       description: An object representing a credit card account.
       example:
         account_id: account_id
-        last_payment_date: last_payment_date
+        last_payment_date: 2000-01-23
         is_overdue: true
-        last_statement_issue_date: last_statement_issue_date
+        last_statement_issue_date: 2000-01-23
         minimum_payment_amount: 5.637376656633329
         aprs:
         - apr_percentage: 0.8008281904610115
@@ -11582,7 +12059,7 @@ components:
           interest_charge_amount: 1.4658129805029452
           balance_subject_to_apr: 6.027456183070403
         last_payment_amount: 5.962133916683182
-        next_payment_due_date: next_payment_due_date
+        next_payment_due_date: 2000-01-23
       properties:
         account_id:
           description: The ID of the account that this liability belongs to.
@@ -11604,10 +12081,12 @@ components:
         last_payment_date:
           description: The date of the last payment. Dates are returned in an ISO
             8601 format (YYYY-MM-DD). Availability for this field is limited.
+          format: date
           type: string
         last_statement_issue_date:
           description: The date of the last statement. Dates are returned in an ISO
             8601 format (YYYY-MM-DD).
+          format: date
           type: string
         minimum_payment_amount:
           description: The minimum payment due for the next billing cycle.
@@ -11615,6 +12094,7 @@ components:
         next_payment_due_date:
           description: The due date for the next payment. The due date is `null` if
             a payment is not expected. Dates are returned in an ISO 8601 format (YYYY-MM-DD).
+          format: date
           nullable: true
           type: string
       required:
@@ -11638,9 +12118,9 @@ components:
         loan_type_description: loan_type_description
         escrow_balance: 7.061401241503109
         has_pmi: true
-        last_payment_date: last_payment_date
+        last_payment_date: 2000-01-23
         past_due_amount: 7.386281948385884
-        maturity_date: maturity_date
+        maturity_date: 2000-01-23
         has_prepayment_penalty: true
         current_late_fee: 2.3021358869347655
         last_payment_amount: 3.616076749251911
@@ -11651,14 +12131,14 @@ components:
           postal_code: postal_code
           region: region
         account_id: account_id
-        origination_date: origination_date
+        origination_date: 2000-01-23
         loan_term: loan_term
         interest_rate:
           percentage: 9.301444243932576
           type: type
         ytd_interest_paid: 1.2315135367772556
         ytd_principal_paid: 1.0246457001441578
-        next_payment_due_date: next_payment_due_date
+        next_payment_due_date: 2000-01-23
       properties:
         account_id:
           description: The ID of the account that this liability belongs to.
@@ -11694,6 +12174,7 @@ components:
         last_payment_date:
           description: The date of the last payment. Dates are returned in an ISO
             8601 format (YYYY-MM-DD).
+          format: date
           nullable: true
           type: string
         loan_type_description:
@@ -11709,6 +12190,7 @@ components:
         maturity_date:
           description: Original date on which mortgage is due in full. Dates are returned
             in an ISO 8601 format (YYYY-MM-DD).
+          format: date
           nullable: true
           type: string
         next_monthly_payment:
@@ -11718,11 +12200,13 @@ components:
         next_payment_due_date:
           description: The due date for the next payment. Dates are returned in an
             ISO 8601 format (YYYY-MM-DD).
+          format: date
           nullable: true
           type: string
         origination_date:
           description: The date on which the loan was initially lent. Dates are returned
             in an ISO 8601 format (YYYY-MM-DD).
+          format: date
           nullable: true
           type: string
         origination_principal_amount:
@@ -11829,12 +12313,13 @@ components:
       additionalProperties: true
       description: An object representing the status of the student loan
       example:
-        end_date: end_date
+        end_date: 2000-01-23
         type: cancelled
       properties:
         end_date:
           description: |
             The date until which the loan will be in its current status. Dates are returned in an ISO 8601 format (YYYY-MM-DD).
+          format: date
           nullable: true
           type: string
         type:
@@ -11905,11 +12390,12 @@ components:
       example:
         payments_remaining: 9.965781217890562
         payments_made: 5.025004791520295
-        estimated_eligibility_date: estimated_eligibility_date
+        estimated_eligibility_date: 2000-01-23
       properties:
         estimated_eligibility_date:
           description: The estimated date borrower will have completed 120 qualifying
             monthly payments. Returned in ISO 8601 format (YYYY-MM-DD).
+          format: date
           nullable: true
           type: string
         payments_made:
@@ -12100,19 +12586,26 @@ components:
           description: An array of length 1-2 representing the street address where
             the recipient is located. Maximum of 70 characters.
           items:
+            minLength: 1
             type: string
           minItems: 1
           type: array
         city:
           description: The city where the recipient is located. Maximum of 35 characters.
+          maxLength: 35
+          minLength: 1
           type: string
         postal_code:
           description: The postal code where the recipient is located. Maximum of
             16 characters.
+          maxLength: 16
+          minLength: 1
           type: string
         country:
           description: The ISO 3166-1 alpha-2 country code where the recipient is
             located.
+          maxLength: 2
+          minLength: 2
           type: string
       required:
       - city
@@ -12179,6 +12672,7 @@ components:
       enum:
       - WEEKLY
       - MONTHLY
+      minLength: 1
       title: PaymentScheduleInterval
       type: string
     ExternalPaymentOptions:
@@ -12201,6 +12695,8 @@ components:
           description: The International Bank Account Number (IBAN) for the payer's
             account. If provided, the end user will be able to send payments only
             from the specified bank account.
+          maxLength: 34
+          minLength: 15
           nullable: true
           type: string
         bacs:
@@ -12210,6 +12706,7 @@ components:
             associated with, if any. This EMI account is used as an intermediary account
             to enable Plaid to reconcile the settlement of funds for Payment Initiation
             requests.
+          minLength: 1
           nullable: true
           type: string
       title: PaymentOptions
@@ -12273,10 +12770,11 @@ components:
     ProductStatus:
       additionalProperties: true
       description: A representation of the status health of a request type. Auth requests,
-        Balance requests, Identity requests, Transactions updates, Investments updates,
-        and Item logins each have their own status object.
+        Balance requests, Identity requests, Investments requests, Liabilities requests,
+        Transactions updates, Investments updates, Liabilities updates, and Item logins
+        each have their own status object.
       example:
-        last_status_change: last_status_change
+        last_status_change: 2000-01-23T04:56:07.000+00:00
         breakdown:
           error_plaid: 6.027456183070403
           refresh_interval: NORMAL
@@ -12297,6 +12795,7 @@ components:
         last_status_change:
           description: ISO 8601 formatted timestamp of the last status change for
             the institution.
+          format: date-time
           type: string
         breakdown:
           $ref: '#/components/schemas/ProductStatusBreakdown'
@@ -12561,9 +13060,11 @@ components:
             transaction dates in the future will result in pending transactions. Transactions
             in Sandbox will move from pending to posted once their transaction date
             has been reached.
+          format: date
           type: string
         date_posted:
           description: The date the transaction posted, in ISO8601 (YYYY-MM-DD) format
+          format: date
           type: string
         amount:
           description: The transaction amount. Can be negative.
@@ -12620,6 +13121,7 @@ components:
         origination_date:
           description: The date on which the loan was initially lent, in ISO 8601
             (YYYY-MM-DD) format. Can only be set if `type` is `student`.
+          format: date
           type: string
         principal:
           description: The original loan principal. Can only be set if `type` is `student`.
@@ -12638,6 +13140,7 @@ components:
         expected_payoff_date:
           description: Override the `expected_payoff_date` field. Can only be set
             if `type` is `student`.
+          format: date
           type: string
         guarantor:
           description: Override the `guarantor` field. Can only be set if `type` is
@@ -12701,6 +13204,7 @@ components:
       - servicer_address
       - special_apr
       - type
+      title: LiabilityOverride
       type: object
     StudentLoanRepaymentModel:
       additionalProperties: true
@@ -12901,6 +13405,7 @@ components:
         consent_expiration_time:
           description: The date and time at which the Item's access consent will expire,
             in ISO 8601 format
+          format: date-time
           type: string
       required:
       - consent_expiration_time
@@ -13306,7 +13811,7 @@ components:
             documentation_url: documentation_url
             request_id: request_id
             status: 0.8008281904610115
-        warning_code: warning_code
+        warning_code: OWNERS_UNAVAILABLE
       properties:
         warning_type:
           description: The warning type, which will always be `ASSET_REPORT_WARNING`
@@ -13315,6 +13820,8 @@ components:
           description: The warning code identifies a specific kind of warning. Currently,
             the only possible warning code is `OWNERS_UNAVAILABLE`, which indicates
             that account-owner information is not available.
+          enum:
+          - OWNERS_UNAVAILABLE
           type: string
         cause:
           $ref: '#/components/schemas/Cause'
@@ -13348,6 +13855,8 @@ components:
           enum:
           - GBP
           - EUR
+          maxLength: 3
+          minLength: 3
           type: string
         value:
           description: The amount of the payment. Must contain at most two digits
@@ -14302,7 +14811,7 @@ components:
       additionalProperties: true
       description: An object representing an Asset Report
       example:
-        date_generated: date_generated
+        date_generated: 2000-01-23T04:56:07.000+00:00
         client_report_id: client_report_id
         user:
           client_user_id: client_user_id
@@ -14319,14 +14828,14 @@ components:
           - null
           institution_name: institution_name
           institution_id: institution_id
-          date_last_updated: date_last_updated
+          date_last_updated: 2000-01-23T04:56:07.000+00:00
         - item_id: item_id
           accounts:
           - null
           - null
           institution_name: institution_name
           institution_id: institution_id
-          date_last_updated: date_last_updated
+          date_last_updated: 2000-01-23T04:56:07.000+00:00
         asset_report_id: asset_report_id
         days_requested: 0.8008281904610115
       properties:
@@ -14341,6 +14850,7 @@ components:
         date_generated:
           description: The date and time when the Asset Report was created, in ISO
             8601 format (e.g. "2018-04-12T03:32:11Z").
+          format: date-time
           type: string
         days_requested:
           description: The duration of transaction history you requested
@@ -14372,7 +14882,7 @@ components:
         - null
         institution_name: institution_name
         institution_id: institution_id
-        date_last_updated: date_last_updated
+        date_last_updated: 2000-01-23T04:56:07.000+00:00
       properties:
         item_id:
           description: The `item_id` of the Item associated with this webhook, warning,
@@ -14388,6 +14898,7 @@ components:
         date_last_updated:
           description: The date and time when this Item’s data was last retrieved
             from the financial institution, in ISO 8601 format.
+          format: date-time
           type: string
         accounts:
           description: Data about each of the accounts open on the Item.
@@ -14499,6 +15010,7 @@ components:
           type: string
         timestamp:
           description: The timestamp of the update, in ISO 8601 format, e.g. `"2017-09-14T14:42:19.350Z"`
+          format: date-time
           type: string
         error:
           $ref: '#/components/schemas/Error'
@@ -14728,7 +15240,7 @@ components:
       additionalProperties: true
       description: A transaction within an investment account.
       example:
-        date: date
+        date: 2000-01-23
         unofficial_currency_code: unofficial_currency_code
         amount: 6.027456183070403
         fees: 5.962133916683182
@@ -14765,6 +15277,7 @@ components:
         date:
           description: The ISO-8601 posting date for the transaction, or transacted
             date for pending transactions.
+          format: date
           type: string
         name:
           description: The institution’s description of the transaction.
@@ -15185,8 +15698,10 @@ components:
             The method used to make the deposit switch.
 
             - `instant` – User instantly switched their direct deposit to a new or existing bank account by connecting their payroll or employer account.
+
             - `mail` – User requested that Plaid contact their employer by mail to make the direct deposit switch.
-            - `pdf` – User generated a PDF or email to be sent to their employer with the information necessary to make the deposit switch.
+
+            - `pdf` – User generated a PDF or email to be sent to their employer with the information necessary to make the deposit switch.'
           enum:
           - instant
           - mail
@@ -15365,7 +15880,7 @@ components:
           amount: amount
           metadata:
             key: metadata
-          created: created
+          created: 2000-01-23T04:56:07.000+00:00
           description: description
           failure_reason:
             ach_return_code: ach_return_code
@@ -15406,7 +15921,7 @@ components:
         amount: amount
         metadata:
           key: metadata
-        created: created
+        created: 2000-01-23T04:56:07.000+00:00
         description: description
         failure_reason:
           ach_return_code: ach_return_code
@@ -15449,6 +15964,7 @@ components:
         created:
           description: The datetime when this bank transfer was created. This will
             be of the form `2006-01-02T15:04:05Z`
+          format: date-time
           type: string
         status:
           $ref: '#/components/schemas/BankTransferStatus'
@@ -15755,7 +16271,7 @@ components:
           amount: amount
           metadata:
             key: metadata
-          created: created
+          created: 2000-01-23T04:56:07.000+00:00
           description: description
           failure_reason:
             ach_return_code: ach_return_code
@@ -15847,7 +16363,7 @@ components:
         - amount: amount
           metadata:
             key: metadata
-          created: created
+          created: 2000-01-23T04:56:07.000+00:00
           description: description
           failure_reason:
             ach_return_code: ach_return_code
@@ -15865,7 +16381,7 @@ components:
         - amount: amount
           metadata:
             key: metadata
-          created: created
+          created: 2000-01-23T04:56:07.000+00:00
           description: description
           failure_reason:
             ach_return_code: ach_return_code
@@ -16093,7 +16609,7 @@ components:
         receiver_details:
           available_balance: positive
         bank_transfer_iso_currency_code: bank_transfer_iso_currency_code
-        timestamp: timestamp
+        timestamp: 2000-01-23T04:56:07.000+00:00
       properties:
         event_id:
           description: Plaid’s unique identifier for this event. IDs are sequential
@@ -16103,6 +16619,7 @@ components:
         timestamp:
           description: The datetime when this event occurred. This will be of the
             form `2006-01-02T15:04:05Z`.
+          format: date-time
           type: string
         event_type:
           $ref: '#/components/schemas/BankTransferEventType'
@@ -16163,7 +16680,7 @@ components:
           receiver_details:
             available_balance: positive
           bank_transfer_iso_currency_code: bank_transfer_iso_currency_code
-          timestamp: timestamp
+          timestamp: 2000-01-23T04:56:07.000+00:00
         - event_id: 0
           account_id: account_id
           bank_transfer_amount: bank_transfer_amount
@@ -16175,7 +16692,7 @@ components:
           receiver_details:
             available_balance: positive
           bank_transfer_iso_currency_code: bank_transfer_iso_currency_code
-          timestamp: timestamp
+          timestamp: 2000-01-23T04:56:07.000+00:00
         request_id: request_id
       properties:
         bank_transfer_events:
@@ -16244,7 +16761,7 @@ components:
           receiver_details:
             available_balance: positive
           bank_transfer_iso_currency_code: bank_transfer_iso_currency_code
-          timestamp: timestamp
+          timestamp: 2000-01-23T04:56:07.000+00:00
         - event_id: 0
           account_id: account_id
           bank_transfer_amount: bank_transfer_amount
@@ -16256,7 +16773,7 @@ components:
           receiver_details:
             available_balance: positive
           bank_transfer_iso_currency_code: bank_transfer_iso_currency_code
-          timestamp: timestamp
+          timestamp: 2000-01-23T04:56:07.000+00:00
         request_id: request_id
       properties:
         bank_transfer_events:
@@ -16880,7 +17397,7 @@ components:
         - pay_frequency:
             value: monthly
           verified_transaction:
-            date: date
+            date: 2000-01-23
             transaction_id: transaction_id
             amount: 0.8008281904610115
             account_id: account_id
@@ -16888,7 +17405,7 @@ components:
         - pay_frequency:
             value: monthly
           verified_transaction:
-            date: date
+            date: 2000-01-23
             transaction_id: transaction_id
             amount: 0.8008281904610115
             account_id: account_id
@@ -16925,6 +17442,49 @@ components:
       - request_id
       title: IncomeVerificationSummaryGetResponse
       type: object
+    IncomeVerificationRefreshRequest:
+      description: IncomeVerificationRefreshRequest defines the request schema for
+        `/income/verification/refresh`
+      example:
+        income_verification_id: income_verification_id
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        income_verification_id:
+          description: The ID of the verification.
+          type: string
+      required:
+      - income_verification_id
+      type: object
+    IncomeVerificationRefreshResponse:
+      description: IncomeVerificationRequestResponse defines the response schema for
+        `/income/verification/refresh`
+      example:
+        request_id: request_id
+      properties:
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+        verification_refresh_status:
+          $ref: '#/components/schemas/VerificationRefreshStatus'
+      required:
+      - request_id
+      - verification_refresh_status
+      type: object
     IncomeSummary:
       additionalProperties: true
       description: The verified fields from a paystub verification. All fields are
@@ -16933,7 +17493,7 @@ components:
         pay_frequency:
           value: monthly
         verified_transaction:
-          date: date
+          date: 2000-01-23
           transaction_id: transaction_id
           amount: 0.8008281904610115
           account_id: account_id
@@ -16968,7 +17528,7 @@ components:
       description: Information about the matched direct deposit transaction used to
         verify a user's payroll information.
       example:
-        date: date
+        date: 2000-01-23
         transaction_id: transaction_id
         amount: 0.8008281904610115
         account_id: account_id
@@ -16983,6 +17543,7 @@ components:
           type: number
         date:
           description: The date of the transaction, in ISO 8601 format ("yyyy-mm-dd").
+          format: date
           type: string
         account_id:
           description: A unique identifier for the end user's account.
@@ -17102,6 +17663,15 @@ components:
       - UNKNOWN
       title: VerificationStatus
       type: string
+    VerificationRefreshStatus:
+      description: |-
+        The verification refresh status. One of the following:
+
+        `"VERIFICATION_REFRESH_STATUS_USER_PRESENCE_REQUIRED"` User presence is required to refresh an income verification.
+      enum:
+      - VERIFICATION_REFRESH_STATUS_USER_PRESENCE_REQUIRED
+      title: VerificationRefreshStatus
+      type: string
     IncomeVerificationPaystubsGetRequest:
       description: IncomeVerificationPaystubsGetRequest defines the request schema
         for `/income/verification/paystubs/get`.
@@ -17136,11 +17706,11 @@ components:
         paystubs:
         - account_id: account_id
           pay_period_details:
-            end_date: end_date
-            pay_day: pay_day
+            end_date: 2000-01-23
+            pay_day: 2000-01-23
             gross_earnings: 0.8008281904610115
             check_amount: 6.027456183070403
-            start_date: start_date
+            start_date: 2000-01-23
           ytd_earnings: ""
           employer:
             name: name
@@ -17153,11 +17723,11 @@ components:
             type: bonus
         - account_id: account_id
           pay_period_details:
-            end_date: end_date
-            pay_day: pay_day
+            end_date: 2000-01-23
+            pay_day: 2000-01-23
             gross_earnings: 0.8008281904610115
             check_amount: 6.027456183070403
-            start_date: start_date
+            start_date: 2000-01-23
           ytd_earnings: ""
           employer:
             name: name
@@ -17191,11 +17761,11 @@ components:
       example:
         account_id: account_id
         pay_period_details:
-          end_date: end_date
-          pay_day: pay_day
+          end_date: 2000-01-23
+          pay_day: 2000-01-23
           gross_earnings: 0.8008281904610115
           check_amount: 6.027456183070403
-          start_date: start_date
+          start_date: 2000-01-23
         ytd_earnings: ""
         employer:
           name: name
@@ -17305,23 +17875,26 @@ components:
       additionalProperties: true
       description: Details about the pay period.
       example:
-        end_date: end_date
-        pay_day: pay_day
+        end_date: 2000-01-23
+        pay_day: 2000-01-23
         gross_earnings: 0.8008281904610115
         check_amount: 6.027456183070403
-        start_date: start_date
+        start_date: 2000-01-23
       properties:
         start_date:
           description: 'The pay period start date, in ISO 8601 format: "yyyy-mm-dd".'
+          format: date
           nullable: true
           type: string
         end_date:
           description: 'The pay period end date, in ISO 8601 format: "yyyy-mm-dd".'
+          format: date
           nullable: true
           type: string
         pay_day:
           description: The date on which the paystub was issued, in ISO 8601 format
             ("yyyy-mm-dd").
+          format: date
           nullable: true
           type: string
         gross_earnings:
@@ -17431,22 +18004,24 @@ components:
     HealthIncident:
       additionalProperties: true
       example:
-        end_date: end_date
+        end_date: 2000-01-23T04:56:07.000+00:00
         incident_updates:
         - description: description
-          updated_date: updated_date
+          updated_date: 2000-01-23T04:56:07.000+00:00
           status: INVESTIGATING
         - description: description
-          updated_date: updated_date
+          updated_date: 2000-01-23T04:56:07.000+00:00
           status: INVESTIGATING
         title: title
-        start_date: start_date
+        start_date: 2000-01-23T04:56:07.000+00:00
       properties:
         start_date:
           description: The start date of the incident, in ISO 8601 format, e.g. `"2020-10-30T15:26:48Z"`.
+          format: date-time
           type: string
         end_date:
           description: The end date of the incident, in ISO 8601 format, e.g. `"2020-10-30T15:26:48Z"`.
+          format: date-time
           type: string
         title:
           description: The title of the incident
@@ -17466,7 +18041,7 @@ components:
       additionalProperties: true
       example:
         description: description
-        updated_date: updated_date
+        updated_date: 2000-01-23T04:56:07.000+00:00
         status: INVESTIGATING
       properties:
         description:
@@ -17484,6 +18059,7 @@ components:
         updated_date:
           description: The date when the update was published, in ISO 8601 format,
             e.g. `"2020-10-30T15:26:48Z"`.
+          format: date-time
           type: string
       title: IncidentUpdate
       type: object
@@ -17734,7 +18310,7 @@ components:
         reason_for_access: reason_for_access
         logo_url: logo_url
         name: name
-        created_at: created_at
+        created_at: 2000-01-23
         application_id: application_id
         application_url: application_url
       properties:
@@ -17750,6 +18326,7 @@ components:
         created_at:
           description: The date this application was linked in ISO8601 (YYYY-MM-DD)
             format in UTC.
+          format: date
           type: string
         logo_url:
           description: A URL that links to the application logo image.
@@ -17808,7 +18385,7 @@ components:
           reason_for_access: reason_for_access
           logo_url: logo_url
           name: name
-          created_at: created_at
+          created_at: 2000-01-23
           application_id: application_id
           application_url: application_url
         request_id: request_id
@@ -18361,6 +18938,657 @@ components:
           nullable: true
           type: string
       type: object
+    SignalEvaluateRequest:
+      additionalProperties: true
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        access_token:
+          description: The access token associated with the Item data is being requested
+            for.
+          title: AccessToken
+          type: string
+        account_id:
+          description: The `account_id` of the account whose verification status is
+            to be modified
+          type: string
+        client_transaction_id:
+          description: The unique ID that you would like to use to refer to this transaction.
+            For your convenience mapping your internal data, you could use your internal
+            ID/identifier for this transaction. The max length for this field is 36
+            characters.
+          maxLength: 36
+          type: string
+        amount:
+          description: The transaction amount, in USD (e.g. `102.05`)
+          type: number
+        client_user_id:
+          description: A unique ID that identifies the end user in your system. This
+            ID is used to correlate requests by a user with multiple Items. The max
+            length for this field is 36 characters.
+          maxLength: 36
+          type: string
+        user:
+          $ref: '#/components/schemas/SignalUser'
+        device:
+          $ref: '#/components/schemas/SignalDevice'
+      required:
+      - access_token
+      - account_id
+      - amount
+      - client_transaction_id
+      title: SignalEvaluateRequest
+      type: object
+    SignalUser:
+      description: Details about the end user initiating the transaction (i.e., the
+        account holder).
+      properties:
+        name:
+          $ref: '#/components/schemas/SignalPersonName'
+        phone_number:
+          description: 'The user''s phone number, in E.164 format: +{countrycode}{number}.
+            For example: "+14151234567"'
+          nullable: true
+          type: string
+        email_address:
+          description: The user's email address.
+          nullable: true
+          type: string
+        address:
+          $ref: '#/components/schemas/SignalAddressData'
+      title: SignalUser
+      type: object
+    SignalPersonName:
+      description: The user's legal name
+      nullable: true
+      properties:
+        prefix:
+          description: The user's name prefix (e.g. "Mr.")
+          nullable: true
+          type: string
+        given_name:
+          description: The user's given name. If the user has a one-word name, it
+            should be provided in this field.
+          nullable: true
+          type: string
+        middle_name:
+          description: The user's middle name
+          nullable: true
+          type: string
+        family_name:
+          description: The user's family name / surname
+          nullable: true
+          type: string
+        suffix:
+          description: The user's name suffix (e.g. "II")
+          nullable: true
+          type: string
+      title: SignalPersonName
+      type: object
+    SignalAddressData:
+      additionalProperties: true
+      description: Data about the components comprising an address.
+      nullable: true
+      properties:
+        city:
+          description: The full city name
+          type: string
+        region:
+          description: |-
+            The region or state
+            Example: `"NC"`
+          nullable: true
+          type: string
+        street:
+          description: |-
+            The full street address
+            Example: `"564 Main Street, APT 15"`
+          type: string
+        postal_code:
+          description: The postal code
+          nullable: true
+          type: string
+        country:
+          description: The ISO 3166-1 alpha-2 country code
+          nullable: true
+          type: string
+      title: AddressData
+      type: object
+    SignalDevice:
+      description: Details about the end user's device
+      properties:
+        ip_address:
+          description: The IP address of the device that initiated the transaction
+          nullable: true
+          type: string
+        user_agent:
+          description: The user agent of the device that initiated the transaction
+            (e.g. "Mozilla/5.0")
+          nullable: true
+          type: string
+      title: SignalEvaluateDevice
+      type: object
+    SignalEvaluateResponse:
+      additionalProperties: true
+      example:
+        scores:
+          customer_initiated_return_risk:
+            score: 8
+            risk_tier: 3
+          bank_initiated_return_risk:
+            score: 14
+            risk_tier: 5
+        core_attributes:
+          days_since_first_plaid_connection: 1
+          nsf_overdraft_transactions_count_90d: 7
+          nsf_overdraft_transactions_count_60d: 4
+          p90_eod_balance_30d: 8.762042012749001
+          p90_eod_balance_60d: 9.018348186070783
+          available_balance: 2.8841621266687802
+          p90_eod_balance_90d: 6.438423552598547
+          is_savings_or_money_market_account: true
+          nsf_overdraft_transactions_count_7d: 3
+          total_credit_transactions_amount_10d: 7.457744773683766
+          p95_credit_transactions_amount_28d: 9.965781217890562
+          phone_change_count_90d: 5
+          plaid_connections_count_30d: 1
+          balance_last_updated: 2000-01-23T04:56:07.000+00:00
+          p95_debit_transactions_amount_28d: 9.369310271410669
+          unauthorized_transactions_count_90d: 9
+          current_balance: 6.778324963048013
+          unauthorized_transactions_count_60d: 7
+          phone_change_count_28d: 6
+          unauthorized_transactions_count_30d: 2
+          total_plaid_connections_count: 6
+          p50_credit_transactions_amount_28d: 4.965218492984954
+          p10_eod_balance_60d: 6.965117697638846
+          p10_eod_balance_90d: 1.284659006116532
+          p50_debit_transactions_amount_28d: 5.025004791520295
+          email_change_count_90d: 3
+          plaid_connections_count_7d: 1
+          address_change_count_90d: 7
+          total_debit_transactions_amount_10d: 1.1730742509559433
+          nsf_overdraft_transactions_count_30d: 2
+          email_change_count_28d: 6
+          unauthorized_transactions_count_7d: 5
+          days_with_negative_balance_count_90d: 6
+          p10_eod_balance_30d: 3.5571952270680973
+          address_change_count_28d: 3
+        request_id: request_id
+      properties:
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+        scores:
+          $ref: '#/components/schemas/SignalScores'
+        core_attributes:
+          $ref: '#/components/schemas/SignalEvaluateCoreAttributes'
+      required:
+      - core_attributes
+      - request_id
+      - scores
+      title: SignalEvaluateResponse
+      type: object
+    SignalScores:
+      additionalProperties: true
+      example:
+        customer_initiated_return_risk:
+          score: 8
+          risk_tier: 3
+        bank_initiated_return_risk:
+          score: 14
+          risk_tier: 5
+      properties:
+        customer_initiated_return_risk:
+          $ref: '#/components/schemas/CustomerInitiatedReturnRisk'
+        bank_initiated_return_risk:
+          $ref: '#/components/schemas/BankInitiatedReturnRisk'
+      title: SignalEvaluateScores
+      type: object
+    SignalScore:
+      description: 'A score from 0-99 that indicates the transaction return risk:
+        a higher risk score suggests a higher return likelihood.'
+      maximum: 100
+      minimum: 0
+      type: integer
+    CustomerInitiatedRiskTier:
+      description: |
+        A tier corresponding to the projected likelihood that the transaction, if initiated, will be subject to a return.
+
+        In the `customer_initiated_return_risk` object, there are five risk tiers corresponding to the scores:
+          1: Predicted customer-initiated return incidence rate between 0.00% - 0.02%
+          2: Predicted customer-initiated return incidence rate between 0.02% - 0.05%
+          3: Predicted customer-initiated return incidence rate between 0.05% - 0.1%
+          4: Predicted customer-initiated return incidence rate between 0.1% - 0.5%
+          5: Predicted customer-initiated return incidence rate greater than 0.5%
+      maximum: 5
+      minimum: 1
+      type: integer
+    CustomerInitiatedReturnRisk:
+      description: 'The object contains a risk score and a risk tier that evaluate
+        the transaction return risk of an unauthorized debit. Common return codes
+        in this category include: “R05”, "R07", "R10", "R11", "R29". These returns
+        typically have a return time frame of up to 60 calendar days. During this
+        period, the customer of financial institutions can dispute a transaction as
+        unauthorized.'
+      example:
+        score: 8
+        risk_tier: 3
+      properties:
+        score:
+          description: 'A score from 0-99 that indicates the transaction return risk:
+            a higher risk score suggests a higher return likelihood.'
+          maximum: 100
+          minimum: 0
+          type: integer
+        risk_tier:
+          description: |
+            A tier corresponding to the projected likelihood that the transaction, if initiated, will be subject to a return.
+
+            In the `customer_initiated_return_risk` object, there are five risk tiers corresponding to the scores:
+              1: Predicted customer-initiated return incidence rate between 0.00% - 0.02%
+              2: Predicted customer-initiated return incidence rate between 0.02% - 0.05%
+              3: Predicted customer-initiated return incidence rate between 0.05% - 0.1%
+              4: Predicted customer-initiated return incidence rate between 0.1% - 0.5%
+              5: Predicted customer-initiated return incidence rate greater than 0.5%
+          maximum: 5
+          minimum: 1
+          type: integer
+      required:
+      - risk_tier
+      - score
+      title: CustomerInitiatedReturnRisk
+      type: object
+    BankInitiatedRiskTier:
+      description: |
+        In the `bank_initiated_return_risk` object, there are eight risk tiers corresponding to the scores:
+          1: Predicted bank-initiated return incidence rate between 0.0% - 0.5%
+          2: Predicted bank-initiated return incidence rate between 0.5% - 1.5%
+          3: Predicted bank-initiated return incidence rate between 1.5% - 3%
+          4: Predicted bank-initiated return incidence rate between 3% - 5%
+          5: Predicted bank-initiated return incidence rate between 5% - 10%
+          6: Predicted bank-initiated return incidence rate between 10% - 15%
+          7: Predicted bank-initiated return incidence rate between 15% and 50%
+          8: Predicted bank-initiated return incidence rate greater than 50%
+      maximum: 8
+      minimum: 1
+      type: integer
+    BankInitiatedReturnRisk:
+      description: 'The object contains a risk score and a risk tier that evaluate
+        the transaction return risk because an account is overdrawn or because an
+        ineligible account is used. Common return codes in this category include:
+        "R01", "R02", "R03", "R04", "R06", “R08”,  "R09", "R13", "R16", "R17", "R20",
+        "R23". These returns have a turnaround time of 2 banking days.'
+      example:
+        score: 14
+        risk_tier: 5
+      properties:
+        score:
+          description: 'A score from 0-99 that indicates the transaction return risk:
+            a higher risk score suggests a higher return likelihood.'
+          maximum: 100
+          minimum: 0
+          type: integer
+        risk_tier:
+          description: |
+            In the `bank_initiated_return_risk` object, there are eight risk tiers corresponding to the scores:
+              1: Predicted bank-initiated return incidence rate between 0.0% - 0.5%
+              2: Predicted bank-initiated return incidence rate between 0.5% - 1.5%
+              3: Predicted bank-initiated return incidence rate between 1.5% - 3%
+              4: Predicted bank-initiated return incidence rate between 3% - 5%
+              5: Predicted bank-initiated return incidence rate between 5% - 10%
+              6: Predicted bank-initiated return incidence rate between 10% - 15%
+              7: Predicted bank-initiated return incidence rate between 15% and 50%
+              8: Predicted bank-initiated return incidence rate greater than 50%
+          maximum: 8
+          minimum: 1
+          type: integer
+      required:
+      - risk_tier
+      - score
+      title: BankInitiatedReturnRisk
+      type: object
+    SignalEvaluateCoreAttributes:
+      description: The core attributes object contains additional data that can be
+        used to assess the ACH return risk, such as past ACH return events, balance/transaction
+        history, the Item’s connection history in the Plaid network, and identity
+        change history.
+      example:
+        days_since_first_plaid_connection: 1
+        nsf_overdraft_transactions_count_90d: 7
+        nsf_overdraft_transactions_count_60d: 4
+        p90_eod_balance_30d: 8.762042012749001
+        p90_eod_balance_60d: 9.018348186070783
+        available_balance: 2.8841621266687802
+        p90_eod_balance_90d: 6.438423552598547
+        is_savings_or_money_market_account: true
+        nsf_overdraft_transactions_count_7d: 3
+        total_credit_transactions_amount_10d: 7.457744773683766
+        p95_credit_transactions_amount_28d: 9.965781217890562
+        phone_change_count_90d: 5
+        plaid_connections_count_30d: 1
+        balance_last_updated: 2000-01-23T04:56:07.000+00:00
+        p95_debit_transactions_amount_28d: 9.369310271410669
+        unauthorized_transactions_count_90d: 9
+        current_balance: 6.778324963048013
+        unauthorized_transactions_count_60d: 7
+        phone_change_count_28d: 6
+        unauthorized_transactions_count_30d: 2
+        total_plaid_connections_count: 6
+        p50_credit_transactions_amount_28d: 4.965218492984954
+        p10_eod_balance_60d: 6.965117697638846
+        p10_eod_balance_90d: 1.284659006116532
+        p50_debit_transactions_amount_28d: 5.025004791520295
+        email_change_count_90d: 3
+        plaid_connections_count_7d: 1
+        address_change_count_90d: 7
+        total_debit_transactions_amount_10d: 1.1730742509559433
+        nsf_overdraft_transactions_count_30d: 2
+        email_change_count_28d: 6
+        unauthorized_transactions_count_7d: 5
+        days_with_negative_balance_count_90d: 6
+        p10_eod_balance_30d: 3.5571952270680973
+        address_change_count_28d: 3
+      properties:
+        unauthorized_transactions_count_7d:
+          description: We parse and analyze historical transaction metadata to identify
+            the number of possible past returns due to unauthorized transactions over
+            the past 7 days from the account that will be debited.
+          type: integer
+        unauthorized_transactions_count_30d:
+          description: We parse and analyze historical transaction metadata to identify
+            the number of possible past returns due to unauthorized transactions over
+            the past 30 days from the account that will be debited.
+          type: integer
+        unauthorized_transactions_count_60d:
+          description: We parse and analyze historical transaction metadata to identify
+            the number of possible past returns due to unauthorized transactions over
+            the past 60 days from the account that will be debited.
+          type: integer
+        unauthorized_transactions_count_90d:
+          description: We parse and analyze historical transaction metadata to identify
+            the number of possible past returns due to unauthorized transactions over
+            the past 90 days from the account that will be debited.
+          type: integer
+        nsf_overdraft_transactions_count_7d:
+          description: We parse and analyze historical transaction metadata to identify
+            the number of possible past returns due to non-sufficient funds/overdrafts
+            over the past 7 days from the account that will be debited.
+          type: integer
+        nsf_overdraft_transactions_count_30d:
+          description: We parse and analyze historical transaction metadata to identify
+            the number of possible past returns due to non-sufficient funds/overdrafts
+            over the past 30 days from the account that will be debited.
+          type: integer
+        nsf_overdraft_transactions_count_60d:
+          description: We parse and analyze historical transaction metadata to identify
+            the number of possible past returns due to non-sufficient funds/overdrafts
+            over the past 60 days from the account that will be debited.
+          type: integer
+        nsf_overdraft_transactions_count_90d:
+          description: We parse and analyze historical transaction metadata to identify
+            the number of possible past returns due to non-sufficient funds/overdrafts
+            over the past 90 days from the account that will be debited.
+          type: integer
+        days_since_first_plaid_connection:
+          description: The number of days since the first time the Item was connected
+            to an application via Plaid
+          nullable: true
+          type: integer
+        plaid_connections_count_7d:
+          description: The number of times the Item has been connected to applications
+            via Plaid over the past 7 days
+          nullable: true
+          type: integer
+        plaid_connections_count_30d:
+          description: The number of times the Item has been connected to applications
+            via Plaid over the past 30 days
+          nullable: true
+          type: integer
+        total_plaid_connections_count:
+          description: The total number of times the Item has been connected to applications
+            via Plaid
+          nullable: true
+          type: integer
+        is_savings_or_money_market_account:
+          description: Indicates if the ACH transaction funding account is a savings/money
+            market account
+          type: boolean
+        total_credit_transactions_amount_10d:
+          description: The total credit (inflow) transaction amount over the past
+            10 days from the account that will be debited
+          type: number
+        total_debit_transactions_amount_10d:
+          description: The total debit (outflow) transaction amount over the past
+            10 days from the account that will be debited
+          type: number
+        p50_credit_transactions_amount_28d:
+          description: The 50th percentile of all credit (inflow) transaction amounts
+            over the past 28 days from the account that will be debited
+          nullable: true
+          type: number
+        p50_debit_transactions_amount_28d:
+          description: The 50th percentile of all debit (outflow) transaction amounts
+            over the past 28 days from the account that will be debited
+          nullable: true
+          type: number
+        p95_credit_transactions_amount_28d:
+          description: The 95th percentile of all credit (inflow) transaction amounts
+            over the past 28 days from the account that will be debited
+          nullable: true
+          type: number
+        p95_debit_transactions_amount_28d:
+          description: The 95th percentile of all debit (outflow) transaction amounts
+            over the past 28 days from the account that will be debited
+          nullable: true
+          type: number
+        days_with_negative_balance_count_90d:
+          description: The number of days within the past 90 days when the account
+            that will be debited had a negative end-of-day available balance
+          nullable: true
+          type: integer
+        p90_eod_balance_30d:
+          description: The 90th percentile of the end-of-day available balance over
+            the past 30 days of the account that will be debited
+          nullable: true
+          type: number
+        p90_eod_balance_60d:
+          description: The 90th percentile of the end-of-day available balance over
+            the past 60 days of the account that will be debited
+          nullable: true
+          type: number
+        p90_eod_balance_90d:
+          description: The 90th percentile of the end-of-day available balance over
+            the past 90 days of the account that will be debited
+          nullable: true
+          type: number
+        p10_eod_balance_30d:
+          description: The 10th percentile of the end-of-day available balance over
+            the past 30 days of the account that will be debited
+          nullable: true
+          type: number
+        p10_eod_balance_60d:
+          description: The 10th percentile of the end-of-day available balance over
+            the past 60 days of the account that will be debited
+          nullable: true
+          type: number
+        p10_eod_balance_90d:
+          description: The 10th percentile of the end-of-day available balance over
+            the past 90 days of the account that will be debited
+          nullable: true
+          type: number
+        available_balance:
+          description: Available balance, as of the `balance_last_updated` time. The
+            available balance is the current balance less any outstanding holds or
+            debits that have not yet posted to the account.
+          nullable: true
+          type: number
+        current_balance:
+          description: Current balance, as of the `balance_last_updated` time. The
+            current balance is the total amount of funds in the account.
+          nullable: true
+          type: number
+        balance_last_updated:
+          description: Timestamp in ISO-8601 format (YYYY-MM-DDTHH:mm:ssZ) indicating
+            the last time that the balance for the given account has been updated.
+          format: date-time
+          nullable: true
+          type: string
+        phone_change_count_28d:
+          description: The number of times the account's phone numbers on file have
+            changed over the past 28 days
+          nullable: true
+          type: integer
+        phone_change_count_90d:
+          description: The number of times the account's phone numbers on file have
+            changed over the past 90 days
+          nullable: true
+          type: integer
+        email_change_count_28d:
+          description: The number of times the account's email addresses on file have
+            changed over the past 28 days
+          nullable: true
+          type: integer
+        email_change_count_90d:
+          description: The number of times the account's email addresses on file have
+            changed over the past 90 days
+          nullable: true
+          type: integer
+        address_change_count_28d:
+          description: The number of times the account's addresses on file have changed
+            over the past 28 days
+          nullable: true
+          type: integer
+        address_change_count_90d:
+          description: The number of times the account's addresses on file have changed
+            over the past 90 days
+          nullable: true
+          type: integer
+      title: SignalEvaluateCoreAttributes
+      type: object
+    SignalDecisionReportRequest:
+      example:
+        initiated: true
+        secret: secret
+        client_transaction_id: client_transaction_id
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        client_transaction_id:
+          description: Must be the same as the `client_transaction_id` supplied when
+            calling `/signal/evaluate`
+          type: string
+        initiated:
+          description: '`true` if the ACH transaction was initiated, `false` otherwise.'
+          type: boolean
+      required:
+      - client_transaction_id
+      - initiated
+      title: SignalDecisionReportRequest
+      type: object
+    SignalDecisionReportResponse:
+      example:
+        request_id: request_id
+      properties:
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      title: SignalDecisionReportResponse
+      type: object
+    SignalReturnReportRequest:
+      example:
+        secret: secret
+        client_transaction_id: client_transaction_id
+        return_code: return_code
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        client_transaction_id:
+          description: Must be the same as the `client_transaction_id` supplied when
+            calling `/signal/evaluate`
+          type: string
+        return_code:
+          description: Must be a valid ACH return code (e.g. "R01")
+          type: string
+      required:
+      - client_transaction_id
+      - return_code
+      title: SignalReturnReportRequest
+      type: object
+    SignalReturnReportResponse:
+      example:
+        request_id: request_id
+      properties:
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      title: SignalReturnReportResponse
+      type: object
+    SandboxOauthSelectAccountsRequest:
+      description: Defines the request schema for `sandbox/oauth/select_accounts`
+      example:
+        accounts:
+        - accounts
+        - accounts
+        oauth_state_id: oauth_state_id
+      properties:
+        oauth_state_id:
+          type: string
+        accounts:
+          items:
+            type: string
+          type: array
+      required:
+      - accounts
+      - oauth_state_id
+      title: SandboxOauthSelectAccountsRequest
+      type: object
+    SandboxOauthSelectAccountsResponse:
+      description: Defines the response schema for `/sandbox/oauth/select_accounts`
+      title: SandboxOauthSelectAccountsResponse
+      type: object
     PaymentInitiationRecipientGetResponse_allOf:
       properties:
         request_id:
@@ -18394,6 +19622,7 @@ components:
         authorized_date:
           description: The date that the transaction was authorized. Dates are returned
             in an ISO 8601 format ( `YYYY-MM-DD` ).
+          format: date
           nullable: true
           type: string
         authorized_datetime:
@@ -18401,6 +19630,7 @@ components:
             Date and time when a transaction was authorized in ISO 8601 format ( `YYYY-MM-DDTHH:mm:ssZ` ).
 
             This field is only populated for UK institutions. For institutions in other countries, will be `null`.
+          format: date-time
           nullable: true
           type: string
         datetime:
@@ -18408,6 +19638,7 @@ components:
             Date and time when a transaction was posted in ISO 8601 format ( `YYYY-MM-DDTHH:mm:ssZ` ).
 
             This field is only populated for UK institutions. For institutions in other countries, will be `null`.
+          format: date-time
           nullable: true
           type: string
         transaction_code:

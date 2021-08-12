@@ -50,7 +50,7 @@ In the case one of the endpoints you call returns an error, you can get the Plai
 
 ```go
 response, httpResponse, err := client.PlaidApi.Endpoint(...)
-plaidErr := err.(plaid.GenericOpenAPIError).Model().(plaid.Error)
+plaidErr, err := plaid.ToPlaidError(err)
 fmt.Println(plaidErr.ErrorMessage)
 ```
 
