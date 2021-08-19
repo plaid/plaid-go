@@ -79,12 +79,7 @@ func TestBankTransferEventList(t *testing.T) {
 	testClient := NewTestClient()
 	ctx := context.Background()
 
-	btResp := createBankTransfer(t, ctx, testClient)
-
-	simulateReq := plaid.NewSandboxBankTransferSimulateRequest(btResp.BankTransfer.Id, "posted")
-	simulateResp, _, err := testClient.PlaidApi.SandboxBankTransferSimulate(ctx).SandboxBankTransferSimulateRequest(*simulateReq).Execute()
-	assert.NoError(t, err)
-	assert.NotEmpty(t, simulateResp.RequestId)
+	createBankTransfer(t, ctx, testClient)
 
 	listReq := plaid.NewBankTransferEventListRequest()
 	listReq.SetCount(1)
@@ -114,7 +109,7 @@ func TestBankTransferGet(t *testing.T) {
 	getReq := plaid.NewBankTransferGetRequest(btResp.BankTransfer.Id)
 	getResp, _, err := testClient.PlaidApi.BankTransferGet(ctx).BankTransferGetRequest(*getReq).Execute()
 	assert.NoError(t, err)
-	assert.Equal(t, btResp.BankTransfer, getResp.BankTransfer)
+	assert.Equal(t, btResp.BankTransfer.Id, getResp.BankTransfer.Id)
 }
 
 func TestBankTransferList(t *testing.T) {
