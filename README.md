@@ -1,6 +1,6 @@
 # plaid-go [![CircleCI](https://circleci.com/gh/plaid/plaid-go.svg?style=svg)](https://circleci.com/gh/plaid/plaid-go) [![GoDoc](https://godoc.org/github.com/plaid/plaid-go?status.svg)](https://godoc.org/github.com/plaid/plaid-go/plaid)
 
-The official beta Go client library for the [Plaid API](https://plaid.com/docs).
+The official Go client library for the [Plaid API](https://plaid.com/docs). The library is now generated from our [OpenAPI schema](https://github.com/plaid/plaid-openapi). For older manually-written versions of this client library, go [here](https://github.com/plaid/plaid-go/commit/0d3f02cddaa8fd637e84dccf2175a4a1a7dd0e07) for the latest non-generated version.
 
 ## Table of Contents
 
@@ -15,7 +15,7 @@ The official beta Go client library for the [Plaid API](https://plaid.com/docs).
 
 ## Install
 
-Versions look something like `v0.1.0-beta.1`.
+Versions look something like `v1.0.0`. As of `v1.0.0`, we've moved to support `GOMODULES`.
 
 Edit your go.mod to include `github.com/plaid/plaid-go {VERSION}`
 

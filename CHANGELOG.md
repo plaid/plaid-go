@@ -1,3 +1,9 @@
+This library is generated from an OpenAPI schema. See full changelog [here](https://github.com/plaid/plaid-openapi/blob/master/CHANGELOG.md) for schema changes.
+
+## 1.0.0
+- Moved officially to `GOMODULES`, as well as GA'd the generated version of `plaid-go`! This is ported over from our beta branch / release.
+- Pinned to OpenAPI version `2020-09-14_1.21.0`. Make sure to check the OpenAPI changelog.
+
 ## 0.1.0-beta-2
 - Introduce the `ToPlaidError` helper function to convert generic errors to the plaid.Error struct
 - Type fixes from `OpenAPI version 2020-09-14_1.20.6`, see full changelog [here](https://github.com/plaid/plaid-openapi/blob/master/CHANGELOG.md#2020-09-14_11912)

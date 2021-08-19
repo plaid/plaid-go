@@ -7,7 +7,7 @@ info:
     details.
   termsOfService: https://plaid.com/legal/
   title: The Plaid API
-  version: 2020-09-14_1.20.6
+  version: 2020-09-14_1.21.0
 servers:
 - description: Production
   url: https://production.plaid.com
@@ -291,6 +291,7 @@ paths:
                       - Shops
                       - Computers and Electronics
                       category_id: "19013000"
+                      check_number: null
                       date: 2017-01-29
                       datetime: null
                       authorized_date: 2017-01-27
@@ -3269,6 +3270,66 @@ paths:
       summary: Retrieve a deposit switch
       tags:
       - plaid
+  /transfer/get:
+    post:
+      description: The `/transfer/get` fetches information about the transfer corresponding
+        to the given `transfer_id`.
+      externalDocs:
+        url: /transfer/reference#transferget
+      operationId: transferGet
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            examples: {}
+            schema:
+              $ref: '#/components/schemas/TransferGetRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    transfer:
+                      account_id: 6qL6lWoQkAfNE3mB8Kk5tAnvpX81qefrvvl7B
+                      ach_class: ppd
+                      amount: "12.34"
+                      cancellable: true
+                      created: 2020-08-06T17:27:15Z
+                      custom_tag: my tag
+                      description: Testing2
+                      direction: outbound
+                      failure_reason:
+                        ach_return_code: R13
+                        description: Invalid ACH routing number
+                      id: 460cbe92-2dcc-8eae-5ad6-b37d0ec90fd9
+                      iso_currency_code: USD
+                      metadata:
+                        key1: value1
+                        key2: value2
+                      network: ach
+                      origination_account_id: 11111111-1111-1111-1111-111111111111
+                      status: pending
+                      type: credit
+                      user:
+                        email_address: plaid@plaid.com
+                        legal_name: John Smith
+                        routing_number: "111111111"
+                    request_id: saKrIBuEB9qJZno
+              schema:
+                $ref: '#/components/schemas/TransferGetResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error response
+      summary: Retrieve a transfer
+      tags:
+      - plaid
   /bank_transfer/get:
     post:
       description: The `/bank_transfer/get` fetches information about the bank transfer
@@ -3329,6 +3390,134 @@ paths:
       summary: Retrieve a bank transfer
       tags:
       - plaid
+  /transfer/authorization/create:
+    post:
+      description: |-
+        Use the `/transfer/authorization/create` endpoint to determine transfer failure risk.
+
+        In Plaid's sandbox environment the decisions will be returned as follows:
+          - To approve a transfer, create an Item in Link with the username `user_good` and password `pass_good`
+          - To decline a transfer with the rationale code NSF, create an Item in Link with the username `declined_nsf_good` and password `pass_good`
+          - To decline a transfer with the rationale code RISK, create an Item in Link with the username `declined_risk_good` and password `pass_good`
+          - To permit a transfer with the rationale code MANUALLY_VERIFIED_ITEM, create an Item in Link through the [Same Day Micro-deposits flow](https://plaid.com/docs/auth/coverage/testing/#testing-same-day-micro-deposits).
+          - To permit a transfer with the rationale code LOGIN_REQUIRED, [reset the login for an Item](https://plaid.com/docs/sandbox/#item_login_required).
+
+        All username/password combinations other than the ones listed above will result in a decision of permitted and rationale code ERROR.
+      externalDocs:
+        url: /transfer/reference#transferauthorizationcreate
+      operationId: transferAuthorizationCreate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferAuthorizationCreateRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    authorization:
+                      id: 460cbe92-2dcc-8eae-5ad6-b37d0ec90fd9
+                      created: 2020-08-06T17:27:15Z
+                      decision: approved
+                      decision_rationale: null
+                      proposed_transfer:
+                        ach_class: ppd
+                        account_id: 6qL6lWoQkAfNE3mB8Kk5tAnvpX81qefrvvl7B
+                        type: credit
+                        user:
+                          legal_name: Foo Bar
+                          phone_number: 123-456-7890
+                          email_address: user@plaid.com
+                          address:
+                            street: 100 Market Street
+                            city: San Francisco
+                            region: California
+                            postal_code: "94103"
+                            country: US
+                        amount: "12.34"
+                        iso_currency_code: USD
+                        description: A description of the proposed transfer
+                        network: ach
+                        origination_account_id: 0123-4567-8901-2345-67890123
+                    request_id: saKrIBuEB9qJZno
+              schema:
+                $ref: '#/components/schemas/TransferAuthorizationCreateResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error response
+      summary: Create a transfer authorization
+      tags:
+      - plaid
+  /transfer/create:
+    post:
+      description: Use the `/transfer/create` endpoint to initiate a new transfer.
+      externalDocs:
+        url: /transfer/reference#transfercreate
+      operationId: transferCreate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferCreateRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    transfer:
+                      id: 460cbe92-2dcc-8eae-5ad6-b37d0ec90fd9
+                      ach_class: ppd
+                      account_id: 6qL6lWoQkAfNE3mB8Kk5tAnvpX81qefrvvl7B
+                      type: credit
+                      user:
+                        legal_name: Foo Bar
+                        phone_number: 123-456-7890
+                        email_address: user@plaid.com
+                        address:
+                          street: 100 Market Street
+                          city: San Francisco
+                          region: California
+                          postal_code: "94103"
+                          country: US
+                        routing_number: "1234567890"
+                      amount: "12.34"
+                      iso_currency_code: USD
+                      description: A description of the proposed transfer
+                      created: 2020-08-06T17:27:15Z
+                      status: pending
+                      network: ach
+                      cancellable: true
+                      failure_reason: null
+                      custom_tag: My custom tag
+                      metadata:
+                        key1: value1
+                        key2: value2
+                      origination_account_id: 0123-4567-8901-2345-67890123
+                      direction: outbound
+                    request_id: saKrIBuEB9qJZno
+              schema:
+                $ref: '#/components/schemas/TransferCreateResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error response
+      summary: Create a transfer
+      tags:
+      - plaid
   /bank_transfer/create:
     post:
       description: Use the `/bank_transfer/create` endpoint to initiate a new bank
@@ -3383,6 +3572,64 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: Error response
       summary: Create a bank transfer
+      tags:
+      - plaid
+  /transfer/list:
+    post:
+      description: |
+        Use the `/transfer/list` endpoint to see a list of all your transfers and their statuses. Results are paginated; use the `count` and `offset` query parameters to retrieve the desired transfers.
+      externalDocs:
+        url: /transfer/reference#transferlist
+      operationId: transferList
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferListRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    transfers:
+                    - account_id: 6qL6lWoQkAfNE3mB8Kk5tAnvpX81qefrvvl7B
+                      ach_class: ppd
+                      amount: "12.34"
+                      cancellable: true
+                      created: 2020-08-06T17:27:15Z
+                      custom_tag: my tag
+                      description: Testing2
+                      direction: outbound
+                      failure_reason:
+                        ach_return_code: R13
+                        description: Invalid ACH routing number
+                      id: 460cbe92-2dcc-8eae-5ad6-b37d0ec90fd9
+                      iso_currency_code: USD
+                      metadata:
+                        key1: value1
+                        key2: value2
+                      network: ach
+                      origination_account_id: 11111111-1111-1111-1111-111111111111
+                      status: pending
+                      type: credit
+                      user:
+                        email_address: plaid@plaid.com
+                        legal_name: John Smith
+                        routing_number: "111111111"
+                    request_id: saKrIBuEB9qJZno
+              schema:
+                $ref: '#/components/schemas/TransferListResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error response
+      summary: List transfers
       tags:
       - plaid
   /bank_transfer/list:
@@ -3443,6 +3690,40 @@ paths:
       summary: List bank transfers
       tags:
       - plaid
+  /transfer/cancel:
+    post:
+      description: Use the `/transfer/cancel` endpoint to cancel a transfer.  A transfer
+        is eligible for cancelation if the `cancellable` property returned by `/transfer/get`
+        is `true`.
+      externalDocs:
+        url: /transfer/reference#transfercancel
+      operationId: transferCancel
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferCancelRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    request_id: saKrIBuEB9qJZno
+              schema:
+                $ref: '#/components/schemas/TransferCancelResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error response
+      summary: Cancel a transfer
+      tags:
+      - plaid
   /bank_transfer/cancel:
     post:
       description: Use the `/bank_transfer/cancel` endpoint to cancel a bank transfer.  A
@@ -3475,6 +3756,53 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: Error response
       summary: Cancel a bank transfer
+      tags:
+      - plaid
+  /transfer/event/list:
+    post:
+      description: Use the `/transfer/event/list` endpoint to get a list of transfer
+        events based on specified filter criteria.
+      externalDocs:
+        url: /transfer/reference#transfereventlist
+      operationId: transferEventList
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferEventListRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    transfer_events:
+                    - account_id: 6qL6lWoQkAfNE3mB8Kk5tAnvpX81qefrvvl7B
+                      transfer_amount: "12.34"
+                      transfer_id: 460cbe92-2dcc-8eae-5ad6-b37d0ec90fd9
+                      transfer_iso_currency_code: USD
+                      transfer_type: credit
+                      direction: outbound
+                      event_id: 1
+                      event_type: receiver_pending
+                      failure_reason: null
+                      origination_account_id: null
+                      receiver_details:
+                        available_balance: positive
+                      timestamp: 2020-08-06T17:27:15Z
+                    request_id: mdqfuVxeoza6mhu
+              schema:
+                $ref: '#/components/schemas/TransferEventListResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error response
+      summary: List transfer events
       tags:
       - plaid
   /bank_transfer/event/list:
@@ -3524,12 +3852,59 @@ paths:
       summary: List bank transfer events
       tags:
       - plaid
+  /transfer/event/sync:
+    post:
+      description: '`/transfer/event/sync` allows you to request up to the next 25
+        transfer events that happened after a specific `event_id`. Use the `/transfer/event/sync`
+        endpoint to guarantee you have seen all transfer events.'
+      externalDocs:
+        url: /transfer/reference#transfereventsync
+      operationId: transferEventSync
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferEventSyncRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    transfer_events:
+                    - account_id: 6qL6lWoQkAfNE3mB8Kk5tAnvpX81qefrvvl7B
+                      transfer_amount: "12.34"
+                      transfer_id: 460cbe92-2dcc-8eae-5ad6-b37d0ec90fd9
+                      transfer_iso_currency_code: USD
+                      transfer_type: credit
+                      direction: outbound
+                      event_id: 1
+                      event_type: pending
+                      failure_reason: null
+                      origination_account_id: null
+                      receiver_details: null
+                      timestamp: 2020-08-06T17:27:15Z
+                    request_id: mdqfuVxeoza6mhu
+              schema:
+                $ref: '#/components/schemas/TransferEventSyncResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error response
+      summary: Sync transfer events
+      tags:
+      - plaid
   /bank_transfer/event/sync:
     post:
       description: '`/bank_transfer/event/sync` allows you to request up to the next
         25 bank transfer events that happened after a specific `event_id`. Use the
         `/bank_transfer/event/sync` endpoint to guarantee you have seen all bank transfer
-        events. '
+        events.'
       externalDocs:
         url: /api/products#bank_transfereventsync
       operationId: bankTransferEventSync
@@ -3687,6 +4062,42 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: Error response
       summary: Simulate a bank transfer event in Sandbox
+      tags:
+      - plaid
+  /sandbox/transfer/simulate:
+    post:
+      description: Use the `/sandbox/transfer/simulate` endpoint to simulate a transfer
+        event in the Sandbox environment.  Note that while an event will be simulated
+        and will appear when using endpoints such as `/transfer/event/sync` or `/transfer/event/list`,
+        no transactions will actually take place and funds will not move between accounts,
+        even within the Sandbox.
+      externalDocs:
+        url: /transfer/reference#sandboxtransfersimulate
+      operationId: sandboxTransferSimulate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SandboxTransferSimulateRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    request_id: mdqfuVxeoza6mhu
+              schema:
+                $ref: '#/components/schemas/SandboxTransferSimulateResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error response
+      summary: Simulate a transfer event in Sandbox
       tags:
       - plaid
   /employers/search:
@@ -6146,8 +6557,19 @@ components:
 
             This field is only used when the institution is `ins_128026` (Capital One), in which case a value must be provided or an `INVALID_REQUEST` error with the code of `INVALID_FIELD` will be returned. For all other institutions, this field is ignored.
           format: date-time
+          title: MinLastUpdatedDatetime
           type: string
       type: object
+    MinLastUpdatedDatetime:
+      description: |-
+        Timestamp in ISO-8601 format (`YYYY-MM-DDTHH:mm:ssZ`) indicating the oldest acceptable balance when making a request to `/accounts/balance/get`.
+
+        If the balance that is pulled for `ins_128026` (Capital One) is older than the given timestamp, an `INVALID_REQUEST` error with the code of `LAST_UPDATED_DATETIME_OUT_OF_RANGE` will be returned with the most recent timestamp for the requested account contained in the response.
+
+        This field is only used when the institution is `ins_128026` (Capital One), in which case a value must be provided or an `INVALID_REQUEST` error with the code of `INVALID_FIELD` will be returned. For all other institutions, this field is ignored.
+      format: date-time
+      title: MinLastUpdatedDatetime
+      type: string
     IdentityGetRequest:
       description: IdentityGetRequest defines the request schema for `/identity/get`
       example:
@@ -6324,6 +6746,7 @@ components:
         processor_token: processor_token
         user:
           email_address: email_address
+          phone_number: phone_number
           legal_name: legal_name
           routing_number: routing_number
       properties:
@@ -6344,6 +6767,7 @@ components:
 
             The API supports idempotency for safely retrying requests without accidentally performing the same operation twice. For example, if a request to create a bank transfer fails due to a network connection error, you can retry the request with the same idempotency key to guarantee that only a single bank transfer is created.
           maxLength: 50
+          title: BankTransferIdempotencyKey
           type: string
         processor_token:
           description: 'The processor token obtained from the Plaid integration partner.
@@ -6355,8 +6779,9 @@ components:
         network:
           $ref: '#/components/schemas/BankTransferNetwork'
         amount:
-          description: The transfer amount (decimal string with two digits of precision
-            e.g. "10.00").
+          description: The amount of the bank transfer (decimal string with two digits
+            of precision e.g. “10.00”).
+          title: BankTransferAmount
           type: string
         iso_currency_code:
           description: The currency of the transfer amount – should be set to "USD".
@@ -6371,8 +6796,7 @@ components:
           $ref: '#/components/schemas/BankTransferUser'
         custom_tag:
           description: An arbitrary string provided by the client for storage with
-            the bank transfer. Will be returned in all `BankTransfer` objects. May
-            be up to 100 characters.
+            the bank transfer. May be up to 100 characters.
           maxLength: 100
           nullable: true
           type: string
@@ -6429,6 +6853,7 @@ components:
           id: id
           user:
             email_address: email_address
+            phone_number: phone_number
             legal_name: legal_name
             routing_number: routing_number
         request_id: request_id
@@ -6512,6 +6937,8 @@ components:
     ProcessorBalanceGetRequest:
       description: ProcessorBalanceGetRequest defines the request schema for `/processor/balance/get`
       example:
+        options:
+          min_last_updated_datetime: 2000-01-23T04:56:07.000+00:00
         secret: secret
         processor_token: processor_token
         client_id: client_id
@@ -6532,8 +6959,26 @@ components:
             Processor tokens are in the format: `processor-<environment>-<identifier>`'
           title: ProcessorToken
           type: string
+        options:
+          $ref: '#/components/schemas/ProcessorBalanceGetRequestOptions'
       required:
       - processor_token
+      type: object
+    ProcessorBalanceGetRequestOptions:
+      description: An optional object to filter `/processor/balance/get` results.
+      example:
+        min_last_updated_datetime: 2000-01-23T04:56:07.000+00:00
+      properties:
+        min_last_updated_datetime:
+          description: |-
+            Timestamp in ISO-8601 format (`YYYY-MM-DDTHH:mm:ssZ`) indicating the oldest acceptable balance when making a request to `/accounts/balance/get`.
+
+            If the balance that is pulled for `ins_128026` (Capital One) is older than the given timestamp, an `INVALID_REQUEST` error with the code of `LAST_UPDATED_DATETIME_OUT_OF_RANGE` will be returned with the most recent timestamp for the requested account contained in the response.
+
+            This field is only used when the institution is `ins_128026` (Capital One), in which case a value must be provided or an `INVALID_REQUEST` error with the code of `INVALID_FIELD` will be returned. For all other institutions, this field is ignored.
+          format: date-time
+          title: MinLastUpdatedDatetime
+          type: string
       type: object
     ProcessorBalanceGetResponse:
       additionalProperties: true
@@ -11270,6 +11715,10 @@ components:
         for.
       nullable: true
       type: string
+    TransferAccessToken:
+      description: The Plaid `access_token` for the account that will be debited or
+        credited.
+      type: string
     BankTransferAccessToken:
       description: The Plaid `access_token` for the account that will be debited or
         credited.
@@ -15846,6 +16295,32 @@ components:
       - audit_copy_token
       title: AssetReportAuditCopyGetRequest
       type: object
+    TransferGetRequest:
+      description: TransferGetRequest defines the request schema for `/transfer/get`
+      example:
+        secret: secret
+        transfer_id: transfer_id
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        transfer_id:
+          description: Plaid’s unique identifier for a transfer.
+          title: TransferID
+          type: string
+      required:
+      - transfer_id
+      title: TransferGetRequest
+      type: object
     BankTransferGetRequest:
       description: BankTransferGetRequest defines the request schema for `/bank_transfer/get`
       example:
@@ -15872,6 +16347,50 @@ components:
       - bank_transfer_id
       title: BankTransferGetRequest
       type: object
+    TransferGetResponse:
+      additionalProperties: true
+      description: TransferGetResponse defines the response schema for `/transfer/get`
+      example:
+        transfer:
+          amount: amount
+          metadata:
+            key: metadata
+          created: 2000-01-23T04:56:07.000+00:00
+          description: description
+          failure_reason:
+            ach_return_code: ach_return_code
+            description: description
+          cancellable: true
+          custom_tag: custom_tag
+          account_id: account_id
+          iso_currency_code: iso_currency_code
+          origination_account_id: origination_account_id
+          id: id
+          user:
+            email_address: email_address
+            address:
+              country: country
+              city: city
+              street: street
+              region: region
+              postal_code: postal_code
+            phone_number: phone_number
+            legal_name: legal_name
+        request_id: request_id
+      properties:
+        transfer:
+          $ref: '#/components/schemas/Transfer'
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      - transfer
+      title: TransferGetResponse
+      type: object
     BankTransferGetResponse:
       additionalProperties: true
       description: BankTransferGetResponse defines the response schema for `/bank_transfer/get`
@@ -15893,6 +16412,7 @@ components:
           id: id
           user:
             email_address: email_address
+            phone_number: phone_number
             legal_name: legal_name
             routing_number: routing_number
         request_id: request_id
@@ -15910,10 +16430,130 @@ components:
       - request_id
       title: BankTransferGetResponse
       type: object
+    TransferID:
+      description: Plaid’s unique identifier for a transfer.
+      title: TransferID
+      type: string
+    TransferAuthorizationID:
+      description: Plaid’s unique identifier for a transfer authorization.
+      title: TransferAuthorizationID
+      type: string
     BankTransferID:
       description: Plaid’s unique identifier for a bank transfer.
       title: BankTransferID
       type: string
+    Transfer:
+      additionalProperties: true
+      description: Represents a transfer within the Transfers API.
+      example:
+        amount: amount
+        metadata:
+          key: metadata
+        created: 2000-01-23T04:56:07.000+00:00
+        description: description
+        failure_reason:
+          ach_return_code: ach_return_code
+          description: description
+        cancellable: true
+        custom_tag: custom_tag
+        account_id: account_id
+        iso_currency_code: iso_currency_code
+        origination_account_id: origination_account_id
+        id: id
+        user:
+          email_address: email_address
+          address:
+            country: country
+            city: city
+            street: street
+            region: region
+            postal_code: postal_code
+          phone_number: phone_number
+          legal_name: legal_name
+      properties:
+        id:
+          description: Plaid’s unique identifier for a transfer.
+          title: TransferID
+          type: string
+        ach_class:
+          $ref: '#/components/schemas/ACHClass'
+        account_id:
+          description: The account ID that should be credited/debited for this transfer.
+          type: string
+        type:
+          $ref: '#/components/schemas/TransferType'
+        user:
+          $ref: '#/components/schemas/TransferUser'
+        amount:
+          description: The amount of the transfer (decimal string with two digits
+            of precision e.g. “10.00”).
+          title: TransferAmount
+          type: string
+        iso_currency_code:
+          description: The currency of the transfer amount, e.g. "USD"
+          type: string
+        description:
+          description: The description of the transfer.
+          type: string
+        created:
+          description: The datetime when this transfer was created. This will be of
+            the form `2006-01-02T15:04:05Z`
+          format: date-time
+          type: string
+        status:
+          $ref: '#/components/schemas/TransferStatus'
+        network:
+          $ref: '#/components/schemas/TransferNetwork'
+        cancellable:
+          description: When `true`, you can still cancel this transfer.
+          type: boolean
+        failure_reason:
+          $ref: '#/components/schemas/TransferFailure'
+        custom_tag:
+          description: A string containing the custom tag provided by the client in
+            the create request. Will be null if not provided.
+          nullable: true
+          type: string
+        metadata:
+          additionalProperties:
+            type: string
+          description: |
+            The Metadata object is a mapping of client-provided string fields to any string value. The following limitations apply:
+            - The JSON values must be Strings (no nested JSON objects allowed)
+            - Only ASCII characters may be used
+            - Maximum of 50 key/value pairs
+            - Maximum key length of 40 characters
+            - Maximum value length of 500 characters
+          maxProperties: 50
+          nullable: true
+          title: TransferMetadata
+          type: object
+        origination_account_id:
+          description: Plaid’s unique identifier for the origination account that
+            was used for this transfer.
+          type: string
+        direction:
+          $ref: '#/components/schemas/TransferDirection'
+      required:
+      - account_id
+      - ach_class
+      - amount
+      - cancellable
+      - created
+      - custom_tag
+      - description
+      - direction
+      - failure_reason
+      - id
+      - iso_currency_code
+      - metadata
+      - network
+      - origination_account_id
+      - status
+      - type
+      - user
+      title: Transfer
+      type: object
     BankTransfer:
       additionalProperties: true
       description: Represents a bank transfer within the Bank Transfers API.
@@ -15934,6 +16574,7 @@ components:
         id: id
         user:
           email_address: email_address
+          phone_number: phone_number
           legal_name: legal_name
           routing_number: routing_number
       properties:
@@ -15952,8 +16593,9 @@ components:
         user:
           $ref: '#/components/schemas/BankTransferUser'
         amount:
-          description: The amount of the transfer (decimal string with two digits
+          description: The amount of the bank transfer (decimal string with two digits
             of precision e.g. “10.00”).
+          title: BankTransferAmount
           type: string
         iso_currency_code:
           description: The currency of the transfer amount, e.g. "USD"
@@ -16071,30 +16713,226 @@ components:
       - web
       title: ACHClass
       type: string
+    TransferAmount:
+      description: The amount of the transfer (decimal string with two digits of precision
+        e.g. “10.00”).
+      title: TransferAmount
+      type: string
+    BankTransferAmount:
+      description: The amount of the bank transfer (decimal string with two digits
+        of precision e.g. “10.00”).
+      title: BankTransferAmount
+      type: string
+    TransferCreateIdempotencyKey:
+      description: |-
+        A random key provided by the client, per unique transfer. Maximum of 50 characters.
+
+        The API supports idempotency for safely retrying requests without accidentally performing the same operation twice. For example, if a request to create a transfer fails due to a network connection error, you can retry the request with the same idempotency key to guarantee that only a single transfer is created.
+      maxLength: 50
+      title: TransferCreateIdempotencyKey
+      type: string
+    BankTransferIdempotencyKey:
+      description: |-
+        A random key provided by the client, per unique bank transfer. Maximum of 50 characters.
+
+        The API supports idempotency for safely retrying requests without accidentally performing the same operation twice. For example, if a request to create a bank transfer fails due to a network connection error, you can retry the request with the same idempotency key to guarantee that only a single bank transfer is created.
+      maxLength: 50
+      title: BankTransferIdempotencyKey
+      type: string
+    TransferUser:
+      additionalProperties: true
+      description: The legal name and other information for the account holder.
+      example:
+        email_address: email_address
+        address:
+          country: country
+          city: city
+          street: street
+          region: region
+          postal_code: postal_code
+        phone_number: phone_number
+        legal_name: legal_name
+      properties:
+        legal_name:
+          description: The user's legal name.
+          type: string
+        phone_number:
+          description: The user's phone number.
+          type: string
+        email_address:
+          description: The user's email address.
+          type: string
+        address:
+          $ref: '#/components/schemas/TransferUserAddress'
+      required:
+      - legal_name
+      title: TransferUser
+      type: object
+    TransferUserAddress:
+      additionalProperties: true
+      description: The address associated with the account holder.
+      example:
+        country: country
+        city: city
+        street: street
+        region: region
+        postal_code: postal_code
+      properties:
+        street:
+          description: The street number and name (i.e., "100 Market St.").
+          type: string
+        city:
+          description: Ex. "San Francisco"
+          type: string
+        region:
+          description: The state or province (e.g., "California").
+          type: string
+        postal_code:
+          description: The postal code (e.g., "94103").
+          type: string
+        country:
+          description: A two-letter country code (e.g., "US").
+          type: string
+      title: TransferUserAddress
+      type: object
     BankTransferUser:
       additionalProperties: true
       description: The legal name and other information for the account holder.
       example:
         email_address: email_address
+        phone_number: phone_number
         legal_name: legal_name
         routing_number: routing_number
       properties:
         legal_name:
-          description: The account holder’s full legal name. If the transfer description
-            is `ccd`, this should be the business name of the account holder.
+          description: The user's legal name.
+          type: string
+        phone_number:
+          description: The user's phone number.
           type: string
         email_address:
-          description: The account holder’s email.
-          nullable: true
+          description: The user's email address.
           type: string
         routing_number:
           description: The account holder's routing number. This field is only used
-            for response data. Do not provide this field when making requests.
-          readOnly: true
+            in response data. Do not provide this field when making requests.
           type: string
       required:
       - legal_name
       title: BankTransferUser
+      type: object
+    TransferAuthorizationDecisionRationale:
+      additionalProperties: true
+      description: The rationale for Plaid's decision regarding a proposed transfer.
+      example:
+        code: NSF
+        description: description
+      properties:
+        code:
+          description: |-
+            A code representing the rationale for permitting or declining the proposed transfer. Possible values are:
+
+            `NSF` – Transaction likely to result in a return due to insufficient funds.
+
+            `RISK` - Transaction is high-risk.
+
+            `MANUALLY_VERIFIED_ITEM` – Item created via same-day micro deposits, limited information available. Plaid can only offer `permitted` as a transaction decision.
+
+            `LOGIN_REQUIRED` – Unable to collect the account information required for an authorization decision due to Item staleness. Can be rectified using Link update mode.
+
+            `ERROR` – Unable to collect the account information required for an authorization decision due to an error.
+          enum:
+          - NSF
+          - RISK
+          - MANUALLY_VERIFIED_ITEM
+          - LOGIN_REQUIRED
+          - ERROR
+          type: string
+        description:
+          description: A human-readable description of the code associated with a
+            permitted transfer or transfer decline.
+          type: string
+      title: TransferAuthorizationDecisionRationale
+      type: object
+    TransferAuthorizationProposedTransfer:
+      additionalProperties: true
+      description: Details regarding the proposed transfer.
+      example:
+        amount: amount
+        account_id: account_id
+        iso_currency_code: iso_currency_code
+        description: description
+        origination_account_id: origination_account_id
+        user:
+          email_address: email_address
+          address:
+            country: country
+            city: city
+            street: street
+            region: region
+            postal_code: postal_code
+          phone_number: phone_number
+          legal_name: legal_name
+        network: network
+      properties:
+        ach_class:
+          $ref: '#/components/schemas/ACHClass'
+        account_id:
+          description: The Plaid `account_id` for the account that will be debited
+            or credited.
+          type: string
+        type:
+          $ref: '#/components/schemas/TransferType'
+        user:
+          $ref: '#/components/schemas/TransferUser'
+        amount:
+          description: The amount of the transfer (decimal string with two digits
+            of precision e.g. “10.00”).
+          title: TransferAmount
+          type: string
+        iso_currency_code:
+          description: The currency of the transfer amount.
+          type: string
+        description:
+          description: A description of the proposed transfer.
+          type: string
+        network:
+          description: The network or rails used for the transfer.
+          type: string
+        origination_account_id:
+          description: Plaid's unique identifier for the origination account that
+            was used for this transfer.
+          type: string
+      title: TransferAuthorizationProposedTransfer
+      type: object
+    TransferAuthorizationDevice:
+      additionalProperties: true
+      description: Information about the device being used to initiate the authorization.
+      example:
+        ip_address: ip_address
+        user_agent: user_agent
+      properties:
+        ip_address:
+          description: The IP address of the device being used to initiate the authorization.
+          type: string
+        user_agent:
+          description: The user agent of the device being used to initiate the authorization.
+          type: string
+      title: TransferAuthorizationDevice
+      type: object
+    TransferMetadata:
+      additionalProperties:
+        type: string
+      description: |
+        The Metadata object is a mapping of client-provided string fields to any string value. The following limitations apply:
+        - The JSON values must be Strings (no nested JSON objects allowed)
+        - Only ASCII characters may be used
+        - Maximum of 50 key/value pairs
+        - Maximum key length of 40 characters
+        - Maximum value length of 500 characters
+      maxProperties: 50
+      nullable: true
+      title: TransferMetadata
       type: object
     BankTransferMetadata:
       additionalProperties:
@@ -16110,14 +16948,33 @@ components:
       nullable: true
       title: BankTransferMetadata
       type: object
+    TransferType:
+      description: The type of transfer. This will be either `debit` or `credit`.  A
+        `debit` indicates a transfer of money into the origination account; a `credit`
+        indicates a transfer of money out of the origination account.
+      enum:
+      - debit
+      - credit
+      title: TransferType
+      type: string
     BankTransferType:
       description: The type of bank transfer. This will be either `debit` or `credit`.  A
-        `debit` indicates a transfer of money into your origination account; a `credit`
-        indicates a transfer of money out of your origination account.
+        `debit` indicates a transfer of money into the origination account; a `credit`
+        indicates a transfer of money out of the origination account.
       enum:
       - debit
       - credit
       title: BankTransferType
+      type: string
+    TransferStatus:
+      description: The status of the transfer.
+      enum:
+      - pending
+      - posted
+      - cancelled
+      - failed
+      - reversed
+      title: TransferStatus
       type: string
     BankTransferStatus:
       description: The status of the transfer.
@@ -16129,6 +16986,14 @@ components:
       - reversed
       title: BankTransferStatus
       type: string
+    TransferNetwork:
+      description: The network or rails used for the transfer. Valid options are `ach`
+        or `same-day-ach`.
+      enum:
+      - ach
+      - same-day-ach
+      title: TransferNetwork
+      type: string
     BankTransferNetwork:
       description: The network or rails used for the transfer. Valid options are `ach`,
         `same-day-ach`, or `wire`.
@@ -16138,6 +17003,27 @@ components:
       - wire
       title: BankTransferNetwork
       type: string
+    TransferFailure:
+      additionalProperties: true
+      description: The failure reason if the type of this transfer is `"failed"` or
+        `"reversed"`. Null value otherwise.
+      example:
+        ach_return_code: ach_return_code
+        description: description
+      nullable: true
+      properties:
+        ach_return_code:
+          description: The ACH return code, e.g. `R01`.  A return code will be provided
+            if and only if the transfer status is `reversed`. For a full listing of
+            ACH return codes, see [Bank Transfers errors](https://plaid.com/docs/errors/bank-transfers/#ach-return-codes).
+          nullable: true
+          type: string
+        description:
+          description: A human-readable description of the reason for the failure
+            or reversal.
+          type: string
+      title: TransferFailure
+      type: object
     BankTransferFailure:
       additionalProperties: true
       description: The failure reason if the type of this transfer is `"failed"` or
@@ -16159,6 +17045,206 @@ components:
           type: string
       title: BankTransferFailure
       type: object
+    TransferAuthorizationCreateRequest:
+      description: TransferAuthorizationCreateRequest defines the request schema for
+        `/transfer/authorization/create`
+      example:
+        amount: amount
+        description: description
+        secret: secret
+        client_id: client_id
+        access_token: access_token
+        account_id: account_id
+        iso_currency_code: iso_currency_code
+        origination_account_id: origination_account_id
+        user:
+          email_address: email_address
+          address:
+            country: country
+            city: city
+            street: street
+            region: region
+            postal_code: postal_code
+          phone_number: phone_number
+          legal_name: legal_name
+        device:
+          ip_address: ip_address
+          user_agent: user_agent
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        access_token:
+          description: The Plaid `access_token` for the account that will be debited
+            or credited.
+          type: string
+        account_id:
+          description: The Plaid `account_id` for the account that will be debited
+            or credited.
+          type: string
+        type:
+          $ref: '#/components/schemas/TransferType'
+        network:
+          $ref: '#/components/schemas/TransferNetwork'
+        amount:
+          description: The amount of the transfer (decimal string with two digits
+            of precision e.g. “10.00”).
+          title: TransferAmount
+          type: string
+        iso_currency_code:
+          description: The currency of the transfer amount – should be set to "USD".
+          type: string
+        description:
+          description: The authorization description. Maximum of 10 characters.
+          maxLength: 10
+          type: string
+        ach_class:
+          $ref: '#/components/schemas/ACHClass'
+        user:
+          $ref: '#/components/schemas/TransferUser'
+        device:
+          $ref: '#/components/schemas/TransferAuthorizationDevice'
+        origination_account_id:
+          description: Plaid's unique identifier for the origination account for this
+            authorization. If not specified, the default account will be used.
+          type: string
+      required:
+      - access_token
+      - account_id
+      - ach_class
+      - amount
+      - description
+      - iso_currency_code
+      - network
+      - type
+      - user
+      title: TransferAuthorizationCreateRequest
+      type: object
+    TransferCreateRequest:
+      description: TransferCreateRequest defines the request schema for `/transfer/create`
+      example:
+        amount: amount
+        metadata:
+          key: metadata
+        authorization_id: authorization_id
+        description: description
+        secret: secret
+        client_id: client_id
+        access_token: access_token
+        custom_tag: custom_tag
+        account_id: account_id
+        iso_currency_code: iso_currency_code
+        idempotency_key: idempotency_key
+        origination_account_id: origination_account_id
+        user:
+          email_address: email_address
+          address:
+            country: country
+            city: city
+            street: street
+            region: region
+            postal_code: postal_code
+          phone_number: phone_number
+          legal_name: legal_name
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        idempotency_key:
+          description: |-
+            A random key provided by the client, per unique transfer. Maximum of 50 characters.
+
+            The API supports idempotency for safely retrying requests without accidentally performing the same operation twice. For example, if a request to create a transfer fails due to a network connection error, you can retry the request with the same idempotency key to guarantee that only a single transfer is created.
+          maxLength: 50
+          title: TransferCreateIdempotencyKey
+          type: string
+        access_token:
+          description: The Plaid `access_token` for the account that will be debited
+            or credited.
+          type: string
+        account_id:
+          description: The Plaid `account_id` for the account that will be debited
+            or credited.
+          type: string
+        authorization_id:
+          description: Plaid’s unique identifier for a transfer authorization.
+          title: TransferAuthorizationID
+          type: string
+        type:
+          $ref: '#/components/schemas/TransferType'
+        network:
+          $ref: '#/components/schemas/TransferNetwork'
+        amount:
+          description: The amount of the transfer (decimal string with two digits
+            of precision e.g. “10.00”).
+          title: TransferAmount
+          type: string
+        iso_currency_code:
+          description: The currency of the transfer amount – should be set to "USD".
+          type: string
+        description:
+          description: The transfer description. Maximum of 10 characters.
+          maxLength: 10
+          type: string
+        ach_class:
+          $ref: '#/components/schemas/ACHClass'
+        user:
+          $ref: '#/components/schemas/TransferUser'
+        custom_tag:
+          description: An arbitrary string provided by the client for storage with
+            the transfer. May be up to 100 characters.
+          maxLength: 100
+          nullable: true
+          type: string
+        metadata:
+          additionalProperties:
+            type: string
+          description: |
+            The Metadata object is a mapping of client-provided string fields to any string value. The following limitations apply:
+            - The JSON values must be Strings (no nested JSON objects allowed)
+            - Only ASCII characters may be used
+            - Maximum of 50 key/value pairs
+            - Maximum key length of 40 characters
+            - Maximum value length of 500 characters
+          maxProperties: 50
+          nullable: true
+          title: TransferMetadata
+          type: object
+        origination_account_id:
+          description: Plaid’s unique identifier for the origination account for this
+            transfer. If you have more than one origination account, this value must
+            be specified.
+          nullable: true
+          type: string
+      required:
+      - access_token
+      - account_id
+      - amount
+      - authorization_id
+      - description
+      - idempotency_key
+      - iso_currency_code
+      - network
+      - type
+      - user
+      title: TransferCreateRequest
+      type: object
     BankTransferCreateRequest:
       description: BankTransferCreateRequest defines the request schema for `/bank_transfer/create`
       example:
@@ -16176,6 +17262,7 @@ components:
         origination_account_id: origination_account_id
         user:
           email_address: email_address
+          phone_number: phone_number
           legal_name: legal_name
           routing_number: routing_number
       properties:
@@ -16196,6 +17283,7 @@ components:
 
             The API supports idempotency for safely retrying requests without accidentally performing the same operation twice. For example, if a request to create a bank transfer fails due to a network connection error, you can retry the request with the same idempotency key to guarantee that only a single bank transfer is created.
           maxLength: 50
+          title: BankTransferIdempotencyKey
           type: string
         access_token:
           description: The Plaid `access_token` for the account that will be debited
@@ -16210,8 +17298,9 @@ components:
         network:
           $ref: '#/components/schemas/BankTransferNetwork'
         amount:
-          description: The transfer amount (decimal string with two digits of precision
-            e.g. "10.00").
+          description: The amount of the bank transfer (decimal string with two digits
+            of precision e.g. “10.00”).
+          title: BankTransferAmount
           type: string
         iso_currency_code:
           description: The currency of the transfer amount – should be set to "USD".
@@ -16226,8 +17315,7 @@ components:
           $ref: '#/components/schemas/BankTransferUser'
         custom_tag:
           description: An arbitrary string provided by the client for storage with
-            the bank transfer. Will be returned in all `BankTransfer` objects. May
-            be up to 100 characters.
+            the bank transfer. May be up to 100 characters.
           maxLength: 100
           nullable: true
           type: string
@@ -16263,6 +17351,117 @@ components:
       - user
       title: BankTransferCreateRequest
       type: object
+    TransferAuthorizationCreateResponse:
+      additionalProperties: true
+      description: TransferAuthorizationCreateResponse defines the response schema
+        for `/transfer/authorization/create`
+      example:
+        proposed_transfer:
+          amount: amount
+          account_id: account_id
+          iso_currency_code: iso_currency_code
+          description: description
+          origination_account_id: origination_account_id
+          user:
+            email_address: email_address
+            address:
+              country: country
+              city: city
+              street: street
+              region: region
+              postal_code: postal_code
+            phone_number: phone_number
+            legal_name: legal_name
+          network: network
+        decision: approved
+        created: created
+        decision_rationale:
+          code: NSF
+          description: description
+        id: id
+        request_id: request_id
+      properties:
+        id:
+          description: Plaid’s unique identifier for a transfer authorization.
+          title: TransferAuthorizationID
+          type: string
+        created:
+          description: The datetime representing when the authorization was created,
+            in the format "2006-01-02T15:04:05Z".
+          type: string
+        decision:
+          description: "\nA decision regarding the proposed transfer.\n\n`approved`\
+            \ – The proposed transfer has received the end user's consent and has\
+            \ been approved for processing. Plaid has also reviewed the proposed transfer\
+            \ and has approved it for processing. \n\n`permitted` – Plaid was unable\
+            \ to fetch the information required to approve or decline the proposed\
+            \ transfer. You may proceed with the transfer, but further review is recommended.\
+            \ Plaid is awaiting further instructions from the client.\n\n`declined`\
+            \ – Plaid reviewed the proposed transfer and declined processing. Refer\
+            \ to the `code` field in the `decision_rationale` object for details."
+          enum:
+          - approved
+          - permitted
+          - declined
+          type: string
+        decision_rationale:
+          $ref: '#/components/schemas/TransferAuthorizationDecisionRationale'
+        proposed_transfer:
+          $ref: '#/components/schemas/TransferAuthorizationProposedTransfer'
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - id
+      title: TransferAuthorizationCreateResponse
+      type: object
+    TransferCreateResponse:
+      additionalProperties: true
+      description: TransferCreateResponse defines the response schema for `/transfer/create`
+      example:
+        transfer:
+          amount: amount
+          metadata:
+            key: metadata
+          created: 2000-01-23T04:56:07.000+00:00
+          description: description
+          failure_reason:
+            ach_return_code: ach_return_code
+            description: description
+          cancellable: true
+          custom_tag: custom_tag
+          account_id: account_id
+          iso_currency_code: iso_currency_code
+          origination_account_id: origination_account_id
+          id: id
+          user:
+            email_address: email_address
+            address:
+              country: country
+              city: city
+              street: street
+              region: region
+              postal_code: postal_code
+            phone_number: phone_number
+            legal_name: legal_name
+        request_id: request_id
+      properties:
+        transfer:
+          $ref: '#/components/schemas/Transfer'
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      - transfer
+      title: TransferCreateResponse
+      type: object
     BankTransferCreateResponse:
       additionalProperties: true
       description: BankTransferCreateResponse defines the response schema for `/bank_transfer/create`
@@ -16284,6 +17483,7 @@ components:
           id: id
           user:
             email_address: email_address
+            phone_number: phone_number
             legal_name: legal_name
             routing_number: routing_number
         request_id: request_id
@@ -16300,6 +17500,60 @@ components:
       - bank_transfer
       - request_id
       title: BankTransferCreateResponse
+      type: object
+    TransferListRequest:
+      description: TransferListRequest defines the request schema for `/transfer/list`
+      example:
+        end_date: 2000-01-23T04:56:07.000+00:00
+        offset: 0
+        count: 2
+        origination_account_id: origination_account_id
+        secret: secret
+        client_id: client_id
+        start_date: 2000-01-23T04:56:07.000+00:00
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        start_date:
+          description: The start datetime of transfers to list. This should be in
+            RFC 3339 format (i.e. `2019-12-06T22:35:49Z`)
+          format: date-time
+          nullable: true
+          type: string
+        end_date:
+          description: The end datetime of transfers to list. This should be in RFC
+            3339 format (i.e. `2019-12-06T22:35:49Z`)
+          format: date-time
+          nullable: true
+          type: string
+        count:
+          default: 25
+          description: The maximum number of transfers to return.
+          maximum: 25
+          minimum: 1
+          type: integer
+        offset:
+          default: 0
+          description: The number of transfers to skip before returning results.
+          minimum: 0
+          type: integer
+        origination_account_id:
+          description: Filter transfers to only those originated through the specified
+            origination account.
+          nullable: true
+          type: string
+        direction:
+          $ref: '#/components/schemas/TransferDirection'
+      title: TransferListRequest
       type: object
     BankTransferListRequest:
       description: BankTransferListRequest defines the request schema for `/bank_transfer/list`
@@ -16355,6 +17609,76 @@ components:
           $ref: '#/components/schemas/BankTransferDirection'
       title: BankTransferListRequest
       type: object
+    TransferListResponse:
+      additionalProperties: true
+      description: TransferListResponse defines the response schema for `/transfer/list`
+      example:
+        transfers:
+        - amount: amount
+          metadata:
+            key: metadata
+          created: 2000-01-23T04:56:07.000+00:00
+          description: description
+          failure_reason:
+            ach_return_code: ach_return_code
+            description: description
+          cancellable: true
+          custom_tag: custom_tag
+          account_id: account_id
+          iso_currency_code: iso_currency_code
+          origination_account_id: origination_account_id
+          id: id
+          user:
+            email_address: email_address
+            address:
+              country: country
+              city: city
+              street: street
+              region: region
+              postal_code: postal_code
+            phone_number: phone_number
+            legal_name: legal_name
+        - amount: amount
+          metadata:
+            key: metadata
+          created: 2000-01-23T04:56:07.000+00:00
+          description: description
+          failure_reason:
+            ach_return_code: ach_return_code
+            description: description
+          cancellable: true
+          custom_tag: custom_tag
+          account_id: account_id
+          iso_currency_code: iso_currency_code
+          origination_account_id: origination_account_id
+          id: id
+          user:
+            email_address: email_address
+            address:
+              country: country
+              city: city
+              street: street
+              region: region
+              postal_code: postal_code
+            phone_number: phone_number
+            legal_name: legal_name
+        request_id: request_id
+      properties:
+        transfers:
+          items:
+            $ref: '#/components/schemas/Transfer'
+          type: array
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      - transfers
+      title: TransferListResponse
+      type: object
     BankTransferListResponse:
       additionalProperties: true
       description: BankTransferListResponse defines the response schema for `/bank_transfer/list`
@@ -16376,6 +17700,7 @@ components:
           id: id
           user:
             email_address: email_address
+            phone_number: phone_number
             legal_name: legal_name
             routing_number: routing_number
         - amount: amount
@@ -16394,6 +17719,7 @@ components:
           id: id
           user:
             email_address: email_address
+            phone_number: phone_number
             legal_name: legal_name
             routing_number: routing_number
         request_id: request_id
@@ -16413,6 +17739,16 @@ components:
       - request_id
       title: BankTransferListResponse
       type: object
+    TransferDirection:
+      description: 'Indicates the direction of the transfer: `outbound` for API-initiated
+        transfers, or `inbound` for payments received by the FBO account.'
+      enum:
+      - outbound
+      - inbound
+      - null
+      nullable: true
+      title: TransferDirection
+      type: string
     BankTransferDirection:
       description: 'Indicates the direction of the transfer: `outbound` for API-initiated
         transfers, or `inbound` for payments received by the FBO account.'
@@ -16423,6 +17759,32 @@ components:
       nullable: true
       title: BankTransferDirection
       type: string
+    TransferCancelRequest:
+      description: TransferCancelRequest defines the request schema for `/transfer/cancel`
+      example:
+        secret: secret
+        transfer_id: transfer_id
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        transfer_id:
+          description: Plaid’s unique identifier for a transfer.
+          title: TransferID
+          type: string
+      required:
+      - transfer_id
+      title: TransferCancelRequest
+      type: object
     BankTransferCancelRequest:
       description: BankTransferCancelRequest defines the request schema for `/bank_transfer/cancel`
       example:
@@ -16449,6 +17811,22 @@ components:
       - bank_transfer_id
       title: BankTransferCancelRequest
       type: object
+    TransferCancelResponse:
+      additionalProperties: true
+      description: TransferCancelResponse defines the response schema for `/transfer/cancel`
+      example:
+        request_id: request_id
+      properties:
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      title: TransferCancelResponse
+      type: object
     BankTransferCancelResponse:
       additionalProperties: true
       description: BankTransferCancelResponse defines the response schema for `/bank_transfer/cancel`
@@ -16464,6 +17842,108 @@ components:
       required:
       - request_id
       title: BankTransferCancelResponse
+      type: object
+    TransferEventListRequest:
+      description: TransferEventListRequest defines the request schema for `/transfer/event/list`
+      example:
+        end_date: 2000-01-23T04:56:07.000+00:00
+        account_id: account_id
+        event_types:
+        - null
+        - null
+        offset: 0
+        count: 2
+        origination_account_id: origination_account_id
+        secret: secret
+        transfer_id: transfer_id
+        transfer_type: debit
+        client_id: client_id
+        start_date: 2000-01-23T04:56:07.000+00:00
+        direction: inbound
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        start_date:
+          description: The start datetime of transfers to list. This should be in
+            RFC 3339 format (i.e. `2019-12-06T22:35:49Z`)
+          format: date-time
+          nullable: true
+          type: string
+        end_date:
+          description: The end datetime of transfers to list. This should be in RFC
+            3339 format (i.e. `2019-12-06T22:35:49Z`)
+          format: date-time
+          nullable: true
+          type: string
+        transfer_id:
+          description: Plaid’s unique identifier for a transfer.
+          nullable: true
+          title: TransferID
+          type: string
+        account_id:
+          description: The account ID to get events for all transactions to/from an
+            account.
+          nullable: true
+          type: string
+        transfer_type:
+          description: The type of transfer. This will be either `debit` or `credit`.  A
+            `debit` indicates a transfer of money into your origination account; a
+            `credit` indicates a transfer of money out of your origination account.
+          enum:
+          - debit
+          - credit
+          - null
+          nullable: true
+          title: TransferType
+          type: string
+        event_types:
+          description: Filter events by event type.
+          items:
+            $ref: '#/components/schemas/TransferEventType'
+          type: array
+        count:
+          default: 25
+          description: The maximum number of transfer events to return. If the number
+            of events matching the above parameters is greater than `count`, the most
+            recent events will be returned.
+          maximum: 25
+          minimum: 1
+          nullable: true
+          type: integer
+        offset:
+          default: 0
+          description: The offset into the list of transfer events. When `count`=25
+            and `offset`=0, the first 25 events will be returned. When `count`=25
+            and `offset`=25, the next 25 bank transfer events will be returned.
+          minimum: 0
+          nullable: true
+          type: integer
+        origination_account_id:
+          description: The origination account ID to get events for transfers from
+            a specific origination account.
+          nullable: true
+          type: string
+        direction:
+          description: |-
+            Indicates the direction of the transfer: `outbound`: for API-initiated transfers
+            `inbound`: for payments received by the FBO account.
+          enum:
+          - inbound
+          - outbound
+          - null
+          nullable: true
+          title: TransferDirection
+          type: string
+      title: TransferEventListRequest
       type: object
     BankTransferEventListRequest:
       description: BankTransferEventListRequest defines the request schema for `/bank_transfer/event/list`
@@ -16567,6 +18047,33 @@ components:
           type: string
       title: BankTransferEventListRequest
       type: object
+    TransferEventType:
+      description: |-
+        The type of event that this transfer represents.
+
+        `pending`: A new transfer was created; it is in the pending state.
+
+        `cancelled`: The transfer was cancelled by the client.
+
+        `failed`: The transfer failed, no funds were moved.
+
+        `posted`: The transfer has been successfully submitted to the payment network.
+
+        `reversed`: A posted transfer was reversed.
+
+        `receiver_pending`: The matching transfer was found as a pending transaction in the receiver's account
+
+        `receiver_posted`: The matching transfer was found as a posted transaction in the receiver's account
+      enum:
+      - pending
+      - cancelled
+      - failed
+      - posted
+      - reversed
+      - receiver_pending
+      - receiver_posted
+      title: TransferEventType
+      type: string
     BankTransferEventType:
       description: |-
         The type of event that this bank transfer represents.
@@ -16594,6 +18101,78 @@ components:
       - receiver_posted
       title: BankTransferEventType
       type: string
+    TransferEvent:
+      additionalProperties: true
+      description: Represents an event in the Transfers API.
+      example:
+        transfer_iso_currency_code: transfer_iso_currency_code
+        event_id: 0
+        account_id: account_id
+        transfer_amount: transfer_amount
+        origination_account_id: origination_account_id
+        transfer_id: transfer_id
+        failure_reason:
+          ach_return_code: ach_return_code
+          description: description
+        receiver_details:
+          available_balance: positive
+        timestamp: 2000-01-23T04:56:07.000+00:00
+      properties:
+        event_id:
+          description: Plaid’s unique identifier for this event. IDs are sequential
+            unsigned 64-bit integers.
+          minimum: 0
+          type: integer
+        timestamp:
+          description: The datetime when this event occurred. This will be of the
+            form `2006-01-02T15:04:05Z`.
+          format: date-time
+          type: string
+        event_type:
+          $ref: '#/components/schemas/TransferEventType'
+        account_id:
+          description: The account ID associated with the transfer.
+          type: string
+        transfer_id:
+          description: Plaid’s unique identifier for a transfer.
+          title: TransferID
+          type: string
+        origination_account_id:
+          description: The ID of the origination account that this balance belongs
+            to.
+          nullable: true
+          type: string
+        transfer_type:
+          $ref: '#/components/schemas/TransferType'
+        transfer_amount:
+          description: The amount of the transfer (decimal string with two digits
+            of precision e.g. “10.00”).
+          title: TransferAmount
+          type: string
+        transfer_iso_currency_code:
+          description: The currency of the transfer amount.
+          type: string
+        failure_reason:
+          $ref: '#/components/schemas/TransferFailure'
+        direction:
+          $ref: '#/components/schemas/TransferDirection'
+        receiver_details:
+          $ref: '#/components/schemas/TransferReceiverDetails'
+      required:
+      - account_id
+      - direction
+      - event_id
+      - event_type
+      - failure_reason
+      - origination_account_id
+      - receiver_details
+      - timestamp
+      - transfer_amount
+      - transfer_id
+      - transfer_iso_currency_code
+      - transfer_type
+      title: TransferEvent
+      type: object
     BankTransferEvent:
       additionalProperties: true
       description: Represents an event in the Bank Transfers API.
@@ -16663,6 +18242,52 @@ components:
       - receiver_details
       - timestamp
       title: BankTransferEvent
+      type: object
+    TransferEventListResponse:
+      additionalProperties: true
+      description: TransferEventListResponse defines the response schema for `/transfer/event/list`
+      example:
+        transfer_events:
+        - transfer_iso_currency_code: transfer_iso_currency_code
+          event_id: 0
+          account_id: account_id
+          transfer_amount: transfer_amount
+          origination_account_id: origination_account_id
+          transfer_id: transfer_id
+          failure_reason:
+            ach_return_code: ach_return_code
+            description: description
+          receiver_details:
+            available_balance: positive
+          timestamp: 2000-01-23T04:56:07.000+00:00
+        - transfer_iso_currency_code: transfer_iso_currency_code
+          event_id: 0
+          account_id: account_id
+          transfer_amount: transfer_amount
+          origination_account_id: origination_account_id
+          transfer_id: transfer_id
+          failure_reason:
+            ach_return_code: ach_return_code
+            description: description
+          receiver_details:
+            available_balance: positive
+          timestamp: 2000-01-23T04:56:07.000+00:00
+        request_id: request_id
+      properties:
+        transfer_events:
+          items:
+            $ref: '#/components/schemas/TransferEvent'
+          type: array
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      - transfer_events
+      title: TransferEventListResponse
       type: object
     BankTransferEventListResponse:
       additionalProperties: true
@@ -16745,6 +18370,41 @@ components:
       - after_id
       title: BankTransferEventSyncRequest
       type: object
+    TransferEventSyncRequest:
+      description: TransferEventSyncRequest defines the request schema for `/transfer/event/sync`
+      example:
+        count: 15
+        after_id: 0
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        after_id:
+          description: The latest (largest) `event_id` fetched via the sync endpoint,
+            or 0 initially.
+          minimum: 0
+          type: integer
+        count:
+          default: 25
+          description: The maximum number of transfer events to return.
+          maximum: 25
+          minimum: 1
+          nullable: true
+          type: integer
+      required:
+      - after_id
+      title: TransferEventSyncRequest
+      type: object
     BankTransferEventSyncResponse:
       additionalProperties: true
       description: BankTransferEventSyncResponse defines the response schema for `/bank_transfer/event/sync`
@@ -16790,6 +18450,52 @@ components:
       - bank_transfer_events
       - request_id
       title: BankTransferEventSyncResponse
+      type: object
+    TransferEventSyncResponse:
+      additionalProperties: true
+      description: TransferEventSyncResponse defines the response schema for `/transfer/event/sync`
+      example:
+        transfer_events:
+        - transfer_iso_currency_code: transfer_iso_currency_code
+          event_id: 0
+          account_id: account_id
+          transfer_amount: transfer_amount
+          origination_account_id: origination_account_id
+          transfer_id: transfer_id
+          failure_reason:
+            ach_return_code: ach_return_code
+            description: description
+          receiver_details:
+            available_balance: positive
+          timestamp: 2000-01-23T04:56:07.000+00:00
+        - transfer_iso_currency_code: transfer_iso_currency_code
+          event_id: 0
+          account_id: account_id
+          transfer_amount: transfer_amount
+          origination_account_id: origination_account_id
+          transfer_id: transfer_id
+          failure_reason:
+            ach_return_code: ach_return_code
+            description: description
+          receiver_details:
+            available_balance: positive
+          timestamp: 2000-01-23T04:56:07.000+00:00
+        request_id: request_id
+      properties:
+        transfer_events:
+          items:
+            $ref: '#/components/schemas/TransferEvent'
+          type: array
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      - transfer_events
+      title: TransferEventSyncResponse
       type: object
     BankTransferBalanceGetRequest:
       description: BankTransferBalanceGetRequest defines the request schema for `/bank_transfer/balance/get`
@@ -16975,6 +18681,51 @@ components:
       - event_type
       title: SandboxBankTransferSimulateRequest
       type: object
+    SandboxTransferSimulateRequest:
+      description: SandboxTransferSimulateRequest defines the request schema for `/sandbox/transfer/simulate`
+      example:
+        event_type: event_type
+        secret: secret
+        transfer_id: transfer_id
+        failure_reason:
+          ach_return_code: ach_return_code
+          description: description
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        transfer_id:
+          description: Plaid’s unique identifier for a transfer.
+          title: TransferID
+          type: string
+        event_type:
+          description: |
+            The asynchronous event to be simulated. May be: `posted`, `failed`, or `reversed`.
+
+            An error will be returned if the event type is incompatible with the current transfer status. Compatible status --> event type transitions include:
+
+            `pending` --> `failed`
+
+            `pending` --> `posted`
+
+            `posted` --> `reversed`
+          type: string
+        failure_reason:
+          $ref: '#/components/schemas/TransferFailure'
+      required:
+      - event_type
+      - transfer_id
+      title: SandboxTransferSimulateRequest
+      type: object
     SandboxBankTransferSimulateResponse:
       additionalProperties: true
       description: SandboxBankTransferSimulateResponse defines the response schema
@@ -16991,6 +18742,46 @@ components:
       required:
       - request_id
       title: SandboxBankTransferSimulateResponse
+      type: object
+    SandboxTransferSimulateResponse:
+      additionalProperties: true
+      description: SandboxTransferSimulateResponse defines the response schema for
+        `/sandbox/transfer/simulate`
+      example:
+        request_id: request_id
+      properties:
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      title: SandboxTransferSimulateResponse
+      type: object
+    TransferReceiverDetails:
+      additionalProperties: true
+      description: The receiver details if the type of this event is `reciever_pending`
+        or `reciever_posted`. Null value otherwise.
+      example:
+        available_balance: positive
+      nullable: true
+      properties:
+        available_balance:
+          description: The sign of the available balance for the receiver bank account
+            associated with the receiver event at the time the matching transaction
+            was found. Can be `positive`, `negative`, or null if the balance was not
+            available at the time.
+          enum:
+          - positive
+          - negative
+          - null
+          nullable: true
+          type: string
+      required:
+      - available_balance
+      title: TransferReceiverDetails
       type: object
     BankTransferReceiverDetails:
       additionalProperties: true
@@ -18531,6 +20322,19 @@ components:
       - optional_product_access
       - required_product_access
       type: object
+    ScopesState:
+      description: When scopes are updated during enrollment, this field must be populated
+        with the state sent to the partner in the OAuth Login URI. This field is required
+        when the context is `ENROLLMENT`.
+      type: string
+    ScopesContext:
+      description: An indicator for when scopes are being updated. When scopes are
+        updated via enrollment (i.e. OAuth), the partner must send `ENROLLMENT`. When
+        scopes are updated in a post-enrollment view, the partner must send `PORTAL`.
+      enum:
+      - ENROLLMENT
+      - PORTAL
+      type: string
     ItemApplicationScopesUpdateRequest:
       description: ItemApplicationScopesUpdateRequest defines the request schema for
         `/item/application/scopes/update`
@@ -18549,6 +20353,7 @@ components:
             authorized: true
           - unique_id: unique_id
             authorized: true
+        state: state
         application_id: application_id
         client_id: client_id
       properties:
@@ -18576,9 +20381,17 @@ components:
           type: string
         scopes:
           $ref: '#/components/schemas/Scopes'
+        state:
+          description: When scopes are updated during enrollment, this field must
+            be populated with the state sent to the partner in the OAuth Login URI.
+            This field is required when the context is `ENROLLMENT`.
+          type: string
+        context:
+          $ref: '#/components/schemas/ScopesContext'
       required:
       - access_token
       - application_id
+      - context
       - scopes
       type: object
     ItemApplicationScopesUpdateResponse:
@@ -19641,6 +21454,11 @@ components:
           format: date-time
           nullable: true
           type: string
+        check_number:
+          description: The check number of the transaction. This field is only populated
+            for check transactions.
+          nullable: true
+          type: string
         transaction_code:
           $ref: '#/components/schemas/TransactionCode'
       required:
@@ -19649,6 +21467,7 @@ components:
       - authorized_datetime
       - category
       - category_id
+      - check_number
       - datetime
       - location
       - merchant_name

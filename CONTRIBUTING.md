@@ -1,6 +1,6 @@
 # Contributing
 
-Instructions for contributing to [plaid-go][1]. A go client library for the [Plaid API][2]. This library is fully generated from the [Plaid OpenAPI spec](3).
+Instructions for contributing to [plaid-go][1]. A go client library for the [Plaid API][2]. This library is fully generated from the [Plaid OpenAPI spec](3). The library is generated internally, so don't try to iterate from this repo.
 
 ## Running Tests
 
@@ -10,7 +10,7 @@ Instructions for contributing to [plaid-go][1]. A go client library for the [Pla
 
 If you wish to run a single test, do something like this:
 
-```
+```sh
 CLIENT_ID="" SECRET="" go test -v ./... -run TESTNAME
 ```
 
