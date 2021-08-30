@@ -3,3 +3,4 @@
 README.md
 go.mod
 go.sum
+git_push.sh

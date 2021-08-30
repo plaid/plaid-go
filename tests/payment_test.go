@@ -214,7 +214,7 @@ func commonPaymentTestFlows(t *testing.T, ctx context.Context, testClient *plaid
 	cursor := paymentListResp.GetNextCursor()
 	if !cursor.IsZero() {
 		listRequest = plaid.NewPaymentInitiationPaymentListRequest()
-		listRequest.SetCursor(cursor.Format(RFC3339Nano))
+		listRequest.SetCursor(cursor)
 		_, _, err := testClient.PlaidApi.PaymentInitiationPaymentList(ctx).PaymentInitiationPaymentListRequest(*listRequest).Execute()
 		assert.NoError(t, err)
 	}
