@@ -7,7 +7,7 @@ info:
     details.
   termsOfService: https://plaid.com/legal/
   title: The Plaid API
-  version: 2020-09-14_1.21.0
+  version: 2020-09-14_1.26.1
 servers:
 - description: Production
   url: https://production.plaid.com
@@ -137,10 +137,10 @@ paths:
                       consent_expiration_time: null
                     status:
                       transactions:
-                        last_successful_update: 2019-02-15T15:52:39
-                        last_failed_update: 2019-01-22T04:32:00
+                        last_successful_update: 2019-02-15T15:52:39Z
+                        last_failed_update: 2019-01-22T04:32:00Z
                       last_webhook:
-                        sent_at: 2019-02-15T15:53:00
+                        sent_at: 2019-02-15T15:53:00Z
                         code_sent: DEFAULT_UPDATE
                     request_id: m8MDnv9okwxFNBV
               schema:
@@ -394,8 +394,6 @@ paths:
         Returns a JSON response containing details on all financial institutions currently supported by Plaid. Because Plaid supports thousands of institutions, results are paginated.
 
         If there is no overlap between an institution’s enabled products and a client’s enabled products, then the institution will be filtered out from the response. As a result, the number of institutions returned may not match the count specified in the call.
-
-        This data changes frequently. If you store it locally on your system, be sure to update it regularly.
       externalDocs:
         url: /api/institutions/#institutionsget
       operationId: institutionsGet
@@ -1200,7 +1198,9 @@ paths:
                       balances:
                         available: 100
                         current: 110
+                        iso_currency_code: USD
                         limit: null
+                        unofficial_currency_code: null
                       mask: "0000"
                       name: Plaid Checking
                       official_name: Plaid Gold Checking
@@ -3316,7 +3316,8 @@ paths:
                       user:
                         email_address: plaid@plaid.com
                         legal_name: John Smith
-                        routing_number: "111111111"
+                        phone_number: null
+                        address: null
                     request_id: saKrIBuEB9qJZno
               schema:
                 $ref: '#/components/schemas/TransferGetResponse'
@@ -3396,13 +3397,18 @@ paths:
         Use the `/transfer/authorization/create` endpoint to determine transfer failure risk.
 
         In Plaid's sandbox environment the decisions will be returned as follows:
-          - To approve a transfer, create an Item in Link with the username `user_good` and password `pass_good`
-          - To decline a transfer with the rationale code NSF, create an Item in Link with the username `declined_nsf_good` and password `pass_good`
-          - To decline a transfer with the rationale code RISK, create an Item in Link with the username `declined_risk_good` and password `pass_good`
-          - To permit a transfer with the rationale code MANUALLY_VERIFIED_ITEM, create an Item in Link through the [Same Day Micro-deposits flow](https://plaid.com/docs/auth/coverage/testing/#testing-same-day-micro-deposits).
-          - To permit a transfer with the rationale code LOGIN_REQUIRED, [reset the login for an Item](https://plaid.com/docs/sandbox/#item_login_required).
 
-        All username/password combinations other than the ones listed above will result in a decision of permitted and rationale code ERROR.
+          - To approve a transfer, create an Item in Link with the username `user_good` and password `pass_good`
+
+          - To decline a transfer with the rationale code `NSF`, create an Item in Link with the username `declined_nsf_good` and password `pass_good`
+
+          - To decline a transfer with the rationale code `RISK`, create an Item in Link with the username `declined_risk_good` and password `pass_good`
+
+          - To permit a transfer with the rationale code `MANUALLY_VERIFIED_ITEM`, create an Item in Link through the [Same Day Micro-deposits flow](https://plaid.com/docs/auth/coverage/testing/#testing-same-day-micro-deposits).
+
+          - To permit a transfer with the rationale code `LOGIN_REQUIRED`, [reset the login for an Item](https://plaid.com/docs/sandbox/#item_login_required).
+
+        All username/password combinations other than the ones listed above will result in a decision of permitted and rationale code `ERROR`.
       externalDocs:
         url: /transfer/reference#transferauthorizationcreate
       operationId: transferAuthorizationCreate
@@ -3490,7 +3496,6 @@ paths:
                           region: California
                           postal_code: "94103"
                           country: US
-                        routing_number: "1234567890"
                       amount: "12.34"
                       iso_currency_code: USD
                       description: A description of the proposed transfer
@@ -3618,7 +3623,8 @@ paths:
                       user:
                         email_address: plaid@plaid.com
                         legal_name: John Smith
-                        routing_number: "111111111"
+                        phone_number: null
+                        address: null
                     request_id: saKrIBuEB9qJZno
               schema:
                 $ref: '#/components/schemas/TransferListResponse'
@@ -3947,6 +3953,50 @@ paths:
       summary: Sync bank transfer events
       tags:
       - plaid
+  /bank_transfer/sweep/get:
+    post:
+      description: The `/bank_transfer/sweep/get` endpoint fetches information about
+        the sweep corresponding to the given `sweep_id`.
+      externalDocs:
+        url: /api/products#bank_transfersweepget
+      operationId: bankTransferSweepGet
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            examples: {}
+            schema:
+              $ref: '#/components/schemas/BankTransferSweepGetRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    sweep:
+                      id: 0
+                      transfer_id: 460cbe92-2dcc-8eae-5ad6-b37d0ec90fd9
+                      created_at: 2020-08-06T17:27:15Z
+                      amount: "12.34"
+                      iso_currency_code: USD
+                      sweep_account:
+                        account_number: "123456789"
+                        routing_number: "111111111"
+                    request_id: saKrIBuEB9qJZno
+              schema:
+                $ref: '#/components/schemas/BankTransferSweepGetResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error response
+      summary: Retrieve a sweep
+      tags:
+      - plaid
   /bank_transfer/balance/get:
     post:
       description: |-
@@ -4141,6 +4191,7 @@ paths:
       - plaid
   /income/verification/create:
     post:
+      deprecated: true
       description: '`/income/verification/create` begins the income verification process
         by returning an `income_verification_id`. You can then provide the `income_verification_id`
         to `/link/token/create` under the `income_verification` parameter in order
@@ -4227,6 +4278,89 @@ paths:
       summary: Retrieve a summary of information derived from income verification
       tags:
       - plaid
+  /income/verification/paystub/get:
+    post:
+      deprecated: true
+      operationId: incomeVerificationPaystubGet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IncomeVerificationPaystubGetRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    request_id: 2pxQ59buGdsHRef
+                    document_metadata:
+                      name: paystub.pdf
+                      status: DOCUMENT_STATUS_PROCESSING_COMPLETE
+                      doc_id: 2jkflanbd
+                    paystub:
+                      deductions:
+                        subtotals: []
+                        totals: []
+                      doc_id: 2jkflanbd
+                      earnings:
+                        subtotals: []
+                        totals: []
+                      employee:
+                        address:
+                          city: SAN FRANCISCO
+                          country: US
+                          postal_code: "94133"
+                          region: CA
+                          street: 2140 TAYLOR ST
+                        name: ANNA CHARLESTON
+                      employer:
+                        name: PLAID INC
+                        address:
+                          city: SAN FRANCISCO
+                          country: US
+                          postal_code: "94111"
+                          region: CA
+                          street: 1098 HARRISON ST
+                      employment_details:
+                        annual_salary:
+                          amount: 60000
+                          currency: USD
+                        hire_date: 2020-09-15
+                      net_pay:
+                        distribution_details: []
+                        total:
+                          canonical_description: NET PAY
+                          description: TOTAL NET PAY
+                          ytd_pay:
+                            amount: 39456
+                            currency: USD
+                          current_pay:
+                            amount: 1490.21
+                            currency: USD
+                      income_breakdown: []
+                      pay_period_details:
+                        check_amount: 1490.21
+                        end_date: 2020-12-15
+                        gross_earnings: 4500
+                        pay_day: 2020-12-15
+                        start_date: 2020-12-01
+                      paystub_details:
+                        pay_frequency: BI-WEEKLY
+                        paystub_provider: ADP
+                        pay_period_start_date: 2020-12-01
+                        pay_period_end_date: 2020-12-15
+                        pay_date: 2020-12-15
+                      ytd_earnings:
+                        gross_earnings: 59375
+                        net_earnings: 39456
+          description: OK
+      summary: (Deprecated) Retrieve information from a single paystub used for income
+        verification
+      tags:
+      - plaid
   /income/verification/paystubs/get:
     post:
       description: '`/income/verification/paystubs/get` returns the information collected
@@ -4251,8 +4385,18 @@ paths:
                 example-1:
                   value:
                     request_id: 2pxQ59buGdsHRef
+                    document_metadata:
+                      name: paystub.pdf
+                      status: DOCUMENT_STATUS_PROCESSING_COMPLETE
+                      doc_id: 2jkflanbd
                     paystubs:
-                    - account_id: null
+                      deductions:
+                        subtotals: []
+                        totals: []
+                      doc_id: 2jkflanbd
+                      earnings:
+                        subtotals: []
+                        totals: []
                       employee:
                         address:
                           city: SAN FRANCISCO
@@ -4263,6 +4407,28 @@ paths:
                         name: ANNA CHARLESTON
                       employer:
                         name: PLAID INC
+                        address:
+                          city: SAN FRANCISCO
+                          country: US
+                          postal_code: "94111"
+                          region: CA
+                          street: 1098 HARRISON ST
+                      employment_details:
+                        annual_salary:
+                          amount: 60000
+                          currency: USD
+                        hire_date: 2020-09-15
+                      net_pay:
+                        distribution_details: []
+                        total:
+                          canonical_description: NET PAY
+                          description: TOTAL NET PAY
+                          ytd_pay:
+                            amount: 39456
+                            currency: USD
+                          current_pay:
+                            amount: 1490.21
+                            currency: USD
                       income_breakdown: []
                       pay_period_details:
                         check_amount: 1490.21
@@ -4270,9 +4436,15 @@ paths:
                         gross_earnings: 4500
                         pay_day: 2020-12-15
                         start_date: 2020-12-01
+                      paystub_details:
+                        pay_frequency: BI-WEEKLY
+                        paystub_provider: ADP
+                        pay_period_start_date: 2020-12-01
+                        pay_period_end_date: 2020-12-15
+                        pay_date: 2020-12-15
                       ytd_earnings:
                         gross_earnings: 59375
-                        net_earnings: null
+                        net_earnings: 39456
               schema:
                 $ref: '#/components/schemas/IncomeVerificationPaystubsGetResponse'
           description: OK
@@ -4334,6 +4506,38 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: Error response.
       summary: Refresh an income verification
+      tags:
+      - plaid
+  /income/verification/taxforms/get:
+    post:
+      description: '`/income/verification/taxforms/get` returns the information collected
+        from taxforms that were used to verify an end user''s. It can be called once
+        the status of the verification has been set to `VERIFICATION_STATUS_PROCESSING_COMPLETE`,
+        as reported by the `INCOME: verification_status` webhook. Attempting to call
+        the endpoint before verification has been completed will result in an error.'
+      externalDocs:
+        url: /api/products#incomeverificationtaxformsget
+      operationId: incomeVerificationTaxformsGet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IncomeVerificationTaxformsGetRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncomeVerificationTaxformsGetResponse'
+          description: success
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error response.
+      summary: Retrieve information from the tax documents used for income verification
       tags:
       - plaid
   /deposit_switch/alt/create:
@@ -4797,7 +5001,7 @@ components:
             last_updated_datetime: 2000-01-23T04:56:07.000+00:00
           account_id: account_id
           name: name
-          verification_status: pending_automatic_verification
+          verification_status: automatically_verified
           mask: mask
         - official_name: official_name
           balances:
@@ -4809,7 +5013,7 @@ components:
             last_updated_datetime: 2000-01-23T04:56:07.000+00:00
           account_id: account_id
           name: name
-          verification_status: pending_automatic_verification
+          verification_status: automatically_verified
           mask: mask
         request_id: request_id
       properties:
@@ -5030,7 +5234,7 @@ components:
             last_updated_datetime: 2000-01-23T04:56:07.000+00:00
           account_id: account_id
           name: name
-          verification_status: pending_automatic_verification
+          verification_status: automatically_verified
           mask: mask
         - official_name: official_name
           balances:
@@ -5042,7 +5246,7 @@ components:
             last_updated_datetime: 2000-01-23T04:56:07.000+00:00
           account_id: account_id
           name: name
-          verification_status: pending_automatic_verification
+          verification_status: automatically_verified
           mask: mask
         transactions:
         - null
@@ -6176,7 +6380,7 @@ components:
             last_updated_datetime: 2000-01-23T04:56:07.000+00:00
           account_id: account_id
           name: name
-          verification_status: pending_automatic_verification
+          verification_status: automatically_verified
           mask: mask
         - official_name: official_name
           balances:
@@ -6188,7 +6392,7 @@ components:
             last_updated_datetime: 2000-01-23T04:56:07.000+00:00
           account_id: account_id
           name: name
-          verification_status: pending_automatic_verification
+          verification_status: automatically_verified
           mask: mask
         request_id: request_id
       properties:
@@ -6551,7 +6755,7 @@ components:
           type: array
         min_last_updated_datetime:
           description: |-
-            Timestamp in ISO-8601 format (`YYYY-MM-DDTHH:mm:ssZ`) indicating the oldest acceptable balance when making a request to `/accounts/balance/get`.
+            Timestamp in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format (`YYYY-MM-DDTHH:mm:ssZ`) indicating the oldest acceptable balance when making a request to `/accounts/balance/get`.
 
             If the balance that is pulled for `ins_128026` (Capital One) is older than the given timestamp, an `INVALID_REQUEST` error with the code of `LAST_UPDATED_DATETIME_OUT_OF_RANGE` will be returned with the most recent timestamp for the requested account contained in the response.
 
@@ -6562,7 +6766,7 @@ components:
       type: object
     MinLastUpdatedDatetime:
       description: |-
-        Timestamp in ISO-8601 format (`YYYY-MM-DDTHH:mm:ssZ`) indicating the oldest acceptable balance when making a request to `/accounts/balance/get`.
+        Timestamp in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format (`YYYY-MM-DDTHH:mm:ssZ`) indicating the oldest acceptable balance when making a request to `/accounts/balance/get`.
 
         If the balance that is pulled for `ins_128026` (Capital One) is older than the given timestamp, an `INVALID_REQUEST` error with the code of `LAST_UPDATED_DATETIME_OUT_OF_RANGE` will be returned with the most recent timestamp for the requested account contained in the response.
 
@@ -6711,7 +6915,7 @@ components:
             last_updated_datetime: 2000-01-23T04:56:07.000+00:00
           account_id: account_id
           name: name
-          verification_status: pending_automatic_verification
+          verification_status: automatically_verified
           mask: mask
       properties:
         request_id:
@@ -6730,8 +6934,7 @@ components:
       - request_id
       type: object
     ProcessorBankTransferCreateRequest:
-      description: ProcessorBankTransferCreateRequest defines the request schema for
-        `/processor/bank_transfer/create`
+      description: Defines the request schema for `/processor/bank_transfer/create`
       example:
         amount: amount
         metadata:
@@ -6746,7 +6949,6 @@ components:
         processor_token: processor_token
         user:
           email_address: email_address
-          phone_number: phone_number
           legal_name: legal_name
           routing_number: routing_number
       properties:
@@ -6833,8 +7035,7 @@ components:
       type: object
     ProcessorBankTransferCreateResponse:
       additionalProperties: true
-      description: ProcessorBankTransferCreateResponse defines the response schema
-        for `/processor/bank_transfer/create`
+      description: Defines the response schema for `/processor/bank_transfer/create`
       example:
         bank_transfer:
           amount: amount
@@ -6853,7 +7054,6 @@ components:
           id: id
           user:
             email_address: email_address
-            phone_number: phone_number
             legal_name: legal_name
             routing_number: routing_number
         request_id: request_id
@@ -6971,7 +7171,7 @@ components:
       properties:
         min_last_updated_datetime:
           description: |-
-            Timestamp in ISO-8601 format (`YYYY-MM-DDTHH:mm:ssZ`) indicating the oldest acceptable balance when making a request to `/accounts/balance/get`.
+            Timestamp in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format (`YYYY-MM-DDTHH:mm:ssZ`) indicating the oldest acceptable balance when making a request to `/accounts/balance/get`.
 
             If the balance that is pulled for `ins_128026` (Capital One) is older than the given timestamp, an `INVALID_REQUEST` error with the code of `LAST_UPDATED_DATETIME_OUT_OF_RANGE` will be returned with the most recent timestamp for the requested account contained in the response.
 
@@ -6996,7 +7196,7 @@ components:
             last_updated_datetime: 2000-01-23T04:56:07.000+00:00
           account_id: account_id
           name: name
-          verification_status: pending_automatic_verification
+          verification_status: automatically_verified
           mask: mask
       properties:
         account:
@@ -7233,8 +7433,10 @@ components:
             point.
           type: string
         created_at:
+          description: The timestamp when the key was created, in Unix time.
           type: integer
         expired_at:
+          description: The timestamp when the key expired, in Unix time.
           nullable: true
           type: integer
       required:
@@ -7502,7 +7704,7 @@ components:
             last_updated_datetime: 2000-01-23T04:56:07.000+00:00
           account_id: account_id
           name: name
-          verification_status: pending_automatic_verification
+          verification_status: automatically_verified
           mask: mask
         - official_name: official_name
           balances:
@@ -7514,7 +7716,7 @@ components:
             last_updated_datetime: 2000-01-23T04:56:07.000+00:00
           account_id: account_id
           name: name
-          verification_status: pending_automatic_verification
+          verification_status: automatically_verified
           mask: mask
         request_id: request_id
       properties:
@@ -7639,8 +7841,6 @@ components:
       description: PaymentInitiationRecipientGetResponse defines the response schema
         for `/payment_initiation/recipient/get`
       required:
-      - bacs
-      - iban
       - name
       - recipient_id
       - request_id
@@ -7682,8 +7882,6 @@ components:
           nullable: true
           type: string
       required:
-      - bacs
-      - iban
       - name
       - recipient_id
       title: PaymentInitiationRecipient
@@ -8180,7 +8378,6 @@ components:
       - payment_id
       - recipient_id
       - reference
-      - schedule
       - status
       type: object
     PaymentInitiationPaymentTokenCreateRequest:
@@ -8223,7 +8420,7 @@ components:
             to enter the payment initiation flow
           type: string
         payment_token_expiration_time:
-          description: The date and time at which the token will expire, in ISO 8601
+          description: The date and time at which the token will expire, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
             format. A `payment_token` expires after 15 minutes.
           format: date-time
           type: string
@@ -8242,8 +8439,8 @@ components:
       description: PaymentInitiationPaymentListRequest defines the request schema
         for `/payment_initiation/payment/list`
       example:
-        cursor: cursor
-        count: 0
+        cursor: 2000-01-23T04:56:07.000+00:00
+        count: 16
         secret: secret
         client_id: client_id
       properties:
@@ -8263,11 +8460,14 @@ components:
           description: The maximum number of payments to return. If `count` is not
             specified, a maximum of 10 payments will be returned, beginning with the
             most recent payment before the cursor (if specified).
+          maximum: 200
+          minimum: 1
           nullable: true
           type: integer
         cursor:
           description: A string in RFC 3339 format (i.e. "2019-12-06T22:35:49Z").
             Only payments created before the cursor will be returned.
+          format: date-time
           nullable: true
           type: string
       type: object
@@ -8996,7 +9196,7 @@ components:
             last_updated_datetime: 2000-01-23T04:56:07.000+00:00
           account_id: account_id
           name: name
-          verification_status: pending_automatic_verification
+          verification_status: automatically_verified
           mask: mask
         - official_name: official_name
           balances:
@@ -9008,7 +9208,7 @@ components:
             last_updated_datetime: 2000-01-23T04:56:07.000+00:00
           account_id: account_id
           name: name
-          verification_status: pending_automatic_verification
+          verification_status: automatically_verified
           mask: mask
         holdings:
         - cost_basis: 1.4658129805029452
@@ -9213,7 +9413,7 @@ components:
             last_updated_datetime: 2000-01-23T04:56:07.000+00:00
           account_id: account_id
           name: name
-          verification_status: pending_automatic_verification
+          verification_status: automatically_verified
           mask: mask
         - official_name: official_name
           balances:
@@ -9225,7 +9425,7 @@ components:
             last_updated_datetime: 2000-01-23T04:56:07.000+00:00
           account_id: account_id
           name: name
-          verification_status: pending_automatic_verification
+          verification_status: automatically_verified
           mask: mask
         investment_transactions:
         - date: 2000-01-23
@@ -9377,6 +9577,7 @@ components:
           - rize
           - sila_money
           - sbv_api
+          - treasury_prime
           - unit
           - vesta
           - vopay
@@ -9726,7 +9927,8 @@ components:
             Switch product
           type: string
         deposit_switch_token_expiration_time:
-          description: Expiration time of the token, in ISO 8601 format
+          description: Expiration time of the token, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            format
           type: string
         request_id:
           description: A unique identifier for the request, which can be used for
@@ -9849,7 +10051,7 @@ components:
           type: string
         country_codes:
           description: |-
-            Specify an array of Plaid-supported country codes using the ISO-3166-1 alpha-2 country code standard. Institutions from all listed countries will be shown.  Supported country codes are: `US`, `CA`, `ES`, `FR`, `GB`, `IE`, `NL`. Example value: `['US', 'CA']`.
+            Specify an array of Plaid-supported country codes using the ISO-3166-1 alpha-2 country code standard. Institutions from all listed countries will be shown.  Supported country codes are: `US`, `CA`, `ES`, `FR`, `GB`, `IE`, `NL`.
 
             If Link is launched with multiple country codes, only products that you are enabled for in all countries will be used by Link. Note that while all countries are enabled by default in Sandbox and Development, in Production only US and Canada are enabled by default. To gain access to European institutions in the Production environment, [file a product access Support ticket](https://dashboard.plaid.com/support/new/product-and-development/product-troubleshooting/request-product-access) via the Plaid dashboard. If you initialize with a European country code, your users will see the European consent panel during the Link flow.
 
@@ -9867,8 +10069,6 @@ components:
             List of Plaid product(s) you wish to use. If launching Link in update mode, should be omitted; required otherwise. Valid products are:
 
             `transactions`, `auth`, `identity`, `assets`, `investments`, `liabilities`, `payment_initiation`, `deposit_switch`, `income_verification`
-
-            Example: `['auth', 'transactions']`
 
             `balance` is *not* a valid value, the Balance product does not require explicit initalization and will automatically be initialized when any other product is initialized.
 
@@ -10057,7 +10257,7 @@ components:
           type: string
         phone_number_verified_time:
           description: |
-            The date and time the phone number was verified in ISO 8601 format (`YYYY-MM-DDThh:mm:ssZ`). This field is optional, but required to enable any [returning user experience](https://plaid.com/docs/link/returning-user).
+            The date and time the phone number was verified in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format (`YYYY-MM-DDThh:mm:ssZ`). This field is optional, but required to enable any [returning user experience](https://plaid.com/docs/link/returning-user).
 
              Only pass a verification time for a phone number that you have verified. If you have performed verification but don’t have the time, you may supply a signal value of the start of the UNIX epoch.
 
@@ -10070,7 +10270,7 @@ components:
           type: string
         email_address_verified_time:
           description: |-
-            The date and time the email address was verified in ISO 8601 format (`YYYY-MM-DDThh:mm:ssZ`). This is an optional field used in the [returning user experience](https://plaid.com/docs/link/returning-user).
+            The date and time the email address was verified in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format (`YYYY-MM-DDThh:mm:ssZ`). This is an optional field used in the [returning user experience](https://plaid.com/docs/link/returning-user).
 
              Only pass a verification time for an email address that you have verified. If you have performed verification but don’t have the time, you may supply a signal value of the start of the UNIX epoch.
 
@@ -10168,12 +10368,13 @@ components:
             it and receive a `public_token`, which can be exchanged for an `access_token`.
           type: string
         created_at:
-          description: The creation timestamp for the `link_token`, in ISO 8601 format.
+          description: The creation timestamp for the `link_token`, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            format.
           format: date-time
           nullable: true
           type: string
         expiration:
-          description: The expiration timestamp for the `link_token`, in ISO 8601
+          description: The expiration timestamp for the `link_token`, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
             format.
           format: date-time
           nullable: true
@@ -10275,10 +10476,10 @@ components:
             it and receive a `public_token`, which can be exchanged for an `access_token`.
           type: string
         expiration:
-          description: The expiration date for the `link_token`, in ISO 8601 format.
-            A `link_token` created to generate a `public_token` that will be exchanged
-            for a new `access_token` expires after 4 hours. A `link_token` created
-            for an existing Item (such as when updating an existing `access_token`
+          description: The expiration date for the `link_token`, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            format. A `link_token` created to generate a `public_token` that will
+            be exchanged for a new `access_token` expires after 4 hours. A `link_token`
+            created for an existing Item (such as when updating an existing `access_token`
             by launching Link in update mode) expires after 30 minutes.
           format: date-time
           type: string
@@ -10473,18 +10674,18 @@ components:
       nullable: true
       properties:
         last_successful_update:
-          description: ISO 8601 timestamp of the last successful transactions update
-            for the Item. The status will update each time Plaid successfully connects
-            with the institution, regardless of whether any new data is available
-            in the update.
+          description: '[ISO 8601](https://wikipedia.org/wiki/ISO_8601) timestamp
+            of the last successful transactions update for the Item. The status will
+            update each time Plaid successfully connects with the institution, regardless
+            of whether any new data is available in the update.'
           format: date-time
           nullable: true
           type: string
         last_failed_update:
-          description: ISO 8601 timestamp of the last failed transactions update for
-            the Item. The status will update each time Plaid fails an attempt to connect
-            with the institution, regardless of whether any new data is available
-            in the update.
+          description: '[ISO 8601](https://wikipedia.org/wiki/ISO_8601) timestamp
+            of the last failed transactions update for the Item. The status will update
+            each time Plaid fails an attempt to connect with the institution, regardless
+            of whether any new data is available in the update.'
           format: date-time
           nullable: true
           type: string
@@ -10496,18 +10697,18 @@ components:
       nullable: true
       properties:
         last_successful_update:
-          description: ISO 8601 timestamp of the last successful investments update
-            for the Item. The status will update each time Plaid successfully connects
-            with the institution, regardless of whether any new data is available
-            in the update.
+          description: '[ISO 8601](https://wikipedia.org/wiki/ISO_8601) timestamp
+            of the last successful investments update for the Item. The status will
+            update each time Plaid successfully connects with the institution, regardless
+            of whether any new data is available in the update.'
           format: date-time
           nullable: true
           type: string
         last_failed_update:
-          description: ISO 8601 timestamp of the last failed investments update for
-            the Item. The status will update each time Plaid fails an attempt to connect
-            with the institution, regardless of whether any new data is available
-            in the update.
+          description: '[ISO 8601](https://wikipedia.org/wiki/ISO_8601) timestamp
+            of the last failed investments update for the Item. The status will update
+            each time Plaid fails an attempt to connect with the institution, regardless
+            of whether any new data is available in the update.'
           format: date-time
           nullable: true
           type: string
@@ -10518,7 +10719,8 @@ components:
       nullable: true
       properties:
         sent_at:
-          description: ISO 8601 timestamp of when the webhook was fired.
+          description: |
+            [ISO 8601](https://wikipedia.org/wiki/ISO_8601) timestamp of when the webhook was fired.
           format: date-time
           nullable: true
           type: string
@@ -10601,7 +10803,7 @@ components:
           last_updated_datetime: 2000-01-23T04:56:07.000+00:00
         account_id: account_id
         name: name
-        verification_status: pending_automatic_verification
+        verification_status: automatically_verified
         mask: mask
       properties:
         account_id:
@@ -10652,6 +10854,7 @@ components:
             \ all 3 verification attempts. Users may retry by submitting their information\
             \ again through Link.\t\n\t"
           enum:
+          - automatically_verified
           - pending_automatic_verification
           - pending_manual_verification
           - manually_verified
@@ -10733,7 +10936,7 @@ components:
           type: string
         last_updated_datetime:
           description: |-
-            Timestamp in ISO-8601 format (`YYYY-MM-DDTHH:mm:ssZ`) indicating the last time that the balance for the given account has been updated
+            Timestamp in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format (`YYYY-MM-DDTHH:mm:ssZ`) indicating the last time that the balance for the given account has been updated
 
             This is currently only provided when the `min_last_updated_datetime` is passed when calling `/accounts/balance/get` for `ins_128026` (Capital One).
           format: date-time
@@ -10760,6 +10963,7 @@ components:
       - cash isa
       - education savings account
       - ebt
+      - fixed annuity
       - gic
       - health reimbursement arrangement
       - hsa
@@ -11100,7 +11304,8 @@ components:
         date:
           description: For pending transactions, the date that the transaction occurred;
             for posted transactions, the date that the transaction posted. Both dates
-            are returned in an ISO 8601 format ( `YYYY-MM-DD` ).
+            are returned in an [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format
+            ( `YYYY-MM-DD` ).
           format: date
           type: string
         pending:
@@ -12001,7 +12206,7 @@ components:
       description: An object representing a balance held by an account in the past
       properties:
         date:
-          description: The date of the calculated historical balance, in an ISO 8601
+          description: The date of the calculated historical balance, in an [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
             format (YYYY-MM-DD)
           format: date
           type: string
@@ -12355,8 +12560,8 @@ components:
           type: string
         disbursement_dates:
           description: The dates on which loaned funds were disbursed or will be disbursed.
-            These are often in the past. Dates are returned in an ISO 8601 format
-            (YYYY-MM-DD).
+            These are often in the past. Dates are returned in an [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            format (YYYY-MM-DD).
           items:
             format: date
             type: string
@@ -12364,8 +12569,8 @@ components:
           type: array
         expected_payoff_date:
           description: The date when the student loan is expected to be paid off.
-            Availability for this field is limited. Dates are returned in an ISO 8601
-            format (YYYY-MM-DD).
+            Availability for this field is limited. Dates are returned in an [ISO
+            8601](https://wikipedia.org/wiki/ISO_8601) format (YYYY-MM-DD).
           format: date
           nullable: true
           type: string
@@ -12386,14 +12591,14 @@ components:
           nullable: true
           type: number
         last_payment_date:
-          description: The date of the last payment. Dates are returned in an ISO
-            8601 format (YYYY-MM-DD).
+          description: The date of the last payment. Dates are returned in an [ISO
+            8601](https://wikipedia.org/wiki/ISO_8601) format (YYYY-MM-DD).
           format: date
           nullable: true
           type: string
         last_statement_issue_date:
-          description: The date of the last statement. Dates are returned in an ISO
-            8601 format (YYYY-MM-DD).
+          description: The date of the last statement. Dates are returned in an [ISO
+            8601](https://wikipedia.org/wiki/ISO_8601) format (YYYY-MM-DD).
           format: date
           nullable: true
           type: string
@@ -12414,13 +12619,14 @@ components:
           description: The due date for the next payment. The due date is `null` if
             a payment is not expected. A payment is not expected if `loan_status.type`
             is `deferment`, `in_school`, `consolidated`, `paid in full`, or `transferred`.
-            Dates are returned in an ISO 8601 format (YYYY-MM-DD).
+            Dates are returned in an [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            format (YYYY-MM-DD).
           format: date
           nullable: true
           type: string
         origination_date:
           description: |
-            The date on which the loan was initially lent. Dates are returned in an ISO 8601 format (YYYY-MM-DD).
+            The date on which the loan was initially lent. Dates are returned in an [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format (YYYY-MM-DD).
           format: date
           nullable: true
           type: string
@@ -12528,13 +12734,14 @@ components:
           description: The amount of the last payment.
           type: number
         last_payment_date:
-          description: The date of the last payment. Dates are returned in an ISO
-            8601 format (YYYY-MM-DD). Availability for this field is limited.
+          description: The date of the last payment. Dates are returned in an [ISO
+            8601](https://wikipedia.org/wiki/ISO_8601) format (YYYY-MM-DD). Availability
+            for this field is limited.
           format: date
           type: string
         last_statement_issue_date:
-          description: The date of the last statement. Dates are returned in an ISO
-            8601 format (YYYY-MM-DD).
+          description: The date of the last statement. Dates are returned in an [ISO
+            8601](https://wikipedia.org/wiki/ISO_8601) format (YYYY-MM-DD).
           format: date
           type: string
         minimum_payment_amount:
@@ -12542,7 +12749,8 @@ components:
           type: number
         next_payment_due_date:
           description: The due date for the next payment. The due date is `null` if
-            a payment is not expected. Dates are returned in an ISO 8601 format (YYYY-MM-DD).
+            a payment is not expected. Dates are returned in an [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            format (YYYY-MM-DD).
           format: date
           nullable: true
           type: string
@@ -12621,8 +12829,8 @@ components:
           nullable: true
           type: number
         last_payment_date:
-          description: The date of the last payment. Dates are returned in an ISO
-            8601 format (YYYY-MM-DD).
+          description: The date of the last payment. Dates are returned in an [ISO
+            8601](https://wikipedia.org/wiki/ISO_8601) format (YYYY-MM-DD).
           format: date
           nullable: true
           type: string
@@ -12638,7 +12846,7 @@ components:
           type: string
         maturity_date:
           description: Original date on which mortgage is due in full. Dates are returned
-            in an ISO 8601 format (YYYY-MM-DD).
+            in an [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format (YYYY-MM-DD).
           format: date
           nullable: true
           type: string
@@ -12648,13 +12856,13 @@ components:
           type: number
         next_payment_due_date:
           description: The due date for the next payment. Dates are returned in an
-            ISO 8601 format (YYYY-MM-DD).
+            [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format (YYYY-MM-DD).
           format: date
           nullable: true
           type: string
         origination_date:
           description: The date on which the loan was initially lent. Dates are returned
-            in an ISO 8601 format (YYYY-MM-DD).
+            in an [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format (YYYY-MM-DD).
           format: date
           nullable: true
           type: string
@@ -12767,7 +12975,7 @@ components:
       properties:
         end_date:
           description: |
-            The date until which the loan will be in its current status. Dates are returned in an ISO 8601 format (YYYY-MM-DD).
+            The date until which the loan will be in its current status. Dates are returned in an [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format (YYYY-MM-DD).
           format: date
           nullable: true
           type: string
@@ -12843,7 +13051,8 @@ components:
       properties:
         estimated_eligibility_date:
           description: The estimated date borrower will have completed 120 qualifying
-            monthly payments. Returned in ISO 8601 format (YYYY-MM-DD).
+            monthly payments. Returned in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            format (YYYY-MM-DD).
           format: date
           nullable: true
           type: string
@@ -13082,22 +13291,23 @@ components:
           type: integer
         start_date:
           description: |-
-            A date in ISO 8601 format (YYYY-MM-DD). Standing order payments will begin on the first `interval_execution_day` on or after the `start_date`.
+            A date in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format (YYYY-MM-DD). Standing order payments will begin on the first `interval_execution_day` on or after the `start_date`.
 
             If the first `interval_execution_day` on or after the start date is also the same day that `/payment_initiation/payment/create` was called, the bank *may* make the first payment on that day, but it is not guaranteed to do so.
           format: date
           type: string
         end_date:
           description: |-
-            A date in ISO 8601 format (YYYY-MM-DD). Standing order payments will end on the last `interval_execution_day` on or before the `end_date`.
+            A date in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format (YYYY-MM-DD). Standing order payments will end on the last `interval_execution_day` on or before the `end_date`.
             If the only `interval_execution_day` between the start date and the end date (inclusive) is also the same day that `/payment_initiation/payment/create` was called, the bank *may* make a payment on that day, but it is not guaranteed to do so.
           format: date
           nullable: true
           type: string
         adjusted_start_date:
           description: The start date sent to the bank after adjusting for holidays
-            or weekends.  Will be provided in ISO 8601 format (YYYY-MM-DD). If the
-            start date did not require adjustment, this field will be `null`.
+            or weekends.  Will be provided in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            format (YYYY-MM-DD). If the start date did not require adjustment, this
+            field will be `null`.
           format: date
           nullable: true
           type: string
@@ -13242,8 +13452,8 @@ components:
           - DOWN
           type: string
         last_status_change:
-          description: ISO 8601 formatted timestamp of the last status change for
-            the institution.
+          description: |
+            [ISO 8601](https://wikipedia.org/wiki/ISO_8601) formatted timestamp of the last status change for the institution.
           format: date-time
           type: string
         breakdown:
@@ -13426,6 +13636,10 @@ components:
           items:
             $ref: '#/components/schemas/TransactionOverride'
           type: array
+        holdings:
+          $ref: '#/components/schemas/HoldingsOverride'
+        investment_transactions:
+          $ref: '#/components/schemas/Investments_TransactionsOverride'
         identity:
           $ref: '#/components/schemas/OwnerOverride'
         liability:
@@ -13504,15 +13718,16 @@ components:
         transactions will be generated instead.
       properties:
         date_transacted:
-          description: The date of the transaction, in ISO8601 (YYYY-MM-DD) format.
-            Transaction dates in the past or present will result in posted transactions;
-            transaction dates in the future will result in pending transactions. Transactions
-            in Sandbox will move from pending to posted once their transaction date
-            has been reached.
+          description: The date of the transaction, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            (YYYY-MM-DD) format. Transaction dates in the past or present will result
+            in posted transactions; transaction dates in the future will result in
+            pending transactions. Transactions in Sandbox will move from pending to
+            posted once their transaction date has been reached.
           format: date
           type: string
         date_posted:
-          description: The date the transaction posted, in ISO8601 (YYYY-MM-DD) format
+          description: The date the transaction posted, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            (YYYY-MM-DD) format
           format: date
           type: string
         amount:
@@ -13530,6 +13745,112 @@ components:
       - date_transacted
       - description
       title: TransactionOverride
+      type: object
+    SecurityOverride:
+      description: Specify the security associated with the holding or investment
+        transaction. When inputting custom security data to the Sandbox, Plaid will
+        perform post-data-retrieval normalization and enrichment. These processes
+        may cause the data returned by the Sandbox to be slightly different from the
+        data you input. An ISO-4217 currency code and a security identifier (`ticker_symbol`,
+        `cusip`, `isin`, or `sedol`) are required.
+      properties:
+        isin:
+          description: 12-character ISIN, a globally unique securities identifier.
+          type: string
+        cusip:
+          description: 9-character CUSIP, an identifier assigned to North American
+            securities.
+          type: string
+        sedol:
+          description: 7-character SEDOL, an identifier assigned to securities in
+            the UK.
+          type: string
+        name:
+          description: A descriptive name for the security, suitable for display.
+          type: string
+        ticker_symbol:
+          description: The security’s trading symbol for publicly traded securities,
+            and otherwise a short identifier if available.
+          type: string
+        currency:
+          description: Either a valid `iso_currency_code` or `unofficial_currency_code`
+          type: string
+      title: SecurityOverride
+      type: object
+    HoldingsOverride:
+      description: Specify the holdings on the account.
+      properties:
+        institution_price:
+          description: The last price given by the institution for this security
+          type: number
+        institution_price_as_of:
+          description: The date at which `institution_price` was current. Must be
+            formatted as an [ISO 8601](https://wikipedia.org/wiki/ISO_8601) date.
+          format: date
+          type: string
+        cost_basis:
+          description: The average original value of the holding. Multiple cost basis
+            values for the same security purchased at different prices are not supported.
+          type: number
+        quantity:
+          description: The total quantity of the asset held, as reported by the financial
+            institution.
+          type: number
+        currency:
+          description: Either a valid `iso_currency_code` or `unofficial_currency_code`
+          type: string
+        security:
+          $ref: '#/components/schemas/SecurityOverride'
+      required:
+      - currency
+      - institution_price
+      - quantity
+      - security
+      title: HoldingsOverride
+      type: object
+    Investments_TransactionsOverride:
+      description: Specify the list of investments transactions on the account.
+      properties:
+        date:
+          description: Posting date for the transaction. Must be formatted as an [ISO
+            8601](https://wikipedia.org/wiki/ISO_8601) date.
+          format: date
+          type: string
+        name:
+          description: The institution's description of the transaction.
+          type: string
+        quantity:
+          description: The number of units of the security involved in this transaction.
+            Must be positive if the type is a buy and negative if the type is a sell.
+          type: number
+        price:
+          description: The price of the security at which this transaction occurred.
+          type: number
+        fees:
+          description: The combined value of all fees applied to this transaction.
+          type: number
+        type:
+          description: |-
+            The type of the investment transaction. Possible values are:
+            `buy`: Buying an investment
+            `sell`: Selling an investment
+            `cash`: Activity that modifies a cash position
+            `fee`: A fee on the account
+            `transfer`: Activity that modifies a position, but not through buy/sell activity e.g. options exercise, portfolio transfer
+          type: string
+        currency:
+          description: Either a valid `iso_currency_code` or `unofficial_currency_code`
+          type: string
+        security:
+          $ref: '#/components/schemas/SecurityOverride'
+      required:
+      - currency
+      - date
+      - name
+      - price
+      - quantity
+      - type
+      title: Investments_TransactionsOverride
       type: object
     LiabilityOverride:
       additionalProperties: true
@@ -13568,7 +13889,7 @@ components:
           description: Override the `is_overdue` field
           type: boolean
         origination_date:
-          description: The date on which the loan was initially lent, in ISO 8601
+          description: The date on which the loan was initially lent, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
             (YYYY-MM-DD) format. Can only be set if `type` is `student`.
           format: date
           type: string
@@ -13853,7 +14174,7 @@ components:
           type: string
         consent_expiration_time:
           description: The date and time at which the Item's access consent will expire,
-            in ISO 8601 format
+            in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format
           format: date-time
           type: string
       required:
@@ -15297,8 +15618,8 @@ components:
           description: An identifier you determine and submit for the Asset Report.
           type: string
         date_generated:
-          description: The date and time when the Asset Report was created, in ISO
-            8601 format (e.g. "2018-04-12T03:32:11Z").
+          description: The date and time when the Asset Report was created, in [ISO
+            8601](https://wikipedia.org/wiki/ISO_8601) format (e.g. "2018-04-12T03:32:11Z").
           format: date-time
           type: string
         days_requested:
@@ -15346,7 +15667,8 @@ components:
           type: string
         date_last_updated:
           description: The date and time when this Item’s data was last retrieved
-            from the financial institution, in ISO 8601 format.
+            from the financial institution, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            format.
           format: date-time
           type: string
         accounts:
@@ -15451,14 +15773,15 @@ components:
           type: string
         adjusted_start_date:
           description: The start date sent to the bank after adjusting for holidays
-            or weekends.  Will be provided in ISO 8601 format (YYYY-MM-DD). If the
-            start date did not require adjustment, or if the payment is not a standing
-            order, this field will be `null`.
+            or weekends.  Will be provided in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            format (YYYY-MM-DD). If the start date did not require adjustment, or
+            if the payment is not a standing order, this field will be `null`.
           format: date
           nullable: true
           type: string
         timestamp:
-          description: The timestamp of the update, in ISO 8601 format, e.g. `"2017-09-14T14:42:19.350Z"`
+          description: The timestamp of the update, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            format, e.g. `"2017-09-14T14:42:19.350Z"`
           format: date-time
           type: string
         error:
@@ -15724,8 +16047,8 @@ components:
           nullable: true
           type: string
         date:
-          description: The ISO-8601 posting date for the transaction, or transacted
-            date for pending transactions.
+          description: The [ISO 8601](https://wikipedia.org/wiki/ISO_8601) posting
+            date for the transaction, or transacted date for pending transactions.
           format: date
           type: string
         name:
@@ -15756,6 +16079,8 @@ components:
             `cash`: Activity that modifies a cash position
             `fee`: A fee on the account
             `transfer`: Activity which modifies a position, but not through buy/sell activity e.g. options exercise, portfolio transfer
+
+            For descriptions of possible transaction types and subtypes, see the [Investment transaction types schema](https://plaid.com/docs/api/accounts/#investment-transaction-types-schema).
           enum:
           - buy
           - sell
@@ -15765,8 +16090,8 @@ components:
           - transfer
           type: string
         subtype:
-          description: For descriptions of possible transaction subtypes, see [Investment
-            transaction subtypes schema](https://plaid.com/docs/api/accounts/#investment-transaction-subtypes-schema).
+          description: For descriptions of possible transaction types and subtypes,
+            see the [Investment transaction types schema](https://plaid.com/docs/api/accounts/#investment-transaction-types-schema).
           enum:
           - account fee
           - assignment
@@ -15843,26 +16168,230 @@ components:
       type: object
     StandaloneInvestmentTransactionType:
       additionalProperties: true
-      description: Valid values for investment transaction types
+      description: Valid values for investment transaction types and subtypes. Note
+        that transactions representing inflow of cash will appear as negative amounts,
+        outflow of cash will appear as positive amounts.
       properties:
         buy:
           description: Buying an investment
+          properties:
+            assignment:
+              description: Assignment of short option holding
+              type: string
+            contribution:
+              description: Inflow of assets into a tax-advantaged account
+              type: string
+            buy:
+              description: Purchase to open or increase a position
+              type: string
+            buy to cover:
+              description: Purchase to close a short position
+              type: string
+            dividend reinvestment:
+              description: Purchase using proceeds from a cash dividend
+              type: string
+            interest reinvestment:
+              description: Purchase using proceeds from a cash interest payment
+              type: string
+            long-term capital gain reinvestment:
+              description: Purchase using long-term capital gain cash proceeds
+              type: string
+            short-term capital gain reinvestment:
+              description: Purchase using short-term capital gain cash proceeds
+              type: string
+          title: BuyType
           type: string
         sell:
           description: Selling an investment
+          properties:
+            distribution:
+              description: Outflow of assets from a tax-advantaged account
+              type: string
+            exercise:
+              description: Exercise of an option or warrant contract
+              type: string
+            sell:
+              description: Sell to close or decrease an existing holding
+              type: string
+            sell short:
+              description: Sell to open a short position
+              type: string
+          title: SellType
           type: string
         cancel:
           description: A cancellation of a pending transaction
           type: string
         cash:
           description: Activity that modifies a cash position
+          properties:
+            account fee:
+              description: Fees paid for account maintenance
+              type: string
+            contribution:
+              description: Inflow of assets into a tax-advantaged account
+              type: string
+            deposit:
+              description: Inflow of cash into an account
+              type: string
+            dividend:
+              description: Inflow of cash from a dividend
+              type: string
+            stock distribution:
+              description: Inflow of stock from a distribution
+              type: string
+            interest:
+              description: Inflow of cash from interest
+              type: string
+            legal fee:
+              description: Fees paid for legal charges or services
+              type: string
+            long-term capital gain:
+              description: Long-term capital gain received as cash
+              type: string
+            management fee:
+              description: Fees paid for investment management of a mutual fund or
+                other pooled investment vehicle
+              type: string
+            margin expense:
+              description: Fees paid for maintaining margin debt
+              type: string
+            non-qualified dividend:
+              description: Inflow of cash from a non-qualified dividend
+              type: string
+            non-resident tax:
+              description: Taxes paid on behalf of the investor for non-residency
+                in investment jurisdiction
+              type: string
+            pending credit:
+              description: Pending inflow of cash
+              type: string
+            pending debit:
+              description: Pending outflow of cash
+              type: string
+            qualified dividend:
+              description: Inflow of cash from a qualified dividend
+              type: string
+            short-term capital gain:
+              description: Short-term capital gain received as cash
+              type: string
+            tax:
+              description: Taxes paid on behalf of the investor
+              type: string
+            tax withheld:
+              description: Taxes withheld on behalf of the customer
+              type: string
+            transfer fee:
+              description: Fees incurred for transfer of a holding or account
+              type: string
+            trust fee:
+              description: Fees related to adminstration of a trust account
+              type: string
+            unqualified gain:
+              description: Unqualified capital gain received as cash
+              type: string
+            withdrawal:
+              description: Outflow of cash from an account
+              type: string
+          title: CashType
           type: string
         fee:
           description: Fees on the account, e.g. commission, bookkeeping, options-related.
+          properties:
+            account fee:
+              description: Fees paid for account maintenance
+              type: string
+            adjustment:
+              description: Increase or decrease in quantity of item
+              type: string
+            dividend:
+              description: Inflow of cash from a dividend
+              type: string
+            interest:
+              description: Inflow of cash from interest
+              type: string
+            interest receivable:
+              description: Inflow of cash from interest receivable
+              type: string
+            long-term capital gain:
+              description: Long-term capital gain received as cash
+              type: string
+            legal fee:
+              description: Fees paid for legal charges or services
+              type: string
+            management fee:
+              description: Fees paid for investment management of a mutual fund or
+                other pooled investment vehicle
+              type: string
+            margin expense:
+              description: Fees paid for maintaining margin debt
+              type: string
+            non-qualified dividend:
+              description: Inflow of cash from a non-qualified dividend
+              type: string
+            non-resident tax:
+              description: Taxes paid on behalf of the investor for non-residency
+                in investment jurisdiction
+              type: string
+            qualified dividend:
+              description: Inflow of cash from a qualified dividend
+              type: string
+            return of principal:
+              description: Repayment of loan principal
+              type: string
+            short-term capital gain:
+              description: Short-term capital gain received as cash
+              type: string
+            stock distribution:
+              description: Inflow of stock from a distribution
+              type: string
+            tax:
+              description: Taxes paid on behalf of the investor
+              type: string
+            tax withheld:
+              description: Taxes withheld on behalf of the customer
+              type: string
+            transfer fee:
+              description: Fees incurred for transfer of a holding or account
+              type: string
+            trust fee:
+              description: Fees related to adminstration of a trust account
+              type: string
+            unqualified gain:
+              description: Unqualified capital gain received as cash
+              type: string
+          title: FeeType
           type: string
         transfer:
-          description: Activity which modifies a position, but not through buy/sell
+          description: Activity that modifies a position, but not through buy/sell
             activity e.g. options exercise, portfolio transfer
+          properties:
+            assignment:
+              description: Assignment of short option holding
+              type: string
+            adjustment:
+              description: Increase or decrease in quantity of item
+              type: string
+            exercise:
+              description: Exercise of an option or warrant contract
+              type: string
+            expire:
+              description: Expiration of an option or warrant contract
+              type: string
+            merger:
+              description: Stock exchanged at a pre-defined ratio as part of a merger
+                between companies
+              type: string
+            spin off:
+              description: Inflow of stock from spin-off transaction of an existing
+                holding
+              type: string
+            split:
+              description: Inflow of stock from a forward split of an existing holding
+              type: string
+            transfer:
+              description: Movement of assets into or out of an account
+              type: string
+          title: TransferType
           type: string
       required:
       - buy
@@ -15873,17 +16402,14 @@ components:
       - transfer
       title: StandaloneInvestmentTransactionType
       type: object
-    StandaloneInvestmentTransactionSubtype:
-      additionalProperties: true
-      description: Valid subtypes for Investment transaction subtypes. Note that transactions
-        representing inflow of cash will appear as negative amounts, outflow of cash
-        will appear as positive amounts.
+    StandaloneInvestmentTransactionBuyType:
+      description: Buying an investment
       properties:
-        account fee:
-          description: Fees paid for account maintenance
-          type: string
         assignment:
           description: Assignment of short option holding
+          type: string
+        contribution:
+          description: Inflow of assets into a tax-advantaged account
           type: string
         buy:
           description: Purchase to open or increase a position
@@ -15891,52 +16417,46 @@ components:
         buy to cover:
           description: Purchase to close a short position
           type: string
+        dividend reinvestment:
+          description: Purchase using proceeds from a cash dividend
+          type: string
+        interest reinvestment:
+          description: Purchase using proceeds from a cash interest payment
+          type: string
+        long-term capital gain reinvestment:
+          description: Purchase using long-term capital gain cash proceeds
+          type: string
+        short-term capital gain reinvestment:
+          description: Purchase using short-term capital gain cash proceeds
+          type: string
+      title: BuyType
+      type: string
+    StandaloneInvestmentTransactionCashType:
+      description: Activity that modifies a cash position
+      properties:
+        account fee:
+          description: Fees paid for account maintenance
+          type: string
         contribution:
           description: Inflow of assets into a tax-advantaged account
           type: string
         deposit:
           description: Inflow of cash into an account
           type: string
-        distribution:
-          description: Outflow of assets from a tax-advantaged account
-          type: string
         dividend:
           description: Inflow of cash from a dividend
           type: string
-        dividend reinvestment:
-          description: Purchase using proceeds from a cash dividend
-          type: string
-        exercise:
-          description: Exercise of an option or warrant contract
-          type: string
-        expire:
-          description: |
-            Expiration of an option or warrant contract
-          type: string
-        fund fee:
-          description: Fees paid for administration of a mutual fund or other pooled
-            investment vehicle
+        stock distribution:
+          description: Inflow of stock from a distribution
           type: string
         interest:
           description: Inflow of cash from interest
           type: string
-        interest receivable:
-          description: Inflow of cash from interest receivable
-          type: string
-        interest reinvestment:
-          description: Purchase using proceeds from a cash interest payment
-          type: string
         legal fee:
           description: Fees paid for legal charges or services
           type: string
-        loan payment:
-          description: Inflow of cash related to payment on a loan
-          type: string
         long-term capital gain:
           description: Long-term capital gain received as cash
-          type: string
-        long-term capital gain reinvestment:
-          description: Purchase using long-term capital gain cash proceeds
           type: string
         management fee:
           description: Fees paid for investment management of a mutual fund or other
@@ -15944,13 +16464,6 @@ components:
           type: string
         margin expense:
           description: Fees paid for maintaining margin debt
-          type: string
-        merger:
-          description: Stock exchanged at a pre-defined ratio as part of a merger
-            between companies
-          type: string
-        miscellaneous fee:
-          description: Fee associated with various account or holding actions
           type: string
         non-qualified dividend:
           description: Inflow of cash from a non-qualified dividend
@@ -15968,42 +16481,14 @@ components:
         qualified dividend:
           description: Inflow of cash from a qualified dividend
           type: string
-        rebalance:
-          description: Rebalancing transaction (buy or sell) with no net impact to
-            value in the account
-          type: string
-        return of principal:
-          description: Repayment of loan principal
-          type: string
-        sell:
-          description: Sell to close or decrease an existing holding
-          type: string
-        sell short:
-          description: Sell to open a short position
-          type: string
         short-term capital gain:
           description: Short-term capital gain received as cash
-          type: string
-        short-term capital gain reinvestment:
-          description: Purchase using short-term capital gain cash proceeds
-          type: string
-        spin off:
-          description: Inflow of stock from spin-off transaction of an existing holding
-          type: string
-        split:
-          description: Inflow of stock from a forward split of an existing holding
-          type: string
-        stock distribution:
-          description: Inflow of stock from a distribution
           type: string
         tax:
           description: Taxes paid on behalf of the investor
           type: string
         tax withheld:
           description: Taxes withheld on behalf of the customer
-          type: string
-        transfer:
-          description: Movement of assets into or out of an account
           type: string
         transfer fee:
           description: Fees incurred for transfer of a holding or account
@@ -16017,8 +16502,123 @@ components:
         withdrawal:
           description: Outflow of cash from an account
           type: string
-      title: StandaloneInvestmentTransactionSubtype
-      type: object
+      title: CashType
+      type: string
+    StandaloneInvestmentTransactionFeeType:
+      description: Fees on the account, e.g. commission, bookkeeping, options-related.
+      properties:
+        account fee:
+          description: Fees paid for account maintenance
+          type: string
+        adjustment:
+          description: Increase or decrease in quantity of item
+          type: string
+        dividend:
+          description: Inflow of cash from a dividend
+          type: string
+        interest:
+          description: Inflow of cash from interest
+          type: string
+        interest receivable:
+          description: Inflow of cash from interest receivable
+          type: string
+        long-term capital gain:
+          description: Long-term capital gain received as cash
+          type: string
+        legal fee:
+          description: Fees paid for legal charges or services
+          type: string
+        management fee:
+          description: Fees paid for investment management of a mutual fund or other
+            pooled investment vehicle
+          type: string
+        margin expense:
+          description: Fees paid for maintaining margin debt
+          type: string
+        non-qualified dividend:
+          description: Inflow of cash from a non-qualified dividend
+          type: string
+        non-resident tax:
+          description: Taxes paid on behalf of the investor for non-residency in investment
+            jurisdiction
+          type: string
+        qualified dividend:
+          description: Inflow of cash from a qualified dividend
+          type: string
+        return of principal:
+          description: Repayment of loan principal
+          type: string
+        short-term capital gain:
+          description: Short-term capital gain received as cash
+          type: string
+        stock distribution:
+          description: Inflow of stock from a distribution
+          type: string
+        tax:
+          description: Taxes paid on behalf of the investor
+          type: string
+        tax withheld:
+          description: Taxes withheld on behalf of the customer
+          type: string
+        transfer fee:
+          description: Fees incurred for transfer of a holding or account
+          type: string
+        trust fee:
+          description: Fees related to adminstration of a trust account
+          type: string
+        unqualified gain:
+          description: Unqualified capital gain received as cash
+          type: string
+      title: FeeType
+      type: string
+    StandaloneInvestmentTransactionSellType:
+      description: Selling an investment
+      properties:
+        distribution:
+          description: Outflow of assets from a tax-advantaged account
+          type: string
+        exercise:
+          description: Exercise of an option or warrant contract
+          type: string
+        sell:
+          description: Sell to close or decrease an existing holding
+          type: string
+        sell short:
+          description: Sell to open a short position
+          type: string
+      title: SellType
+      type: string
+    StandaloneInvestmentTransactionTransferType:
+      description: Activity that modifies a position, but not through buy/sell activity
+        e.g. options exercise, portfolio transfer
+      properties:
+        assignment:
+          description: Assignment of short option holding
+          type: string
+        adjustment:
+          description: Increase or decrease in quantity of item
+          type: string
+        exercise:
+          description: Exercise of an option or warrant contract
+          type: string
+        expire:
+          description: Expiration of an option or warrant contract
+          type: string
+        merger:
+          description: Stock exchanged at a pre-defined ratio as part of a merger
+            between companies
+          type: string
+        spin off:
+          description: Inflow of stock from spin-off transaction of an existing holding
+          type: string
+        split:
+          description: Inflow of stock from a forward split of an existing holding
+          type: string
+        transfer:
+          description: Movement of assets into or out of an account
+          type: string
+      title: TransferType
+      type: string
     AccountSubtypes:
       description: 'An array of account subtypes to display in Link. If not specified,
         all account subtypes will be shown. For a full list of valid types and subtypes,
@@ -16205,12 +16805,13 @@ components:
           nullable: true
           type: string
         date_created:
-          description: ISO8601 date the deposit switch was created.
+          description: |
+            [ISO 8601](https://wikipedia.org/wiki/ISO_8601) date the deposit switch was created.
           format: date
           type: string
         date_completed:
-          description: ISO8601 date the deposit switch was completed. Always `null`
-            if the deposit switch has not been completed.
+          description: |
+            [ISO 8601](https://wikipedia.org/wiki/ISO_8601) date the deposit switch was completed. Always `null` if the deposit switch has not been completed.
           format: date
           nullable: true
           type: string
@@ -16296,7 +16897,7 @@ components:
       title: AssetReportAuditCopyGetRequest
       type: object
     TransferGetRequest:
-      description: TransferGetRequest defines the request schema for `/transfer/get`
+      description: Defines the request schema for `/transfer/get`
       example:
         secret: secret
         transfer_id: transfer_id
@@ -16322,7 +16923,7 @@ components:
       title: TransferGetRequest
       type: object
     BankTransferGetRequest:
-      description: BankTransferGetRequest defines the request schema for `/bank_transfer/get`
+      description: Defines the request schema for `/bank_transfer/get`
       example:
         bank_transfer_id: bank_transfer_id
         secret: secret
@@ -16349,7 +16950,7 @@ components:
       type: object
     TransferGetResponse:
       additionalProperties: true
-      description: TransferGetResponse defines the response schema for `/transfer/get`
+      description: Defines the response schema for `/transfer/get`
       example:
         transfer:
           amount: amount
@@ -16393,7 +16994,7 @@ components:
       type: object
     BankTransferGetResponse:
       additionalProperties: true
-      description: BankTransferGetResponse defines the response schema for `/bank_transfer/get`
+      description: Defines the response schema for `/bank_transfer/get`
       example:
         bank_transfer:
           amount: amount
@@ -16412,7 +17013,6 @@ components:
           id: id
           user:
             email_address: email_address
-            phone_number: phone_number
             legal_name: legal_name
             routing_number: routing_number
         request_id: request_id
@@ -16483,7 +17083,7 @@ components:
         type:
           $ref: '#/components/schemas/TransferType'
         user:
-          $ref: '#/components/schemas/TransferUser'
+          $ref: '#/components/schemas/TransferUserInResponse'
         amount:
           description: The amount of the transfer (decimal string with two digits
             of precision e.g. “10.00”).
@@ -16574,7 +17174,6 @@ components:
         id: id
         user:
           email_address: email_address
-          phone_number: phone_number
           legal_name: legal_name
           routing_number: routing_number
       properties:
@@ -16739,7 +17338,7 @@ components:
       maxLength: 50
       title: BankTransferIdempotencyKey
       type: string
-    TransferUser:
+    TransferUserInRequest:
       additionalProperties: true
       description: The legal name and other information for the account holder.
       example:
@@ -16763,12 +17362,46 @@ components:
           description: The user's email address.
           type: string
         address:
-          $ref: '#/components/schemas/TransferUserAddress'
+          $ref: '#/components/schemas/TransferUserAddressInRequest'
       required:
       - legal_name
-      title: TransferUser
+      title: TransferUserInRequest
       type: object
-    TransferUserAddress:
+    TransferUserInResponse:
+      additionalProperties: true
+      description: The legal name and other information for the account holder.
+      example:
+        email_address: email_address
+        address:
+          country: country
+          city: city
+          street: street
+          region: region
+          postal_code: postal_code
+        phone_number: phone_number
+        legal_name: legal_name
+      properties:
+        legal_name:
+          description: The user's legal name.
+          type: string
+        phone_number:
+          description: The user's phone number.
+          nullable: true
+          type: string
+        email_address:
+          description: The user's email address.
+          nullable: true
+          type: string
+        address:
+          $ref: '#/components/schemas/TransferUserAddressInResponse'
+      required:
+      - address
+      - email_address
+      - legal_name
+      - phone_number
+      title: TransferUserInResponse
+      type: object
+    TransferUserAddressInRequest:
       additionalProperties: true
       description: The address associated with the account holder.
       example:
@@ -16793,29 +17426,67 @@ components:
         country:
           description: A two-letter country code (e.g., "US").
           type: string
-      title: TransferUserAddress
+      title: TransferUserAddressInRequest
+      type: object
+    TransferUserAddressInResponse:
+      additionalProperties: true
+      description: The address associated with the account holder.
+      example:
+        country: country
+        city: city
+        street: street
+        region: region
+        postal_code: postal_code
+      nullable: true
+      properties:
+        street:
+          description: The street number and name (i.e., "100 Market St.").
+          nullable: true
+          type: string
+        city:
+          description: Ex. "San Francisco"
+          nullable: true
+          type: string
+        region:
+          description: The state or province (e.g., "California").
+          nullable: true
+          type: string
+        postal_code:
+          description: The postal code (e.g., "94103").
+          nullable: true
+          type: string
+        country:
+          description: A two-letter country code (e.g., "US").
+          nullable: true
+          type: string
+      required:
+      - city
+      - country
+      - postal_code
+      - region
+      - street
+      title: TransferUserAddressInResponse
       type: object
     BankTransferUser:
       additionalProperties: true
       description: The legal name and other information for the account holder.
       example:
         email_address: email_address
-        phone_number: phone_number
         legal_name: legal_name
         routing_number: routing_number
       properties:
         legal_name:
-          description: The user's legal name.
-          type: string
-        phone_number:
-          description: The user's phone number.
+          description: The account holder’s full legal name. If the transfer description
+            is `ccd`, this should be the business name of the account holder.
           type: string
         email_address:
-          description: The user's email address.
+          description: The account holder’s email.
+          nullable: true
           type: string
         routing_number:
           description: The account holder's routing number. This field is only used
             in response data. Do not provide this field when making requests.
+          readOnly: true
           type: string
       required:
       - legal_name
@@ -16824,9 +17495,11 @@ components:
     TransferAuthorizationDecisionRationale:
       additionalProperties: true
       description: The rationale for Plaid's decision regarding a proposed transfer.
+        Will be null for `approved` decisions.
       example:
         code: NSF
         description: description
+      nullable: true
       properties:
         code:
           description: |-
@@ -16852,6 +17525,9 @@ components:
           description: A human-readable description of the code associated with a
             permitted transfer or transfer decline.
           type: string
+      required:
+      - code
+      - description
       title: TransferAuthorizationDecisionRationale
       type: object
     TransferAuthorizationProposedTransfer:
@@ -16884,7 +17560,7 @@ components:
         type:
           $ref: '#/components/schemas/TransferType'
         user:
-          $ref: '#/components/schemas/TransferUser'
+          $ref: '#/components/schemas/TransferUserInResponse'
         amount:
           description: The amount of the transfer (decimal string with two digits
             of precision e.g. “10.00”).
@@ -16903,6 +17579,16 @@ components:
           description: Plaid's unique identifier for the origination account that
             was used for this transfer.
           type: string
+      required:
+      - account_id
+      - ach_class
+      - amount
+      - description
+      - iso_currency_code
+      - network
+      - origination_account_id
+      - type
+      - user
       title: TransferAuthorizationProposedTransfer
       type: object
     TransferAuthorizationDevice:
@@ -17046,8 +17732,7 @@ components:
       title: BankTransferFailure
       type: object
     TransferAuthorizationCreateRequest:
-      description: TransferAuthorizationCreateRequest defines the request schema for
-        `/transfer/authorization/create`
+      description: Defines the request schema for `/transfer/authorization/create`
       example:
         amount: amount
         description: description
@@ -17109,7 +17794,7 @@ components:
         ach_class:
           $ref: '#/components/schemas/ACHClass'
         user:
-          $ref: '#/components/schemas/TransferUser'
+          $ref: '#/components/schemas/TransferUserInRequest'
         device:
           $ref: '#/components/schemas/TransferAuthorizationDevice'
         origination_account_id:
@@ -17129,7 +17814,7 @@ components:
       title: TransferAuthorizationCreateRequest
       type: object
     TransferCreateRequest:
-      description: TransferCreateRequest defines the request schema for `/transfer/create`
+      description: Defines the request schema for `/transfer/create`
       example:
         amount: amount
         metadata:
@@ -17205,7 +17890,7 @@ components:
         ach_class:
           $ref: '#/components/schemas/ACHClass'
         user:
-          $ref: '#/components/schemas/TransferUser'
+          $ref: '#/components/schemas/TransferUserInRequest'
         custom_tag:
           description: An arbitrary string provided by the client for storage with
             the transfer. May be up to 100 characters.
@@ -17246,7 +17931,7 @@ components:
       title: TransferCreateRequest
       type: object
     BankTransferCreateRequest:
-      description: BankTransferCreateRequest defines the request schema for `/bank_transfer/create`
+      description: Defines the request schema for `/bank_transfer/create`
       example:
         amount: amount
         metadata:
@@ -17262,7 +17947,6 @@ components:
         origination_account_id: origination_account_id
         user:
           email_address: email_address
-          phone_number: phone_number
           legal_name: legal_name
           routing_number: routing_number
       properties:
@@ -17353,8 +18037,51 @@ components:
       type: object
     TransferAuthorizationCreateResponse:
       additionalProperties: true
-      description: TransferAuthorizationCreateResponse defines the response schema
-        for `/transfer/authorization/create`
+      description: Defines the response schema for `/transfer/authorization/create`
+      example:
+        authorization:
+          proposed_transfer:
+            amount: amount
+            account_id: account_id
+            iso_currency_code: iso_currency_code
+            description: description
+            origination_account_id: origination_account_id
+            user:
+              email_address: email_address
+              address:
+                country: country
+                city: city
+                street: street
+                region: region
+                postal_code: postal_code
+              phone_number: phone_number
+              legal_name: legal_name
+            network: network
+          decision: approved
+          created: created
+          decision_rationale:
+            code: NSF
+            description: description
+          id: id
+        request_id: request_id
+      properties:
+        authorization:
+          $ref: '#/components/schemas/TransferAuthorization'
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - authorization
+      - request_id
+      title: TransferAuthorizationCreateResponse
+      type: object
+    TransferAuthorization:
+      additionalProperties: true
+      description: TransferAuthorization contains the authorization decision for a
+        proposed transfer
       example:
         proposed_transfer:
           amount: amount
@@ -17379,7 +18106,6 @@ components:
           code: NSF
           description: description
         id: id
-        request_id: request_id
       properties:
         id:
           description: Plaid’s unique identifier for a transfer authorization.
@@ -17408,19 +18134,17 @@ components:
           $ref: '#/components/schemas/TransferAuthorizationDecisionRationale'
         proposed_transfer:
           $ref: '#/components/schemas/TransferAuthorizationProposedTransfer'
-        request_id:
-          description: A unique identifier for the request, which can be used for
-            troubleshooting. This identifier, like all Plaid identifiers, is case
-            sensitive.
-          title: RequestID
-          type: string
       required:
+      - created
+      - decision
+      - decision_rationale
       - id
-      title: TransferAuthorizationCreateResponse
+      - proposed_transfer
+      title: TransferAuthorization
       type: object
     TransferCreateResponse:
       additionalProperties: true
-      description: TransferCreateResponse defines the response schema for `/transfer/create`
+      description: Defines the response schema for `/transfer/create`
       example:
         transfer:
           amount: amount
@@ -17464,7 +18188,7 @@ components:
       type: object
     BankTransferCreateResponse:
       additionalProperties: true
-      description: BankTransferCreateResponse defines the response schema for `/bank_transfer/create`
+      description: Defines the response schema for `/bank_transfer/create`
       example:
         bank_transfer:
           amount: amount
@@ -17483,7 +18207,6 @@ components:
           id: id
           user:
             email_address: email_address
-            phone_number: phone_number
             legal_name: legal_name
             routing_number: routing_number
         request_id: request_id
@@ -17502,7 +18225,7 @@ components:
       title: BankTransferCreateResponse
       type: object
     TransferListRequest:
-      description: TransferListRequest defines the request schema for `/transfer/list`
+      description: Defines the request schema for `/transfer/list`
       example:
         end_date: 2000-01-23T04:56:07.000+00:00
         offset: 0
@@ -17556,7 +18279,7 @@ components:
       title: TransferListRequest
       type: object
     BankTransferListRequest:
-      description: BankTransferListRequest defines the request schema for `/bank_transfer/list`
+      description: Defines the request schema for `/bank_transfer/list`
       example:
         end_date: 2000-01-23T04:56:07.000+00:00
         offset: 0
@@ -17611,7 +18334,7 @@ components:
       type: object
     TransferListResponse:
       additionalProperties: true
-      description: TransferListResponse defines the response schema for `/transfer/list`
+      description: Defines the response schema for `/transfer/list`
       example:
         transfers:
         - amount: amount
@@ -17681,7 +18404,7 @@ components:
       type: object
     BankTransferListResponse:
       additionalProperties: true
-      description: BankTransferListResponse defines the response schema for `/bank_transfer/list`
+      description: Defines the response schema for `/bank_transfer/list`
       example:
         bank_transfers:
         - amount: amount
@@ -17700,7 +18423,6 @@ components:
           id: id
           user:
             email_address: email_address
-            phone_number: phone_number
             legal_name: legal_name
             routing_number: routing_number
         - amount: amount
@@ -17719,7 +18441,6 @@ components:
           id: id
           user:
             email_address: email_address
-            phone_number: phone_number
             legal_name: legal_name
             routing_number: routing_number
         request_id: request_id
@@ -17760,7 +18481,7 @@ components:
       title: BankTransferDirection
       type: string
     TransferCancelRequest:
-      description: TransferCancelRequest defines the request schema for `/transfer/cancel`
+      description: Defines the request schema for `/transfer/cancel`
       example:
         secret: secret
         transfer_id: transfer_id
@@ -17786,7 +18507,7 @@ components:
       title: TransferCancelRequest
       type: object
     BankTransferCancelRequest:
-      description: BankTransferCancelRequest defines the request schema for `/bank_transfer/cancel`
+      description: Defines the request schema for `/bank_transfer/cancel`
       example:
         bank_transfer_id: bank_transfer_id
         secret: secret
@@ -17813,7 +18534,7 @@ components:
       type: object
     TransferCancelResponse:
       additionalProperties: true
-      description: TransferCancelResponse defines the response schema for `/transfer/cancel`
+      description: Defines the response schema for `/transfer/cancel`
       example:
         request_id: request_id
       properties:
@@ -17829,7 +18550,7 @@ components:
       type: object
     BankTransferCancelResponse:
       additionalProperties: true
-      description: BankTransferCancelResponse defines the response schema for `/bank_transfer/cancel`
+      description: Defines the response schema for `/bank_transfer/cancel`
       example:
         request_id: request_id
       properties:
@@ -17844,7 +18565,7 @@ components:
       title: BankTransferCancelResponse
       type: object
     TransferEventListRequest:
-      description: TransferEventListRequest defines the request schema for `/transfer/event/list`
+      description: Defines the request schema for `/transfer/event/list`
       example:
         end_date: 2000-01-23T04:56:07.000+00:00
         account_id: account_id
@@ -17946,7 +18667,7 @@ components:
       title: TransferEventListRequest
       type: object
     BankTransferEventListRequest:
-      description: BankTransferEventListRequest defines the request schema for `/bank_transfer/event/list`
+      description: Defines the request schema for `/bank_transfer/event/list`
       example:
         end_date: 2000-01-23T04:56:07.000+00:00
         account_id: account_id
@@ -18245,7 +18966,7 @@ components:
       type: object
     TransferEventListResponse:
       additionalProperties: true
-      description: TransferEventListResponse defines the response schema for `/transfer/event/list`
+      description: Defines the response schema for `/transfer/event/list`
       example:
         transfer_events:
         - transfer_iso_currency_code: transfer_iso_currency_code
@@ -18291,7 +19012,7 @@ components:
       type: object
     BankTransferEventListResponse:
       additionalProperties: true
-      description: BankTransferEventListResponse defines the response schema for `/bank_transfer/event/list`
+      description: Defines the response schema for `/bank_transfer/event/list`
       example:
         bank_transfer_events:
         - event_id: 0
@@ -18336,7 +19057,7 @@ components:
       title: BankTransferEventListResponse
       type: object
     BankTransferEventSyncRequest:
-      description: BankTransferEventSyncRequest defines the request schema for `/bank_transfer/event/sync`
+      description: Defines the request schema for `/bank_transfer/event/sync`
       example:
         count: 15
         after_id: 0
@@ -18371,7 +19092,7 @@ components:
       title: BankTransferEventSyncRequest
       type: object
     TransferEventSyncRequest:
-      description: TransferEventSyncRequest defines the request schema for `/transfer/event/sync`
+      description: Defines the request schema for `/transfer/event/sync`
       example:
         count: 15
         after_id: 0
@@ -18407,7 +19128,7 @@ components:
       type: object
     BankTransferEventSyncResponse:
       additionalProperties: true
-      description: BankTransferEventSyncResponse defines the response schema for `/bank_transfer/event/sync`
+      description: Defines the response schema for `/bank_transfer/event/sync`
       example:
         bank_transfer_events:
         - event_id: 0
@@ -18453,7 +19174,7 @@ components:
       type: object
     TransferEventSyncResponse:
       additionalProperties: true
-      description: TransferEventSyncResponse defines the response schema for `/transfer/event/sync`
+      description: Defines the response schema for `/transfer/event/sync`
       example:
         transfer_events:
         - transfer_iso_currency_code: transfer_iso_currency_code
@@ -18497,8 +19218,128 @@ components:
       - transfer_events
       title: TransferEventSyncResponse
       type: object
+    BankTransferSweepGetRequest:
+      description: BankTransferSweepGetRequest defines the request schema for `/bank_transfer/sweep/get`
+      example:
+        sweep_id: 0
+        origination_account_id: origination_account_id
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        sweep_id:
+          description: Identifier of the sweep.
+          format: int64
+          minimum: 0
+          type: integer
+        origination_account_id:
+          description: If multiple origination accounts are available, `origination_account_id`
+            must be used to specify the account for which balance will be returned.
+          nullable: true
+          type: string
+      required:
+      - sweep_id
+      title: BankTransferSweepGetRequest
+      type: object
+    BankTransferSweepGetResponse:
+      additionalProperties: true
+      description: BankTransferSweepGetResponse defines the response schema for `/bank_transfer/sweep/get`
+      example:
+        sweep:
+          amount: amount
+          iso_currency_code: iso_currency_code
+          created_at: 2000-01-23T04:56:07.000+00:00
+          id: 0
+          transfer_id: transfer_id
+          sweep_account:
+            account_number: account_number
+            routing_number: routing_number
+        request_id: request_id
+      properties:
+        sweep:
+          $ref: '#/components/schemas/BankTransferSweep'
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      - sweep
+      title: BankTransferSweepGetResponse
+      type: object
+    BankTransferSweep:
+      additionalProperties: true
+      description: BankTransferSweep describes a sweep transfer.
+      example:
+        amount: amount
+        iso_currency_code: iso_currency_code
+        created_at: 2000-01-23T04:56:07.000+00:00
+        id: 0
+        transfer_id: transfer_id
+        sweep_account:
+          account_number: account_number
+          routing_number: routing_number
+      properties:
+        id:
+          description: Identifier of the sweep.
+          format: int64
+          minimum: 0
+          type: integer
+        transfer_id:
+          description: Identifier of the sweep transfer.
+          nullable: true
+          type: string
+        created_at:
+          description: The datetime when the sweep occurred, in RFC 3339 format.
+          format: date-time
+          type: string
+        amount:
+          description: The amount of the sweep.
+          type: string
+        iso_currency_code:
+          description: The currency of the sweep, e.g. "USD".
+          type: string
+        sweep_account:
+          $ref: '#/components/schemas/BankTransferSweepAccount'
+      required:
+      - amount
+      - created_at
+      - id
+      - iso_currency_code
+      - sweep_account
+      - transfer_id
+      title: BankTransferSweep
+      type: object
+    BankTransferSweepAccount:
+      additionalProperties: true
+      description: The account where the funds are swept to.
+      example:
+        account_number: account_number
+        routing_number: routing_number
+      properties:
+        account_number:
+          type: string
+        routing_number:
+          type: string
+      required:
+      - account_number
+      - routing_number
+      title: BankTransferSweepAccount
+      type: object
     BankTransferBalanceGetRequest:
-      description: BankTransferBalanceGetRequest defines the request schema for `/bank_transfer/balance/get`
+      description: Defines the request schema for `/bank_transfer/balance/get`
       example:
         origination_account_id: origination_account_id
         secret: secret
@@ -18524,8 +19365,7 @@ components:
       type: object
     BankTransferBalanceGetResponse:
       additionalProperties: true
-      description: BankTransferBalanceGetResponse defines the response schema for
-        `/bank_transfer/balance/get`
+      description: Defines the response schema for `/bank_transfer/balance/get`
       example:
         balance:
           transactable: transactable
@@ -18573,8 +19413,7 @@ components:
       title: BankTransferBalance
       type: object
     BankTransferMigrateAccountRequest:
-      description: BankTransferMigrateAccountRequest defines the request schema for
-        `/bank_transfer/migrate_account`
+      description: Defines the request schema for `/bank_transfer/migrate_account`
       example:
         account_number: account_number
         account_type: account_type
@@ -18610,8 +19449,7 @@ components:
       type: object
     BankTransferMigrateAccountResponse:
       additionalProperties: true
-      description: BankTransferMigrateAccountResponse defines the response schema
-        for `/bank_transfer/migrate_account`
+      description: Defines the response schema for `/bank_transfer/migrate_account`
       example:
         access_token: access_token
         account_id: account_id
@@ -18636,8 +19474,7 @@ components:
       title: BankTransferMigrateAccountResponse
       type: object
     SandboxBankTransferSimulateRequest:
-      description: SandboxBankTransferSimulateRequest defines the request schema for
-        `/sandbox/bank_transfer/simulate`
+      description: Defines the request schema for `/sandbox/bank_transfer/simulate`
       example:
         event_type: event_type
         bank_transfer_id: bank_transfer_id
@@ -18682,7 +19519,7 @@ components:
       title: SandboxBankTransferSimulateRequest
       type: object
     SandboxTransferSimulateRequest:
-      description: SandboxTransferSimulateRequest defines the request schema for `/sandbox/transfer/simulate`
+      description: Defines the request schema for `/sandbox/transfer/simulate`
       example:
         event_type: event_type
         secret: secret
@@ -18728,8 +19565,7 @@ components:
       type: object
     SandboxBankTransferSimulateResponse:
       additionalProperties: true
-      description: SandboxBankTransferSimulateResponse defines the response schema
-        for `/sandbox/bank_transfer/simulate`
+      description: Defines the response schema for `/sandbox/bank_transfer/simulate`
       example:
         request_id: request_id
       properties:
@@ -18745,8 +19581,7 @@ components:
       type: object
     SandboxTransferSimulateResponse:
       additionalProperties: true
-      description: SandboxTransferSimulateResponse defines the response schema for
-        `/sandbox/transfer/simulate`
+      description: Defines the response schema for `/sandbox/transfer/simulate`
       example:
         request_id: request_id
       properties:
@@ -19157,6 +19992,7 @@ components:
       description: IncomeVerificationSummaryGetRequest defines the request schema
         for `/income/verification/summary/get`.
       example:
+        access_token: access_token
         income_verification_id: income_verification_id
         secret: secret
         client_id: client_id
@@ -19173,10 +20009,15 @@ components:
           title: APISecret
           type: string
         income_verification_id:
+          deprecated: true
           description: The ID of the verification.
+          nullable: true
           type: string
-      required:
-      - income_verification_id
+        access_token:
+          description: The access token associated with the Item data is being requested
+            for.
+          nullable: true
+          type: string
       title: IncomeVerificationSummaryGetRequest
       type: object
     IncomeVerificationSummaryGetResponse:
@@ -19237,6 +20078,7 @@ components:
       description: IncomeVerificationRefreshRequest defines the request schema for
         `/income/verification/refresh`
       example:
+        access_token: access_token
         income_verification_id: income_verification_id
         secret: secret
         client_id: client_id
@@ -19253,10 +20095,15 @@ components:
           title: APISecret
           type: string
         income_verification_id:
+          deprecated: true
           description: The ID of the verification.
+          nullable: true
           type: string
-      required:
-      - income_verification_id
+        access_token:
+          description: The access token associated with the Item data is being requested
+            for.
+          nullable: true
+          type: string
       type: object
     IncomeVerificationRefreshResponse:
       description: IncomeVerificationRequestResponse defines the response schema for
@@ -19333,7 +20180,8 @@ components:
           description: The amount of the transaction.
           type: number
         date:
-          description: The date of the transaction, in ISO 8601 format ("yyyy-mm-dd").
+          description: The date of the transaction, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            format ("yyyy-mm-dd").
           format: date
           type: string
         account_id:
@@ -19463,10 +20311,12 @@ components:
       - VERIFICATION_REFRESH_STATUS_USER_PRESENCE_REQUIRED
       title: VerificationRefreshStatus
       type: string
-    IncomeVerificationPaystubsGetRequest:
-      description: IncomeVerificationPaystubsGetRequest defines the request schema
-        for `/income/verification/paystubs/get`.
+    IncomeVerificationPaystubGetRequest:
+      deprecated: true
+      description: IncomeVerificationPaystubGetRequest defines the request schema
+        for `/income/verification/paystub/get`.
       example:
+        access_token: access_token
         income_verification_id: income_verification_id
         secret: secret
         client_id: client_id
@@ -19483,10 +20333,47 @@ components:
           title: APISecret
           type: string
         income_verification_id:
+          deprecated: true
           description: The ID of the verification for which to get paystub information.
+          nullable: true
           type: string
-      required:
-      - income_verification_id
+        access_token:
+          description: The access token associated with the Item data is being requested
+            for.
+          nullable: true
+          type: string
+      title: IncomeVerificationPaystubGetRequest
+      type: object
+    IncomeVerificationPaystubsGetRequest:
+      description: IncomeVerificationPaystubsGetRequest defines the request schema
+        for `/income/verification/paystubs/get`.
+      example:
+        access_token: access_token
+        income_verification_id: income_verification_id
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        income_verification_id:
+          deprecated: true
+          description: The ID of the verification for which to get paystub information.
+          nullable: true
+          type: string
+        access_token:
+          description: The access token associated with the Item data is being requested
+            for.
+          nullable: true
+          type: string
       title: IncomeVerificationPaystubsGetRequest
       type: object
     IncomeVerificationPaystubsGetResponse:
@@ -19495,45 +20382,354 @@ components:
         for `/income/verification/paystubs/get`.
       example:
         paystubs:
-        - account_id: account_id
+        - net_pay:
+            total:
+              ytd_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              description: description
+              current_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              canonical_description: Bonus
+            distribution_details:
+            - account_number: account_number
+              bank_name: bank_name
+              current_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              description: description
+              bank_account_type: bank_account_type
+            - account_number: account_number
+              bank_name: bank_name
+              current_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              description: description
+              bank_account_type: bank_account_type
+          earnings:
+            subtotals:
+            - ytd_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              description: description
+              current_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              current_rate: current_rate
+              canonical_description: Bonus
+              current_hours: current_hours
+            - ytd_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              description: description
+              current_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              current_rate: current_rate
+              canonical_description: Bonus
+              current_hours: current_hours
+            totals:
+            - ytd_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              description: description
+              current_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              current_rate: current_rate
+              canonical_description: Bonus
+              current_hours: current_hours
+            - ytd_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              description: description
+              current_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              current_rate: current_rate
+              canonical_description: Bonus
+              current_hours: current_hours
           pay_period_details:
             end_date: 2000-01-23
             pay_day: 2000-01-23
-            gross_earnings: 0.8008281904610115
-            check_amount: 6.027456183070403
+            gross_earnings: 6.027456183070403
+            check_amount: 1.4658129805029452
             start_date: 2000-01-23
-          ytd_earnings: ""
+          ytd_earnings:
+            gross_earnings: 7.061401241503109
+            net_earnings: 9.301444243932576
           employer:
+            address:
+              country: country
+              city: city
+              street: street
+              postal_code: postal_code
+              region: region
+              state_code: state_code
+              line2: line2
+              line1: line1
             name: name
+          paystub_details:
+            pay_date: 2000-01-23
+            paystub_provider: paystub_provider
+            pay_period_start_date: 2000-01-23
+            pay_frequency: MONTHLY
+            pay_period_end_date: 2000-01-23
+          deductions:
+            subtotals:
+            - ytd_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              description: description
+              current_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              canonical_description: Bonus
+            - ytd_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              description: description
+              current_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              canonical_description: Bonus
+            totals:
+            - ytd_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              description: description
+              current_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              canonical_description: Bonus
+            - ytd_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              description: description
+              current_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              canonical_description: Bonus
           employee:
+            marital_status: marital_status
+            address:
+              country: country
+              city: city
+              street: street
+              postal_code: postal_code
+              region: region
+              state_code: state_code
+              line2: line2
+              line1: line1
+            taxpayer_id:
+              last_4_digits: last_4_digits
+              id_type: id_type
             name: name
+          employment_details:
+            annual_salary:
+              amount: 0.8008281904610115
+              currency: currency
+            hire_date: 2000-01-23
+          doc_id: doc_id
           income_breakdown:
-            hours: 5.962133916683182
-            total: 5.637376656633329
-            rate: 1.4658129805029452
+          - hours: 5.637376656633329
+            total: 2.3021358869347655
+            rate: 5.962133916683182
             type: bonus
-        - account_id: account_id
+          - hours: 5.637376656633329
+            total: 2.3021358869347655
+            rate: 5.962133916683182
+            type: bonus
+        - net_pay:
+            total:
+              ytd_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              description: description
+              current_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              canonical_description: Bonus
+            distribution_details:
+            - account_number: account_number
+              bank_name: bank_name
+              current_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              description: description
+              bank_account_type: bank_account_type
+            - account_number: account_number
+              bank_name: bank_name
+              current_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              description: description
+              bank_account_type: bank_account_type
+          earnings:
+            subtotals:
+            - ytd_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              description: description
+              current_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              current_rate: current_rate
+              canonical_description: Bonus
+              current_hours: current_hours
+            - ytd_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              description: description
+              current_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              current_rate: current_rate
+              canonical_description: Bonus
+              current_hours: current_hours
+            totals:
+            - ytd_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              description: description
+              current_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              current_rate: current_rate
+              canonical_description: Bonus
+              current_hours: current_hours
+            - ytd_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              description: description
+              current_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              current_rate: current_rate
+              canonical_description: Bonus
+              current_hours: current_hours
           pay_period_details:
             end_date: 2000-01-23
             pay_day: 2000-01-23
-            gross_earnings: 0.8008281904610115
-            check_amount: 6.027456183070403
+            gross_earnings: 6.027456183070403
+            check_amount: 1.4658129805029452
             start_date: 2000-01-23
-          ytd_earnings: ""
+          ytd_earnings:
+            gross_earnings: 7.061401241503109
+            net_earnings: 9.301444243932576
           employer:
+            address:
+              country: country
+              city: city
+              street: street
+              postal_code: postal_code
+              region: region
+              state_code: state_code
+              line2: line2
+              line1: line1
             name: name
+          paystub_details:
+            pay_date: 2000-01-23
+            paystub_provider: paystub_provider
+            pay_period_start_date: 2000-01-23
+            pay_frequency: MONTHLY
+            pay_period_end_date: 2000-01-23
+          deductions:
+            subtotals:
+            - ytd_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              description: description
+              current_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              canonical_description: Bonus
+            - ytd_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              description: description
+              current_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              canonical_description: Bonus
+            totals:
+            - ytd_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              description: description
+              current_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              canonical_description: Bonus
+            - ytd_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              description: description
+              current_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              canonical_description: Bonus
           employee:
+            marital_status: marital_status
+            address:
+              country: country
+              city: city
+              street: street
+              postal_code: postal_code
+              region: region
+              state_code: state_code
+              line2: line2
+              line1: line1
+            taxpayer_id:
+              last_4_digits: last_4_digits
+              id_type: id_type
             name: name
+          employment_details:
+            annual_salary:
+              amount: 0.8008281904610115
+              currency: currency
+            hire_date: 2000-01-23
+          doc_id: doc_id
           income_breakdown:
-            hours: 5.962133916683182
-            total: 5.637376656633329
-            rate: 1.4658129805029452
+          - hours: 5.637376656633329
+            total: 2.3021358869347655
+            rate: 5.962133916683182
             type: bonus
+          - hours: 5.637376656633329
+            total: 2.3021358869347655
+            rate: 5.962133916683182
+            type: bonus
+        error:
+          error_message: error_message
+          suggested_action: suggested_action
+          error_type: INVALID_REQUEST
+          causes:
+          - ""
+          - ""
+          display_message: display_message
+          error_code: error_code
+          documentation_url: documentation_url
+          request_id: request_id
+          status: 0.8008281904610115
+        document_metadata:
+        - name: name
+          doc_id: doc_id
+          status: status
+        - name: name
+          doc_id: doc_id
+          status: status
         request_id: request_id
       properties:
         paystubs:
           items:
             $ref: '#/components/schemas/Paystub'
+          type: array
+        error:
+          $ref: '#/components/schemas/Error'
+        document_metadata:
+          items:
+            $ref: '#/components/schemas/DocumentMetadata'
           type: array
         request_id:
           description: A unique identifier for the request, which can be used for
@@ -19546,44 +20742,215 @@ components:
       - request_id
       title: IncomeVerificationPaystubsGetResponse
       type: object
+    DocumentMetadata:
+      additionalProperties: true
+      description: An object representing metadata from the end user's uploaded document.
+      example:
+        name: name
+        doc_id: doc_id
+        status: status
+      properties:
+        name:
+          description: The name of the document.
+          type: string
+        status:
+          description: The processing status of the document.
+          type: string
+        doc_id:
+          description: An identifier of the document that is also present in the paystub
+            response.
+          type: string
+      title: DocumentMetadata
+      type: object
     Paystub:
       additionalProperties: true
       description: An object representing data extracted from the end user's paystub.
       example:
-        account_id: account_id
+        net_pay:
+          total:
+            ytd_pay:
+              amount: 0.8008281904610115
+              currency: currency
+            description: description
+            current_pay:
+              amount: 0.8008281904610115
+              currency: currency
+            canonical_description: Bonus
+          distribution_details:
+          - account_number: account_number
+            bank_name: bank_name
+            current_pay:
+              amount: 0.8008281904610115
+              currency: currency
+            description: description
+            bank_account_type: bank_account_type
+          - account_number: account_number
+            bank_name: bank_name
+            current_pay:
+              amount: 0.8008281904610115
+              currency: currency
+            description: description
+            bank_account_type: bank_account_type
+        earnings:
+          subtotals:
+          - ytd_pay:
+              amount: 0.8008281904610115
+              currency: currency
+            description: description
+            current_pay:
+              amount: 0.8008281904610115
+              currency: currency
+            current_rate: current_rate
+            canonical_description: Bonus
+            current_hours: current_hours
+          - ytd_pay:
+              amount: 0.8008281904610115
+              currency: currency
+            description: description
+            current_pay:
+              amount: 0.8008281904610115
+              currency: currency
+            current_rate: current_rate
+            canonical_description: Bonus
+            current_hours: current_hours
+          totals:
+          - ytd_pay:
+              amount: 0.8008281904610115
+              currency: currency
+            description: description
+            current_pay:
+              amount: 0.8008281904610115
+              currency: currency
+            current_rate: current_rate
+            canonical_description: Bonus
+            current_hours: current_hours
+          - ytd_pay:
+              amount: 0.8008281904610115
+              currency: currency
+            description: description
+            current_pay:
+              amount: 0.8008281904610115
+              currency: currency
+            current_rate: current_rate
+            canonical_description: Bonus
+            current_hours: current_hours
         pay_period_details:
           end_date: 2000-01-23
           pay_day: 2000-01-23
-          gross_earnings: 0.8008281904610115
-          check_amount: 6.027456183070403
+          gross_earnings: 6.027456183070403
+          check_amount: 1.4658129805029452
           start_date: 2000-01-23
-        ytd_earnings: ""
+        ytd_earnings:
+          gross_earnings: 7.061401241503109
+          net_earnings: 9.301444243932576
         employer:
+          address:
+            country: country
+            city: city
+            street: street
+            postal_code: postal_code
+            region: region
+            state_code: state_code
+            line2: line2
+            line1: line1
           name: name
+        paystub_details:
+          pay_date: 2000-01-23
+          paystub_provider: paystub_provider
+          pay_period_start_date: 2000-01-23
+          pay_frequency: MONTHLY
+          pay_period_end_date: 2000-01-23
+        deductions:
+          subtotals:
+          - ytd_pay:
+              amount: 0.8008281904610115
+              currency: currency
+            description: description
+            current_pay:
+              amount: 0.8008281904610115
+              currency: currency
+            canonical_description: Bonus
+          - ytd_pay:
+              amount: 0.8008281904610115
+              currency: currency
+            description: description
+            current_pay:
+              amount: 0.8008281904610115
+              currency: currency
+            canonical_description: Bonus
+          totals:
+          - ytd_pay:
+              amount: 0.8008281904610115
+              currency: currency
+            description: description
+            current_pay:
+              amount: 0.8008281904610115
+              currency: currency
+            canonical_description: Bonus
+          - ytd_pay:
+              amount: 0.8008281904610115
+              currency: currency
+            description: description
+            current_pay:
+              amount: 0.8008281904610115
+              currency: currency
+            canonical_description: Bonus
         employee:
+          marital_status: marital_status
+          address:
+            country: country
+            city: city
+            street: street
+            postal_code: postal_code
+            region: region
+            state_code: state_code
+            line2: line2
+            line1: line1
+          taxpayer_id:
+            last_4_digits: last_4_digits
+            id_type: id_type
           name: name
+        employment_details:
+          annual_salary:
+            amount: 0.8008281904610115
+            currency: currency
+          hire_date: 2000-01-23
+        doc_id: doc_id
         income_breakdown:
-          hours: 5.962133916683182
-          total: 5.637376656633329
-          rate: 1.4658129805029452
+        - hours: 5.637376656633329
+          total: 2.3021358869347655
+          rate: 5.962133916683182
+          type: bonus
+        - hours: 5.637376656633329
+          total: 2.3021358869347655
+          rate: 5.962133916683182
           type: bonus
       properties:
-        account_id:
-          description: The account identifier for the account associated with this
-            paystub.
-          nullable: true
+        deductions:
+          $ref: '#/components/schemas/Deductions'
+        doc_id:
+          description: An identifier of the document referenced by the document metadata.
           type: string
+        earnings:
+          $ref: '#/components/schemas/Earnings'
         employer:
           $ref: '#/components/schemas/PaystubEmployer'
         employee:
           $ref: '#/components/schemas/Employee'
+        employment_details:
+          $ref: '#/components/schemas/EmploymentDetails'
+        net_pay:
+          $ref: '#/components/schemas/NetPay'
         pay_period_details:
           $ref: '#/components/schemas/PayPeriodDetails'
+        paystub_details:
+          $ref: '#/components/schemas/PaystubDetails'
         income_breakdown:
-          $ref: '#/components/schemas/IncomeBreakdown'
+          items:
+            $ref: '#/components/schemas/IncomeBreakdown'
+          type: array
         ytd_earnings:
-          allOf:
-          - $ref: '#/components/schemas/PaystubYTDDetails'
+          $ref: '#/components/schemas/PaystubYTDDetails'
       required:
       - employee
       - employer
@@ -19592,12 +20959,364 @@ components:
       - ytd_earnings
       title: Paystub
       type: object
+    Deductions:
+      additionalProperties: true
+      description: An object with the deduction information found on a paystub.
+      example:
+        subtotals:
+        - ytd_pay:
+            amount: 0.8008281904610115
+            currency: currency
+          description: description
+          current_pay:
+            amount: 0.8008281904610115
+            currency: currency
+          canonical_description: Bonus
+        - ytd_pay:
+            amount: 0.8008281904610115
+            currency: currency
+          description: description
+          current_pay:
+            amount: 0.8008281904610115
+            currency: currency
+          canonical_description: Bonus
+        totals:
+        - ytd_pay:
+            amount: 0.8008281904610115
+            currency: currency
+          description: description
+          current_pay:
+            amount: 0.8008281904610115
+            currency: currency
+          canonical_description: Bonus
+        - ytd_pay:
+            amount: 0.8008281904610115
+            currency: currency
+          description: description
+          current_pay:
+            amount: 0.8008281904610115
+            currency: currency
+          canonical_description: Bonus
+      properties:
+        subtotals:
+          items:
+            $ref: '#/components/schemas/Total'
+          type: array
+        totals:
+          items:
+            $ref: '#/components/schemas/Total'
+          type: array
+      title: Deductions
+      type: object
+    Total:
+      additionalProperties: true
+      description: An object representing both the current pay period and year to
+        date amount for a category.
+      example:
+        ytd_pay:
+          amount: 0.8008281904610115
+          currency: currency
+        description: description
+        current_pay:
+          amount: 0.8008281904610115
+          currency: currency
+        canonical_description: Bonus
+      properties:
+        canonical_description:
+          description: Commonly used term to describe the line item.
+          enum:
+          - Bonus
+          - Commission
+          - Overtime
+          - Paid Time Off
+          - Regular Pay
+          - Vacation
+          - Employee Medicare
+          - FICA
+          - Social Security Employee Tax
+          - Medical
+          - Vision
+          - Dental
+          nullable: true
+          type: string
+        description:
+          description: Text of the line item as printed on the paystub.
+          nullable: true
+          type: string
+        current_pay:
+          $ref: '#/components/schemas/Pay'
+        ytd_pay:
+          $ref: '#/components/schemas/Pay'
+      title: Total
+      type: object
+    Pay:
+      additionalProperties: true
+      description: An object representing a monetary amount.
+      example:
+        amount: 0.8008281904610115
+        currency: currency
+      properties:
+        amount:
+          description: A numerical amount of a specific currency.
+          nullable: true
+          type: number
+        currency:
+          description: Currency code, e.g. USD
+          maxLength: 3
+          minLength: 3
+          nullable: true
+          type: string
+      title: Pay
+      type: object
+    Earnings:
+      additionalProperties: true
+      description: An object representing both a breakdown of earnings on a paystub
+        and the total earnings.
+      example:
+        subtotals:
+        - ytd_pay:
+            amount: 0.8008281904610115
+            currency: currency
+          description: description
+          current_pay:
+            amount: 0.8008281904610115
+            currency: currency
+          current_rate: current_rate
+          canonical_description: Bonus
+          current_hours: current_hours
+        - ytd_pay:
+            amount: 0.8008281904610115
+            currency: currency
+          description: description
+          current_pay:
+            amount: 0.8008281904610115
+            currency: currency
+          current_rate: current_rate
+          canonical_description: Bonus
+          current_hours: current_hours
+        totals:
+        - ytd_pay:
+            amount: 0.8008281904610115
+            currency: currency
+          description: description
+          current_pay:
+            amount: 0.8008281904610115
+            currency: currency
+          current_rate: current_rate
+          canonical_description: Bonus
+          current_hours: current_hours
+        - ytd_pay:
+            amount: 0.8008281904610115
+            currency: currency
+          description: description
+          current_pay:
+            amount: 0.8008281904610115
+            currency: currency
+          current_rate: current_rate
+          canonical_description: Bonus
+          current_hours: current_hours
+      properties:
+        subtotals:
+          items:
+            $ref: '#/components/schemas/EarningsTotal'
+          type: array
+        totals:
+          items:
+            $ref: '#/components/schemas/EarningsTotal'
+          type: array
+      title: Earnings
+      type: object
+    EarningsTotal:
+      additionalProperties: true
+      description: An object representing both the current pay period and year to
+        date amount for an earning category.
+      example:
+        ytd_pay:
+          amount: 0.8008281904610115
+          currency: currency
+        description: description
+        current_pay:
+          amount: 0.8008281904610115
+          currency: currency
+        current_rate: current_rate
+        canonical_description: Bonus
+        current_hours: current_hours
+      properties:
+        canonical_description:
+          description: Commonly used term to describe the line item.
+          enum:
+          - Bonus
+          - Commission
+          - Overtime
+          - Paid Time Off
+          - Regular Pay
+          - Vacation
+          - Employee Medicare
+          - FICA
+          - Social Security Employee Tax
+          - Medical
+          - Vision
+          - Dental
+          nullable: true
+          type: string
+        description:
+          description: Text of the line item as printed on the paystub.
+          nullable: true
+          type: string
+        current_pay:
+          $ref: '#/components/schemas/Pay'
+        ytd_pay:
+          $ref: '#/components/schemas/Pay'
+        current_hours:
+          nullable: true
+          type: string
+        current_rate:
+          nullable: true
+          type: string
+      title: EarningsTotal
+      type: object
+    EmploymentDetails:
+      additionalProperties: true
+      description: An object representing employment details found on a paystub.
+      example:
+        annual_salary:
+          amount: 0.8008281904610115
+          currency: currency
+        hire_date: 2000-01-23
+      properties:
+        annual_salary:
+          $ref: '#/components/schemas/Pay'
+        hire_date:
+          description: Date on which the employee was hired, in the YYYY-MM-DD format.
+          format: date
+          nullable: true
+          type: string
+      title: EmploymentDetails
+      type: object
+    NetPay:
+      additionalProperties: true
+      description: An object representing information about the net pay amount on
+        the paystub.
+      example:
+        total:
+          ytd_pay:
+            amount: 0.8008281904610115
+            currency: currency
+          description: description
+          current_pay:
+            amount: 0.8008281904610115
+            currency: currency
+          canonical_description: Bonus
+        distribution_details:
+        - account_number: account_number
+          bank_name: bank_name
+          current_pay:
+            amount: 0.8008281904610115
+            currency: currency
+          description: description
+          bank_account_type: bank_account_type
+        - account_number: account_number
+          bank_name: bank_name
+          current_pay:
+            amount: 0.8008281904610115
+            currency: currency
+          description: description
+          bank_account_type: bank_account_type
+      properties:
+        distribution_details:
+          items:
+            $ref: '#/components/schemas/DistributionDetails'
+          type: array
+        total:
+          $ref: '#/components/schemas/Total'
+      title: NetPay
+      type: object
+    DistributionDetails:
+      additionalProperties: true
+      description: An object representing information about a distribution from the
+        paycheck (for example, the amount distributed to a specific checking account,
+        or to a retirement plan).
+      example:
+        account_number: account_number
+        bank_name: bank_name
+        current_pay:
+          amount: 0.8008281904610115
+          currency: currency
+        description: description
+        bank_account_type: bank_account_type
+      properties:
+        account_number:
+          description: The account number of the account being deposited to.
+          nullable: true
+          type: string
+        bank_account_type:
+          description: The type of bank account (e.g. Checking or Savings)
+          nullable: true
+          type: string
+        bank_name:
+          description: The name of the bank that the payment is being deposited to.
+          nullable: true
+          type: string
+        current_pay:
+          $ref: '#/components/schemas/Pay'
+        description:
+          description: A description of the distribution type.
+          nullable: true
+          type: string
+      title: DistributionDetails
+      type: object
+    PaystubDetails:
+      additionalProperties: true
+      description: An object representing details that can be found on the paystub.
+      example:
+        pay_date: 2000-01-23
+        paystub_provider: paystub_provider
+        pay_period_start_date: 2000-01-23
+        pay_frequency: MONTHLY
+        pay_period_end_date: 2000-01-23
+      properties:
+        pay_period_start_date:
+          description: Beginning date of the pay period on the paystub in the 'YYYY-MM-DD'
+            format.
+          format: date
+          nullable: true
+          type: string
+        pay_period_end_date:
+          description: Ending date of the pay period on the paystub in the 'YYYY-MM-DD'
+            format.
+          format: date
+          nullable: true
+          type: string
+        pay_date:
+          description: Pay date on the paystub in the 'YYYY-MM-DD' format.
+          format: date
+          nullable: true
+          type: string
+        paystub_provider:
+          description: The name of the payroll provider that generated the paystub,
+            e.g. ADP
+          nullable: true
+          type: string
+        pay_frequency:
+          description: 'The frequency at which the employee is paid. Possible values:
+            `MONTHLY`, `BI-WEEKLY`, `WEEKLY`, `SEMI-MONTHLY`.'
+          enum:
+          - MONTHLY
+          - BI-WEEKLY
+          - WEEKLY
+          - SEMI-MONTHLY
+          nullable: true
+          type: string
+      title: PaystubDetails
+      type: object
     IncomeBreakdown:
       additionalProperties: true
+      description: An object representing a breakdown of the different income types
+        on the paystub.
       example:
-        hours: 5.962133916683182
-        total: 5.637376656633329
-        rate: 1.4658129805029452
+        hours: 5.637376656633329
+        total: 2.3021358869347655
+        rate: 5.962133916683182
         type: bonus
       properties:
         type:
@@ -19636,6 +21355,19 @@ components:
       additionalProperties: true
       description: Data about the employee.
       example:
+        marital_status: marital_status
+        address:
+          country: country
+          city: city
+          street: street
+          postal_code: postal_code
+          region: region
+          state_code: state_code
+          line2: line2
+          line1: line1
+        taxpayer_id:
+          last_4_digits: last_4_digits
+          id_type: id_type
         name: name
       properties:
         name:
@@ -19643,24 +21375,109 @@ components:
           nullable: true
           type: string
         address:
-          $ref: '#/components/schemas/AddressDataNullable'
+          $ref: '#/components/schemas/PaystubAddress'
+        marital_status:
+          description: Marital status of the employee.
+          nullable: true
+          type: string
+        taxpayer_id:
+          $ref: '#/components/schemas/TaxpayerID'
       required:
       - address
       - name
       title: Employee
       type: object
+    TaxpayerID:
+      additionalProperties: true
+      example:
+        last_4_digits: last_4_digits
+        id_type: id_type
+      properties:
+        id_type:
+          description: Type of ID, e.g. 'SSN'
+          nullable: true
+          type: string
+        last_4_digits:
+          description: Last 4 digits of unique number of ID.
+          maxLength: 4
+          minLength: 4
+          nullable: true
+          type: string
+      title: TaxpayerID
+      type: object
     PaystubEmployer:
       additionalProperties: true
       example:
+        address:
+          country: country
+          city: city
+          street: street
+          postal_code: postal_code
+          region: region
+          state_code: state_code
+          line2: line2
+          line1: line1
         name: name
       properties:
         name:
           description: The name of the employer on the paystub.
           nullable: true
           type: string
+        address:
+          $ref: '#/components/schemas/PaystubAddress'
       required:
       - name
       title: Employer
+      type: object
+    PaystubAddress:
+      additionalProperties: true
+      example:
+        country: country
+        city: city
+        street: street
+        postal_code: postal_code
+        region: region
+        state_code: state_code
+        line2: line2
+        line1: line1
+      properties:
+        city:
+          description: The full city name.
+          nullable: true
+          type: string
+        street:
+          description: The listed street address.
+          nullable: true
+          type: string
+        line1:
+          description: Street address line 1.
+          nullable: true
+          type: string
+        line2:
+          description: Street address line 2.
+          nullable: true
+          type: string
+        postal_code:
+          description: 5 digit postal code.
+          nullable: true
+          type: string
+        region:
+          description: |-
+            The region or state
+            Example: `"NC"`
+          nullable: true
+          type: string
+        state_code:
+          description: |-
+            The region or state
+            Example: `"NC"`
+          nullable: true
+          type: string
+        country:
+          description: The country of the address.
+          nullable: true
+          type: string
+      title: Address
       type: object
     PayPeriodDetails:
       additionalProperties: true
@@ -19668,23 +21485,25 @@ components:
       example:
         end_date: 2000-01-23
         pay_day: 2000-01-23
-        gross_earnings: 0.8008281904610115
-        check_amount: 6.027456183070403
+        gross_earnings: 6.027456183070403
+        check_amount: 1.4658129805029452
         start_date: 2000-01-23
       properties:
         start_date:
-          description: 'The pay period start date, in ISO 8601 format: "yyyy-mm-dd".'
+          description: 'The pay period start date, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            format: "yyyy-mm-dd".'
           format: date
           nullable: true
           type: string
         end_date:
-          description: 'The pay period end date, in ISO 8601 format: "yyyy-mm-dd".'
+          description: 'The pay period end date, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            format: "yyyy-mm-dd".'
           format: date
           nullable: true
           type: string
         pay_day:
-          description: The date on which the paystub was issued, in ISO 8601 format
-            ("yyyy-mm-dd").
+          description: The date on which the paystub was issued, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            format ("yyyy-mm-dd").
           format: date
           nullable: true
           type: string
@@ -19729,22 +21548,25 @@ components:
     PaystubYTDDetails:
       additionalProperties: true
       description: The amount of income earned year to date, as based on paystub data.
+      example:
+        gross_earnings: 7.061401241503109
+        net_earnings: 9.301444243932576
       properties:
         gross_earnings:
           description: Year-to-date gross earnings.
+          nullable: true
           type: number
         net_earnings:
           description: Year-to-date net (take home) earnings.
+          nullable: true
           type: number
-      required:
-      - gross_earnings
-      - net_earnings
       title: PaystubYTDDetails
       type: object
     IncomeVerificationDocumentsDownloadRequest:
       description: IncomeVerificationDocumentsDownloadRequest defines the request
         schema for `/income/verification/documents/download`.
       example:
+        access_token: access_token
         income_verification_id: income_verification_id
         secret: secret
         client_id: client_id
@@ -19761,10 +21583,15 @@ components:
           title: APISecret
           type: string
         income_verification_id:
+          deprecated: true
           description: The ID of the verification.
+          nullable: true
           type: string
-      required:
-      - income_verification_id
+        access_token:
+          description: The access token associated with the Item data is being requested
+            for.
+          nullable: true
+          type: string
       title: IncomeVerificationDocumentsDownloadRequest
       type: object
     IncomeVerificationDocumentsDownloadResponse:
@@ -19777,6 +21604,498 @@ components:
       required:
       - id
       title: IncomeVerificationDocumentsDownloadResponse
+      type: object
+    IncomeVerificationTaxformsGetRequest:
+      additionalProperties: true
+      description: IncomeVerificationTaxformsGetRequest defines the request schema
+        for `/income/verification/taxforms/get`
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        income_verification_id:
+          deprecated: true
+          description: The ID of the verification.
+          nullable: true
+          type: string
+        access_token:
+          description: The access token associated with the Item data is being requested
+            for.
+          nullable: true
+          type: string
+      title: IncomeVerificationTaxformsGetRequest
+      type: object
+    IncomeVerificationTaxformsGetResponse:
+      description: IncomeVerificationTaxformsGetResponse defines the response schema
+        for `/income/verification/taxforms/get`
+      example:
+        document_metadata:
+        - name: name
+          doc_id: doc_id
+          status: status
+        - name: name
+          doc_id: doc_id
+          status: status
+        error:
+          error_message: error_message
+          suggested_action: suggested_action
+          error_type: INVALID_REQUEST
+          causes:
+          - ""
+          - ""
+          display_message: display_message
+          error_code: error_code
+          documentation_url: documentation_url
+          request_id: request_id
+          status: 0.8008281904610115
+        request_id: request_id
+        taxforms:
+        - w2:
+            statutory_employee: statutory_employee
+            other: other
+            allocated_tips: allocated_tips
+            retirement_plan: retirement_plan
+            wages_tips_other_comp: wages_tips_other_comp
+            nonqualified_plans: nonqualified_plans
+            employee:
+              marital_status: marital_status
+              address:
+                country: country
+                city: city
+                street: street
+                postal_code: postal_code
+                region: region
+                state_code: state_code
+                line2: line2
+                line1: line1
+              taxpayer_id:
+                last_4_digits: last_4_digits
+                id_type: id_type
+              name: name
+            tax_year: tax_year
+            social_security_wages: social_security_wages
+            social_security_tax_withheld: social_security_tax_withheld
+            social_security_tips: social_security_tips
+            medicare_wages_and_tips: medicare_wages_and_tips
+            third_party_sick_pay: third_party_sick_pay
+            employer_id_number: employer_id_number
+            federal_income_tax_withheld: federal_income_tax_withheld
+            medicare_tax_withheld: medicare_tax_withheld
+            employer:
+              address:
+                country: country
+                city: city
+                street: street
+                postal_code: postal_code
+                region: region
+                state_code: state_code
+                line2: line2
+                line1: line1
+              name: name
+            box_12:
+            - amount: amount
+              code: code
+            - amount: amount
+              code: code
+            state_and_local_wages:
+            - state_wages_tips: state_wages_tips
+              local_wages_tips: local_wages_tips
+              employer_state_id_number: employer_state_id_number
+              state_income_tax: state_income_tax
+              state: state
+              local_income_tax: local_income_tax
+              locality_name: locality_name
+            - state_wages_tips: state_wages_tips
+              local_wages_tips: local_wages_tips
+              employer_state_id_number: employer_state_id_number
+              state_income_tax: state_income_tax
+              state: state
+              local_income_tax: local_income_tax
+              locality_name: locality_name
+            box_9: box_9
+            dependent_care_benefits: dependent_care_benefits
+          document_type: document_type
+        - w2:
+            statutory_employee: statutory_employee
+            other: other
+            allocated_tips: allocated_tips
+            retirement_plan: retirement_plan
+            wages_tips_other_comp: wages_tips_other_comp
+            nonqualified_plans: nonqualified_plans
+            employee:
+              marital_status: marital_status
+              address:
+                country: country
+                city: city
+                street: street
+                postal_code: postal_code
+                region: region
+                state_code: state_code
+                line2: line2
+                line1: line1
+              taxpayer_id:
+                last_4_digits: last_4_digits
+                id_type: id_type
+              name: name
+            tax_year: tax_year
+            social_security_wages: social_security_wages
+            social_security_tax_withheld: social_security_tax_withheld
+            social_security_tips: social_security_tips
+            medicare_wages_and_tips: medicare_wages_and_tips
+            third_party_sick_pay: third_party_sick_pay
+            employer_id_number: employer_id_number
+            federal_income_tax_withheld: federal_income_tax_withheld
+            medicare_tax_withheld: medicare_tax_withheld
+            employer:
+              address:
+                country: country
+                city: city
+                street: street
+                postal_code: postal_code
+                region: region
+                state_code: state_code
+                line2: line2
+                line1: line1
+              name: name
+            box_12:
+            - amount: amount
+              code: code
+            - amount: amount
+              code: code
+            state_and_local_wages:
+            - state_wages_tips: state_wages_tips
+              local_wages_tips: local_wages_tips
+              employer_state_id_number: employer_state_id_number
+              state_income_tax: state_income_tax
+              state: state
+              local_income_tax: local_income_tax
+              locality_name: locality_name
+            - state_wages_tips: state_wages_tips
+              local_wages_tips: local_wages_tips
+              employer_state_id_number: employer_state_id_number
+              state_income_tax: state_income_tax
+              state: state
+              local_income_tax: local_income_tax
+              locality_name: locality_name
+            box_9: box_9
+            dependent_care_benefits: dependent_care_benefits
+          document_type: document_type
+      properties:
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+        taxforms:
+          description: A list of taxforms.
+          items:
+            $ref: '#/components/schemas/Taxform'
+          type: array
+        document_metadata:
+          items:
+            $ref: '#/components/schemas/DocumentMetadata'
+          type: array
+        error:
+          $ref: '#/components/schemas/Error'
+      required:
+      - document_metadata
+      - taxforms
+      title: IncomeVerificationTaxformsGetResponse
+      type: object
+    Taxform:
+      additionalProperties: true
+      example:
+        w2:
+          statutory_employee: statutory_employee
+          other: other
+          allocated_tips: allocated_tips
+          retirement_plan: retirement_plan
+          wages_tips_other_comp: wages_tips_other_comp
+          nonqualified_plans: nonqualified_plans
+          employee:
+            marital_status: marital_status
+            address:
+              country: country
+              city: city
+              street: street
+              postal_code: postal_code
+              region: region
+              state_code: state_code
+              line2: line2
+              line1: line1
+            taxpayer_id:
+              last_4_digits: last_4_digits
+              id_type: id_type
+            name: name
+          tax_year: tax_year
+          social_security_wages: social_security_wages
+          social_security_tax_withheld: social_security_tax_withheld
+          social_security_tips: social_security_tips
+          medicare_wages_and_tips: medicare_wages_and_tips
+          third_party_sick_pay: third_party_sick_pay
+          employer_id_number: employer_id_number
+          federal_income_tax_withheld: federal_income_tax_withheld
+          medicare_tax_withheld: medicare_tax_withheld
+          employer:
+            address:
+              country: country
+              city: city
+              street: street
+              postal_code: postal_code
+              region: region
+              state_code: state_code
+              line2: line2
+              line1: line1
+            name: name
+          box_12:
+          - amount: amount
+            code: code
+          - amount: amount
+            code: code
+          state_and_local_wages:
+          - state_wages_tips: state_wages_tips
+            local_wages_tips: local_wages_tips
+            employer_state_id_number: employer_state_id_number
+            state_income_tax: state_income_tax
+            state: state
+            local_income_tax: local_income_tax
+            locality_name: locality_name
+          - state_wages_tips: state_wages_tips
+            local_wages_tips: local_wages_tips
+            employer_state_id_number: employer_state_id_number
+            state_income_tax: state_income_tax
+            state: state
+            local_income_tax: local_income_tax
+            locality_name: locality_name
+          box_9: box_9
+          dependent_care_benefits: dependent_care_benefits
+        document_type: document_type
+      properties:
+        document_type:
+          description: The type of tax document.
+          type: string
+        w2:
+          $ref: '#/components/schemas/W2'
+      required:
+      - document_type
+      title: Taxform
+      type: object
+    W2:
+      additionalProperties: true
+      description: W2 is an object that represents income data taken from a W2 tax
+        document.
+      example:
+        statutory_employee: statutory_employee
+        other: other
+        allocated_tips: allocated_tips
+        retirement_plan: retirement_plan
+        wages_tips_other_comp: wages_tips_other_comp
+        nonqualified_plans: nonqualified_plans
+        employee:
+          marital_status: marital_status
+          address:
+            country: country
+            city: city
+            street: street
+            postal_code: postal_code
+            region: region
+            state_code: state_code
+            line2: line2
+            line1: line1
+          taxpayer_id:
+            last_4_digits: last_4_digits
+            id_type: id_type
+          name: name
+        tax_year: tax_year
+        social_security_wages: social_security_wages
+        social_security_tax_withheld: social_security_tax_withheld
+        social_security_tips: social_security_tips
+        medicare_wages_and_tips: medicare_wages_and_tips
+        third_party_sick_pay: third_party_sick_pay
+        employer_id_number: employer_id_number
+        federal_income_tax_withheld: federal_income_tax_withheld
+        medicare_tax_withheld: medicare_tax_withheld
+        employer:
+          address:
+            country: country
+            city: city
+            street: street
+            postal_code: postal_code
+            region: region
+            state_code: state_code
+            line2: line2
+            line1: line1
+          name: name
+        box_12:
+        - amount: amount
+          code: code
+        - amount: amount
+          code: code
+        state_and_local_wages:
+        - state_wages_tips: state_wages_tips
+          local_wages_tips: local_wages_tips
+          employer_state_id_number: employer_state_id_number
+          state_income_tax: state_income_tax
+          state: state
+          local_income_tax: local_income_tax
+          locality_name: locality_name
+        - state_wages_tips: state_wages_tips
+          local_wages_tips: local_wages_tips
+          employer_state_id_number: employer_state_id_number
+          state_income_tax: state_income_tax
+          state: state
+          local_income_tax: local_income_tax
+          locality_name: locality_name
+        box_9: box_9
+        dependent_care_benefits: dependent_care_benefits
+      properties:
+        employer:
+          $ref: '#/components/schemas/PaystubEmployer'
+        employee:
+          $ref: '#/components/schemas/Employee'
+        tax_year:
+          description: The tax year of the W2 document.
+          nullable: true
+          type: string
+        employer_id_number:
+          description: An employee identification number or EIN.
+          nullable: true
+          type: string
+        wages_tips_other_comp:
+          description: Wages from tips and other compensation.
+          nullable: true
+          type: string
+        federal_income_tax_withheld:
+          description: Federal income tax withheld for the tax year.
+          nullable: true
+          type: string
+        social_security_wages:
+          description: Wages from social security.
+          nullable: true
+          type: string
+        social_security_tax_withheld:
+          description: Social security tax withheld for the tax year.
+          nullable: true
+          type: string
+        medicare_wages_and_tips:
+          description: Wages and tips from medicare.
+          nullable: true
+          type: string
+        medicare_tax_withheld:
+          description: Medicare tax withheld for the tax year.
+          nullable: true
+          type: string
+        social_security_tips:
+          description: Tips from social security.
+          nullable: true
+          type: string
+        allocated_tips:
+          description: Allocated tips.
+          nullable: true
+          type: string
+        box_9:
+          description: Contents from box 9 on the W2.
+          nullable: true
+          type: string
+        dependent_care_benefits:
+          description: Dependent care benefits.
+          nullable: true
+          type: string
+        nonqualified_plans:
+          description: Nonqualified plans.
+          nullable: true
+          type: string
+        box_12:
+          items:
+            $ref: '#/components/schemas/W2Box12'
+          type: array
+        statutory_employee:
+          description: Statutory employee.
+          nullable: true
+          type: string
+        retirement_plan:
+          description: Retirement plan.
+          nullable: true
+          type: string
+        third_party_sick_pay:
+          description: Third party sick pay.
+          nullable: true
+          type: string
+        other:
+          description: Other.
+          nullable: true
+          type: string
+        state_and_local_wages:
+          items:
+            $ref: '#/components/schemas/W2StateAndLocalWages'
+          type: array
+      title: W2
+      type: object
+    W2Box12:
+      additionalProperties: true
+      example:
+        amount: amount
+        code: code
+      properties:
+        code:
+          description: W2 Box 12 code.
+          nullable: true
+          type: string
+        amount:
+          description: W2 Box 12 amount.
+          nullable: true
+          type: string
+      title: W2Box12
+      type: object
+    W2StateAndLocalWages:
+      additionalProperties: true
+      example:
+        state_wages_tips: state_wages_tips
+        local_wages_tips: local_wages_tips
+        employer_state_id_number: employer_state_id_number
+        state_income_tax: state_income_tax
+        state: state
+        local_income_tax: local_income_tax
+        locality_name: locality_name
+      properties:
+        state:
+          description: State associated with the wage.
+          nullable: true
+          type: string
+        employer_state_id_number:
+          description: State identification number of the employer.
+          nullable: true
+          type: string
+        state_wages_tips:
+          description: Wages and tips from the specified state.
+          nullable: true
+          type: string
+        state_income_tax:
+          description: Income tax from the specified state.
+          nullable: true
+          type: string
+        local_wages_tips:
+          description: Wages and tips from the locality.
+          nullable: true
+          type: string
+        local_income_tax:
+          description: Income tax from the locality.
+          nullable: true
+          type: string
+        locality_name:
+          description: Name of the locality.
+          nullable: true
+          type: string
+      title: W2StateAndLocalWages
       type: object
     IncomeVerificationWebhookStatus:
       additionalProperties: true
@@ -19807,11 +22126,13 @@ components:
         start_date: 2000-01-23T04:56:07.000+00:00
       properties:
         start_date:
-          description: The start date of the incident, in ISO 8601 format, e.g. `"2020-10-30T15:26:48Z"`.
+          description: The start date of the incident, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            format, e.g. `"2020-10-30T15:26:48Z"`.
           format: date-time
           type: string
         end_date:
-          description: The end date of the incident, in ISO 8601 format, e.g. `"2020-10-30T15:26:48Z"`.
+          description: The end date of the incident, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            format, e.g. `"2020-10-30T15:26:48Z"`.
           format: date-time
           type: string
         title:
@@ -19848,8 +22169,8 @@ components:
           - UNKNOWN
           type: string
         updated_date:
-          description: The date when the update was published, in ISO 8601 format,
-            e.g. `"2020-10-30T15:26:48Z"`.
+          description: The date when the update was published, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            format, e.g. `"2020-10-30T15:26:48Z"`.
           format: date-time
           type: string
       title: IncidentUpdate
@@ -20049,8 +22370,7 @@ components:
       title: DepositSwitchAddressData
       type: object
     SandboxBankTransferFireWebhookRequest:
-      description: SandboxBankTransferFireWebhookRequest defines the request schema
-        for `/sandbox/bank_transfer/fire_webhook`
+      description: Defines the request schema for `/sandbox/bank_transfer/fire_webhook`
       example:
         webhook: webhook
         secret: secret
@@ -20075,8 +22395,7 @@ components:
       title: SandboxBankTransferFireWebhookRequest
       type: object
     SandboxBankTransferFireWebhookResponse:
-      description: SandboxBankTransferFireWebhookResponse defines the response schema
-        for `/sandbox/bank_transfer/fire_webhook`
+      description: Defines the response schema for `/sandbox/bank_transfer/fire_webhook`
       example:
         request_id: request_id
       properties:
@@ -20115,8 +22434,8 @@ components:
           description: The name of the application
           type: string
         created_at:
-          description: The date this application was linked in ISO8601 (YYYY-MM-DD)
-            format in UTC.
+          description: The date this application was linked in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            (YYYY-MM-DD) format in UTC.
           format: date
           type: string
         logo_url:
@@ -20466,7 +22785,7 @@ components:
           logo_url: logo_url
           name: name
           logo: logo
-          created_at: created_at
+          created_at: 2020-01-01T00:00:00.000+0000
           product_data_types:
           - ACCOUNT_BALANCE
           - ACCOUNT_BALANCE
@@ -20500,7 +22819,7 @@ components:
           logo_url: logo_url
           name: name
           logo: logo
-          created_at: created_at
+          created_at: 2020-01-01T00:00:00.000+0000
           product_data_types:
           - ACCOUNT_BALANCE
           - ACCOUNT_BALANCE
@@ -20552,7 +22871,7 @@ components:
         logo_url: logo_url
         name: name
         logo: logo
-        created_at: created_at
+        created_at: 2020-01-01T00:00:00.000+0000
         product_data_types:
         - ACCOUNT_BALANCE
         - ACCOUNT_BALANCE
@@ -20588,8 +22907,10 @@ components:
           nullable: true
           type: string
         created_at:
-          description: The date this application was linked in ISO8601 (YYYY-MM-DD)
-            format in UTC.
+          description: The date this application was linked in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            (YYYY-MM-DD) format in UTC.
+          example: 2020-01-01
+          format: date
           type: string
         product_data_types:
           description: (Deprecated) A list of enums representing the data collected
@@ -20741,6 +23062,7 @@ components:
         an `access_token`. This is only allowed for select clients and will not be
         supported in the future. Most clients should call /item/import to obtain an
         access token before making a request.
+      nullable: true
       properties:
         user_id:
           description: Account username.
@@ -21254,8 +23576,9 @@ components:
           nullable: true
           type: number
         balance_last_updated:
-          description: Timestamp in ISO-8601 format (YYYY-MM-DDTHH:mm:ssZ) indicating
-            the last time that the balance for the given account has been updated.
+          description: Timestamp in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            format (YYYY-MM-DDTHH:mm:ssZ) indicating the last time that the balance
+            for the given account has been updated.
           format: date-time
           nullable: true
           type: string
@@ -21434,13 +23757,14 @@ components:
           type: string
         authorized_date:
           description: The date that the transaction was authorized. Dates are returned
-            in an ISO 8601 format ( `YYYY-MM-DD` ).
+            in an [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format ( `YYYY-MM-DD`
+            ).
           format: date
           nullable: true
           type: string
         authorized_datetime:
           description: |-
-            Date and time when a transaction was authorized in ISO 8601 format ( `YYYY-MM-DDTHH:mm:ssZ` ).
+            Date and time when a transaction was authorized in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format ( `YYYY-MM-DDTHH:mm:ssZ` ).
 
             This field is only populated for UK institutions. For institutions in other countries, will be `null`.
           format: date-time
@@ -21448,7 +23772,7 @@ components:
           type: string
         datetime:
           description: |-
-            Date and time when a transaction was posted in ISO 8601 format ( `YYYY-MM-DDTHH:mm:ssZ` ).
+            Date and time when a transaction was posted in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format ( `YYYY-MM-DDTHH:mm:ssZ` ).
 
             This field is only populated for UK institutions. For institutions in other countries, will be `null`.
           format: date-time

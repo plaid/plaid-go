@@ -2,7 +2,6 @@ api/openapi.yaml
 api_plaid.go
 client.go
 configuration.go
-git_push.sh
 model_account_access.go
 model_account_assets.go
 model_account_assets_all_of.go
@@ -85,6 +84,10 @@ model_bank_transfer_migrate_account_response.go
 model_bank_transfer_network.go
 model_bank_transfer_receiver_details.go
 model_bank_transfer_status.go
+model_bank_transfer_sweep.go
+model_bank_transfer_sweep_account.go
+model_bank_transfer_sweep_get_request.go
+model_bank_transfer_sweep_get_response.go
 model_bank_transfer_type.go
 model_bank_transfer_user.go
 model_bank_transfers_events_update_webhook.go
@@ -96,6 +99,7 @@ model_country_code.go
 model_credit_card_liability.go
 model_credit_filter.go
 model_customer_initiated_return_risk.go
+model_deductions.go
 model_default_update_webhook.go
 model_deposit_switch_address_data.go
 model_deposit_switch_alt_create_request.go
@@ -111,6 +115,10 @@ model_deposit_switch_target_user.go
 model_deposit_switch_token_create_request.go
 model_deposit_switch_token_create_response.go
 model_depository_filter.go
+model_distribution_details.go
+model_document_metadata.go
+model_earnings.go
+model_earnings_total.go
 model_email.go
 model_employee.go
 model_employee_income_summary_field_string.go
@@ -118,6 +126,7 @@ model_employer.go
 model_employer_income_summary_field_string.go
 model_employers_search_request.go
 model_employers_search_response.go
+model_employment_details.go
 model_error.go
 model_external_payment_options.go
 model_external_payment_refund_details.go
@@ -129,6 +138,7 @@ model_historical_balance.go
 model_historical_update_webhook.go
 model_holding.go
 model_holdings_default_update_webhook.go
+model_holdings_override.go
 model_identity_get_request.go
 model_identity_get_request_options.go
 model_identity_get_response.go
@@ -141,6 +151,7 @@ model_income_verification_create_request.go
 model_income_verification_create_response.go
 model_income_verification_documents_download_request.go
 model_income_verification_documents_download_response.go
+model_income_verification_paystub_get_request.go
 model_income_verification_paystubs_get_request.go
 model_income_verification_paystubs_get_response.go
 model_income_verification_refresh_request.go
@@ -148,6 +159,8 @@ model_income_verification_refresh_response.go
 model_income_verification_status_webhook.go
 model_income_verification_summary_get_request.go
 model_income_verification_summary_get_response.go
+model_income_verification_taxforms_get_request.go
+model_income_verification_taxforms_get_response.go
 model_income_verification_webhook_status.go
 model_inflow_model.go
 model_initial_update_webhook.go
@@ -173,6 +186,7 @@ model_investments_holdings_get_response.go
 model_investments_transactions_get_request.go
 model_investments_transactions_get_request_options.go
 model_investments_transactions_get_response.go
+model_investments_transactions_override.go
 model_item.go
 model_item_access_token_invalidate_request.go
 model_item_access_token_invalidate_response.go
@@ -230,6 +244,7 @@ model_mfa.go
 model_mortgage_interest_rate.go
 model_mortgage_liability.go
 model_mortgage_property_address.go
+model_net_pay.go
 model_numbers.go
 model_numbers_ach.go
 model_numbers_ach_nullable.go
@@ -243,6 +258,7 @@ model_override_account_type.go
 model_override_accounts.go
 model_owner.go
 model_owner_override.go
+model_pay.go
 model_pay_frequency.go
 model_pay_period_details.go
 model_payment_amount.go
@@ -271,7 +287,9 @@ model_payment_meta.go
 model_payment_schedule_interval.go
 model_payment_status_update_webhook.go
 model_paystub.go
+model_paystub_address.go
 model_paystub_deduction.go
+model_paystub_details.go
 model_paystub_employer.go
 model_paystub_ytd_details.go
 model_pending_expiration_webhook.go
@@ -327,6 +345,7 @@ model_scopes.go
 model_scopes_context.go
 model_scopes_nullable.go
 model_security.go
+model_security_override.go
 model_sender_bacs_nullable.go
 model_servicer_address_data.go
 model_signal_address_data.go
@@ -343,12 +362,14 @@ model_signal_scores.go
 model_signal_user.go
 model_standalone_account_type.go
 model_standalone_currency_code_list.go
-model_standalone_investment_transaction_subtype.go
 model_standalone_investment_transaction_type.go
 model_student_loan.go
 model_student_loan_repayment_model.go
 model_student_loan_status.go
 model_student_repayment_plan.go
+model_taxform.go
+model_taxpayer_id.go
+model_total.go
 model_transaction.go
 model_transaction_all_of.go
 model_transaction_base.go
@@ -362,6 +383,7 @@ model_transactions_refresh_request.go
 model_transactions_refresh_response.go
 model_transactions_removed_webhook.go
 model_transfer.go
+model_transfer_authorization.go
 model_transfer_authorization_create_request.go
 model_transfer_authorization_create_response.go
 model_transfer_authorization_decision_rationale.go
@@ -387,13 +409,18 @@ model_transfer_network.go
 model_transfer_receiver_details.go
 model_transfer_status.go
 model_transfer_type.go
-model_transfer_user.go
-model_transfer_user_address.go
+model_transfer_user_address_in_request.go
+model_transfer_user_address_in_response.go
+model_transfer_user_in_request.go
+model_transfer_user_in_response.go
 model_user_custom_password.go
 model_user_permission_revoked_webhook.go
 model_verification_expired_webhook.go
 model_verification_refresh_status.go
 model_verification_status.go
+model_w2.go
+model_w2_box12.go
+model_w2_state_and_local_wages.go
 model_warning.go
 model_webhook_update_acknowledged_webhook.go
 model_webhook_verification_key_get_request.go

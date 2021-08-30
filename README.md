@@ -26,7 +26,7 @@ $ go get github.com/plaid/plaid-go@{VERSION}
 ## Documentation
 
 The module supports all Plaid API endpoints.  For complete information about
-the API, head to the [docs][https://plaid.com/docs/api].
+the API, head to the [docs](https://plaid.com/docs/api).
 
 ## Getting Started
 
