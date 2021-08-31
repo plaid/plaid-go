@@ -1,6 +1,6 @@
 # plaid-go [![CircleCI](https://circleci.com/gh/plaid/plaid-go.svg?style=svg)](https://circleci.com/gh/plaid/plaid-go) [![GoDoc](https://godoc.org/github.com/plaid/plaid-go?status.svg)](https://godoc.org/github.com/plaid/plaid-go/plaid)
 
-The official Go client library for the [Plaid API](https://plaid.com/docs). The library is now generated from our [OpenAPI schema](https://github.com/plaid/plaid-openapi). For older manually-written versions of this client library, go [here](https://github.com/plaid/plaid-go/commit/0d3f02cddaa8fd637e84dccf2175a4a1a7dd0e07) for the latest non-generated version.
+The official Go client library for the [Plaid API](https://plaid.com/docs). The library is now generated from our [OpenAPI schema](https://github.com/plaid/plaid-openapi) and is only compatible with the 2020-09-14 Plaid API version. The current library version contains breaking changes from the 7.x.x library version. For the previous version of this client library, also targeting Plaid API version 2020-09-14, [see version 7.3.0](https://github.com/plaid/plaid-go/releases/tag/7.3.0-archived).
 
 ## Table of Contents
 
