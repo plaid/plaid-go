@@ -7,7 +7,7 @@ info:
     details.
   termsOfService: https://plaid.com/legal/
   title: The Plaid API
-  version: 2020-09-14_1.31.1
+  version: 2020-09-14_1.33.0
 servers:
 - description: Production
   url: https://production.plaid.com
@@ -3179,7 +3179,7 @@ paths:
               examples:
                 example-1:
                   value:
-                    link_token: link-production-840204-193734
+                    link_token: link-sandbox-af1a0311-da53-4636-b754-dd15cc058176
                     expiration: 2020-03-27T12:56:34Z
                     request_id: XQVgFigpGHXkb0b
               schema:
@@ -3426,11 +3426,11 @@ paths:
 
         In Plaid's sandbox environment the decisions will be returned as follows:
 
-          - To approve a transfer, create an Item in Link with the username `user_good` and password `pass_good`
+          - To approve a transfer, make an authorization request with an `amount` less than the available balance in the account.
 
-          - To decline a transfer with the rationale code `NSF`, create an Item in Link with the username `declined_nsf_good` and password `pass_good`
+          - To decline a transfer with the rationale code `NSF`, the available balance on the account must be less than the authorization `amount`. See [Create Sandbox test data](https://plaid.com/docs/sandbox/user-custom/) for details on how to customize data in Sandbox.
 
-          - To decline a transfer with the rationale code `RISK`, create an Item in Link with the username `declined_risk_good` and password `pass_good`
+          - To decline a transfer with the rationale code `RISK`, the available balance on the account must be exactly $0. See [Create Sandbox test data](https://plaid.com/docs/sandbox/user-custom/) for details on how to customize data in Sandbox.
 
           - To permit a transfer with the rationale code `MANUALLY_VERIFIED_ITEM`, create an Item in Link through the [Same Day Micro-deposits flow](https://plaid.com/docs/auth/coverage/testing/#testing-same-day-micro-deposits).
 
@@ -10269,6 +10269,8 @@ components:
         link_customization_name: link_customization_name
         eu_config:
           headless: true
+        update:
+          account_selection_enabled: false
         language: language
         secret: secret
         deposit_switch:
@@ -10360,7 +10362,7 @@ components:
           description: |-
             List of Plaid product(s) you wish to use. If launching Link in update mode, should be omitted; required otherwise. Valid products are:
 
-            `transactions`, `auth`, `identity`, `assets`, `investments`, `liabilities`, `payment_initiation`, `deposit_switch`, `income_verification`
+            `transactions`, `auth`, `identity`, `assets`, `investments`, `liabilities`, `payment_initiation`, `deposit_switch`, `income_verification`, `transfer`
 
             `balance` is *not* a valid value, the Balance product does not require explicit initalization and will automatically be initialized when any other product is initialized.
 
@@ -10424,6 +10426,8 @@ components:
           $ref: '#/components/schemas/LinkTokenCreateRequestIncomeVerification'
         auth:
           $ref: '#/components/schemas/LinkTokenCreateRequestAuth'
+        update:
+          $ref: '#/components/schemas/LinkTokenCreateRequestUpdate'
       required:
       - client_name
       - country_codes
@@ -10580,6 +10584,16 @@ components:
           type: string
       required:
       - client_user_id
+      type: object
+    LinkTokenCreateRequestUpdate:
+      description: Specifies options for initializing Link for [update mode](https://plaid.com/docs/link/update-mode).
+      example:
+        account_selection_enabled: false
+      properties:
+        account_selection_enabled:
+          default: false
+          description: If `true`, enables [update mode with Account Select](https://plaid.com/docs/link/update-mode/#using-update-mode-to-request-new-accounts).
+          type: boolean
       type: object
     LinkTokenCreateRequestAccountSubtypes:
       description: |
@@ -11070,6 +11084,8 @@ components:
 
         `loan:` Loan account
 
+        `payroll:` Payroll acccount
+
         `other:` Non-specified account type
 
         See the [Account type schema](https://plaid.com/docs/api/accounts#account-type-schema) for a full listing of account types and corresponding subtypes.
@@ -11078,6 +11094,7 @@ components:
       - credit
       - depository
       - loan
+      - payroll
       - other
       title: OverrideAccountType
       type: string
@@ -11321,6 +11338,7 @@ components:
       - rewards
       - safe deposit
       - sarsep
+      - payroll
       - null
       nullable: true
       title: AccountSubtype
@@ -12342,7 +12360,10 @@ components:
       description: Fired when an Item's historical transaction pull is completed and
         Plaid has prepared as much historical transaction data as possible for the
         Item. Once this webhook has been fired, transaction data beyond the most recent
-        30 days can be fetched for the Item.
+        30 days can be fetched for the Item. If [Account Select v2](https://plaid.com/docs/link/customization/#account-select)
+        is enabled, this webhook will also be fired if account selections for the
+        Item are updated, with `num_transactions` set to the number of net new transactions
+        pulled after the account selection update.
       properties:
         webhook_type:
           description: '`TRANSACTIONS`'
@@ -12377,7 +12398,10 @@ components:
       additionalProperties: true
       description: Fired when an Item's initial transaction pull is completed. Once
         this webhook has been fired, transaction data for the most recent 30 days
-        can be fetched for the Item.
+        can be fetched for the Item. If [Account Select v2](https://plaid.com/docs/link/customization/#account-select)
+        is enabled, this webhook will also be fired if account selections for the
+        Item are updated, with `num_transactions` set to the number of net new transactions
+        pulled after the account selection update.
       properties:
         webhook_type:
           description: '`TRANSACTIONS`'
@@ -13791,6 +13815,7 @@ components:
       - income_verification
       - deposit_switch
       - standing_orders
+      - transfer
       title: Products
       type: string
     ProductStatus:
@@ -14013,6 +14038,8 @@ components:
           $ref: '#/components/schemas/LiabilityOverride'
         inflow_model:
           $ref: '#/components/schemas/InflowModel'
+        income:
+          $ref: '#/components/schemas/IncomeOverride'
       required:
       - currency
       - force_available_balance
@@ -14406,6 +14433,31 @@ components:
       - transaction_name
       - type
       title: InflowModel
+      type: object
+    IncomeOverride:
+      description: Specify payroll data on the account.
+      properties:
+        paystubs:
+          description: A list of paystubs associated with the account.
+          items:
+            $ref: '#/components/schemas/PaystubOverride'
+          type: array
+      title: IncomeOverride
+      type: object
+    PaystubOverride:
+      description: An object representing data from a paystub.
+      properties:
+        employer:
+          $ref: '#/components/schemas/PaystubOverride_employer'
+        employee:
+          $ref: '#/components/schemas/PaystubOverride_employee'
+        income_breakdown:
+          items:
+            $ref: '#/components/schemas/IncomeBreakdown'
+          type: array
+        pay_period_details:
+          $ref: '#/components/schemas/PayPeriodDetails'
+      title: PaystubOverride
       type: object
     ItemId:
       description: The `item_id` of the Item associated with this webhook, warning,
@@ -20258,6 +20310,12 @@ components:
         secret: secret
         user:
           email_address: email_address
+          home_address:
+            country: country
+            city: city
+            street: street
+            region: region
+            postal_code: postal_code
           last_name: last_name
           first_name: first_name
         client_id: client_id
@@ -20294,9 +20352,11 @@ components:
       properties:
         name:
           description: The employer's name
+          nullable: true
           type: string
         tax_id:
           description: The employer's tax id
+          nullable: true
           type: string
       title: IncomeVerificationPrecheckEmployer
       type: object
@@ -20326,6 +20386,12 @@ components:
     IncomeVerificationPrecheckUser:
       example:
         email_address: email_address
+        home_address:
+          country: country
+          city: city
+          street: street
+          region: region
+          postal_code: postal_code
         last_name: last_name
         first_name: first_name
       nullable: true
@@ -20343,7 +20409,7 @@ components:
           nullable: true
           type: string
         home_address:
-          $ref: '#/components/schemas/AddressDataNullable'
+          $ref: '#/components/schemas/SignalAddressData'
       title: IncomeVerificationPrecheckUser
       type: object
     IncomeVerificationPrecheckResponse:
@@ -21985,7 +22051,7 @@ components:
             The type of income. Possible values include:
               `"regular"`: regular income
               `"overtime"`: overtime income
-               `"bonus"`: bonus income
+              `"bonus"`: bonus income
           enum:
           - bonus
           - overtime
@@ -23834,6 +23900,12 @@ components:
     SignalAddressData:
       additionalProperties: true
       description: Data about the components comprising an address.
+      example:
+        country: country
+        city: city
+        street: street
+        region: region
+        postal_code: postal_code
       nullable: true
       properties:
         city:
@@ -24393,6 +24465,32 @@ components:
       description: Defines the response schema for `/sandbox/oauth/select_accounts`
       title: SandboxOauthSelectAccountsResponse
       type: object
+    NewAccountsAvailableWebhook:
+      description: Fired when Plaid detects a new account for Items created or updated
+        with [Account Select v2](https://plaid.com/docs/link/customization/#account-select).
+        Upon receiving this webhook, you can prompt your users to share new accounts
+        with you through [Account Select v2 update mode](https://plaid.com/docs/link/update-mode/#using-update-mode-to-request-new-accounts).
+      properties:
+        webhook_type:
+          description: '`ITEM`'
+          type: string
+        webhook_code:
+          description: '`NEW_ACCOUNTS_AVAILABLE`'
+          type: string
+        item_id:
+          description: The `item_id` of the Item associated with this webhook, warning,
+            or error
+          title: ItemId
+          type: string
+        error:
+          $ref: '#/components/schemas/Error'
+      title: NewAccountsAvailableWebhook
+      type: object
+      x-examples:
+        example-1:
+          webhook_type: ITEM
+          webhook_code: NEW_ACCOUNTS_AVAILABLE
+          item_id: gAXlMgVEw5uEGoQnnXZ6tn9E7Mn3LBc4PJVKZ
     PaymentInitiationRecipientGetResponse_allOf:
       properties:
         request_id:
@@ -24474,6 +24572,45 @@ components:
       - payment_meta
       - pending_transaction_id
       - transaction_code
+      type: object
+    PaystubOverride_employer:
+      description: The employer on the paystub.
+      properties:
+        name:
+          description: The name of the employer.
+          type: string
+      type: object
+    PaystubOverride_employee_address:
+      description: The address of the employee.
+      properties:
+        city:
+          description: The full city name.
+          type: string
+        region:
+          description: |-
+            The region or state
+            Example: `"NC"`
+          type: string
+        street:
+          description: |-
+            The full street address
+            Example: `"564 Main Street, APT 15"`
+          type: string
+        postal_code:
+          description: 5 digit postal code.
+          type: string
+        country:
+          description: The country of the address.
+          type: string
+      type: object
+    PaystubOverride_employee:
+      description: The employee on the paystub.
+      properties:
+        name:
+          description: The name of the employee.
+          type: string
+        address:
+          $ref: '#/components/schemas/PaystubOverride_employee_address'
       type: object
     AccountIdentity_allOf:
       properties:

@@ -148,6 +148,7 @@ model_identity_get_request_options.go
 model_identity_get_response.go
 model_incident_update.go
 model_income_breakdown.go
+model_income_override.go
 model_income_summary.go
 model_income_summary_field_number.go
 model_income_summary_field_string.go
@@ -241,6 +242,7 @@ model_link_token_create_request_auth.go
 model_link_token_create_request_deposit_switch.go
 model_link_token_create_request_income_verification.go
 model_link_token_create_request_payment_initiation.go
+model_link_token_create_request_update.go
 model_link_token_create_request_user.go
 model_link_token_create_response.go
 model_link_token_eu_config.go
@@ -255,6 +257,7 @@ model_mortgage_interest_rate.go
 model_mortgage_liability.go
 model_mortgage_property_address.go
 model_net_pay.go
+model_new_accounts_available_webhook.go
 model_numbers.go
 model_numbers_ach.go
 model_numbers_ach_nullable.go
@@ -304,6 +307,10 @@ model_paystub_address.go
 model_paystub_deduction.go
 model_paystub_details.go
 model_paystub_employer.go
+model_paystub_override.go
+model_paystub_override_employee.go
+model_paystub_override_employee_address.go
+model_paystub_override_employer.go
 model_paystub_ytd_details.go
 model_pending_expiration_webhook.go
 model_personal_finance_category.go
