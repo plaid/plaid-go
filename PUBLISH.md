@@ -1,6 +1,6 @@
 # Publish guide
 
-`plaid-go` is published on this repo via tags, as it uses GOMODULES. Follow SEMVER to come up with the new `VERSION` number. Make sure to first update the `CHANGELOG` file.
+`plaid-go` is published on this repo via tags, as it uses GOMODULES. Follow SEMVER to come up with the new `VERSION` number. Make sure to first update the `CHANGELOG` file. Also, modify the Makefile to have the new `GO_PACKAGE_VERSION`.
 
 After merging into `master`, run the following commands.
 
