@@ -7,7 +7,7 @@ info:
     details.
   termsOfService: https://plaid.com/legal/
   title: The Plaid API
-  version: 2020-09-14_1.33.0
+  version: 2020-09-14_1.36.1
 servers:
 - description: Production
   url: https://production.plaid.com
@@ -386,6 +386,37 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: Error response
       summary: Refresh transaction data
+      tags:
+      - plaid
+  /transactions/recurring/get:
+    post:
+      description: |-
+        The `/transactions/recurring/get` endpoint identifies and returns groups of transactions that occur on a regular basis for the inputted Item and accounts.
+
+        The product is currently in beta. To request access, contact transactions-feedback@plaid.com.
+      operationId: transactionsRecurringGet
+      requestBody:
+        content:
+          application/json:
+            examples: {}
+            schema:
+              $ref: '#/components/schemas/TransactionsRecurringGetRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples: {}
+              schema:
+                $ref: '#/components/schemas/TransactionsRecurringGetResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error response
+      summary: Get streams of recurring transactions
       tags:
       - plaid
   /institutions/get:
@@ -1640,6 +1671,7 @@ paths:
                         last_payment_amount: 168.25
                         last_payment_date: 2019-05-22
                         last_statement_issue_date: 2019-05-28
+                        last_statement_balance: 1708.77
                         minimum_payment_amount: 20
                         next_payment_due_date: 2020-05-28
                       mortgage:
@@ -5420,6 +5452,140 @@ components:
       required:
       - request_id
       type: object
+    TransactionsRecurringGetRequest:
+      description: TransactionsRecurringGetRequest defines the request schema for
+        `/transactions/recurring/get`
+      example:
+        access_token: access_token
+        account_ids:
+        - account_ids
+        - account_ids
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        access_token:
+          description: The access token associated with the Item data is being requested
+            for.
+          title: AccessToken
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        account_ids:
+          description: |-
+            A list of `account_ids` to retrieve for the Item
+
+            Note: An error will be returned if a provided `account_id` is not associated with the Item.
+          items:
+            type: string
+          type: array
+      type: object
+    TransactionsRecurringGetResponse:
+      additionalProperties: true
+      description: TransactionsRecurringGetResponse defines the response schema for
+        `/transactions/recurring/get`
+      example:
+        inflow_streams:
+        - account_id: account_id
+          average_amount:
+            unofficial_currency_code: unofficial_currency_code
+            amount: 0.8008281904610115
+            iso_currency_code: iso_currency_code
+          is_active: true
+          category_id: category_id
+          stream_id: stream_id
+          description: description
+          transaction_ids:
+          - transaction_ids
+          - transaction_ids
+          category:
+          - category
+          - category
+          first_date: 2000-01-23
+          last_date: 2000-01-23
+        - account_id: account_id
+          average_amount:
+            unofficial_currency_code: unofficial_currency_code
+            amount: 0.8008281904610115
+            iso_currency_code: iso_currency_code
+          is_active: true
+          category_id: category_id
+          stream_id: stream_id
+          description: description
+          transaction_ids:
+          - transaction_ids
+          - transaction_ids
+          category:
+          - category
+          - category
+          first_date: 2000-01-23
+          last_date: 2000-01-23
+        request_id: request_id
+        outflow_streams:
+        - account_id: account_id
+          average_amount:
+            unofficial_currency_code: unofficial_currency_code
+            amount: 0.8008281904610115
+            iso_currency_code: iso_currency_code
+          is_active: true
+          category_id: category_id
+          stream_id: stream_id
+          description: description
+          transaction_ids:
+          - transaction_ids
+          - transaction_ids
+          category:
+          - category
+          - category
+          first_date: 2000-01-23
+          last_date: 2000-01-23
+        - account_id: account_id
+          average_amount:
+            unofficial_currency_code: unofficial_currency_code
+            amount: 0.8008281904610115
+            iso_currency_code: iso_currency_code
+          is_active: true
+          category_id: category_id
+          stream_id: stream_id
+          description: description
+          transaction_ids:
+          - transaction_ids
+          - transaction_ids
+          category:
+          - category
+          - category
+          first_date: 2000-01-23
+          last_date: 2000-01-23
+      properties:
+        inflow_streams:
+          description: An array of depository transaction streams.
+          items:
+            $ref: '#/components/schemas/TransactionStream'
+          type: array
+        outflow_streams:
+          description: An array of expense transaction streams.
+          items:
+            $ref: '#/components/schemas/TransactionStream'
+          type: array
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - inflow_strems
+      - outflow_streams
+      - request_id
+      type: object
     InstitutionsGetRequest:
       description: InstitutionsGetRequest defines the request schema for `/institutions/get`
       example:
@@ -7666,18 +7832,18 @@ components:
           institution_id: institution_id
         liabilities:
           mortgage:
-          - origination_principal_amount: 4.145608029883936
+          - origination_principal_amount: 7.386281948385884
             account_number: account_number
-            next_monthly_payment: 2.027123023002322
+            next_monthly_payment: 4.145608029883936
             loan_type_description: loan_type_description
-            escrow_balance: 7.061401241503109
+            escrow_balance: 9.301444243932576
             has_pmi: true
             last_payment_date: 2000-01-23
-            past_due_amount: 7.386281948385884
+            past_due_amount: 1.2315135367772556
             maturity_date: 2000-01-23
             has_prepayment_penalty: true
-            current_late_fee: 2.3021358869347655
-            last_payment_amount: 3.616076749251911
+            current_late_fee: 7.061401241503109
+            last_payment_amount: 2.027123023002322
             property_address:
               country: country
               city: city
@@ -7688,23 +7854,23 @@ components:
             origination_date: 2000-01-23
             loan_term: loan_term
             interest_rate:
-              percentage: 9.301444243932576
+              percentage: 3.616076749251911
               type: type
-            ytd_interest_paid: 1.2315135367772556
-            ytd_principal_paid: 1.0246457001441578
+            ytd_interest_paid: 1.0246457001441578
+            ytd_principal_paid: 1.4894159098541704
             next_payment_due_date: 2000-01-23
-          - origination_principal_amount: 4.145608029883936
+          - origination_principal_amount: 7.386281948385884
             account_number: account_number
-            next_monthly_payment: 2.027123023002322
+            next_monthly_payment: 4.145608029883936
             loan_type_description: loan_type_description
-            escrow_balance: 7.061401241503109
+            escrow_balance: 9.301444243932576
             has_pmi: true
             last_payment_date: 2000-01-23
-            past_due_amount: 7.386281948385884
+            past_due_amount: 1.2315135367772556
             maturity_date: 2000-01-23
             has_prepayment_penalty: true
-            current_late_fee: 2.3021358869347655
-            last_payment_amount: 3.616076749251911
+            current_late_fee: 7.061401241503109
+            last_payment_amount: 2.027123023002322
             property_address:
               country: country
               city: city
@@ -7715,13 +7881,13 @@ components:
             origination_date: 2000-01-23
             loan_term: loan_term
             interest_rate:
-              percentage: 9.301444243932576
+              percentage: 3.616076749251911
               type: type
-            ytd_interest_paid: 1.2315135367772556
-            ytd_principal_paid: 1.0246457001441578
+            ytd_interest_paid: 1.0246457001441578
+            ytd_principal_paid: 1.4894159098541704
             next_payment_due_date: 2000-01-23
           student:
-          - origination_principal_amount: 1.1730742509559433
+          - origination_principal_amount: 4.965218492984954
             account_number: account_number
             loan_status:
               end_date: 2000-01-23
@@ -7734,32 +7900,32 @@ components:
             guarantor: guarantor
             is_overdue: true
             last_statement_issue_date: 2000-01-23
-            last_payment_amount: 6.84685269835264
+            last_payment_amount: 7.457744773683766
             expected_payoff_date: 2000-01-23
             sequence_number: sequence_number
             account_id: account_id
             pslf_status:
-              payments_remaining: 9.965781217890562
-              payments_made: 5.025004791520295
+              payments_remaining: 9.369310271410669
+              payments_made: 9.965781217890562
               estimated_eligibility_date: 2000-01-23
-            interest_rate_percentage: 1.4894159098541704
+            interest_rate_percentage: 6.84685269835264
             disbursement_dates:
             - 2000-01-23
             - 2000-01-23
             origination_date: 2000-01-23
-            outstanding_interest_amount: 4.965218492984954
+            outstanding_interest_amount: 5.025004791520295
             servicer_address:
               country: country
               city: city
               street: street
               region: region
               postal_code: postal_code
-            ytd_interest_paid: 9.369310271410669
-            ytd_principal_paid: 6.683562403749608
+            ytd_interest_paid: 6.683562403749608
+            ytd_principal_paid: 8.762042012749001
             loan_name: loan_name
-            minimum_payment_amount: 7.457744773683766
+            minimum_payment_amount: 1.1730742509559433
             next_payment_due_date: 2000-01-23
-          - origination_principal_amount: 1.1730742509559433
+          - origination_principal_amount: 4.965218492984954
             account_number: account_number
             loan_status:
               end_date: 2000-01-23
@@ -7772,37 +7938,37 @@ components:
             guarantor: guarantor
             is_overdue: true
             last_statement_issue_date: 2000-01-23
-            last_payment_amount: 6.84685269835264
+            last_payment_amount: 7.457744773683766
             expected_payoff_date: 2000-01-23
             sequence_number: sequence_number
             account_id: account_id
             pslf_status:
-              payments_remaining: 9.965781217890562
-              payments_made: 5.025004791520295
+              payments_remaining: 9.369310271410669
+              payments_made: 9.965781217890562
               estimated_eligibility_date: 2000-01-23
-            interest_rate_percentage: 1.4894159098541704
+            interest_rate_percentage: 6.84685269835264
             disbursement_dates:
             - 2000-01-23
             - 2000-01-23
             origination_date: 2000-01-23
-            outstanding_interest_amount: 4.965218492984954
+            outstanding_interest_amount: 5.025004791520295
             servicer_address:
               country: country
               city: city
               street: street
               region: region
               postal_code: postal_code
-            ytd_interest_paid: 9.369310271410669
-            ytd_principal_paid: 6.683562403749608
+            ytd_interest_paid: 6.683562403749608
+            ytd_principal_paid: 8.762042012749001
             loan_name: loan_name
-            minimum_payment_amount: 7.457744773683766
+            minimum_payment_amount: 1.1730742509559433
             next_payment_due_date: 2000-01-23
           credit:
           - account_id: account_id
             last_payment_date: 2000-01-23
             is_overdue: true
             last_statement_issue_date: 2000-01-23
-            minimum_payment_amount: 5.637376656633329
+            minimum_payment_amount: 2.3021358869347655
             aprs:
             - apr_percentage: 0.8008281904610115
               apr_type: balance_transfer_apr
@@ -7814,11 +7980,12 @@ components:
               balance_subject_to_apr: 6.027456183070403
             last_payment_amount: 5.962133916683182
             next_payment_due_date: 2000-01-23
+            last_statement_balance: 5.637376656633329
           - account_id: account_id
             last_payment_date: 2000-01-23
             is_overdue: true
             last_statement_issue_date: 2000-01-23
-            minimum_payment_amount: 5.637376656633329
+            minimum_payment_amount: 2.3021358869347655
             aprs:
             - apr_percentage: 0.8008281904610115
               apr_type: balance_transfer_apr
@@ -7830,6 +7997,7 @@ components:
               balance_subject_to_apr: 6.027456183070403
             last_payment_amount: 5.962133916683182
             next_payment_due_date: 2000-01-23
+            last_statement_balance: 5.637376656633329
         accounts:
         - official_name: official_name
           balances:
@@ -8872,7 +9040,7 @@ components:
           description: The maximum integer number of days of history to include in
             the Asset Report. If using Fannie Mae Day 1 Certainty, `days_requested`
             must be at least 61 for new originations or at least 31 for refinancings.
-          maximum: 730
+          maximum: 731
           minimum: 0
           type: integer
         options:
@@ -8900,10 +9068,12 @@ components:
         client_report_id:
           description: Client-generated identifier, which can be used by lenders to
             track loan applications.
+          nullable: true
           type: string
         webhook:
           description: URL to which Plaid will send Assets webhooks, for example when
             the requested Asset Report is ready.
+          nullable: true
           type: string
         user:
           $ref: '#/components/schemas/AssetReportUser'
@@ -8975,7 +9145,7 @@ components:
           description: The maximum number of days of history to include in the Asset
             Report. Must be an integer. If not specified, the value from the original
             call to `/asset_report/create` will be used.
-          maximum: 730
+          maximum: 731
           minimum: 0
           type: integer
         options:
@@ -9002,10 +9172,12 @@ components:
         client_report_id:
           description: Client-generated identifier, which can be used by lenders to
             track loan applications.
+          nullable: true
           type: string
         webhook:
           description: URL to which Plaid will send Assets webhooks, for example when
             the requested Asset Report is ready.
+          nullable: true
           type: string
         user:
           $ref: '#/components/schemas/AssetReportUser'
@@ -11696,6 +11868,120 @@ components:
       - store_number
       title: Transaction Location
       type: object
+    TransactionStream:
+      additionalProperties: true
+      description: A grouping of related transactions
+      example:
+        account_id: account_id
+        average_amount:
+          unofficial_currency_code: unofficial_currency_code
+          amount: 0.8008281904610115
+          iso_currency_code: iso_currency_code
+        is_active: true
+        category_id: category_id
+        stream_id: stream_id
+        description: description
+        transaction_ids:
+        - transaction_ids
+        - transaction_ids
+        category:
+        - category
+        - category
+        first_date: 2000-01-23
+        last_date: 2000-01-23
+      properties:
+        account_id:
+          description: The ID of the account to which the stream belongs
+          type: string
+        stream_id:
+          description: A unique id for the stream
+          type: string
+        category_id:
+          description: The ID of the category to which this transaction belongs. See
+            [Categories](https://plaid.com/docs/#category-overview).
+          type: string
+        category:
+          description: A hierarchical array of the categories to which this transaction
+            belongs. See [Categories](https://plaid.com/docs/#category-overview).
+          items:
+            type: string
+          type: array
+        description:
+          description: A description of the transaction stream.
+          type: string
+        first_date:
+          description: The posted date of the earliest transaction in the stream.
+          format: date
+          type: string
+        last_date:
+          description: The posted date of the latest transaction in the stream.
+          format: date
+          type: string
+        frequency:
+          $ref: '#/components/schemas/RecurringTransactionFrequency'
+        transaction_ids:
+          description: An array of Plaid transaction IDs belonging to the stream,
+            sorted by posted date.
+          items:
+            type: string
+          type: array
+        average_amount:
+          $ref: '#/components/schemas/TransactionStreamAmount'
+        is_active:
+          description: indicates whether the transaction stream is still live.
+          type: boolean
+      required:
+      - account_id
+      - average_amount
+      - category
+      - category_id
+      - description
+      - first_date
+      - frequency
+      - is_active
+      - last_date
+      - stream_id
+      - transaction_ids
+      title: TransactionStream
+      type: object
+      x-examples: {}
+    TransactionStreamAmount:
+      additionalProperties: true
+      description: Object with data pertaining to an amount on the transaction stream.
+      example:
+        unofficial_currency_code: unofficial_currency_code
+        amount: 0.8008281904610115
+        iso_currency_code: iso_currency_code
+      properties:
+        amount:
+          description: represents the numerical value of an amount.
+          type: number
+        iso_currency_code:
+          description: |-
+            The ISO-4217 currency code of the amount. Always `null` if `unofficial_currency_code` is non-`null`.
+
+            See the [currency code schema](https://plaid.com/docs/api/accounts#currency-code-schema) for a full listing of supported `iso_currency_code`s.
+          nullable: true
+          type: string
+        unofficial_currency_code:
+          description: The unofficial currency code of the amount. Always `null` if
+            `iso_currency_code` is non-`null`. Unofficial currency codes are used
+            for currencies that do not have official ISO currency codes, such as cryptocurrencies
+            and the currencies of certain countries.
+          nullable: true
+          type: string
+      title: TransactionStreamAmount
+      type: object
+    RecurringTransactionFrequency:
+      description: describes the frequency of the transaction stream.
+      enum:
+      - UNKNOWN
+      - WEEKLY
+      - BIWEEKLY
+      - SEMI_MONTHLY
+      - MONTHLY
+      title: RecurringTransactionFrequency
+      type: string
     Institution:
       additionalProperties: true
       description: Details relating to a specific financial institution
@@ -12665,18 +12951,18 @@ components:
       description: An object containing liability accounts
       example:
         mortgage:
-        - origination_principal_amount: 4.145608029883936
+        - origination_principal_amount: 7.386281948385884
           account_number: account_number
-          next_monthly_payment: 2.027123023002322
+          next_monthly_payment: 4.145608029883936
           loan_type_description: loan_type_description
-          escrow_balance: 7.061401241503109
+          escrow_balance: 9.301444243932576
           has_pmi: true
           last_payment_date: 2000-01-23
-          past_due_amount: 7.386281948385884
+          past_due_amount: 1.2315135367772556
           maturity_date: 2000-01-23
           has_prepayment_penalty: true
-          current_late_fee: 2.3021358869347655
-          last_payment_amount: 3.616076749251911
+          current_late_fee: 7.061401241503109
+          last_payment_amount: 2.027123023002322
           property_address:
             country: country
             city: city
@@ -12687,23 +12973,23 @@ components:
           origination_date: 2000-01-23
           loan_term: loan_term
           interest_rate:
-            percentage: 9.301444243932576
+            percentage: 3.616076749251911
             type: type
-          ytd_interest_paid: 1.2315135367772556
-          ytd_principal_paid: 1.0246457001441578
+          ytd_interest_paid: 1.0246457001441578
+          ytd_principal_paid: 1.4894159098541704
           next_payment_due_date: 2000-01-23
-        - origination_principal_amount: 4.145608029883936
+        - origination_principal_amount: 7.386281948385884
           account_number: account_number
-          next_monthly_payment: 2.027123023002322
+          next_monthly_payment: 4.145608029883936
           loan_type_description: loan_type_description
-          escrow_balance: 7.061401241503109
+          escrow_balance: 9.301444243932576
           has_pmi: true
           last_payment_date: 2000-01-23
-          past_due_amount: 7.386281948385884
+          past_due_amount: 1.2315135367772556
           maturity_date: 2000-01-23
           has_prepayment_penalty: true
-          current_late_fee: 2.3021358869347655
-          last_payment_amount: 3.616076749251911
+          current_late_fee: 7.061401241503109
+          last_payment_amount: 2.027123023002322
           property_address:
             country: country
             city: city
@@ -12714,13 +13000,13 @@ components:
           origination_date: 2000-01-23
           loan_term: loan_term
           interest_rate:
-            percentage: 9.301444243932576
+            percentage: 3.616076749251911
             type: type
-          ytd_interest_paid: 1.2315135367772556
-          ytd_principal_paid: 1.0246457001441578
+          ytd_interest_paid: 1.0246457001441578
+          ytd_principal_paid: 1.4894159098541704
           next_payment_due_date: 2000-01-23
         student:
-        - origination_principal_amount: 1.1730742509559433
+        - origination_principal_amount: 4.965218492984954
           account_number: account_number
           loan_status:
             end_date: 2000-01-23
@@ -12733,32 +13019,32 @@ components:
           guarantor: guarantor
           is_overdue: true
           last_statement_issue_date: 2000-01-23
-          last_payment_amount: 6.84685269835264
+          last_payment_amount: 7.457744773683766
           expected_payoff_date: 2000-01-23
           sequence_number: sequence_number
           account_id: account_id
           pslf_status:
-            payments_remaining: 9.965781217890562
-            payments_made: 5.025004791520295
+            payments_remaining: 9.369310271410669
+            payments_made: 9.965781217890562
             estimated_eligibility_date: 2000-01-23
-          interest_rate_percentage: 1.4894159098541704
+          interest_rate_percentage: 6.84685269835264
           disbursement_dates:
           - 2000-01-23
           - 2000-01-23
           origination_date: 2000-01-23
-          outstanding_interest_amount: 4.965218492984954
+          outstanding_interest_amount: 5.025004791520295
           servicer_address:
             country: country
             city: city
             street: street
             region: region
             postal_code: postal_code
-          ytd_interest_paid: 9.369310271410669
-          ytd_principal_paid: 6.683562403749608
+          ytd_interest_paid: 6.683562403749608
+          ytd_principal_paid: 8.762042012749001
           loan_name: loan_name
-          minimum_payment_amount: 7.457744773683766
+          minimum_payment_amount: 1.1730742509559433
           next_payment_due_date: 2000-01-23
-        - origination_principal_amount: 1.1730742509559433
+        - origination_principal_amount: 4.965218492984954
           account_number: account_number
           loan_status:
             end_date: 2000-01-23
@@ -12771,37 +13057,37 @@ components:
           guarantor: guarantor
           is_overdue: true
           last_statement_issue_date: 2000-01-23
-          last_payment_amount: 6.84685269835264
+          last_payment_amount: 7.457744773683766
           expected_payoff_date: 2000-01-23
           sequence_number: sequence_number
           account_id: account_id
           pslf_status:
-            payments_remaining: 9.965781217890562
-            payments_made: 5.025004791520295
+            payments_remaining: 9.369310271410669
+            payments_made: 9.965781217890562
             estimated_eligibility_date: 2000-01-23
-          interest_rate_percentage: 1.4894159098541704
+          interest_rate_percentage: 6.84685269835264
           disbursement_dates:
           - 2000-01-23
           - 2000-01-23
           origination_date: 2000-01-23
-          outstanding_interest_amount: 4.965218492984954
+          outstanding_interest_amount: 5.025004791520295
           servicer_address:
             country: country
             city: city
             street: street
             region: region
             postal_code: postal_code
-          ytd_interest_paid: 9.369310271410669
-          ytd_principal_paid: 6.683562403749608
+          ytd_interest_paid: 6.683562403749608
+          ytd_principal_paid: 8.762042012749001
           loan_name: loan_name
-          minimum_payment_amount: 7.457744773683766
+          minimum_payment_amount: 1.1730742509559433
           next_payment_due_date: 2000-01-23
         credit:
         - account_id: account_id
           last_payment_date: 2000-01-23
           is_overdue: true
           last_statement_issue_date: 2000-01-23
-          minimum_payment_amount: 5.637376656633329
+          minimum_payment_amount: 2.3021358869347655
           aprs:
           - apr_percentage: 0.8008281904610115
             apr_type: balance_transfer_apr
@@ -12813,11 +13099,12 @@ components:
             balance_subject_to_apr: 6.027456183070403
           last_payment_amount: 5.962133916683182
           next_payment_due_date: 2000-01-23
+          last_statement_balance: 5.637376656633329
         - account_id: account_id
           last_payment_date: 2000-01-23
           is_overdue: true
           last_statement_issue_date: 2000-01-23
-          minimum_payment_amount: 5.637376656633329
+          minimum_payment_amount: 2.3021358869347655
           aprs:
           - apr_percentage: 0.8008281904610115
             apr_type: balance_transfer_apr
@@ -12829,6 +13116,7 @@ components:
             balance_subject_to_apr: 6.027456183070403
           last_payment_amount: 5.962133916683182
           next_payment_due_date: 2000-01-23
+          last_statement_balance: 5.637376656633329
       properties:
         credit:
           description: The credit accounts returned.
@@ -12858,7 +13146,7 @@ components:
       additionalProperties: true
       description: Contains details about a student loan account
       example:
-        origination_principal_amount: 1.1730742509559433
+        origination_principal_amount: 4.965218492984954
         account_number: account_number
         loan_status:
           end_date: 2000-01-23
@@ -12871,30 +13159,30 @@ components:
         guarantor: guarantor
         is_overdue: true
         last_statement_issue_date: 2000-01-23
-        last_payment_amount: 6.84685269835264
+        last_payment_amount: 7.457744773683766
         expected_payoff_date: 2000-01-23
         sequence_number: sequence_number
         account_id: account_id
         pslf_status:
-          payments_remaining: 9.965781217890562
-          payments_made: 5.025004791520295
+          payments_remaining: 9.369310271410669
+          payments_made: 9.965781217890562
           estimated_eligibility_date: 2000-01-23
-        interest_rate_percentage: 1.4894159098541704
+        interest_rate_percentage: 6.84685269835264
         disbursement_dates:
         - 2000-01-23
         - 2000-01-23
         origination_date: 2000-01-23
-        outstanding_interest_amount: 4.965218492984954
+        outstanding_interest_amount: 5.025004791520295
         servicer_address:
           country: country
           city: city
           street: street
           region: region
           postal_code: postal_code
-        ytd_interest_paid: 9.369310271410669
-        ytd_principal_paid: 6.683562403749608
+        ytd_interest_paid: 6.683562403749608
+        ytd_principal_paid: 8.762042012749001
         loan_name: loan_name
-        minimum_payment_amount: 7.457744773683766
+        minimum_payment_amount: 1.1730742509559433
         next_payment_due_date: 2000-01-23
       properties:
         account_id:
@@ -13052,7 +13340,7 @@ components:
         last_payment_date: 2000-01-23
         is_overdue: true
         last_statement_issue_date: 2000-01-23
-        minimum_payment_amount: 5.637376656633329
+        minimum_payment_amount: 2.3021358869347655
         aprs:
         - apr_percentage: 0.8008281904610115
           apr_type: balance_transfer_apr
@@ -13064,6 +13352,7 @@ components:
           balance_subject_to_apr: 6.027456183070403
         last_payment_amount: 5.962133916683182
         next_payment_due_date: 2000-01-23
+        last_statement_balance: 5.637376656633329
       properties:
         account_id:
           description: The ID of the account that this liability belongs to.
@@ -13093,6 +13382,9 @@ components:
             8601](https://wikipedia.org/wiki/ISO_8601) format (YYYY-MM-DD).
           format: date
           type: string
+        last_statement_balance:
+          description: The total amount owed as of the last statement issued
+          type: number
         minimum_payment_amount:
           description: The minimum payment due for the next billing cycle.
           type: number
@@ -13109,6 +13401,7 @@ components:
       - is_overdue
       - last_payment_amount
       - last_payment_date
+      - last_statement_balance
       - last_statement_issue_date
       - minimum_payment_amount
       - next_payment_due_date
@@ -13118,18 +13411,18 @@ components:
       additionalProperties: true
       description: Contains details about a mortgage account.
       example:
-        origination_principal_amount: 4.145608029883936
+        origination_principal_amount: 7.386281948385884
         account_number: account_number
-        next_monthly_payment: 2.027123023002322
+        next_monthly_payment: 4.145608029883936
         loan_type_description: loan_type_description
-        escrow_balance: 7.061401241503109
+        escrow_balance: 9.301444243932576
         has_pmi: true
         last_payment_date: 2000-01-23
-        past_due_amount: 7.386281948385884
+        past_due_amount: 1.2315135367772556
         maturity_date: 2000-01-23
         has_prepayment_penalty: true
-        current_late_fee: 2.3021358869347655
-        last_payment_amount: 3.616076749251911
+        current_late_fee: 7.061401241503109
+        last_payment_amount: 2.027123023002322
         property_address:
           country: country
           city: city
@@ -13140,10 +13433,10 @@ components:
         origination_date: 2000-01-23
         loan_term: loan_term
         interest_rate:
-          percentage: 9.301444243932576
+          percentage: 3.616076749251911
           type: type
-        ytd_interest_paid: 1.2315135367772556
-        ytd_principal_paid: 1.0246457001441578
+        ytd_interest_paid: 1.0246457001441578
+        ytd_principal_paid: 1.4894159098541704
         next_payment_due_date: 2000-01-23
       properties:
         account_id:
@@ -13260,7 +13553,7 @@ components:
       additionalProperties: true
       description: Object containing metadata about the interest rate for the mortgage.
       example:
-        percentage: 9.301444243932576
+        percentage: 3.616076749251911
         type: type
       properties:
         percentage:
@@ -13394,8 +13687,8 @@ components:
         Loan Forgiveness program. This is only returned if the institution is Fedloan
         (`ins_116527`). '
       example:
-        payments_remaining: 9.965781217890562
-        payments_made: 5.025004791520295
+        payments_remaining: 9.369310271410669
+        payments_made: 9.965781217890562
         estimated_eligibility_date: 2000-01-23
       properties:
         estimated_eligibility_date:
@@ -15150,6 +15443,9 @@ components:
             BTG:
               description: Bitcoin Gold
               type: string
+            BSV:
+              description: Bitcoin Satoshi Vision
+              type: string
             CNH:
               description: Chinese Yuan (offshore)
               type: string
@@ -15248,6 +15544,9 @@ components:
           type: string
         BTG:
           description: Bitcoin Gold
+          type: string
+        BSV:
+          description: Bitcoin Satoshi Vision
           type: string
         CNH:
           description: Chinese Yuan (offshore)
@@ -15459,7 +15758,7 @@ components:
             "401k":
               description: Standard 401(k) retirement account (US)
               type: string
-            "403b":
+            "403B":
               description: 403(b) retirement savings account for non-profits and schools
                 (US)
               type: string
@@ -15611,7 +15910,7 @@ components:
           required:
           - 401a
           - 401k
-          - 403b
+          - 403B
           - 457b
           - "529"
           - brokerage
@@ -15655,6 +15954,7 @@ components:
           - trust
           - ugma
           - utma
+          - variable annuity
           title: InvestmentAccountSubtype
           type: string
         other:
@@ -15799,7 +16099,7 @@ components:
         "401k":
           description: Standard 401(k) retirement account (US)
           type: string
-        "403b":
+        "403B":
           description: 403(b) retirement savings account for non-profits and schools
             (US)
           type: string
@@ -15950,7 +16250,7 @@ components:
       required:
       - 401a
       - 401k
-      - 403b
+      - 403B
       - 457b
       - "529"
       - brokerage
@@ -15994,6 +16294,7 @@ components:
       - trust
       - ugma
       - utma
+      - variable annuity
       title: InvestmentAccountSubtype
       type: string
     AssetReport:
@@ -23801,8 +24102,33 @@ components:
           type: string
       type: object
     SignalEvaluateRequest:
-      additionalProperties: true
       description: SignalEvaluateRequest defines the request schema for `/signal/evaluate`
+      example:
+        access_token: access_token
+        amount: 0.8008281904610115
+        account_id: account_id
+        client_user_id: client_user_id
+        secret: secret
+        client_transaction_id: client_transaction_id
+        user:
+          email_address: email_address
+          address:
+            country: country
+            city: city
+            street: street
+            region: region
+            postal_code: postal_code
+          name:
+            prefix: prefix
+            given_name: given_name
+            middle_name: middle_name
+            suffix: suffix
+            family_name: family_name
+          phone_number: phone_number
+        device:
+          ip_address: ip_address
+          user_agent: user_agent
+        client_id: client_id
       properties:
         client_id:
           description: Your Plaid API `client_id`. The `client_id` is required and
@@ -23854,6 +24180,21 @@ components:
     SignalUser:
       description: Details about the end user initiating the transaction (i.e., the
         account holder).
+      example:
+        email_address: email_address
+        address:
+          country: country
+          city: city
+          street: street
+          region: region
+          postal_code: postal_code
+        name:
+          prefix: prefix
+          given_name: given_name
+          middle_name: middle_name
+          suffix: suffix
+          family_name: family_name
+        phone_number: phone_number
       properties:
         name:
           $ref: '#/components/schemas/SignalPersonName'
@@ -23872,6 +24213,12 @@ components:
       type: object
     SignalPersonName:
       description: The user's legal name
+      example:
+        prefix: prefix
+        given_name: given_name
+        middle_name: middle_name
+        suffix: suffix
+        family_name: family_name
       nullable: true
       properties:
         prefix:
@@ -23934,6 +24281,9 @@ components:
       type: object
     SignalDevice:
       description: Details about the end user's device
+      example:
+        ip_address: ip_address
+        user_agent: user_agent
       properties:
         ip_address:
           description: The IP address of the device that initiated the transaction

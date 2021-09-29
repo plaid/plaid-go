@@ -339,6 +339,7 @@ model_pslf_status.go
 model_recaptcha_required_error.go
 model_recipient_bacs.go
 model_recipient_bacs_nullable.go
+model_recurring_transaction_frequency.go
 model_requested_scopes.go
 model_sandbox_bank_transfer_fire_webhook_request.go
 model_sandbox_bank_transfer_fire_webhook_response.go
@@ -397,9 +398,13 @@ model_transaction_base.go
 model_transaction_code.go
 model_transaction_data.go
 model_transaction_override.go
+model_transaction_stream.go
+model_transaction_stream_amount.go
 model_transactions_get_request.go
 model_transactions_get_request_options.go
 model_transactions_get_response.go
+model_transactions_recurring_get_request.go
+model_transactions_recurring_get_response.go
 model_transactions_refresh_request.go
 model_transactions_refresh_response.go
 model_transactions_removed_webhook.go
