@@ -7,7 +7,7 @@ info:
     details.
   termsOfService: https://plaid.com/legal/
   title: The Plaid API
-  version: 2020-09-14_1.36.1
+  version: 2020-09-14_1.39.0
 servers:
 - description: Production
   url: https://production.plaid.com
@@ -4386,7 +4386,7 @@ paths:
                   value:
                     request_id: 2pxQ59buGdsHRef
                     document_metadata:
-                      name: paystub.pdf
+                    - name: paystub.pdf
                       status: DOCUMENT_STATUS_PROCESSING_COMPLETE
                       doc_id: 2jkflanbd
                     paystub:
@@ -4475,19 +4475,49 @@ paths:
               examples:
                 example-1:
                   value:
-                    request_id: 2pxQ59buGdsHRef
                     document_metadata:
+                    - doc_id: 2jkflanbd
+                      doc_type: DOCUMENT_TYPE_PAYSTUB
                       name: paystub.pdf
                       status: DOCUMENT_STATUS_PROCESSING_COMPLETE
-                      doc_id: 2jkflanbd
                     paystubs:
                     - deductions:
-                        subtotals: []
-                        totals: []
+                        breakdown:
+                        - current_amount: 123.45
+                          description: taxes
+                          iso_currency_code: USD
+                          unofficial_currency_code: null
+                          ytd_amount: 246.9
+                        total:
+                          current_amount: 123.45
+                          iso_currency_code: USD
+                          unofficial_currency_code: null
+                          ytd_amount: 246.9
                       doc_id: 2jkflanbd
                       earnings:
-                        subtotals: []
-                        totals: []
+                        breakdown:
+                        - canonical_description: REGULAR PAY
+                          current_amount: 200.22
+                          description: salary earned
+                          hours: 80
+                          iso_currency_code: USD
+                          rate: null
+                          unofficial_currency_code: null
+                          ytd_amount: 400.44
+                        - canonical_desription: BONUS
+                          current_amount: 100
+                          description: bonus earned
+                          hours: null
+                          iso_currency_code: USD
+                          rate: null
+                          unofficial_currency_code: null
+                          ytd_amount: 100
+                        total:
+                          current_amount: 300.22
+                          hours: 160
+                          iso_currency_code: USD
+                          unofficial_currency_code: null
+                          ytd_amount: 500.44
                       employee:
                         address:
                           city: SAN FRANCISCO
@@ -4496,6 +4526,10 @@ paths:
                           region: CA
                           street: 2140 TAYLOR ST
                         name: ANNA CHARLESTON
+                        marital_status: single
+                        taxpayer_id:
+                          id_type: SSN
+                          id_mask: "3333"
                       employer:
                         name: PLAID INC
                         address:
@@ -4504,38 +4538,28 @@ paths:
                           postal_code: "94111"
                           region: CA
                           street: 1098 HARRISON ST
-                      employment_details:
-                        annual_salary:
-                          amount: 60000
-                          currency: USD
-                        hire_date: 2020-09-15
                       net_pay:
-                        distribution_details: []
-                        total:
-                          canonical_description: NET PAY
-                          description: TOTAL NET PAY
-                          ytd_pay:
-                            amount: 39456
-                            currency: USD
-                          current_pay:
-                            amount: 1490.21
-                            currency: USD
-                      income_breakdown: []
+                        current_amount: 123.34
+                        description: TOTAL NET PAY
+                        iso_currency_code: USD
+                        unofficial_currency_code: null
+                        ytd_amount: 253.54
                       pay_period_details:
                         check_amount: 1490.21
+                        distribution_breakdown:
+                        - account_name: Big time checking
+                          bank_name: bank of plaid
+                          current_amount: 176.77
+                          iso_currency_code: USD
+                          mask: "1223"
+                          type: checking
+                          unofficial_currency_code: null
                         end_date: 2020-12-15
                         gross_earnings: 4500
-                        pay_day: 2020-12-15
-                        start_date: 2020-12-01
-                      paystub_details:
-                        pay_frequency: BI-WEEKLY
-                        paystub_provider: ADP
-                        pay_period_start_date: 2020-12-01
-                        pay_period_end_date: 2020-12-15
                         pay_date: 2020-12-15
-                      ytd_earnings:
-                        gross_earnings: 59375
-                        net_earnings: 39456
+                        start_date: 2020-12-01
+                        pay_frequency: PAY_FREQUENCY_BIWEEKLY
+                    request_id: 2pxQ59buGdsHRef
               schema:
                 $ref: '#/components/schemas/IncomeVerificationPaystubsGetResponse'
           description: OK
@@ -4545,11 +4569,15 @@ paths:
   /income/verification/documents/download:
     post:
       description: |-
-        `/income/verification/documents/download` provides the ability to download the source paystub PDF that the end user uploaded via Paystub Import.
+        `/income/verification/documents/download` provides the ability to download the source documents associated with the verification.
 
-        The response to `/income/verification/documents/download` is a ZIP file in binary data. The `request_id`  is returned in the `Plaid-Request-ID` header.
+        If Document Income was used, the documents will be those the user provided in Link. For Payroll Income, the most recent files available
+        for download from the payroll provider will be available from this endpoint.
 
-        For Payroll Income, the most recent file available for download with the payroll provider will also be available from this endpoint.
+        The response to `/income/verification/documents/download` is ZIP file in binary data. If a document_id is passed, a single document will be contained in this file.
+        If not, the response will contain all documents associated with the verification.
+
+        The `request_id` is returned in the `Plaid-Request-ID` header.
       externalDocs:
         url: /api/products/#incomeverificationdocumentsdownload
       operationId: incomeVerificationDocumentsDownload
@@ -4566,7 +4594,7 @@ paths:
               schema:
                 format: binary
                 type: string
-          description: A ZIP file containing the source paystub(s) used as the basis
+          description: A ZIP file containing source documents(s) used as the basis
             for income verification.
       summary: Download the original documents used for income verification
       tags:
@@ -4607,7 +4635,7 @@ paths:
         as reported by the `INCOME: verification_status` webhook. Attempting to call
         the endpoint before verification has been completed will result in an error.'
       externalDocs:
-        url: /api/products#incomeverificationtaxformsget
+        url: /api/products/#incomeverificationtaxformsget
       operationId: incomeVerificationTaxformsGet
       requestBody:
         content:
@@ -4619,9 +4647,69 @@ paths:
         "200":
           content:
             application/json:
+              examples:
+                example-1:
+                  value:
+                    document_metadata:
+                    - doc_id: q5Ypbbr03p
+                      doc_type: DOCUMENT_TYPE_US_TAX_W2
+                      name: my_w2.pdf
+                      status: DOCUMENT_STATUS_PROCESSING_COMPLETE
+                    request_id: 73W7sz8nIP8Mgck
+                    taxforms:
+                    - document_type: W2
+                      w2:
+                        allocated_tips: "1000"
+                        box_12:
+                        - amount: "200"
+                          code: AA
+                        box_9: box9
+                        dependent_care_benefits: "1000"
+                        employee:
+                          address:
+                            city: San Francisco
+                            country: US
+                            postal_code: "94103"
+                            region: CA
+                            street: 1234 Grand St
+                          name: Josie Georgia Harrison
+                          marital_status: single
+                          taxpayer_id:
+                            id_type: SSN
+                            id_mask: "1234"
+                        employer:
+                          address:
+                            city: New York
+                            country: US
+                            postal_code: "10010"
+                            region: NY
+                            street: 456 Main St
+                          name: Acme Inc
+                        employee_id_number: 12-1234567
+                        federal_income_tax_withheld: "1000"
+                        medicare_tax_withheld: "1000"
+                        medicare_wages_and_tips: "1000"
+                        nonqualified_plans: "1000"
+                        other: other
+                        retirement_plan: CHECKED
+                        social_security_tax_withheld: "1000"
+                        social_security_tips: "1000"
+                        social_security_wages: "1000"
+                        state_and_local_wages:
+                        - employer_state_id_number: 11111111111AAA
+                          local_income_tax: "200"
+                          local_wages_and_tips: "200"
+                          locality_name: local
+                          state: UT
+                          state_income_tax: "200"
+                          state_wages_tips: "200"
+                        statutory_employee: CHECKED
+                        tax_year: "2020"
+                        third_party_sick_ppay: CHECKED
+                        wages_tips_other_comp: "1000"
               schema:
                 $ref: '#/components/schemas/IncomeVerificationTaxformsGetResponse'
-          description: success
+          description: OK
         default:
           content:
             application/json:
@@ -4654,6 +4742,42 @@ paths:
                 $ref: '#/components/schemas/IncomeVerificationPrecheckResponse'
           description: OK
       summary: Check a user's eligibility for the income verification product
+      tags:
+      - plaid
+  /employment/verification/get:
+    post:
+      description: '`/employment/verification/get` returns a list of employments through
+        a user payroll that was verified by an end user.'
+      operationId: employmentVerificationGet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmploymentVerificationGetRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    employments:
+                    - status: EMPLOYMENT_STATUS_ACTIVE
+                      start_date: 2020-01-01
+                      end_date: null
+                      employer:
+                        name: Plaid Inc
+                      title: Software Engineer
+                      platform_ids:
+                        employee_id: "1234567"
+                        position_id: "8888"
+                        payroll_id: "1234567"
+                    request_id: LhQf0THi8SH1yJm
+              schema:
+                $ref: '#/components/schemas/EmploymentVerificationGetResponse'
+          description: OK
+      summary: Retrieve a summary of an individual's employment information.
       tags:
       - plaid
   /deposit_switch/alt/create:
@@ -4806,42 +4930,7 @@ paths:
                       bank_initiated_return_risk:
                         score: 72
                         risk_tier: 7
-                    core_attributes:
-                      unauthorized_transactions_count_7d: 0
-                      unauthorized_transactions_count_30d: 0
-                      unauthorized_transactions_count_60d: 0
-                      unauthorized_transactions_count_90d: 0
-                      nsf_overdraft_transactions_count_7d: 1
-                      nsf_overdraft_transactions_count_30d: 1
-                      nsf_overdraft_transactions_count_60d: 2
-                      nsf_overdraft_transactions_count_90d: 2
-                      days_since_first_plaid_connection: 510
-                      plaid_connections_count_7d: 6
-                      plaid_connections_count_30d: 7
-                      total_plaid_connections_count: 15
-                      is_savings_or_money_market_account: false
-                      total_credit_transactions_amount_10d: 507.04
-                      total_debit_transactions_amount_10d: 590.14
-                      p50_credit_transactions_amount_28d: 46.79
-                      p50_debit_transactions_amount_28d: 75
-                      p95_credit_transactions_amount_28d: 155.95
-                      p95_debit_transactions_amount_28d: 799.59
-                      days_with_negative_balance_count_90d: 0
-                      p90_eod_balance_30d: 555.71
-                      p90_eod_balance_60d: 449.96
-                      p90_eod_balance_90d: 434.38
-                      p10_eod_balance_30d: 320.44
-                      p10_eod_balance_60d: 320.46
-                      p10_eod_balance_90d: 320.23
-                      available_balance: 420.22
-                      current_balance: 476
-                      balance_last_updated: 2021-02-25T09:18:21Z
-                      phone_change_count_28d: 0
-                      phone_change_count_90d: 0
-                      email_change_count_28d: 0
-                      email_change_count_90d: 0
-                      address_change_count_28d: 0
-                      address_change_count_90d: 0
+                    core_attributes: {}
                     request_id: mdqfuVxeoza6mhu
               schema:
                 $ref: '#/components/schemas/SignalEvaluateResponse'
@@ -5487,6 +5576,9 @@ components:
           items:
             type: string
           type: array
+      required:
+      - access_token
+      - account_ids
       type: object
     TransactionsRecurringGetResponse:
       additionalProperties: true
@@ -5582,7 +5674,7 @@ components:
           title: RequestID
           type: string
       required:
-      - inflow_strems
+      - inflow_streams
       - outflow_streams
       - request_id
       type: object
@@ -9147,6 +9239,7 @@ components:
             call to `/asset_report/create` will be used.
           maximum: 731
           minimum: 0
+          nullable: true
           type: integer
         options:
           $ref: '#/components/schemas/AssetReportRefreshRequestOptions'
@@ -9326,7 +9419,7 @@ components:
       description: AssetReportGetRequest defines the request schema for `/asset_report/get`
       example:
         asset_report_token: asset_report_token
-        include_insights: true
+        include_insights: false
         secret: secret
         client_id: client_id
       properties:
@@ -9347,6 +9440,7 @@ components:
           title: AssetReportToken
           type: string
         include_insights:
+          default: false
           description: '`true` if you would like to retrieve the Asset Report with
             Insights, `false` otherwise. This field defaults to `false` if omitted.'
           type: boolean
@@ -10434,6 +10528,10 @@ components:
       example:
         income_verification:
           income_verification_id: income_verification_id
+          precheck_id: precheck_id
+          access_tokens:
+          - null
+          - null
           asset_report_id: asset_report_id
         webhook: webhook
         auth:
@@ -11093,6 +11191,7 @@ components:
           - OAUTH_ERROR
           - PAYMENT_ERROR
           - BANK_TRANSFER_ERROR
+          - INCOME_VERIFICATION_ERROR
           type: string
         error_code:
           description: The particular error code. Safe for programmatic use.
@@ -20552,6 +20651,11 @@ components:
         `/income/verification/create`
       example:
         webhook: webhook
+        precheck_id: precheck_id
+        options:
+          access_tokens:
+          - null
+          - null
         secret: secret
         client_id: client_id
       properties:
@@ -20570,9 +20674,33 @@ components:
           description: The URL endpoint to which Plaid should send webhooks related
             to the progress of the income verification process.
           type: string
+        precheck_id:
+          description: The ID of a precheck created with `/income/verification/precheck`.
+            Will be used to improve conversion of the income verification flow.
+          type: string
+        options:
+          $ref: '#/components/schemas/IncomeVerificationCreateRequestOptions'
       required:
       - webhook
       title: IncomeVerificationCreateRequest
+      type: object
+    IncomeVerificationCreateRequestOptions:
+      description: IncomeVerificationCreateRequestOptions defines the optional arguments
+        schema for `/income/verification/create`
+      example:
+        access_tokens:
+        - null
+        - null
+      properties:
+        access_tokens:
+          description: An array of access tokens corresponding to the Items that will
+            be cross-referenced with the product data. If the `transactions` product
+            was not initialized for the Items during link, it will be initialized
+            after this Link session.
+          items:
+            $ref: '#/components/schemas/AccessToken'
+          type: array
+      title: IncomeVerificationCreateRequestOptions
       type: object
     IncomeVerificationCreateResponse:
       additionalProperties: true
@@ -20608,6 +20736,7 @@ components:
         employer:
           name: name
           tax_id: tax_id
+          url: url
         secret: secret
         user:
           email_address: email_address
@@ -20649,17 +20778,33 @@ components:
       example:
         name: name
         tax_id: tax_id
+        url: url
       nullable: true
       properties:
         name:
           description: The employer's name
           nullable: true
           type: string
+        address:
+          $ref: '#/components/schemas/IncomeVerificationPrecheckEmployerAddress'
         tax_id:
           description: The employer's tax id
           nullable: true
           type: string
+        url:
+          description: The URL for the employer's public website
+          nullable: true
+          type: string
       title: IncomeVerificationPrecheckEmployer
+      type: object
+    IncomeVerificationPrecheckEmployerAddress:
+      allOf:
+      - $ref: '#/components/schemas/AddressData'
+      - additionalProperties: true
+        type: object
+      description: The address of the employer
+      nullable: true
+      title: IncomeVerificationPrecheckEmployerAddress
       type: object
     IncomeVerificationPrecheckMilitaryInfo:
       example:
@@ -20756,9 +20901,14 @@ components:
         in the `products` array.
       example:
         income_verification_id: income_verification_id
+        precheck_id: precheck_id
+        access_tokens:
+        - null
+        - null
         asset_report_id: asset_report_id
       properties:
         income_verification_id:
+          deprecated: true
           description: The `income_verification_id` of the verification instance,
             as provided by `/income/verification/create`.
           type: string
@@ -20768,8 +20918,18 @@ components:
             is optional and can be used to verify the user through a streamlined flow.
             If provided, the bank linking flow will be skipped.
           type: string
-      required:
-      - income_verification_id
+        precheck_id:
+          description: The ID of a precheck created with `/income/verification/precheck`.
+            Will be used to improve conversion of the income verification flow.
+          type: string
+        access_tokens:
+          description: An array of access tokens corresponding to the Items that will
+            be cross-referenced with the product data. If the `transactions` product
+            was not initialized for the Items during link, it will be initialized
+            after this Link session.
+          items:
+            $ref: '#/components/schemas/AccessToken'
+          type: array
       title: LinkTokenCreateRequestIncomeVerification
       type: object
     IncomeVerificationStatusWebhook:
@@ -21177,6 +21337,8 @@ components:
       example:
         paystub:
           net_pay:
+            current_amount: 1.2315135367772556
+            unofficial_currency_code: unofficial_currency_code
             total:
               ytd_pay:
                 amount: 0.8008281904610115
@@ -21186,73 +21348,122 @@ components:
                 amount: 0.8008281904610115
                 currency: currency
               canonical_description: BONUS
-            distribution_details:
-            - account_number: account_number
-              bank_name: bank_name
-              current_pay:
-                amount: 0.8008281904610115
-                currency: currency
-              description: description
-              bank_account_type: bank_account_type
-            - account_number: account_number
-              bank_name: bank_name
-              current_pay:
-                amount: 0.8008281904610115
-                currency: currency
-              description: description
-              bank_account_type: bank_account_type
+            ytd_amount: 1.0246457001441578
+            iso_currency_code: iso_currency_code
+            description: description
           earnings:
             subtotals:
-            - ytd_pay:
+            - current_amount: 2.3021358869347655
+              ytd_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              description: description
+              unofficial_currency_code: unofficial_currency_code
+              hours: 7.061401241503109
+              ytd_amount: 9.301444243932576
+              iso_currency_code: iso_currency_code
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              current_rate: current_rate
               canonical_description: BONUS
-              current_hours: current_hours
-            - ytd_pay:
+            - current_amount: 2.3021358869347655
+              ytd_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              description: description
+              unofficial_currency_code: unofficial_currency_code
+              hours: 7.061401241503109
+              ytd_amount: 9.301444243932576
+              iso_currency_code: iso_currency_code
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              current_rate: current_rate
               canonical_description: BONUS
-              current_hours: current_hours
+            total:
+              current_amount: 2.3021358869347655
+              ytd_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              unofficial_currency_code: unofficial_currency_code
+              hours: 7.061401241503109
+              ytd_amount: 9.301444243932576
+              iso_currency_code: iso_currency_code
+              current_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              canonical_description: BONUS
+            breakdown:
+            - current_amount: 3.616076749251911
+              unofficial_currency_code: unofficial_currency_code
+              hours: 2.027123023002322
+              rate: 4.145608029883936
+              ytd_amount: 7.386281948385884
+              iso_currency_code: iso_currency_code
+              description: description
+              canonical_description: BONUS
+            - current_amount: 3.616076749251911
+              unofficial_currency_code: unofficial_currency_code
+              hours: 2.027123023002322
+              rate: 4.145608029883936
+              ytd_amount: 7.386281948385884
+              iso_currency_code: iso_currency_code
+              description: description
+              canonical_description: BONUS
             totals:
-            - ytd_pay:
+            - current_amount: 2.3021358869347655
+              ytd_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              description: description
+              unofficial_currency_code: unofficial_currency_code
+              hours: 7.061401241503109
+              ytd_amount: 9.301444243932576
+              iso_currency_code: iso_currency_code
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              current_rate: current_rate
               canonical_description: BONUS
-              current_hours: current_hours
-            - ytd_pay:
+            - current_amount: 2.3021358869347655
+              ytd_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              description: description
+              unofficial_currency_code: unofficial_currency_code
+              hours: 7.061401241503109
+              ytd_amount: 9.301444243932576
+              iso_currency_code: iso_currency_code
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              current_rate: current_rate
               canonical_description: BONUS
-              current_hours: current_hours
           pay_period_details:
             end_date: 2000-01-23
             pay_day: 2000-01-23
-            gross_earnings: 6.027456183070403
-            check_amount: 1.4658129805029452
+            pay_date: 2000-01-23
+            gross_earnings: 7.457744773683766
+            distribution_breakdown:
+            - current_amount: 6.84685269835264
+              unofficial_currency_code: unofficial_currency_code
+              account_name: account_name
+              bank_name: bank_name
+              iso_currency_code: iso_currency_code
+              current_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              type: type
+              mask: mask
+            - current_amount: 6.84685269835264
+              unofficial_currency_code: unofficial_currency_code
+              account_name: account_name
+              bank_name: bank_name
+              iso_currency_code: iso_currency_code
+              current_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              type: type
+              mask: mask
+            pay_frequency: PAY_FREQUENCY_UNKNOWN
+            check_amount: 1.4894159098541704
             start_date: 2000-01-23
           ytd_earnings:
-            gross_earnings: 7.061401241503109
-            net_earnings: 9.301444243932576
+            gross_earnings: 9.965781217890562
+            net_earnings: 9.369310271410669
           employer:
             address:
               country: country
@@ -21288,6 +21499,22 @@ components:
                 amount: 0.8008281904610115
                 currency: currency
               canonical_description: BONUS
+            total:
+              current_amount: 5.962133916683182
+              unofficial_currency_code: unofficial_currency_code
+              ytd_amount: 5.637376656633329
+              iso_currency_code: iso_currency_code
+            breakdown:
+            - current_amount: 6.027456183070403
+              unofficial_currency_code: unofficial_currency_code
+              ytd_amount: 1.4658129805029452
+              iso_currency_code: iso_currency_code
+              description: description
+            - current_amount: 6.027456183070403
+              unofficial_currency_code: unofficial_currency_code
+              ytd_amount: 1.4658129805029452
+              iso_currency_code: iso_currency_code
+              description: description
             totals:
             - ytd_pay:
                 amount: 0.8008281904610115
@@ -21317,6 +21544,7 @@ components:
               line2: line2
               line1: line1
             taxpayer_id:
+              id_mask: id_mask
               last_4_digits: last_4_digits
               id_type: id_type
             name: name
@@ -21327,13 +21555,13 @@ components:
             hire_date: 2000-01-23
           doc_id: doc_id
           income_breakdown:
-          - hours: 5.637376656633329
-            total: 2.3021358869347655
-            rate: 5.962133916683182
+          - hours: 4.965218492984954
+            total: 5.025004791520295
+            rate: 1.1730742509559433
             type: bonus
-          - hours: 5.637376656633329
-            total: 2.3021358869347655
-            rate: 5.962133916683182
+          - hours: 4.965218492984954
+            total: 5.025004791520295
+            rate: 1.1730742509559433
             type: bonus
         error:
           error_message: error_message
@@ -21403,6 +21631,8 @@ components:
       example:
         paystubs:
         - net_pay:
+            current_amount: 1.2315135367772556
+            unofficial_currency_code: unofficial_currency_code
             total:
               ytd_pay:
                 amount: 0.8008281904610115
@@ -21412,73 +21642,122 @@ components:
                 amount: 0.8008281904610115
                 currency: currency
               canonical_description: BONUS
-            distribution_details:
-            - account_number: account_number
-              bank_name: bank_name
-              current_pay:
-                amount: 0.8008281904610115
-                currency: currency
-              description: description
-              bank_account_type: bank_account_type
-            - account_number: account_number
-              bank_name: bank_name
-              current_pay:
-                amount: 0.8008281904610115
-                currency: currency
-              description: description
-              bank_account_type: bank_account_type
+            ytd_amount: 1.0246457001441578
+            iso_currency_code: iso_currency_code
+            description: description
           earnings:
             subtotals:
-            - ytd_pay:
+            - current_amount: 2.3021358869347655
+              ytd_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              description: description
+              unofficial_currency_code: unofficial_currency_code
+              hours: 7.061401241503109
+              ytd_amount: 9.301444243932576
+              iso_currency_code: iso_currency_code
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              current_rate: current_rate
               canonical_description: BONUS
-              current_hours: current_hours
-            - ytd_pay:
+            - current_amount: 2.3021358869347655
+              ytd_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              description: description
+              unofficial_currency_code: unofficial_currency_code
+              hours: 7.061401241503109
+              ytd_amount: 9.301444243932576
+              iso_currency_code: iso_currency_code
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              current_rate: current_rate
               canonical_description: BONUS
-              current_hours: current_hours
+            total:
+              current_amount: 2.3021358869347655
+              ytd_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              unofficial_currency_code: unofficial_currency_code
+              hours: 7.061401241503109
+              ytd_amount: 9.301444243932576
+              iso_currency_code: iso_currency_code
+              current_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              canonical_description: BONUS
+            breakdown:
+            - current_amount: 3.616076749251911
+              unofficial_currency_code: unofficial_currency_code
+              hours: 2.027123023002322
+              rate: 4.145608029883936
+              ytd_amount: 7.386281948385884
+              iso_currency_code: iso_currency_code
+              description: description
+              canonical_description: BONUS
+            - current_amount: 3.616076749251911
+              unofficial_currency_code: unofficial_currency_code
+              hours: 2.027123023002322
+              rate: 4.145608029883936
+              ytd_amount: 7.386281948385884
+              iso_currency_code: iso_currency_code
+              description: description
+              canonical_description: BONUS
             totals:
-            - ytd_pay:
+            - current_amount: 2.3021358869347655
+              ytd_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              description: description
+              unofficial_currency_code: unofficial_currency_code
+              hours: 7.061401241503109
+              ytd_amount: 9.301444243932576
+              iso_currency_code: iso_currency_code
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              current_rate: current_rate
               canonical_description: BONUS
-              current_hours: current_hours
-            - ytd_pay:
+            - current_amount: 2.3021358869347655
+              ytd_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              description: description
+              unofficial_currency_code: unofficial_currency_code
+              hours: 7.061401241503109
+              ytd_amount: 9.301444243932576
+              iso_currency_code: iso_currency_code
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              current_rate: current_rate
               canonical_description: BONUS
-              current_hours: current_hours
           pay_period_details:
             end_date: 2000-01-23
             pay_day: 2000-01-23
-            gross_earnings: 6.027456183070403
-            check_amount: 1.4658129805029452
+            pay_date: 2000-01-23
+            gross_earnings: 7.457744773683766
+            distribution_breakdown:
+            - current_amount: 6.84685269835264
+              unofficial_currency_code: unofficial_currency_code
+              account_name: account_name
+              bank_name: bank_name
+              iso_currency_code: iso_currency_code
+              current_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              type: type
+              mask: mask
+            - current_amount: 6.84685269835264
+              unofficial_currency_code: unofficial_currency_code
+              account_name: account_name
+              bank_name: bank_name
+              iso_currency_code: iso_currency_code
+              current_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              type: type
+              mask: mask
+            pay_frequency: PAY_FREQUENCY_UNKNOWN
+            check_amount: 1.4894159098541704
             start_date: 2000-01-23
           ytd_earnings:
-            gross_earnings: 7.061401241503109
-            net_earnings: 9.301444243932576
+            gross_earnings: 9.965781217890562
+            net_earnings: 9.369310271410669
           employer:
             address:
               country: country
@@ -21514,6 +21793,22 @@ components:
                 amount: 0.8008281904610115
                 currency: currency
               canonical_description: BONUS
+            total:
+              current_amount: 5.962133916683182
+              unofficial_currency_code: unofficial_currency_code
+              ytd_amount: 5.637376656633329
+              iso_currency_code: iso_currency_code
+            breakdown:
+            - current_amount: 6.027456183070403
+              unofficial_currency_code: unofficial_currency_code
+              ytd_amount: 1.4658129805029452
+              iso_currency_code: iso_currency_code
+              description: description
+            - current_amount: 6.027456183070403
+              unofficial_currency_code: unofficial_currency_code
+              ytd_amount: 1.4658129805029452
+              iso_currency_code: iso_currency_code
+              description: description
             totals:
             - ytd_pay:
                 amount: 0.8008281904610115
@@ -21543,6 +21838,7 @@ components:
               line2: line2
               line1: line1
             taxpayer_id:
+              id_mask: id_mask
               last_4_digits: last_4_digits
               id_type: id_type
             name: name
@@ -21553,15 +21849,17 @@ components:
             hire_date: 2000-01-23
           doc_id: doc_id
           income_breakdown:
-          - hours: 5.637376656633329
-            total: 2.3021358869347655
-            rate: 5.962133916683182
+          - hours: 4.965218492984954
+            total: 5.025004791520295
+            rate: 1.1730742509559433
             type: bonus
-          - hours: 5.637376656633329
-            total: 2.3021358869347655
-            rate: 5.962133916683182
+          - hours: 4.965218492984954
+            total: 5.025004791520295
+            rate: 1.1730742509559433
             type: bonus
         - net_pay:
+            current_amount: 1.2315135367772556
+            unofficial_currency_code: unofficial_currency_code
             total:
               ytd_pay:
                 amount: 0.8008281904610115
@@ -21571,73 +21869,122 @@ components:
                 amount: 0.8008281904610115
                 currency: currency
               canonical_description: BONUS
-            distribution_details:
-            - account_number: account_number
-              bank_name: bank_name
-              current_pay:
-                amount: 0.8008281904610115
-                currency: currency
-              description: description
-              bank_account_type: bank_account_type
-            - account_number: account_number
-              bank_name: bank_name
-              current_pay:
-                amount: 0.8008281904610115
-                currency: currency
-              description: description
-              bank_account_type: bank_account_type
+            ytd_amount: 1.0246457001441578
+            iso_currency_code: iso_currency_code
+            description: description
           earnings:
             subtotals:
-            - ytd_pay:
+            - current_amount: 2.3021358869347655
+              ytd_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              description: description
+              unofficial_currency_code: unofficial_currency_code
+              hours: 7.061401241503109
+              ytd_amount: 9.301444243932576
+              iso_currency_code: iso_currency_code
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              current_rate: current_rate
               canonical_description: BONUS
-              current_hours: current_hours
-            - ytd_pay:
+            - current_amount: 2.3021358869347655
+              ytd_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              description: description
+              unofficial_currency_code: unofficial_currency_code
+              hours: 7.061401241503109
+              ytd_amount: 9.301444243932576
+              iso_currency_code: iso_currency_code
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              current_rate: current_rate
               canonical_description: BONUS
-              current_hours: current_hours
+            total:
+              current_amount: 2.3021358869347655
+              ytd_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              unofficial_currency_code: unofficial_currency_code
+              hours: 7.061401241503109
+              ytd_amount: 9.301444243932576
+              iso_currency_code: iso_currency_code
+              current_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              canonical_description: BONUS
+            breakdown:
+            - current_amount: 3.616076749251911
+              unofficial_currency_code: unofficial_currency_code
+              hours: 2.027123023002322
+              rate: 4.145608029883936
+              ytd_amount: 7.386281948385884
+              iso_currency_code: iso_currency_code
+              description: description
+              canonical_description: BONUS
+            - current_amount: 3.616076749251911
+              unofficial_currency_code: unofficial_currency_code
+              hours: 2.027123023002322
+              rate: 4.145608029883936
+              ytd_amount: 7.386281948385884
+              iso_currency_code: iso_currency_code
+              description: description
+              canonical_description: BONUS
             totals:
-            - ytd_pay:
+            - current_amount: 2.3021358869347655
+              ytd_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              description: description
+              unofficial_currency_code: unofficial_currency_code
+              hours: 7.061401241503109
+              ytd_amount: 9.301444243932576
+              iso_currency_code: iso_currency_code
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              current_rate: current_rate
               canonical_description: BONUS
-              current_hours: current_hours
-            - ytd_pay:
+            - current_amount: 2.3021358869347655
+              ytd_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              description: description
+              unofficial_currency_code: unofficial_currency_code
+              hours: 7.061401241503109
+              ytd_amount: 9.301444243932576
+              iso_currency_code: iso_currency_code
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              current_rate: current_rate
               canonical_description: BONUS
-              current_hours: current_hours
           pay_period_details:
             end_date: 2000-01-23
             pay_day: 2000-01-23
-            gross_earnings: 6.027456183070403
-            check_amount: 1.4658129805029452
+            pay_date: 2000-01-23
+            gross_earnings: 7.457744773683766
+            distribution_breakdown:
+            - current_amount: 6.84685269835264
+              unofficial_currency_code: unofficial_currency_code
+              account_name: account_name
+              bank_name: bank_name
+              iso_currency_code: iso_currency_code
+              current_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              type: type
+              mask: mask
+            - current_amount: 6.84685269835264
+              unofficial_currency_code: unofficial_currency_code
+              account_name: account_name
+              bank_name: bank_name
+              iso_currency_code: iso_currency_code
+              current_pay:
+                amount: 0.8008281904610115
+                currency: currency
+              type: type
+              mask: mask
+            pay_frequency: PAY_FREQUENCY_UNKNOWN
+            check_amount: 1.4894159098541704
             start_date: 2000-01-23
           ytd_earnings:
-            gross_earnings: 7.061401241503109
-            net_earnings: 9.301444243932576
+            gross_earnings: 9.965781217890562
+            net_earnings: 9.369310271410669
           employer:
             address:
               country: country
@@ -21673,6 +22020,22 @@ components:
                 amount: 0.8008281904610115
                 currency: currency
               canonical_description: BONUS
+            total:
+              current_amount: 5.962133916683182
+              unofficial_currency_code: unofficial_currency_code
+              ytd_amount: 5.637376656633329
+              iso_currency_code: iso_currency_code
+            breakdown:
+            - current_amount: 6.027456183070403
+              unofficial_currency_code: unofficial_currency_code
+              ytd_amount: 1.4658129805029452
+              iso_currency_code: iso_currency_code
+              description: description
+            - current_amount: 6.027456183070403
+              unofficial_currency_code: unofficial_currency_code
+              ytd_amount: 1.4658129805029452
+              iso_currency_code: iso_currency_code
+              description: description
             totals:
             - ytd_pay:
                 amount: 0.8008281904610115
@@ -21702,6 +22065,7 @@ components:
               line2: line2
               line1: line1
             taxpayer_id:
+              id_mask: id_mask
               last_4_digits: last_4_digits
               id_type: id_type
             name: name
@@ -21712,14 +22076,23 @@ components:
             hire_date: 2000-01-23
           doc_id: doc_id
           income_breakdown:
-          - hours: 5.637376656633329
-            total: 2.3021358869347655
-            rate: 5.962133916683182
+          - hours: 4.965218492984954
+            total: 5.025004791520295
+            rate: 1.1730742509559433
             type: bonus
-          - hours: 5.637376656633329
-            total: 2.3021358869347655
-            rate: 5.962133916683182
+          - hours: 4.965218492984954
+            total: 5.025004791520295
+            rate: 1.1730742509559433
             type: bonus
+        document_metadata:
+        - name: name
+          doc_type: UNKNOWN
+          doc_id: doc_id
+          status: status
+        - name: name
+          doc_type: UNKNOWN
+          doc_id: doc_id
+          status: status
         error:
           error_message: error_message
           suggested_action: suggested_action
@@ -21732,25 +22105,18 @@ components:
           documentation_url: documentation_url
           request_id: request_id
           status: 0.8008281904610115
-        document_metadata:
-        - name: name
-          doc_id: doc_id
-          status: status
-        - name: name
-          doc_id: doc_id
-          status: status
         request_id: request_id
       properties:
+        document_metadata:
+          items:
+            $ref: '#/components/schemas/DocumentMetadata'
+          type: array
         paystubs:
           items:
             $ref: '#/components/schemas/Paystub'
           type: array
         error:
           $ref: '#/components/schemas/Error'
-        document_metadata:
-          items:
-            $ref: '#/components/schemas/DocumentMetadata'
-          type: array
         request_id:
           description: A unique identifier for the request, which can be used for
             troubleshooting. This identifier, like all Plaid identifiers, is case
@@ -21767,6 +22133,7 @@ components:
       description: An object representing metadata from the end user's uploaded document.
       example:
         name: name
+        doc_type: UNKNOWN
         doc_id: doc_id
         status: status
       properties:
@@ -21780,6 +22147,18 @@ components:
           description: An identifier of the document that is also present in the paystub
             response.
           type: string
+        doc_type:
+          description: The type of document
+          enum:
+          - UNKNOWN
+          - DOCUMENT_TYPE_PAYSTUB
+          - DOCUMENT_TYPE_BANK_STATEMENT
+          - DOCUMENT_TYPE_US_TAX_W2
+          - DOCUMENT_TYPE_US_MILITARY_ERAS
+          - DOCUMENT_TYPE_US_MILITARY_LES
+          - DOCUMENT_TYPE_US_MILITARY_CLES
+          - DOCUMENT_TYPE_GIG
+          type: string
       title: DocumentMetadata
       type: object
     Paystub:
@@ -21787,6 +22166,8 @@ components:
       description: An object representing data extracted from the end user's paystub.
       example:
         net_pay:
+          current_amount: 1.2315135367772556
+          unofficial_currency_code: unofficial_currency_code
           total:
             ytd_pay:
               amount: 0.8008281904610115
@@ -21796,73 +22177,122 @@ components:
               amount: 0.8008281904610115
               currency: currency
             canonical_description: BONUS
-          distribution_details:
-          - account_number: account_number
-            bank_name: bank_name
-            current_pay:
-              amount: 0.8008281904610115
-              currency: currency
-            description: description
-            bank_account_type: bank_account_type
-          - account_number: account_number
-            bank_name: bank_name
-            current_pay:
-              amount: 0.8008281904610115
-              currency: currency
-            description: description
-            bank_account_type: bank_account_type
+          ytd_amount: 1.0246457001441578
+          iso_currency_code: iso_currency_code
+          description: description
         earnings:
           subtotals:
-          - ytd_pay:
+          - current_amount: 2.3021358869347655
+            ytd_pay:
               amount: 0.8008281904610115
               currency: currency
-            description: description
+            unofficial_currency_code: unofficial_currency_code
+            hours: 7.061401241503109
+            ytd_amount: 9.301444243932576
+            iso_currency_code: iso_currency_code
             current_pay:
               amount: 0.8008281904610115
               currency: currency
-            current_rate: current_rate
             canonical_description: BONUS
-            current_hours: current_hours
-          - ytd_pay:
+          - current_amount: 2.3021358869347655
+            ytd_pay:
               amount: 0.8008281904610115
               currency: currency
-            description: description
+            unofficial_currency_code: unofficial_currency_code
+            hours: 7.061401241503109
+            ytd_amount: 9.301444243932576
+            iso_currency_code: iso_currency_code
             current_pay:
               amount: 0.8008281904610115
               currency: currency
-            current_rate: current_rate
             canonical_description: BONUS
-            current_hours: current_hours
+          total:
+            current_amount: 2.3021358869347655
+            ytd_pay:
+              amount: 0.8008281904610115
+              currency: currency
+            unofficial_currency_code: unofficial_currency_code
+            hours: 7.061401241503109
+            ytd_amount: 9.301444243932576
+            iso_currency_code: iso_currency_code
+            current_pay:
+              amount: 0.8008281904610115
+              currency: currency
+            canonical_description: BONUS
+          breakdown:
+          - current_amount: 3.616076749251911
+            unofficial_currency_code: unofficial_currency_code
+            hours: 2.027123023002322
+            rate: 4.145608029883936
+            ytd_amount: 7.386281948385884
+            iso_currency_code: iso_currency_code
+            description: description
+            canonical_description: BONUS
+          - current_amount: 3.616076749251911
+            unofficial_currency_code: unofficial_currency_code
+            hours: 2.027123023002322
+            rate: 4.145608029883936
+            ytd_amount: 7.386281948385884
+            iso_currency_code: iso_currency_code
+            description: description
+            canonical_description: BONUS
           totals:
-          - ytd_pay:
+          - current_amount: 2.3021358869347655
+            ytd_pay:
               amount: 0.8008281904610115
               currency: currency
-            description: description
+            unofficial_currency_code: unofficial_currency_code
+            hours: 7.061401241503109
+            ytd_amount: 9.301444243932576
+            iso_currency_code: iso_currency_code
             current_pay:
               amount: 0.8008281904610115
               currency: currency
-            current_rate: current_rate
             canonical_description: BONUS
-            current_hours: current_hours
-          - ytd_pay:
+          - current_amount: 2.3021358869347655
+            ytd_pay:
               amount: 0.8008281904610115
               currency: currency
-            description: description
+            unofficial_currency_code: unofficial_currency_code
+            hours: 7.061401241503109
+            ytd_amount: 9.301444243932576
+            iso_currency_code: iso_currency_code
             current_pay:
               amount: 0.8008281904610115
               currency: currency
-            current_rate: current_rate
             canonical_description: BONUS
-            current_hours: current_hours
         pay_period_details:
           end_date: 2000-01-23
           pay_day: 2000-01-23
-          gross_earnings: 6.027456183070403
-          check_amount: 1.4658129805029452
+          pay_date: 2000-01-23
+          gross_earnings: 7.457744773683766
+          distribution_breakdown:
+          - current_amount: 6.84685269835264
+            unofficial_currency_code: unofficial_currency_code
+            account_name: account_name
+            bank_name: bank_name
+            iso_currency_code: iso_currency_code
+            current_pay:
+              amount: 0.8008281904610115
+              currency: currency
+            type: type
+            mask: mask
+          - current_amount: 6.84685269835264
+            unofficial_currency_code: unofficial_currency_code
+            account_name: account_name
+            bank_name: bank_name
+            iso_currency_code: iso_currency_code
+            current_pay:
+              amount: 0.8008281904610115
+              currency: currency
+            type: type
+            mask: mask
+          pay_frequency: PAY_FREQUENCY_UNKNOWN
+          check_amount: 1.4894159098541704
           start_date: 2000-01-23
         ytd_earnings:
-          gross_earnings: 7.061401241503109
-          net_earnings: 9.301444243932576
+          gross_earnings: 9.965781217890562
+          net_earnings: 9.369310271410669
         employer:
           address:
             country: country
@@ -21898,6 +22328,22 @@ components:
               amount: 0.8008281904610115
               currency: currency
             canonical_description: BONUS
+          total:
+            current_amount: 5.962133916683182
+            unofficial_currency_code: unofficial_currency_code
+            ytd_amount: 5.637376656633329
+            iso_currency_code: iso_currency_code
+          breakdown:
+          - current_amount: 6.027456183070403
+            unofficial_currency_code: unofficial_currency_code
+            ytd_amount: 1.4658129805029452
+            iso_currency_code: iso_currency_code
+            description: description
+          - current_amount: 6.027456183070403
+            unofficial_currency_code: unofficial_currency_code
+            ytd_amount: 1.4658129805029452
+            iso_currency_code: iso_currency_code
+            description: description
           totals:
           - ytd_pay:
               amount: 0.8008281904610115
@@ -21927,6 +22373,7 @@ components:
             line2: line2
             line1: line1
           taxpayer_id:
+            id_mask: id_mask
             last_4_digits: last_4_digits
             id_type: id_type
           name: name
@@ -21937,13 +22384,13 @@ components:
           hire_date: 2000-01-23
         doc_id: doc_id
         income_breakdown:
-        - hours: 5.637376656633329
-          total: 2.3021358869347655
-          rate: 5.962133916683182
+        - hours: 4.965218492984954
+          total: 5.025004791520295
+          rate: 1.1730742509559433
           type: bonus
-        - hours: 5.637376656633329
-          total: 2.3021358869347655
-          rate: 5.962133916683182
+        - hours: 4.965218492984954
+          total: 5.025004791520295
+          rate: 1.1730742509559433
           type: bonus
       properties:
         deductions:
@@ -21953,10 +22400,10 @@ components:
           type: string
         earnings:
           $ref: '#/components/schemas/Earnings'
-        employer:
-          $ref: '#/components/schemas/PaystubEmployer'
         employee:
           $ref: '#/components/schemas/Employee'
+        employer:
+          $ref: '#/components/schemas/PaystubEmployer'
         employment_details:
           $ref: '#/components/schemas/EmploymentDetails'
         net_pay:
@@ -21966,15 +22413,20 @@ components:
         paystub_details:
           $ref: '#/components/schemas/PaystubDetails'
         income_breakdown:
+          deprecated: true
           items:
             $ref: '#/components/schemas/IncomeBreakdown'
           type: array
         ytd_earnings:
           $ref: '#/components/schemas/PaystubYTDDetails'
       required:
+      - deductions
+      - doc_id
+      - earnings
       - employee
       - employer
       - income_breakdown
+      - net_pay
       - pay_period_details
       - ytd_earnings
       title: Paystub
@@ -22000,6 +22452,22 @@ components:
             amount: 0.8008281904610115
             currency: currency
           canonical_description: BONUS
+        total:
+          current_amount: 5.962133916683182
+          unofficial_currency_code: unofficial_currency_code
+          ytd_amount: 5.637376656633329
+          iso_currency_code: iso_currency_code
+        breakdown:
+        - current_amount: 6.027456183070403
+          unofficial_currency_code: unofficial_currency_code
+          ytd_amount: 1.4658129805029452
+          iso_currency_code: iso_currency_code
+          description: description
+        - current_amount: 6.027456183070403
+          unofficial_currency_code: unofficial_currency_code
+          ytd_amount: 1.4658129805029452
+          iso_currency_code: iso_currency_code
+          description: description
         totals:
         - ytd_pay:
             amount: 0.8008281904610115
@@ -22019,17 +22487,96 @@ components:
           canonical_description: BONUS
       properties:
         subtotals:
+          deprecated: true
           items:
             $ref: '#/components/schemas/Total'
+          type: array
+        breakdown:
+          items:
+            $ref: '#/components/schemas/DeductionsBreakdown'
           type: array
         totals:
+          deprecated: true
           items:
             $ref: '#/components/schemas/Total'
           type: array
+        total:
+          $ref: '#/components/schemas/DeductionsTotal'
+      required:
+      - breakdown
+      - total
       title: Deductions
+      type: object
+    DeductionsBreakdown:
+      additionalProperties: true
+      description: An object representing the deduction line items for the pay period
+      example:
+        current_amount: 6.027456183070403
+        unofficial_currency_code: unofficial_currency_code
+        ytd_amount: 1.4658129805029452
+        iso_currency_code: iso_currency_code
+        description: description
+      properties:
+        current_amount:
+          description: Raw amount of the deduction
+          nullable: true
+          type: number
+        description:
+          description: Description of the deduction line item
+          nullable: true
+          type: string
+        iso_currency_code:
+          description: The ISO-4217 currency code of the line item. Always `null`
+            if `unofficial_currency_code` is non-null.
+          nullable: true
+          type: string
+        unofficial_currency_code:
+          description: |-
+            The unofficial currency code associated with the line item. Always `null` if `iso_currency_code` is non-`null`. Unofficial currency codes are used for currencies that do not have official ISO currency codes, such as cryptocurrencies and the currencies of certain countries.
+
+            See the [currency code schema](https://plaid.com/docs/api/accounts#currency-code-schema) for a full listing of supported `iso_currency_code`s.
+          nullable: true
+          type: string
+        ytd_amount:
+          description: The year-to-date amount of the deduction
+          nullable: true
+          type: number
+      title: DeductionsBreakdown
+      type: object
+    DeductionsTotal:
+      additionalProperties: true
+      description: An object representing the total deductions for the pay period
+      example:
+        current_amount: 5.962133916683182
+        unofficial_currency_code: unofficial_currency_code
+        ytd_amount: 5.637376656633329
+        iso_currency_code: iso_currency_code
+      properties:
+        current_amount:
+          description: Raw amount of the deduction
+          nullable: true
+          type: number
+        iso_currency_code:
+          description: The ISO-4217 currency code of the line item. Always `null`
+            if `unofficial_currency_code` is non-null.
+          nullable: true
+          type: string
+        unofficial_currency_code:
+          description: |-
+            The unofficial currency code associated with the line item. Always `null` if `iso_currency_code` is non-`null`. Unofficial currency codes are used for currencies that do not have official ISO currency codes, such as cryptocurrencies and the currencies of certain countries.
+
+            See the [currency code schema](https://plaid.com/docs/api/accounts#currency-code-schema) for a full listing of supported `iso_currency_code`s.
+          nullable: true
+          type: string
+        ytd_amount:
+          description: The year-to-date total amount of the deductions
+          nullable: true
+          type: number
+      title: DeductionsTotal
       type: object
     Total:
       additionalProperties: true
+      deprecated: true
       description: An object representing both the current pay period and year to
         date amount for a category.
       example:
@@ -22075,6 +22622,7 @@ components:
       type: object
     Pay:
       additionalProperties: true
+      deprecated: true
       description: An object representing a monetary amount.
       example:
         amount: 0.8008281904610115
@@ -22098,75 +22646,184 @@ components:
         and the total earnings.
       example:
         subtotals:
-        - ytd_pay:
+        - current_amount: 2.3021358869347655
+          ytd_pay:
             amount: 0.8008281904610115
             currency: currency
-          description: description
+          unofficial_currency_code: unofficial_currency_code
+          hours: 7.061401241503109
+          ytd_amount: 9.301444243932576
+          iso_currency_code: iso_currency_code
           current_pay:
             amount: 0.8008281904610115
             currency: currency
-          current_rate: current_rate
           canonical_description: BONUS
-          current_hours: current_hours
-        - ytd_pay:
+        - current_amount: 2.3021358869347655
+          ytd_pay:
             amount: 0.8008281904610115
             currency: currency
-          description: description
+          unofficial_currency_code: unofficial_currency_code
+          hours: 7.061401241503109
+          ytd_amount: 9.301444243932576
+          iso_currency_code: iso_currency_code
           current_pay:
             amount: 0.8008281904610115
             currency: currency
-          current_rate: current_rate
           canonical_description: BONUS
-          current_hours: current_hours
+        total:
+          current_amount: 2.3021358869347655
+          ytd_pay:
+            amount: 0.8008281904610115
+            currency: currency
+          unofficial_currency_code: unofficial_currency_code
+          hours: 7.061401241503109
+          ytd_amount: 9.301444243932576
+          iso_currency_code: iso_currency_code
+          current_pay:
+            amount: 0.8008281904610115
+            currency: currency
+          canonical_description: BONUS
+        breakdown:
+        - current_amount: 3.616076749251911
+          unofficial_currency_code: unofficial_currency_code
+          hours: 2.027123023002322
+          rate: 4.145608029883936
+          ytd_amount: 7.386281948385884
+          iso_currency_code: iso_currency_code
+          description: description
+          canonical_description: BONUS
+        - current_amount: 3.616076749251911
+          unofficial_currency_code: unofficial_currency_code
+          hours: 2.027123023002322
+          rate: 4.145608029883936
+          ytd_amount: 7.386281948385884
+          iso_currency_code: iso_currency_code
+          description: description
+          canonical_description: BONUS
         totals:
-        - ytd_pay:
+        - current_amount: 2.3021358869347655
+          ytd_pay:
             amount: 0.8008281904610115
             currency: currency
-          description: description
+          unofficial_currency_code: unofficial_currency_code
+          hours: 7.061401241503109
+          ytd_amount: 9.301444243932576
+          iso_currency_code: iso_currency_code
           current_pay:
             amount: 0.8008281904610115
             currency: currency
-          current_rate: current_rate
           canonical_description: BONUS
-          current_hours: current_hours
-        - ytd_pay:
+        - current_amount: 2.3021358869347655
+          ytd_pay:
             amount: 0.8008281904610115
             currency: currency
-          description: description
+          unofficial_currency_code: unofficial_currency_code
+          hours: 7.061401241503109
+          ytd_amount: 9.301444243932576
+          iso_currency_code: iso_currency_code
           current_pay:
             amount: 0.8008281904610115
             currency: currency
-          current_rate: current_rate
           canonical_description: BONUS
-          current_hours: current_hours
       properties:
         subtotals:
+          deprecated: true
           items:
             $ref: '#/components/schemas/EarningsTotal'
           type: array
         totals:
+          deprecated: true
           items:
             $ref: '#/components/schemas/EarningsTotal'
           type: array
+        breakdown:
+          items:
+            $ref: '#/components/schemas/EarningsBreakdown'
+          type: array
+        total:
+          $ref: '#/components/schemas/EarningsTotal'
       title: Earnings
+      type: object
+    EarningsBreakdown:
+      additionalProperties: true
+      description: An object representing the earnings line items for the pay period.
+      example:
+        current_amount: 3.616076749251911
+        unofficial_currency_code: unofficial_currency_code
+        hours: 2.027123023002322
+        rate: 4.145608029883936
+        ytd_amount: 7.386281948385884
+        iso_currency_code: iso_currency_code
+        description: description
+        canonical_description: BONUS
+      properties:
+        canonical_description:
+          description: Commonly used term to describe the earning line item.
+          enum:
+          - BONUS
+          - COMMISSION
+          - OVERTIME
+          - PAID TIME OFF
+          - REGULAR PAY
+          - VACATION
+          - OTHER
+          - null
+          nullable: true
+          type: string
+        current_amount:
+          description: Raw amount of the earning line item.
+          nullable: true
+          type: number
+        description:
+          description: Description of the earning line item.
+          nullable: true
+          type: string
+        hours:
+          description: Number of hours applicable for this earning.
+          nullable: true
+          type: number
+        iso_currency_code:
+          description: The ISO-4217 currency code of the line item. Always `null`
+            if `unofficial_currency_code` is non-null.
+          nullable: true
+          type: string
+        rate:
+          description: Hourly rate applicable for this earning.
+          nullable: true
+          type: number
+        unofficial_currency_code:
+          description: |-
+            The unofficial currency code associated with the line item. Always `null` if `iso_currency_code` is non-`null`. Unofficial currency codes are used for currencies that do not have official ISO currency codes, such as cryptocurrencies and the currencies of certain countries.
+
+            See the [currency code schema](https://plaid.com/docs/api/accounts#currency-code-schema) for a full listing of supported `iso_currency_code`s.
+          nullable: true
+          type: string
+        ytd_amount:
+          description: The year-to-date amount of the deduction.
+          nullable: true
+          type: number
+      title: EarningsBreakdown
       type: object
     EarningsTotal:
       additionalProperties: true
       description: An object representing both the current pay period and year to
         date amount for an earning category.
       example:
+        current_amount: 2.3021358869347655
         ytd_pay:
           amount: 0.8008281904610115
           currency: currency
-        description: description
+        unofficial_currency_code: unofficial_currency_code
+        hours: 7.061401241503109
+        ytd_amount: 9.301444243932576
+        iso_currency_code: iso_currency_code
         current_pay:
           amount: 0.8008281904610115
           currency: currency
-        current_rate: current_rate
         canonical_description: BONUS
-        current_hours: current_hours
       properties:
         canonical_description:
+          deprecated: true
           description: Commonly used term to describe the line item.
           enum:
           - BONUS
@@ -22187,24 +22844,40 @@ components:
           - OTHER
           nullable: true
           type: string
-        description:
-          description: Text of the line item as printed on the paystub.
+          x-private_visibility: true
+        current_amount:
+          description: Total amount of the earnings for this pay period
           nullable: true
-          type: string
+          type: number
         current_pay:
           $ref: '#/components/schemas/Pay'
         ytd_pay:
           $ref: '#/components/schemas/Pay'
-        current_hours:
+        hours:
+          description: Total number of hours worked for this pay period
+          nullable: true
+          type: number
+        iso_currency_code:
+          description: The ISO-4217 currency code of the line item. Always `null`
+            if `unofficial_currency_code` is non-null.
           nullable: true
           type: string
-        current_rate:
+        unofficial_currency_code:
+          description: |-
+            The unofficial currency code associated with the security. Always `null` if `iso_currency_code` is non-`null`. Unofficial currency codes are used for currencies that do not have official ISO currency codes, such as cryptocurrencies and the currencies of certain countries.
+
+            See the [currency code schema](https://plaid.com/docs/api/accounts#currency-code-schema) for a full listing of supported `iso_currency_code`s.
           nullable: true
           type: string
+        ytd_amount:
+          description: The total year-to-date amount of the earnings
+          nullable: true
+          type: number
       title: EarningsTotal
       type: object
     EmploymentDetails:
       additionalProperties: true
+      deprecated: true
       description: An object representing employment details found on a paystub.
       example:
         annual_salary:
@@ -22226,6 +22899,8 @@ components:
       description: An object representing information about the net pay amount on
         the paystub.
       example:
+        current_amount: 1.2315135367772556
+        unofficial_currency_code: unofficial_currency_code
         total:
           ytd_pay:
             amount: 0.8008281904610115
@@ -22235,66 +22910,41 @@ components:
             amount: 0.8008281904610115
             currency: currency
           canonical_description: BONUS
-        distribution_details:
-        - account_number: account_number
-          bank_name: bank_name
-          current_pay:
-            amount: 0.8008281904610115
-            currency: currency
-          description: description
-          bank_account_type: bank_account_type
-        - account_number: account_number
-          bank_name: bank_name
-          current_pay:
-            amount: 0.8008281904610115
-            currency: currency
-          description: description
-          bank_account_type: bank_account_type
+        ytd_amount: 1.0246457001441578
+        iso_currency_code: iso_currency_code
+        description: description
       properties:
-        distribution_details:
-          items:
-            $ref: '#/components/schemas/DistributionDetails'
-          type: array
+        current_amount:
+          description: Raw amount of the net pay for the pay period
+          nullable: true
+          type: number
+        description:
+          description: Description of the net pay
+          nullable: true
+          type: string
+        iso_currency_code:
+          description: The ISO-4217 currency code of the net pay. Always `null` if
+            `unofficial_currency_code` is non-null.
+          nullable: true
+          type: string
+        unofficial_currency_code:
+          description: |-
+            The unofficial currency code associated with the net pay. Always `null` if `iso_currency_code` is non-`null`. Unofficial currency codes are used for currencies that do not have official ISO currency codes, such as cryptocurrencies and the currencies of certain countries.
+
+            See the [currency code schema](https://plaid.com/docs/api/accounts#currency-code-schema) for a full listing of supported `iso_currency_code`s.
+          nullable: true
+          type: string
+        ytd_amount:
+          description: The year-to-date amount of the net pay
+          nullable: true
+          type: number
         total:
           $ref: '#/components/schemas/Total'
       title: NetPay
       type: object
-    DistributionDetails:
-      additionalProperties: true
-      description: An object representing information about a distribution from the
-        paycheck (for example, the amount distributed to a specific checking account,
-        or to a retirement plan).
-      example:
-        account_number: account_number
-        bank_name: bank_name
-        current_pay:
-          amount: 0.8008281904610115
-          currency: currency
-        description: description
-        bank_account_type: bank_account_type
-      properties:
-        account_number:
-          description: The account number of the account being deposited to.
-          nullable: true
-          type: string
-        bank_account_type:
-          description: The type of bank account (e.g. Checking or Savings)
-          nullable: true
-          type: string
-        bank_name:
-          description: The name of the bank that the payment is being deposited to.
-          nullable: true
-          type: string
-        current_pay:
-          $ref: '#/components/schemas/Pay'
-        description:
-          description: A description of the distribution type.
-          nullable: true
-          type: string
-      title: DistributionDetails
-      type: object
     PaystubDetails:
       additionalProperties: true
+      deprecated: true
       description: An object representing details that can be found on the paystub.
       example:
         pay_date: 2000-01-23
@@ -22339,12 +22989,13 @@ components:
       type: object
     IncomeBreakdown:
       additionalProperties: true
+      deprecated: true
       description: An object representing a breakdown of the different income types
         on the paystub.
       example:
-        hours: 5.637376656633329
-        total: 2.3021358869347655
-        rate: 5.962133916683182
+        hours: 4.965218492984954
+        total: 5.025004791520295
+        rate: 1.1730742509559433
         type: bonus
       properties:
         type:
@@ -22394,16 +23045,17 @@ components:
           line2: line2
           line1: line1
         taxpayer_id:
+          id_mask: id_mask
           last_4_digits: last_4_digits
           id_type: id_type
         name: name
       properties:
+        address:
+          $ref: '#/components/schemas/PaystubAddress'
         name:
           description: The name of the employee.
           nullable: true
           type: string
-        address:
-          $ref: '#/components/schemas/PaystubAddress'
         marital_status:
           description: Marital status of the employee.
           nullable: true
@@ -22417,7 +23069,9 @@ components:
       type: object
     TaxpayerID:
       additionalProperties: true
+      description: Taxpayer ID of the individual receiving the paystub.
       example:
+        id_mask: id_mask
         last_4_digits: last_4_digits
         id_type: id_type
       properties:
@@ -22425,7 +23079,12 @@ components:
           description: Type of ID, e.g. 'SSN'
           nullable: true
           type: string
+        id_mask:
+          description: ID mask; i.e. last 4 digits of the taxpayer ID
+          nullable: true
+          type: string
         last_4_digits:
+          deprecated: true
           description: Last 4 digits of unique number of ID.
           maxLength: 4
           minLength: 4
@@ -22447,12 +23106,12 @@ components:
           line1: line1
         name: name
       properties:
+        address:
+          $ref: '#/components/schemas/PaystubAddress'
         name:
           description: The name of the employer on the paystub.
           nullable: true
           type: string
-        address:
-          $ref: '#/components/schemas/PaystubAddress'
       required:
       - name
       title: Employer
@@ -22473,20 +23132,12 @@ components:
           description: The full city name.
           nullable: true
           type: string
-        street:
-          description: The listed street address.
-          nullable: true
-          type: string
-        line1:
-          description: Street address line 1.
-          nullable: true
-          type: string
-        line2:
-          description: Street address line 2.
+        country:
+          description: The ISO 3166-1 alpha-2 country code.
           nullable: true
           type: string
         postal_code:
-          description: 5 digit postal code.
+          description: The postal code of the address.
           nullable: true
           type: string
         region:
@@ -22495,14 +23146,25 @@ components:
             Example: `"NC"`
           nullable: true
           type: string
+        street:
+          description: The full street address.
+          nullable: true
+          type: string
+        line1:
+          deprecated: true
+          description: Street address line 1.
+          nullable: true
+          type: string
+        line2:
+          deprecated: true
+          description: Street address line 2.
+          nullable: true
+          type: string
         state_code:
+          deprecated: true
           description: |-
             The region or state
             Example: `"NC"`
-          nullable: true
-          type: string
-        country:
-          description: The country of the address.
           nullable: true
           type: string
       title: Address
@@ -22513,43 +23175,135 @@ components:
       example:
         end_date: 2000-01-23
         pay_day: 2000-01-23
-        gross_earnings: 6.027456183070403
-        check_amount: 1.4658129805029452
+        pay_date: 2000-01-23
+        gross_earnings: 7.457744773683766
+        distribution_breakdown:
+        - current_amount: 6.84685269835264
+          unofficial_currency_code: unofficial_currency_code
+          account_name: account_name
+          bank_name: bank_name
+          iso_currency_code: iso_currency_code
+          current_pay:
+            amount: 0.8008281904610115
+            currency: currency
+          type: type
+          mask: mask
+        - current_amount: 6.84685269835264
+          unofficial_currency_code: unofficial_currency_code
+          account_name: account_name
+          bank_name: bank_name
+          iso_currency_code: iso_currency_code
+          current_pay:
+            amount: 0.8008281904610115
+            currency: currency
+          type: type
+          mask: mask
+        pay_frequency: PAY_FREQUENCY_UNKNOWN
+        check_amount: 1.4894159098541704
         start_date: 2000-01-23
       properties:
-        start_date:
-          description: 'The pay period start date, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
-            format: "yyyy-mm-dd".'
-          format: date
+        check_amount:
+          description: The amount of the paycheck.
           nullable: true
-          type: string
+          type: number
+        distribution_breakdown:
+          items:
+            $ref: '#/components/schemas/DistributionBreakdown'
+          type: array
         end_date:
           description: 'The pay period end date, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
             format: "yyyy-mm-dd".'
           format: date
           nullable: true
           type: string
-        pay_day:
+        gross_earnings:
+          description: Total earnings before tax/deductions.
+          nullable: true
+          type: number
+        pay_date:
           description: The date on which the paystub was issued, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
             format ("yyyy-mm-dd").
           format: date
           nullable: true
           type: string
-        gross_earnings:
-          description: Total earnings before tax.
+        pay_frequency:
+          description: The frequency at which an individual is paid.
+          enum:
+          - PAY_FREQUENCY_UNKNOWN
+          - PAY_FREQUENCY_WEEKLY
+          - PAY_FREQUENCY_BIWEEKLY
+          - PAY_FREQUENCY_SEMIMONTHLY
+          - PAY_FREQUENCY_MONTHLY
+          - null
           nullable: true
-          type: number
-        check_amount:
-          description: The net amount of the paycheck.
+          type: string
+        pay_day:
+          deprecated: true
+          description: The date on which the paystub was issued, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            format ("yyyy-mm-dd").
+          format: date
           nullable: true
-          type: number
-      required:
-      - check_amount
-      - end_date
-      - gross_earnings
-      - pay_day
-      - start_date
+          type: string
+        start_date:
+          description: 'The pay period start date, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            format: "yyyy-mm-dd".'
+          format: date
+          nullable: true
+          type: string
       title: PayPeriodDetails
+      type: object
+    DistributionBreakdown:
+      additionalProperties: true
+      description: Information about the accounts that the payment was distributed
+        to.
+      example:
+        current_amount: 6.84685269835264
+        unofficial_currency_code: unofficial_currency_code
+        account_name: account_name
+        bank_name: bank_name
+        iso_currency_code: iso_currency_code
+        current_pay:
+          amount: 0.8008281904610115
+          currency: currency
+        type: type
+        mask: mask
+      properties:
+        account_name:
+          description: Name of the account for the given distribution.
+          nullable: true
+          type: string
+        bank_name:
+          description: The name of the bank that the payment is being deposited to.
+          nullable: true
+          type: string
+        current_amount:
+          description: The amount distributed to this account.
+          nullable: true
+          type: number
+        iso_currency_code:
+          description: The ISO-4217 currency code of the net pay. Always `null` if
+            `unofficial_currency_code` is non-null.
+          nullable: true
+          type: string
+        mask:
+          description: The last 2-4 alphanumeric characters of an account's official
+            account number.
+          nullable: true
+          type: string
+        type:
+          description: Type of the account that the paystub was sent to (e.g. 'checking').
+          nullable: true
+          type: string
+        unofficial_currency_code:
+          description: |-
+            The unofficial currency code associated with the net pay. Always `null` if `iso_currency_code` is non-`null`. Unofficial currency codes are used for currencies that do not have official ISO currency codes, such as cryptocurrencies and the currencies of certain countries.
+
+            See the [currency code schema](https://plaid.com/docs/api/accounts#currency-code-schema) for a full listing of supported `iso_currency_code`s.
+          nullable: true
+          type: string
+        current_pay:
+          $ref: '#/components/schemas/Pay'
+      title: DistributionBreakdown
       type: object
     PaystubDeduction:
       additionalProperties: true
@@ -22575,10 +23329,11 @@ components:
       type: object
     PaystubYTDDetails:
       additionalProperties: true
+      deprecated: true
       description: The amount of income earned year to date, as based on paystub data.
       example:
-        gross_earnings: 7.061401241503109
-        net_earnings: 9.301444243932576
+        gross_earnings: 9.965781217890562
+        net_earnings: 9.369310271410669
       properties:
         gross_earnings:
           description: Year-to-date gross earnings.
@@ -22597,6 +23352,7 @@ components:
         access_token: access_token
         income_verification_id: income_verification_id
         secret: secret
+        document_id: document_id
         client_id: client_id
       properties:
         client_id:
@@ -22620,18 +23376,12 @@ components:
             for.
           nullable: true
           type: string
-      title: IncomeVerificationDocumentsDownloadRequest
-      type: object
-    IncomeVerificationDocumentsDownloadResponse:
-      additionalProperties: true
-      description: IncomeVerificationDocumentsDownloadResponse defines the response
-        schema for `/income/verification/documents/download`.
-      properties:
-        id:
+        document_id:
+          description: The document ID to download. If passed, a single document will
+            be returned in the resulting zip file, rather than all document
+          nullable: true
           type: string
-      required:
-      - id
-      title: IncomeVerificationDocumentsDownloadResponse
+      title: IncomeVerificationDocumentsDownloadRequest
       type: object
     IncomeVerificationTaxformsGetRequest:
       additionalProperties: true
@@ -22662,14 +23412,17 @@ components:
       title: IncomeVerificationTaxformsGetRequest
       type: object
     IncomeVerificationTaxformsGetResponse:
+      additionalProperties: true
       description: IncomeVerificationTaxformsGetResponse defines the response schema
         for `/income/verification/taxforms/get`
       example:
         document_metadata:
         - name: name
+          doc_type: UNKNOWN
           doc_id: doc_id
           status: status
         - name: name
+          doc_type: UNKNOWN
           doc_id: doc_id
           status: status
         error:
@@ -22705,6 +23458,7 @@ components:
                 line2: line2
                 line1: line1
               taxpayer_id:
+                id_mask: id_mask
                 last_4_digits: last_4_digits
                 id_type: id_type
               name: name
@@ -22770,6 +23524,7 @@ components:
                 line2: line2
                 line1: line1
               taxpayer_id:
+                id_mask: id_mask
                 last_4_digits: last_4_digits
                 id_type: id_type
               name: name
@@ -22823,14 +23578,14 @@ components:
             sensitive.
           title: RequestID
           type: string
+        document_metadata:
+          items:
+            $ref: '#/components/schemas/DocumentMetadata'
+          type: array
         taxforms:
           description: A list of taxforms.
           items:
             $ref: '#/components/schemas/Taxform'
-          type: array
-        document_metadata:
-          items:
-            $ref: '#/components/schemas/DocumentMetadata'
           type: array
         error:
           $ref: '#/components/schemas/Error'
@@ -22861,6 +23616,7 @@ components:
               line2: line2
               line1: line1
             taxpayer_id:
+              id_mask: id_mask
               last_4_digits: last_4_digits
               id_type: id_type
             name: name
@@ -22940,6 +23696,7 @@ components:
             line2: line2
             line1: line1
           taxpayer_id:
+            id_mask: id_mask
             last_4_digits: last_4_digits
             id_type: id_type
           name: name
@@ -23133,6 +23890,169 @@ components:
       required:
       - id
       title: IncomeVerificationWebhookStatus
+      type: object
+    EmploymentVerificationGetRequest:
+      description: EmploymentVerificationGetRequest defines the request schema for
+        `/employment/verification/get`.
+      example:
+        access_token: access_token
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        access_token:
+          description: The access token associated with the Item data is being requested
+            for.
+          title: AccessToken
+          type: string
+      required:
+      - access_token
+      title: EmploymentVerificationGetRequest
+      type: object
+    EmploymentVerificationGetResponse:
+      additionalProperties: true
+      description: EmploymentVerificationGetResponse defines the response schema for
+        `/employment/verification/get`.
+      example:
+        employments:
+        - end_date: 2000-01-23
+          platform_ids:
+            employee_id: employee_id
+            payroll_id: payroll_id
+            position_id: position_id
+          employer:
+            name: name
+          title: title
+          status: EMPLOYMENT_STATUS_ACTIVE
+          start_date: 2000-01-23
+        - end_date: 2000-01-23
+          platform_ids:
+            employee_id: employee_id
+            payroll_id: payroll_id
+            position_id: position_id
+          employer:
+            name: name
+          title: title
+          status: EMPLOYMENT_STATUS_ACTIVE
+          start_date: 2000-01-23
+        error:
+          error_message: error_message
+          suggested_action: suggested_action
+          error_type: INVALID_REQUEST
+          causes:
+          - ""
+          - ""
+          display_message: display_message
+          error_code: error_code
+          documentation_url: documentation_url
+          request_id: request_id
+          status: 0.8008281904610115
+        request_id: request_id
+      properties:
+        employments:
+          description: A list of employment verification summaries.
+          items:
+            $ref: '#/components/schemas/EmploymentVerification'
+          type: array
+        error:
+          $ref: '#/components/schemas/Error'
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - employments
+      - request_id
+      title: EmploymentVerificationGetResponse
+      type: object
+    EmploymentVerification:
+      additionalProperties: true
+      description: An object containing proof of employment data for an individual
+      example:
+        end_date: 2000-01-23
+        platform_ids:
+          employee_id: employee_id
+          payroll_id: payroll_id
+          position_id: position_id
+        employer:
+          name: name
+        title: title
+        status: EMPLOYMENT_STATUS_ACTIVE
+        start_date: 2000-01-23
+      properties:
+        status:
+          description: Current employment status.
+          enum:
+          - EMPLOYMENT_STATUS_ACTIVE
+          - EMPLOYMENT_STATUS_INACTIVE
+          - null
+          nullable: true
+          type: string
+        start_date:
+          description: Start of employment in ISO_8601 format (YYYY-MM-DD).
+          format: date
+          nullable: true
+          type: string
+        end_date:
+          description: End of employment, if applicable. In ISO_8601 format (YYY-MM-DD).
+          format: date
+          nullable: true
+          type: string
+        employer:
+          $ref: '#/components/schemas/EmployerVerification'
+        title:
+          description: Current title of employee.
+          nullable: true
+          type: string
+        platform_ids:
+          $ref: '#/components/schemas/PlatformIds'
+      title: EmploymentVerification
+      type: object
+    EmployerVerification:
+      additionalProperties: true
+      description: An object containing employer data.
+      example:
+        name: name
+      properties:
+        name:
+          description: Name of employer.
+          nullable: true
+          type: string
+      title: EmployerVerification
+      type: object
+    PlatformIds:
+      additionalProperties: true
+      description: An object containing a set of ids related to an employee
+      example:
+        employee_id: employee_id
+        payroll_id: payroll_id
+        position_id: position_id
+      properties:
+        employee_id:
+          description: The ID of an employee as given by their employer
+          nullable: true
+          type: string
+        payroll_id:
+          description: The ID of an employee as given by their payroll
+          nullable: true
+          type: string
+        position_id:
+          description: The ID of the position of the employee
+          nullable: true
+          type: string
+      title: PlatformIds
       type: object
     AssetReportTransaction:
       allOf:
@@ -24356,7 +25276,6 @@ components:
         core_attributes:
           $ref: '#/components/schemas/SignalEvaluateCoreAttributes'
       required:
-      - core_attributes
       - request_id
       - scores
       title: SignalEvaluateResponse
@@ -24483,9 +25402,9 @@ components:
       type: object
     SignalEvaluateCoreAttributes:
       description: The core attributes object contains additional data that can be
-        used to assess the ACH return risk, such as past ACH return events, balance/transaction
-        history, the Item’s connection history in the Plaid network, and identity
-        change history.
+        used to assess the ACH return risk. For detailed documentation of core attributes
+        available, or to request that core attributes not be returned, contact Sales
+        or your Plaid account manager.
       example:
         days_since_first_plaid_connection: 1
         nsf_overdraft_transactions_count_90d: 7
@@ -24732,6 +25651,7 @@ components:
       title: SignalDecisionReportRequest
       type: object
     SignalDecisionReportResponse:
+      additionalProperties: true
       description: SignalDecisionReportResponse defines the response schema for `/signal/decision/report`
       example:
         request_id: request_id
@@ -24747,12 +25667,8 @@ components:
       title: SignalDecisionReportResponse
       type: object
     SignalReturnReportRequest:
+      additionalProperties: true
       description: SignalReturnReportRequest defines the request schema for `/signal/return/report`
-      example:
-        secret: secret
-        client_transaction_id: client_transaction_id
-        return_code: return_code
-        client_id: client_id
       properties:
         client_id:
           description: Your Plaid API `client_id`. The `client_id` is required and
