@@ -1,16 +1,19 @@
 This library is generated from an OpenAPI schema (OAS). See full changelog [here](https://github.com/plaid/plaid-openapi/blob/master/CHANGELOG.md) for schema changes.
 
+# 1.5.0
+- Updating to OAS 2020-09-14_1.36.1
+
 ## 1.4.0
-Updating to OAS 2020-09-14_1.36.1
+- Updating to OAS 2020-09-14_1.36.1
 
 ## 1.3.0
-Updating to OAS 2020-09-14_1.33.0.
+- Updating to OAS 2020-09-14_1.33.0.
 
 ## 1.2.0
-Updated to OAS 2020-09-14_1.31.1.
+- Updated to OAS 2020-09-14_1.31.1.
 
 ## 1.1.0
-Updated to OAS 2020-09-14_1.26.1.
+- Updated to OAS 2020-09-14_1.26.1.
 
 ## 1.0.0
 - Moved officially to `GOMODULES`, as well as GA'd the generated version of `plaid-go`! This is ported over from our beta branch / release.
