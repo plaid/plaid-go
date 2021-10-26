@@ -144,6 +144,7 @@ model_external_payment_refund_details.go
 model_external_payment_schedule_base.go
 model_external_payment_schedule_get.go
 model_external_payment_schedule_request.go
+model_fraud_attributes.go
 model_health_incident.go
 model_historical_balance.go
 model_historical_update_webhook.go
@@ -315,6 +316,7 @@ model_paystub_address.go
 model_paystub_deduction.go
 model_paystub_details.go
 model_paystub_employer.go
+model_paystub_fraud_verification.go
 model_paystub_override.go
 model_paystub_override_employee.go
 model_paystub_override_employee_address.go
