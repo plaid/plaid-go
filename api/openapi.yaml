@@ -7,7 +7,7 @@ info:
     details.
   termsOfService: https://plaid.com/legal/
   title: The Plaid API
-  version: 2020-09-14_1.40.3
+  version: 2020-09-14_1.44.0
 servers:
 - description: Production
   url: https://production.plaid.com
@@ -417,6 +417,39 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: Error response
       summary: Get streams of recurring transactions
+      tags:
+      - plaid
+  /transactions/sync:
+    post:
+      description: |-
+        The `/transactions/sync` endpoint returns item transactions as a set of delta updates.
+        Subsequent calls to the endpoint using the cursor returned in the response will return new added, modified, and removed transactions since the last call to the endpoint
+
+        The product is currently in beta. To request access, contact transactions-feedback@plaid.com.
+      externalDocs:
+        url: /api/products/#transactionssync
+      operationId: transactionsSync
+      requestBody:
+        content:
+          application/json:
+            examples: {}
+            schema:
+              $ref: '#/components/schemas/TransactionsSyncRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionsSyncResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error response
+      summary: Get incremental transaction updates on an item
       tags:
       - plaid
   /institutions/get:
@@ -4561,8 +4594,8 @@ paths:
                         start_date: 2020-12-01
                         pay_frequency: PAY_FREQUENCY_BIWEEKLY
                       verification:
-                        verification_status: PAYSTUB_VERIFICATION_COMPLETE
-                        fraud_attributes: null
+                        verification_status: PAYSTUB_VERIFICATION_VERIFIED
+                        verification_attributes: null
                     request_id: 2pxQ59buGdsHRef
               schema:
                 $ref: '#/components/schemas/IncomeVerificationPaystubsGetResponse'
@@ -4634,8 +4667,8 @@ paths:
   /income/verification/taxforms/get:
     post:
       description: '`/income/verification/taxforms/get` returns the information collected
-        from taxforms that were used to verify an end user''s. It can be called once
-        the status of the verification has been set to `VERIFICATION_STATUS_PROCESSING_COMPLETE`,
+        from taxforms that were used to verify an end user''s income. It can be called
+        once the status of the verification has been set to `VERIFICATION_STATUS_PROCESSING_COMPLETE`,
         as reported by the `INCOME: verification_status` webhook. Attempting to call
         the endpoint before verification has been completed will result in an error.'
       externalDocs:
@@ -5685,6 +5718,96 @@ components:
       - inflow_streams
       - outflow_streams
       - request_id
+      type: object
+    TransactionsSyncRequest:
+      description: TransactionsSyncRequest defines the request schema for `/transactions/sync`
+      example:
+        access_token: access_token
+        cursor: cursor
+        count: 40
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        access_token:
+          description: The access token associated with the Item data is being requested
+            for.
+          title: AccessToken
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        cursor:
+          description: |-
+            The cursor value represents the last update requested. Providing it will cause the response to only return changes after this update.
+            If omitted, the entire history of updates will be returned, starting with the first-added transactions on the item.
+            Note: The upper-bound length of this cursor is 256 characters of base64.
+          type: string
+        count:
+          default: 100
+          description: The number of transaction updates to fetch.
+          exclusiveMinimum: false
+          maximum: 500
+          minimum: 1
+          type: integer
+      required:
+      - access_token
+      type: object
+    TransactionsSyncResponse:
+      description: TransactionsSyncResponse defines the response schema for `/transactions/sync`
+      example:
+        next_cursor: next_cursor
+        removed:
+        - transaction_id: transaction_id
+        - transaction_id: transaction_id
+        added:
+        - null
+        - null
+        modified:
+        - null
+        - null
+        has_more: true
+      properties:
+        added:
+          description: Transactions that have been added to the item since `cursor`
+            ordered by ascending last modified time.
+          items:
+            $ref: '#/components/schemas/Transaction'
+          type: array
+        modified:
+          description: Transactions that have been modified on the item since `cursor`
+            ordered by ascending last modified time.
+          items:
+            $ref: '#/components/schemas/Transaction'
+          type: array
+        removed:
+          description: Transactions that have been removed from the item since `cursor`
+            ordered by ascending last modified time.
+          items:
+            $ref: '#/components/schemas/RemovedTransaction'
+          type: array
+        next_cursor:
+          description: Cursor used for fetching any future updates after the latest
+            update provided in this response.
+          type: string
+        has_more:
+          description: Represents if more than requested count of transaction updates
+            exist. If true, the additional updates can be fetched by making an additional
+            request with `cursor` set to `next_cursor`.
+          type: boolean
+      required:
+      - added
+      - has_more
+      - modified
+      - next_cursor
+      - removed
       type: object
     InstitutionsGetRequest:
       description: InstitutionsGetRequest defines the request schema for `/institutions/get`
@@ -7009,8 +7132,7 @@ components:
           $ref: '#/components/schemas/SandboxPublicTokenCreateRequestOptionsTransactions'
       type: object
     SandboxPublicTokenCreateRequestOptionsTransactions:
-      description: SandboxPublicTokenCreateRequestOptionsTransactions is an optional
-        set of parameters corresponding to transactions options.
+      description: An optional set of parameters corresponding to transactions options.
       example:
         end_date: 2000-01-23
         start_date: 2000-01-23
@@ -11801,6 +11923,17 @@ components:
           bank account.
         type: object
       nullable: true
+    RemovedTransaction:
+      description: A representation of a removed transaction
+      example:
+        transaction_id: transaction_id
+      properties:
+        transaction_id:
+          description: The ID of the removed transaction.
+          type: string
+      title: RemovedTransaction
+      type: object
+      x-examples: {}
     RequestID:
       description: A unique identifier for the request, which can be used for troubleshooting.
         This identifier, like all Plaid identifiers, is case sensitive.
@@ -12493,6 +12626,7 @@ components:
       - FR
       - IE
       - CA
+      - DE
       title: CountryCode
       type: string
     PaymentMeta:
@@ -14234,7 +14368,10 @@ components:
         status: HEALTHY
       properties:
         status:
+          deprecated: true
           description: |-
+            This field is deprecated in favor of the `breakdown` object, which provides more granular institution health data.
+
             `HEALTHY`: the majority of requests are successful
             `DEGRADED`: only some requests are successful
             `DOWN`: all requests are failing
@@ -14513,15 +14650,15 @@ components:
       properties:
         date_transacted:
           description: The date of the transaction, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
-            (YYYY-MM-DD) format. Transaction dates in the past or present will result
-            in posted transactions; transaction dates in the future will result in
-            pending transactions. Transactions in Sandbox will move from pending to
+            (YYYY-MM-DD) format. Transactions in Sandbox will move from pending to
             posted once their transaction date has been reached.
           format: date
           type: string
         date_posted:
           description: The date the transaction posted, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
-            (YYYY-MM-DD) format
+            (YYYY-MM-DD) format. Posted dates in the past or present will result in
+            posted transactions; posted dates in the future will result in pending
+            transactions.
           format: date
           type: string
         amount:
@@ -20756,6 +20893,9 @@ components:
             postal_code: postal_code
           last_name: last_name
           first_name: first_name
+        transactions_access_tokens:
+        - null
+        - null
         client_id: client_id
       properties:
         client_id:
@@ -20778,6 +20918,14 @@ components:
             for.
           nullable: true
           type: string
+        transactions_access_tokens:
+          description: An array of access tokens corresponding to the Items that will
+            be cross-referenced with the product data. If the `transactions` product
+            was not initialized for the Items during link, it will be initialized
+            after this Link session.
+          items:
+            $ref: '#/components/schemas/AccessToken'
+          type: array
         us_military_info:
           $ref: '#/components/schemas/IncomeVerificationPrecheckMilitaryInfo'
       title: IncomeVerificationPrecheckRequest
@@ -20956,20 +21104,23 @@ components:
           description: The `income_verification_id` of the verification instance whose
             status is being reported.
           type: string
+        item_id:
+          description: The Item ID associated with the verification.
+          type: string
         verification_status:
-          description: |-
-            `VERIFICATION_STATUS_PROCESSING_COMPLETE`: The income verification status processing has completed.
-
-            `VERIFICATION_STATUS_UPLOAD_ERROR`: An upload error occurred when the end user attempted to upload their verification documentation.
-
-            `VERIFICATION_STATUS_INVALID_TYPE`: The end user attempted to upload verification documentation in an unsupported file format.
-
-            `VERIFICATION_STATUS_DOCUMENT_REJECTED`: The documentation uploaded by the end user was recognized as a supported file format, but not recognized as a valid paystub.
-
-            `VERIFICATION_STATUS_PROCESSING_FAILED`: A failure occurred when attempting to process the verification documentation.
+          description: "`VERIFICATION_STATUS_PROCESSING_COMPLETE`: The income verification\
+            \ status processing has completed. If the user uploaded multiple documents,\
+            \ this status means that at least one document was processed successfully.\
+            \ \n\n`VERIFICATION_STATUS_DOCUMENT_REJECTED`: The documentation uploaded\
+            \ by the end user was recognized as a supported file format, but not recognized\
+            \ as a valid verification document. Common causes include poor image quality\
+            \ or the document not being an acceptable income verification document.\n\
+            \n`VERIFICATION_STATUS_PROCESSING_FAILED`: A failure occurred when attempting\
+            \ to process the verification documentation."
           type: string
       required:
       - income_verification_id
+      - item_id
       - verification_status
       - webhook_code
       - webhook_type
@@ -20980,6 +21131,7 @@ components:
           webhook_type: INCOME
           webhook_code: income_verification
           income_verification_id: f6f5132f-853b-421c-8c41-d24f93ebc39f
+          item_id: gAXlMgVEw5uEGoQnnXZ6tn9E7Mn3LBc4PJVKZ
           verification_status: VERIFICATION_STATUS_PROCESSING_COMPLETE
     IncomeVerificationSummaryGetRequest:
       description: IncomeVerificationSummaryGetRequest defines the request schema
@@ -21572,10 +21724,10 @@ components:
             rate: 1.1730742509559433
             type: bonus
           verification:
-            verification_status: PAYSTUB_VERIFICATION_COMPLETE
-            fraud_attributes:
-            - type: FRAUD_ATTRIBUTES_AMOUNT_MISMATCH
-            - type: FRAUD_ATTRIBUTES_AMOUNT_MISMATCH
+            verification_attributes:
+            - type: VERIFICATION_ATTRIBUTE_TYPE_UNKNOWN
+            - type: VERIFICATION_ATTRIBUTE_TYPE_UNKNOWN
+            verification_status: PAYSTUB_VERIFICATION_STATUS_UNKNOWN
         error:
           error_message: error_message
           suggested_action: suggested_action
@@ -21871,10 +22023,10 @@ components:
             rate: 1.1730742509559433
             type: bonus
           verification:
-            verification_status: PAYSTUB_VERIFICATION_COMPLETE
-            fraud_attributes:
-            - type: FRAUD_ATTRIBUTES_AMOUNT_MISMATCH
-            - type: FRAUD_ATTRIBUTES_AMOUNT_MISMATCH
+            verification_attributes:
+            - type: VERIFICATION_ATTRIBUTE_TYPE_UNKNOWN
+            - type: VERIFICATION_ATTRIBUTE_TYPE_UNKNOWN
+            verification_status: PAYSTUB_VERIFICATION_STATUS_UNKNOWN
         - net_pay:
             current_amount: 1.2315135367772556
             unofficial_currency_code: unofficial_currency_code
@@ -22103,10 +22255,10 @@ components:
             rate: 1.1730742509559433
             type: bonus
           verification:
-            verification_status: PAYSTUB_VERIFICATION_COMPLETE
-            fraud_attributes:
-            - type: FRAUD_ATTRIBUTES_AMOUNT_MISMATCH
-            - type: FRAUD_ATTRIBUTES_AMOUNT_MISMATCH
+            verification_attributes:
+            - type: VERIFICATION_ATTRIBUTE_TYPE_UNKNOWN
+            - type: VERIFICATION_ATTRIBUTE_TYPE_UNKNOWN
+            verification_status: PAYSTUB_VERIFICATION_STATUS_UNKNOWN
         document_metadata:
         - name: name
           doc_type: UNKNOWN
@@ -22171,7 +22323,24 @@ components:
             response.
           type: string
         doc_type:
-          description: The type of document
+          description: |-
+            The type of document.
+
+            `DOCUMENT_TYPE_PAYSTUB`: A paystub.
+
+            `DOCUMENT_TYPE_BANK_STATEMENT`: A bank statement.
+
+            `DOCUMENT_TYPE_US_TAX_W2`: A W-2 wage and tax statement provided by a US employer reflecting wages earned by the employee.
+
+            `DOCUMENT_TYPE_US_MILITARY_ERAS`: An electronic Retirement Account Statement (eRAS) issued by the US military.
+
+            `DOCUMENT_TYPE_US_MILITARY_LES`: A Leave and Earnings Statement (LES) issued by the US military.
+
+            `DOCUMENT_TYPE_US_MILITARY_CLES`: A Civilian Leave and Earnings Statment (CLES) issued by the US military.
+
+            `DOCUMENT_TYPE_GIG`: Used to indicate that the income is related to gig work. Does not necessarily correspond to a specific document type.
+
+            `UNKNOWN`: Document type could not be determined.
           enum:
           - UNKNOWN
           - DOCUMENT_TYPE_PAYSTUB
@@ -22416,10 +22585,10 @@ components:
           rate: 1.1730742509559433
           type: bonus
         verification:
-          verification_status: PAYSTUB_VERIFICATION_COMPLETE
-          fraud_attributes:
-          - type: FRAUD_ATTRIBUTES_AMOUNT_MISMATCH
-          - type: FRAUD_ATTRIBUTES_AMOUNT_MISMATCH
+          verification_attributes:
+          - type: VERIFICATION_ATTRIBUTE_TYPE_UNKNOWN
+          - type: VERIFICATION_ATTRIBUTE_TYPE_UNKNOWN
+          verification_status: PAYSTUB_VERIFICATION_STATUS_UNKNOWN
       properties:
         deductions:
           $ref: '#/components/schemas/Deductions'
@@ -22448,18 +22617,16 @@ components:
         ytd_earnings:
           $ref: '#/components/schemas/PaystubYTDDetails'
         verification:
-          $ref: '#/components/schemas/PaystubFraudVerification'
+          $ref: '#/components/schemas/PaystubVerification'
       required:
       - deductions
       - doc_id
       - earnings
       - employee
       - employer
-      - income_breakdown
       - net_pay
       - pay_period_details
       - verification
-      - ytd_earnings
       title: Paystub
       type: object
     Deductions:
@@ -23376,53 +23543,57 @@ components:
           type: number
       title: PaystubYTDDetails
       type: object
-    PaystubFraudVerification:
+    PaystubVerification:
       additionalProperties: true
       description: An object containing information for whether or not the uploaded
         paystub is fradulent
       example:
-        verification_status: PAYSTUB_VERIFICATION_COMPLETE
-        fraud_attributes:
-        - type: FRAUD_ATTRIBUTES_AMOUNT_MISMATCH
-        - type: FRAUD_ATTRIBUTES_AMOUNT_MISMATCH
+        verification_attributes:
+        - type: VERIFICATION_ATTRIBUTE_TYPE_UNKNOWN
+        - type: VERIFICATION_ATTRIBUTE_TYPE_UNKNOWN
+        verification_status: PAYSTUB_VERIFICATION_STATUS_UNKNOWN
       nullable: true
       properties:
         verification_status:
           description: Derived verification status.
           enum:
-          - PAYSTUB_VERIFICATION_COMPLETE
-          - PAYSTUB_VERIFICATION_IN_PROGRESS
-          - PAYSTUB_VERIFICATION_UNKNOWN
+          - PAYSTUB_VERIFICATION_STATUS_UNKNOWN
+          - PAYSTUB_VERIFICATION_STATUS_VERIFIED
+          - PAYSTUB_VERIFICATION_STATUS_FRAUDULENT
+          - null
           nullable: true
           type: string
-        fraud_attributes:
+        verification_attributes:
           items:
-            $ref: '#/components/schemas/FraudAttributes'
+            $ref: '#/components/schemas/VerificationAttribute'
           type: array
       required:
       - fraud_attributes
       - verification_status
-      title: PaystubFraudVerification
+      title: PaystubVerification
       type: object
-    FraudAttributes:
+    VerificationAttribute:
       additionalProperties: true
       description: Details about a certain reason as to why a document could potentially
         be fraudulent
       example:
-        type: FRAUD_ATTRIBUTES_AMOUNT_MISMATCH
+        type: VERIFICATION_ATTRIBUTE_TYPE_UNKNOWN
       nullable: true
       properties:
         type:
           description: Message indicating the reason as to why the verification failed
           enum:
-          - FRAUD_ATTRIBUTES_AMOUNT_MISMATCH
-          - FRAUD_ATTRIBUTES_DATE_MISMATCH
-          - FRAUD_ATTRIBUTES_UNKNOWN_ERROR
+          - VERIFICATION_ATTRIBUTE_TYPE_UNKNOWN
+          - VERIFICATION_ATTRIBUTE_TYPE_AMOUNT_MATCH
+          - VERIFICATION_ATTRIBUTE_TYPE_DATE_MATCH
+          - VERIFICATION_ATTRIBUTE_TYPE_DATE_MISMATCH
+          - VERIFICATION_ATTRIBUTE_TYPE_FILE_TAMPERING
+          - null
           nullable: true
           type: string
       required:
       - type
-      title: FraudAttributes
+      title: VerificationAttribute
       type: object
     IncomeVerificationDocumentsDownloadRequest:
       description: IncomeVerificationDocumentsDownloadRequest defines the request
@@ -23583,6 +23754,7 @@ components:
               locality_name: locality_name
             box_9: box_9
             dependent_care_benefits: dependent_care_benefits
+          doc_id: doc_id
           document_type: document_type
         - w2:
             statutory_employee: statutory_employee
@@ -23649,6 +23821,7 @@ components:
               locality_name: locality_name
             box_9: box_9
             dependent_care_benefits: dependent_care_benefits
+          doc_id: doc_id
           document_type: document_type
       properties:
         request_id:
@@ -23741,8 +23914,12 @@ components:
             locality_name: locality_name
           box_9: box_9
           dependent_care_benefits: dependent_care_benefits
+        doc_id: doc_id
         document_type: document_type
       properties:
+        doc_id:
+          description: An identifier of the document referenced by the document metadata.
+          type: string
         document_type:
           description: The type of tax document.
           type: string
@@ -24551,25 +24728,27 @@ components:
       properties:
         statements:
           default: true
-          description: Allow access to statements. If unset, defaults to `true`.
+          description: Allow access to statements. Only used by certain partners.
+            If relevant to the partner and unset, defaults to `true`.
           nullable: true
           type: boolean
         identity:
           default: true
           description: Allow access to the Identity product (name, email, phone, address).
-            If unset, defaults to `true`.
+            Only used by certain partners. If relevant to the partner and unset, defaults
+            to `true`.
           nullable: true
           type: boolean
         auth:
           default: true
-          description: Allow access to account number details. If unset, defaults
-            to `true`.
+          description: Allow access to account number details. Only used by certain
+            partners. If relevant to the partner and unset, defaults to `true`.
           nullable: true
           type: boolean
         transactions:
           default: true
-          description: Allow access to transaction details. If unset, defaults to
-            `true`.
+          description: Allow access to transaction details. Only used by certain partners.
+            If relevant to the partner and unset, defaults to `true`.
           nullable: true
           type: boolean
       type: object
@@ -24587,11 +24766,43 @@ components:
         authorized:
           default: true
           description: Allow the application to see this account (and associated details,
-            including balance) in the list of accounts. If unset, defaults to `true`.
+            including balance) in the list of accounts. If relevant to the partner
+            and unset, defaults to `true`.
           nullable: true
           type: boolean
+        account_product_access:
+          $ref: '#/components/schemas/AccountProductAccessNullable'
       required:
       - unique_id
+      type: object
+    AccountProductAccessNullable:
+      allOf:
+      - $ref: '#/components/schemas/AccountProductAccess'
+      - additionalProperties: true
+        type: object
+      nullable: true
+    AccountProductAccess:
+      description: Allow the application to access specific products on this account
+      properties:
+        account_data:
+          default: true
+          description: Allow the application to access account data. Only used by
+            certain partners. If relevant to the partner and unset, defaults to `true`.
+          nullable: true
+          type: boolean
+        statements:
+          default: true
+          description: Allow the application to access bank statements. Only used
+            by certain partners. If relevant to the partner and unset, defaults to
+            `true`.
+          nullable: true
+          type: boolean
+        tax_documents:
+          default: true
+          description: Allow the application to access tax documents. Only used by
+            certain partners. If relevant to the partner and unset, defaults to `true`.
+          nullable: true
+          type: boolean
       type: object
     ScopesNullable:
       allOf:
@@ -25161,6 +25372,7 @@ components:
             ID/identifier for this transaction. The max length for this field is 36
             characters.
           maxLength: 36
+          minLength: 1
           type: string
         amount:
           description: The transaction amount, in USD (e.g. `102.05`)
@@ -25735,6 +25947,8 @@ components:
         client_transaction_id:
           description: Must be the same as the `client_transaction_id` supplied when
             calling `/signal/evaluate`
+          maxLength: 36
+          minLength: 1
           type: string
         initiated:
           description: '`true` if the ACH transaction was initiated, `false` otherwise.'
@@ -25788,6 +26002,8 @@ components:
         client_transaction_id:
           description: Must be the same as the `client_transaction_id` supplied when
             calling `/signal/evaluate`
+          maxLength: 36
+          minLength: 1
           type: string
         return_code:
           description: Must be a valid ACH return code (e.g. "R01")
