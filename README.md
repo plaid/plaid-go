@@ -2,6 +2,8 @@
 
 The official Go client library for the [Plaid API](https://plaid.com/docs). The library is now generated from our [OpenAPI schema](https://github.com/plaid/plaid-openapi). For older manually-written versions of this client library, go [here](https://github.com/plaid/plaid-go/commit/0d3f02cddaa8fd637e84dccf2175a4a1a7dd0e07) for the latest non-generated version.
 
+The latest version of the library supports only the latest version of the Plaid API (currently 2020-09-14). 
+
 ## Table of Contents
 
 - [plaid-go](#plaid-go)
@@ -15,7 +17,7 @@ The official Go client library for the [Plaid API](https://plaid.com/docs). The 
 
 ## Install
 
-Versions look something like `v1.0.0`. As of `v1.0.0`, we've moved to support `GOMODULES`.
+Library versions follow Semantic Versioning ("SemVer") and are formatted as `v1.0.0`. The plaid-go client library is typically updated on a biweekly basis, and the canonical source for the latest version number is the [client library changelog](https://github.com/plaid/plaid-go/blob/master/CHANGELOG.md). As of `v1.0.0`, we've moved to support `GOMODULES`.
 
 Edit your go.mod to include `github.com/plaid/plaid-go {VERSION}`
 
@@ -65,4 +67,3 @@ Please see [Contributing](CONTRIBUTING.md) for guidelines and instructions for l
 ## License
 
 [MIT](LICENSE)
-

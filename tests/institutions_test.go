@@ -151,11 +151,6 @@ func TestInstitutionsSearch(t *testing.T) {
 						assert.NotEmpty(t, inst.Url)
 					}
 				}
-				if tc.options.Oauth != nil {
-					for _, inst := range instsResp.Institutions {
-						assert.Equal(t, inst.Oauth, *tc.options.Oauth)
-					}
-				}
 				if tc.options.IncludePaymentInitiationMetadata != nil {
 					for _, inst := range instsResp.Institutions {
 						assert.NotEmpty(t, inst.PaymentInitiationMetadata)

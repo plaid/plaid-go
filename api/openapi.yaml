@@ -7,7 +7,7 @@ info:
     details.
   termsOfService: https://plaid.com/legal/
   title: The Plaid API
-  version: 2020-09-14_1.44.0
+  version: 2020-09-14_1.54.0
 servers:
 - description: Production
   url: https://production.plaid.com
@@ -163,6 +163,8 @@ paths:
         Note: This request may take some time to complete if `auth` was not specified as an initial product when creating the Item. This is because Plaid must communicate directly with the institution to retrieve the data.
 
         Also note that `/auth/get` will not return data for any new accounts opened after the Item was created. To obtain data for new accounts, create a new Item.
+
+        Versioning note: In API version 2017-03-08, the schema of the `numbers` object returned by this endpoint is substantially different. For details, see [Plaid API versioning](https://plaid.com/docs/api/versioning/#version-2018-05-22).
       externalDocs:
         url: /api/products/#authget
       operationId: authGet
@@ -537,8 +539,10 @@ paths:
       - plaid
   /institutions/search:
     post:
-      description: Returns a JSON response containing details for institutions that
-        match the query parameters, up to a maximum of ten institutions per query.
+      description: |
+        Returns a JSON response containing details for institutions that match the query parameters, up to a maximum of ten institutions per query.
+
+        Versioning note: API versions 2019-05-29 and earlier allow use of the `public_key` parameter instead of the `client_id` and `secret` parameters to authenticate to this endpoint. The `public_key` parameter has since been deprecated; all customers are encouraged to use `client_id` and `secret` instead.
       externalDocs:
         url: /api/institutions/#institutionssearch
       operationId: institutionsSearch
@@ -583,8 +587,12 @@ paths:
       - plaid
   /institutions/get_by_id:
     post:
-      description: Returns a JSON response containing details on a specified financial
-        institution currently supported by Plaid.
+      description: "Returns a JSON response containing details on a specified financial\
+        \ institution currently supported by Plaid. \n\nVersioning note: API versions\
+        \ 2019-05-29 and earlier allow use of the `public_key` parameter instead of\
+        \ the `client_id` and `secret` to authenticate to this endpoint. The `public_key`\
+        \ has been deprecated; all customers are encouraged to use `client_id` and\
+        \ `secret` instead.\n"
       externalDocs:
         url: /api/institutions/#institutionsget_by_id
       operationId: institutionsGetById
@@ -705,6 +713,8 @@ paths:
         Note that in the Development environment, issuing an `/item/remove`  request will not decrement your live credential count. To increase your credential account in Development, contact Support.
 
         Also note that for certain OAuth-based institutions, an Item removed via `/item/remove` may still show as an active connection in the institution's OAuth permission manager.
+
+        API versions 2019-05-29 and earlier return a `removed` boolean as part of the response.
       externalDocs:
         url: /api/items/#itemremove
       operationId: itemRemove
@@ -832,7 +842,7 @@ paths:
       - plaid
   /categories/get:
     post:
-      description: Send a request to the `/categories/get`  endpoint to get detailed
+      description: Send a request to the `/categories/get` endpoint to get detailed
         information on categories returned by Plaid. This endpoint does not require
         authentication.
       externalDocs:
@@ -965,7 +975,9 @@ paths:
         code correctly handles webhooks. Calling this endpoint triggers a Transactions
         `DEFAULT_UPDATE` webhook to be fired for a given Sandbox Item. If the Item
         does not support Transactions, a `SANDBOX_PRODUCT_NOT_ENABLED` error will
-        result.
+        result. Note that this endpoint is provided for developer ease-of-use and
+        is not required for testing webhooks; webhooks will also fire in Sandbox under
+        the same conditions that they would in Production or Development.
       externalDocs:
         url: /api/sandbox/#sandboxitemfire_webhook
       operationId: sandboxItemFireWebhook
@@ -1238,10 +1250,13 @@ paths:
       - plaid
   /processor/auth/get:
     post:
-      description: The `/processor/auth/get` endpoint returns the bank account and
-        bank identification number (such as the routing number, for US accounts),
-        for a checking or savings account that's associated with a given `processor_token`.
-        The endpoint also returns high-level account data and balances when available.
+      description: "The `/processor/auth/get` endpoint returns the bank account and\
+        \ bank identification number (such as the routing number, for US accounts),\
+        \ for a checking or savings account that''s associated with a given `processor_token`.\
+        \ The endpoint also returns high-level account data and balances when available.\
+        \ \n\nVersioning note: API versions 2019-05-29 and earlier use a different\
+        \ schema for the `numbers` object returned by this endpoint. For details,\
+        \ see [Plaid API versioning](https://plaid.com/docs/api/versioning/#version-2020-09-14).\n"
       externalDocs:
         url: /api/processors/#processorauthget
       operationId: processorAuthGet
@@ -4032,6 +4047,45 @@ paths:
       summary: Sync bank transfer events
       tags:
       - plaid
+  /transfer/sweep/get:
+    post:
+      description: The `/transfer/sweep/get` endpoint fetches a sweep corresponding
+        to the given `sweep_id`.
+      externalDocs:
+        url: /transfer/reference#transfersweepget
+      operationId: transferSweepGet
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            examples: {}
+            schema:
+              $ref: '#/components/schemas/TransferSweepGetRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    sweep:
+                      id: d5394a4d-0b04-4a02-9f4a-7ca5c0f52f9d
+                      created_at: 2020-08-06T17:27:15Z
+                      amount: "12.34"
+                    request_id: saKrIBuEB9qJZno
+              schema:
+                $ref: '#/components/schemas/TransferSweepGetResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error response
+      summary: Retrieve a sweep
+      tags:
+      - plaid
   /bank_transfer/sweep/get:
     post:
       description: The `/bank_transfer/sweep/get` endpoint fetches information about
@@ -4055,7 +4109,7 @@ paths:
                 example-1:
                   value:
                     sweep:
-                      id: 0
+                      id: d5394a4d-0b04-4a02-9f4a-7ca5c0f52f9d
                       transfer_id: 460cbe92-2dcc-8eae-5ad6-b37d0ec90fd9
                       created_at: 2020-08-06T17:27:15Z
                       amount: "12.34"
@@ -4074,6 +4128,45 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: Error response
       summary: Retrieve a sweep
+      tags:
+      - plaid
+  /transfer/sweep/list:
+    post:
+      description: The `/transfer/sweep/list` endpoint fetches sweeps matching the
+        given filters.
+      externalDocs:
+        url: /transfer/reference#transfersweeplist
+      operationId: transferSweepList
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            examples: {}
+            schema:
+              $ref: '#/components/schemas/TransferSweepListRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    sweeps:
+                    - id: d5394a4d-0b04-4a02-9f4a-7ca5c0f52f9d
+                      created_at: 2020-08-06T17:27:15Z
+                      amount: -12.34
+                    request_id: saKrIBuEB9qJZno
+              schema:
+                $ref: '#/components/schemas/TransferSweepListResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error response
+      summary: List sweeps
       tags:
       - plaid
   /bank_transfer/sweep/list:
@@ -4099,7 +4192,7 @@ paths:
                 example-1:
                   value:
                     sweeps:
-                    - id: 0
+                    - id: d5394a4d-0b04-4a02-9f4a-7ca5c0f52f9d
                       transfer_id: 460cbe92-2dcc-8eae-5ad6-b37d0ec90fd9
                       created_at: 2020-08-06T17:27:15Z
                       amount: "12.34"
@@ -4201,6 +4294,120 @@ paths:
       summary: Migrate account into Bank Transfers
       tags:
       - plaid
+  /transfer/intent/create:
+    post:
+      description: Use the `/transfer/intent/create` endpoint to generate a transfer
+        intent object and invoke the Transfer UI.
+      externalDocs:
+        url: /transfer/reference#transferintentcreate
+      operationId: transferIntentCreate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferIntentCreateRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    transfer_intent:
+                      id: 460cbe92-2dcc-8eae-5ad6-b37d0ec90fd9
+                      created: 2020-08-06T17:27:15Z
+                      status: PENDING
+                      account_id: 6qL6lWoQkAfNE3mB8Kk5tAnvpX81qefrvvl7B
+                      origination_account_id: 9853defc-e703-463d-86b1-dc0607a45359
+                      amount: "12.34"
+                      mode: DISBURSEMENT
+                      ach_class: ppd
+                      user:
+                        legal_name: Foo Bar
+                        phone_number: 123-456-7890
+                        email_address: user@plaid.com
+                        address:
+                          street: 100 Market Street
+                          city: San Francisco
+                          region: California
+                          postal_code: "94103"
+                          country: US
+                      description: Desc
+                      metadata:
+                        key1: value1
+                        key2: value2
+                    request_id: saKrIBuEB9qJZno
+              schema:
+                $ref: '#/components/schemas/TransferIntentCreateResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error response
+      summary: Create a transfer intent object to invoke the Transfer UI
+      tags:
+      - plaid
+  /transfer/intent/get:
+    post:
+      description: Use the `/transfer/intent/get` endpoint to retrieve more information
+        about a transfer intent.
+      externalDocs:
+        url: /transfer/reference#transferintentget
+      operationId: transferIntentGet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferIntentGetRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    transfer_intent:
+                      id: 460cbe92-2dcc-8eae-5ad6-b37d0ec90fd9
+                      created: 2020-08-06T17:27:15Z
+                      status: SUCCEEDED
+                      transfer_id: 8945fedc-e703-463d-86b1-dc0607b55460
+                      authorization_decision: APPROVED
+                      account_id: 6qL6lWoQkAfNE3mB8Kk5tAnvpX81qefrvvl7B
+                      origination_account_id: 9853defc-e703-463d-86b1-dc0607a45359
+                      amount: "12.34"
+                      mode: DISBURSEMENT
+                      ach_class: ppd
+                      user:
+                        legal_name: Foo Bar
+                        phone_number: 123-456-7890
+                        email_address: user@plaid.com
+                        address:
+                          street: 100 Market Street
+                          city: San Francisco
+                          region: California
+                          postal_code: "94103"
+                          country: US
+                      description: Desc
+                      metadata:
+                        key1: value1
+                        key2: value2
+                    request_id: saKrIBuEB9qJZno
+              schema:
+                $ref: '#/components/schemas/TransferIntentGetResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error response
+      summary: Retrieve more information about a transfer intent
+      tags:
+      - plaid
   /sandbox/bank_transfer/simulate:
     post:
       description: Use the `/sandbox/bank_transfer/simulate` endpoint to simulate
@@ -4235,6 +4442,39 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: Error response
       summary: Simulate a bank transfer event in Sandbox
+      tags:
+      - plaid
+  /sandbox/transfer/sweep/simulate:
+    post:
+      description: Use the `/sandbox/transfer/sweep/simulate` endpoint to create a
+        sweep and associated events in the Sandbox environment.
+      externalDocs:
+        url: /transfer/reference#sandboxtransfersweepsimulate
+      operationId: sandboxTransferSweepSimulate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SandboxTransferSweepSimulateRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    request_id: mdqfuVxeoza6mhu
+              schema:
+                $ref: '#/components/schemas/SandboxTransferSweepSimulateResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error response
+      summary: Simulate creating a sweep for a set of transfers
       tags:
       - plaid
   /sandbox/transfer/simulate:
@@ -4343,7 +4583,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/IncomeVerificationCreateResponse'
           description: OK
-      summary: Create an income verification instance
+      summary: (Deprecated) Create an income verification instance
       tags:
       - plaid
   /income/verification/summary/get:
@@ -4398,7 +4638,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/IncomeVerificationSummaryGetResponse'
           description: OK
-      summary: Retrieve a summary of information derived from income verification
+      summary: (Deprecated) Retrieve a summary of information derived from income
+        verification
       tags:
       - plaid
   /income/verification/paystub/get:
@@ -4947,7 +5188,7 @@ paths:
       description: |-
         Use `/signal/evaluate` to evaluate a planned ACH transaction to get a return risk assessment (such as a risk score and risk tier) and additional risk signals.
 
-        In order to obtain a valid score for an ACH transaction, Plaid must have an access token for the account, and the Item must be healthy (receiving product updates) or have recently been in a healthy state. If the transaction does not meet eligibility requirements, an error will be returned corresponding to the underlying cause.
+        In order to obtain a valid score for an ACH transaction, Plaid must have an access token for the account, and the Item must be healthy (receiving product updates) or have recently been in a healthy state. If the transaction does not meet eligibility requirements, an error will be returned corresponding to the underlying cause. If `/signal/evaluate` is called on the same transaction multiple times within a 24-hour period, cached results may be returned.
       externalDocs:
         url: /signal/reference#signalevaluate
       operationId: signalEvaluate
@@ -4971,7 +5212,12 @@ paths:
                       bank_initiated_return_risk:
                         score: 72
                         risk_tier: 7
-                    core_attributes: {}
+                    core_attributes:
+                      days_since_first_plaid_connection: 510
+                      plaid_connections_count_7d: 6
+                      plaid_connections_count_30d: 7
+                      total_plaid_connections_count: 15
+                      is_savings_or_money_market_account: false
                     request_id: mdqfuVxeoza6mhu
               schema:
                 $ref: '#/components/schemas/SignalEvaluateResponse'
@@ -5055,6 +5301,109 @@ paths:
       summary: Report a return for an ACH transaction
       tags:
       - plaid
+  /wallet/get:
+    post:
+      description: |
+        Fetch an e-wallet. The response includes the current balance.
+      externalDocs:
+        url: /api/products/#walletget
+      operationId: walletGet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletGetRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    wallet_id: wallet-id-sandbox-53e58b32-fc1c-46fe-bbd6-e584b27a88
+                    balance:
+                      iso_currency_code: GBP
+                      current: 123.12
+                    request_id: 4zlKapIkTm8p5KM
+              schema:
+                $ref: '#/components/schemas/WalletGetResponse'
+          description: OK
+      summary: Fetch an e-wallet
+      tags:
+      - plaid
+  /wallet/transaction/execute:
+    post:
+      description: |
+        Execute a transaction using the specified e-wallet. Specify the e-wallet to debit from, the counterparty to credit to, the idempotency key to prevent duplicate payouts, the amount and reference for the payout. The payouts are executed over the Faster Payment rails, where settlement usually only takes a few seconds.
+      externalDocs:
+        url: /api/products/#wallettransactionexecute
+      operationId: walletTransactionExecute
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletTransactionExecuteRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    transaction_id: wallet-transaction-id-production-53e58b32-fc1c-46fe-bbd6-e584b27a88
+                    status: EXECUTED
+                    request_id: 4zlKapIkTm8p5KM
+              schema:
+                $ref: '#/components/schemas/WalletTransactionExecuteResponse'
+          description: OK
+      summary: Execute a transaction using an e-wallet
+      tags:
+      - plaid
+  /wallet/transactions/list:
+    post:
+      description: |
+        This endpoint lists the latest transactions of the specified e-wallet. Transactions are returned in descending order by the `created_at` time.
+      externalDocs:
+        url: /api/products/#wallettransactionslist
+      operationId: walletTransactionsList
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletTransactionsListRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    next_cursor: YWJjMTIzIT8kKiYoKSctPUB
+                    transactions:
+                    - transaction_id: wallet-transaction-id-sandbox-feca8a7a-5591-4aef-9297-f3062bb735d3
+                      type: PAYOUT
+                      reference: Payout 99744
+                      amount:
+                        iso_currency_code: GBP
+                        value: 123.12
+                      status: EXECUTED
+                      created_at: 2020-12-02T21:14:54Z
+                      counterparty:
+                        numbers:
+                          bacs:
+                            account: "31926819"
+                            sort_code: "601613"
+                        name: John Smith
+                    request_id: 4zlKapIkTm8p5KM
+              schema:
+                $ref: '#/components/schemas/WalletTransactionsListResponse'
+          description: OK
+      summary: List e-wallet transactions
+      tags:
+      - plaid
 components:
   schemas:
     ItemGetRequest:
@@ -5112,6 +5461,9 @@ components:
           - null
           - null
           institution_id: institution_id
+          products:
+          - null
+          - null
         request_id: request_id
       properties:
         item:
@@ -5203,6 +5555,9 @@ components:
           - null
           - null
           institution_id: institution_id
+          products:
+          - null
+          - null
         numbers:
           bacs:
           - account_id: account_id
@@ -5475,6 +5830,9 @@ components:
           - null
           - null
           institution_id: institution_id
+          products:
+          - null
+          - null
         total_transactions: 0
         accounts:
         - official_name: official_name
@@ -5774,6 +6132,7 @@ components:
         - null
         - null
         has_more: true
+        request_id: request_id
       properties:
         added:
           description: Transactions that have been added to the item since `cursor`
@@ -5802,12 +6161,19 @@ components:
             exist. If true, the additional updates can be fetched by making an additional
             request with `cursor` set to `next_cursor`.
           type: boolean
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
       required:
       - added
       - has_more
       - modified
       - next_cursor
       - removed
+      - request_id
       type: object
     InstitutionsGetRequest:
       description: InstitutionsGetRequest defines the request schema for `/institutions/get`
@@ -5850,8 +6216,11 @@ components:
           description: The number of Institutions to skip.
           type: integer
         country_codes:
-          description: |
-            Specify an array of Plaid-supported country codes this institution supports, using the ISO-3166-1 alpha-2 country code standard.
+          description: "Specify an array of Plaid-supported country codes this institution\
+            \ supports, using the ISO-3166-1 alpha-2 country code standard. \n\nIn\
+            \ API versions 2019-05-29 and earlier, the `country_codes` parameter is\
+            \ an optional parameter within the `options` object and will default to\
+            \ `[US]` if it is not supplied.\n"
           items:
             $ref: '#/components/schemas/CountryCode'
           minItems: 1
@@ -5885,7 +6254,9 @@ components:
         routing_numbers:
           description: Specify an array of routing numbers to filter institutions.
             The response will only return institutions that match all of the routing
-            numbers in the array.
+            numbers in the array. Routing number records used for this matching are
+            not comprehensive; failure to match a given routing number to an institution
+            does not mean that the institution is unsupported by Plaid.
           items:
             type: string
           type: array
@@ -6235,7 +6606,7 @@ components:
           type: array
         country_codes:
           description: |
-            Specify an array of Plaid-supported country codes this institution supports, using the ISO-3166-1 alpha-2 country code standard.
+            Specify an array of Plaid-supported country codes this institution supports, using the ISO-3166-1 alpha-2 country code standard. In API versions 2019-05-29 and earlier, the `country_codes` parameter is an optional parameter within the `options` object and will default to `[US]` if it is not supplied.
           items:
             $ref: '#/components/schemas/CountryCode'
           type: array
@@ -6592,7 +6963,7 @@ components:
           type: string
         country_codes:
           description: |
-            Specify an array of Plaid-supported country codes this institution supports, using the ISO-3166-1 alpha-2 country code standard.
+            Specify an array of Plaid-supported country codes this institution supports, using the ISO-3166-1 alpha-2 country code standard. In API versions 2019-05-29 and earlier, the `country_codes` parameter is an optional parameter within the `options` object and will default to `[US]` if it is not supplied.
           items:
             $ref: '#/components/schemas/CountryCode'
           type: array
@@ -6895,6 +7266,9 @@ components:
           - null
           - null
           institution_id: institution_id
+          products:
+          - null
+          - null
         accounts:
         - official_name: official_name
           balances:
@@ -7374,6 +7748,9 @@ components:
           - null
           - null
           institution_id: institution_id
+          products:
+          - null
+          - null
         accounts:
         - null
         - null
@@ -7795,6 +8172,9 @@ components:
           - null
           - null
           institution_id: institution_id
+          products:
+          - null
+          - null
         request_id: request_id
       properties:
         item:
@@ -8052,6 +8432,9 @@ components:
           - null
           - null
           institution_id: institution_id
+          products:
+          - null
+          - null
         liabilities:
           mortgage:
           - origination_principal_amount: 7.386281948385884
@@ -8527,8 +8910,8 @@ components:
           value: 0.8008281904610115
         options:
           request_refund_details: true
+          wallet_id: wallet_id
           iban: iban
-          emi_account_id: emi_account_id
         secret: secret
         client_id: client_id
         recipient_id: recipient_id
@@ -8881,12 +9264,12 @@ components:
         amount:
           currency: GBP
           value: 0.8008281904610115
-        emi_account_id: emi_account_id
         adjusted_reference: adjusted_reference
         refund_details:
           iban: iban
           name: name
         reference: reference
+        wallet_id: wallet_id
         payment_id: payment_id
         iban: iban
         initiated_refunds:
@@ -8973,12 +9356,10 @@ components:
           items:
             $ref: '#/components/schemas/PaymentInitiationRefund'
           type: array
-        emi_account_id:
-          description: The EMI (E-Money Institution) account that this payment is
-            associated with, if any. This EMI account is used as an intermediary account
-            to enable Plaid to reconcile the settlement of funds for Payment Initiation
-            requests.
-          minLength: 1
+        wallet_id:
+          description: The EMI (E-Money Institution) wallet that this payment is associated
+            with, if any. This wallet is used as an intermediary account to enable
+            Plaid to reconcile the settlement of funds for Payment Initiation requests.
           nullable: true
           type: string
       required:
@@ -9137,12 +9518,12 @@ components:
         - amount:
             currency: GBP
             value: 0.8008281904610115
-          emi_account_id: emi_account_id
           adjusted_reference: adjusted_reference
           refund_details:
             iban: iban
             name: name
           reference: reference
+          wallet_id: wallet_id
           payment_id: payment_id
           iban: iban
           initiated_refunds:
@@ -9164,12 +9545,12 @@ components:
         - amount:
             currency: GBP
             value: 0.8008281904610115
-          emi_account_id: emi_account_id
           adjusted_reference: adjusted_reference
           refund_details:
             iban: iban
             name: name
           reference: reference
+          wallet_id: wallet_id
           payment_id: payment_id
           iban: iban
           initiated_refunds:
@@ -9873,6 +10254,9 @@ components:
           - null
           - null
           institution_id: institution_id
+          products:
+          - null
+          - null
         accounts:
         - official_name: official_name
           balances:
@@ -10090,6 +10474,9 @@ components:
           - null
           - null
           institution_id: institution_id
+          products:
+          - null
+          - null
         accounts:
         - official_name: official_name
           balances:
@@ -10682,6 +11069,8 @@ components:
         institution_id: institution_id
         access_token: access_token
         android_package_name: android_package_name
+        transfer:
+          intent_id: intent_id
         account_filters:
           loan:
             account_subtypes:
@@ -10741,12 +11130,13 @@ components:
             - French (`'fr'`)
             - Spanish (`'es'`)
             - Dutch (`'nl'`)
+            - German(`'de'`)
 
             When using a Link customization, the language configured here must match the setting in the customization, or the customization will not be applied.
           type: string
         country_codes:
           description: |-
-            Specify an array of Plaid-supported country codes using the ISO-3166-1 alpha-2 country code standard. Institutions from all listed countries will be shown.  Supported country codes are: `US`, `CA`, `ES`, `FR`, `GB`, `IE`, `NL`.
+            Specify an array of Plaid-supported country codes using the ISO-3166-1 alpha-2 country code standard. Institutions from all listed countries will be shown.  Supported country codes are: `US`, `CA`, `DE`, `ES`, `FR`, `GB`, `IE`, `NL`. For a complete mapping of supported products by country, see https://plaid.com/global/.
 
             If Link is launched with multiple country codes, only products that you are enabled for in all countries will be used by Link. Note that while all countries are enabled by default in Sandbox and Development, in Production only US and Canada are enabled by default. To gain access to European institutions in the Production environment, [file a product access Support ticket](https://dashboard.plaid.com/support/new/product-and-development/product-troubleshooting/request-product-access) via the Plaid dashboard. If you initialize with a European country code, your users will see the European consent panel during the Link flow.
 
@@ -10827,6 +11217,8 @@ components:
           $ref: '#/components/schemas/LinkTokenCreateRequestIncomeVerification'
         auth:
           $ref: '#/components/schemas/LinkTokenCreateRequestAuth'
+        transfer:
+          $ref: '#/components/schemas/LinkTokenCreateRequestTransfer'
         update:
           $ref: '#/components/schemas/LinkTokenCreateRequestUpdate'
       required:
@@ -10905,6 +11297,16 @@ components:
           type: string
       required:
       - deposit_switch_id
+      type: object
+    LinkTokenCreateRequestTransfer:
+      description: Specifies options for initializing Link for use with the Transfer
+        product.
+      example:
+        intent_id: intent_id
+      properties:
+        intent_id:
+          description: The `id` returned by the `/transfer/intent/create` endpoint.
+          type: string
       type: object
     LinkTokenCreateRequestAuth:
       description: Specifies options for initializing Link for use with the Auth product.
@@ -11027,7 +11429,8 @@ components:
           type: object
         investment:
           additionalProperties: true
-          description: A filter to apply to `investment`-type accounts
+          description: A filter to apply to `investment`-type accounts (or `brokerage`-type
+            accounts for API versions 2018-05-22 and earlier).
           properties:
             account_subtypes:
               $ref: '#/components/schemas/AccountSubtypes'
@@ -11228,6 +11631,9 @@ components:
         - null
         - null
         institution_id: institution_id
+        products:
+        - null
+        - null
       properties:
         item_id:
           description: The Plaid Item ID. The `item_id` is always unique; linking
@@ -11255,6 +11661,12 @@ components:
         billed_products:
           description: |
             A list of products that have been billed for the Item. Note - `billed_products` is populated in all environments but only requests in Production are billed.
+          items:
+            $ref: '#/components/schemas/Products'
+          type: array
+        products:
+          description: |
+            A list of authorized products for the Item.
           items:
             $ref: '#/components/schemas/Products'
           type: array
@@ -11346,7 +11758,7 @@ components:
           description: |-
             In the Assets product, a request can pertain to more than one Item. If an error is returned for such a request, `causes` will return an array of errors containing a breakdown of these errors on the individual Item level, if any can be identified.
 
-            `causes` will only be provided for the `error_type` `ASSET_REPORT_ERROR`.
+            `causes` will only be provided for the `error_type` `ASSET_REPORT_ERROR`. `causes` will also not be populated inside an error nested within a `warning` object.
           items: {}
           type: array
         status:
@@ -11454,7 +11866,7 @@ components:
         example-1: {}
     AccountType:
       description: |-
-        `investment:` Investment account
+        `investment:` Investment account. In API versions 2018-05-22 and earlier, this type is called `brokerage` instead.
 
         `credit:` Credit card
 
@@ -11478,7 +11890,7 @@ components:
       type: string
     OverrideAccountType:
       description: |-
-        `investment:` Investment account
+        `investment:` Investment account.
 
         `credit:` Credit card
 
@@ -11604,7 +12016,7 @@ components:
 
             For `depository`-type accounts, the `available` balance typically equals the `current` balance less any pending outflows plus any pending inflows. For `depository`-type accounts, the `available` balance does not include the overdraft limit.
 
-            For `investment`-type accounts, the `available` balance is the total cash available to withdraw as presented by the institution.
+            For `investment`-type accounts (or `brokerage`-type accounts for API versions 2018-05-22 and earlier), the `available` balance is the total cash available to withdraw as presented by the institution.
 
             Note that not all institutions calculate the `available`  balance. In the event that `available` balance is unavailable, Plaid will return an `available` balance value of `null`.
 
@@ -11621,7 +12033,7 @@ components:
 
             For `loan`-type accounts, the current balance is the principal remaining on the loan, except in the case of student loan accounts at Sallie Mae (`ins_116944`). For Sallie Mae student loans, the account's balance includes both principal and any outstanding interest.
 
-            For `investment`-type accounts, the current balance is the total value of assets as presented by the institution.
+            For `investment`-type accounts (or `brokerage`-type accounts for API versions 2018-05-22 and earlier), the current balance is the total value of assets as presented by the institution.
 
             Note that balance information may be cached unless the value was returned by `/accounts/balance/get`; if the Item is enabled for Transactions, the balance will be at least as recent as the most recent Transaction update. If you require realtime balance information, use the `available` balance as provided by `/accounts/balance/get`.
 
@@ -12043,11 +12455,22 @@ components:
           description: The unique ID of the transaction. Like all Plaid identifiers,
             the `transaction_id` is case sensitive.
           type: string
+        merchant_name:
+          description: The merchant name, as extracted by Plaid from the `name` field.
+          nullable: true
+          type: string
+        check_number:
+          description: The check number of the transaction. This field is only populated
+            for check transactions.
+          nullable: true
+          type: string
       required:
       - account_id
       - amount
+      - check_number
       - date
       - iso_currency_code
+      - merchant_name
       - pending
       - transaction_id
       - unofficial_currency_code
@@ -12074,11 +12497,13 @@ components:
           nullable: true
           type: string
         region:
-          description: The region or state where the transaction occurred.
+          description: The region or state where the transaction occurred. In API
+            versions 2018-05-22 and earlier, this field is called `state`.
           nullable: true
           type: string
         postal_code:
-          description: The postal code where the transaction occurred.
+          description: The postal code where the transaction occurred. In API versions
+            2018-05-22 and earlier, this field is called `zip`.
           nullable: true
           type: string
         country:
@@ -13047,7 +13472,7 @@ components:
           type: string
         region:
           description: |-
-            The region or state
+            The region or state. In API versions 2018-05-22 and earlier, this field is called `state`.
             Example: `"NC"`
           nullable: true
           type: string
@@ -13057,7 +13482,8 @@ components:
             Example: `"564 Main Street, APT 15"`
           type: string
         postal_code:
-          description: The postal code
+          description: The postal code. In API versions 2018-05-22 and earlier, this
+            field is called `zip`.
           nullable: true
           type: string
         country:
@@ -14264,8 +14690,8 @@ components:
       description: Additional payment options
       example:
         request_refund_details: true
+        wallet_id: wallet_id
         iban: iban
-        emi_account_id: emi_account_id
       nullable: true
       properties:
         request_refund_details:
@@ -14285,11 +14711,10 @@ components:
           type: string
         bacs:
           $ref: '#/components/schemas/PaymentInitiationOptionalRestrictionBacs'
-        emi_account_id:
-          description: The EMI (E-Money Institution) account that this payment is
-            associated with, if any. This EMI account is used as an intermediary account
-            to enable Plaid to reconcile the settlement of funds for Payment Initiation
-            requests.
+        wallet_id:
+          description: The EMI (E-Money Institution) wallet that this payment is associated
+            with, if any. This wallet is used as an intermediary account to enable
+            Plaid to reconcile the settlement of funds for Payment Initiation requests.
           minLength: 1
           nullable: true
           type: string
@@ -14936,12 +15361,15 @@ components:
         or transactions specified by `override_accounts`.
       properties:
         type:
-          description: |-
-            Inflow model. One of the following:
-
-            `none`: No income
-            `monthly-income`: Income occurs once per month `monthly-balance-payment`: Pays off the balance on a liability account at the given statement day of month
-            `monthly-interest-only-payment`: Makes an interest-only payment on a liability account at the given statement day of month. Note that account types supported by Liabilities will accrue interest in the Sandbox. The types are account type `credit` with subtype `credit` or `paypal`, and account type `loan` with subtype `student` or `mortgage`.
+          description: "Inflow model. One of the following:\n\n`none`: No income\n\
+            \n`monthly-income`: Income occurs once per month `monthly-balance-payment`:\
+            \ Pays off the balance on a liability account at the given statement day\
+            \ of month.\n\n`monthly-interest-only-payment`: Makes an interest-only\
+            \ payment on a liability account at the given statement day of month.\
+            \ \n\nNote that account types supported by Liabilities will accrue interest\
+            \ in the Sandbox. The types impacted are account type `credit` with subtype\
+            \ `credit` or `paypal`, and account type `loan` with subtype `student`\
+            \ or `mortgage`."
           type: string
         income_amount:
           description: Amount of income per month. This value is required if `type`
@@ -15989,7 +16417,8 @@ components:
           type: string
         investment:
           description: 'An investment account. Supported products for `investment`
-            accounts are: Balance and Investments.'
+            accounts are: Balance and Investments. In API versions 2018-05-22 and
+            earlier, this type is called `brokerage`.'
           properties:
             "529":
               description: |
@@ -16331,7 +16760,8 @@ components:
       type: string
     InvestmentAccountSubtype:
       description: 'An investment account. Supported products for `investment` accounts
-        are: Balance and Investments.'
+        are: Balance and Investments. In API versions 2018-05-22 and earlier, this
+        type is called `brokerage`.'
       properties:
         "529":
           description: |
@@ -17012,7 +17442,7 @@ components:
           type: string
         date:
           description: The [ISO 8601](https://wikipedia.org/wiki/ISO_8601) posting
-            date for the transaction, or transacted date for pending transactions.
+            date for the transaction.
           format: date
           type: string
         name:
@@ -17996,6 +18426,10 @@ components:
       description: Plaid’s unique identifier for a transfer.
       title: TransferID
       type: string
+    TransferSweepID:
+      description: Plaid’s unique identifier for a sweep.
+      title: TransferSweepID
+      type: string
     TransferAuthorizationID:
       description: Plaid’s unique identifier for a transfer authorization.
       title: TransferAuthorizationID
@@ -18059,6 +18493,8 @@ components:
           type: string
         status:
           $ref: '#/components/schemas/TransferStatus'
+        sweep_status:
+          $ref: '#/components/schemas/TransferSweepStatus'
         network:
           $ref: '#/components/schemas/TransferNetwork'
         cancellable:
@@ -18263,6 +18699,48 @@ components:
       description: The amount of the transfer (decimal string with two digits of precision
         e.g. “10.00”).
       title: TransferAmount
+      type: string
+    TransferSweepAmount:
+      description: A signed amount of how much was `swept` or `reverse_swept` (decimal
+        string with two digits of precision e.g. “-5.50”).
+      title: TransferSweepAmount
+      type: string
+    TransferIntentGetFailureReason:
+      additionalProperties: true
+      description: The reason for a failed transfer intent. Returned only if the transfer
+        intent status is `failed`. Null otherwise.
+      example:
+        error_message: error_message
+        error_type: error_type
+        error_code: error_code
+      nullable: true
+      properties:
+        error_type:
+          description: A broad categorization of the error.
+          type: string
+        error_code:
+          description: |-
+            A code representing the reason for a failed transfer intent (i.e., an API error or the authorization being declined).
+
+            For a full listing of bank transfer errors, see [Bank Transfers errors](https://plaid.com/docs/errors/bank-transfers/).
+          type: string
+        error_message:
+          description: A human-readable description of the code associated with a
+            failed transfer intent.
+          type: string
+      title: TransferIntentGetFailureReason
+      type: object
+    TransferIntentCreateMode:
+      description: |-
+        The direction of the flow of transfer funds.
+
+        - `PAYMENT` – Transfers funds from an end user's account to your business account.
+
+        - `DISBURSEMENT` – Transfers funds from your business account to an end user's account.
+      enum:
+      - PAYMENT
+      - DISBURSEMENT
+      title: TransferIntentCreateMode
       type: string
     BankTransferAmount:
       description: The amount of the bank transfer (decimal string with two digits
@@ -18598,6 +19076,21 @@ components:
       - failed
       - reversed
       title: TransferStatus
+      type: string
+    TransferSweepStatus:
+      description: |-
+        The status of the sweep for the transfer.
+        `unswept`: The transfer hasn't been swept yet.
+        `swept`: The transfer was swept to the sweep account.
+        `reverse_swept`: The transfer was reversed, funds were pulled back or pushed back to the sweep account.
+        `null`: The transfer will never be swept (e.g. if the transfer is cancelled or reversed before being swept)
+      enum:
+      - null
+      - unswept
+      - swept
+      - reverse_swept
+      nullable: true
+      title: TransferSweepStatus
       type: string
     BankTransferStatus:
       description: The status of the transfer.
@@ -19466,6 +19959,7 @@ components:
         - null
         - null
         offset: 0
+        sweep_id: sweep_id
         count: 2
         origination_account_id: origination_account_id
         secret: secret
@@ -19523,6 +20017,10 @@ components:
           items:
             $ref: '#/components/schemas/TransferEventType'
           type: array
+        sweep_id:
+          description: Plaid’s unique identifier for a sweep.
+          title: TransferSweepID
+          type: string
         count:
           default: 25
           description: The maximum number of transfer events to return. If the number
@@ -19662,12 +20160,18 @@ components:
         `posted`: The transfer has been successfully submitted to the payment network.
 
         `reversed`: A posted transfer was reversed.
+
+        `swept`: The transfer was swept to / from the sweep account.
+
+        `reverse_swept`: Due to the transfer reversing, funds were pulled from or pushed back to the sweep account.
       enum:
       - pending
       - cancelled
       - failed
       - posted
       - reversed
+      - swept
+      - reverse_swept
       title: TransferEventType
       type: string
     BankTransferEventType:
@@ -19704,6 +20208,8 @@ components:
         event_id: 0
         account_id: account_id
         transfer_amount: transfer_amount
+        sweep_id: sweep_id
+        sweep_amount: sweep_amount
         origination_account_id: origination_account_id
         transfer_id: transfer_id
         failure_reason:
@@ -19744,6 +20250,15 @@ components:
           type: string
         failure_reason:
           $ref: '#/components/schemas/TransferFailure'
+        sweep_id:
+          description: Plaid’s unique identifier for a sweep.
+          title: TransferSweepID
+          type: string
+        sweep_amount:
+          description: A signed amount of how much was `swept` or `reverse_swept`
+            (decimal string with two digits of precision e.g. “-5.50”).
+          title: TransferSweepAmount
+          type: string
       required:
       - account_id
       - event_id
@@ -19834,6 +20349,8 @@ components:
         - event_id: 0
           account_id: account_id
           transfer_amount: transfer_amount
+          sweep_id: sweep_id
+          sweep_amount: sweep_amount
           origination_account_id: origination_account_id
           transfer_id: transfer_id
           failure_reason:
@@ -19843,6 +20360,8 @@ components:
         - event_id: 0
           account_id: account_id
           transfer_amount: transfer_amount
+          sweep_id: sweep_id
+          sweep_amount: sweep_amount
           origination_account_id: origination_account_id
           transfer_id: transfer_id
           failure_reason:
@@ -20036,6 +20555,8 @@ components:
         - event_id: 0
           account_id: account_id
           transfer_amount: transfer_amount
+          sweep_id: sweep_id
+          sweep_amount: sweep_amount
           origination_account_id: origination_account_id
           transfer_id: transfer_id
           failure_reason:
@@ -20045,6 +20566,8 @@ components:
         - event_id: 0
           account_id: account_id
           transfer_amount: transfer_amount
+          sweep_id: sweep_id
+          sweep_amount: sweep_amount
           origination_account_id: origination_account_id
           transfer_id: transfer_id
           failure_reason:
@@ -20071,7 +20594,7 @@ components:
     BankTransferSweepGetRequest:
       description: BankTransferSweepGetRequest defines the request schema for `/bank_transfer/sweep/get`
       example:
-        sweep_id: 0
+        sweep_id: sweep_id
         origination_account_id: origination_account_id
         secret: secret
         client_id: client_id
@@ -20089,9 +20612,7 @@ components:
           type: string
         sweep_id:
           description: Identifier of the sweep.
-          format: int64
-          minimum: 0
-          type: integer
+          type: string
         origination_account_id:
           description: If multiple origination accounts are available, `origination_account_id`
             must be used to specify the account that the sweep belongs to.
@@ -20101,6 +20622,32 @@ components:
       - sweep_id
       title: BankTransferSweepGetRequest
       type: object
+    TransferSweepGetRequest:
+      description: Defines the request schema for `/transfer/sweep/get`
+      example:
+        sweep_id: sweep_id
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        sweep_id:
+          description: Plaid’s unique identifier for a sweep.
+          title: TransferSweepID
+          type: string
+      required:
+      - sweep_id
+      title: TransferSweepGetRequest
+      type: object
     BankTransferSweepGetResponse:
       additionalProperties: true
       description: BankTransferSweepGetResponse defines the response schema for `/bank_transfer/sweep/get`
@@ -20109,7 +20656,7 @@ components:
           amount: amount
           iso_currency_code: iso_currency_code
           created_at: 2000-01-23T04:56:07.000+00:00
-          id: 0
+          id: id
           transfer_id: transfer_id
           sweep_account:
             account_number: account_number
@@ -20129,13 +20676,35 @@ components:
       - sweep
       title: BankTransferSweepGetResponse
       type: object
+    TransferSweepGetResponse:
+      additionalProperties: true
+      description: Defines the response schema for `/transfer/sweep/get`
+      example:
+        sweep:
+          amount: amount
+          created_at: 2000-01-23T04:56:07.000+00:00
+          id: id
+        request_id: request_id
+      properties:
+        sweep:
+          $ref: '#/components/schemas/TransferSweep'
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      - sweep
+      title: TransferSweepGetResponse
+      type: object
     BankTransferSweepListRequest:
       description: BankTransferSweepListRequest defines the request schema for `/bank_transfer/sweep/list`
       example:
         start_time: 2000-01-23T04:56:07.000+00:00
-        start_id: 0
         end_time: 2000-01-23T04:56:07.000+00:00
-        count: 15
+        count: 2
         origination_account_id: origination_account_id
         secret: secret
         client_id: client_id
@@ -20156,11 +20725,6 @@ components:
             must be used to specify the account that the sweeps belong to.
           nullable: true
           type: string
-        start_id:
-          description: Starting ID of sweeps to return.
-          minimum: 0
-          nullable: true
-          type: integer
         start_time:
           description: The start datetime of sweeps to return (RFC 3339 format).
           format: date-time
@@ -20180,6 +20744,84 @@ components:
           type: integer
       title: BankTransferSweepListRequest
       type: object
+    TransferSweepListRequest:
+      description: Defines the request schema for `/transfer/sweep/list`
+      example:
+        start_time: 2000-01-23T04:56:07.000+00:00
+        offset: 0
+        end_time: 2000-01-23T04:56:07.000+00:00
+        count: 2
+        secret: secret
+        transfer_id: transfer_id
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        start_time:
+          description: The start datetime of sweeps to return (RFC 3339 format).
+          format: date-time
+          nullable: true
+          type: string
+        end_time:
+          description: The end datetime of sweeps to return (RFC 3339 format).
+          format: date-time
+          nullable: true
+          type: string
+        count:
+          default: 25
+          description: The maximum number of sweeps to return.
+          maximum: 25
+          minimum: 1
+          nullable: true
+          type: integer
+        transfer_id:
+          description: Plaid’s unique identifier for a transfer.
+          title: TransferID
+          type: string
+        offset:
+          default: 0
+          description: The number of sweeps to skip before returning results.
+          minimum: 0
+          type: integer
+      title: TransferSweepListRequest
+      type: object
+    TransferSweepListResponse:
+      additionalProperties: true
+      description: Defines the response schema for `/transfer/sweep/list`
+      example:
+        request_id: request_id
+        sweeps:
+        - amount: amount
+          created_at: 2000-01-23T04:56:07.000+00:00
+          id: id
+        - amount: amount
+          created_at: 2000-01-23T04:56:07.000+00:00
+          id: id
+      properties:
+        sweeps:
+          items:
+            $ref: '#/components/schemas/TransferSweep'
+          type: array
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      - sweeps
+      title: TransferSweepListResponse
+      type: object
     BankTransferSweepListResponse:
       additionalProperties: true
       description: BankTransferSweepListResponse defines the response schema for `/bank_transfer/sweep/list`
@@ -20189,7 +20831,7 @@ components:
         - amount: amount
           iso_currency_code: iso_currency_code
           created_at: 2000-01-23T04:56:07.000+00:00
-          id: 0
+          id: id
           transfer_id: transfer_id
           sweep_account:
             account_number: account_number
@@ -20197,7 +20839,7 @@ components:
         - amount: amount
           iso_currency_code: iso_currency_code
           created_at: 2000-01-23T04:56:07.000+00:00
-          id: 0
+          id: id
           transfer_id: transfer_id
           sweep_account:
             account_number: account_number
@@ -20225,7 +20867,7 @@ components:
         amount: amount
         iso_currency_code: iso_currency_code
         created_at: 2000-01-23T04:56:07.000+00:00
-        id: 0
+        id: id
         transfer_id: transfer_id
         sweep_account:
           account_number: account_number
@@ -20233,9 +20875,7 @@ components:
       properties:
         id:
           description: Identifier of the sweep.
-          format: int64
-          minimum: 0
-          type: integer
+          type: string
         transfer_id:
           description: Identifier of the sweep transfer.
           nullable: true
@@ -20260,6 +20900,43 @@ components:
       - sweep_account
       - transfer_id
       title: BankTransferSweep
+      type: object
+    TransferSweep:
+      additionalProperties: true
+      description: |-
+        Describes a sweep of funds to / from the sweep account.
+
+        A sweep is associated with many sweep events (events of type `swept` or `reverse_swept`) which
+        can be retrieved by invoking the `/transfer/event/list` endpoint with the corresponding `sweep_id`.
+
+        `swept` events occur when the transfer amount is credited or debited from your sweep account, depending
+        on the `type` of the transfer. `reverse_swept` events occur when a transfer is reversed and Plaid undoes the credit or debit.
+
+        The total sum of the `swept` and `reverse_swept` events is equal to the `amount` of the sweep Plaid creates and matches the amount
+        of the entry on your sweep account ledger.
+      example:
+        amount: amount
+        created_at: 2000-01-23T04:56:07.000+00:00
+        id: id
+      properties:
+        id:
+          description: Identifier of the sweep.
+          type: string
+        created_at:
+          description: The datetime when the sweep occurred, in RFC 3339 format.
+          format: date-time
+          type: string
+        amount:
+          description: |-
+            Signed decimal amount of the sweep as it appears on your sweep account ledger (e.g. "-10.00")
+
+            If amount is not present, the sweep was net-settled to zero and outstanding debits and credits between
+            the sweep account and Plaid are balanced.
+          type: string
+      required:
+      - created_at
+      - id
+      title: TransferSweep
       type: object
     BankTransferSweepAccount:
       additionalProperties: true
@@ -20412,6 +21089,333 @@ components:
       - request_id
       title: BankTransferMigrateAccountResponse
       type: object
+    TransferIntentCreateRequest:
+      description: Defines the request schema for `/transfer/intent/create`
+      example:
+        amount: amount
+        metadata:
+          key: metadata
+        account_id: account_id
+        description: description
+        origination_account_id: origination_account_id
+        secret: secret
+        user:
+          email_address: email_address
+          address:
+            country: country
+            city: city
+            street: street
+            region: region
+            postal_code: postal_code
+          phone_number: phone_number
+          legal_name: legal_name
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        account_id:
+          description: The Plaid `account_id` for the account that will be debited
+            or credited.
+          type: string
+        mode:
+          $ref: '#/components/schemas/TransferIntentCreateMode'
+        amount:
+          description: The amount of the transfer (decimal string with two digits
+            of precision e.g. “10.00”).
+          title: TransferAmount
+          type: string
+        description:
+          description: A description for the underlying transfer. Maximum of 8 characters.
+          maxLength: 8
+          type: string
+        ach_class:
+          $ref: '#/components/schemas/ACHClass'
+        origination_account_id:
+          description: Plaid’s unique identifier for the origination account for the
+            intent. If not provided, the default account will be used.
+          nullable: true
+          type: string
+        user:
+          $ref: '#/components/schemas/TransferUserInRequest'
+        metadata:
+          additionalProperties:
+            type: string
+          description: |
+            The Metadata object is a mapping of client-provided string fields to any string value. The following limitations apply:
+            - The JSON values must be Strings (no nested JSON objects allowed)
+            - Only ASCII characters may be used
+            - Maximum of 50 key/value pairs
+            - Maximum key length of 40 characters
+            - Maximum value length of 500 characters
+          maxProperties: 50
+          nullable: true
+          title: TransferMetadata
+          type: object
+      required:
+      - ach_class
+      - amount
+      - client_id
+      - description
+      - mode
+      - secret
+      - user
+      title: TransferIntentCreateRequest
+      type: object
+    TransferIntentCreateResponse:
+      additionalProperties: true
+      description: Defines the response schema for `/transfer/intent/create`
+      example:
+        amount: amount
+        metadata:
+          key: metadata
+        account_id: account_id
+        created: 2000-01-23T04:56:07.000+00:00
+        origination_account_id: origination_account_id
+        description: description
+        id: id
+        user:
+          email_address: email_address
+          address:
+            country: country
+            city: city
+            street: street
+            region: region
+            postal_code: postal_code
+          phone_number: phone_number
+          legal_name: legal_name
+        status: PENDING
+      properties:
+        id:
+          description: Plaid's unique identifier for the transfer intent object.
+          type: string
+        created:
+          description: The datetime the transfer was created. This will be of the
+            form `2006-01-02T15:04:05Z`.
+          format: date-time
+          type: string
+        status:
+          description: |-
+            The status of the transfer intent.
+
+            - `PENDING` – The transfer intent is pending.
+            - `SUCCEEDED`– The transfer intent was successfully created.
+            - `FAILED` – The transfer intent was unable to be created.
+          enum:
+          - PENDING
+          - SUCCEEDED
+          - FAILED
+          type: string
+        account_id:
+          description: The Plaid `account_id` for the account that will be debited
+            or credited.
+          type: string
+        origination_account_id:
+          description: Plaid’s unique identifier for the origination account for the
+            intent. If not provided, the default account will be used.
+          type: string
+        amount:
+          description: The amount of the transfer (decimal string with two digits
+            of precision e.g. “10.00”).
+          title: TransferAmount
+          type: string
+        mode:
+          $ref: '#/components/schemas/TransferIntentCreateMode'
+        ach_class:
+          $ref: '#/components/schemas/ACHClass'
+        user:
+          $ref: '#/components/schemas/TransferUserInResponse'
+        description:
+          description: A description for the underlying transfer. Maximum of 8 characters.
+          type: string
+        metadata:
+          additionalProperties:
+            type: string
+          description: |
+            The Metadata object is a mapping of client-provided string fields to any string value. The following limitations apply:
+            - The JSON values must be Strings (no nested JSON objects allowed)
+            - Only ASCII characters may be used
+            - Maximum of 50 key/value pairs
+            - Maximum key length of 40 characters
+            - Maximum value length of 500 characters
+          maxProperties: 50
+          nullable: true
+          title: TransferMetadata
+          type: object
+      required:
+      - ach_class
+      - amount
+      - created
+      - description
+      - id
+      - mode
+      - origination_account_id
+      - request_id
+      - status
+      - user
+      title: TransferIntentCreateResponse
+      type: object
+    TransferIntentGetRequest:
+      additionalProperties: true
+      description: Defines the request schema for `/transfer/intent/get`
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        transfer_intent_id:
+          description: Plaid's unique identifier for a transfer intent object.
+          type: string
+      required:
+      - client_id
+      - secret
+      - transfer_intent_id
+      title: TransferIntentGetRequest
+      type: object
+    TransferIntentGetResponse:
+      additionalProperties: true
+      description: Defines the response schema for `/transfer/intent/get`
+      example:
+        amount: amount
+        metadata:
+          key: metadata
+        created: 2000-01-23T04:56:07.000+00:00
+        authorization_decision: APPROVED
+        description: description
+        transfer_id: transfer_id
+        failure_reason:
+          error_message: error_message
+          error_type: error_type
+          error_code: error_code
+        authorization_decision_rationale:
+          code: NSF
+          description: description
+        account_id: account_id
+        origination_account_id: origination_account_id
+        id: id
+        user:
+          email_address: email_address
+          address:
+            country: country
+            city: city
+            street: street
+            region: region
+            postal_code: postal_code
+          phone_number: phone_number
+          legal_name: legal_name
+        status: PENDING
+      properties:
+        id:
+          description: Plaid's unique identifier for a transfer intent object.
+          type: string
+        created:
+          description: The datetime the transfer was created. This will be of the
+            form `2006-01-02T15:04:05Z`.
+          format: date-time
+          type: string
+        status:
+          description: The status of the transfer intent.
+          enum:
+          - PENDING
+          - SUCCEEDED
+          - FAILED
+          type: string
+        transfer_id:
+          description: Plaid's unique identifier for the transfer created through
+            the UI. Returned only if the transfer was successfully created. Null value
+            otherwise.
+          nullable: true
+          type: string
+        failure_reason:
+          $ref: '#/components/schemas/TransferIntentGetFailureReason'
+        authorization_decision:
+          description: "\nA decision regarding the proposed transfer.\n\n`APPROVED`\
+            \ – The proposed transfer has received the end user's consent and has\
+            \ been approved for processing. Plaid has also reviewed the proposed transfer\
+            \ and has approved it for processing. \n\n`PERMITTED` – Plaid was unable\
+            \ to fetch the information required to approve or decline the proposed\
+            \ transfer. You may proceed with the transfer, but further review is recommended.\
+            \ Plaid is awaiting further instructions from the client.\n\n`DECLINED`\
+            \ – Plaid reviewed the proposed transfer and declined processing. Refer\
+            \ to the `code` field in the `decision_rationale` object for details.\
+            \ Null value otherwise."
+          enum:
+          - APPROVED
+          - PERMITTED
+          - DECLINED
+          nullable: true
+          type: string
+        authorization_decision_rationale:
+          $ref: '#/components/schemas/TransferAuthorizationDecisionRationale'
+        account_id:
+          description: The Plaid `account_id` for the account that will be debited
+            or credited.
+          type: string
+        origination_account_id:
+          description: Plaid’s unique identifier for the origination account used
+            for the transfer.
+          type: string
+        amount:
+          description: The amount of the transfer (decimal string with two digits
+            of precision e.g. “10.00”).
+          title: TransferAmount
+          type: string
+        mode:
+          $ref: '#/components/schemas/TransferIntentCreateMode'
+        ach_class:
+          $ref: '#/components/schemas/ACHClass'
+        user:
+          $ref: '#/components/schemas/TransferUserInResponse'
+        description:
+          description: A description for the underlying transfer. Maximum of 8 characters.
+          type: string
+        metadata:
+          additionalProperties:
+            type: string
+          description: |
+            The Metadata object is a mapping of client-provided string fields to any string value. The following limitations apply:
+            - The JSON values must be Strings (no nested JSON objects allowed)
+            - Only ASCII characters may be used
+            - Maximum of 50 key/value pairs
+            - Maximum key length of 40 characters
+            - Maximum value length of 500 characters
+          maxProperties: 50
+          nullable: true
+          title: TransferMetadata
+          type: object
+      required:
+      - account_id
+      - ach_class
+      - amount
+      - authorization_decision
+      - authorization_decision_rationale
+      - created
+      - description
+      - failure_reason
+      - id
+      - mode
+      - origination_account_id
+      - request_id
+      - status
+      - transfer_id
+      - user
+      title: TransferIntentGetResponse
+      type: object
     SandboxBankTransferSimulateRequest:
       description: Defines the request schema for `/sandbox/bank_transfer/simulate`
       example:
@@ -20502,6 +21506,44 @@ components:
       - transfer_id
       title: SandboxTransferSimulateRequest
       type: object
+    SandboxTransferSweepSimulateRequest:
+      description: Defines the request schema for `/sandbox/transfer/sweep/simulate`
+      example:
+        swept:
+        - null
+        - null
+        reverse_swept:
+        - null
+        - null
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        swept:
+          description: A set of `pending` or `posted` transfers which should be included
+            in the sweep.
+          items:
+            $ref: '#/components/schemas/TransferID'
+          type: array
+        reverse_swept:
+          description: A set of transfers to be `reverse_swept`. Transfers must first
+            be `reversed` using the `/sandbox/transfer/simulate` endpoint before they
+            can be `reverse_swept`
+          items:
+            $ref: '#/components/schemas/TransferID'
+          type: array
+      title: SandboxTransferSweepSimulateRequest
+      type: object
     SandboxBankTransferSimulateResponse:
       additionalProperties: true
       description: Defines the response schema for `/sandbox/bank_transfer/simulate`
@@ -20533,6 +21575,29 @@ components:
       required:
       - request_id
       title: SandboxTransferSimulateResponse
+      type: object
+    SandboxTransferSweepSimulateResponse:
+      additionalProperties: true
+      description: Defines the response schema for `/sandbox/transfer/sweep/simulate`
+      example:
+        sweep:
+          amount: amount
+          created_at: 2000-01-23T04:56:07.000+00:00
+          id: id
+        request_id: request_id
+      properties:
+        sweep:
+          $ref: '#/components/schemas/TransferSweep'
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      - sweep
+      title: SandboxTransferSweepSimulateResponse
       type: object
     BankTransferReceiverDetails:
       additionalProperties: true
@@ -20682,7 +21747,8 @@ components:
       type: object
     InvestmentFilter:
       additionalProperties: true
-      description: A filter to apply to `investment`-type accounts
+      description: A filter to apply to `investment`-type accounts (or `brokerage`-type
+        acconunts for API versions 2018-05-22 and earlier).
       example:
         account_subtypes:
         - null
@@ -20839,8 +21905,12 @@ components:
       properties:
         access_tokens:
           description: An array of access tokens corresponding to the Items that will
-            be cross-referenced with the product data. If the `transactions` product
-            was not initialized for the Items during link, it will be initialized
+            be cross-referenced with the product data. Plaid will attempt to correlate
+            transaction history from these Items with data from the user's paystub,
+            such as date and amount. The `verification` status of the paystub as returned
+            by `/income/verification/paystubs/get` will indicate if the verification
+            status was successful, or, if not, why it failed. If the `transactions`
+            product was not initialized for the Items during Link, it will be initialized
             after this Link session.
           items:
             $ref: '#/components/schemas/AccessToken'
@@ -21018,7 +22088,6 @@ components:
       description: IncomeVerificationPrecheckResponse defines the response schema
         for `/income/verification/precheck`.
       example:
-        confidence: HIGH
         precheck_id: precheck_id
         request_id: request_id
       properties:
@@ -21032,25 +22101,27 @@ components:
           title: RequestID
           type: string
         confidence:
-          description: |-
-            The confidence that Plaid can support the user in the income verification flow. One of the following:
-
-            `"HIGH"`: This precheck information submitted is definitively tied to a Plaid-supported integration.
-
-            "`LOW`": This precheck information submitted is known not to be supported by Plaid.
-
-            `"UNKNOWN"`: It was not possible to determine if the user is supportable with the information passed.
-          enum:
-          - HIGH
-          - LOW
-          - UNKNOWN
-          type: string
+          $ref: '#/components/schemas/IncomeVerificationPrecheckConfidence'
       required:
       - confidence
       - precheck_id
       - request_id
       title: IncomeVerificationPrecheckResponse
       type: object
+    IncomeVerificationPrecheckConfidence:
+      description: |-
+        The confidence that Plaid can support the user in the income verification flow. One of the following:
+
+        `"HIGH"`: This precheck information submitted is definitively tied to a Plaid-supported integration.
+
+        "`LOW`": This precheck information submitted is known not to be supported by Plaid.
+
+        `"UNKNOWN"`: It was not possible to determine if the user is supportable with the information passed.
+      enum:
+      - HIGH
+      - LOW
+      - UNKNOWN
+      type: string
     LinkTokenCreateRequestIncomeVerification:
       description: Specifies options for initializing Link for use with the Income
         (beta) product. This field is required if `income_verification` is included
@@ -21108,15 +22179,14 @@ components:
           description: The Item ID associated with the verification.
           type: string
         verification_status:
-          description: "`VERIFICATION_STATUS_PROCESSING_COMPLETE`: The income verification\
-            \ status processing has completed. If the user uploaded multiple documents,\
-            \ this status means that at least one document was processed successfully.\
-            \ \n\n`VERIFICATION_STATUS_DOCUMENT_REJECTED`: The documentation uploaded\
-            \ by the end user was recognized as a supported file format, but not recognized\
-            \ as a valid verification document. Common causes include poor image quality\
-            \ or the document not being an acceptable income verification document.\n\
-            \n`VERIFICATION_STATUS_PROCESSING_FAILED`: A failure occurred when attempting\
-            \ to process the verification documentation."
+          description: |-
+            `VERIFICATION_STATUS_PROCESSING_COMPLETE`: The income verification status processing has completed. If the user uploaded multiple documents, this status means that at least one document was processed successfully.
+
+            `VERIFICATION_STATUS_DOCUMENT_REJECTED`: The documentation uploaded by the end user was recognized as a supported file format, but not recognized as a valid verification document. Common causes include poor image quality or the document not being an acceptable income verification document.
+
+            `VERIFICATION_STATUS_PROCESSING_FAILED`: A failure occurred when attempting to process the verification documentation.
+
+            `VERIFICATION_STATUS_PENDING_APPROVAL`: The income verification has been sent to the user for review.
           type: string
       required:
       - income_verification_id
@@ -21171,16 +22241,14 @@ components:
         for `/income/verification/summary/get`.
       example:
         income_summaries:
-        - pay_frequency:
-            value: monthly
+        - pay_frequency: {}
           verified_transaction:
             date: 2000-01-23
             transaction_id: transaction_id
             amount: 0.8008281904610115
             account_id: account_id
             description: description
-        - pay_frequency:
-            value: monthly
+        - pay_frequency: {}
           verified_transaction:
             date: 2000-01-23
             transaction_id: transaction_id
@@ -21273,8 +22341,7 @@ components:
       description: The verified fields from a paystub verification. All fields are
         provided as reported on the paystub.
       example:
-        pay_frequency:
-          value: monthly
+        pay_frequency: {}
         verified_transaction:
           date: 2000-01-23
           transaction_id: transaction_id
@@ -21405,20 +22472,11 @@ components:
         type: object
     PayFrequency:
       additionalProperties: true
-      example:
-        value: monthly
+      example: {}
       nullable: true
       properties:
         value:
-          description: The frequency of the pay period.
-          enum:
-          - monthly
-          - semimonthly
-          - weekly
-          - biweekly
-          - unknown
-          - "null"
-          type: string
+          $ref: '#/components/schemas/PayFrequencyValue'
         verification_status:
           $ref: '#/components/schemas/VerificationStatus'
       required:
@@ -21426,6 +22484,17 @@ components:
       - verification_status
       title: PayFrequency
       type: object
+    PayFrequencyValue:
+      description: The frequency of the pay period.
+      enum:
+      - monthly
+      - semimonthly
+      - weekly
+      - biweekly
+      - unknown
+      - null
+      title: PayFrequencyValue
+      type: string
     VerificationStatus:
       description: |-
         The verification status. One of the following:
@@ -21507,7 +22576,6 @@ components:
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              canonical_description: BONUS
             ytd_amount: 1.0246457001441578
             iso_currency_code: iso_currency_code
             description: description
@@ -21524,7 +22592,6 @@ components:
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              canonical_description: BONUS
             - current_amount: 2.3021358869347655
               ytd_pay:
                 amount: 0.8008281904610115
@@ -21536,7 +22603,6 @@ components:
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              canonical_description: BONUS
             total:
               current_amount: 2.3021358869347655
               ytd_pay:
@@ -21549,7 +22615,6 @@ components:
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              canonical_description: BONUS
             breakdown:
             - current_amount: 3.616076749251911
               unofficial_currency_code: unofficial_currency_code
@@ -21558,7 +22623,6 @@ components:
               ytd_amount: 7.386281948385884
               iso_currency_code: iso_currency_code
               description: description
-              canonical_description: BONUS
             - current_amount: 3.616076749251911
               unofficial_currency_code: unofficial_currency_code
               hours: 2.027123023002322
@@ -21566,7 +22630,6 @@ components:
               ytd_amount: 7.386281948385884
               iso_currency_code: iso_currency_code
               description: description
-              canonical_description: BONUS
             totals:
             - current_amount: 2.3021358869347655
               ytd_pay:
@@ -21579,7 +22642,6 @@ components:
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              canonical_description: BONUS
             - current_amount: 2.3021358869347655
               ytd_pay:
                 amount: 0.8008281904610115
@@ -21591,7 +22653,6 @@ components:
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              canonical_description: BONUS
           pay_period_details:
             end_date: 2000-01-23
             pay_day: 2000-01-23
@@ -21639,7 +22700,6 @@ components:
             pay_date: 2000-01-23
             paystub_provider: paystub_provider
             pay_period_start_date: 2000-01-23
-            pay_frequency: MONTHLY
             pay_period_end_date: 2000-01-23
           deductions:
             subtotals:
@@ -21650,7 +22710,6 @@ components:
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              canonical_description: BONUS
             - ytd_pay:
                 amount: 0.8008281904610115
                 currency: currency
@@ -21658,7 +22717,6 @@ components:
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              canonical_description: BONUS
             total:
               current_amount: 5.962133916683182
               unofficial_currency_code: unofficial_currency_code
@@ -21683,7 +22741,6 @@ components:
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              canonical_description: BONUS
             - ytd_pay:
                 amount: 0.8008281904610115
                 currency: currency
@@ -21691,7 +22748,6 @@ components:
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              canonical_description: BONUS
           employee:
             marital_status: marital_status
             address:
@@ -21718,16 +22774,13 @@ components:
           - hours: 4.965218492984954
             total: 5.025004791520295
             rate: 1.1730742509559433
-            type: bonus
           - hours: 4.965218492984954
             total: 5.025004791520295
             rate: 1.1730742509559433
-            type: bonus
           verification:
             verification_attributes:
             - type: VERIFICATION_ATTRIBUTE_TYPE_UNKNOWN
             - type: VERIFICATION_ATTRIBUTE_TYPE_UNKNOWN
-            verification_status: PAYSTUB_VERIFICATION_STATUS_UNKNOWN
         error:
           error_message: error_message
           suggested_action: suggested_action
@@ -21806,7 +22859,6 @@ components:
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              canonical_description: BONUS
             ytd_amount: 1.0246457001441578
             iso_currency_code: iso_currency_code
             description: description
@@ -21823,7 +22875,6 @@ components:
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              canonical_description: BONUS
             - current_amount: 2.3021358869347655
               ytd_pay:
                 amount: 0.8008281904610115
@@ -21835,7 +22886,6 @@ components:
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              canonical_description: BONUS
             total:
               current_amount: 2.3021358869347655
               ytd_pay:
@@ -21848,7 +22898,6 @@ components:
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              canonical_description: BONUS
             breakdown:
             - current_amount: 3.616076749251911
               unofficial_currency_code: unofficial_currency_code
@@ -21857,7 +22906,6 @@ components:
               ytd_amount: 7.386281948385884
               iso_currency_code: iso_currency_code
               description: description
-              canonical_description: BONUS
             - current_amount: 3.616076749251911
               unofficial_currency_code: unofficial_currency_code
               hours: 2.027123023002322
@@ -21865,7 +22913,6 @@ components:
               ytd_amount: 7.386281948385884
               iso_currency_code: iso_currency_code
               description: description
-              canonical_description: BONUS
             totals:
             - current_amount: 2.3021358869347655
               ytd_pay:
@@ -21878,7 +22925,6 @@ components:
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              canonical_description: BONUS
             - current_amount: 2.3021358869347655
               ytd_pay:
                 amount: 0.8008281904610115
@@ -21890,7 +22936,6 @@ components:
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              canonical_description: BONUS
           pay_period_details:
             end_date: 2000-01-23
             pay_day: 2000-01-23
@@ -21938,7 +22983,6 @@ components:
             pay_date: 2000-01-23
             paystub_provider: paystub_provider
             pay_period_start_date: 2000-01-23
-            pay_frequency: MONTHLY
             pay_period_end_date: 2000-01-23
           deductions:
             subtotals:
@@ -21949,7 +22993,6 @@ components:
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              canonical_description: BONUS
             - ytd_pay:
                 amount: 0.8008281904610115
                 currency: currency
@@ -21957,7 +23000,6 @@ components:
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              canonical_description: BONUS
             total:
               current_amount: 5.962133916683182
               unofficial_currency_code: unofficial_currency_code
@@ -21982,7 +23024,6 @@ components:
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              canonical_description: BONUS
             - ytd_pay:
                 amount: 0.8008281904610115
                 currency: currency
@@ -21990,7 +23031,6 @@ components:
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              canonical_description: BONUS
           employee:
             marital_status: marital_status
             address:
@@ -22017,16 +23057,13 @@ components:
           - hours: 4.965218492984954
             total: 5.025004791520295
             rate: 1.1730742509559433
-            type: bonus
           - hours: 4.965218492984954
             total: 5.025004791520295
             rate: 1.1730742509559433
-            type: bonus
           verification:
             verification_attributes:
             - type: VERIFICATION_ATTRIBUTE_TYPE_UNKNOWN
             - type: VERIFICATION_ATTRIBUTE_TYPE_UNKNOWN
-            verification_status: PAYSTUB_VERIFICATION_STATUS_UNKNOWN
         - net_pay:
             current_amount: 1.2315135367772556
             unofficial_currency_code: unofficial_currency_code
@@ -22038,7 +23075,6 @@ components:
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              canonical_description: BONUS
             ytd_amount: 1.0246457001441578
             iso_currency_code: iso_currency_code
             description: description
@@ -22055,7 +23091,6 @@ components:
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              canonical_description: BONUS
             - current_amount: 2.3021358869347655
               ytd_pay:
                 amount: 0.8008281904610115
@@ -22067,7 +23102,6 @@ components:
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              canonical_description: BONUS
             total:
               current_amount: 2.3021358869347655
               ytd_pay:
@@ -22080,7 +23114,6 @@ components:
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              canonical_description: BONUS
             breakdown:
             - current_amount: 3.616076749251911
               unofficial_currency_code: unofficial_currency_code
@@ -22089,7 +23122,6 @@ components:
               ytd_amount: 7.386281948385884
               iso_currency_code: iso_currency_code
               description: description
-              canonical_description: BONUS
             - current_amount: 3.616076749251911
               unofficial_currency_code: unofficial_currency_code
               hours: 2.027123023002322
@@ -22097,7 +23129,6 @@ components:
               ytd_amount: 7.386281948385884
               iso_currency_code: iso_currency_code
               description: description
-              canonical_description: BONUS
             totals:
             - current_amount: 2.3021358869347655
               ytd_pay:
@@ -22110,7 +23141,6 @@ components:
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              canonical_description: BONUS
             - current_amount: 2.3021358869347655
               ytd_pay:
                 amount: 0.8008281904610115
@@ -22122,7 +23152,6 @@ components:
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              canonical_description: BONUS
           pay_period_details:
             end_date: 2000-01-23
             pay_day: 2000-01-23
@@ -22170,7 +23199,6 @@ components:
             pay_date: 2000-01-23
             paystub_provider: paystub_provider
             pay_period_start_date: 2000-01-23
-            pay_frequency: MONTHLY
             pay_period_end_date: 2000-01-23
           deductions:
             subtotals:
@@ -22181,7 +23209,6 @@ components:
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              canonical_description: BONUS
             - ytd_pay:
                 amount: 0.8008281904610115
                 currency: currency
@@ -22189,7 +23216,6 @@ components:
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              canonical_description: BONUS
             total:
               current_amount: 5.962133916683182
               unofficial_currency_code: unofficial_currency_code
@@ -22214,7 +23240,6 @@ components:
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              canonical_description: BONUS
             - ytd_pay:
                 amount: 0.8008281904610115
                 currency: currency
@@ -22222,7 +23247,6 @@ components:
               current_pay:
                 amount: 0.8008281904610115
                 currency: currency
-              canonical_description: BONUS
           employee:
             marital_status: marital_status
             address:
@@ -22249,23 +23273,18 @@ components:
           - hours: 4.965218492984954
             total: 5.025004791520295
             rate: 1.1730742509559433
-            type: bonus
           - hours: 4.965218492984954
             total: 5.025004791520295
             rate: 1.1730742509559433
-            type: bonus
           verification:
             verification_attributes:
             - type: VERIFICATION_ATTRIBUTE_TYPE_UNKNOWN
             - type: VERIFICATION_ATTRIBUTE_TYPE_UNKNOWN
-            verification_status: PAYSTUB_VERIFICATION_STATUS_UNKNOWN
         document_metadata:
         - name: name
-          doc_type: UNKNOWN
           doc_id: doc_id
           status: status
         - name: name
-          doc_type: UNKNOWN
           doc_id: doc_id
           status: status
         error:
@@ -22308,7 +23327,6 @@ components:
       description: An object representing metadata from the end user's uploaded document.
       example:
         name: name
-        doc_type: UNKNOWN
         doc_id: doc_id
         status: status
       properties:
@@ -22323,36 +23341,38 @@ components:
             response.
           type: string
         doc_type:
-          description: |-
-            The type of document.
-
-            `DOCUMENT_TYPE_PAYSTUB`: A paystub.
-
-            `DOCUMENT_TYPE_BANK_STATEMENT`: A bank statement.
-
-            `DOCUMENT_TYPE_US_TAX_W2`: A W-2 wage and tax statement provided by a US employer reflecting wages earned by the employee.
-
-            `DOCUMENT_TYPE_US_MILITARY_ERAS`: An electronic Retirement Account Statement (eRAS) issued by the US military.
-
-            `DOCUMENT_TYPE_US_MILITARY_LES`: A Leave and Earnings Statement (LES) issued by the US military.
-
-            `DOCUMENT_TYPE_US_MILITARY_CLES`: A Civilian Leave and Earnings Statment (CLES) issued by the US military.
-
-            `DOCUMENT_TYPE_GIG`: Used to indicate that the income is related to gig work. Does not necessarily correspond to a specific document type.
-
-            `UNKNOWN`: Document type could not be determined.
-          enum:
-          - UNKNOWN
-          - DOCUMENT_TYPE_PAYSTUB
-          - DOCUMENT_TYPE_BANK_STATEMENT
-          - DOCUMENT_TYPE_US_TAX_W2
-          - DOCUMENT_TYPE_US_MILITARY_ERAS
-          - DOCUMENT_TYPE_US_MILITARY_LES
-          - DOCUMENT_TYPE_US_MILITARY_CLES
-          - DOCUMENT_TYPE_GIG
-          type: string
+          $ref: '#/components/schemas/DocType'
       title: DocumentMetadata
       type: object
+    DocType:
+      description: |-
+        The type of document.
+
+        `DOCUMENT_TYPE_PAYSTUB`: A paystub.
+
+        `DOCUMENT_TYPE_BANK_STATEMENT`: A bank statement.
+
+        `DOCUMENT_TYPE_US_TAX_W2`: A W-2 wage and tax statement provided by a US employer reflecting wages earned by the employee.
+
+        `DOCUMENT_TYPE_US_MILITARY_ERAS`: An electronic Retirement Account Statement (eRAS) issued by the US military.
+
+        `DOCUMENT_TYPE_US_MILITARY_LES`: A Leave and Earnings Statement (LES) issued by the US military.
+
+        `DOCUMENT_TYPE_US_MILITARY_CLES`: A Civilian Leave and Earnings Statment (CLES) issued by the US military.
+
+        `DOCUMENT_TYPE_GIG`: Used to indicate that the income is related to gig work. Does not necessarily correspond to a specific document type.
+
+        `UNKNOWN`: Document type could not be determined.
+      enum:
+      - UNKNOWN
+      - DOCUMENT_TYPE_PAYSTUB
+      - DOCUMENT_TYPE_BANK_STATEMENT
+      - DOCUMENT_TYPE_US_TAX_W2
+      - DOCUMENT_TYPE_US_MILITARY_ERAS
+      - DOCUMENT_TYPE_US_MILITARY_LES
+      - DOCUMENT_TYPE_US_MILITARY_CLES
+      - DOCUMENT_TYPE_GIG
+      type: string
     Paystub:
       additionalProperties: true
       description: An object representing data extracted from the end user's paystub.
@@ -22368,7 +23388,6 @@ components:
             current_pay:
               amount: 0.8008281904610115
               currency: currency
-            canonical_description: BONUS
           ytd_amount: 1.0246457001441578
           iso_currency_code: iso_currency_code
           description: description
@@ -22385,7 +23404,6 @@ components:
             current_pay:
               amount: 0.8008281904610115
               currency: currency
-            canonical_description: BONUS
           - current_amount: 2.3021358869347655
             ytd_pay:
               amount: 0.8008281904610115
@@ -22397,7 +23415,6 @@ components:
             current_pay:
               amount: 0.8008281904610115
               currency: currency
-            canonical_description: BONUS
           total:
             current_amount: 2.3021358869347655
             ytd_pay:
@@ -22410,7 +23427,6 @@ components:
             current_pay:
               amount: 0.8008281904610115
               currency: currency
-            canonical_description: BONUS
           breakdown:
           - current_amount: 3.616076749251911
             unofficial_currency_code: unofficial_currency_code
@@ -22419,7 +23435,6 @@ components:
             ytd_amount: 7.386281948385884
             iso_currency_code: iso_currency_code
             description: description
-            canonical_description: BONUS
           - current_amount: 3.616076749251911
             unofficial_currency_code: unofficial_currency_code
             hours: 2.027123023002322
@@ -22427,7 +23442,6 @@ components:
             ytd_amount: 7.386281948385884
             iso_currency_code: iso_currency_code
             description: description
-            canonical_description: BONUS
           totals:
           - current_amount: 2.3021358869347655
             ytd_pay:
@@ -22440,7 +23454,6 @@ components:
             current_pay:
               amount: 0.8008281904610115
               currency: currency
-            canonical_description: BONUS
           - current_amount: 2.3021358869347655
             ytd_pay:
               amount: 0.8008281904610115
@@ -22452,7 +23465,6 @@ components:
             current_pay:
               amount: 0.8008281904610115
               currency: currency
-            canonical_description: BONUS
         pay_period_details:
           end_date: 2000-01-23
           pay_day: 2000-01-23
@@ -22500,7 +23512,6 @@ components:
           pay_date: 2000-01-23
           paystub_provider: paystub_provider
           pay_period_start_date: 2000-01-23
-          pay_frequency: MONTHLY
           pay_period_end_date: 2000-01-23
         deductions:
           subtotals:
@@ -22511,7 +23522,6 @@ components:
             current_pay:
               amount: 0.8008281904610115
               currency: currency
-            canonical_description: BONUS
           - ytd_pay:
               amount: 0.8008281904610115
               currency: currency
@@ -22519,7 +23529,6 @@ components:
             current_pay:
               amount: 0.8008281904610115
               currency: currency
-            canonical_description: BONUS
           total:
             current_amount: 5.962133916683182
             unofficial_currency_code: unofficial_currency_code
@@ -22544,7 +23553,6 @@ components:
             current_pay:
               amount: 0.8008281904610115
               currency: currency
-            canonical_description: BONUS
           - ytd_pay:
               amount: 0.8008281904610115
               currency: currency
@@ -22552,7 +23560,6 @@ components:
             current_pay:
               amount: 0.8008281904610115
               currency: currency
-            canonical_description: BONUS
         employee:
           marital_status: marital_status
           address:
@@ -22579,16 +23586,13 @@ components:
         - hours: 4.965218492984954
           total: 5.025004791520295
           rate: 1.1730742509559433
-          type: bonus
         - hours: 4.965218492984954
           total: 5.025004791520295
           rate: 1.1730742509559433
-          type: bonus
         verification:
           verification_attributes:
           - type: VERIFICATION_ATTRIBUTE_TYPE_UNKNOWN
           - type: VERIFICATION_ATTRIBUTE_TYPE_UNKNOWN
-          verification_status: PAYSTUB_VERIFICATION_STATUS_UNKNOWN
       properties:
         deductions:
           $ref: '#/components/schemas/Deductions'
@@ -22641,7 +23645,6 @@ components:
           current_pay:
             amount: 0.8008281904610115
             currency: currency
-          canonical_description: BONUS
         - ytd_pay:
             amount: 0.8008281904610115
             currency: currency
@@ -22649,7 +23652,6 @@ components:
           current_pay:
             amount: 0.8008281904610115
             currency: currency
-          canonical_description: BONUS
         total:
           current_amount: 5.962133916683182
           unofficial_currency_code: unofficial_currency_code
@@ -22674,7 +23676,6 @@ components:
           current_pay:
             amount: 0.8008281904610115
             currency: currency
-          canonical_description: BONUS
         - ytd_pay:
             amount: 0.8008281904610115
             currency: currency
@@ -22682,7 +23683,6 @@ components:
           current_pay:
             amount: 0.8008281904610115
             currency: currency
-          canonical_description: BONUS
       properties:
         subtotals:
           deprecated: true
@@ -22785,29 +23785,9 @@ components:
         current_pay:
           amount: 0.8008281904610115
           currency: currency
-        canonical_description: BONUS
       properties:
         canonical_description:
-          description: Commonly used term to describe the line item.
-          enum:
-          - BONUS
-          - COMMISSION
-          - OVERTIME
-          - PAID TIME OFF
-          - REGULAR PAY
-          - VACATION
-          - EMPLOYEE MEDICARE
-          - FICA
-          - SOCIAL SECURITY EMPLOYEE TAX
-          - MEDICAL
-          - VISION
-          - DENTAL
-          - NET PAY
-          - TAXES
-          - NOT_FOUND
-          - OTHER
-          nullable: true
-          type: string
+          $ref: '#/components/schemas/TotalCanonicalDescription'
         description:
           description: Text of the line item as printed on the paystub.
           nullable: true
@@ -22818,6 +23798,28 @@ components:
           $ref: '#/components/schemas/Pay'
       title: Total
       type: object
+    TotalCanonicalDescription:
+      description: Commonly used term to describe the line item.
+      enum:
+      - BONUS
+      - COMMISSION
+      - OVERTIME
+      - PAID TIME OFF
+      - REGULAR PAY
+      - VACATION
+      - EMPLOYEE MEDICARE
+      - FICA
+      - SOCIAL SECURITY EMPLOYEE TAX
+      - MEDICAL
+      - VISION
+      - DENTAL
+      - NET PAY
+      - TAXES
+      - NOT_FOUND
+      - OTHER
+      - null
+      nullable: true
+      type: string
     Pay:
       additionalProperties: true
       deprecated: true
@@ -22855,7 +23857,6 @@ components:
           current_pay:
             amount: 0.8008281904610115
             currency: currency
-          canonical_description: BONUS
         - current_amount: 2.3021358869347655
           ytd_pay:
             amount: 0.8008281904610115
@@ -22867,7 +23868,6 @@ components:
           current_pay:
             amount: 0.8008281904610115
             currency: currency
-          canonical_description: BONUS
         total:
           current_amount: 2.3021358869347655
           ytd_pay:
@@ -22880,7 +23880,6 @@ components:
           current_pay:
             amount: 0.8008281904610115
             currency: currency
-          canonical_description: BONUS
         breakdown:
         - current_amount: 3.616076749251911
           unofficial_currency_code: unofficial_currency_code
@@ -22889,7 +23888,6 @@ components:
           ytd_amount: 7.386281948385884
           iso_currency_code: iso_currency_code
           description: description
-          canonical_description: BONUS
         - current_amount: 3.616076749251911
           unofficial_currency_code: unofficial_currency_code
           hours: 2.027123023002322
@@ -22897,7 +23895,6 @@ components:
           ytd_amount: 7.386281948385884
           iso_currency_code: iso_currency_code
           description: description
-          canonical_description: BONUS
         totals:
         - current_amount: 2.3021358869347655
           ytd_pay:
@@ -22910,7 +23907,6 @@ components:
           current_pay:
             amount: 0.8008281904610115
             currency: currency
-          canonical_description: BONUS
         - current_amount: 2.3021358869347655
           ytd_pay:
             amount: 0.8008281904610115
@@ -22922,7 +23918,6 @@ components:
           current_pay:
             amount: 0.8008281904610115
             currency: currency
-          canonical_description: BONUS
       properties:
         subtotals:
           deprecated: true
@@ -22953,21 +23948,9 @@ components:
         ytd_amount: 7.386281948385884
         iso_currency_code: iso_currency_code
         description: description
-        canonical_description: BONUS
       properties:
         canonical_description:
-          description: Commonly used term to describe the earning line item.
-          enum:
-          - BONUS
-          - COMMISSION
-          - OVERTIME
-          - PAID TIME OFF
-          - REGULAR PAY
-          - VACATION
-          - OTHER
-          - null
-          nullable: true
-          type: string
+          $ref: '#/components/schemas/EarningsBreakdownCanonicalDescription'
         current_amount:
           description: Raw amount of the earning line item.
           nullable: true
@@ -23002,6 +23985,19 @@ components:
           type: number
       title: EarningsBreakdown
       type: object
+    EarningsBreakdownCanonicalDescription:
+      description: Commonly used term to describe the earning line item.
+      enum:
+      - BONUS
+      - COMMISSION
+      - OVERTIME
+      - PAID TIME OFF
+      - REGULAR PAY
+      - VACATION
+      - OTHER
+      - null
+      nullable: true
+      type: string
     EarningsTotal:
       additionalProperties: true
       description: An object representing both the current pay period and year to
@@ -23018,31 +24014,7 @@ components:
         current_pay:
           amount: 0.8008281904610115
           currency: currency
-        canonical_description: BONUS
       properties:
-        canonical_description:
-          deprecated: true
-          description: Commonly used term to describe the line item.
-          enum:
-          - BONUS
-          - COMMISSION
-          - OVERTIME
-          - PAID TIME OFF
-          - REGULAR PAY
-          - VACATION
-          - EMPLOYEE MEDICARE
-          - FICA
-          - SOCIAL SECURITY EMPLOYEE TAX
-          - MEDICAL
-          - VISION
-          - DENTAL
-          - NET PAY
-          - TAXES
-          - NOT_FOUND
-          - OTHER
-          nullable: true
-          type: string
-          x-private_visibility: true
         current_amount:
           description: Total amount of the earnings for this pay period
           nullable: true
@@ -23107,7 +24079,6 @@ components:
           current_pay:
             amount: 0.8008281904610115
             currency: currency
-          canonical_description: BONUS
         ytd_amount: 1.0246457001441578
         iso_currency_code: iso_currency_code
         description: description
@@ -23148,7 +24119,6 @@ components:
         pay_date: 2000-01-23
         paystub_provider: paystub_provider
         pay_period_start_date: 2000-01-23
-        pay_frequency: MONTHLY
         pay_period_end_date: 2000-01-23
       properties:
         pay_period_start_date:
@@ -23174,17 +24144,20 @@ components:
           nullable: true
           type: string
         pay_frequency:
-          description: 'The frequency at which the employee is paid. Possible values:
-            `MONTHLY`, `BI-WEEKLY`, `WEEKLY`, `SEMI-MONTHLY`.'
-          enum:
-          - MONTHLY
-          - BI-WEEKLY
-          - WEEKLY
-          - SEMI-MONTHLY
-          nullable: true
-          type: string
+          $ref: '#/components/schemas/PaystubPayFrequency'
       title: PaystubDetails
       type: object
+    PaystubPayFrequency:
+      description: 'The frequency at which the employee is paid. Possible values:
+        `MONTHLY`, `BI-WEEKLY`, `WEEKLY`, `SEMI-MONTHLY`.'
+      enum:
+      - MONTHLY
+      - BI-WEEKLY
+      - WEEKLY
+      - SEMI-MONTHLY
+      - null
+      nullable: true
+      type: string
     IncomeBreakdown:
       additionalProperties: true
       deprecated: true
@@ -23194,21 +24167,9 @@ components:
         hours: 4.965218492984954
         total: 5.025004791520295
         rate: 1.1730742509559433
-        type: bonus
       properties:
         type:
-          description: |-
-            The type of income. Possible values include:
-              `"regular"`: regular income
-              `"overtime"`: overtime income
-              `"bonus"`: bonus income
-          enum:
-          - bonus
-          - overtime
-          - regular
-          - null
-          nullable: true
-          type: string
+          $ref: '#/components/schemas/IncomeBreakdownType'
         rate:
           description: The hourly rate at which the income is paid.
           nullable: true
@@ -23228,6 +24189,19 @@ components:
       - type
       title: IncomeBreakdown
       type: object
+    IncomeBreakdownType:
+      description: |-
+        The type of income. Possible values include:
+          `"regular"`: regular income
+          `"overtime"`: overtime income
+          `"bonus"`: bonus income
+      enum:
+      - bonus
+      - overtime
+      - regular
+      - null
+      nullable: true
+      type: string
     Employee:
       additionalProperties: true
       description: Data about the employee.
@@ -23545,33 +24519,37 @@ components:
       type: object
     PaystubVerification:
       additionalProperties: true
-      description: An object containing information for whether or not the uploaded
-        paystub is fradulent
+      description: An object containing details on the paystub's verification status.
+        This object will only be populated if the [`income_verification.access_tokens`](/docs/api/tokens/#link-token-create-request-income-verification-access-tokens)
+        parameter was provided during the `/link/token/create` call or if a problem
+        was detected with the information supplied by the user; otherwise it will
+        be `null`.
       example:
         verification_attributes:
         - type: VERIFICATION_ATTRIBUTE_TYPE_UNKNOWN
         - type: VERIFICATION_ATTRIBUTE_TYPE_UNKNOWN
-        verification_status: PAYSTUB_VERIFICATION_STATUS_UNKNOWN
       nullable: true
       properties:
         verification_status:
-          description: Derived verification status.
-          enum:
-          - PAYSTUB_VERIFICATION_STATUS_UNKNOWN
-          - PAYSTUB_VERIFICATION_STATUS_VERIFIED
-          - PAYSTUB_VERIFICATION_STATUS_FRAUDULENT
-          - null
-          nullable: true
-          type: string
+          $ref: '#/components/schemas/PaystubVerificationStatus'
         verification_attributes:
           items:
             $ref: '#/components/schemas/VerificationAttribute'
           type: array
       required:
-      - fraud_attributes
+      - verification_attributes
       - verification_status
       title: PaystubVerification
       type: object
+    PaystubVerificationStatus:
+      description: Derived verification status.
+      enum:
+      - PAYSTUB_VERIFICATION_STATUS_UNKNOWN
+      - PAYSTUB_VERIFICATION_STATUS_VERIFIED
+      - PAYSTUB_VERIFICATION_STATUS_FRAUDULENT
+      - null
+      nullable: true
+      type: string
     VerificationAttribute:
       additionalProperties: true
       description: Details about a certain reason as to why a document could potentially
@@ -23588,6 +24566,12 @@ components:
           - VERIFICATION_ATTRIBUTE_TYPE_DATE_MATCH
           - VERIFICATION_ATTRIBUTE_TYPE_DATE_MISMATCH
           - VERIFICATION_ATTRIBUTE_TYPE_FILE_TAMPERING
+          - VERIFICATION_ATTRIBUTE_TYPE_DESCRIPTION_MATCH
+          - VERIFICATION_ATTRIBUTE_TYPE_DESCRIPTION_MISMATCH
+          - VERIFICATION_ATTRIBUTE_TYPE_FIRST_NAME_MATCH
+          - VERIFICATION_ATTRIBUTE_TYPE_FIRST_NAME_MISMATCH
+          - VERIFICATION_ATTRIBUTE_TYPE_LAST_NAME_MATCH
+          - VERIFICATION_ATTRIBUTE_TYPE_LAST_NAME_MISMATCH
           - null
           nullable: true
           type: string
@@ -23668,11 +24652,9 @@ components:
       example:
         document_metadata:
         - name: name
-          doc_type: UNKNOWN
           doc_id: doc_id
           status: status
         - name: name
-          doc_type: UNKNOWN
           doc_id: doc_id
           status: status
         error:
@@ -24189,7 +25171,6 @@ components:
           employer:
             name: name
           title: title
-          status: EMPLOYMENT_STATUS_ACTIVE
           start_date: 2000-01-23
         - end_date: 2000-01-23
           platform_ids:
@@ -24199,7 +25180,6 @@ components:
           employer:
             name: name
           title: title
-          status: EMPLOYMENT_STATUS_ACTIVE
           start_date: 2000-01-23
         error:
           error_message: error_message
@@ -24245,17 +25225,10 @@ components:
         employer:
           name: name
         title: title
-        status: EMPLOYMENT_STATUS_ACTIVE
         start_date: 2000-01-23
       properties:
         status:
-          description: Current employment status.
-          enum:
-          - EMPLOYMENT_STATUS_ACTIVE
-          - EMPLOYMENT_STATUS_INACTIVE
-          - null
-          nullable: true
-          type: string
+          $ref: '#/components/schemas/EmploymentVerificationStatus'
         start_date:
           description: Start of employment in ISO_8601 format (YYYY-MM-DD).
           format: date
@@ -24276,6 +25249,14 @@ components:
           $ref: '#/components/schemas/PlatformIds'
       title: EmploymentVerification
       type: object
+    EmploymentVerificationStatus:
+      description: Current employment status.
+      enum:
+      - EMPLOYMENT_STATUS_ACTIVE
+      - EMPLOYMENT_STATUS_INACTIVE
+      - null
+      nullable: true
+      type: string
     EmployerVerification:
       additionalProperties: true
       description: An object containing employer data.
@@ -24766,8 +25747,7 @@ components:
         authorized:
           default: true
           description: Allow the application to see this account (and associated details,
-            including balance) in the list of accounts. If relevant to the partner
-            and unset, defaults to `true`.
+            including balance) in the list of accounts  If unset, defaults to `true`.
           nullable: true
           type: boolean
         account_product_access:
@@ -25378,11 +26358,11 @@ components:
           description: The transaction amount, in USD (e.g. `102.05`)
           type: number
         user_present:
-          description: returns `true` if the end user is present while initiating
-            the ACH transfer and the endpoint is being called; `false` otherwise (for
-            example, when the ACH transfer is scheduled and the end user is not present,
-            or you call this endpoint after the ACH transfer but before submitting
-            the Nacha file for ACH processing).
+          description: '`true` if the end user is present while initiating the ACH
+            transfer and the endpoint is being called; `false` otherwise (for example,
+            when the ACH transfer is scheduled and the end user is not present, or
+            you call this endpoint after the ACH transfer but before submitting the
+            Nacha file for ACH processing).'
           nullable: true
           type: boolean
         client_user_id:
@@ -25706,10 +26686,16 @@ components:
       title: BankInitiatedReturnRisk
       type: object
     SignalEvaluateCoreAttributes:
-      description: The core attributes object contains additional data that can be
-        used to assess the ACH return risk. For detailed documentation of core attributes
-        available, or to request that core attributes not be returned, contact Sales
-        or your Plaid account manager.
+      description: |-
+        The core attributes object contains additional data that can be used to assess the ACH return risk. Examples of data include:
+
+        `days_since_first_plaid_connection`: The number of days since the first time the Item was connected to an application via Plaid
+        `plaid_connections_count_7d`: The number of times the Item has been connected to applications via Plaid over the past 7 days
+        `plaid_connections_count_30d`: The number of times the Item has been connected to applications via Plaid over the past 30 days
+        `total_plaid_connections_count`: The number of times the Item has been connected to applications via Plaid
+        `is_savings_or_money_market_account`: Indicates whether the ACH transaction funding account is a savings/money market account
+
+        For the full list and detailed documentation of core attributes available, or to request that core attributes not be returned, contact Sales or your Plaid account manager
       example:
         days_since_first_plaid_connection: 1
         nsf_overdraft_transactions_count_90d: 7
@@ -25985,8 +26971,12 @@ components:
       title: SignalDecisionReportResponse
       type: object
     SignalReturnReportRequest:
-      additionalProperties: true
       description: SignalReturnReportRequest defines the request schema for `/signal/return/report`
+      example:
+        secret: secret
+        client_transaction_id: client_transaction_id
+        return_code: return_code
+        client_id: client_id
       properties:
         client_id:
           description: Your Plaid API `client_id`. The `client_id` is required and
@@ -26014,6 +27004,7 @@ components:
       title: SignalReturnReportRequest
       type: object
     SignalReturnReportResponse:
+      additionalProperties: true
       description: SignalReturnReportResponse defines the response schema for `/signal/return/report`
       example:
         request_id: request_id
@@ -26077,6 +27068,382 @@ components:
           webhook_type: ITEM
           webhook_code: NEW_ACCOUNTS_AVAILABLE
           item_id: gAXlMgVEw5uEGoQnnXZ6tn9E7Mn3LBc4PJVKZ
+    WalletGetRequest:
+      description: WalletGetRequest defines the request schema for `/wallet/get`
+      example:
+        wallet_id: wallet_id
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        wallet_id:
+          description: The ID of the e-wallet
+          minLength: 1
+          type: string
+      required:
+      - wallet_id
+      type: object
+    WalletGetResponse:
+      additionalProperties: true
+      description: WalletGetResponse defines the response schema for `/wallet/get`
+      example:
+        wallet_id: wallet_id
+        balance:
+          current: 0.8008281904610115
+          iso_currency_code: iso_currency_code
+        request_id: request_id
+      properties:
+        wallet_id:
+          description: A unique ID identifying the e-wallet
+          type: string
+        balance:
+          $ref: '#/components/schemas/WalletBalance'
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - balance
+      - request_id
+      - wallet_id
+      type: object
+    WalletBalance:
+      additionalProperties: true
+      description: An object representing the e-wallet balance
+      example:
+        current: 0.8008281904610115
+        iso_currency_code: iso_currency_code
+      nullable: true
+      properties:
+        iso_currency_code:
+          description: The ISO-4217 currency code of the balance
+          type: string
+        current:
+          description: The total amount of funds in the account
+          type: number
+      required:
+      - current
+      - iso_currency_code
+      title: WalletBalance
+      type: object
+    WalletTransactionExecuteRequest:
+      description: WalletTransactionExecuteRequest defines the request schema for
+        `/wallet/transaction/execute`
+      example:
+        reference: reference
+        wallet_id: wallet_id
+        amount:
+          iso_currency_code: GBP
+          value: 1.0800828190461012
+        idempotency_key: idempotency_key
+        counterparty:
+          name: name
+          numbers: {}
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        idempotency_key:
+          description: |-
+            A random key provided by the client, per unique wallet transaction. Maximum of 128 characters.
+
+            The API supports idempotency for safely retrying requests without accidentally performing the same operation twice. If a request to execute a wallet transaction fails due to a network connection error, then after a minimum delay of one minute, you can retry the request with the same idempotency key to guarantee that only a single wallet transaction is created. If the request was successfully processed, it will prevent any transaction that uses the same idempotency key, and was received within 24 hours of the first request, from being processed.
+          maxLength: 128
+          minLength: 1
+          title: WalletTransactionIdempotencyKey
+          type: string
+        wallet_id:
+          description: The ID of the e-wallet to debit from
+          minLength: 1
+          type: string
+        counterparty:
+          $ref: '#/components/schemas/WalletTransactionCounterparty'
+        amount:
+          $ref: '#/components/schemas/WalletTransactionAmount'
+        reference:
+          description: A reference for the transaction. This must be an alphanumeric
+            string with at most 18 characters and must not contain any special characters
+            or spaces.
+          maxLength: 18
+          minLength: 1
+          type: string
+      required:
+      - amount
+      - counterparty
+      - idempotency_key
+      - reference
+      - wallet_id
+      type: object
+    WalletTransactionIdempotencyKey:
+      description: |-
+        A random key provided by the client, per unique wallet transaction. Maximum of 128 characters.
+
+        The API supports idempotency for safely retrying requests without accidentally performing the same operation twice. If a request to execute a wallet transaction fails due to a network connection error, then after a minimum delay of one minute, you can retry the request with the same idempotency key to guarantee that only a single wallet transaction is created. If the request was successfully processed, it will prevent any transaction that uses the same idempotency key, and was received within 24 hours of the first request, from being processed.
+      maxLength: 128
+      minLength: 1
+      title: WalletTransactionIdempotencyKey
+      type: string
+    WalletTransactionCounterparty:
+      additionalProperties: true
+      description: An object representing the e-wallet transaction's counterparty
+      example:
+        name: name
+        numbers: {}
+      properties:
+        name:
+          description: The name of the counterparty
+          minLength: 1
+          type: string
+        numbers:
+          $ref: '#/components/schemas/WalletTransactionCounterpartyNumbers'
+      required:
+      - name
+      - numbers
+      title: WalletTransactionCounterparty
+      type: object
+    WalletTransactionCounterpartyNumbers:
+      description: The counterparty's bank account numbers
+      example: {}
+      properties:
+        bacs:
+          $ref: '#/components/schemas/WalletTransactionCounterpartyBACS'
+      required:
+      - bacs
+      title: WalletTransactionCounterpartyNumbers
+      type: object
+    WalletTransactionCounterpartyBACS:
+      allOf:
+      - $ref: '#/components/schemas/RecipientBACS'
+      - additionalProperties: true
+        description: The account number and sort code of the counterparty's account
+        type: object
+    WalletTransactionAmount:
+      additionalProperties: true
+      description: The amount and currency of a transaction
+      example:
+        iso_currency_code: GBP
+        value: 1.0800828190461012
+      properties:
+        iso_currency_code:
+          description: The ISO-4217 currency code of the transaction. Currently, only
+            `"GBP"` is supported.
+          enum:
+          - GBP
+          maxLength: 3
+          minLength: 3
+          type: string
+        value:
+          description: The amount of the transaction. Must contain at most two digits
+            of precision e.g. `1.23`.
+          minimum: 1
+          type: number
+      required:
+      - iso_currency_code
+      - value
+      title: WalletTransactionAmount
+      type: object
+    WalletTransactionExecuteResponse:
+      additionalProperties: true
+      description: WalletTransactionExecuteResponse defines the response schema for
+        `/wallet/transaction/execute`
+      example:
+        transaction_id: transaction_id
+        request_id: request_id
+      properties:
+        transaction_id:
+          description: A unique ID identifying the transaction
+          type: string
+        status:
+          $ref: '#/components/schemas/WalletTransactionStatus'
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      - status
+      - transaction_id
+      type: object
+    WalletTransactionStatus:
+      description: |-
+        The status of the transaction.
+
+        `INITIATED`: This is the initial state of all transactions. It indicates that the transaction has been initiated and is currently being processed.
+
+        `EXECUTED`: The transaction has been successfully executed.
+
+        `FAILED`: The transaction failed to process successfully. This is a terminal status.
+
+        `BLOCKED`: The transaction has been blocked for violating compliance rules. This is a terminal status.
+      enum:
+      - INITIATED
+      - EXECUTED
+      - BLOCKED
+      - FAILED
+      type: string
+    WalletTransactionsListRequest:
+      description: WalletTransactionsListRequest defines the request schema for `/wallet/transactions/list`
+      example:
+        cursor: cursor
+        wallet_id: wallet_id
+        count: 16
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        wallet_id:
+          description: The ID of the e-wallet to fetch transactions from
+          minLength: 1
+          type: string
+        cursor:
+          description: A base64 value representing the latest transaction that has
+            already been requested. Set this to `next_cursor` received from the previous
+            `/wallet/transactions/list` request. If provided, the response will only
+            contain transactions created before that transaction. If omitted, the
+            response will contain transactions starting from the most recent, and
+            in descending order by the `created_at` time.
+          maxLength: 256
+          type: string
+        count:
+          default: 10
+          description: The number of transactions to fetch
+          maximum: 200
+          minimum: 1
+          type: integer
+      required:
+      - wallet_id
+      type: object
+    WalletTransactionsListResponse:
+      additionalProperties: true
+      description: WalletTransactionsListResponse defines the response schema for
+        `/wallet/transactions/list`
+      example:
+        next_cursor: next_cursor
+        transactions:
+        - transaction_id: transaction_id
+          reference: reference
+          amount:
+            iso_currency_code: GBP
+            value: 1.0800828190461012
+          counterparty:
+            name: name
+            numbers: {}
+          created_at: 2000-01-23T04:56:07.000+00:00
+          type: PAYOUT
+        - transaction_id: transaction_id
+          reference: reference
+          amount:
+            iso_currency_code: GBP
+            value: 1.0800828190461012
+          counterparty:
+            name: name
+            numbers: {}
+          created_at: 2000-01-23T04:56:07.000+00:00
+          type: PAYOUT
+        request_id: request_id
+      properties:
+        transactions:
+          description: An array of transactions of an e-wallet, associated with the
+            given `wallet_id`
+          items:
+            $ref: '#/components/schemas/WalletTransaction'
+          type: array
+        next_cursor:
+          description: Cursor used for fetching transactions created before the latest
+            transaction provided in this response
+          type: string
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      - transactions
+      type: object
+    WalletTransaction:
+      additionalProperties: true
+      description: The transaction details
+      example:
+        transaction_id: transaction_id
+        reference: reference
+        amount:
+          iso_currency_code: GBP
+          value: 1.0800828190461012
+        counterparty:
+          name: name
+          numbers: {}
+        created_at: 2000-01-23T04:56:07.000+00:00
+        type: PAYOUT
+      properties:
+        transaction_id:
+          description: A unique ID identifying the transaction
+          type: string
+        reference:
+          description: A reference for the transaction
+          type: string
+        type:
+          description: The type of of the transaction. Currently, only `"PAYOUT"`
+            is supported.
+          enum:
+          - PAYOUT
+          type: string
+        amount:
+          $ref: '#/components/schemas/WalletTransactionAmount'
+        counterparty:
+          $ref: '#/components/schemas/WalletTransactionCounterparty'
+        status:
+          $ref: '#/components/schemas/WalletTransactionStatus'
+        created_at:
+          description: Timestamp when the transaction was created, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            format.
+          format: date-time
+          type: string
+      required:
+      - amount
+      - counterparty
+      - created_at
+      - reference
+      - status
+      - transaction_id
+      - type
+      title: WalletTransaction
+      type: object
     PaymentInitiationRecipientGetResponse_allOf:
       properties:
         request_id:
@@ -26103,10 +27470,6 @@ components:
           - in store
           - other
           type: string
-        merchant_name:
-          description: The merchant name, as extracted by Plaid from the `name` field.
-          nullable: true
-          type: string
         authorized_date:
           description: The date that the transaction was authorized. Dates are returned
             in an [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format ( `YYYY-MM-DD`
@@ -26130,11 +27493,6 @@ components:
           format: date-time
           nullable: true
           type: string
-        check_number:
-          description: The check number of the transaction. This field is only populated
-            for check transactions.
-          nullable: true
-          type: string
         transaction_code:
           $ref: '#/components/schemas/TransactionCode'
         personal_finance_category:
@@ -26149,10 +27507,8 @@ components:
       - authorized_datetime
       - category
       - category_id
-      - check_number
       - datetime
       - location
-      - merchant_name
       - name
       - payment_channel
       - payment_meta
@@ -26204,7 +27560,10 @@ components:
           description: Data returned by the financial institution about the account
             owner or owners. Only returned by Identity or Assets endpoints. Multiple
             owners on a single account will be represented in the same `owner` object,
-            not in multiple owner objects within the array.
+            not in multiple owner objects within the array. In API versions 2018-05-22
+            and earlier, the `owners` object is not returned, and instead identity
+            information is returned in the top level `identity` object. For more details,
+            see [Plaid API versioning](https://plaid.com/docs/api/versioning/#version-2019-05-29)
           items:
             $ref: '#/components/schemas/Owner'
           type: array
@@ -26230,7 +27589,10 @@ components:
           description: Data returned by the financial institution about the account
             owner or owners. Only returned by Identity or Assets endpoints. Multiple
             owners on a single account will be represented in the same `owner` object,
-            not in multiple owner objects within the array.
+            not in multiple owner objects within the array. In API versions 2018-05-22
+            and earlier, the `owners` object is not returned, and instead identity
+            information is returned in the top level `identity` object. For more details,
+            see [Plaid API versioning](https://plaid.com/docs/api/versioning/#version-2019-05-29)
           items:
             $ref: '#/components/schemas/Owner'
           type: array
