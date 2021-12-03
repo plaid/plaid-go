@@ -1,4 +1,4 @@
-module github.com/plaid/plaid-go
+module github.com/visor-tax/plaid-go
 
 go 1.13
 
