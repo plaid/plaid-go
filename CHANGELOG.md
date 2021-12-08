@@ -1,5 +1,8 @@
 This library is generated from an OpenAPI schema (OAS). See full changelog [here](https://github.com/plaid/plaid-openapi/blob/master/CHANGELOG.md) for schema changes.
 
+# 1.9.0
+- Updating to OAS 2020-09-14_1.58.1
+
 # 1.8.0
 - Updating to OAS 2020-09-14_1.54.0
 
