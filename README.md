@@ -4,6 +4,8 @@ The official Go client library for the [Plaid API](https://plaid.com/docs). The 
 
 The latest version of the library supports only the latest version of the Plaid API (currently 2020-09-14). 
 
+For more information about the Plaid API, including reference documentation, see the [Plaid API docs](https://www.plaid.com/docs/api).
+
 ## Table of Contents
 
 - [plaid-go](#plaid-go)
@@ -12,8 +14,10 @@ The latest version of the library supports only the latest version of the Plaid 
     + [Calling Endpoints](#calling-endpoints)
     + [Errors](#errors)
   * [Authentication](#authentication)
+  * [Examples](#examples)
   * [Contributing](#contributing)
   * [License](#license)
+
 
 ## Install
 
@@ -24,11 +28,6 @@ Edit your go.mod to include `github.com/plaid/plaid-go {VERSION}`
 ```console
 $ go get github.com/plaid/plaid-go@{VERSION}
 ```
-
-## Documentation
-
-The module supports all Plaid API endpoints.  For complete information about
-the API, head to the [docs](https://plaid.com/docs/api).
 
 ## Getting Started
 
@@ -46,6 +45,7 @@ client := plaid.NewAPIClient(configuration)
 
 Each endpoint will require an appropriate request model, and will return either the response model or an error.
 
+
 ### Errors
 
 In the case one of the endpoints you call returns an error, you can get the Plaid error object with the following:
@@ -59,6 +59,129 @@ fmt.Println(plaidErr.ErrorMessage)
 ## Authentication
 
 First, you get your `client_id` and `secret` from your dashboard account. Authentication is handled by setting the `client_id` and `secret` on the configuration object.
+
+## Examples
+
+The sections below show examples for some common API calls in Go. For more examples, see the [API reference docs](https://plaid.com/docs/api/).
+
+#### Get Link Token to initialize Link
+
+```go
+user := plaid.LinkTokenCreateRequestUser{
+    ClientUserId: "USER_ID_FROM_YOUR_DB",
+}
+request := plaid.NewLinkTokenCreateRequest(
+  "Plaid Test",
+  "en",
+  []plaid.CountryCode{plaid.COUNTRYCODE_US},
+  user,
+)
+request.SetProducts([]plaid.Products{plaid.PRODUCTS_AUTH})
+request.SetLinkCustomizationName("default")
+request.SetWebhook("https://webhook-uri.com")
+request.SetRedirectUri("https://domainname.com/oauth-page.html")
+request.SetAccountFilters(plaid.LinkTokenAccountFilters{
+  Depository: &plaid.DepositoryFilter{
+    AccountSubtypes: []plaid.AccountSubtype{plaid.ACCOUNTSUBTYPE_CHECKING, plaid.ACCOUNTSUBTYPE_SAVINGS},
+  },
+})
+resp, _, err := testClient.PlaidApi.LinkTokenCreate(ctx).LinkTokenCreateRequest(*request).Execute()
+
+linkToken := resp.GetLinkToken()
+```
+
+#### Create an Item using Link
+
+Exchange a `public_token` from Plaid Link for a Plaid access token:
+```go
+exchangePublicTokenReq := plaid.NewItemPublicTokenExchangeRequest(sandboxPublicTokenResp.GetPublicToken())
+exchangePublicTokenResp, _, err := client.PlaidApi.ItemPublicTokenExchange(ctx).ItemPublicTokenExchangeRequest(
+  *exchangePublicTokenReq,
+).Execute()
+accessToken := exchangePublicTokenResp.GetAccessToken()
+```
+
+#### Retrieve transactions
+
+```go
+const iso8601TimeFormat = "2006-01-02"
+startDate := time.Now().Add(-365 * 24 * time.Hour).Format(iso8601TimeFormat)
+endDate := time.Now().Format(iso8601TimeFormat)
+
+request := plaid.NewTransactionsGetRequest(
+  accessToken,
+  startDate,
+  endDate,
+)
+
+options := plaid.TransactionsGetRequestOptions{
+  Count:  plaid.PtrInt32(100),
+  Offset: plaid.PtrInt32(0),
+}
+
+request.SetOptions(options)
+
+transactionsResp, _, err := testClient.PlaidApi.TransactionsGet(ctx).TransactionsGetRequest(*request).Execute()
+```
+
+#### Retrieve real-time balance data
+
+```go
+balancesGetReq := plaid.NewAccountsBalanceGetRequest(accessToken)
+
+balancesGetResp, _, err = testClient.PlaidApi.AccountsBalanceGet(ctx).AccountsBalanceGetRequest(
+  *balancesGetReq,
+).Execute()
+```
+
+#### Create a Dwolla bank account token
+
+Exchange a Plaid Link `public_token` for an API `access_token`. Then exchange that `access_token` and the Plaid Link `account_id` (received along with the `public_token`) for a Dwolla processor token:
+
+```go
+import (
+    "context"
+    "os"
+
+    plaid "github.com/plaid/plaid-go"
+)
+
+configuration := plaid.NewConfiguration()
+configuration.AddDefaultHeader("PLAID-CLIENT-ID", os.Getenv("CLIENT_ID"))
+configuration.AddDefaultHeader("PLAID-SECRET", os.Getenv("SECRET"))
+configuration.UseEnvironment(plaid.Sandbox)
+
+client := plaid.NewAPIClient(configuration)
+ctx := context.Background()
+
+// If not testing in Sandbox, remove these four lines and instead use a publicToken obtained from Link
+sandboxInstitution := "ins_109508"
+testProducts := []string{"auth"}
+sandboxPublicTokenResp, _, err := client.PlaidApi.SandboxPublicTokenCreate(ctx).SandboxPublicTokenCreateRequest(
+  *plaid.NewSandboxPublicTokenCreateRequest(
+    sandboxInstitution,
+    testProducts,
+  ),
+).Execute()
+publicToken := sandboxPublicTokenResp.GetPublicToken()
+
+// Exchange the publicToken for an accessToken
+exchangePublicTokenResp, _, err := client.PlaidApi.ItemPublicTokenExchange(ctx).ItemPublicTokenExchangeRequest(
+  *plaid.NewItemPublicTokenExchangeRequest(publicToken),
+).Execute()
+accessToken := exchangePublicTokenResp.GetAccessToken()
+
+// Get Accounts
+accountsGetResp, _, err := client.PlaidApi.AccountsGet(ctx).AccountsGetRequest(
+  *plaid.NewAccountsGetRequest(accessToken),
+).Execute()
+accountID := accountsGetResp.GetAccounts()[0].GetAccountId()
+
+// Create processor token
+processorTokenCreateResp, _, err := client.PlaidApi.ProcessorTokenCreate(ctx).ProcessorTokenCreateRequest(
+  *plaid.NewProcessorTokenCreateRequest(accessToken, accountID, "dwolla"),
+).Execute()
+```
 
 ## Contributing
 

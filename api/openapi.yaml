@@ -7,7 +7,7 @@ info:
     details.
   termsOfService: https://plaid.com/legal/
   title: The Plaid API
-  version: 2020-09-14_1.58.1
+  version: 2020-09-14_1.61.0
 servers:
 - description: Production
   url: https://production.plaid.com
@@ -645,13 +645,6 @@ paths:
                             success: 0.91
                             error_plaid: 0.01
                             error_institution: 0.08
-                        balance:
-                          status: HEALTHY
-                          last_status_change: 2019-02-15T15:53:00Z
-                          breakdown:
-                            success: 0.89
-                            error_plaid: 0.02
-                            error_institution: 0.09
                         identity:
                           status: DEGRADED
                           last_status_change: 2019-02-15T15:50:00Z
@@ -747,9 +740,11 @@ paths:
   /accounts/get:
     post:
       description: |-
-        The `/accounts/get`  endpoint can be used to retrieve information for any linked Item. Note that some information is nullable. Plaid will only return active bank accounts, i.e. accounts that are not closed and are capable of carrying a balance.
+        The `/accounts/get` endpoint can be used to retrieve a list of accounts associated with any linked Item. Plaid will only return active bank accounts — that is, accounts that are not closed and are capable of carrying a balance.
 
-        This endpoint retrieves cached information, rather than extracting fresh information from the institution. As a result, balances returned may not be up-to-date; for realtime balance information, use `/accounts/balance/get` instead.
+        This endpoint only returns accounts that were permissioned by the user when they initially created the Item. If a user creates a new account after the initial link, you can capture this event through the [`NEW_ACCOUNTS_AVAILABLE`](https://plaid.com/docs/api/webhooks/#item-new_accounts_available) webhook and then use Link's [update mode](https://plaid.com/docs/link/update-mode/) to request that the user share this new account with you.
+
+        This endpoint retrieves cached information, rather than extracting fresh information from the institution. As a result, balances returned may not be up-to-date; for realtime balance information, use `/accounts/balance/get` instead. Note that some information is nullable.
       externalDocs:
         url: /api/accounts/#accountsget
       operationId: accountsGet
@@ -3555,6 +3550,7 @@ paths:
                             country: US
                         amount: "12.34"
                         network: ach
+                        iso_currency_code: USD
                         origination_account_id: 0123-4567-8901-2345-67890123
                     request_id: saKrIBuEB9qJZno
               schema:
@@ -3614,6 +3610,7 @@ paths:
                         key1: value1
                         key2: value2
                       origination_account_id: 0123-4567-8901-2345-67890123
+                      iso_currency_code: USD
                     request_id: saKrIBuEB9qJZno
               schema:
                 $ref: '#/components/schemas/TransferCreateResponse'
@@ -4071,8 +4068,9 @@ paths:
                   value:
                     sweep:
                       id: d5394a4d-0b04-4a02-9f4a-7ca5c0f52f9d
-                      created_at: 2020-08-06T17:27:15Z
+                      created: 2020-08-06T17:27:15Z
                       amount: "12.34"
+                      iso_currency_code: USD
                     request_id: saKrIBuEB9qJZno
               schema:
                 $ref: '#/components/schemas/TransferSweepGetResponse'
@@ -4110,13 +4108,9 @@ paths:
                   value:
                     sweep:
                       id: d5394a4d-0b04-4a02-9f4a-7ca5c0f52f9d
-                      transfer_id: 460cbe92-2dcc-8eae-5ad6-b37d0ec90fd9
                       created_at: 2020-08-06T17:27:15Z
                       amount: "12.34"
                       iso_currency_code: USD
-                      sweep_account:
-                        account_number: "123456789"
-                        routing_number: "111111111"
                     request_id: saKrIBuEB9qJZno
               schema:
                 $ref: '#/components/schemas/BankTransferSweepGetResponse'
@@ -4154,8 +4148,9 @@ paths:
                   value:
                     sweeps:
                     - id: d5394a4d-0b04-4a02-9f4a-7ca5c0f52f9d
-                      created_at: 2020-08-06T17:27:15Z
+                      created: 2020-08-06T17:27:15Z
                       amount: -12.34
+                      iso_currency_code: USD
                     request_id: saKrIBuEB9qJZno
               schema:
                 $ref: '#/components/schemas/TransferSweepListResponse'
@@ -4193,13 +4188,9 @@ paths:
                   value:
                     sweeps:
                     - id: d5394a4d-0b04-4a02-9f4a-7ca5c0f52f9d
-                      transfer_id: 460cbe92-2dcc-8eae-5ad6-b37d0ec90fd9
                       created_at: 2020-08-06T17:27:15Z
                       amount: "12.34"
                       iso_currency_code: USD
-                      sweep_account:
-                        account_number: "123456789"
-                        routing_number: "111111111"
                     request_id: saKrIBuEB9qJZno
               schema:
                 $ref: '#/components/schemas/BankTransferSweepListResponse'
@@ -4318,6 +4309,7 @@ paths:
                       account_id: 6qL6lWoQkAfNE3mB8Kk5tAnvpX81qefrvvl7B
                       ach_class: ppd
                       amount: "12.34"
+                      iso_currency_code: USD
                       created: 2020-08-06T17:27:15Z
                       description: Desc
                       id: 460cbe92-2dcc-8eae-5ad6-b37d0ec90fd9
@@ -4374,6 +4366,7 @@ paths:
                       account_id: 6qL6lWoQkAfNE3mB8Kk5tAnvpX81qefrvvl7B
                       ach_class: ppd
                       amount: "12.34"
+                      iso_currency_code: USD
                       authorization_decision: APPROVED
                       authorization_decision_rationale: null
                       created: 2020-08-06T17:27:15Z
@@ -4448,8 +4441,11 @@ paths:
       - plaid
   /sandbox/transfer/sweep/simulate:
     post:
-      description: Use the `/sandbox/transfer/sweep/simulate` endpoint to create a
-        sweep and associated events in the Sandbox environment.
+      description: |-
+        Use the `/sandbox/transfer/sweep/simulate` endpoint to create a sweep and associated events in the Sandbox environment.
+
+        - All `posted` or `pending` Transfers with sweep_status `unswept` will become `swept`
+        - All `reversed` Transfers with sweep_status `swept` will become `reverse_swept`
       externalDocs:
         url: /transfer/reference#sandboxtransfersweepsimulate
       operationId: sandboxTransferSweepSimulate
@@ -4468,8 +4464,9 @@ paths:
                   value:
                     sweep:
                       id: d5394a4d-0b04-4a02-9f4a-7ca5c0f52f9d
-                      created_at: 2020-08-06T17:27:15Z
+                      created: 2020-08-06T17:27:15Z
                       amount: "12.34"
+                      iso_currency_code: USD
                     request_id: mdqfuVxeoza6mhu
               schema:
                 $ref: '#/components/schemas/SandboxTransferSweepSimulateResponse'
@@ -4480,7 +4477,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Error response
-      summary: Simulate creating a sweep for a set of transfers
+      summary: Simulate creating a sweep
       tags:
       - plaid
   /sandbox/transfer/simulate:
@@ -4841,8 +4838,8 @@ paths:
                         start_date: 2020-12-01
                         pay_frequency: PAY_FREQUENCY_BIWEEKLY
                       verification:
-                        verification_status: PAYSTUB_VERIFICATION_VERIFIED
-                        verification_attributes: null
+                        verification_status: PAYSTUB_VERIFICATION_STATUS_VERIFIED
+                        verification_attributes: []
                     request_id: 2pxQ59buGdsHRef
               schema:
                 $ref: '#/components/schemas/IncomeVerificationPaystubsGetResponse'
@@ -4899,6 +4896,11 @@ paths:
         "200":
           content:
             application/json:
+              examples:
+                example-1:
+                  value:
+                    request_id: nTkbCH41HYmpbm5
+                    verification_refresh_status: VERIFICATION_REFRESH_STATUS_USER_PRESENCE_REQUIRED
               schema:
                 $ref: '#/components/schemas/IncomeVerificationRefreshResponse'
           description: success
@@ -6334,14 +6336,6 @@ components:
                 success: 0.8008281904610115
                 error_institution: 1.4658129805029452
               status: HEALTHY
-            balance:
-              last_status_change: 2000-01-23T04:56:07.000+00:00
-              breakdown:
-                error_plaid: 6.027456183070403
-                refresh_interval: NORMAL
-                success: 0.8008281904610115
-                error_institution: 1.4658129805029452
-              status: HEALTHY
             liabilities_updates:
               last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
@@ -6452,14 +6446,6 @@ components:
           - null
           status:
             investments_updates:
-              last_status_change: 2000-01-23T04:56:07.000+00:00
-              breakdown:
-                error_plaid: 6.027456183070403
-                refresh_interval: NORMAL
-                success: 0.8008281904610115
-                error_institution: 1.4658129805029452
-              status: HEALTHY
-            balance:
               last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
@@ -6713,14 +6699,6 @@ components:
                 success: 0.8008281904610115
                 error_institution: 1.4658129805029452
               status: HEALTHY
-            balance:
-              last_status_change: 2000-01-23T04:56:07.000+00:00
-              breakdown:
-                error_plaid: 6.027456183070403
-                refresh_interval: NORMAL
-                success: 0.8008281904610115
-                error_institution: 1.4658129805029452
-              status: HEALTHY
             liabilities_updates:
               last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
@@ -6831,14 +6809,6 @@ components:
           - null
           status:
             investments_updates:
-              last_status_change: 2000-01-23T04:56:07.000+00:00
-              breakdown:
-                error_plaid: 6.027456183070403
-                refresh_interval: NORMAL
-                success: 0.8008281904610115
-                error_institution: 1.4658129805029452
-              status: HEALTHY
-            balance:
               last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
@@ -7051,14 +7021,6 @@ components:
           - null
           status:
             investments_updates:
-              last_status_change: 2000-01-23T04:56:07.000+00:00
-              breakdown:
-                error_plaid: 6.027456183070403
-                refresh_interval: NORMAL
-                success: 0.8008281904610115
-                error_institution: 1.4658129805029452
-              status: HEALTHY
-            balance:
               last_status_change: 2000-01-23T04:56:07.000+00:00
               breakdown:
                 error_plaid: 6.027456183070403
@@ -8147,10 +8109,10 @@ components:
           type: string
         webhook:
           description: The new webhook URL to associate with the Item.
+          nullable: true
           type: string
       required:
       - access_token
-      - webhook
       type: object
     ItemWebhookUpdateResponse:
       additionalProperties: true
@@ -8920,6 +8882,7 @@ components:
           request_refund_details: true
           wallet_id: wallet_id
           iban: iban
+          scheme_automatic_downgrade: true
         secret: secret
         client_id: client_id
         recipient_id: recipient_id
@@ -9389,6 +9352,10 @@ components:
             Plaid to reconcile the settlement of funds for Payment Initiation requests.
           nullable: true
           type: string
+        scheme:
+          $ref: '#/components/schemas/PaymentScheme'
+        adjusted_scheme:
+          $ref: '#/components/schemas/PaymentScheme'
       required:
       - amount
       - bacs
@@ -9991,34 +9958,10 @@ components:
         - warning_type: warning_type
           cause:
             item_id: item_id
-            error:
-              error_message: error_message
-              suggested_action: suggested_action
-              error_type: INVALID_REQUEST
-              causes:
-              - ""
-              - ""
-              display_message: display_message
-              error_code: error_code
-              documentation_url: documentation_url
-              request_id: request_id
-              status: 0.8008281904610115
           warning_code: OWNERS_UNAVAILABLE
         - warning_type: warning_type
           cause:
             item_id: item_id
-            error:
-              error_message: error_message
-              suggested_action: suggested_action
-              error_type: INVALID_REQUEST
-              causes:
-              - ""
-              - ""
-              display_message: display_message
-              error_code: error_code
-              documentation_url: documentation_url
-              request_id: request_id
-              status: 0.8008281904610115
           warning_code: OWNERS_UNAVAILABLE
         report:
           date_generated: 2000-01-23T04:56:07.000+00:00
@@ -11723,6 +11666,13 @@ components:
       - update_type
       - webhook
       type: object
+    PlaidError:
+      allOf:
+      - $ref: '#/components/schemas/Error'
+      - additionalProperties: true
+        description: Similar to Error, but renamed to avoid collisions in languages
+          where "Error" is an existing type.
+        type: object
     Error:
       additionalProperties: true
       description: We use standard HTTP response codes for success and failure notifications,
@@ -12714,14 +12664,6 @@ components:
               success: 0.8008281904610115
               error_institution: 1.4658129805029452
             status: HEALTHY
-          balance:
-            last_status_change: 2000-01-23T04:56:07.000+00:00
-            breakdown:
-              error_plaid: 6.027456183070403
-              refresh_interval: NORMAL
-              success: 0.8008281904610115
-              error_institution: 1.4658129805029452
-            status: HEALTHY
           liabilities_updates:
             last_status_change: 2000-01-23T04:56:07.000+00:00
             breakdown:
@@ -12840,7 +12782,6 @@ components:
             list of routing numbers for an institution.
           items:
             type: string
-          nullable: true
           type: array
         oauth:
           description: Indicates that the institution has an OAuth login flow. This
@@ -12869,14 +12810,6 @@ components:
         Institution status is accessible in the Dashboard and via the API using the `/institutions/get_by_id` endpoint with the `include_status` option set to true. Note that institution status is not available in the Sandbox environment.
       example:
         investments_updates:
-          last_status_change: 2000-01-23T04:56:07.000+00:00
-          breakdown:
-            error_plaid: 6.027456183070403
-            refresh_interval: NORMAL
-            success: 0.8008281904610115
-            error_institution: 1.4658129805029452
-          status: HEALTHY
-        balance:
           last_status_change: 2000-01-23T04:56:07.000+00:00
           breakdown:
             error_plaid: 6.027456183070403
@@ -12968,8 +12901,6 @@ components:
           $ref: '#/components/schemas/ProductStatus'
         auth:
           $ref: '#/components/schemas/ProductStatus'
-        balance:
-          $ref: '#/components/schemas/ProductStatus'
         identity:
           $ref: '#/components/schemas/ProductStatus'
         investments_updates:
@@ -12988,7 +12919,6 @@ components:
           type: array
       required:
       - auth
-      - balance
       - identity
       - investments_updates
       - item_logins
@@ -13020,13 +12950,6 @@ components:
                 success: 0.91
                 error_plaid: 0.01
                 error_institution: 0.08
-            balance:
-              status: HEALTHY
-              last_status_change: 2019-02-15T15:53:00Z
-              breakdown:
-                success: 0.89
-                error_plaid: 0.02
-                error_institution: 0.09
             identity:
               status: DEGRADED
               last_status_change: 2019-02-15T15:50:00Z
@@ -13270,7 +13193,7 @@ components:
           description: '`TRANSACTIONS_REMOVED`'
           type: string
         error:
-          $ref: '#/components/schemas/Error'
+          $ref: '#/components/schemas/PlaidError'
         removed_transactions:
           description: An array of `transaction_ids` corresponding to the removed
             transactions
@@ -13309,7 +13232,7 @@ components:
           description: '`DEFAULT_UPDATE`'
           type: string
         error:
-          $ref: '#/components/schemas/Error'
+          $ref: '#/components/schemas/PlaidError'
         new_transactions:
           description: The number of new transactions detected since the last time
             this webhook was fired.
@@ -13347,7 +13270,7 @@ components:
           description: '`HISTORICAL_UPDATE`'
           type: string
         error:
-          $ref: '#/components/schemas/Error'
+          $ref: '#/components/schemas/PlaidError'
         new_transactions:
           description: The number of new, unfetched transactions available
           type: number
@@ -14066,6 +13989,7 @@ components:
             8601](https://wikipedia.org/wiki/ISO_8601) format (YYYY-MM-DD). Availability
             for this field is limited.
           format: date
+          nullable: true
           type: string
         last_statement_issue_date:
           description: The date of the last statement. Dates are returned in an [ISO
@@ -14708,6 +14632,22 @@ components:
       minLength: 1
       title: PaymentScheduleInterval
       type: string
+    PaymentScheme:
+      description: |-
+        Payment scheme. If not specified - the default in the region will be used (e.g. `SEPA_CREDIT_TRANSFER` for EU). Using unsupported values will result in a failed payment.
+
+        `FASTER_PAYMENTS`: Enables payments to move quickly between UK bank accounts. Default value in the UK.
+
+        `SEPA_CREDIT_TRANSFER`: The standard payment to a beneficiary within the SEPA area.
+
+        `SEPA_CREDIT_TRANSFER_INSTANT`: Instant payment within the SEPA area. May involve additional fees and may not be available at some banks.
+      enum:
+      - null
+      - FASTER_PAYMENTS
+      - SEPA_CREDIT_TRANSFER
+      - SEPA_CREDIT_TRANSFER_INSTANT
+      nullable: true
+      type: string
     ExternalPaymentOptions:
       additionalProperties: true
       description: Additional payment options
@@ -14715,6 +14655,7 @@ components:
         request_refund_details: true
         wallet_id: wallet_id
         iban: iban
+        scheme_automatic_downgrade: true
       nullable: true
       properties:
         request_refund_details:
@@ -14741,6 +14682,14 @@ components:
           minLength: 1
           nullable: true
           type: string
+        scheme:
+          $ref: '#/components/schemas/PaymentScheme'
+        scheme_automatic_downgrade:
+          description: When `true`, Plaid will attempt to automatically downgrade
+            payment `scheme` (e.g. `SEPA_CREDIT_TRANSFER_INSTANT` to `SEPA_CREDIT_TRANSFER`)
+            when the requested scheme is not supported by the bank.
+          nullable: true
+          type: boolean
       title: PaymentOptions
       type: object
     ExternalPaymentRefundDetails:
@@ -15547,7 +15496,7 @@ components:
           description: The new webhook URL
           type: string
         error:
-          $ref: '#/components/schemas/Error'
+          $ref: '#/components/schemas/PlaidError'
       required:
       - item_id
       - new_webhook_url
@@ -15614,7 +15563,7 @@ components:
           title: ItemId
           type: string
         error:
-          $ref: '#/components/schemas/Error'
+          $ref: '#/components/schemas/PlaidError'
       required:
       - error
       - item_id
@@ -15651,7 +15600,7 @@ components:
           title: ItemId
           type: string
         error:
-          $ref: '#/components/schemas/Error'
+          $ref: '#/components/schemas/PlaidError'
       required:
       - item_id
       - webhook_code
@@ -15752,7 +15701,7 @@ components:
           title: ItemId
           type: string
         error:
-          $ref: '#/components/schemas/Error'
+          $ref: '#/components/schemas/PlaidError'
         new_investments_transactions:
           description: The number of new transactions reported since the last time
             this webhook was fired.
@@ -15794,7 +15743,7 @@ components:
           title: ItemId
           type: string
         error:
-          $ref: '#/components/schemas/Error'
+          $ref: '#/components/schemas/PlaidError'
         new_holdings:
           description: The number of new holdings reported since the last time this
             webhook was fired.
@@ -15835,7 +15784,7 @@ components:
           title: ItemId
           type: string
         error:
-          $ref: '#/components/schemas/Error'
+          $ref: '#/components/schemas/PlaidError'
         account_ids_with_new_liabilities:
           description: An array of `account_id`'s for accounts that contain new liabilities.
           items:
@@ -15911,7 +15860,7 @@ components:
           description: '`ERROR`'
           type: string
         error:
-          $ref: '#/components/schemas/Error'
+          $ref: '#/components/schemas/PlaidError'
         asset_report_id:
           description: The ID associated with the Asset Report.
           type: string
@@ -15942,18 +15891,6 @@ components:
         an error in one of the Items.
       example:
         item_id: item_id
-        error:
-          error_message: error_message
-          suggested_action: suggested_action
-          error_type: INVALID_REQUEST
-          causes:
-          - ""
-          - ""
-          display_message: display_message
-          error_code: error_code
-          documentation_url: documentation_url
-          request_id: request_id
-          status: 0.8008281904610115
       properties:
         item_id:
           description: The `item_id` of the Item associated with this webhook, warning,
@@ -15961,7 +15898,7 @@ components:
           title: ItemId
           type: string
         error:
-          $ref: '#/components/schemas/Error'
+          $ref: '#/components/schemas/PlaidError'
       required:
       - error
       - item_id
@@ -15976,18 +15913,6 @@ components:
         warning_type: warning_type
         cause:
           item_id: item_id
-          error:
-            error_message: error_message
-            suggested_action: suggested_action
-            error_type: INVALID_REQUEST
-            causes:
-            - ""
-            - ""
-            display_message: display_message
-            error_code: error_code
-            documentation_url: documentation_url
-            request_id: request_id
-            status: 0.8008281904610115
         warning_code: OWNERS_UNAVAILABLE
       properties:
         warning_type:
@@ -17033,6 +16958,7 @@ components:
           type: string
         client_report_id:
           description: An identifier you determine and submit for the Asset Report.
+          nullable: true
           type: string
         date_generated:
           description: The date and time when the Asset Report was created, in [ISO
@@ -17202,7 +17128,7 @@ components:
           format: date-time
           type: string
         error:
-          $ref: '#/components/schemas/Error'
+          $ref: '#/components/schemas/PlaidError'
       required:
       - adjusted_start_date
       - new_payment_status
@@ -18064,7 +17990,7 @@ components:
           title: ItemId
           type: string
         error:
-          $ref: '#/components/schemas/Error'
+          $ref: '#/components/schemas/PlaidError'
       required:
       - item_id
       - webhook_code
@@ -18380,6 +18306,7 @@ components:
             description: description
           cancellable: true
           account_id: account_id
+          iso_currency_code: iso_currency_code
           origination_account_id: origination_account_id
           id: id
           user:
@@ -18475,6 +18402,7 @@ components:
           description: description
         cancellable: true
         account_id: account_id
+        iso_currency_code: iso_currency_code
         origination_account_id: origination_account_id
         id: id
         user:
@@ -18543,6 +18471,9 @@ components:
           description: Plaid’s unique identifier for the origination account that
             was used for this transfer.
           type: string
+        iso_currency_code:
+          description: The currency of the transfer amount, e.g. "USD"
+          type: string
       required:
       - account_id
       - ach_class
@@ -18552,6 +18483,7 @@ components:
       - description
       - failure_reason
       - id
+      - iso_currency_code
       - metadata
       - network
       - origination_account_id
@@ -18984,6 +18916,7 @@ components:
       example:
         amount: amount
         account_id: account_id
+        iso_currency_code: iso_currency_code
         origination_account_id: origination_account_id
         user:
           email_address: email_address
@@ -19019,10 +18952,14 @@ components:
           description: Plaid's unique identifier for the origination account that
             was used for this transfer.
           type: string
+        iso_currency_code:
+          description: The currency of the transfer amount. The default value is "USD".
+          type: string
       required:
       - account_id
       - ach_class
       - amount
+      - iso_currency_code
       - network
       - origination_account_id
       - type
@@ -19190,6 +19127,7 @@ components:
         access_token: access_token
         amount: amount
         account_id: account_id
+        iso_currency_code: iso_currency_code
         origination_account_id: origination_account_id
         secret: secret
         user:
@@ -19245,6 +19183,9 @@ components:
           description: Plaid's unique identifier for the origination account for this
             authorization. If not specified, the default account will be used.
           type: string
+        iso_currency_code:
+          description: The currency of the transfer amount. The default value is "USD".
+          type: string
       required:
       - access_token
       - account_id
@@ -19267,6 +19208,7 @@ components:
         client_id: client_id
         access_token: access_token
         account_id: account_id
+        iso_currency_code: iso_currency_code
         idempotency_key: idempotency_key
         origination_account_id: origination_account_id
         user:
@@ -19345,8 +19287,11 @@ components:
         origination_account_id:
           description: Plaid’s unique identifier for the origination account for this
             transfer. If you have more than one origination account, this value must
-            be specified.
+            be specified. Otherwise, this field should be left blank.
           nullable: true
+          type: string
+        iso_currency_code:
+          description: The currency of the transfer amount. The default value is "USD".
           type: string
       required:
       - access_token
@@ -19451,7 +19396,7 @@ components:
         origination_account_id:
           description: Plaid’s unique identifier for the origination account for this
             transfer. If you have more than one origination account, this value must
-            be specified.
+            be specified. Otherwise, this field should be left blank.
           nullable: true
           type: string
       required:
@@ -19474,6 +19419,7 @@ components:
           proposed_transfer:
             amount: amount
             account_id: account_id
+            iso_currency_code: iso_currency_code
             origination_account_id: origination_account_id
             user:
               email_address: email_address
@@ -19487,7 +19433,7 @@ components:
               legal_name: legal_name
             network: network
           decision: approved
-          created: created
+          created: 2000-01-23T04:56:07.000+00:00
           decision_rationale:
             code: NSF
             description: description
@@ -19515,6 +19461,7 @@ components:
         proposed_transfer:
           amount: amount
           account_id: account_id
+          iso_currency_code: iso_currency_code
           origination_account_id: origination_account_id
           user:
             email_address: email_address
@@ -19528,7 +19475,7 @@ components:
             legal_name: legal_name
           network: network
         decision: approved
-        created: created
+        created: 2000-01-23T04:56:07.000+00:00
         decision_rationale:
           code: NSF
           description: description
@@ -19540,7 +19487,8 @@ components:
           type: string
         created:
           description: The datetime representing when the authorization was created,
-            in the format "2006-01-02T15:04:05Z".
+            in the format `2006-01-02T15:04:05Z`.
+          format: date-time
           type: string
         decision:
           description: "\nA decision regarding the proposed transfer.\n\n`approved`\
@@ -19584,6 +19532,7 @@ components:
             description: description
           cancellable: true
           account_id: account_id
+          iso_currency_code: iso_currency_code
           origination_account_id: origination_account_id
           id: id
           user:
@@ -19770,6 +19719,7 @@ components:
             description: description
           cancellable: true
           account_id: account_id
+          iso_currency_code: iso_currency_code
           origination_account_id: origination_account_id
           id: id
           user:
@@ -19792,6 +19742,7 @@ components:
             description: description
           cancellable: true
           account_id: account_id
+          iso_currency_code: iso_currency_code
           origination_account_id: origination_account_id
           id: id
           user:
@@ -20615,10 +20566,9 @@ components:
       title: TransferEventSyncResponse
       type: object
     BankTransferSweepGetRequest:
-      description: BankTransferSweepGetRequest defines the request schema for `/bank_transfer/sweep/get`
+      description: Defines the request schema for `/bank_transfer/sweep/get`
       example:
         sweep_id: sweep_id
-        origination_account_id: origination_account_id
         secret: secret
         client_id: client_id
       properties:
@@ -20635,11 +20585,6 @@ components:
           type: string
         sweep_id:
           description: Identifier of the sweep.
-          type: string
-        origination_account_id:
-          description: If multiple origination accounts are available, `origination_account_id`
-            must be used to specify the account that the sweep belongs to.
-          nullable: true
           type: string
       required:
       - sweep_id
@@ -20680,10 +20625,6 @@ components:
           iso_currency_code: iso_currency_code
           created_at: 2000-01-23T04:56:07.000+00:00
           id: id
-          transfer_id: transfer_id
-          sweep_account:
-            account_number: account_number
-            routing_number: routing_number
         request_id: request_id
       properties:
         sweep:
@@ -20705,7 +20646,8 @@ components:
       example:
         sweep:
           amount: amount
-          created_at: 2000-01-23T04:56:07.000+00:00
+          created: 2000-01-23T04:56:07.000+00:00
+          iso_currency_code: iso_currency_code
           id: id
         request_id: request_id
       properties:
@@ -20770,13 +20712,12 @@ components:
     TransferSweepListRequest:
       description: Defines the request schema for `/transfer/sweep/list`
       example:
-        start_time: 2000-01-23T04:56:07.000+00:00
+        end_date: 2000-01-23T04:56:07.000+00:00
         offset: 0
-        end_time: 2000-01-23T04:56:07.000+00:00
         count: 2
         secret: secret
-        transfer_id: transfer_id
         client_id: client_id
+        start_date: 2000-01-23T04:56:07.000+00:00
       properties:
         client_id:
           description: Your Plaid API `client_id`. The `client_id` is required and
@@ -20789,12 +20730,12 @@ components:
             provided either in the `PLAID-SECRET` header or as part of a request body.
           title: APISecret
           type: string
-        start_time:
+        start_date:
           description: The start datetime of sweeps to return (RFC 3339 format).
           format: date-time
           nullable: true
           type: string
-        end_time:
+        end_date:
           description: The end datetime of sweeps to return (RFC 3339 format).
           format: date-time
           nullable: true
@@ -20806,10 +20747,6 @@ components:
           minimum: 1
           nullable: true
           type: integer
-        transfer_id:
-          description: Plaid’s unique identifier for a transfer.
-          title: TransferID
-          type: string
         offset:
           default: 0
           description: The number of sweeps to skip before returning results.
@@ -20824,10 +20761,12 @@ components:
         request_id: request_id
         sweeps:
         - amount: amount
-          created_at: 2000-01-23T04:56:07.000+00:00
+          created: 2000-01-23T04:56:07.000+00:00
+          iso_currency_code: iso_currency_code
           id: id
         - amount: amount
-          created_at: 2000-01-23T04:56:07.000+00:00
+          created: 2000-01-23T04:56:07.000+00:00
+          iso_currency_code: iso_currency_code
           id: id
       properties:
         sweeps:
@@ -20855,18 +20794,10 @@ components:
           iso_currency_code: iso_currency_code
           created_at: 2000-01-23T04:56:07.000+00:00
           id: id
-          transfer_id: transfer_id
-          sweep_account:
-            account_number: account_number
-            routing_number: routing_number
         - amount: amount
           iso_currency_code: iso_currency_code
           created_at: 2000-01-23T04:56:07.000+00:00
           id: id
-          transfer_id: transfer_id
-          sweep_account:
-            account_number: account_number
-            routing_number: routing_number
       properties:
         sweeps:
           items:
@@ -20891,17 +20822,9 @@ components:
         iso_currency_code: iso_currency_code
         created_at: 2000-01-23T04:56:07.000+00:00
         id: id
-        transfer_id: transfer_id
-        sweep_account:
-          account_number: account_number
-          routing_number: routing_number
       properties:
         id:
           description: Identifier of the sweep.
-          type: string
-        transfer_id:
-          description: Identifier of the sweep transfer.
-          nullable: true
           type: string
         created_at:
           description: The datetime when the sweep occurred, in RFC 3339 format.
@@ -20913,15 +20836,11 @@ components:
         iso_currency_code:
           description: The currency of the sweep, e.g. "USD".
           type: string
-        sweep_account:
-          $ref: '#/components/schemas/BankTransferSweepAccount'
       required:
       - amount
       - created_at
       - id
       - iso_currency_code
-      - sweep_account
-      - transfer_id
       title: BankTransferSweep
       type: object
     TransferSweep:
@@ -20939,13 +20858,14 @@ components:
         of the entry on your sweep account ledger.
       example:
         amount: amount
-        created_at: 2000-01-23T04:56:07.000+00:00
+        created: 2000-01-23T04:56:07.000+00:00
+        iso_currency_code: iso_currency_code
         id: id
       properties:
         id:
           description: Identifier of the sweep.
           type: string
-        created_at:
+        created:
           description: The datetime when the sweep occurred, in RFC 3339 format.
           format: date-time
           type: string
@@ -20956,26 +20876,26 @@ components:
             If amount is not present, the sweep was net-settled to zero and outstanding debits and credits between
             the sweep account and Plaid are balanced.
           type: string
+        iso_currency_code:
+          description: The currency of the sweep, e.g. "USD".
+          type: string
       required:
-      - created_at
+      - amount
+      - created
       - id
+      - iso_currency_code
       title: TransferSweep
       type: object
-    BankTransferSweepAccount:
+    SimulatedTransferSweep:
       additionalProperties: true
-      description: The account where the funds are swept to.
-      example:
-        account_number: account_number
-        routing_number: routing_number
-      properties:
-        account_number:
-          type: string
-        routing_number:
-          type: string
-      required:
-      - account_number
-      - routing_number
-      title: BankTransferSweepAccount
+      allOf:
+      - $ref: '#/components/schemas/TransferSweep'
+      - nullable: true
+        type: object
+      description: |-
+        A sweep returned from the `/sandbox/transfer/sweep/simulate` endpoint.
+        Can be null if there are no transfers to include in a sweep.
+      title: SimulatedTransferSweep
       type: object
     BankTransferBalanceGetRequest:
       description: Defines the request schema for `/bank_transfer/balance/get`
@@ -21119,6 +21039,7 @@ components:
         metadata:
           key: metadata
         account_id: account_id
+        iso_currency_code: iso_currency_code
         description: description
         origination_account_id: origination_account_id
         secret: secret
@@ -21184,6 +21105,9 @@ components:
           nullable: true
           title: TransferMetadata
           type: object
+        iso_currency_code:
+          description: The currency of the transfer amount, e.g. "USD"
+          type: string
       required:
       - ach_class
       - amount
@@ -21203,6 +21127,7 @@ components:
           key: metadata
         account_id: account_id
         created: 2000-01-23T04:56:07.000+00:00
+        iso_currency_code: iso_currency_code
         origination_account_id: origination_account_id
         description: description
         id: id
@@ -21275,12 +21200,16 @@ components:
           nullable: true
           title: TransferMetadata
           type: object
+        iso_currency_code:
+          description: The currency of the transfer amount, e.g. "USD"
+          type: string
       required:
       - ach_class
       - amount
       - created
       - description
       - id
+      - iso_currency_code
       - mode
       - origination_account_id
       - status
@@ -21297,6 +21226,7 @@ components:
             key: metadata
           account_id: account_id
           created: 2000-01-23T04:56:07.000+00:00
+          iso_currency_code: iso_currency_code
           origination_account_id: origination_account_id
           description: description
           id: id
@@ -21369,6 +21299,7 @@ components:
           code: NSF
           description: description
         account_id: account_id
+        iso_currency_code: iso_currency_code
         origination_account_id: origination_account_id
         id: id
         user:
@@ -21467,6 +21398,9 @@ components:
           nullable: true
           title: TransferMetadata
           type: object
+        iso_currency_code:
+          description: The currency of the transfer amount, e.g. "USD"
+          type: string
       required:
       - ach_class
       - amount
@@ -21476,6 +21410,7 @@ components:
       - description
       - failure_reason
       - id
+      - iso_currency_code
       - mode
       - origination_account_id
       - status
@@ -21503,6 +21438,7 @@ components:
             code: NSF
             description: description
           account_id: account_id
+          iso_currency_code: iso_currency_code
           origination_account_id: origination_account_id
           id: id
           user:
@@ -21624,12 +21560,6 @@ components:
     SandboxTransferSweepSimulateRequest:
       description: Defines the request schema for `/sandbox/transfer/sweep/simulate`
       example:
-        swept:
-        - null
-        - null
-        reverse_swept:
-        - null
-        - null
         secret: secret
         client_id: client_id
       properties:
@@ -21644,19 +21574,6 @@ components:
             provided either in the `PLAID-SECRET` header or as part of a request body.
           title: APISecret
           type: string
-        swept:
-          description: A set of `pending` or `posted` transfers which should be included
-            in the sweep.
-          items:
-            $ref: '#/components/schemas/TransferID'
-          type: array
-        reverse_swept:
-          description: A set of transfers to be `reverse_swept`. Transfers must first
-            be `reversed` using the `/sandbox/transfer/simulate` endpoint before they
-            can be `reverse_swept`
-          items:
-            $ref: '#/components/schemas/TransferID'
-          type: array
       title: SandboxTransferSweepSimulateRequest
       type: object
     SandboxBankTransferSimulateResponse:
@@ -21695,14 +21612,10 @@ components:
       additionalProperties: true
       description: Defines the response schema for `/sandbox/transfer/sweep/simulate`
       example:
-        sweep:
-          amount: amount
-          created_at: 2000-01-23T04:56:07.000+00:00
-          id: id
         request_id: request_id
       properties:
         sweep:
-          $ref: '#/components/schemas/TransferSweep'
+          $ref: '#/components/schemas/SimulatedTransferSweep'
         request_id:
           description: A unique identifier for the request, which can be used for
             troubleshooting. This identifier, like all Plaid identifiers, is case
@@ -21711,7 +21624,6 @@ components:
           type: string
       required:
       - request_id
-      - sweep
       title: SandboxTransferSweepSimulateResponse
       type: object
     BankTransferReceiverDetails:
@@ -22140,12 +22052,38 @@ components:
       type: object
     IncomeVerificationPrecheckEmployerAddress:
       allOf:
-      - $ref: '#/components/schemas/AddressData'
+      - $ref: '#/components/schemas/IncomeVerificationPrecheckEmployerAddressData'
       - additionalProperties: true
         type: object
       description: The address of the employer
       nullable: true
       title: IncomeVerificationPrecheckEmployerAddress
+      type: object
+    IncomeVerificationPrecheckEmployerAddressData:
+      additionalProperties: true
+      description: Data about the components comprising an address.
+      properties:
+        city:
+          description: The full city name
+          type: string
+        region:
+          description: |-
+            The region or state. In API versions 2018-05-22 and earlier, this field is called `state`.
+            Example: `"NC"`
+          type: string
+        street:
+          description: |-
+            The full street address
+            Example: `"564 Main Street, APT 15"`
+          type: string
+        postal_code:
+          description: The postal code. In API versions 2018-05-22 and earlier, this
+            field is called `zip`.
+          type: string
+        country:
+          description: The ISO 3166-1 alpha-2 country code
+          type: string
+      title: AddressData
       type: object
     IncomeVerificationPrecheckMilitaryInfo:
       example:
@@ -22169,7 +22107,6 @@ components:
           - UNKNOWN
           nullable: true
           type: string
-          x-plaid-income-enum-lint: github.plaid.com/plaid/go.git/lib/proto/incomeverificationmanagerpb.PrecheckMilitaryBranch
       title: IncomeVerificationPrecheckMilitaryInfo
       type: object
     IncomeVerificationPrecheckUser:
@@ -22239,7 +22176,6 @@ components:
       - LOW
       - UNKNOWN
       type: string
-      x-plaid-income-enum-lint: github.plaid.com/plaid/go.git/lib/proto/incomeverificationmanagerpb.PrecheckConfidence
     LinkTokenCreateRequestIncomeVerification:
       description: Specifies options for initializing Link for use with the Income
         (beta) product. This field is required if `income_verification` is included
@@ -22298,9 +22234,7 @@ components:
           type: string
         verification_status:
           description: |-
-            `VERIFICATION_STATUS_PROCESSING_COMPLETE`: The income verification status processing has completed. If the user uploaded multiple documents, this status means that at least one document was processed successfully.
-
-            `VERIFICATION_STATUS_DOCUMENT_REJECTED`: The documentation uploaded by the end user was recognized as a supported file format, but not recognized as a valid verification document. Common causes include poor image quality or the document not being an acceptable income verification document.
+            `VERIFICATION_STATUS_PROCESSING_COMPLETE`: The income verification status processing has completed. If the user uploaded multiple documents, this webhook will fire when all documents have finished processing. Call the `/paystubs/get` endpoint and check the document metadata to see which documents were successfully parsed.
 
             `VERIFICATION_STATUS_PROCESSING_FAILED`: A failure occurred when attempting to process the verification documentation.
 
@@ -22373,18 +22307,6 @@ components:
             amount: 0.8008281904610115
             account_id: account_id
             description: description
-        error:
-          error_message: error_message
-          suggested_action: suggested_action
-          error_type: INVALID_REQUEST
-          causes:
-          - ""
-          - ""
-          display_message: display_message
-          error_code: error_code
-          documentation_url: documentation_url
-          request_id: request_id
-          status: 0.8008281904610115
         request_id: request_id
       properties:
         income_summaries:
@@ -22393,7 +22315,7 @@ components:
             $ref: '#/components/schemas/IncomeSummary'
           type: array
         error:
-          $ref: '#/components/schemas/Error'
+          $ref: '#/components/schemas/PlaidError'
         request_id:
           description: A unique identifier for the request, which can be used for
             troubleshooting. This identifier, like all Plaid identifiers, is case
@@ -22613,7 +22535,6 @@ components:
       - null
       title: PayFrequencyValue
       type: string
-      x-plaid-income-enum-lint: github.plaid.com/plaid/go.git/lib/proto/incomeverificationmanagerpb.PayFrequency
     VerificationStatus:
       description: |-
         The verification status. One of the following:
@@ -22635,7 +22556,6 @@ components:
       - UNKNOWN
       title: VerificationStatus
       type: string
-      x-plaid-income-enum-lint: github.plaid.com/plaid/go.git/lib/proto/incomeverificationmanagerpb.FieldStatus
     VerificationRefreshStatus:
       description: |-
         The verification refresh status. One of the following:
@@ -22649,7 +22569,6 @@ components:
       - VERIFICATION_REFRESH_NOT_FOUND
       title: VerificationRefreshStatus
       type: string
-      x-plaid-income-enum-lint: github.plaid.com/plaid/go.git/lib/proto/incomeverificationmanagerpb.VerificationRefreshStatus
     IncomeVerificationPaystubGetRequest:
       deprecated: true
       description: IncomeVerificationPaystubGetRequest defines the request schema
@@ -22906,24 +22825,12 @@ components:
             verification_attributes:
             - type: VERIFICATION_ATTRIBUTE_TYPE_UNKNOWN
             - type: VERIFICATION_ATTRIBUTE_TYPE_UNKNOWN
-        error:
-          error_message: error_message
-          suggested_action: suggested_action
-          error_type: INVALID_REQUEST
-          causes:
-          - ""
-          - ""
-          display_message: display_message
-          error_code: error_code
-          documentation_url: documentation_url
-          request_id: request_id
-          status: 0.8008281904610115
         request_id: request_id
       properties:
         paystub:
           $ref: '#/components/schemas/Paystub'
         error:
-          $ref: '#/components/schemas/Error'
+          $ref: '#/components/schemas/PlaidError'
         request_id:
           description: A unique identifier for the request, which can be used for
             troubleshooting. This identifier, like all Plaid identifiers, is case
@@ -23412,18 +23319,6 @@ components:
         - name: name
           doc_id: doc_id
           status: status
-        error:
-          error_message: error_message
-          suggested_action: suggested_action
-          error_type: INVALID_REQUEST
-          causes:
-          - ""
-          - ""
-          display_message: display_message
-          error_code: error_code
-          documentation_url: documentation_url
-          request_id: request_id
-          status: 0.8008281904610115
         request_id: request_id
       properties:
         document_metadata:
@@ -23435,7 +23330,7 @@ components:
             $ref: '#/components/schemas/Paystub'
           type: array
         error:
-          $ref: '#/components/schemas/Error'
+          $ref: '#/components/schemas/PlaidError'
         request_id:
           description: A unique identifier for the request, which can be used for
             troubleshooting. This identifier, like all Plaid identifiers, is case
@@ -23499,7 +23394,6 @@ components:
       - DOCUMENT_TYPE_GIG
       title: DocType
       type: string
-      x-plaid-income-enum-lint: github.plaid.com/plaid/go.git/lib/proto/incomeverificationmanagerpb.DocumentType
     Paystub:
       additionalProperties: true
       description: An object representing data extracted from the end user's paystub.
@@ -24536,7 +24430,6 @@ components:
           - null
           nullable: true
           type: string
-          x-plaid-income-enum-lint: github.plaid.com/plaid/go.git/lib/proto/incomeverificationmanagerpb.PayFrequency
         pay_day:
           deprecated: true
           description: The date on which the paystub was issued, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
@@ -24679,7 +24572,6 @@ components:
       nullable: true
       title: PaystubVerificationStatus
       type: string
-      x-plaid-income-enum-lint: github.plaid.com/plaid/go.git/lib/proto/incomeverificationmanagerpb.PaystubVerificationStatus
     VerificationAttribute:
       additionalProperties: true
       description: Details about a certain reason as to why a document could potentially
@@ -24706,7 +24598,6 @@ components:
           nullable: true
           title: VerificationAttributeType
           type: string
-          x-plaid-income-enum-lint: github.plaid.com/plaid/go.git/lib/proto/incomeverificationmanagerpb.VerificationAttributeType
       required:
       - type
       title: VerificationAttribute
@@ -24789,18 +24680,6 @@ components:
         - name: name
           doc_id: doc_id
           status: status
-        error:
-          error_message: error_message
-          suggested_action: suggested_action
-          error_type: INVALID_REQUEST
-          causes:
-          - ""
-          - ""
-          display_message: display_message
-          error_code: error_code
-          documentation_url: documentation_url
-          request_id: request_id
-          status: 0.8008281904610115
         request_id: request_id
         taxforms:
         - w2:
@@ -24954,7 +24833,7 @@ components:
             $ref: '#/components/schemas/Taxform'
           type: array
         error:
-          $ref: '#/components/schemas/Error'
+          $ref: '#/components/schemas/PlaidError'
       required:
       - document_metadata
       - taxforms
@@ -25313,18 +25192,6 @@ components:
             name: name
           title: title
           start_date: 2000-01-23
-        error:
-          error_message: error_message
-          suggested_action: suggested_action
-          error_type: INVALID_REQUEST
-          causes:
-          - ""
-          - ""
-          display_message: display_message
-          error_code: error_code
-          documentation_url: documentation_url
-          request_id: request_id
-          status: 0.8008281904610115
         request_id: request_id
       properties:
         employments:
@@ -25333,7 +25200,7 @@ components:
             $ref: '#/components/schemas/EmploymentVerification'
           type: array
         error:
-          $ref: '#/components/schemas/Error'
+          $ref: '#/components/schemas/PlaidError'
         request_id:
           description: A unique identifier for the request, which can be used for
             troubleshooting. This identifier, like all Plaid identifiers, is case
@@ -26379,15 +26246,15 @@ components:
           type: string
         verification_status:
           description: |-
-            `VERIFICATION_STATUS_PROCESSING_COMPLETE`: The income verification status processing has completed.
-
-            `VERIFICATION_STATUS_DOCUMENT_REJECTED`: The documentation uploaded by the end user was recognized as a supported file format, but not recognized as a valid paystub.
+            `VERIFICATION_STATUS_PROCESSING_COMPLETE`: The income verification status processing has completed. If the user uploaded multiple documents, this webhook will fire when all documents have finished processing. Call the `/paystubs/get` endpoint and check the document metadata to see which documents were successfully parsed.
 
             `VERIFICATION_STATUS_PROCESSING_FAILED`: A failure occurred when attempting to process the verification documentation.
+
+            `VERIFICATION_STATUS_PENDING_APPROVAL`: The income verification has been sent to the user for review.
           enum:
           - VERIFICATION_STATUS_PROCESSING_COMPLETE
-          - VERIFICATION_STATUS_DOCUMENT_REJECTED
           - VERIFICATION_STATUS_PROCESSING_FAILED
+          - VERIFICATION_STATUS_PENDING_APPROVAL
           type: string
       required:
       - income_verification_id
@@ -27192,7 +27059,7 @@ components:
           title: ItemId
           type: string
         error:
-          $ref: '#/components/schemas/Error'
+          $ref: '#/components/schemas/PlaidError'
       title: NewAccountsAvailableWebhook
       type: object
       x-examples:
