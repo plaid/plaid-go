@@ -89,7 +89,6 @@ model_bank_transfer_network.go
 model_bank_transfer_receiver_details.go
 model_bank_transfer_status.go
 model_bank_transfer_sweep.go
-model_bank_transfer_sweep_account.go
 model_bank_transfer_sweep_get_request.go
 model_bank_transfer_sweep_get_response.go
 model_bank_transfer_sweep_list_request.go
@@ -176,6 +175,7 @@ model_income_verification_paystubs_get_response.go
 model_income_verification_precheck_confidence.go
 model_income_verification_precheck_employer.go
 model_income_verification_precheck_employer_address.go
+model_income_verification_precheck_employer_address_data.go
 model_income_verification_precheck_military_info.go
 model_income_verification_precheck_request.go
 model_income_verification_precheck_response.go
@@ -319,6 +319,7 @@ model_payment_initiation_refund.go
 model_payment_initiation_standing_order_metadata.go
 model_payment_meta.go
 model_payment_schedule_interval.go
+model_payment_scheme.go
 model_payment_status_update_webhook.go
 model_paystub.go
 model_paystub_address.go
@@ -336,6 +337,7 @@ model_paystub_ytd_details.go
 model_pending_expiration_webhook.go
 model_personal_finance_category.go
 model_phone_number.go
+model_plaid_error.go
 model_platform_ids.go
 model_processor_apex_processor_token_create_request.go
 model_processor_auth_get_request.go
@@ -407,6 +409,7 @@ model_signal_return_report_request.go
 model_signal_return_report_response.go
 model_signal_scores.go
 model_signal_user.go
+model_simulated_transfer_sweep.go
 model_standalone_account_type.go
 model_standalone_currency_code_list.go
 model_standalone_investment_transaction_type.go
