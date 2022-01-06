@@ -35,7 +35,8 @@ func TestItemWebhookUpdate(t *testing.T) {
 	ctx := context.Background()
 
 	accessToken := createSandboxItem(t, ctx, testClient, FIRST_PLATYPUS_BANK, testProducts)
-	request := plaid.NewItemWebhookUpdateRequest(accessToken, "https://plaid.com/webhook-test")
+	request := plaid.NewItemWebhookUpdateRequest(accessToken)
+	request.SetWebhook("https://plaid.com/webhook-test")
 	resp, _, err := testClient.PlaidApi.ItemWebhookUpdate(ctx).ItemWebhookUpdateRequest(*request).Execute()
 
 	assert.NoError(t, err)
