@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/plaid/plaid-go/plaid"
+	"github.com/plaid/plaid-go/v2/plaid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -41,7 +41,7 @@ func TestInstitutionsGet(t *testing.T) {
 			countryCodes:   []plaid.CountryCode{plaid.COUNTRYCODE_GB},
 			count:          2,
 			offset:         1,
-			options:        plaid.InstitutionsGetRequestOptions{Oauth: plaid.PtrBool(true)},
+			options:        plaid.InstitutionsGetRequestOptions{Oauth: *plaid.NewNullableBool(plaid.PtrBool(true))},
 			expectedLength: 2,
 		},
 		{
@@ -57,7 +57,7 @@ func TestInstitutionsGet(t *testing.T) {
 			count:        1,
 			offset:       0,
 			options: plaid.InstitutionsGetRequestOptions{
-				RoutingNumbers: &[]string{"021200339", "052001633"},
+				RoutingNumbers: []string{"021200339", "052001633"},
 			},
 			expectedLength: 1,
 		},
@@ -82,9 +82,9 @@ func TestInstitutionsGet(t *testing.T) {
 						assert.NotEmpty(t, inst.Url)
 					}
 				}
-				if tc.options.Oauth != nil {
+				if tc.options.Oauth.IsSet() {
 					for _, inst := range instsResp.Institutions {
-						assert.Equal(t, inst.Oauth, *tc.options.Oauth)
+						assert.Equal(t, inst.Oauth, *tc.options.Oauth.Get())
 					}
 				}
 			}
@@ -121,13 +121,13 @@ func TestInstitutionsSearch(t *testing.T) {
 			desc:         "succeeds with payment initiation metadata",
 			query:        paymentInitiationMetadataSandboxInstitutionQuery,
 			countryCodes: []plaid.CountryCode{plaid.COUNTRYCODE_GB},
-			options:      plaid.InstitutionsSearchRequestOptions{IncludePaymentInitiationMetadata: plaid.PtrBool(true)},
+			options:      plaid.InstitutionsSearchRequestOptions{IncludePaymentInitiationMetadata: *plaid.NewNullableBool(plaid.PtrBool(true))},
 		},
 		{
 			desc:         "succeeds for oauth institutions",
 			query:        sandboxInstitutionQuery,
 			countryCodes: []plaid.CountryCode{plaid.COUNTRYCODE_GB},
-			options:      plaid.InstitutionsSearchRequestOptions{Oauth: plaid.PtrBool(true)},
+			options:      plaid.InstitutionsSearchRequestOptions{Oauth: *plaid.NewNullableBool(plaid.PtrBool(true))},
 		},
 		{
 			desc:    "errors without empty query",
@@ -151,7 +151,7 @@ func TestInstitutionsSearch(t *testing.T) {
 						assert.NotEmpty(t, inst.Url)
 					}
 				}
-				if tc.options.IncludePaymentInitiationMetadata != nil {
+				if tc.options.IncludePaymentInitiationMetadata.IsSet() {
 					for _, inst := range instsResp.Institutions {
 						assert.NotEmpty(t, inst.PaymentInitiationMetadata)
 					}

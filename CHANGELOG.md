@@ -1,5 +1,88 @@
 This library is generated from an OpenAPI schema (OAS). See full changelog [here](https://github.com/plaid/plaid-openapi/blob/master/CHANGELOG.md) for schema changes.
 
+# 2.0.0
+- Updating to OAS 2020-09-14_1.64.0
+
+## Breaking changes
+- `InstitutionsGetRequestOptions.Oauth` went from a `PtrBool` -> `NullableBool` as it's now nullable.
+- `InstitutionsSearchRequestOptions` fields changed to nullable (so `NullableBool`):
+   - `.Oauth`
+   - `.IncludeAuthMetadata`
+   - `.IncludePaymentInitiationMetadata`
+- To migrate from `PtrBool` -> `NullableBool`, set the value to a `*plaid.NewNullableBool(plaid.PtrBool(bool))`. For an example, check out how `Oauth` is set in `/tests/institutions_test.go`.
+- Split `AccountSubtype` enums and objects into per-endpoint ones to more accurately represent allowed values.
+  - Fixed a bug with `LinkTokenCreateRequestAccountSubtypes` having unconditional maps as parameters instead of models
+  - `DepositoryFilter`'s account subtypes uses `DepositoryAccountSubtypes`
+  - `CreditFilter`'s account subtypes uses `CreditAccountSubtypes`
+  - `LoanFilter`'s account subtypes uses `LoanAccountSubtypes`
+  - `InvestmentFilter`'s account subtypes uses `InvestmentAccountSubtypes`
+## OpenAPI Schema Changes
+### 2020-09-14_1.64.0
+- Remove `scheme_automatic_downgrade` from `/payment_initiation/payment/create`
+
+### 2020-09-14_1.63.1
+- Update description for `/sandbox/transfer/sweep/simulate` endpoint
+
+### 2020-09-14_1.63.0
+- Refactor account subtype enums for greater specificity. This has no changes to the API but is a major semver change for Python, Node, Go, and Java client library interfaces to the AccountSubtype object within account filtering contexts in `/link/token/create`. The `AccountSubtype` namespace in this context is now prefixed with the AccountType. (Example for Node: Old: `AccountSubtype.checking` New: `DepositoryAccountSubtype.checking`)
+
+### 2020-09-14_1.62.7
+- Update description for `datetime` and `authorized_datetime` fields in Transactions endpoints
+
+### 2020-09-14_1.62.6
+- Make `sweep_id` / `sweep_amount` fields on Transfer Event nullable
+
+### 2020-09-14_1.62.6
+- Set `institution_status` to be nullable in `InstitutionsGetResponse`
+
+### 2020-09-14_1.62.5
+- Update external docs URLs for Transfer and Bank Transfer endpoints
+- Update description for `ach_return_code` field in Transfer endpoints
+
+### 2020-09-14_1.62.4
+- Add `join_date` to `/application/get` and `/item/application/list`
+- Remove `created_at` from `/application/get`
+
+### 2020-09-14_1.62.3
+- Updated various description fields for Income
+
+### 2020-09-14_1.62.2
+- Add `employment` as an available product in Product array.
+
+### 2020-09-14_1.62.1
+- Add `minItems` and `minLength` validation to various fields in `/institution/*` request schemas
+
+### 2020-09-14_1.62.0
+- Add guarantee_decision and guarantee_decision rationale fields to the transfer API
+- Add repayment-related resources to the transfer API
+
+### 2020-09-14_1.61.7
+- Remove `receiver_pending` and `receiver_posted` from bank transfer event types.
+- Remove `BankTransferReceiverDetails` from bank transfer event types.
+
+### 2020-09-14_1.61.6
+- Update description formatting for `sweep` and `amount` fields for sweep endpoints
+
+### 2020-09-14_1.61.5
+- Added `NEW_ACCOUNTS_AVAILABLE` webhook code as valid input to `/sandbox/item/fire_webhook`
+- Update description for `/sandbox/item/fire_webhook`
+
+### 2020-09-14_1.61.4
+- Set the `minimum` for the `count` and `offset` fields in `InstitutionsGetRequest`
+- Set `products`, `routing_numbers`, and `oauth` fields to be nullable in `InstitutionsGetRequestOptions`
+- Set `products` to be nullable in `InstitutionsSearchRequest`
+- Set `oauth`, `include_auth_metadata`, and `include_payment_initiation_metadata` fields to be nullable in `InstitutionsSearchRequestOptions`
+- Set `payment_id` field to be nullable in `InstitutionsSearchPaymentInitiationOptions`
+
+### 2020-09-14_1.61.3
+- Adds `DOCUMENT_TYPE_NONE` enum value for document metadata
+
+### 2020-09-14_1.61.2
+- Relax length restrictions on the `currency` field in the `Pay` schema
+
+### 2020-09-14_1.61.1
+- Use new payment statuses in `PaymentStatusUpdateWebhook`
+
 # 1.10.0
 - Updating to OAS 2020-09-14_1.61.0
 
@@ -18,34 +101,34 @@ This library is generated from an OpenAPI schema (OAS). See full changelog [here
 # 1.5.0
 - Updating to OAS 2020-09-14_1.36.1
 
-## 1.4.0
+# 1.4.0
 - Updating to OAS 2020-09-14_1.36.1
 
-## 1.3.0
+# 1.3.0
 - Updating to OAS 2020-09-14_1.33.0.
 
-## 1.2.0
+# 1.2.0
 - Updated to OAS 2020-09-14_1.31.1.
 
-## 1.1.0
+# 1.1.0
 - Updated to OAS 2020-09-14_1.26.1.
 
-## 1.0.0
+# 1.0.0
 - Moved officially to `GOMODULES`, as well as GA'd the generated version of `plaid-go`! This is ported over from our beta branch / release.
 - Pinned to OpenAPI version `2020-09-14_1.21.0`. Make sure to check the OpenAPI changelog.
 
-## 0.1.0-beta-2
+# 0.1.0-beta-2
 - Introduce the `ToPlaidError` helper function to convert generic errors to the plaid.Error struct
 - Type fixes from `OpenAPI version 2020-09-14_1.20.6`, see full changelog [here](https://github.com/plaid/plaid-openapi/blob/master/CHANGELOG.md#2020-09-14_11912)
 
-## 0.1.0-beta-1
+# 0.1.0-beta-1
 We first are reversioning this package, as we are now using GOMODULES.
 
 This version represents a transition in how we maintain our external client libraries. We are now using an [API spec](https://github.com/plaid/plaid-openapi) written in `OpenAPI 3.0.0` and running our definition file through [OpenAPITool's `go` generator](https://github.com/OpenAPITools/openapi-generator).
 
 **Go Migration Guide:**
 
-### Client initialization
+## Client initialization
 From:
 ```go
 import (
@@ -74,7 +157,7 @@ configuration.UseEnvironment(plaid.Sandbox)
 client := plaid.NewAPIClient(configuration)
 ```
 
-### Endpoints
+## Endpoints
 All endpoint rquests now take a request model and the functions have been renamed to move the
 verb to the end (e.g. `GetBalances` is now `BalancesGet`). We now accept a `context` object in order to give the caller more control over the [http request](https://pkg.go.dev/net/http#Request.WithContext).
 
@@ -93,7 +176,7 @@ response, httpResponse, err := client.PlaidApi.SandboxPublicTokenCreate(context.
    ).Execute()
 ```
 
-### Errors
+## Errors
 From:
 ```go
 response, err := client.CreateSandboxPublicToken(SandboxInstitution, TestProducts)
@@ -113,17 +196,17 @@ response, httpResponse, err := client.PlaidApi.SandboxPublicTokenCreate(context.
 plaidErr, _ := plaid.ToPlaidError(err)
 ```
 
-## 7.3.0
+# 7.3.0
 - Add support for `options` to `/payment_initiation/payment/create`
 
-## 7.2.0
+# 7.2.0
 - Add support for `last_updated_datetime` to `/accounts/balance/get`
 - Add Standing Orders support to Payment Initiation
 
-## 7.1.0
+# 7.1.0
 - Add institution status types for health incidents and investment updates
 
-## 7.0.0
+# 7.0.0
 
 - Add back (deprecated) `/payment_initiation/payment/token/create` endpoint
 - Add back (deprecated) `/item/public_token/create` endpoint
@@ -132,7 +215,7 @@ BREAKING CHANGES:
 
 - Add Standing Order support to the `/payment_initiation/payment/create` endpoint
 
-## 6.0.0
+# 6.0.0
 
 BREAKING CHANGES:
 
@@ -146,18 +229,18 @@ BREAKING CHANGES:
 - The `/institutions/get`, `/institutions/get_by_id`, and `/institutions/search` now require
     `country_codes` to be passed in.
 
-## 5.1.0
+# 5.1.0
 
 - Add support for Link Token get endpoint ([#142](https://github.com/plaid/plaid-go/pull/142))
   - `/link/token/get`
 
-## 5.0.0
+# 5.0.0
 
 BREAKING CHANGES:
 
 - Add BACS as a parameter to `/recipient/create` ([#137](https://github.com/plaid/plaid-go/pull/137))
 
-## 4.0.0
+# 4.0.0
 
 - Add `MerchantName` to `Transaction` struct
 
@@ -166,12 +249,12 @@ BREAKING CHANGES:
 - Removes the public key as input to `ClientOptions`. The public key is no longer needed by the API.
 - Add support for the `/link/token/create` endpoint
 
-## 3.1.0
+# 3.1.0
 
 - `AuthorizedDate` and `PaymentChannel` added to the `Transaction` struct
 - `Item` added to the `GetAuthResponse` struct
 
-## 3.0.0
+# 3.0.0
 
 - Adds support for `/sandbox/item/set_verification_status`
 - `PaymentRecipientAddress` can now be null
