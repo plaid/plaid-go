@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/plaid/plaid-go/plaid"
+	"github.com/plaid/plaid-go/v2/plaid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -48,7 +48,7 @@ func TestLinkTokenCreateOptional(t *testing.T) {
 	request.SetWebhook("https://webhook-uri.com")
 	request.SetAccountFilters(plaid.LinkTokenAccountFilters{
 		Depository: &plaid.DepositoryFilter{
-			AccountSubtypes: []plaid.AccountSubtype{plaid.ACCOUNTSUBTYPE_CHECKING, plaid.ACCOUNTSUBTYPE_SAVINGS},
+			AccountSubtypes: []plaid.DepositoryAccountSubtype{plaid.DEPOSITORYACCOUNTSUBTYPE_CHECKING, plaid.DEPOSITORYACCOUNTSUBTYPE_SAVINGS},
 		},
 	})
 	resp, _, err := testClient.PlaidApi.LinkTokenCreate(ctx).LinkTokenCreateRequest(*request).Execute()
@@ -85,7 +85,7 @@ func TestLinkTokenCreateThenGet(t *testing.T) {
 	request.SetWebhook("https://webhook-uri.com")
 	request.SetAccountFilters(plaid.LinkTokenAccountFilters{
 		Depository: &plaid.DepositoryFilter{
-			AccountSubtypes: []plaid.AccountSubtype{plaid.ACCOUNTSUBTYPE_CHECKING, plaid.ACCOUNTSUBTYPE_SAVINGS},
+			AccountSubtypes: []plaid.DepositoryAccountSubtype{plaid.DEPOSITORYACCOUNTSUBTYPE_CHECKING, plaid.DEPOSITORYACCOUNTSUBTYPE_SAVINGS},
 		},
 	})
 	createLinkTokenResp, _, err := testClient.PlaidApi.LinkTokenCreate(ctx).LinkTokenCreateRequest(*request).Execute()
