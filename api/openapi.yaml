@@ -7,7 +7,7 @@ info:
     details.
   termsOfService: https://plaid.com/legal/
   title: The Plaid API
-  version: 2020-09-14_1.64.9
+  version: 2020-09-14_1.64.14
 servers:
 - description: Production
   url: https://production.plaid.com
@@ -3413,6 +3413,8 @@ paths:
                       cancellable: true
                       created: 2020-08-06T17:27:15Z
                       description: Testing2
+                      guarantee_decision: null
+                      guarantee_decision_rationale: null
                       failure_reason:
                         ach_return_code: R13
                         description: Invalid ACH routing number
@@ -3555,7 +3557,7 @@ paths:
                           address:
                             street: 100 Market Street
                             city: San Francisco
-                            region: California
+                            region: CA
                             postal_code: "94103"
                             country: US
                         amount: "12.34"
@@ -3606,7 +3608,7 @@ paths:
                         address:
                           street: 100 Market Street
                           city: San Francisco
-                          region: California
+                          region: CA
                           postal_code: "94103"
                           country: US
                       amount: "12.34"
@@ -3615,6 +3617,8 @@ paths:
                       status: pending
                       network: ach
                       cancellable: true
+                      guarantee_decision: GUARANTEED
+                      guarantee_decision_rationale: null
                       failure_reason: null
                       metadata:
                         key1: value1
@@ -3717,6 +3721,8 @@ paths:
                       cancellable: true
                       created: 2020-08-06T17:27:15Z
                       description: Testing2
+                      guarantee_decision: null
+                      guarantee_decision_rationale: null
                       failure_reason:
                         ach_return_code: R13
                         description: Invalid ACH routing number
@@ -4335,7 +4341,7 @@ paths:
                         address:
                           street: 100 Market Street
                           city: San Francisco
-                          region: California
+                          region: CA
                           postal_code: "94103"
                           country: US
                         email_address: user@plaid.com
@@ -4477,6 +4483,7 @@ paths:
                 value:
                   start_time: 2022-01-10T12:34:56Z
                   count: 1
+                  repayment_id: d4bfce70-2470-4298-ae87-5e9b3e18bfaf
             schema:
               $ref: '#/components/schemas/TransferRepaymentReturnListRequest'
         required: true
@@ -4513,7 +4520,7 @@ paths:
         or `/bank_transfer/event/list`, no transactions will actually take place and
         funds will not move between accounts, even within the Sandbox.
       externalDocs:
-        url: /api/sandbox/#sandboxbank_transfersimulate
+        url: /bank-transfers/reference/#sandboxbank_transfersimulate
       operationId: sandboxBankTransferSimulate
       requestBody:
         content:
@@ -5253,7 +5260,7 @@ paths:
       description: Use the `/sandbox/bank_transfer/fire_webhook` endpoint to manually
         trigger a Bank Transfers webhook in the Sandbox environment.
       externalDocs:
-        url: /api/sandbox/#sandboxbank_transferfire_webhook
+        url: /bank-transfers/reference/#sandboxbank_transferfire_webhook
       operationId: sandboxBankTransferFireWebhook
       requestBody:
         content:
@@ -6440,7 +6447,6 @@ components:
           type: array
         oauth:
           description: Limit results to institutions with or without OAuth login flows.
-            This is primarily relevant to institutions with European country codes.
           nullable: true
           type: boolean
         include_optional_metadata:
@@ -6807,7 +6813,6 @@ components:
       properties:
         oauth:
           description: Limit results to institutions with or without OAuth login flows.
-            This is primarily relevant to institutions with European country codes
           nullable: true
           type: boolean
         include_optional_metadata:
@@ -12118,8 +12123,6 @@ components:
 
         `loan:` Loan account
 
-        `brokerage`: An investment account. Used for `/assets/` endpoints only; other endpoints use `investment`.
-
         `other:` Non-specified account type
 
         See the [Account type schema](https://plaid.com/docs/api/accounts#account-type-schema) for a full listing of account types and corresponding subtypes.
@@ -13036,7 +13039,8 @@ components:
             Note that only institutions that support Instant Auth will return `auth`
             in the product array; institutions that do not list `auth` may still support
             other Auth methods such as Instant Match or Automated Micro-deposit Verification.
-            For more details, see [Full Auth coverage](https://plaid.com/docs/auth/coverage/).
+            To identify institutions that support those methods, use the `auth_metadata`
+            object. For more details, see [Full Auth coverage](https://plaid.com/docs/auth/coverage/).
           items:
             $ref: '#/components/schemas/Products'
           type: array
@@ -13067,8 +13071,7 @@ components:
             type: string
           type: array
         oauth:
-          description: Indicates that the institution has an OAuth login flow. This
-            is primarily relevant to institutions with European country codes.
+          description: Indicates that the institution has an OAuth login flow.
           type: boolean
         status:
           $ref: '#/components/schemas/InstitutionStatus'
@@ -13537,6 +13540,68 @@ components:
           webhook_code: DEFAULT_UPDATE
           item_id: wz666MBjYWTp2PDzzggYhM6oWWmBb
           new_transactions: 3
+    IdentityDefaultUpdateWebhook:
+      additionalProperties: true
+      description: Fired when a change to identity data has been detected on an Item.
+      properties:
+        webhook_type:
+          description: '`IDENTITY`'
+          type: string
+        webhook_code:
+          description: '`DEFAULT_UPDATE`'
+          type: string
+        item_id:
+          description: The `item_id` of the Item associated with this webhook, warning,
+            or error
+          title: ItemId
+          type: string
+        account_ids_with_updated_identity:
+          additionalProperties:
+            items:
+              $ref: '#/components/schemas/IdentityUpdateTypes'
+            type: array
+          description: |
+            An object with keys of `account_id`'s that are mapped to their respective identity attributes that changed.
+
+            Example: `{ "XMBvvyMGQ1UoLbKByoMqH3nXMj84ALSdE5B58": ["PHONES"] }`
+          title: AccountIdsWithUpdatedIdentity
+          type: object
+        error:
+          $ref: '#/components/schemas/PlaidError'
+      required:
+      - account_ids_with_updated_identity
+      - error
+      - item_id
+      - webhook_code
+      - webhook_type
+      type: object
+      x-examples:
+        example-1:
+          webhook_type: IDENTITY
+          webhook_code: DEFAULT_UPDATE
+          item_id: wz666MBjYWTp2PDzzggYhM6oWWmBb
+          account_ids_with_updated_identity:
+            BxBXxLj1m4HMXBm9WZZmCWVbPjX16EHwv99vp:
+            - ADDRESSES
+    AccountIdsWithUpdatedIdentity:
+      additionalProperties:
+        items:
+          $ref: '#/components/schemas/IdentityUpdateTypes'
+        type: array
+      description: |
+        An object with keys of `account_id`'s that are mapped to their respective identity attributes that changed.
+
+        Example: `{ "XMBvvyMGQ1UoLbKByoMqH3nXMj84ALSdE5B58": ["PHONES"] }`
+      title: AccountIdsWithUpdatedIdentity
+      type: object
+    IdentityUpdateTypes:
+      description: The possible types of identity data that may have changed.
+      enum:
+      - PHONES
+      - ADDRESSES
+      - EMAILS
+      - NAMES
+      type: string
     HistoricalUpdateWebhook:
       additionalProperties: true
       description: Fired when an Item's historical transaction pull is completed and
@@ -14258,7 +14323,9 @@ components:
           nullable: true
           type: string
         aprs:
-          description: The various interest rates that apply to the account.
+          description: The various interest rates that apply to the account. APR information
+            is not provided by all card issuers; if APR data is not available, this
+            array will be empty.
           items:
             $ref: '#/components/schemas/APR'
           type: array
@@ -14269,6 +14336,7 @@ components:
           type: boolean
         last_payment_amount:
           description: The amount of the last payment.
+          nullable: true
           type: number
         last_payment_date:
           description: The date of the last payment. Dates are returned in an [ISO
@@ -14281,6 +14349,7 @@ components:
           description: The date of the last statement. Dates are returned in an [ISO
             8601](https://wikipedia.org/wiki/ISO_8601) format (YYYY-MM-DD).
           format: date
+          nullable: true
           type: string
         last_statement_balance:
           description: The total amount owed as of the last statement issued
@@ -17725,6 +17794,7 @@ components:
             see the [Investment transaction types schema](https://plaid.com/docs/api/accounts/#investment-transaction-types-schema).
           enum:
           - account fee
+          - adjustment
           - assignment
           - buy
           - buy to cover
@@ -19005,7 +19075,10 @@ components:
       title: BankTransferAmount
       type: string
     TransferCreateIdempotencyKey:
+      deprecated: true
       description: |-
+        Deprecated. `authorization_id` is now for used idempotency instead.
+
         A random key provided by the client, per unique transfer. Maximum of 50 characters.
 
         The API supports idempotency for safely retrying requests without accidentally performing the same operation twice. For example, if a request to create a transfer fails due to a network connection error, you can retry the request with the same idempotency key to guarantee that only a single transfer is created.
@@ -19100,7 +19173,7 @@ components:
           description: Ex. "San Francisco"
           type: string
         region:
-          description: The state or province (e.g., "California").
+          description: The state or province (e.g., "CA").
           type: string
         postal_code:
           description: The postal code (e.g., "94103").
@@ -19130,7 +19203,7 @@ components:
           nullable: true
           type: string
         region:
-          description: The state or province (e.g., "California").
+          description: The state or province (e.g., "CA").
           nullable: true
           type: string
         postal_code:
@@ -19583,7 +19656,10 @@ components:
           title: APISecret
           type: string
         idempotency_key:
+          deprecated: true
           description: |-
+            Deprecated. `authorization_id` is now for used idempotency instead.
+
             A random key provided by the client, per unique transfer. Maximum of 50 characters.
 
             The API supports idempotency for safely retrying requests without accidentally performing the same operation twice. For example, if a request to create a transfer fails due to a network connection error, you can retry the request with the same idempotency key to guarantee that only a single transfer is created.
@@ -19599,8 +19675,8 @@ components:
             or credited.
           type: string
         authorization_id:
-          description: Plaid’s unique identifier for a transfer authorization.
-          title: TransferAuthorizationID
+          description: Plaid’s unique identifier for a transfer authorization. This
+            parameter also serves the purpose of acting as an idempotency identifier.
           type: string
         type:
           $ref: '#/components/schemas/TransferType'
@@ -19649,7 +19725,6 @@ components:
       - amount
       - authorization_id
       - description
-      - idempotency_key
       - network
       - type
       - user
@@ -24965,9 +25040,12 @@ components:
           nullable: true
           type: string
         marital_status:
-          description: Marital status of the employee.
+          description: Marital status of the employee - either `single` or `married`.
           nullable: true
           type: string
+          x-override-enum-values-shown:
+          - single
+          - married
         taxpayer_id:
           $ref: '#/components/schemas/TaxpayerID'
       required:
@@ -26563,11 +26641,6 @@ components:
       description: Scope of required and optional account features or content from
         a ConnectedApplication.
       example:
-        optional_product_access:
-          auth: true
-          identity: true
-          statements: true
-          transactions: true
         account_filters:
           loan:
           - loan
@@ -26581,24 +26654,13 @@ components:
           credit:
           - credit
           - credit
-        required_product_access:
-          auth: true
-          identity: true
-          statements: true
-          transactions: true
       properties:
-        required_product_access:
-          $ref: '#/components/schemas/ProductAccess'
-        optional_product_access:
-          $ref: '#/components/schemas/ProductAccess'
         account_filters:
           $ref: '#/components/schemas/AccountFilter'
         account_selection_cardinality:
           $ref: '#/components/schemas/AccountSelectionCardinality'
       required:
       - account_selection_cardinality
-      - optional_product_access
-      - required_product_access
       type: object
     ScopesState:
       description: When scopes are updated during enrollment, this field must be populated
@@ -26719,11 +26781,6 @@ components:
         request_id: request_id
         applications:
         - requested_scopes:
-            optional_product_access:
-              auth: true
-              identity: true
-              statements: true
-              transactions: true
             account_filters:
               loan:
               - loan
@@ -26737,11 +26794,6 @@ components:
               credit:
               - credit
               - credit
-            required_product_access:
-              auth: true
-              identity: true
-              statements: true
-              transactions: true
           reason_for_access: reason_for_access
           logo_url: logo_url
           join_date: 2000-01-23
@@ -26754,11 +26806,6 @@ components:
           application_id: application_id
           application_url: application_url
         - requested_scopes:
-            optional_product_access:
-              auth: true
-              identity: true
-              statements: true
-              transactions: true
             account_filters:
               loan:
               - loan
@@ -26772,11 +26819,6 @@ components:
               credit:
               - credit
               - credit
-            required_product_access:
-              auth: true
-              identity: true
-              statements: true
-              transactions: true
           reason_for_access: reason_for_access
           logo_url: logo_url
           join_date: 2000-01-23
@@ -26807,11 +26849,6 @@ components:
       description: Describes the connected application for a particular end user.
       example:
         requested_scopes:
-          optional_product_access:
-            auth: true
-            identity: true
-            statements: true
-            transactions: true
           account_filters:
             loan:
             - loan
@@ -26825,11 +26862,6 @@ components:
             credit:
             - credit
             - credit
-          required_product_access:
-            auth: true
-            identity: true
-            statements: true
-            transactions: true
         reason_for_access: reason_for_access
         logo_url: logo_url
         join_date: 2000-01-23
