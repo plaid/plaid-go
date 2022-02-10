@@ -1,5 +1,28 @@
 This library is generated from an OpenAPI schema (OAS). See full changelog [here](https://github.com/plaid/plaid-openapi/blob/master/CHANGELOG.md) for schema changes.
 
+# 2.0.1
+- Updating to OAS 2020-09-14_1.64.14
+- Fix issue with nullable strings incorrectly reporting if they are set.
+
+## OpenAPI Schema Changes
+### 2020-09-14_1.64.14
+- Made `last_payment_amount` and `last_statement_issue_date` `nullable` for credit card liabilities schema to reflect existing API behavior.
+- Fix transfers examples to reflect more consistent usage of `region` field.
+
+### 2020-09-14_1.64.13
+- Deprecate `idempotency_key` parameter in transfer/create
+
+### 2020-09-14_1.64.12
+- Removed the unused `required_product_access` and `optional_product_access` parameters from `RequestedScopes`
+
+### 2020-09-14_1.64.11
+- Fix some examples that were not consistent with their schemas
+- Add `adjustments` as an investments transaction type to make OpenAPI file consistent with values returned by the API
+- Clarify description field for `marital_status` to reflect possible values
+
+### 2020-09-14_1.64.10
+- Updated the external docs URL for Bank Transfers sandbox endpoints
+
 # 2.0.0
 - Updating to OAS 2020-09-14_1.64.9
 

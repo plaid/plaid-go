@@ -155,9 +155,11 @@ model_historical_update_webhook.go
 model_holding.go
 model_holdings_default_update_webhook.go
 model_holdings_override.go
+model_identity_default_update_webhook.go
 model_identity_get_request.go
 model_identity_get_request_options.go
 model_identity_get_response.go
+model_identity_update_types.go
 model_incident_update.go
 model_income_breakdown.go
 model_income_breakdown_type.go
