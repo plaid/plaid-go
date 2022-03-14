@@ -7,7 +7,7 @@ info:
     details.
   termsOfService: https://plaid.com/legal/
   title: The Plaid API
-  version: 2020-09-14_1.79.0
+  version: 2020-09-14_1.84.5
 servers:
 - description: Production
   url: https://production.plaid.com
@@ -2346,6 +2346,35 @@ paths:
       summary: Create public token
       tags:
       - plaid
+  /user/create:
+    post:
+      description: 'Note: As of February 2022, the `/user/create` endpoint is in beta.
+        Unless you have been opted-in, you will not have access to this endpoint.'
+      externalDocs:
+        url: /api/users/#usercreate
+      operationId: userCreate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    user_token: user-sandbox-b0e2c4ee-a763-4df5-bfe9-46a46bce993d
+                    user_id: wz666MBjYWTp2PDzzggYhM6oWWmBb
+                    request_id: Aim3b
+              schema:
+                $ref: '#/components/schemas/UserCreateResponse'
+          description: OK
+      summary: Create user
+      tags:
+      - plaid
   /payment_initiation/payment/get:
     post:
       description: The `/payment_initiation/payment/get` endpoint can be used to check
@@ -4064,22 +4093,22 @@ paths:
       - plaid
   /transfer/authorization/create:
     post:
-      description: |-
-        Use the `/transfer/authorization/create` endpoint to determine transfer failure risk.
-
-        In Plaid's sandbox environment the decisions will be returned as follows:
-
-          - To approve a transfer, make an authorization request with an `amount` less than the available balance in the account.
-
-          - To decline a transfer with the rationale code `NSF`, the available balance on the account must be less than the authorization `amount`. See [Create Sandbox test data](https://plaid.com/docs/sandbox/user-custom/) for details on how to customize data in Sandbox.
-
-          - To decline a transfer with the rationale code `RISK`, the available balance on the account must be exactly $0. See [Create Sandbox test data](https://plaid.com/docs/sandbox/user-custom/) for details on how to customize data in Sandbox.
-
-          - To permit a transfer with the rationale code `MANUALLY_VERIFIED_ITEM`, create an Item in Link through the [Same Day Micro-deposits flow](https://plaid.com/docs/auth/coverage/testing/#testing-same-day-micro-deposits).
-
-          - To permit a transfer with the rationale code `LOGIN_REQUIRED`, [reset the login for an Item](https://plaid.com/docs/sandbox/#item_login_required).
-
-        All username/password combinations other than the ones listed above will result in a decision of permitted and rationale code `ERROR`.
+      description: "Use the `/transfer/authorization/create` endpoint to determine\
+        \ transfer failure risk.\n\nIn Plaid's sandbox environment the decisions will\
+        \ be returned as follows:\n\n  - To approve a transfer with null rationale\
+        \ code, make an authorization request with an `amount` less than the available\
+        \ balance in the account.\n\n  - To approve a transfer with the rationale\
+        \ code `MANUALLY_VERIFIED_ITEM`, create an Item in Link through the [Same\
+        \ Day Micro-deposits flow](https://plaid.com/docs/auth/coverage/testing/#testing-same-day-micro-deposits).\n\
+        \  \n  - To approve a transfer with the rationale code `LOGIN_REQUIRED`, [reset\
+        \ the login for an Item](https://plaid.com/docs/sandbox/#item_login_required).\n\
+        \  \n  - To decline a transfer with the rationale code `NSF`, the available\
+        \ balance on the account must be less than the authorization `amount`. See\
+        \ [Create Sandbox test data](https://plaid.com/docs/sandbox/user-custom/)\
+        \ for details on how to customize data in Sandbox.\n\n  - To decline a transfer\
+        \ with the rationale code `RISK`, the available balance on the account must\
+        \ be exactly $0. See [Create Sandbox test data](https://plaid.com/docs/sandbox/user-custom/)\
+        \ for details on how to customize data in Sandbox."
       externalDocs:
         url: /api/products/transfer/#transferauthorizationcreate
       operationId: transferAuthorizationCreate
@@ -5666,9 +5695,10 @@ paths:
       - plaid
   /credit/bank_income/get:
     post:
-      description: This endpoint gets the bank income report(s) for a specified user.
+      description: '`/credit/bank_income/get` returns the bank income report(s) for
+        a specified user.'
       externalDocs:
-        url: /api/products/#creditbankincomeget
+        url: /api/products/income/#creditbank_incomeget
       operationId: creditBankIncomeGet
       requestBody:
         content:
@@ -5700,6 +5730,44 @@ paths:
                           official_name: Plaid Checking Account
                           type: depository
                           subtype: checking
+                          owners:
+                          - addresses:
+                            - data:
+                                city: Malakoff
+                                country: US
+                                postal_code: "14236"
+                                region: NY
+                                street: 2992 Cameron Road
+                              primary: true
+                            - data:
+                                city: San Matias
+                                country: US
+                                postal_code: 93405-2255
+                                region: CA
+                                street: 2493 Leisure Lane
+                              primary: false
+                            emails:
+                            - data: accountholder0@example.com
+                              primary: true
+                              type: primary
+                            - data: accountholder1@example.com
+                              primary: false
+                              type: secondary
+                            - data: extraordinarily.long.email.username.123456@reallylonghostname.com
+                              primary: false
+                              type: other
+                            names:
+                            - Alberta Bobbeth Charleson
+                            phone_numbers:
+                            - data: "1112223333"
+                              primary: false
+                              type: home
+                            - data: "1112224444"
+                              primary: false
+                              type: work
+                            - data: "1112225555"
+                              primary: false
+                              type: mobile1
                         bank_income_sources:
                         - account_id: GeooLPBGDEunl54q7N3ZcyD5aLPLEai1nkzM9
                           income_source_id: “f17efbdd-caab-4278-8ece-963511cd3d51”
@@ -5811,10 +5879,11 @@ paths:
                             check_number: null
                             iso_currency_code: USD
                             unofficial_currency_code: null
+                      warnings: []
               schema:
                 $ref: '#/components/schemas/CreditBankIncomeGetResponse'
           description: OK
-      summary: Get bank income report(s) for a user
+      summary: Retrieve information from the bank accounts used for income verification
       tags:
       - plaid
   /sandbox/bank_transfer/fire_webhook:
@@ -6188,6 +6257,154 @@ paths:
       summary: enhance locally-held transaction data
       tags:
       - plaid
+  /beta/transactions/rules/create:
+    post:
+      description: |-
+        The `/transactions/rules/create` endpoint creates transaction categorization rules.
+
+        Rules will be applied on the Item's transactions returned in `/transactions/get` response.
+
+        The product is currently in beta. To request access, contact transactions-feedback@plaid.com.
+      operationId: transactionsRulesCreate
+      requestBody:
+        content:
+          application/json:
+            examples:
+              example-1:
+                value:
+                  client_id: 7f57eb3d2a9j6480121fx361
+                  secret: 79g03eoofwl8240v776r2h667442119
+                  access_token: access-sandbox-71e02f71-0960-4a27-abd2-5631e04f2175
+                  personal_finance_category: FOOD_AND_DRINK_FAST_FOOD
+                  rule_details:
+                    field: NAME
+                    type: SUBSTRING_MATCH
+                    query: Burger Shack
+            schema:
+              $ref: '#/components/schemas/TransactionsRulesCreateRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    rule:
+                      id: lPNjeW1nR6CDn5okmGQ6hEpMo4lLNo
+                      item_id: wz666MBjYWTp2PDzzggYhM6oWWmBb
+                      created_at: 2022-02-28T11:00:00Z
+                      personal_finance_category: FOOD_AND_DRINK_FAST_FOOD
+                      rule_details:
+                        field: NAME
+                        type: SUBSTRING_MATCH
+                        query: Burger Shack
+                    request_id: 4zlKapIkTm8p5KM
+              schema:
+                $ref: '#/components/schemas/TransactionsRulesCreateResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error response
+      summary: Create transaction category rule
+      tags:
+      - plaid
+  /beta/transactions/rules/list:
+    post:
+      description: The `/transactions/rules/list` returns a list of transaction rules
+        created for the Item associated with the access token.
+      operationId: transactionsRulesList
+      requestBody:
+        content:
+          application/json:
+            examples:
+              example-1:
+                value:
+                  client_id: 7f57eb3d2a9j6480121fx361
+                  secret: 79g03eoofwl8240v776r2h667442119
+                  access_token: access-sandbox-71e02f71-0960-4a27-abd2-5631e04f2175
+            schema:
+              $ref: '#/components/schemas/TransactionsRulesListRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    rules:
+                    - id: lPNjeW1nR6CDn5okmGQ6hEpMo4lLNo
+                      item_id: wz666MBjYWTp2PDzzggYhM6oWWmBb
+                      created_at: 2022-02-28T11:00:00Z
+                      personal_finance_category: FOOD_AND_DRINK_FAST_FOOD
+                      rule_details:
+                        field: NAME
+                        type: SUBSTRING_MATCH
+                        query: Burger Shack
+                    - id: eVBnVMp7zdTJLkRNr33Rs6zr7KNJqBF
+                      item_id: wz666MBjYWTp2PDzzggYhM6oWWmBb
+                      created_at: 2022-02-27T14:50:00Z
+                      personal_finance_category: TRANSFER_IN_ACCOUNT_TRANSFER
+                      rule_details:
+                        field: TRANSACTION_ID
+                        type: EXACT_MATCH
+                        query: kgygNvAVPzSX9KkddNdWHaVGRVex1MHm3k9no
+                    request_id: 4zlKapIkTm8p5KM
+              schema:
+                $ref: '#/components/schemas/TransactionsRulesListResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error response
+      summary: Return a list of rules created for the Item associated with the access
+        token.
+      tags:
+      - plaid
+  /beta/transactions/rules/remove:
+    post:
+      description: The `/transactions/rules/remove` endpoint is used to remove a transaction
+        rule.
+      operationId: transactionsRulesRemove
+      requestBody:
+        content:
+          application/json:
+            examples:
+              example-1:
+                value:
+                  client_id: 7f57eb3d2a9j6480121fx361
+                  secret: 79g03eoofwl8240v776r2h667442119
+                  access_token: access-sandbox-71e02f71-0960-4a27-abd2-5631e04f2175
+                  rule_id: eVBnVMp7zdTJLkRNr33Rs6zr7KNJqBF
+            schema:
+              $ref: '#/components/schemas/TransactionsRulesRemoveRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    request_id: 4zlKapIkTm8p5KM
+              schema:
+                $ref: '#/components/schemas/TransactionsRulesRemoveResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error response
+      summary: Remove transaction rule
+      tags:
+      - plaid
 components:
   schemas:
     ItemGetRequest:
@@ -6241,6 +6458,9 @@ components:
             documentation_url: documentation_url
             request_id: request_id
             status: 0.8008281904610115
+          consented_products:
+          - null
+          - null
           available_products:
           - null
           - null
@@ -6335,6 +6555,9 @@ components:
             documentation_url: documentation_url
             request_id: request_id
             status: 0.8008281904610115
+          consented_products:
+          - null
+          - null
           available_products:
           - null
           - null
@@ -6620,6 +6843,9 @@ components:
             documentation_url: documentation_url
             request_id: request_id
             status: 0.8008281904610115
+          consented_products:
+          - null
+          - null
           available_products:
           - null
           - null
@@ -6780,15 +7006,17 @@ components:
         `/transactions/recurring/get`
       example:
         inflow_streams:
-        - account_id: account_id
-          average_amount:
+        - average_amount:
             unofficial_currency_code: unofficial_currency_code
             amount: 0.8008281904610115
             iso_currency_code: iso_currency_code
           is_active: true
+          description: description
+          merchant_name: merchant_name
+          last_date: 2000-01-23
+          account_id: account_id
           category_id: category_id
           stream_id: stream_id
-          description: description
           transaction_ids:
           - transaction_ids
           - transaction_ids
@@ -6796,16 +7024,21 @@ components:
           - category
           - category
           first_date: 2000-01-23
-          last_date: 2000-01-23
-        - account_id: account_id
-          average_amount:
+          last_amount:
+            unofficial_currency_code: unofficial_currency_code
+            amount: 0.8008281904610115
+            iso_currency_code: iso_currency_code
+        - average_amount:
             unofficial_currency_code: unofficial_currency_code
             amount: 0.8008281904610115
             iso_currency_code: iso_currency_code
           is_active: true
+          description: description
+          merchant_name: merchant_name
+          last_date: 2000-01-23
+          account_id: account_id
           category_id: category_id
           stream_id: stream_id
-          description: description
           transaction_ids:
           - transaction_ids
           - transaction_ids
@@ -6813,18 +7046,24 @@ components:
           - category
           - category
           first_date: 2000-01-23
-          last_date: 2000-01-23
+          last_amount:
+            unofficial_currency_code: unofficial_currency_code
+            amount: 0.8008281904610115
+            iso_currency_code: iso_currency_code
+        updated_datetime: 2000-01-23T04:56:07.000+00:00
         request_id: request_id
         outflow_streams:
-        - account_id: account_id
-          average_amount:
+        - average_amount:
             unofficial_currency_code: unofficial_currency_code
             amount: 0.8008281904610115
             iso_currency_code: iso_currency_code
           is_active: true
+          description: description
+          merchant_name: merchant_name
+          last_date: 2000-01-23
+          account_id: account_id
           category_id: category_id
           stream_id: stream_id
-          description: description
           transaction_ids:
           - transaction_ids
           - transaction_ids
@@ -6832,16 +7071,21 @@ components:
           - category
           - category
           first_date: 2000-01-23
-          last_date: 2000-01-23
-        - account_id: account_id
-          average_amount:
+          last_amount:
+            unofficial_currency_code: unofficial_currency_code
+            amount: 0.8008281904610115
+            iso_currency_code: iso_currency_code
+        - average_amount:
             unofficial_currency_code: unofficial_currency_code
             amount: 0.8008281904610115
             iso_currency_code: iso_currency_code
           is_active: true
+          description: description
+          merchant_name: merchant_name
+          last_date: 2000-01-23
+          account_id: account_id
           category_id: category_id
           stream_id: stream_id
-          description: description
           transaction_ids:
           - transaction_ids
           - transaction_ids
@@ -6849,7 +7093,10 @@ components:
           - category
           - category
           first_date: 2000-01-23
-          last_date: 2000-01-23
+          last_amount:
+            unofficial_currency_code: unofficial_currency_code
+            amount: 0.8008281904610115
+            iso_currency_code: iso_currency_code
       properties:
         inflow_streams:
           description: An array of depository transaction streams.
@@ -6861,6 +7108,12 @@ components:
           items:
             $ref: '#/components/schemas/TransactionStream'
           type: array
+        updated_datetime:
+          description: Timestamp in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            format (`YYYY-MM-DDTHH:mm:ssZ`) indicating the last time transaction streams
+            for the given account were updated on
+          format: date-time
+          type: string
         request_id:
           description: A unique identifier for the request, which can be used for
             troubleshooting. This identifier, like all Plaid identifiers, is case
@@ -6870,6 +7123,185 @@ components:
       required:
       - inflow_streams
       - outflow_streams
+      - request_id
+      - updated_datetime
+      type: object
+    TransactionsRulesCreateRequest:
+      description: TransactionsRulesCreateRequest defines the request schema for `/transactions/rules/create`
+      example:
+        access_token: access_token
+        rule_details:
+          query: query
+        secret: secret
+        personal_finance_category: personal_finance_category
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        access_token:
+          description: The access token associated with the Item data is being requested
+            for.
+          title: AccessToken
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        personal_finance_category:
+          description: |
+            Personal finance detailed category.
+
+            See the [`taxonomy csv file`](https://plaid.com/documents/transactions-personal-finance-category-taxonomy.csv) for a full list of personal finance categories.
+          type: string
+        rule_details:
+          $ref: '#/components/schemas/TransactionsRuleDetails'
+      required:
+      - access_token
+      - client_id
+      - personal_finance_category
+      - rule_details
+      - secret
+      type: object
+    TransactionsRulesCreateResponse:
+      additionalProperties: true
+      description: TransactionsRulesCreateResponse defines the response schema for
+        `/transactions/rules/create`
+      example:
+        rule:
+          item_id: item_id
+          created_at: 2000-01-23T04:56:07.000+00:00
+          rule_details:
+            query: query
+          id: id
+          personal_finance_category: personal_finance_category
+        request_id: request_id
+      properties:
+        rule:
+          $ref: '#/components/schemas/TransactionsCategoryRule'
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      - rule
+      type: object
+    TransactionsRulesListRequest:
+      description: TransactionsRulesListRequest defines the request schema for `/transactions/rules/list`
+      example:
+        access_token: access_token
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        access_token:
+          description: The access token associated with the Item data is being requested
+            for.
+          title: AccessToken
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+      required:
+      - access_token
+      - client_id
+      - secret
+      type: object
+    TransactionsRulesListResponse:
+      additionalProperties: true
+      description: TransactionsRulesListResponse defines the response schema for `/transactions/rules/list`
+      example:
+        rules:
+        - item_id: item_id
+          created_at: 2000-01-23T04:56:07.000+00:00
+          rule_details:
+            query: query
+          id: id
+          personal_finance_category: personal_finance_category
+        - item_id: item_id
+          created_at: 2000-01-23T04:56:07.000+00:00
+          rule_details:
+            query: query
+          id: id
+          personal_finance_category: personal_finance_category
+        request_id: request_id
+      properties:
+        rules:
+          description: A list of the Item's transaction rules
+          items:
+            $ref: '#/components/schemas/TransactionsCategoryRule'
+          type: array
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      - rules
+      type: object
+    TransactionsRulesRemoveRequest:
+      description: TransactionsRulesRemoveRequest defines the request schema for `/transactions/rules/remove`
+      example:
+        access_token: access_token
+        rule_id: rule_id
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        access_token:
+          description: The access token associated with the Item data is being requested
+            for.
+          title: AccessToken
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        rule_id:
+          description: A rule's unique identifier
+          type: string
+      required:
+      - access_token
+      - client_id
+      - rule_id
+      - secret
+      type: object
+    TransactionsRulesRemoveResponse:
+      additionalProperties: true
+      description: TransactionsRulesRemoveResponse defines the response schema for
+        `/transactions/rules/remove`
+      example:
+        request_id: request_id
+      properties:
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
       - request_id
       type: object
     TransactionsSyncRequest:
@@ -8054,6 +8486,9 @@ components:
             documentation_url: documentation_url
             request_id: request_id
             status: 0.8008281904610115
+          consented_products:
+          - null
+          - null
           available_products:
           - null
           - null
@@ -8555,6 +8990,9 @@ components:
             documentation_url: documentation_url
             request_id: request_id
             status: 0.8008281904610115
+          consented_products:
+          - null
+          - null
           available_products:
           - null
           - null
@@ -8979,6 +9417,9 @@ components:
             documentation_url: documentation_url
             request_id: request_id
             status: 0.8008281904610115
+          consented_products:
+          - null
+          - null
           available_products:
           - null
           - null
@@ -9239,6 +9680,9 @@ components:
             documentation_url: documentation_url
             request_id: request_id
             status: 0.8008281904610115
+          consented_products:
+          - null
+          - null
           available_products:
           - null
           - null
@@ -10025,6 +10469,58 @@ components:
       required:
       - public_token
       - request_id
+      type: object
+    UserCreateRequest:
+      description: UserCreateRequest defines the request schema for `/user/create`
+      example:
+        client_user_id: client_user_id
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        client_user_id:
+          description: A unique ID representing the end user. Typically this will
+            be a user ID number from your application. Personally identifiable information,
+            such as an email address or phone number, should not be used in the `client_user_id`.
+          type: string
+      required:
+      - client_user_id
+      type: object
+    UserCreateResponse:
+      additionalProperties: true
+      description: UserCreateResponse defines the response schema for `/user/create`
+      example:
+        user_id: user_id
+        user_token: user_token
+        request_id: request_id
+      properties:
+        user_token:
+          description: The user token associated with the User data is being requested
+            for.
+          title: UserToken
+          type: string
+        user_id:
+          type: string
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      - user_id
+      - user_token
       type: object
     PaymentInitiationPaymentGetRequest:
       description: PaymentInitiationPaymentGetRequest defines the request schema for
@@ -10944,8 +11440,14 @@ components:
       example:
         asset_relay_token: asset_relay_token
         request_id: request_id
+        asset_report_id: asset_report_id
       properties:
         asset_relay_token:
+          type: string
+        asset_report_id:
+          description: A unique ID identifying an Asset Report. Like all Plaid identifiers,
+            this ID is case sensitive.
+          title: AssetReportId
           type: string
         request_id:
           description: A unique identifier for the request, which can be used for
@@ -11501,6 +12003,9 @@ components:
             documentation_url: documentation_url
             request_id: request_id
             status: 0.8008281904610115
+          consented_products:
+          - null
+          - null
           available_products:
           - null
           - null
@@ -11721,6 +12226,9 @@ components:
             documentation_url: documentation_url
             request_id: request_id
             status: 0.8008281904610115
+          consented_products:
+          - null
+          - null
           available_products:
           - null
           - null
@@ -12304,8 +12812,17 @@ components:
       description: LinkTokenCreateRequest defines the request schema for `/link/token/create`
       example:
         income_verification:
+          bank_income:
+            days_requested: 0
+          income_source_types:
+          - null
+          - null
           income_verification_id: income_verification_id
           precheck_id: precheck_id
+          payroll_income:
+            flow_types:
+            - null
+            - null
           access_tokens:
           - null
           - null
@@ -12352,6 +12869,7 @@ components:
         - null
         - null
         redirect_uri: redirect_uri
+        user_token: user_token
         client_name: client_name
         user:
           phone_number_verified_time: 2000-01-23T04:56:07.000+00:00
@@ -12491,6 +13009,10 @@ components:
           $ref: '#/components/schemas/LinkTokenCreateRequestTransfer'
         update:
           $ref: '#/components/schemas/LinkTokenCreateRequestUpdate'
+        user_token:
+          description: A user token generated using /user/create. Any item created
+            during the link session will be associated with the user.
+          type: string
       required:
       - client_name
       - country_codes
@@ -12929,6 +13451,9 @@ components:
           documentation_url: documentation_url
           request_id: request_id
           status: 0.8008281904610115
+        consented_products:
+        - null
+        - null
         available_products:
         - null
         - null
@@ -12969,6 +13494,12 @@ components:
         products:
           description: |
             A list of authorized products for the Item.
+          items:
+            $ref: '#/components/schemas/Products'
+          type: array
+        consented_products:
+          description: |
+            Beta: A list of products that have gone through consent collection for the Item. Only present for those enabled in the beta.
           items:
             $ref: '#/components/schemas/Products'
           type: array
@@ -13681,6 +14212,74 @@ components:
         This identifier, like all Plaid identifiers, is case sensitive.
       title: RequestID
       type: string
+    TransactionsRuleDetails:
+      description: A representation of transactions rule details.
+      example:
+        query: query
+      properties:
+        field:
+          $ref: '#/components/schemas/TransactionsRuleField'
+        type:
+          $ref: '#/components/schemas/TransactionsRuleType'
+        query:
+          description: |
+            For TRANSACTION_ID field, provide transaction_id. For NAME field, provide a string pattern.
+          type: string
+      required:
+      - field
+      - query
+      - type
+      title: TransactionsRuleDetails
+      type: object
+      x-examples: {}
+    TransactionsRuleField:
+      description: Transaction field for which the rule is defined.
+      enum:
+      - TRANSACTION_ID
+      - NAME
+      title: TransactionsRuleField
+      type: string
+    TransactionsRuleType:
+      description: |
+        Transaction rule's match type. For TRANSACTION_ID field, EXACT_MATCH is available.
+        Matches are case sensitive.
+      enum:
+      - EXACT_MATCH
+      - SUBSTRING_MATCH
+      title: TransactionsRuleType
+      type: string
+    TransactionsCategoryRule:
+      description: A representation of a transactions category rule.
+      example:
+        item_id: item_id
+        created_at: 2000-01-23T04:56:07.000+00:00
+        rule_details:
+          query: query
+        id: id
+        personal_finance_category: personal_finance_category
+      properties:
+        id:
+          description: A unique identifier of the rule created
+          type: string
+        item_id:
+          description: A unique identifier of the item the rule was created for
+          type: string
+        created_at:
+          description: |
+            Date and time when a rule was created in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format ( `YYYY-MM-DDTHH:mm:ssZ` ).
+          format: date-time
+          type: string
+        personal_finance_category:
+          description: |
+            Personal finance category unique identifier.
+
+            In the personal finance category taxonomy, this field is represented by the detailed category field.
+          type: string
+        rule_details:
+          $ref: '#/components/schemas/TransactionsRuleDetails'
+      title: TransactionsCategoryRule
+      type: object
+      x-examples: {}
     TransactionBase:
       additionalProperties: true
       description: A representation of a transaction
@@ -13877,15 +14476,17 @@ components:
       additionalProperties: true
       description: A grouping of related transactions
       example:
-        account_id: account_id
         average_amount:
           unofficial_currency_code: unofficial_currency_code
           amount: 0.8008281904610115
           iso_currency_code: iso_currency_code
         is_active: true
+        description: description
+        merchant_name: merchant_name
+        last_date: 2000-01-23
+        account_id: account_id
         category_id: category_id
         stream_id: stream_id
-        description: description
         transaction_ids:
         - transaction_ids
         - transaction_ids
@@ -13893,7 +14494,10 @@ components:
         - category
         - category
         first_date: 2000-01-23
-        last_date: 2000-01-23
+        last_amount:
+          unofficial_currency_code: unofficial_currency_code
+          amount: 0.8008281904610115
+          iso_currency_code: iso_currency_code
       properties:
         account_id:
           description: The ID of the account to which the stream belongs
@@ -13914,6 +14518,9 @@ components:
         description:
           description: A description of the transaction stream.
           type: string
+        merchant_name:
+          description: The merchant associated with the transaction stream.
+          type: string
         first_date:
           description: The posted date of the earliest transaction in the stream.
           format: date
@@ -13932,9 +14539,13 @@ components:
           type: array
         average_amount:
           $ref: '#/components/schemas/TransactionStreamAmount'
+        last_amount:
+          $ref: '#/components/schemas/TransactionStreamAmount'
         is_active:
-          description: indicates whether the transaction stream is still live.
+          description: Indicates whether the transaction stream is still live.
           type: boolean
+        status:
+          $ref: '#/components/schemas/TransactionStreamStatus'
       required:
       - account_id
       - average_amount
@@ -13944,7 +14555,10 @@ components:
       - first_date
       - frequency
       - is_active
+      - last_amount
       - last_date
+      - merchant_name
+      - status
       - stream_id
       - transaction_ids
       title: TransactionStream
@@ -13959,7 +14573,7 @@ components:
         iso_currency_code: iso_currency_code
       properties:
         amount:
-          description: represents the numerical value of an amount.
+          description: Represents the numerical value of an amount.
           format: double
           type: number
         iso_currency_code:
@@ -13979,7 +14593,7 @@ components:
       title: TransactionStreamAmount
       type: object
     RecurringTransactionFrequency:
-      description: describes the frequency of the transaction stream.
+      description: Describes the frequency of the transaction stream.
       enum:
       - UNKNOWN
       - WEEKLY
@@ -13987,6 +14601,22 @@ components:
       - SEMI_MONTHLY
       - MONTHLY
       title: RecurringTransactionFrequency
+      type: string
+    TransactionStreamStatus:
+      description: "The current status of the transaction stream.\n\n`mature`: A mature\
+        \ recurring stream should have at least 3 transactions and happen on a regular\
+        \ cadence. \n\n`early_detection`: When a recurring transaction first appears\
+        \ in the transaction history and before it fulfills the requirement of a mature\
+        \ stream, we set the status as early_detection.\n\n`tombstoned`: An early_detection\
+        \ stream would be tombstoned if no further transactions were found at the\
+        \ next expected date.\n\n`unknown`: A stream is assigned an unknown status\
+        \ when none of the other statuses are applicable."
+      enum:
+      - UNKNOWN
+      - MATURE
+      - EARLY_DETECTION
+      - TOMBSTONED
+      title: TransactionStreamStatus
       type: string
     Institution:
       additionalProperties: true
@@ -14523,6 +15153,11 @@ components:
       - primary
       title: PersonalFinanceCategory
       type: object
+    UserToken:
+      description: The user token associated with the User data is being requested
+        for.
+      title: UserToken
+      type: string
     AccessToken:
       description: The access token associated with the Item data is being requested
         for.
@@ -14769,6 +15404,10 @@ components:
     PhoneNumber:
       additionalProperties: true
       description: A phone number
+      example:
+        data: data
+        type: home
+        primary: true
       properties:
         data:
           description: The phone number.
@@ -14796,6 +15435,10 @@ components:
     Email:
       additionalProperties: true
       description: An object representing an email address
+      example:
+        data: data
+        type: primary
+        primary: true
       properties:
         data:
           description: The email address.
@@ -14820,6 +15463,14 @@ components:
     Address:
       additionalProperties: true
       description: A physical mailing address.
+      example:
+        data:
+          country: country
+          city: city
+          street: street
+          region: region
+          postal_code: postal_code
+        primary: true
       properties:
         data:
           $ref: '#/components/schemas/AddressData'
@@ -14848,6 +15499,12 @@ components:
     AddressData:
       additionalProperties: true
       description: Data about the components comprising an address.
+      example:
+        country: country
+        city: city
+        street: street
+        region: region
+        postal_code: postal_code
       properties:
         city:
           description: The full city name
@@ -14924,6 +15581,39 @@ components:
       additionalProperties: true
       description: Data returned from the financial institution about the owner or
         owners of an account. Only the `names` array must be non-empty.
+      example:
+        emails:
+        - data: data
+          type: primary
+          primary: true
+        - data: data
+          type: primary
+          primary: true
+        phone_numbers:
+        - data: data
+          type: home
+          primary: true
+        - data: data
+          type: home
+          primary: true
+        addresses:
+        - data:
+            country: country
+            city: city
+            street: street
+            region: region
+            postal_code: postal_code
+          primary: true
+        - data:
+            country: country
+            city: city
+            street: street
+            region: region
+            postal_code: postal_code
+          primary: true
+        names:
+        - names
+        - names
       properties:
         names:
           description: |-
@@ -17008,6 +17698,11 @@ components:
       description: The `item_id` of the Item associated with this webhook, warning,
         or error
       title: ItemId
+      type: string
+    UserId:
+      description: The Plaid `user_id` of the User associated with this webhook, warning,
+        or error.
+      title: UserId
       type: string
     AutomaticallyVerifiedWebhook:
       additionalProperties: true
@@ -20578,17 +21273,17 @@ components:
       type: object
     TransferAuthorizationDecisionRationaleCode:
       description: |-
-        A code representing the rationale for permitting or declining the proposed transfer. Possible values are:
+        A code representing the rationale for approving or declining the proposed transfer. Possible values are:
 
-        `NSF` – Transaction likely to result in a return due to insufficient funds.
+        `MANUALLY_VERIFIED_ITEM` – Item created via same-day micro deposits, limited information available. Plaid will offer `approved` as a transaction decision.
 
-        `RISK` - Transaction is high-risk.
+        `LOGIN_REQUIRED` – Unable to collect the account information due to Item staleness. Can be rectified using Link in update mode. Plaid will offer `approved` as a transaction decision.
 
-        `MANUALLY_VERIFIED_ITEM` – Item created via same-day micro deposits, limited information available. Plaid can only offer `permitted` as a transaction decision.
+        `ERROR` – Unable to collect the account information due to an error. Plaid will offer `approved` as a transaction decision.
 
-        `LOGIN_REQUIRED` – Unable to collect the account information required for an authorization decision due to Item staleness. Can be rectified using Link update mode.
+        `NSF` – Transaction likely to result in a return due to insufficient funds. Plaid will offer `declined` as a transaction decision.
 
-        `ERROR` – Unable to collect the account information required for an authorization decision due to an error.
+        `RISK` - Transaction is high-risk. Plaid will offer `declined` as a transaction decision.
       enum:
       - NSF
       - RISK
@@ -20599,7 +21294,8 @@ components:
     TransferAuthorizationDecisionRationale:
       additionalProperties: true
       description: The rationale for Plaid's decision regarding a proposed transfer.
-        Will be null for `approved` decisions.
+        It is always set for `declined` decisions, and may or may not be null for
+        `approved` decisions.
       example:
         description: description
       nullable: true
@@ -20608,7 +21304,7 @@ components:
           $ref: '#/components/schemas/TransferAuthorizationDecisionRationaleCode'
         description:
           description: A human-readable description of the code associated with a
-            permitted transfer or transfer decline.
+            transfer approval or transfer decline.
           type: string
       required:
       - code
@@ -21209,18 +21905,15 @@ components:
       title: TransferAuthorizationCreateResponse
       type: object
     TransferAuthorizationDecision:
-      description: "\nA decision regarding the proposed transfer.\n\n`approved` –\
-        \ The proposed transfer has received the end user's consent and has been approved\
-        \ for processing. Plaid has also reviewed the proposed transfer and has approved\
-        \ it for processing. \n\n`permitted` – Plaid was unable to fetch the information\
-        \ required to approve or decline the proposed transfer. You may proceed with\
-        \ the transfer, but further review is recommended. Plaid is awaiting further\
-        \ instructions from the client.\n\n`declined` – Plaid reviewed the proposed\
-        \ transfer and declined processing. Refer to the `code` field in the `decision_rationale`\
-        \ object for details."
+      description: |2-
+
+        A decision regarding the proposed transfer.
+
+        `approved` – The proposed transfer has received the end user's consent and has been approved for processing by Plaid. The `decision_rationale` field is set if Plaid was unable to fetch the account information. You may proceed with the transfer, but further review is recommended (i.e., use Link in update to re-authenticate your user when `decision_rationale.code` is `LOGIN_REQUIRED`). Refer to the `code` field in the `decision_rationale` object for details.
+
+        `declined` – Plaid reviewed the proposed transfer and declined processing. Refer to the `code` field in the `decision_rationale` object for details.
       enum:
       - approved
-      - permitted
       - declined
       type: string
     TransferAuthorization:
@@ -23240,18 +23933,15 @@ components:
       title: TransferIntentGetRequest
       type: object
     TransferIntentAuthorizationDecision:
-      description: "\nA decision regarding the proposed transfer.\n\n`APPROVED` –\
-        \ The proposed transfer has received the end user's consent and has been approved\
-        \ for processing. Plaid has also reviewed the proposed transfer and has approved\
-        \ it for processing. \n\n`PERMITTED` – Plaid was unable to fetch the information\
-        \ required to approve or decline the proposed transfer. You may proceed with\
-        \ the transfer, but further review is recommended. Plaid is awaiting further\
-        \ instructions from the client.\n\n`DECLINED` – Plaid reviewed the proposed\
-        \ transfer and declined processing. Refer to the `code` field in the `decision_rationale`\
-        \ object for details. Null value otherwise."
+      description: |2-
+
+        A decision regarding the proposed transfer.
+
+        `APPROVED` – The proposed transfer has received the end user's consent and has been approved for processing by Plaid. The `decision_rationale` field is set if Plaid was unable to fetch the account information. You may proceed with the transfer, but further review is recommended (i.e., use Link in update to re-authenticate your user when `decision_rationale.code` is `LOGIN_REQUIRED`). Refer to the `code` field in the `decision_rationale` object for details.
+
+        `DECLINED` – Plaid reviewed the proposed transfer and declined processing. Refer to the `code` field in the `decision_rationale` object for details.
       enum:
       - APPROVED
-      - PERMITTED
       - DECLINED
       nullable: true
       type: string
@@ -23853,7 +24543,7 @@ components:
       - other
       - other annuity
       - other insurance
-      - person
+      - pension
       - prif
       - profit sharing plan
       - qshr
@@ -24264,8 +24954,17 @@ components:
         (beta) product. This field is required if `income_verification` is included
         in the `products` array.
       example:
+        bank_income:
+          days_requested: 0
+        income_source_types:
+        - null
+        - null
         income_verification_id: income_verification_id
         precheck_id: precheck_id
+        payroll_income:
+          flow_types:
+          - null
+          - null
         access_tokens:
         - null
         - null
@@ -24295,8 +24994,64 @@ components:
           items:
             $ref: '#/components/schemas/AccessToken'
           type: array
+        income_source_types:
+          description: The types of source income data that users will be permitted
+            to share. Options include `bank` and `payroll`. Currently you can only
+            specify one of these options.
+          items:
+            $ref: '#/components/schemas/IncomeVerificationSourceType'
+          type: array
+        bank_income:
+          $ref: '#/components/schemas/LinkTokenCreateRequestIncomeVerificationBankIncome'
+        payroll_income:
+          $ref: '#/components/schemas/LinkTokenCreateRequestIncomeVerificationPayrollIncome'
       title: LinkTokenCreateRequestIncomeVerification
       type: object
+    IncomeVerificationSourceType:
+      description: The types of source income data that users should be able to share
+      enum:
+      - bank
+      - payroll
+      title: IncomeVerificationSourceType
+      type: string
+    LinkTokenCreateRequestIncomeVerificationBankIncome:
+      description: Specifies options for initializing Link for use with Bank Income.
+        This field is required if `income_verification` is included in the `products`
+        array and `bank` is specified in `income_source_types`.
+      example:
+        days_requested: 0
+      properties:
+        days_requested:
+          description: The number of days of data to request for the Bank Income product
+          type: integer
+      title: LinkTokenCreateRequestIncomeVerificationBankIncome
+      type: object
+    LinkTokenCreateRequestIncomeVerificationPayrollIncome:
+      description: Specifies options for initializing Link for use with Payroll Income.
+        This field is required if `income_verification` is included in the `products`
+        array and `payroll` is specified in `income_source_types`.
+      example:
+        flow_types:
+        - null
+        - null
+      properties:
+        flow_types:
+          description: The types of payroll income verification to enable for the
+            link session. If none are specified, then users will see both document
+            and digital payroll income.
+          items:
+            $ref: '#/components/schemas/IncomeVerificationPayrollFlowType'
+          nullable: true
+          type: array
+      title: LinkTokenCreateRequestIncomeVerificationPayrollIncome
+      type: object
+    IncomeVerificationPayrollFlowType:
+      description: Flow types to retrieve payroll income data
+      enum:
+      - payroll_digital_income
+      - payroll_document_income
+      title: IncomeVerificationPayrollFlowType
+      type: string
     IncomeVerificationStatusWebhook:
       additionalProperties: true
       description: Fired when the status of an income verification instance has changed.
@@ -27349,6 +28104,8 @@ components:
           title: APISecret
           type: string
         user_token:
+          description: The user token associated with the User data is being requested
+            for.
           title: UserToken
           type: string
         options:
@@ -27374,16 +28131,157 @@ components:
       example:
         bank_income:
         - bank_income_id: bank_income_id
+          warnings:
+          - cause:
+              error_message: error_message
+              item_id: item_id
+              display_message: display_message
+              error_code: error_code
+          - cause:
+              error_message: error_message
+              item_id: item_id
+              display_message: display_message
+              error_code: error_code
           items:
           - insitution_name: insitution_name
             bank_income_accounts:
             - official_name: official_name
               account_id: account_id
               name: name
+              owners:
+              - emails:
+                - data: data
+                  type: primary
+                  primary: true
+                - data: data
+                  type: primary
+                  primary: true
+                phone_numbers:
+                - data: data
+                  type: home
+                  primary: true
+                - data: data
+                  type: home
+                  primary: true
+                addresses:
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                names:
+                - names
+                - names
+              - emails:
+                - data: data
+                  type: primary
+                  primary: true
+                - data: data
+                  type: primary
+                  primary: true
+                phone_numbers:
+                - data: data
+                  type: home
+                  primary: true
+                - data: data
+                  type: home
+                  primary: true
+                addresses:
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                names:
+                - names
+                - names
               mask: mask
             - official_name: official_name
               account_id: account_id
               name: name
+              owners:
+              - emails:
+                - data: data
+                  type: primary
+                  primary: true
+                - data: data
+                  type: primary
+                  primary: true
+                phone_numbers:
+                - data: data
+                  type: home
+                  primary: true
+                - data: data
+                  type: home
+                  primary: true
+                addresses:
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                names:
+                - names
+                - names
+              - emails:
+                - data: data
+                  type: primary
+                  primary: true
+                - data: data
+                  type: primary
+                  primary: true
+                phone_numbers:
+                - data: data
+                  type: home
+                  primary: true
+                - data: data
+                  type: home
+                  primary: true
+                addresses:
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                names:
+                - names
+                - names
               mask: mask
             last_updated_time: 2000-01-23T04:56:07.000+00:00
             item_id: item_id
@@ -27506,10 +28404,140 @@ components:
             - official_name: official_name
               account_id: account_id
               name: name
+              owners:
+              - emails:
+                - data: data
+                  type: primary
+                  primary: true
+                - data: data
+                  type: primary
+                  primary: true
+                phone_numbers:
+                - data: data
+                  type: home
+                  primary: true
+                - data: data
+                  type: home
+                  primary: true
+                addresses:
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                names:
+                - names
+                - names
+              - emails:
+                - data: data
+                  type: primary
+                  primary: true
+                - data: data
+                  type: primary
+                  primary: true
+                phone_numbers:
+                - data: data
+                  type: home
+                  primary: true
+                - data: data
+                  type: home
+                  primary: true
+                addresses:
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                names:
+                - names
+                - names
               mask: mask
             - official_name: official_name
               account_id: account_id
               name: name
+              owners:
+              - emails:
+                - data: data
+                  type: primary
+                  primary: true
+                - data: data
+                  type: primary
+                  primary: true
+                phone_numbers:
+                - data: data
+                  type: home
+                  primary: true
+                - data: data
+                  type: home
+                  primary: true
+                addresses:
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                names:
+                - names
+                - names
+              - emails:
+                - data: data
+                  type: primary
+                  primary: true
+                - data: data
+                  type: primary
+                  primary: true
+                phone_numbers:
+                - data: data
+                  type: home
+                  primary: true
+                - data: data
+                  type: home
+                  primary: true
+                addresses:
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                names:
+                - names
+                - names
               mask: mask
             last_updated_time: 2000-01-23T04:56:07.000+00:00
             item_id: item_id
@@ -27688,16 +28716,157 @@ components:
             income_sources_count: 7
           days_requested: 0
         - bank_income_id: bank_income_id
+          warnings:
+          - cause:
+              error_message: error_message
+              item_id: item_id
+              display_message: display_message
+              error_code: error_code
+          - cause:
+              error_message: error_message
+              item_id: item_id
+              display_message: display_message
+              error_code: error_code
           items:
           - insitution_name: insitution_name
             bank_income_accounts:
             - official_name: official_name
               account_id: account_id
               name: name
+              owners:
+              - emails:
+                - data: data
+                  type: primary
+                  primary: true
+                - data: data
+                  type: primary
+                  primary: true
+                phone_numbers:
+                - data: data
+                  type: home
+                  primary: true
+                - data: data
+                  type: home
+                  primary: true
+                addresses:
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                names:
+                - names
+                - names
+              - emails:
+                - data: data
+                  type: primary
+                  primary: true
+                - data: data
+                  type: primary
+                  primary: true
+                phone_numbers:
+                - data: data
+                  type: home
+                  primary: true
+                - data: data
+                  type: home
+                  primary: true
+                addresses:
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                names:
+                - names
+                - names
               mask: mask
             - official_name: official_name
               account_id: account_id
               name: name
+              owners:
+              - emails:
+                - data: data
+                  type: primary
+                  primary: true
+                - data: data
+                  type: primary
+                  primary: true
+                phone_numbers:
+                - data: data
+                  type: home
+                  primary: true
+                - data: data
+                  type: home
+                  primary: true
+                addresses:
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                names:
+                - names
+                - names
+              - emails:
+                - data: data
+                  type: primary
+                  primary: true
+                - data: data
+                  type: primary
+                  primary: true
+                phone_numbers:
+                - data: data
+                  type: home
+                  primary: true
+                - data: data
+                  type: home
+                  primary: true
+                addresses:
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                names:
+                - names
+                - names
               mask: mask
             last_updated_time: 2000-01-23T04:56:07.000+00:00
             item_id: item_id
@@ -27820,10 +28989,140 @@ components:
             - official_name: official_name
               account_id: account_id
               name: name
+              owners:
+              - emails:
+                - data: data
+                  type: primary
+                  primary: true
+                - data: data
+                  type: primary
+                  primary: true
+                phone_numbers:
+                - data: data
+                  type: home
+                  primary: true
+                - data: data
+                  type: home
+                  primary: true
+                addresses:
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                names:
+                - names
+                - names
+              - emails:
+                - data: data
+                  type: primary
+                  primary: true
+                - data: data
+                  type: primary
+                  primary: true
+                phone_numbers:
+                - data: data
+                  type: home
+                  primary: true
+                - data: data
+                  type: home
+                  primary: true
+                addresses:
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                names:
+                - names
+                - names
               mask: mask
             - official_name: official_name
               account_id: account_id
               name: name
+              owners:
+              - emails:
+                - data: data
+                  type: primary
+                  primary: true
+                - data: data
+                  type: primary
+                  primary: true
+                phone_numbers:
+                - data: data
+                  type: home
+                  primary: true
+                - data: data
+                  type: home
+                  primary: true
+                addresses:
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                names:
+                - names
+                - names
+              - emails:
+                - data: data
+                  type: primary
+                  primary: true
+                - data: data
+                  type: primary
+                  primary: true
+                phone_numbers:
+                - data: data
+                  type: home
+                  primary: true
+                - data: data
+                  type: home
+                  primary: true
+                addresses:
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                - data:
+                    country: country
+                    city: city
+                    street: street
+                    region: region
+                    postal_code: postal_code
+                  primary: true
+                names:
+                - names
+                - names
               mask: mask
             last_updated_time: 2000-01-23T04:56:07.000+00:00
             item_id: item_id
@@ -28021,16 +29320,157 @@ components:
       description: The report of the Bank Income data for an end user.
       example:
         bank_income_id: bank_income_id
+        warnings:
+        - cause:
+            error_message: error_message
+            item_id: item_id
+            display_message: display_message
+            error_code: error_code
+        - cause:
+            error_message: error_message
+            item_id: item_id
+            display_message: display_message
+            error_code: error_code
         items:
         - insitution_name: insitution_name
           bank_income_accounts:
           - official_name: official_name
             account_id: account_id
             name: name
+            owners:
+            - emails:
+              - data: data
+                type: primary
+                primary: true
+              - data: data
+                type: primary
+                primary: true
+              phone_numbers:
+              - data: data
+                type: home
+                primary: true
+              - data: data
+                type: home
+                primary: true
+              addresses:
+              - data:
+                  country: country
+                  city: city
+                  street: street
+                  region: region
+                  postal_code: postal_code
+                primary: true
+              - data:
+                  country: country
+                  city: city
+                  street: street
+                  region: region
+                  postal_code: postal_code
+                primary: true
+              names:
+              - names
+              - names
+            - emails:
+              - data: data
+                type: primary
+                primary: true
+              - data: data
+                type: primary
+                primary: true
+              phone_numbers:
+              - data: data
+                type: home
+                primary: true
+              - data: data
+                type: home
+                primary: true
+              addresses:
+              - data:
+                  country: country
+                  city: city
+                  street: street
+                  region: region
+                  postal_code: postal_code
+                primary: true
+              - data:
+                  country: country
+                  city: city
+                  street: street
+                  region: region
+                  postal_code: postal_code
+                primary: true
+              names:
+              - names
+              - names
             mask: mask
           - official_name: official_name
             account_id: account_id
             name: name
+            owners:
+            - emails:
+              - data: data
+                type: primary
+                primary: true
+              - data: data
+                type: primary
+                primary: true
+              phone_numbers:
+              - data: data
+                type: home
+                primary: true
+              - data: data
+                type: home
+                primary: true
+              addresses:
+              - data:
+                  country: country
+                  city: city
+                  street: street
+                  region: region
+                  postal_code: postal_code
+                primary: true
+              - data:
+                  country: country
+                  city: city
+                  street: street
+                  region: region
+                  postal_code: postal_code
+                primary: true
+              names:
+              - names
+              - names
+            - emails:
+              - data: data
+                type: primary
+                primary: true
+              - data: data
+                type: primary
+                primary: true
+              phone_numbers:
+              - data: data
+                type: home
+                primary: true
+              - data: data
+                type: home
+                primary: true
+              addresses:
+              - data:
+                  country: country
+                  city: city
+                  street: street
+                  region: region
+                  postal_code: postal_code
+                primary: true
+              - data:
+                  country: country
+                  city: city
+                  street: street
+                  region: region
+                  postal_code: postal_code
+                primary: true
+              names:
+              - names
+              - names
             mask: mask
           last_updated_time: 2000-01-23T04:56:07.000+00:00
           item_id: item_id
@@ -28153,10 +29593,140 @@ components:
           - official_name: official_name
             account_id: account_id
             name: name
+            owners:
+            - emails:
+              - data: data
+                type: primary
+                primary: true
+              - data: data
+                type: primary
+                primary: true
+              phone_numbers:
+              - data: data
+                type: home
+                primary: true
+              - data: data
+                type: home
+                primary: true
+              addresses:
+              - data:
+                  country: country
+                  city: city
+                  street: street
+                  region: region
+                  postal_code: postal_code
+                primary: true
+              - data:
+                  country: country
+                  city: city
+                  street: street
+                  region: region
+                  postal_code: postal_code
+                primary: true
+              names:
+              - names
+              - names
+            - emails:
+              - data: data
+                type: primary
+                primary: true
+              - data: data
+                type: primary
+                primary: true
+              phone_numbers:
+              - data: data
+                type: home
+                primary: true
+              - data: data
+                type: home
+                primary: true
+              addresses:
+              - data:
+                  country: country
+                  city: city
+                  street: street
+                  region: region
+                  postal_code: postal_code
+                primary: true
+              - data:
+                  country: country
+                  city: city
+                  street: street
+                  region: region
+                  postal_code: postal_code
+                primary: true
+              names:
+              - names
+              - names
             mask: mask
           - official_name: official_name
             account_id: account_id
             name: name
+            owners:
+            - emails:
+              - data: data
+                type: primary
+                primary: true
+              - data: data
+                type: primary
+                primary: true
+              phone_numbers:
+              - data: data
+                type: home
+                primary: true
+              - data: data
+                type: home
+                primary: true
+              addresses:
+              - data:
+                  country: country
+                  city: city
+                  street: street
+                  region: region
+                  postal_code: postal_code
+                primary: true
+              - data:
+                  country: country
+                  city: city
+                  street: street
+                  region: region
+                  postal_code: postal_code
+                primary: true
+              names:
+              - names
+              - names
+            - emails:
+              - data: data
+                type: primary
+                primary: true
+              - data: data
+                type: primary
+                primary: true
+              phone_numbers:
+              - data: data
+                type: home
+                primary: true
+              - data: data
+                type: home
+                primary: true
+              addresses:
+              - data:
+                  country: country
+                  city: city
+                  street: street
+                  region: region
+                  postal_code: postal_code
+                primary: true
+              - data:
+                  country: country
+                  city: city
+                  street: street
+                  region: region
+                  postal_code: postal_code
+                primary: true
+              names:
+              - names
+              - names
             mask: mask
           last_updated_time: 2000-01-23T04:56:07.000+00:00
           item_id: item_id
@@ -28354,6 +29924,13 @@ components:
           type: array
         bank_income_summary:
           $ref: '#/components/schemas/CreditBankIncomeSummary'
+        warnings:
+          description: If data from the Bank Income report was unable to be retrieved,
+            the warnings will contain information about the error that caused the
+            data to be incomplete.
+          items:
+            $ref: '#/components/schemas/CreditBankIncomeWarning'
+          type: array
       type: object
     CreditBankIncomeItem:
       description: The details and metadata for an end user's Item.
@@ -28363,10 +29940,140 @@ components:
         - official_name: official_name
           account_id: account_id
           name: name
+          owners:
+          - emails:
+            - data: data
+              type: primary
+              primary: true
+            - data: data
+              type: primary
+              primary: true
+            phone_numbers:
+            - data: data
+              type: home
+              primary: true
+            - data: data
+              type: home
+              primary: true
+            addresses:
+            - data:
+                country: country
+                city: city
+                street: street
+                region: region
+                postal_code: postal_code
+              primary: true
+            - data:
+                country: country
+                city: city
+                street: street
+                region: region
+                postal_code: postal_code
+              primary: true
+            names:
+            - names
+            - names
+          - emails:
+            - data: data
+              type: primary
+              primary: true
+            - data: data
+              type: primary
+              primary: true
+            phone_numbers:
+            - data: data
+              type: home
+              primary: true
+            - data: data
+              type: home
+              primary: true
+            addresses:
+            - data:
+                country: country
+                city: city
+                street: street
+                region: region
+                postal_code: postal_code
+              primary: true
+            - data:
+                country: country
+                city: city
+                street: street
+                region: region
+                postal_code: postal_code
+              primary: true
+            names:
+            - names
+            - names
           mask: mask
         - official_name: official_name
           account_id: account_id
           name: name
+          owners:
+          - emails:
+            - data: data
+              type: primary
+              primary: true
+            - data: data
+              type: primary
+              primary: true
+            phone_numbers:
+            - data: data
+              type: home
+              primary: true
+            - data: data
+              type: home
+              primary: true
+            addresses:
+            - data:
+                country: country
+                city: city
+                street: street
+                region: region
+                postal_code: postal_code
+              primary: true
+            - data:
+                country: country
+                city: city
+                street: street
+                region: region
+                postal_code: postal_code
+              primary: true
+            names:
+            - names
+            - names
+          - emails:
+            - data: data
+              type: primary
+              primary: true
+            - data: data
+              type: primary
+              primary: true
+            phone_numbers:
+            - data: data
+              type: home
+              primary: true
+            - data: data
+              type: home
+              primary: true
+            addresses:
+            - data:
+                country: country
+                city: city
+                street: street
+                region: region
+                postal_code: postal_code
+              primary: true
+            - data:
+                country: country
+                city: city
+                street: street
+                region: region
+                postal_code: postal_code
+              primary: true
+            names:
+            - names
+            - names
           mask: mask
         last_updated_time: 2000-01-23T04:56:07.000+00:00
         item_id: item_id
@@ -28518,6 +30225,71 @@ components:
         official_name: official_name
         account_id: account_id
         name: name
+        owners:
+        - emails:
+          - data: data
+            type: primary
+            primary: true
+          - data: data
+            type: primary
+            primary: true
+          phone_numbers:
+          - data: data
+            type: home
+            primary: true
+          - data: data
+            type: home
+            primary: true
+          addresses:
+          - data:
+              country: country
+              city: city
+              street: street
+              region: region
+              postal_code: postal_code
+            primary: true
+          - data:
+              country: country
+              city: city
+              street: street
+              region: region
+              postal_code: postal_code
+            primary: true
+          names:
+          - names
+          - names
+        - emails:
+          - data: data
+            type: primary
+            primary: true
+          - data: data
+            type: primary
+            primary: true
+          phone_numbers:
+          - data: data
+            type: home
+            primary: true
+          - data: data
+            type: home
+            primary: true
+          addresses:
+          - data:
+              country: country
+              city: city
+              street: street
+              region: region
+              postal_code: postal_code
+            primary: true
+          - data:
+              country: country
+              city: city
+              street: street
+              region: region
+              postal_code: postal_code
+            primary: true
+          names:
+          - names
+          - names
         mask: mask
       properties:
         account_id:
@@ -28540,6 +30312,10 @@ components:
           $ref: '#/components/schemas/DepositoryAccountSubtype'
         type:
           $ref: '#/components/schemas/CreditBankIncomeAccountType'
+        owners:
+          items:
+            $ref: '#/components/schemas/Owner'
+          type: array
       type: object
     CreditBankIncomeAccountType:
       description: The account type. This will always be `depository`.
@@ -28675,7 +30451,7 @@ components:
       type: string
     CreditUnofficialCurrencyCode:
       description: |-
-        The unofficial currency code associated with the amount or balance. Always `null` if iso_currency_code is non-null.
+        The unofficial currency code associated with the amount or balance. Always `null` if `iso_currency_code` is non-null.
         Unofficial currency codes are used for currencies that do not have official ISO currency codes, such as cryptocurrencies and the currencies of certain countries.
       nullable: true
       type: string
@@ -28751,7 +30527,7 @@ components:
           type: string
         unofficial_currency_code:
           description: |-
-            The unofficial currency code associated with the amount or balance. Always `null` if iso_currency_code is non-null.
+            The unofficial currency code associated with the amount or balance. Always `null` if `iso_currency_code` is non-null.
             Unofficial currency codes are used for currencies that do not have official ISO currency codes, such as cryptocurrencies and the currencies of certain countries.
           nullable: true
           type: string
@@ -28819,7 +30595,7 @@ components:
           type: string
         unofficial_currency_code:
           description: |-
-            The unofficial currency code associated with the amount or balance. Always `null` if iso_currency_code is non-null.
+            The unofficial currency code associated with the amount or balance. Always `null` if `iso_currency_code` is non-null.
             Unofficial currency codes are used for currencies that do not have official ISO currency codes, such as cryptocurrencies and the currencies of certain countries.
           nullable: true
           type: string
@@ -28895,11 +30671,96 @@ components:
           type: string
         unofficial_currency_code:
           description: |-
-            The unofficial currency code associated with the amount or balance. Always `null` if iso_currency_code is non-null.
+            The unofficial currency code associated with the amount or balance. Always `null` if `iso_currency_code` is non-null.
             Unofficial currency codes are used for currencies that do not have official ISO currency codes, such as cryptocurrencies and the currencies of certain countries.
           nullable: true
           type: string
       type: object
+    CreditBankIncomeWarning:
+      description: The warning associated with the data that was unavailable for the
+        Bank Income Report.
+      example:
+        cause:
+          error_message: error_message
+          item_id: item_id
+          display_message: display_message
+          error_code: error_code
+      properties:
+        warning_type:
+          $ref: '#/components/schemas/CreditBankIncomeWarningType'
+        warning_code:
+          $ref: '#/components/schemas/CreditBankIncomeWarningCode'
+        cause:
+          $ref: '#/components/schemas/CreditBankIncomeCause'
+      type: object
+    CreditBankIncomeWarningType:
+      description: The warning type which will always be `BANK_INCOME_WARNING`.
+      enum:
+      - BANK_INCOME_WARNING
+      type: string
+    CreditBankIncomeWarningCode:
+      description: |-
+        The warning code identifies a specific kind of warning.
+        `IDENTITY_UNAVAILABLE`: Unable to extract identity for the Item
+        `TRANSACTIONS_UNAVAILABLE`: Unable to extract transactions for the Item
+        `ITEM_UNAPPROVED`: User did not grant permission to share income data for the Item
+      enum:
+      - IDENTITY_UNAVAILABLE
+      - TRANSACTIONS_UNAVAILABLE
+      - ITEM_UNAPPROVED
+      type: string
+    CreditBankIncomeCause:
+      description: An error object and associated `item_id` used to identify a specific
+        Item and error when a batch operation operating on multiple Items has encountered
+        an error in one of the Items.
+      example:
+        error_message: error_message
+        item_id: item_id
+        display_message: display_message
+        error_code: error_code
+      properties:
+        error_type:
+          $ref: '#/components/schemas/CreditBankIncomeErrorType'
+        error_code:
+          description: We use standard HTTP response codes for success and failure
+            notifications, and our errors are further classified by `error_type`.
+            In general, 200 HTTP codes correspond to success, 40X codes are for developer-
+            or user-related failures, and 50X codes are for Plaid-related issues.
+            Error fields will be `null` if no error has occurred.
+          type: string
+        error_message:
+          description: A developer-friendly representation of the error code. This
+            may change over time and is not safe for programmatic use.
+          type: string
+        display_message:
+          description: |-
+            A user-friendly representation of the error code. null if the error is not related to user action.
+            This may change over time and is not safe for programmatic use.
+          type: string
+        item_id:
+          description: The `item_id` of the Item associated with this warning.
+          type: string
+      type: object
+    CreditBankIncomeErrorType:
+      description: A broad categorization of the error. Safe for programmatic use.
+      enum:
+      - INTERNAL_SERVER_ERROR
+      - INSUFFICIENT_CREDENTIALS
+      - ITEM_LOCKED
+      - USER_SETUP_REQUIRED
+      - COUNTRY_NOT_SUPPORTED
+      - INSTITUTION_DOWN
+      - INSTITUTION_NO_LONGER_SUPPORTED
+      - INSTITUTION_NOT_RESPONDING
+      - INVALID_CREDENTIALS
+      - INVALID_MFA
+      - INVALID_SEND_METHOD
+      - ITEM_LOGIN_REQUIRED
+      - MFA_NOT_SUPPORTED
+      - NO_ACCOUNTS
+      - ITEM_NOT_SUPPORTED
+      - ACCESS_NOT_GRANTED
+      type: string
     SandboxBankTransferFireWebhookRequest:
       description: Defines the request schema for `/sandbox/bank_transfer/fire_webhook`
       example:
@@ -29432,6 +31293,13 @@ components:
       required:
       - applications
       type: object
+    ConnectedApplicationStatus:
+      description: Describes if the connected item is active (i.e. has not been revoked
+        or unlinked)
+      enum:
+      - ACTIVE
+      - INACTIVE
+      type: string
     ConnectedApplication:
       description: Describes the connected application for a particular end user.
       example:
@@ -29515,6 +31383,8 @@ components:
           $ref: '#/components/schemas/ScopesNullable'
         requested_scopes:
           $ref: '#/components/schemas/RequestedScopes'
+        status:
+          $ref: '#/components/schemas/ConnectedApplicationStatus'
       required:
       - application_id
       - application_url
@@ -29525,6 +31395,7 @@ components:
       - name
       - product_data_types
       - reason_for_access
+      - status
       type: object
     AccountSelectionCardinality:
       description: |-
@@ -31148,11 +33019,7 @@ components:
         transaction_code:
           $ref: '#/components/schemas/TransactionCode'
         personal_finance_category:
-          allOf:
-          - $ref: '#/components/schemas/PersonalFinanceCategory'
-          - additionalProperties: true
-            type: object
-          nullable: true
+          $ref: '#/components/schemas/PersonalFinanceCategory'
       required:
       - account_owner
       - authorized_date
