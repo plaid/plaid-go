@@ -96,7 +96,7 @@ func pollForAssetReport(t *testing.T, ctx context.Context, testClient *plaid.API
 			plaidErr, err := plaid.ToPlaidError(err)
 			assert.NoError(t, err)
 			if plaidErr.ErrorCode == "PRODUCT_NOT_READY" {
-				time.Sleep(1 * time.Second)
+				time.Sleep(2 * time.Second)
 				continue
 			} else {
 				return nil, err
