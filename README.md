@@ -143,7 +143,7 @@ import (
     "context"
     "os"
 
-    plaid "github.com/plaid/plaid-go/v3"
+    "github.com/plaid/plaid-go/v3/plaid"
 )
 
 configuration := plaid.NewConfiguration()
