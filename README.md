@@ -45,6 +45,40 @@ client := plaid.NewAPIClient(configuration)
 
 Each endpoint will require an appropriate request model, and will return either the response model or an error.
 
+### Dates
+
+Dates and datetimes in requests, which are represented as strings in the API and in previous client library versions, are represented in this version of the Go client library as `time.Time` types. For more information, see the [Go documentation on the `time` package](https://pkg.go.dev/time).
+
+Time zone information is required for request fields that accept datetimes. Failing to include time zone information (or specifying a string, instead of an instance of the `time` package) will result in an error.
+
+If the API reference documentation for a request field specifies `format: date`, the following is acceptable:
+
+```go
+import (
+    "time"
+)
+
+const (
+    // Choose any arbitrary date in the desired format
+    YYYYMMDD = "2006-01-02"
+)
+
+myDate := time.Date(2019, time.December, 6, 22, 35, 49, 0, time.UTC).Format(YYYYMMDD)
+// Returns 2019-12-06
+```
+
+If the API reference documentation for a request field specifies `format: date-time`, the following is acceptable:
+
+
+```go
+import (
+  "time"
+)
+
+myDate := time.Date(2019, time.December, 6, 22, 35, 49, 0, time.UTC)
+// Returns 2019-12-06 22:35:49 +0000 UTC
+```
+
 
 ### Errors
 
