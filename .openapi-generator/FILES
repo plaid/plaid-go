@@ -451,6 +451,7 @@ model_numbers_bacs.go
 model_numbers_bacs_nullable.go
 model_numbers_eft.go
 model_numbers_eft_nullable.go
+model_numbers_iban_nullable.go
 model_numbers_international.go
 model_numbers_international_nullable.go
 model_override_account_type.go

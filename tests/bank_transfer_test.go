@@ -6,7 +6,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/plaid/plaid-go/v3/plaid"
+	"github.com/plaid/plaid-go/v8/plaid"
 	"github.com/stretchr/testify/assert"
 )
 
