@@ -23,10 +23,10 @@ For more information about the Plaid API, including reference documentation, see
 
 Library versions follow Semantic Versioning ("SemVer") and are formatted as `v1.0.0`. The plaid-go client library is typically updated on a monthly basis, and the canonical source for the latest version number is the [client library changelog](https://github.com/plaid/plaid-go/blob/master/CHANGELOG.md). As of `v1.0.0`, we've moved to support `GOMODULES`.
 
-Edit your go.mod to include `github.com/plaid/plaid-go/v3 {VERSION}`
+Edit your go.mod to include `github.com/plaid/plaid-go/v8 {VERSION}`
 
 ```console
-$ go get github.com/plaid/plaid-go/v3@{VERSION}
+$ go get github.com/plaid/plaid-go/v8@{VERSION}
 ```
 
 ## Getting Started
@@ -177,7 +177,7 @@ import (
     "context"
     "os"
 
-    "github.com/plaid/plaid-go/v3/plaid"
+    "github.com/plaid/plaid-go/v8/plaid"
 )
 
 configuration := plaid.NewConfiguration()

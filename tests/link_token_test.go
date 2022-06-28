@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/plaid/plaid-go/v3/plaid"
+	"github.com/plaid/plaid-go/v8/plaid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -106,4 +106,31 @@ func TestLinkTokenCreateThenGet(t *testing.T) {
 	assert.Equal(t, "Plaid Test", linkTokenGetResp.Metadata.GetClientName())
 	assert.NotZero(t, linkTokenGetResp.GetExpiration())
 	assert.NotZero(t, linkTokenGetResp.GetCreatedAt())
+}
+
+func TestLinkTokenCreateThenGet_ExtendedAuth(t *testing.T) {
+	testClient := NewTestClient()
+	ctx := context.Background()
+	now := time.Now()
+
+	request := plaid.NewLinkTokenCreateRequest(
+		"Plaid Test",
+		"en",
+		[]plaid.CountryCode{plaid.COUNTRYCODE_US},
+		plaid.LinkTokenCreateRequestUser{ClientUserId: now.String()},
+	)
+	request.SetProducts([]plaid.Products{plaid.PRODUCTS_AUTH})
+	enabled := true
+	request.SetAuth(plaid.LinkTokenCreateRequestAuth{
+		AuthTypeSelectEnabled:         &enabled,
+		AutomatedMicrodepositsEnabled: &enabled,
+		InstantMatchEnabled:           &enabled,
+		SameDayMicrodepositsEnabled:   &enabled,
+	})
+	createLinkTokenResp, _, err := testClient.PlaidApi.LinkTokenCreate(ctx).LinkTokenCreateRequest(*request).Execute()
+
+	assert.NoError(t, err)
+	assert.True(t, strings.HasPrefix(createLinkTokenResp.LinkToken, "link-sandbox"))
+	assert.NotZero(t, createLinkTokenResp.Expiration)
+	assert.NotZero(t, createLinkTokenResp.RequestId)
 }
