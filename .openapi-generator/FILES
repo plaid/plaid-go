@@ -120,6 +120,8 @@ model_create_individual_watchlist_screening_review_request.go
 model_credit_account_subtype.go
 model_credit_audit_copy_token_create_request.go
 model_credit_audit_copy_token_create_response.go
+model_credit_audit_copy_token_remove_request.go
+model_credit_audit_copy_token_remove_response.go
 model_credit_bank_income.go
 model_credit_bank_income_account.go
 model_credit_bank_income_account_type.go
@@ -274,6 +276,10 @@ model_identity_default_update_webhook.go
 model_identity_get_request.go
 model_identity_get_request_options.go
 model_identity_get_response.go
+model_identity_match_request.go
+model_identity_match_request_options.go
+model_identity_match_response.go
+model_identity_match_user.go
 model_identity_update_types.go
 model_identity_verification.go
 model_identity_verification_create_request.go
@@ -414,6 +420,7 @@ model_link_token_create_request_payment_initiation.go
 model_link_token_create_request_transfer.go
 model_link_token_create_request_update.go
 model_link_token_create_request_user.go
+model_link_token_create_request_user_stated_income_source.go
 model_link_token_create_response.go
 model_link_token_eu_config.go
 model_link_token_get_metadata_response.go
@@ -453,6 +460,7 @@ model_numbers_eft.go
 model_numbers_eft_nullable.go
 model_numbers_iban_nullable.go
 model_numbers_international.go
+model_numbers_international_iban.go
 model_numbers_international_nullable.go
 model_override_account_type.go
 model_override_accounts.go
@@ -528,6 +536,13 @@ model_payment_initiation_recipient_list_response.go
 model_payment_initiation_refund_status.go
 model_payment_initiation_standing_order_metadata.go
 model_payment_meta.go
+model_payment_profile_create_request.go
+model_payment_profile_create_response.go
+model_payment_profile_get_request.go
+model_payment_profile_get_response.go
+model_payment_profile_remove_request.go
+model_payment_profile_remove_response.go
+model_payment_profile_status.go
 model_payment_schedule_interval.go
 model_payment_scheme.go
 model_payment_status_update_webhook.go
@@ -768,6 +783,9 @@ model_user_custom_password.go
 model_user_id_number.go
 model_user_name.go
 model_user_permission_revoked_webhook.go
+model_user_stated_income_source_category.go
+model_user_stated_income_source_frequency.go
+model_user_stated_income_source_pay_type.go
 model_verification_attribute.go
 model_verification_expired_webhook.go
 model_verification_refresh_status.go
@@ -789,6 +807,7 @@ model_wallet_transaction.go
 model_wallet_transaction_amount.go
 model_wallet_transaction_counterparty.go
 model_wallet_transaction_counterparty_bacs.go
+model_wallet_transaction_counterparty_international.go
 model_wallet_transaction_counterparty_numbers.go
 model_wallet_transaction_execute_request.go
 model_wallet_transaction_execute_response.go
