@@ -7,7 +7,7 @@ info:
     details.
   termsOfService: https://plaid.com/legal/
   title: The Plaid API
-  version: 2020-09-14_1.146.0
+  version: 2020-09-14_1.161.5
 servers:
 - description: Production
   url: https://production.plaid.com
@@ -505,7 +505,7 @@ paths:
 
         Returned transactions data is grouped into three types of update, indicating whether the transaction was added, removed, or modified since the last call to the API.
 
-        In the first call to `/transactions/sync` for an Item, the endpoint will return all historical transactions data associated with that Item up until the time of the API call (as "adds"), which then generates a `latest_cursor` for that Item. In subsequent calls, send the `latest_cursor` to receive only the changes that have occurred since the previous call.
+        In the first call to `/transactions/sync` for an Item, the endpoint will return all historical transactions data associated with that Item up until the time of the API call (as "adds"), which then generates a `next_cursor` for that Item. In subsequent calls, send the `next_cursor` to receive only the changes that have occurred since the previous call.
 
         Due to the potentially large number of transactions associated with an Item, results are paginated. The `has_more` field specifies if additional calls are necessary to fetch all available transaction updates.
 
@@ -1242,7 +1242,9 @@ paths:
 
         `AUTH_DATA_UPDATE`: Webhook to be fired for a given Sandbox Item created with Auth as an enabled product.
 
-        Note that this endpoint is provided for developer ease-of-use and is not required for testing webhooks; webhooks will also fire in Sandbox under the same conditions that they would in Production or Development'
+        `RECURRING_TRANSACTIONS_UPDATE`: Recurring Transactions webhook to be fired for a given Sandbox Item. If the Item does not support Recurring Transactions, a `SANDBOX_PRODUCT_NOT_ENABLED` error will result.
+
+        Note that this endpoint is provided for developer ease-of-use and is not required for testing webhooks; webhooks will also fire in Sandbox under the same conditions that they would in Production or Development.
       externalDocs:
         url: /api/sandbox/#sandboxitemfire_webhook
       operationId: sandboxItemFireWebhook
@@ -5747,6 +5749,8 @@ paths:
           - To decline a transfer with the rationale code `NSF`, the available balance on the account must be less than the authorization `amount`. See [Create Sandbox test data](https://plaid.com/docs/sandbox/user-custom/) for details on how to customize data in Sandbox.
 
           - To decline a transfer with the rationale code `RISK`, the available balance on the account must be exactly $0. See [Create Sandbox test data](https://plaid.com/docs/sandbox/user-custom/) for details on how to customize data in Sandbox.
+
+        For guaranteed ACH customers, the following fields are required : `user.phone_number` (optional if `email_address` provided), `user.email_address` (optional if `phone_number` provided), `device.ip_address`, `device.user_agent`, and `user_present`.
       externalDocs:
         url: /api/products/transfer/#transferauthorizationcreate
       operationId: transferAuthorizationCreate
@@ -7677,6 +7681,30 @@ paths:
       summary: Retrieve information from the bank accounts used for income verification
       tags:
       - plaid
+  /credit/bank_income/pdf/get:
+    post:
+      description: '`/credit/bank_income/pdf/get` returns the most recent bank income
+        report for a specified user in PDF format.'
+      externalDocs:
+        url: /api/products/income/#creditbank_incomepdfget
+      operationId: creditBankIncomePdfGet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreditBankIncomePDFGetRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/pdf:
+              schema:
+                $ref: '#/components/schemas/CreditBankIncomePDFGetResponse'
+          description: A PDF of the Bank Income Report
+      summary: Retrieve information from the bank accounts used for income verification
+        in PDF format
+      tags:
+      - plaid
   /credit/bank_income/refresh:
     post:
       description: '`/credit/bank_income/refresh` refreshes the bank income report
@@ -7880,6 +7908,92 @@ paths:
                           tax_year: "2020"
                           third_party_sick_pay: CHECKED
                           wages_tips_other_comp: "1000"
+                        form1099s:
+                        - april_amount: null
+                          august_amount: null
+                          card_not_present_transaction: null
+                          crop_insurance_proceeds: 1000
+                          december_amount: null
+                          document_id: mvMZ59Z2a5
+                          document_metadata:
+                            document_type: US_TAX_1099_MISC
+                            download_url: null
+                            name: form_1099_misc.pdf
+                            status: PROCESSING_COMPLETE
+                          excess_golden_parachute_payments: 1000
+                          feburary_amount: null
+                          federal_income_tax_withheld: 1000
+                          filer:
+                            address:
+                              city: null
+                              country: null
+                              postal_code: null
+                              region: null
+                              street: null
+                            name: null
+                            tin: null
+                            type: null
+                          fishing_boat_proceeds: 1000
+                          form_1099_type: FORM_1099_TYPE_MISC
+                          gross_amount: 1000
+                          gross_proceeds_paid_to_an_attorney: 1000
+                          january_amount: null
+                          july_amount: null
+                          june_amount: null
+                          march_amount: null
+                          may_amount: null
+                          medical_and_healthcare_payments: 1000
+                          merchant_category_code: null
+                          nonemployee_compensation: 1000
+                          november_amount: null
+                          number_of_payment_transactions: null
+                          october_amount: null
+                          other_income: 1000
+                          payer:
+                            address:
+                              city: SAN FRANCISCO
+                              country: US
+                              postal_code: "94111"
+                              region: CA
+                              street: 1098 HARRISON ST
+                            name: PLAID INC
+                            telephone_number: (123)456-7890
+                            tin: 12-3456789
+                          payer_made_direct_sales_of_500_or_more_of_consumer_products_to_buyer: null
+                          payer_state_number: CA 12345
+                          payer_state_number_lower: null
+                          primary_state: null
+                          primary_state_id: CA 12345
+                          primary_state_income_tax: 1000
+                          pse_name: null
+                          pse_telephone_number: null
+                          recipient:
+                            account_number: "45678"
+                            address:
+                              city: SAN FRANCISCO
+                              country: US
+                              postal_code: "94133"
+                              region: CA
+                              street: 2140 TAYLOR ST
+                            facta_filing_requirement: CHECKED
+                            name: Josie Georgia Harrison
+                            second_tin_exists: NOT CHECKED
+                            tin: 12-3456789
+                          rents: 1000
+                          royalties: 1000
+                          secondary_state: null
+                          secondary_state_id: null
+                          secondary_state_income_tax: null
+                          section_409a_deferrals: 1000
+                          section_409a_income: 1000
+                          september_amount: null
+                          state_income: 1000
+                          state_income_lower: null
+                          state_tax_withheld: 1000
+                          state_tax_withheld_lower: null
+                          substitute_payments_in_lieu_of_dividens_or_interest: null
+                          tax_year: "2022"
+                          transactions_reported: null
                       status:
                         processing_status: PROCESSING_COMPLETE
                     request_id: 2pxQ59buGdsHRef
@@ -8025,6 +8139,304 @@ paths:
                 $ref: '#/components/schemas/CreditRelayCreateResponse'
           description: OK
       summary: Create a `relay_token` to share an Asset Report with a partner client
+      tags:
+      - plaid
+  /credit/relay/get:
+    post:
+      description: '`/credit/relay/get` allows third parties to get a report that
+        was shared with them, using an `relay_token` that was created by the report
+        owner.'
+      externalDocs:
+        url: /none/
+      operationId: creditRelayGet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreditRelayGetRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    report:
+                      asset_report_id: bf3a0490-344c-4620-a219-2693162e4b1d
+                      client_report_id: 123abc
+                      date_generated: 2020-06-05T22:47:53Z
+                      days_requested: 3
+                      items:
+                      - accounts:
+                        - account_id: 3gE5gnRzNyfXpBK5wEEKcymJ5albGVUqg77gr
+                          balances:
+                            available: 200
+                            current: 210
+                            iso_currency_code: USD
+                            limit: null
+                            unofficial_currency_code: null
+                          days_available: 3
+                          historical_balances:
+                          - current: 210
+                            date: 2020-06-04
+                            iso_currency_code: USD
+                            unofficial_currency_code: null
+                          - current: 210
+                            date: 2020-06-03
+                            iso_currency_code: USD
+                            unofficial_currency_code: null
+                          - current: 210
+                            date: 2020-06-02
+                            iso_currency_code: USD
+                            unofficial_currency_code: null
+                          mask: "1111"
+                          name: Plaid Saving
+                          official_name: Plaid Silver Standard 0.1% Interest Saving
+                          owners:
+                          - addresses:
+                            - data:
+                                city: Malakoff
+                                country: US
+                                postal_code: "14236"
+                                region: NY
+                                street: 2992 Cameron Road
+                              primary: true
+                            - data:
+                                city: San Matias
+                                country: US
+                                postal_code: 93405-2255
+                                region: CA
+                                street: 2493 Leisure Lane
+                              primary: false
+                            emails:
+                            - data: accountholder0@example.com
+                              primary: true
+                              type: primary
+                            - data: accountholder1@example.com
+                              primary: false
+                              type: secondary
+                            - data: extraordinarily.long.email.username.123456@reallylonghostname.com
+                              primary: false
+                              type: other
+                            names:
+                            - Alberta Bobbeth Charleson
+                            phone_numbers:
+                            - data: "1112223333"
+                              primary: false
+                              type: home
+                            - data: "1112224444"
+                              primary: false
+                              type: work
+                            - data: "1112225555"
+                              primary: false
+                              type: mobile
+                          ownership_type: null
+                          subtype: savings
+                          transactions: []
+                          type: depository
+                        - account_id: BxBXxLj1m4HMXBm9WZJyUg9XLd4rKEhw8Pb1J
+                          balances:
+                            available: null
+                            current: 56302.06
+                            iso_currency_code: USD
+                            limit: null
+                            unofficial_currency_code: null
+                          days_available: 3
+                          historical_balances: []
+                          mask: "8888"
+                          name: Plaid Mortgage
+                          official_name: null
+                          owners:
+                          - addresses:
+                            - data:
+                                city: Malakoff
+                                country: US
+                                postal_code: "14236"
+                                region: NY
+                                street: 2992 Cameron Road
+                              primary: true
+                            - data:
+                                city: San Matias
+                                country: US
+                                postal_code: 93405-2255
+                                region: CA
+                                street: 2493 Leisure Lane
+                              primary: false
+                            emails:
+                            - data: accountholder0@example.com
+                              primary: true
+                              type: primary
+                            - data: accountholder1@example.com
+                              primary: false
+                              type: secondary
+                            - data: extraordinarily.long.email.username.123456@reallylonghostname.com
+                              primary: false
+                              type: other
+                            names:
+                            - Alberta Bobbeth Charleson
+                            phone_numbers:
+                            - data: "1112223333"
+                              primary: false
+                              type: home
+                            - data: "1112224444"
+                              primary: false
+                              type: work
+                            - data: "1112225555"
+                              primary: false
+                              type: mobile
+                          ownership_type: null
+                          subtype: mortgage
+                          transactions: []
+                          type: loan
+                        - account_id: dVzbVMLjrxTnLjX4G66XUp5GLklm4oiZy88yK
+                          balances:
+                            available: null
+                            current: 410
+                            iso_currency_code: USD
+                            limit: null
+                            unofficial_currency_code: null
+                          days_available: 3
+                          historical_balances:
+                          - current: 410
+                            date: 2020-06-04
+                            iso_currency_code: USD
+                            unofficial_currency_code: null
+                          - current: 410
+                            date: 2020-06-03
+                            iso_currency_code: USD
+                            unofficial_currency_code: null
+                          - current: 410
+                            date: 2020-06-02
+                            iso_currency_code: USD
+                            unofficial_currency_code: null
+                          mask: "3333"
+                          name: Plaid Credit Card
+                          official_name: Plaid Diamond 12.5% APR Interest Credit Card
+                          owners:
+                          - addresses:
+                            - data:
+                                city: Malakoff
+                                country: US
+                                postal_code: "14236"
+                                region: NY
+                                street: 2992 Cameron Road
+                              primary: true
+                            - data:
+                                city: San Matias
+                                country: US
+                                postal_code: 93405-2255
+                                region: CA
+                                street: 2493 Leisure Lane
+                              primary: false
+                            emails:
+                            - data: accountholder0@example.com
+                              primary: true
+                              type: primary
+                            - data: accountholder1@example.com
+                              primary: false
+                              type: secondary
+                            - data: extraordinarily.long.email.username.123456@reallylonghostname.com
+                              primary: false
+                              type: other
+                            names:
+                            - Alberta Bobbeth Charleson
+                            phone_numbers:
+                            - data: "1112223333"
+                              primary: false
+                              type: home
+                            - data: "1112224444"
+                              primary: false
+                              type: work
+                            - data: "1112225555"
+                              primary: false
+                              type: mobile
+                          ownership_type: null
+                          subtype: credit card
+                          transactions: []
+                          type: credit
+                        date_last_updated: 2020-06-05T22:47:52Z
+                        institution_id: ins_3
+                        institution_name: Chase
+                        item_id: eVBnVMp7zdTJLkRNr33Rs6zr7KNJqBFL9DrE6
+                      user:
+                        client_user_id: "123456789"
+                        email: accountholder0@example.com
+                        first_name: Alberta
+                        last_name: Charleson
+                        middle_name: Bobbeth
+                        phone_number: 111-222-3333
+                        ssn: 123-45-6789
+                    request_id: eYupqX1mZkEuQRx
+                    warnings: []
+              schema:
+                $ref: '#/components/schemas/AssetReportGetResponse'
+          description: OK
+      summary: Retrieve the reports associated with a Relay token that was shared
+        with you
+      tags:
+      - plaid
+  /credit/relay/refresh:
+    post:
+      description: The `/credit/relay/refresh` endpoint allows third parties to refresh
+        an report that was relayed to them, using a `relay_token` that was created
+        by the report owner. A new report will be created based on the old one, but
+        with the most recent data available.
+      externalDocs:
+        url: /api/products/#creditrelayrefresh
+      operationId: creditRelayRefresh
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreditRelayRefreshRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    relay_token: credit-relay-sandbox-8218d5f8-6d6d-403d-92f5-13a9afaa4398
+                    request_id: NBZaq
+                    asset_report_id: bf3a0490-344c-4620-a219-2693162e4b1d
+              schema:
+                $ref: '#/components/schemas/CreditRelayRefreshResponse'
+          description: OK
+      summary: Refresh a report of a Relay Token
+      tags:
+      - plaid
+  /credit/relay/remove:
+    post:
+      description: The `/credit/relay/remove` endpoint allows you to invalidate a
+        `relay_token`, meaning the third party holding the token will no longer be
+        able to use it to access the reports to which the `relay_token` gives access
+        to. The report, items associated with it, and other Relay tokens that provide
+        access to the same report are not affected and will remain accessible after
+        removing the given `relay_token.
+      externalDocs:
+        url: /none/
+      operationId: creditRelayRemove
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreditRelayRemoveRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    removed: true
+                    request_id: m8MDnv9okwxFNBV
+              schema:
+                $ref: '#/components/schemas/CreditRelayRemoveResponse'
+          description: OK
+      summary: Remove Credit Relay Token
       tags:
       - plaid
   /sandbox/bank_transfer/fire_webhook:
@@ -8598,6 +9010,7 @@ paths:
                         personal_finance_category:
                           primary: GENERAL_MERCHANDISE
                           detailed: ELECTRONICS
+                        personal_finance_category_icon_url: https://plaid-category-icons.plaid.com/PFC_GENERAL_MERCHANDISE.png
               schema:
                 $ref: '#/components/schemas/TransactionsEnhanceGetResponse'
           description: OK
@@ -8864,6 +9277,52 @@ paths:
       summary: Remove payment profile
       tags:
       - plaid
+  /beta/partner/v1/customers/create:
+    post:
+      description: The `/partner/v1/customers/create` endpoint is used by reseller
+        partners to create an end customer client.
+      operationId: partnerCustomersCreate
+      requestBody:
+        content:
+          application/json:
+            examples:
+              example-1:
+                value:
+                  client_id: 7f57eb3d2a9j6480121fx361
+                  secret: 79g03eoofwl8240v776r2h667442119
+                  company_name: Plaid
+                  is_diligence_attested: true
+                  products:
+                  - auth
+                  - identity
+                  create_link_customization: true
+            schema:
+              $ref: '#/components/schemas/PartnerCustomersCreateRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    end_customer:
+                      client_id: 7f57eb3d2a9j6480121fx361
+                      company_name: Plaid
+                    production_secret: 79g03eoofwl8240v776r2h667442119
+                    request_id: 4zlKapIkTm8p5KM
+              schema:
+                $ref: '#/components/schemas/PartnerCustomersCreateResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error response
+      summary: Creates a new client for a reseller partner end customer.
+      tags:
+      - plaid
 components:
   schemas:
     AuthGetRequest:
@@ -8925,18 +9384,6 @@ components:
           - null
           - null
           consent_expiration_time: 2000-01-23T04:56:07.000+00:00
-          error:
-            error_message: error_message
-            suggested_action: suggested_action
-            error_type: INVALID_REQUEST
-            causes:
-            - ""
-            - ""
-            display_message: display_message
-            error_code: error_code
-            documentation_url: documentation_url
-            request_id: request_id
-            status: 0.8008281904610115
           consented_products:
           - null
           - null
@@ -9215,18 +9662,6 @@ components:
           - null
           - null
           consent_expiration_time: 2000-01-23T04:56:07.000+00:00
-          error:
-            error_message: error_message
-            suggested_action: suggested_action
-            error_type: INVALID_REQUEST
-            causes:
-            - ""
-            - ""
-            display_message: display_message
-            error_code: error_code
-            documentation_url: documentation_url
-            request_id: request_id
-            status: 0.8008281904610115
           consented_products:
           - null
           - null
@@ -10890,18 +11325,6 @@ components:
           - null
           - null
           consent_expiration_time: 2000-01-23T04:56:07.000+00:00
-          error:
-            error_message: error_message
-            suggested_action: suggested_action
-            error_type: INVALID_REQUEST
-            causes:
-            - ""
-            - ""
-            display_message: display_message
-            error_code: error_code
-            documentation_url: documentation_url
-            request_id: request_id
-            status: 0.8008281904610115
           consented_products:
           - null
           - null
@@ -11244,6 +11667,7 @@ components:
           - DEFAULT_UPDATE
           - NEW_ACCOUNTS_AVAILABLE
           - AUTH_DATA_UPDATE
+          - RECURRING_TRANSACTIONS_UPDATE
           type: string
       required:
       - access_token
@@ -11410,18 +11834,6 @@ components:
           - null
           - null
           consent_expiration_time: 2000-01-23T04:56:07.000+00:00
-          error:
-            error_message: error_message
-            suggested_action: suggested_action
-            error_type: INVALID_REQUEST
-            causes:
-            - ""
-            - ""
-            display_message: display_message
-            error_code: error_code
-            documentation_url: documentation_url
-            request_id: request_id
-            status: 0.8008281904610115
           consented_products:
           - null
           - null
@@ -12062,18 +12474,6 @@ components:
           - null
           - null
           consent_expiration_time: 2000-01-23T04:56:07.000+00:00
-          error:
-            error_message: error_message
-            suggested_action: suggested_action
-            error_type: INVALID_REQUEST
-            causes:
-            - ""
-            - ""
-            display_message: display_message
-            error_code: error_code
-            documentation_url: documentation_url
-            request_id: request_id
-            status: 0.8008281904610115
           consented_products:
           - null
           - null
@@ -14283,18 +14683,6 @@ components:
           - null
           - null
           consent_expiration_time: 2000-01-23T04:56:07.000+00:00
-          error:
-            error_message: error_message
-            suggested_action: suggested_action
-            error_type: INVALID_REQUEST
-            causes:
-            - ""
-            - ""
-            display_message: display_message
-            error_code: error_code
-            documentation_url: documentation_url
-            request_id: request_id
-            status: 0.8008281904610115
           consented_products:
           - null
           - null
@@ -14510,18 +14898,6 @@ components:
           - null
           - null
           consent_expiration_time: 2000-01-23T04:56:07.000+00:00
-          error:
-            error_message: error_message
-            suggested_action: suggested_action
-            error_type: INVALID_REQUEST
-            causes:
-            - ""
-            - ""
-            display_message: display_message
-            error_code: error_code
-            documentation_url: documentation_url
-            request_id: request_id
-            status: 0.8008281904610115
           consented_products:
           - null
           - null
@@ -15072,9 +15448,11 @@ components:
         access_token: access_token
         android_package_name: android_package_name
         identity_verification:
+          gave_consent: true
           template_id: idvtmp_4FrXJvfQU3zGUR
-          consent: true
+          consent: ""
         transfer:
+          payment_profile_id: payment_profile_id
           intent_id: intent_id
         account_filters:
           loan:
@@ -15096,9 +15474,20 @@ components:
         redirect_uri: redirect_uri
         user:
           phone_number_verified_time: 2000-01-23T04:56:07.000+00:00
+          id_number:
+            type: us_ssn
+            value: "123456789"
           email_address: email_address
+          address:
+            country: US
+            city: Pawnee
+            street: 123 Main St.
+            street2: Unit 42
+            region: IN
+            postal_code: "46001"
           client_user_id: client_user_id
           date_of_birth: 2000-01-23
+          name: ""
           phone_number: phone_number
           legal_name: legal_name
           email_address_verified_time: 2000-01-23T04:56:07.000+00:00
@@ -15346,10 +15735,15 @@ components:
       description: Specifies options for initializing Link for use with the Transfer
         product.
       example:
+        payment_profile_id: payment_profile_id
         intent_id: intent_id
       properties:
         intent_id:
           description: The `id` returned by the `/transfer/intent/create` endpoint.
+          type: string
+        payment_profile_id:
+          description: The `payment_profile_id` returned by the `/payment_profile/create`
+            endpoint.
           type: string
       type: object
     LinkTokenCreateRequestUserStatedIncomeSource:
@@ -15452,8 +15846,9 @@ components:
       description: Specifies option for initializing Link for use with the Identity
         Verification product.
       example:
+        gave_consent: true
         template_id: idvtmp_4FrXJvfQU3zGUR
-        consent: true
+        consent: ""
       properties:
         template_id:
           description: ID of the associated Identity Verification template.
@@ -15461,6 +15856,10 @@ components:
           title: IdentityVerificationTemplateID
           type: string
         consent:
+          allOf:
+          - $ref: '#/components/schemas/IdentityVerificationConsent'
+          x-hidden-from-docs: true
+        gave_consent:
           default: false
           description: |-
             A flag specifying whether the end user has already agreed to a privacy policy specifying that their data will be shared with Plaid for verification purposes.
@@ -15486,9 +15885,20 @@ components:
         linking their account.
       example:
         phone_number_verified_time: 2000-01-23T04:56:07.000+00:00
+        id_number:
+          type: us_ssn
+          value: "123456789"
         email_address: email_address
+        address:
+          country: US
+          city: Pawnee
+          street: 123 Main St.
+          street2: Unit 42
+          region: IN
+          postal_code: "46001"
         client_user_id: client_user_id
         date_of_birth: 2000-01-23
+        name: ""
         phone_number: phone_number
         legal_name: legal_name
         email_address_verified_time: 2000-01-23T04:56:07.000+00:00
@@ -15502,10 +15912,16 @@ components:
             the Plaid Dashboard.
           type: string
         legal_name:
-          description: The user's full legal name. This is an optional field used
-            in the [returning user experience](https://plaid.com/docs/link/returning-user)
-            to associate Items to the user.
+          deprecated: true
+          description: The user's full legal name. Currently used only to support
+            certain legacy flows.
           type: string
+        name:
+          allOf:
+          - $ref: '#/components/schemas/UserName'
+          description: The user's full name. Optional if using the [Identity Verification](https://plaid.com/docs/api/products/identity-verification)
+            product; if not using Identity Verification, this field is not allowed.
+            Users will not be asked for their name when this field is provided.
         phone_number:
           description: The user's phone number in [E.164](https://en.wikipedia.org/wiki/E.164)
             format. This field is optional, but required to enable the [returning
@@ -15534,14 +15950,18 @@ components:
           format: date-time
           type: string
         ssn:
-          description: To be provided in the format "ddd-dd-dddd". This field is optional
-            and will support not-yet-implemented functionality for new products.
+          deprecated: true
+          description: To be provided in the format "ddd-dd-dddd". Not currently used.
           type: string
         date_of_birth:
-          description: To be provided in the format "yyyy-mm-dd". This field is optional
-            and will support not-yet-implemented functionality for new products.
+          deprecated: true
+          description: To be provided in the format "yyyy-mm-dd". Not currently used.
           format: date
           type: string
+        address:
+          $ref: '#/components/schemas/UserAddress'
+        id_number:
+          $ref: '#/components/schemas/UserIDNumber'
       required:
       - client_user_id
       type: object
@@ -15735,6 +16155,19 @@ components:
           items:
             $ref: '#/components/schemas/Products'
           type: array
+          x-override-enum-values-shown:
+          - assets
+          - auth
+          - employment
+          - identity
+          - income_verification
+          - identity_verification
+          - investments
+          - liabilities
+          - payment_initiation
+          - standing_orders
+          - transactions
+          - transfer
         webhook:
           description: The `webhook` specified in the `/link/token/create` call.
           nullable: true
@@ -15809,6 +16242,7 @@ components:
         codes correspond to success, 40X codes are for developer- or user-related
         failures, and 50X codes are for Plaid-related issues.  Error fields will be
         `null` if no error has occurred.
+      nullable: true
     Error:
       additionalProperties: true
       description: We use standard HTTP response codes for success and failure notifications,
@@ -15816,18 +16250,6 @@ components:
         codes correspond to success, 40X codes are for developer- or user-related
         failures, and 50X codes are for Plaid-related issues.  Error fields will be
         `null` if no error has occurred.
-      example:
-        error_message: error_message
-        suggested_action: suggested_action
-        error_type: INVALID_REQUEST
-        causes:
-        - ""
-        - ""
-        display_message: display_message
-        error_code: error_code
-        documentation_url: documentation_url
-        request_id: request_id
-        status: 0.8008281904610115
       nullable: true
       properties:
         error_type:
@@ -17625,7 +18047,9 @@ components:
     SyncUpdatesAvailableWebhook:
       additionalProperties: true
       description: |-
-        Fired when an Item's transactions change. This can be due to any event resulting in new changes, such as an initial, historical, or default pull. After receipt of this webhook, the new changes can be fetched for the Item from `/transactions/sync`.
+        Fired when an Item's transactions change. This can be due to any event resulting in new changes, such as an initial 30-day transactions fetch upon the initialization of an Item with transactions, the backfill of historical transactions that occurs shortly after, or when changes are populated from a regularly-scheduled transactions update job. It is recommended to listen for the `SYNC_UPDATES_AVAILABLE` webhook when using the `/transactions/sync` endpoint. Note that when using `/transactions/sync` the older webhooks `INITIAL_UPDATE`, `HISTORICAL_UPDATE`, or `DEFAULT_UPDATE`, which are intended for use with `/transactions/get`, will also continue to be sent in order to maintain backwards compatibility.
+
+        After receipt of this webhook, the new changes can be fetched for the Item from `/transactions/sync`.
 
         Note that to receive this webhook for an Item, `/transactions/sync` must have been called at least once on that Item.
       properties:
@@ -17661,6 +18085,43 @@ components:
           item_id: wz666MBjYWTp2PDzzggYhM6oWWmBb
           initial_update_complete: true
           historical_update_complete: false
+    RecurringTransactionsUpdateWebhook:
+      additionalProperties: true
+      description: Fired when an Item's recurring transactions data is updated. After
+        receipt of this webhook, the updated data can be fetched from `/transactions/recurring/get`.
+      properties:
+        webhook_type:
+          description: '`TRANSACTIONS`'
+          type: string
+        webhook_code:
+          description: '`RECURRING_TRANSACTIONS_UPDATE`'
+          type: string
+        item_id:
+          description: The `item_id` of the Item associated with this webhook, warning,
+            or error
+          title: ItemId
+          type: string
+        account_ids:
+          description: A list of `account_ids` for accounts that have new or updated
+            recurring transactions data.
+          items:
+            type: string
+          type: array
+      required:
+      - account_ids
+      - item_id
+      - webhook_code
+      - webhook_type
+      title: RecurringTransactionsUpdateWebhook
+      type: object
+      x-examples:
+        example-1:
+          webhook_type: TRANSACTIONS
+          webhook_code: RECURRING_TRANSACTIONS_UPDATE
+          item_id: wz666MBjYWTp2PDzzggYhM6oWWmBb
+          account_ids:
+          - lPNjeW1nR6CDn5okmGQ6hEpMo4lLNoSrzqDje
+          - lPNjeW1nR6CDn5okmGQ6hEpMo4lLNoSrzqDff
     IdentityDefaultUpdateWebhook:
       additionalProperties: true
       description: Fired when a change to identity data has been detected on an Item.
@@ -22838,11 +23299,12 @@ components:
       type: array
     UserPermissionRevokedWebhook:
       additionalProperties: true
-      description: The `USER_PERMISSION_REVOKED` webhook is fired to when an end user
-        has used the [my.plaid.com portal](https://my.plaid.com) to revoke the permission
-        that they previously granted to access an Item. Once access to an Item has
-        been revoked, it cannot be restored. If the user subsequently returns to your
-        application, a new Item must be created for the user.
+      description: The `USER_PERMISSION_REVOKED` webhook is fired when an end user
+        has used either the [my.plaid.com portal](https://my.plaid.com) or the financial
+        institution’s consent portal to revoke the permission that they previously
+        granted to access an Item. Once access to an Item has been revoked, it cannot
+        be restored. If the user subsequently returns to your application, a new Item
+        must be created for the user.
       properties:
         webhook_type:
           description: '`ITEM`'
@@ -23568,6 +24030,37 @@ components:
       maxLength: 50
       title: BankTransferIdempotencyKey
       type: string
+    TransferAuthorizationUserInRequest:
+      additionalProperties: true
+      description: The legal name and other information for the account holder.
+      example:
+        email_address: email_address
+        address:
+          country: country
+          city: city
+          street: street
+          region: region
+          postal_code: postal_code
+        phone_number: phone_number
+        legal_name: legal_name
+      properties:
+        legal_name:
+          description: The user's legal name.
+          type: string
+        phone_number:
+          description: The user's phone number. In order to qualify for a guaranteed
+            transfer, at least one of `phone_number` or `email_address` must be provided.
+          type: string
+        email_address:
+          description: The user's email address. In order to qualify for a guaranteed
+            transfer, at least one of `phone_number` or `email_address` must be provided.
+          type: string
+        address:
+          $ref: '#/components/schemas/TransferUserAddressInRequest'
+      required:
+      - legal_name
+      title: TransferAuthorizationUserInRequest
+      type: object
     TransferUserInRequest:
       additionalProperties: true
       description: The legal name and other information for the account holder.
@@ -23633,7 +24126,9 @@ components:
       type: object
     TransferUserAddressInRequest:
       additionalProperties: true
-      description: The address associated with the account holder.
+      description: The address associated with the account holder. Providing this
+        data will improve the likelihood that Plaid will be able to guarantee the
+        transfer, if applicable.
       example:
         country: country
         city: city
@@ -23788,11 +24283,14 @@ components:
         `GUARANTEE_LIMIT_REACHED`: This transfer is low-risk, but Guaranteed ACH has exhausted an internal limit on the number or rate of guarantees that applies to this transfer.
 
         `RISK_ESTIMATE_UNAVAILABLE`: A risk estimate is unavailable for this Item.
+
+        `REQUIRED_PARAM_MISSING`: Required fields are missing.
       enum:
       - RETURN_BANK
       - RETURN_CUSTOMER
       - GUARANTEE_LIMIT_REACHED
       - RISK_ESTIMATE_UNAVAILABLE
+      - REQUIRED_PARAM_MISSING
       type: string
     TransferAuthorizationGuaranteeDecisionRationale:
       additionalProperties: true
@@ -23878,9 +24376,11 @@ components:
       properties:
         ip_address:
           description: The IP address of the device being used to initiate the authorization.
+            Required for guaranteed ACH customers.
           type: string
         user_agent:
           description: The user agent of the device being used to initiate the authorization.
+            Required for guaranteed ACH customers.
           type: string
       title: TransferAuthorizationDevice
       type: object
@@ -23937,16 +24437,9 @@ components:
       - posted
       - cancelled
       - failed
-      - reversed
       - returned
       title: TransferStatus
       type: string
-      x-override-enum-values-shown:
-      - pending
-      - posted
-      - cancelled
-      - failed
-      - returned
     TransferSweepStatus:
       description: |-
         The status of the sweep for the transfer.
@@ -23980,7 +24473,14 @@ components:
       type: string
     TransferNetwork:
       description: The network or rails used for the transfer. Valid options are `ach`
-        or `same-day-ach`.
+        or `same-day-ach`. The cutoff for same-day transfers is 7:45 AM Pacific Time
+        and the cutoff for next-day transfers is 5:45 PM Pacific Time. It is recommended
+        to submit a transfer at least 15 minutes before the cutoff time in order to
+        ensure that it will be processed before the cutoff. Any transfer that is indicated
+        as `same-day-ach` and that misses the same-day cutoff, but is submitted in
+        time for the next-day cutoff, will be sent over next-day rails and will not
+        incur same-day charges. Note that both legs of the transfer will be downgraded
+        if applicable.
       enum:
       - ach
       - same-day-ach
@@ -24040,12 +24540,15 @@ components:
     TransferAuthorizationCreateRequest:
       description: Defines the request schema for `/transfer/authorization/create`
       example:
-        access_token: access_token
         amount: amount
+        secret: secret
+        client_id: client_id
+        access_token: access_token
+        user_present: true
         account_id: account_id
+        payment_profile_id: payment_profile_id
         iso_currency_code: iso_currency_code
         origination_account_id: origination_account_id
-        secret: secret
         user:
           email_address: email_address
           address:
@@ -24059,7 +24562,6 @@ components:
         device:
           ip_address: ip_address
           user_agent: user_agent
-        client_id: client_id
       properties:
         client_id:
           description: Your Plaid API `client_id`. The `client_id` is required and
@@ -24092,7 +24594,7 @@ components:
         ach_class:
           $ref: '#/components/schemas/ACHClass'
         user:
-          $ref: '#/components/schemas/TransferUserInRequest'
+          $ref: '#/components/schemas/TransferAuthorizationUserInRequest'
         device:
           $ref: '#/components/schemas/TransferAuthorizationDevice'
         origination_account_id:
@@ -24102,9 +24604,18 @@ components:
         iso_currency_code:
           description: The currency of the transfer amount. The default value is "USD".
           type: string
+        user_present:
+          description: Required for guaranteed ACH customers. If the end user is initiating
+            the specific transfer themselves via an interactive UI, this should be
+            `true`; for automatic recurring payments where the end user is not actually
+            initiating each individual transfer, it should be `false`.
+          nullable: true
+          type: boolean
+        payment_profile_id:
+          description: Plaid’s unique identifier for a payment profile.
+          title: PaymentProfileID
+          type: string
       required:
-      - access_token
-      - account_id
       - ach_class
       - amount
       - network
@@ -24124,6 +24635,7 @@ components:
         client_id: client_id
         access_token: access_token
         account_id: account_id
+        payment_profile_id: payment_profile_id
         iso_currency_code: iso_currency_code
         idempotency_key: idempotency_key
         origination_account_id: origination_account_id
@@ -24212,9 +24724,11 @@ components:
         iso_currency_code:
           description: The currency of the transfer amount. The default value is "USD".
           type: string
+        payment_profile_id:
+          description: Plaid’s unique identifier for a payment profile.
+          title: PaymentProfileID
+          type: string
       required:
-      - access_token
-      - account_id
       - ach_class
       - amount
       - authorization_id
@@ -25081,21 +25595,12 @@ components:
       - cancelled
       - failed
       - posted
-      - reversed
       - returned
       - swept
       - reverse_swept
       - return_swept
       title: TransferEventType
       type: string
-      x-override-enum-values-shown:
-      - pending
-      - cancelled
-      - failed
-      - posted
-      - returned
-      - swept
-      - return_swept
     BankTransferEventType:
       description: |-
         The type of event that this bank transfer represents.
@@ -26944,6 +27449,11 @@ components:
       - $ref: '#/components/schemas/AccountBase'
       - $ref: '#/components/schemas/AccountAssets_allOf'
       description: Asset information about an account
+      required:
+      - days_available
+      - historical_balances
+      - owners
+      - transactions
       title: AccountAssets
     DepositoryFilter:
       additionalProperties: true
@@ -28510,6 +29020,7 @@ components:
       - DOCUMENT_TYPE_GIG
       - DOCUMENT_TYPE_NONE
       - DOCUMENT_TYPE_US_TAX_1099_MISC
+      - DOCUMENT_TYPE_US_TAX_1099_K
       title: DocType
       type: string
     Paystub:
@@ -30444,6 +30955,8 @@ components:
       - $ref: '#/components/schemas/TransactionBase'
       - $ref: '#/components/schemas/AssetReportTransaction_allOf'
       description: A transaction on the asset report
+      required:
+      - original_description
       title: AssetReportTransaction
     HealthIncident:
       additionalProperties: true
@@ -31940,6 +32453,39 @@ components:
       - request_id
       title: CreditBankIncomeGetResponse
       type: object
+    CreditBankIncomePDFGetRequest:
+      description: CreditBankIncomePDFGetRequest defines the request schema for `/credit/bank_income/pdf/get`
+      example:
+        secret: secret
+        user_token: user_token
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        user_token:
+          description: The user token associated with the User data is being requested
+            for.
+          title: UserToken
+          type: string
+      required:
+      - user_token
+      title: CreditBankIncomePDFGetRequest
+      type: object
+    CreditBankIncomePDFGetResponse:
+      description: CreditBankIncomePDFGetResponse defines the response schema for
+        `/credit/bank_income/pdf/get`
+      format: binary
+      title: CreditBankIncomePDFGetResponse
+      type: string
     CreditBankIncome:
       description: The report of the Bank Income data for an end user.
       example:
@@ -33517,10 +34063,8 @@ components:
         `/credit/audit_copy_token/create`
       example:
         report_tokens:
-        - report_type: report_type
-          token: token
-        - report_type: report_type
-          token: token
+        - token: token
+        - token: token
         secret: secret
         client_id: client_id
         auditor_id: auditor_id
@@ -33859,6 +34403,175 @@ components:
                 - type: type
                 verification_status: verification_status
             account_id: account_id
+            form1099s:
+            - crop_insurance_proceeds: 6.438423552598547
+              september_amount: 3.0205796992916243
+              fishing_boat_proceeds: 9.369310271410669
+              february_amount: 0.8851374739011653
+              gross_amount: 3.353193347011243
+              document_id: document_id
+              payer:
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+                tin: tin
+                telephone_number: telephone_number
+              substitute_payments_in_lieu_of_dividends_or_interest: 9.018348186070783
+              federal_income_tax_withheld: 9.965781217890562
+              pse_telephone_number: pse_telephone_number
+              medical_and_healthcare_payments: 6.683562403749608
+              payer_state_number: payer_state_number
+              document_metadata:
+                name: name
+                download_url: download_url
+                document_type: document_type
+                status: status
+              october_amount: 3.0576100241049344
+              secondary_state_id: secondary_state_id
+              other_income: 5.025004791520295
+              merchant_category_code: merchant_category_code
+              state_income_lower: 6.704019297950036
+              tax_year: tax_year
+              rents: 1.1730742509559433
+              payer_state_number_lower: payer_state_number_lower
+              filer:
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+                tin: tin
+                type: type
+              excess_golden_parachute_payments: 3.5571952270680973
+              may_amount: 0.10263654006109402
+              primary_state: primary_state
+              primary_state_id: primary_state_id
+              state_tax_withheld: 6.778324963048013
+              section_409a_deferrals: 1.284659006116532
+              secondary_state_income_tax: 4.078845849666752
+              primary_state_income_tax: 3.2588565619047607
+              march_amount: 7.058770351582356
+              section_409a_income: 2.8841621266687802
+              number_of_payment_transactions: number_of_payment_transactions
+              august_amount: 7.740351818741173
+              payer_made_direct_sales_of_5000_or_more_of_consumer_products_to_buyer: payer_made_direct_sales_of_5000_or_more_of_consumer_products_to_buyer
+              december_amount: 5.533258397034986
+              june_amount: 4.652396432933246
+              pse_name: pse_name
+              november_amount: 7.04836565559697
+              state_income: 5.944895607614016
+              secondary_state: secondary_state
+              july_amount: 8.969578798196912
+              royalties: 4.965218492984954
+              january_amount: 7.143538047012306
+              recipient:
+                account_number: account_number
+                second_tin_exists: second_tin_exists
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+                tin: tin
+                facta_filing_requirement: facta_filing_requirement
+              gross_proceeds_paid_to_an_attorney: 6.965117697638846
+              transactions_reported: transactions_reported
+              card_not_present_transaction: 3.0937452626664474
+              nonemployee_compensation: 8.762042012749001
+              state_tax_withheld_lower: 6.878052220127876
+              april_amount: 6.519180951018382
+            - crop_insurance_proceeds: 6.438423552598547
+              september_amount: 3.0205796992916243
+              fishing_boat_proceeds: 9.369310271410669
+              february_amount: 0.8851374739011653
+              gross_amount: 3.353193347011243
+              document_id: document_id
+              payer:
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+                tin: tin
+                telephone_number: telephone_number
+              substitute_payments_in_lieu_of_dividends_or_interest: 9.018348186070783
+              federal_income_tax_withheld: 9.965781217890562
+              pse_telephone_number: pse_telephone_number
+              medical_and_healthcare_payments: 6.683562403749608
+              payer_state_number: payer_state_number
+              document_metadata:
+                name: name
+                download_url: download_url
+                document_type: document_type
+                status: status
+              october_amount: 3.0576100241049344
+              secondary_state_id: secondary_state_id
+              other_income: 5.025004791520295
+              merchant_category_code: merchant_category_code
+              state_income_lower: 6.704019297950036
+              tax_year: tax_year
+              rents: 1.1730742509559433
+              payer_state_number_lower: payer_state_number_lower
+              filer:
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+                tin: tin
+                type: type
+              excess_golden_parachute_payments: 3.5571952270680973
+              may_amount: 0.10263654006109402
+              primary_state: primary_state
+              primary_state_id: primary_state_id
+              state_tax_withheld: 6.778324963048013
+              section_409a_deferrals: 1.284659006116532
+              secondary_state_income_tax: 4.078845849666752
+              primary_state_income_tax: 3.2588565619047607
+              march_amount: 7.058770351582356
+              section_409a_income: 2.8841621266687802
+              number_of_payment_transactions: number_of_payment_transactions
+              august_amount: 7.740351818741173
+              payer_made_direct_sales_of_5000_or_more_of_consumer_products_to_buyer: payer_made_direct_sales_of_5000_or_more_of_consumer_products_to_buyer
+              december_amount: 5.533258397034986
+              june_amount: 4.652396432933246
+              pse_name: pse_name
+              november_amount: 7.04836565559697
+              state_income: 5.944895607614016
+              secondary_state: secondary_state
+              july_amount: 8.969578798196912
+              royalties: 4.965218492984954
+              january_amount: 7.143538047012306
+              recipient:
+                account_number: account_number
+                second_tin_exists: second_tin_exists
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+                tin: tin
+                facta_filing_requirement: facta_filing_requirement
+              gross_proceeds_paid_to_an_attorney: 6.965117697638846
+              transactions_reported: transactions_reported
+              card_not_present_transaction: 3.0937452626664474
+              nonemployee_compensation: 8.762042012749001
+              state_tax_withheld_lower: 6.878052220127876
+              april_amount: 6.519180951018382
             w2s:
             - statutory_employee: statutory_employee
               other: other
@@ -34192,6 +34905,175 @@ components:
                 - type: type
                 verification_status: verification_status
             account_id: account_id
+            form1099s:
+            - crop_insurance_proceeds: 6.438423552598547
+              september_amount: 3.0205796992916243
+              fishing_boat_proceeds: 9.369310271410669
+              february_amount: 0.8851374739011653
+              gross_amount: 3.353193347011243
+              document_id: document_id
+              payer:
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+                tin: tin
+                telephone_number: telephone_number
+              substitute_payments_in_lieu_of_dividends_or_interest: 9.018348186070783
+              federal_income_tax_withheld: 9.965781217890562
+              pse_telephone_number: pse_telephone_number
+              medical_and_healthcare_payments: 6.683562403749608
+              payer_state_number: payer_state_number
+              document_metadata:
+                name: name
+                download_url: download_url
+                document_type: document_type
+                status: status
+              october_amount: 3.0576100241049344
+              secondary_state_id: secondary_state_id
+              other_income: 5.025004791520295
+              merchant_category_code: merchant_category_code
+              state_income_lower: 6.704019297950036
+              tax_year: tax_year
+              rents: 1.1730742509559433
+              payer_state_number_lower: payer_state_number_lower
+              filer:
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+                tin: tin
+                type: type
+              excess_golden_parachute_payments: 3.5571952270680973
+              may_amount: 0.10263654006109402
+              primary_state: primary_state
+              primary_state_id: primary_state_id
+              state_tax_withheld: 6.778324963048013
+              section_409a_deferrals: 1.284659006116532
+              secondary_state_income_tax: 4.078845849666752
+              primary_state_income_tax: 3.2588565619047607
+              march_amount: 7.058770351582356
+              section_409a_income: 2.8841621266687802
+              number_of_payment_transactions: number_of_payment_transactions
+              august_amount: 7.740351818741173
+              payer_made_direct_sales_of_5000_or_more_of_consumer_products_to_buyer: payer_made_direct_sales_of_5000_or_more_of_consumer_products_to_buyer
+              december_amount: 5.533258397034986
+              june_amount: 4.652396432933246
+              pse_name: pse_name
+              november_amount: 7.04836565559697
+              state_income: 5.944895607614016
+              secondary_state: secondary_state
+              july_amount: 8.969578798196912
+              royalties: 4.965218492984954
+              january_amount: 7.143538047012306
+              recipient:
+                account_number: account_number
+                second_tin_exists: second_tin_exists
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+                tin: tin
+                facta_filing_requirement: facta_filing_requirement
+              gross_proceeds_paid_to_an_attorney: 6.965117697638846
+              transactions_reported: transactions_reported
+              card_not_present_transaction: 3.0937452626664474
+              nonemployee_compensation: 8.762042012749001
+              state_tax_withheld_lower: 6.878052220127876
+              april_amount: 6.519180951018382
+            - crop_insurance_proceeds: 6.438423552598547
+              september_amount: 3.0205796992916243
+              fishing_boat_proceeds: 9.369310271410669
+              february_amount: 0.8851374739011653
+              gross_amount: 3.353193347011243
+              document_id: document_id
+              payer:
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+                tin: tin
+                telephone_number: telephone_number
+              substitute_payments_in_lieu_of_dividends_or_interest: 9.018348186070783
+              federal_income_tax_withheld: 9.965781217890562
+              pse_telephone_number: pse_telephone_number
+              medical_and_healthcare_payments: 6.683562403749608
+              payer_state_number: payer_state_number
+              document_metadata:
+                name: name
+                download_url: download_url
+                document_type: document_type
+                status: status
+              october_amount: 3.0576100241049344
+              secondary_state_id: secondary_state_id
+              other_income: 5.025004791520295
+              merchant_category_code: merchant_category_code
+              state_income_lower: 6.704019297950036
+              tax_year: tax_year
+              rents: 1.1730742509559433
+              payer_state_number_lower: payer_state_number_lower
+              filer:
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+                tin: tin
+                type: type
+              excess_golden_parachute_payments: 3.5571952270680973
+              may_amount: 0.10263654006109402
+              primary_state: primary_state
+              primary_state_id: primary_state_id
+              state_tax_withheld: 6.778324963048013
+              section_409a_deferrals: 1.284659006116532
+              secondary_state_income_tax: 4.078845849666752
+              primary_state_income_tax: 3.2588565619047607
+              march_amount: 7.058770351582356
+              section_409a_income: 2.8841621266687802
+              number_of_payment_transactions: number_of_payment_transactions
+              august_amount: 7.740351818741173
+              payer_made_direct_sales_of_5000_or_more_of_consumer_products_to_buyer: payer_made_direct_sales_of_5000_or_more_of_consumer_products_to_buyer
+              december_amount: 5.533258397034986
+              june_amount: 4.652396432933246
+              pse_name: pse_name
+              november_amount: 7.04836565559697
+              state_income: 5.944895607614016
+              secondary_state: secondary_state
+              july_amount: 8.969578798196912
+              royalties: 4.965218492984954
+              january_amount: 7.143538047012306
+              recipient:
+                account_number: account_number
+                second_tin_exists: second_tin_exists
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+                tin: tin
+                facta_filing_requirement: facta_filing_requirement
+              gross_proceeds_paid_to_an_attorney: 6.965117697638846
+              transactions_reported: transactions_reported
+              card_not_present_transaction: 3.0937452626664474
+              nonemployee_compensation: 8.762042012749001
+              state_tax_withheld_lower: 6.878052220127876
+              april_amount: 6.519180951018382
             w2s:
             - statutory_employee: statutory_employee
               other: other
@@ -34541,6 +35423,175 @@ components:
                 - type: type
                 verification_status: verification_status
             account_id: account_id
+            form1099s:
+            - crop_insurance_proceeds: 6.438423552598547
+              september_amount: 3.0205796992916243
+              fishing_boat_proceeds: 9.369310271410669
+              february_amount: 0.8851374739011653
+              gross_amount: 3.353193347011243
+              document_id: document_id
+              payer:
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+                tin: tin
+                telephone_number: telephone_number
+              substitute_payments_in_lieu_of_dividends_or_interest: 9.018348186070783
+              federal_income_tax_withheld: 9.965781217890562
+              pse_telephone_number: pse_telephone_number
+              medical_and_healthcare_payments: 6.683562403749608
+              payer_state_number: payer_state_number
+              document_metadata:
+                name: name
+                download_url: download_url
+                document_type: document_type
+                status: status
+              october_amount: 3.0576100241049344
+              secondary_state_id: secondary_state_id
+              other_income: 5.025004791520295
+              merchant_category_code: merchant_category_code
+              state_income_lower: 6.704019297950036
+              tax_year: tax_year
+              rents: 1.1730742509559433
+              payer_state_number_lower: payer_state_number_lower
+              filer:
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+                tin: tin
+                type: type
+              excess_golden_parachute_payments: 3.5571952270680973
+              may_amount: 0.10263654006109402
+              primary_state: primary_state
+              primary_state_id: primary_state_id
+              state_tax_withheld: 6.778324963048013
+              section_409a_deferrals: 1.284659006116532
+              secondary_state_income_tax: 4.078845849666752
+              primary_state_income_tax: 3.2588565619047607
+              march_amount: 7.058770351582356
+              section_409a_income: 2.8841621266687802
+              number_of_payment_transactions: number_of_payment_transactions
+              august_amount: 7.740351818741173
+              payer_made_direct_sales_of_5000_or_more_of_consumer_products_to_buyer: payer_made_direct_sales_of_5000_or_more_of_consumer_products_to_buyer
+              december_amount: 5.533258397034986
+              june_amount: 4.652396432933246
+              pse_name: pse_name
+              november_amount: 7.04836565559697
+              state_income: 5.944895607614016
+              secondary_state: secondary_state
+              july_amount: 8.969578798196912
+              royalties: 4.965218492984954
+              january_amount: 7.143538047012306
+              recipient:
+                account_number: account_number
+                second_tin_exists: second_tin_exists
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+                tin: tin
+                facta_filing_requirement: facta_filing_requirement
+              gross_proceeds_paid_to_an_attorney: 6.965117697638846
+              transactions_reported: transactions_reported
+              card_not_present_transaction: 3.0937452626664474
+              nonemployee_compensation: 8.762042012749001
+              state_tax_withheld_lower: 6.878052220127876
+              april_amount: 6.519180951018382
+            - crop_insurance_proceeds: 6.438423552598547
+              september_amount: 3.0205796992916243
+              fishing_boat_proceeds: 9.369310271410669
+              february_amount: 0.8851374739011653
+              gross_amount: 3.353193347011243
+              document_id: document_id
+              payer:
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+                tin: tin
+                telephone_number: telephone_number
+              substitute_payments_in_lieu_of_dividends_or_interest: 9.018348186070783
+              federal_income_tax_withheld: 9.965781217890562
+              pse_telephone_number: pse_telephone_number
+              medical_and_healthcare_payments: 6.683562403749608
+              payer_state_number: payer_state_number
+              document_metadata:
+                name: name
+                download_url: download_url
+                document_type: document_type
+                status: status
+              october_amount: 3.0576100241049344
+              secondary_state_id: secondary_state_id
+              other_income: 5.025004791520295
+              merchant_category_code: merchant_category_code
+              state_income_lower: 6.704019297950036
+              tax_year: tax_year
+              rents: 1.1730742509559433
+              payer_state_number_lower: payer_state_number_lower
+              filer:
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+                tin: tin
+                type: type
+              excess_golden_parachute_payments: 3.5571952270680973
+              may_amount: 0.10263654006109402
+              primary_state: primary_state
+              primary_state_id: primary_state_id
+              state_tax_withheld: 6.778324963048013
+              section_409a_deferrals: 1.284659006116532
+              secondary_state_income_tax: 4.078845849666752
+              primary_state_income_tax: 3.2588565619047607
+              march_amount: 7.058770351582356
+              section_409a_income: 2.8841621266687802
+              number_of_payment_transactions: number_of_payment_transactions
+              august_amount: 7.740351818741173
+              payer_made_direct_sales_of_5000_or_more_of_consumer_products_to_buyer: payer_made_direct_sales_of_5000_or_more_of_consumer_products_to_buyer
+              december_amount: 5.533258397034986
+              june_amount: 4.652396432933246
+              pse_name: pse_name
+              november_amount: 7.04836565559697
+              state_income: 5.944895607614016
+              secondary_state: secondary_state
+              july_amount: 8.969578798196912
+              royalties: 4.965218492984954
+              january_amount: 7.143538047012306
+              recipient:
+                account_number: account_number
+                second_tin_exists: second_tin_exists
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+                tin: tin
+                facta_filing_requirement: facta_filing_requirement
+              gross_proceeds_paid_to_an_attorney: 6.965117697638846
+              transactions_reported: transactions_reported
+              card_not_present_transaction: 3.0937452626664474
+              nonemployee_compensation: 8.762042012749001
+              state_tax_withheld_lower: 6.878052220127876
+              april_amount: 6.519180951018382
             w2s:
             - statutory_employee: statutory_employee
               other: other
@@ -34874,6 +35925,175 @@ components:
                 - type: type
                 verification_status: verification_status
             account_id: account_id
+            form1099s:
+            - crop_insurance_proceeds: 6.438423552598547
+              september_amount: 3.0205796992916243
+              fishing_boat_proceeds: 9.369310271410669
+              february_amount: 0.8851374739011653
+              gross_amount: 3.353193347011243
+              document_id: document_id
+              payer:
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+                tin: tin
+                telephone_number: telephone_number
+              substitute_payments_in_lieu_of_dividends_or_interest: 9.018348186070783
+              federal_income_tax_withheld: 9.965781217890562
+              pse_telephone_number: pse_telephone_number
+              medical_and_healthcare_payments: 6.683562403749608
+              payer_state_number: payer_state_number
+              document_metadata:
+                name: name
+                download_url: download_url
+                document_type: document_type
+                status: status
+              october_amount: 3.0576100241049344
+              secondary_state_id: secondary_state_id
+              other_income: 5.025004791520295
+              merchant_category_code: merchant_category_code
+              state_income_lower: 6.704019297950036
+              tax_year: tax_year
+              rents: 1.1730742509559433
+              payer_state_number_lower: payer_state_number_lower
+              filer:
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+                tin: tin
+                type: type
+              excess_golden_parachute_payments: 3.5571952270680973
+              may_amount: 0.10263654006109402
+              primary_state: primary_state
+              primary_state_id: primary_state_id
+              state_tax_withheld: 6.778324963048013
+              section_409a_deferrals: 1.284659006116532
+              secondary_state_income_tax: 4.078845849666752
+              primary_state_income_tax: 3.2588565619047607
+              march_amount: 7.058770351582356
+              section_409a_income: 2.8841621266687802
+              number_of_payment_transactions: number_of_payment_transactions
+              august_amount: 7.740351818741173
+              payer_made_direct_sales_of_5000_or_more_of_consumer_products_to_buyer: payer_made_direct_sales_of_5000_or_more_of_consumer_products_to_buyer
+              december_amount: 5.533258397034986
+              june_amount: 4.652396432933246
+              pse_name: pse_name
+              november_amount: 7.04836565559697
+              state_income: 5.944895607614016
+              secondary_state: secondary_state
+              july_amount: 8.969578798196912
+              royalties: 4.965218492984954
+              january_amount: 7.143538047012306
+              recipient:
+                account_number: account_number
+                second_tin_exists: second_tin_exists
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+                tin: tin
+                facta_filing_requirement: facta_filing_requirement
+              gross_proceeds_paid_to_an_attorney: 6.965117697638846
+              transactions_reported: transactions_reported
+              card_not_present_transaction: 3.0937452626664474
+              nonemployee_compensation: 8.762042012749001
+              state_tax_withheld_lower: 6.878052220127876
+              april_amount: 6.519180951018382
+            - crop_insurance_proceeds: 6.438423552598547
+              september_amount: 3.0205796992916243
+              fishing_boat_proceeds: 9.369310271410669
+              february_amount: 0.8851374739011653
+              gross_amount: 3.353193347011243
+              document_id: document_id
+              payer:
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+                tin: tin
+                telephone_number: telephone_number
+              substitute_payments_in_lieu_of_dividends_or_interest: 9.018348186070783
+              federal_income_tax_withheld: 9.965781217890562
+              pse_telephone_number: pse_telephone_number
+              medical_and_healthcare_payments: 6.683562403749608
+              payer_state_number: payer_state_number
+              document_metadata:
+                name: name
+                download_url: download_url
+                document_type: document_type
+                status: status
+              october_amount: 3.0576100241049344
+              secondary_state_id: secondary_state_id
+              other_income: 5.025004791520295
+              merchant_category_code: merchant_category_code
+              state_income_lower: 6.704019297950036
+              tax_year: tax_year
+              rents: 1.1730742509559433
+              payer_state_number_lower: payer_state_number_lower
+              filer:
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+                tin: tin
+                type: type
+              excess_golden_parachute_payments: 3.5571952270680973
+              may_amount: 0.10263654006109402
+              primary_state: primary_state
+              primary_state_id: primary_state_id
+              state_tax_withheld: 6.778324963048013
+              section_409a_deferrals: 1.284659006116532
+              secondary_state_income_tax: 4.078845849666752
+              primary_state_income_tax: 3.2588565619047607
+              march_amount: 7.058770351582356
+              section_409a_income: 2.8841621266687802
+              number_of_payment_transactions: number_of_payment_transactions
+              august_amount: 7.740351818741173
+              payer_made_direct_sales_of_5000_or_more_of_consumer_products_to_buyer: payer_made_direct_sales_of_5000_or_more_of_consumer_products_to_buyer
+              december_amount: 5.533258397034986
+              june_amount: 4.652396432933246
+              pse_name: pse_name
+              november_amount: 7.04836565559697
+              state_income: 5.944895607614016
+              secondary_state: secondary_state
+              july_amount: 8.969578798196912
+              royalties: 4.965218492984954
+              january_amount: 7.143538047012306
+              recipient:
+                account_number: account_number
+                second_tin_exists: second_tin_exists
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+                tin: tin
+                facta_filing_requirement: facta_filing_requirement
+              gross_proceeds_paid_to_an_attorney: 6.965117697638846
+              transactions_reported: transactions_reported
+              card_not_present_transaction: 3.0937452626664474
+              nonemployee_compensation: 8.762042012749001
+              state_tax_withheld_lower: 6.878052220127876
+              april_amount: 6.519180951018382
             w2s:
             - statutory_employee: statutory_employee
               other: other
@@ -35341,6 +36561,175 @@ components:
               - type: type
               verification_status: verification_status
           account_id: account_id
+          form1099s:
+          - crop_insurance_proceeds: 6.438423552598547
+            september_amount: 3.0205796992916243
+            fishing_boat_proceeds: 9.369310271410669
+            february_amount: 0.8851374739011653
+            gross_amount: 3.353193347011243
+            document_id: document_id
+            payer:
+              address:
+                country: country
+                city: city
+                street: street
+                postal_code: postal_code
+                region: region
+              name: name
+              tin: tin
+              telephone_number: telephone_number
+            substitute_payments_in_lieu_of_dividends_or_interest: 9.018348186070783
+            federal_income_tax_withheld: 9.965781217890562
+            pse_telephone_number: pse_telephone_number
+            medical_and_healthcare_payments: 6.683562403749608
+            payer_state_number: payer_state_number
+            document_metadata:
+              name: name
+              download_url: download_url
+              document_type: document_type
+              status: status
+            october_amount: 3.0576100241049344
+            secondary_state_id: secondary_state_id
+            other_income: 5.025004791520295
+            merchant_category_code: merchant_category_code
+            state_income_lower: 6.704019297950036
+            tax_year: tax_year
+            rents: 1.1730742509559433
+            payer_state_number_lower: payer_state_number_lower
+            filer:
+              address:
+                country: country
+                city: city
+                street: street
+                postal_code: postal_code
+                region: region
+              name: name
+              tin: tin
+              type: type
+            excess_golden_parachute_payments: 3.5571952270680973
+            may_amount: 0.10263654006109402
+            primary_state: primary_state
+            primary_state_id: primary_state_id
+            state_tax_withheld: 6.778324963048013
+            section_409a_deferrals: 1.284659006116532
+            secondary_state_income_tax: 4.078845849666752
+            primary_state_income_tax: 3.2588565619047607
+            march_amount: 7.058770351582356
+            section_409a_income: 2.8841621266687802
+            number_of_payment_transactions: number_of_payment_transactions
+            august_amount: 7.740351818741173
+            payer_made_direct_sales_of_5000_or_more_of_consumer_products_to_buyer: payer_made_direct_sales_of_5000_or_more_of_consumer_products_to_buyer
+            december_amount: 5.533258397034986
+            june_amount: 4.652396432933246
+            pse_name: pse_name
+            november_amount: 7.04836565559697
+            state_income: 5.944895607614016
+            secondary_state: secondary_state
+            july_amount: 8.969578798196912
+            royalties: 4.965218492984954
+            january_amount: 7.143538047012306
+            recipient:
+              account_number: account_number
+              second_tin_exists: second_tin_exists
+              address:
+                country: country
+                city: city
+                street: street
+                postal_code: postal_code
+                region: region
+              name: name
+              tin: tin
+              facta_filing_requirement: facta_filing_requirement
+            gross_proceeds_paid_to_an_attorney: 6.965117697638846
+            transactions_reported: transactions_reported
+            card_not_present_transaction: 3.0937452626664474
+            nonemployee_compensation: 8.762042012749001
+            state_tax_withheld_lower: 6.878052220127876
+            april_amount: 6.519180951018382
+          - crop_insurance_proceeds: 6.438423552598547
+            september_amount: 3.0205796992916243
+            fishing_boat_proceeds: 9.369310271410669
+            february_amount: 0.8851374739011653
+            gross_amount: 3.353193347011243
+            document_id: document_id
+            payer:
+              address:
+                country: country
+                city: city
+                street: street
+                postal_code: postal_code
+                region: region
+              name: name
+              tin: tin
+              telephone_number: telephone_number
+            substitute_payments_in_lieu_of_dividends_or_interest: 9.018348186070783
+            federal_income_tax_withheld: 9.965781217890562
+            pse_telephone_number: pse_telephone_number
+            medical_and_healthcare_payments: 6.683562403749608
+            payer_state_number: payer_state_number
+            document_metadata:
+              name: name
+              download_url: download_url
+              document_type: document_type
+              status: status
+            october_amount: 3.0576100241049344
+            secondary_state_id: secondary_state_id
+            other_income: 5.025004791520295
+            merchant_category_code: merchant_category_code
+            state_income_lower: 6.704019297950036
+            tax_year: tax_year
+            rents: 1.1730742509559433
+            payer_state_number_lower: payer_state_number_lower
+            filer:
+              address:
+                country: country
+                city: city
+                street: street
+                postal_code: postal_code
+                region: region
+              name: name
+              tin: tin
+              type: type
+            excess_golden_parachute_payments: 3.5571952270680973
+            may_amount: 0.10263654006109402
+            primary_state: primary_state
+            primary_state_id: primary_state_id
+            state_tax_withheld: 6.778324963048013
+            section_409a_deferrals: 1.284659006116532
+            secondary_state_income_tax: 4.078845849666752
+            primary_state_income_tax: 3.2588565619047607
+            march_amount: 7.058770351582356
+            section_409a_income: 2.8841621266687802
+            number_of_payment_transactions: number_of_payment_transactions
+            august_amount: 7.740351818741173
+            payer_made_direct_sales_of_5000_or_more_of_consumer_products_to_buyer: payer_made_direct_sales_of_5000_or_more_of_consumer_products_to_buyer
+            december_amount: 5.533258397034986
+            june_amount: 4.652396432933246
+            pse_name: pse_name
+            november_amount: 7.04836565559697
+            state_income: 5.944895607614016
+            secondary_state: secondary_state
+            july_amount: 8.969578798196912
+            royalties: 4.965218492984954
+            january_amount: 7.143538047012306
+            recipient:
+              account_number: account_number
+              second_tin_exists: second_tin_exists
+              address:
+                country: country
+                city: city
+                street: street
+                postal_code: postal_code
+                region: region
+              name: name
+              tin: tin
+              facta_filing_requirement: facta_filing_requirement
+            gross_proceeds_paid_to_an_attorney: 6.965117697638846
+            transactions_reported: transactions_reported
+            card_not_present_transaction: 3.0937452626664474
+            nonemployee_compensation: 8.762042012749001
+            state_tax_withheld_lower: 6.878052220127876
+            april_amount: 6.519180951018382
           w2s:
           - statutory_employee: statutory_employee
             other: other
@@ -35674,6 +37063,175 @@ components:
               - type: type
               verification_status: verification_status
           account_id: account_id
+          form1099s:
+          - crop_insurance_proceeds: 6.438423552598547
+            september_amount: 3.0205796992916243
+            fishing_boat_proceeds: 9.369310271410669
+            february_amount: 0.8851374739011653
+            gross_amount: 3.353193347011243
+            document_id: document_id
+            payer:
+              address:
+                country: country
+                city: city
+                street: street
+                postal_code: postal_code
+                region: region
+              name: name
+              tin: tin
+              telephone_number: telephone_number
+            substitute_payments_in_lieu_of_dividends_or_interest: 9.018348186070783
+            federal_income_tax_withheld: 9.965781217890562
+            pse_telephone_number: pse_telephone_number
+            medical_and_healthcare_payments: 6.683562403749608
+            payer_state_number: payer_state_number
+            document_metadata:
+              name: name
+              download_url: download_url
+              document_type: document_type
+              status: status
+            october_amount: 3.0576100241049344
+            secondary_state_id: secondary_state_id
+            other_income: 5.025004791520295
+            merchant_category_code: merchant_category_code
+            state_income_lower: 6.704019297950036
+            tax_year: tax_year
+            rents: 1.1730742509559433
+            payer_state_number_lower: payer_state_number_lower
+            filer:
+              address:
+                country: country
+                city: city
+                street: street
+                postal_code: postal_code
+                region: region
+              name: name
+              tin: tin
+              type: type
+            excess_golden_parachute_payments: 3.5571952270680973
+            may_amount: 0.10263654006109402
+            primary_state: primary_state
+            primary_state_id: primary_state_id
+            state_tax_withheld: 6.778324963048013
+            section_409a_deferrals: 1.284659006116532
+            secondary_state_income_tax: 4.078845849666752
+            primary_state_income_tax: 3.2588565619047607
+            march_amount: 7.058770351582356
+            section_409a_income: 2.8841621266687802
+            number_of_payment_transactions: number_of_payment_transactions
+            august_amount: 7.740351818741173
+            payer_made_direct_sales_of_5000_or_more_of_consumer_products_to_buyer: payer_made_direct_sales_of_5000_or_more_of_consumer_products_to_buyer
+            december_amount: 5.533258397034986
+            june_amount: 4.652396432933246
+            pse_name: pse_name
+            november_amount: 7.04836565559697
+            state_income: 5.944895607614016
+            secondary_state: secondary_state
+            july_amount: 8.969578798196912
+            royalties: 4.965218492984954
+            january_amount: 7.143538047012306
+            recipient:
+              account_number: account_number
+              second_tin_exists: second_tin_exists
+              address:
+                country: country
+                city: city
+                street: street
+                postal_code: postal_code
+                region: region
+              name: name
+              tin: tin
+              facta_filing_requirement: facta_filing_requirement
+            gross_proceeds_paid_to_an_attorney: 6.965117697638846
+            transactions_reported: transactions_reported
+            card_not_present_transaction: 3.0937452626664474
+            nonemployee_compensation: 8.762042012749001
+            state_tax_withheld_lower: 6.878052220127876
+            april_amount: 6.519180951018382
+          - crop_insurance_proceeds: 6.438423552598547
+            september_amount: 3.0205796992916243
+            fishing_boat_proceeds: 9.369310271410669
+            february_amount: 0.8851374739011653
+            gross_amount: 3.353193347011243
+            document_id: document_id
+            payer:
+              address:
+                country: country
+                city: city
+                street: street
+                postal_code: postal_code
+                region: region
+              name: name
+              tin: tin
+              telephone_number: telephone_number
+            substitute_payments_in_lieu_of_dividends_or_interest: 9.018348186070783
+            federal_income_tax_withheld: 9.965781217890562
+            pse_telephone_number: pse_telephone_number
+            medical_and_healthcare_payments: 6.683562403749608
+            payer_state_number: payer_state_number
+            document_metadata:
+              name: name
+              download_url: download_url
+              document_type: document_type
+              status: status
+            october_amount: 3.0576100241049344
+            secondary_state_id: secondary_state_id
+            other_income: 5.025004791520295
+            merchant_category_code: merchant_category_code
+            state_income_lower: 6.704019297950036
+            tax_year: tax_year
+            rents: 1.1730742509559433
+            payer_state_number_lower: payer_state_number_lower
+            filer:
+              address:
+                country: country
+                city: city
+                street: street
+                postal_code: postal_code
+                region: region
+              name: name
+              tin: tin
+              type: type
+            excess_golden_parachute_payments: 3.5571952270680973
+            may_amount: 0.10263654006109402
+            primary_state: primary_state
+            primary_state_id: primary_state_id
+            state_tax_withheld: 6.778324963048013
+            section_409a_deferrals: 1.284659006116532
+            secondary_state_income_tax: 4.078845849666752
+            primary_state_income_tax: 3.2588565619047607
+            march_amount: 7.058770351582356
+            section_409a_income: 2.8841621266687802
+            number_of_payment_transactions: number_of_payment_transactions
+            august_amount: 7.740351818741173
+            payer_made_direct_sales_of_5000_or_more_of_consumer_products_to_buyer: payer_made_direct_sales_of_5000_or_more_of_consumer_products_to_buyer
+            december_amount: 5.533258397034986
+            june_amount: 4.652396432933246
+            pse_name: pse_name
+            november_amount: 7.04836565559697
+            state_income: 5.944895607614016
+            secondary_state: secondary_state
+            july_amount: 8.969578798196912
+            royalties: 4.965218492984954
+            january_amount: 7.143538047012306
+            recipient:
+              account_number: account_number
+              second_tin_exists: second_tin_exists
+              address:
+                country: country
+                city: city
+                street: street
+                postal_code: postal_code
+                region: region
+              name: name
+              tin: tin
+              facta_filing_requirement: facta_filing_requirement
+            gross_proceeds_paid_to_an_attorney: 6.965117697638846
+            transactions_reported: transactions_reported
+            card_not_present_transaction: 3.0937452626664474
+            nonemployee_compensation: 8.762042012749001
+            state_tax_withheld_lower: 6.878052220127876
+            april_amount: 6.519180951018382
           w2s:
           - statutory_employee: statutory_employee
             other: other
@@ -36092,6 +37650,175 @@ components:
             - type: type
             verification_status: verification_status
         account_id: account_id
+        form1099s:
+        - crop_insurance_proceeds: 6.438423552598547
+          september_amount: 3.0205796992916243
+          fishing_boat_proceeds: 9.369310271410669
+          february_amount: 0.8851374739011653
+          gross_amount: 3.353193347011243
+          document_id: document_id
+          payer:
+            address:
+              country: country
+              city: city
+              street: street
+              postal_code: postal_code
+              region: region
+            name: name
+            tin: tin
+            telephone_number: telephone_number
+          substitute_payments_in_lieu_of_dividends_or_interest: 9.018348186070783
+          federal_income_tax_withheld: 9.965781217890562
+          pse_telephone_number: pse_telephone_number
+          medical_and_healthcare_payments: 6.683562403749608
+          payer_state_number: payer_state_number
+          document_metadata:
+            name: name
+            download_url: download_url
+            document_type: document_type
+            status: status
+          october_amount: 3.0576100241049344
+          secondary_state_id: secondary_state_id
+          other_income: 5.025004791520295
+          merchant_category_code: merchant_category_code
+          state_income_lower: 6.704019297950036
+          tax_year: tax_year
+          rents: 1.1730742509559433
+          payer_state_number_lower: payer_state_number_lower
+          filer:
+            address:
+              country: country
+              city: city
+              street: street
+              postal_code: postal_code
+              region: region
+            name: name
+            tin: tin
+            type: type
+          excess_golden_parachute_payments: 3.5571952270680973
+          may_amount: 0.10263654006109402
+          primary_state: primary_state
+          primary_state_id: primary_state_id
+          state_tax_withheld: 6.778324963048013
+          section_409a_deferrals: 1.284659006116532
+          secondary_state_income_tax: 4.078845849666752
+          primary_state_income_tax: 3.2588565619047607
+          march_amount: 7.058770351582356
+          section_409a_income: 2.8841621266687802
+          number_of_payment_transactions: number_of_payment_transactions
+          august_amount: 7.740351818741173
+          payer_made_direct_sales_of_5000_or_more_of_consumer_products_to_buyer: payer_made_direct_sales_of_5000_or_more_of_consumer_products_to_buyer
+          december_amount: 5.533258397034986
+          june_amount: 4.652396432933246
+          pse_name: pse_name
+          november_amount: 7.04836565559697
+          state_income: 5.944895607614016
+          secondary_state: secondary_state
+          july_amount: 8.969578798196912
+          royalties: 4.965218492984954
+          january_amount: 7.143538047012306
+          recipient:
+            account_number: account_number
+            second_tin_exists: second_tin_exists
+            address:
+              country: country
+              city: city
+              street: street
+              postal_code: postal_code
+              region: region
+            name: name
+            tin: tin
+            facta_filing_requirement: facta_filing_requirement
+          gross_proceeds_paid_to_an_attorney: 6.965117697638846
+          transactions_reported: transactions_reported
+          card_not_present_transaction: 3.0937452626664474
+          nonemployee_compensation: 8.762042012749001
+          state_tax_withheld_lower: 6.878052220127876
+          april_amount: 6.519180951018382
+        - crop_insurance_proceeds: 6.438423552598547
+          september_amount: 3.0205796992916243
+          fishing_boat_proceeds: 9.369310271410669
+          february_amount: 0.8851374739011653
+          gross_amount: 3.353193347011243
+          document_id: document_id
+          payer:
+            address:
+              country: country
+              city: city
+              street: street
+              postal_code: postal_code
+              region: region
+            name: name
+            tin: tin
+            telephone_number: telephone_number
+          substitute_payments_in_lieu_of_dividends_or_interest: 9.018348186070783
+          federal_income_tax_withheld: 9.965781217890562
+          pse_telephone_number: pse_telephone_number
+          medical_and_healthcare_payments: 6.683562403749608
+          payer_state_number: payer_state_number
+          document_metadata:
+            name: name
+            download_url: download_url
+            document_type: document_type
+            status: status
+          october_amount: 3.0576100241049344
+          secondary_state_id: secondary_state_id
+          other_income: 5.025004791520295
+          merchant_category_code: merchant_category_code
+          state_income_lower: 6.704019297950036
+          tax_year: tax_year
+          rents: 1.1730742509559433
+          payer_state_number_lower: payer_state_number_lower
+          filer:
+            address:
+              country: country
+              city: city
+              street: street
+              postal_code: postal_code
+              region: region
+            name: name
+            tin: tin
+            type: type
+          excess_golden_parachute_payments: 3.5571952270680973
+          may_amount: 0.10263654006109402
+          primary_state: primary_state
+          primary_state_id: primary_state_id
+          state_tax_withheld: 6.778324963048013
+          section_409a_deferrals: 1.284659006116532
+          secondary_state_income_tax: 4.078845849666752
+          primary_state_income_tax: 3.2588565619047607
+          march_amount: 7.058770351582356
+          section_409a_income: 2.8841621266687802
+          number_of_payment_transactions: number_of_payment_transactions
+          august_amount: 7.740351818741173
+          payer_made_direct_sales_of_5000_or_more_of_consumer_products_to_buyer: payer_made_direct_sales_of_5000_or_more_of_consumer_products_to_buyer
+          december_amount: 5.533258397034986
+          june_amount: 4.652396432933246
+          pse_name: pse_name
+          november_amount: 7.04836565559697
+          state_income: 5.944895607614016
+          secondary_state: secondary_state
+          july_amount: 8.969578798196912
+          royalties: 4.965218492984954
+          january_amount: 7.143538047012306
+          recipient:
+            account_number: account_number
+            second_tin_exists: second_tin_exists
+            address:
+              country: country
+              city: city
+              street: street
+              postal_code: postal_code
+              region: region
+            name: name
+            tin: tin
+            facta_filing_requirement: facta_filing_requirement
+          gross_proceeds_paid_to_an_attorney: 6.965117697638846
+          transactions_reported: transactions_reported
+          card_not_present_transaction: 3.0937452626664474
+          nonemployee_compensation: 8.762042012749001
+          state_tax_withheld_lower: 6.878052220127876
+          april_amount: 6.519180951018382
         w2s:
         - statutory_employee: statutory_employee
           other: other
@@ -36234,11 +37961,467 @@ components:
           items:
             $ref: '#/components/schemas/CreditW2'
           type: array
+        form1099s:
+          description: Array of tax form 1099s.
+          items:
+            $ref: '#/components/schemas/Credit1099'
+          type: array
       required:
       - account_id
+      - form1099s
       - pay_stubs
       - w2s
       title: PayrollIncomeObject
+      type: object
+    Credit1099:
+      additionalProperties: true
+      description: An object representing an end user's 1099 tax form
+      example:
+        crop_insurance_proceeds: 6.438423552598547
+        september_amount: 3.0205796992916243
+        fishing_boat_proceeds: 9.369310271410669
+        february_amount: 0.8851374739011653
+        gross_amount: 3.353193347011243
+        document_id: document_id
+        payer:
+          address:
+            country: country
+            city: city
+            street: street
+            postal_code: postal_code
+            region: region
+          name: name
+          tin: tin
+          telephone_number: telephone_number
+        substitute_payments_in_lieu_of_dividends_or_interest: 9.018348186070783
+        federal_income_tax_withheld: 9.965781217890562
+        pse_telephone_number: pse_telephone_number
+        medical_and_healthcare_payments: 6.683562403749608
+        payer_state_number: payer_state_number
+        document_metadata:
+          name: name
+          download_url: download_url
+          document_type: document_type
+          status: status
+        october_amount: 3.0576100241049344
+        secondary_state_id: secondary_state_id
+        other_income: 5.025004791520295
+        merchant_category_code: merchant_category_code
+        state_income_lower: 6.704019297950036
+        tax_year: tax_year
+        rents: 1.1730742509559433
+        payer_state_number_lower: payer_state_number_lower
+        filer:
+          address:
+            country: country
+            city: city
+            street: street
+            postal_code: postal_code
+            region: region
+          name: name
+          tin: tin
+          type: type
+        excess_golden_parachute_payments: 3.5571952270680973
+        may_amount: 0.10263654006109402
+        primary_state: primary_state
+        primary_state_id: primary_state_id
+        state_tax_withheld: 6.778324963048013
+        section_409a_deferrals: 1.284659006116532
+        secondary_state_income_tax: 4.078845849666752
+        primary_state_income_tax: 3.2588565619047607
+        march_amount: 7.058770351582356
+        section_409a_income: 2.8841621266687802
+        number_of_payment_transactions: number_of_payment_transactions
+        august_amount: 7.740351818741173
+        payer_made_direct_sales_of_5000_or_more_of_consumer_products_to_buyer: payer_made_direct_sales_of_5000_or_more_of_consumer_products_to_buyer
+        december_amount: 5.533258397034986
+        june_amount: 4.652396432933246
+        pse_name: pse_name
+        november_amount: 7.04836565559697
+        state_income: 5.944895607614016
+        secondary_state: secondary_state
+        july_amount: 8.969578798196912
+        royalties: 4.965218492984954
+        january_amount: 7.143538047012306
+        recipient:
+          account_number: account_number
+          second_tin_exists: second_tin_exists
+          address:
+            country: country
+            city: city
+            street: street
+            postal_code: postal_code
+            region: region
+          name: name
+          tin: tin
+          facta_filing_requirement: facta_filing_requirement
+        gross_proceeds_paid_to_an_attorney: 6.965117697638846
+        transactions_reported: transactions_reported
+        card_not_present_transaction: 3.0937452626664474
+        nonemployee_compensation: 8.762042012749001
+        state_tax_withheld_lower: 6.878052220127876
+        april_amount: 6.519180951018382
+      properties:
+        document_id:
+          description: An identifier of the document referenced by the document metadata.
+          nullable: true
+          type: string
+        document_metadata:
+          $ref: '#/components/schemas/CreditDocumentMetadata'
+        form_1099_type:
+          $ref: '#/components/schemas/Form1099Type'
+        recipient:
+          $ref: '#/components/schemas/Credit1099Recipient'
+        payer:
+          $ref: '#/components/schemas/Credit1099Payer'
+        filer:
+          $ref: '#/components/schemas/Credit1099Filer'
+        tax_year:
+          description: Tax year of the tax form.
+          nullable: true
+          type: string
+        rents:
+          description: Amount in rent by payer.
+          format: double
+          nullable: true
+          type: number
+        royalties:
+          description: Amount in royalties by payer.
+          format: double
+          nullable: true
+          type: number
+        other_income:
+          description: Amount in other income by payer.
+          format: double
+          nullable: true
+          type: number
+        federal_income_tax_withheld:
+          description: Amount of federal income tax withheld from payer.
+          format: double
+          nullable: true
+          type: number
+        fishing_boat_proceeds:
+          description: Amount of fishing boat proceeds from payer.
+          format: double
+          nullable: true
+          type: number
+        medical_and_healthcare_payments:
+          description: Amount of medical and healthcare payments from payer.
+          format: double
+          nullable: true
+          type: number
+        nonemployee_compensation:
+          description: Amount of nonemployee compensation from payer.
+          format: double
+          nullable: true
+          type: number
+        substitute_payments_in_lieu_of_dividends_or_interest:
+          description: Amount of substitute payments made by payer.
+          format: double
+          nullable: true
+          type: number
+        payer_made_direct_sales_of_5000_or_more_of_consumer_products_to_buyer:
+          description: Whether or not payer made direct sales over $5000 of consumer
+            products.
+          nullable: true
+          type: string
+        crop_insurance_proceeds:
+          description: Amount of crop insurance proceeds.
+          format: double
+          nullable: true
+          type: number
+        excess_golden_parachute_payments:
+          description: Amount of golden parachute payments made by payer.
+          format: double
+          nullable: true
+          type: number
+        gross_proceeds_paid_to_an_attorney:
+          description: Amount of gross proceeds paid to an attorney by payer.
+          format: double
+          nullable: true
+          type: number
+        section_409a_deferrals:
+          description: Amount of 409A deferrals earned by payer.
+          format: double
+          nullable: true
+          type: number
+        section_409a_income:
+          description: Amount of 409A income earned by payer.
+          format: double
+          nullable: true
+          type: number
+        state_tax_withheld:
+          description: Amount of state tax withheld of payer for primary state.
+          format: double
+          nullable: true
+          type: number
+        state_tax_withheld_lower:
+          description: Amount of state tax withheld of payer for secondary state.
+          format: double
+          nullable: true
+          type: number
+        payer_state_number:
+          description: Primary state ID.
+          nullable: true
+          type: string
+        payer_state_number_lower:
+          description: Secondary state ID.
+          nullable: true
+          type: string
+        state_income:
+          description: State income reported for primary state.
+          format: double
+          nullable: true
+          type: number
+        state_income_lower:
+          description: State income reported for secondary state.
+          format: double
+          nullable: true
+          type: number
+        transactions_reported:
+          description: One of the values will be provided Payment card Third party
+            network
+          nullable: true
+          type: string
+          x-override-enum-values-shown:
+          - Payment card
+          - Third party network
+        pse_name:
+          description: Name of the PSE (Payment Settlement Entity).
+          nullable: true
+          type: string
+        pse_telephone_number:
+          description: Formatted (XXX) XXX-XXXX. Phone number of the PSE (Payment
+            Settlement Entity).
+          nullable: true
+          type: string
+        gross_amount:
+          description: Gross amount reported.
+          format: double
+          nullable: true
+          type: number
+        card_not_present_transaction:
+          description: Amount in card not present transactions.
+          format: double
+          nullable: true
+          type: number
+        merchant_category_code:
+          description: Merchant category of filer.
+          nullable: true
+          type: string
+        number_of_payment_transactions:
+          description: Number of payment transactions made.
+          nullable: true
+          type: string
+        january_amount:
+          description: Amount reported for January.
+          format: double
+          nullable: true
+          type: number
+        february_amount:
+          description: Amount reported for February.
+          format: double
+          nullable: true
+          type: number
+        march_amount:
+          description: Amount reported for March.
+          format: double
+          nullable: true
+          type: number
+        april_amount:
+          description: Amount reported for April.
+          format: double
+          nullable: true
+          type: number
+        may_amount:
+          description: Amount reported for May.
+          format: double
+          nullable: true
+          type: number
+        june_amount:
+          description: Amount reported for June.
+          format: double
+          nullable: true
+          type: number
+        july_amount:
+          description: Amount reported for July.
+          format: double
+          nullable: true
+          type: number
+        august_amount:
+          description: Amount reported for August.
+          format: double
+          nullable: true
+          type: number
+        september_amount:
+          description: Amount reported for September.
+          format: double
+          nullable: true
+          type: number
+        october_amount:
+          description: Amount reported for October.
+          format: double
+          nullable: true
+          type: number
+        november_amount:
+          description: Amount reported for November.
+          format: double
+          nullable: true
+          type: number
+        december_amount:
+          description: Amount reported for December.
+          format: double
+          nullable: true
+          type: number
+        primary_state:
+          description: Primary state of business.
+          nullable: true
+          type: string
+        secondary_state:
+          description: Secondary state of business.
+          nullable: true
+          type: string
+        primary_state_id:
+          description: Primary state ID.
+          nullable: true
+          type: string
+        secondary_state_id:
+          description: Secondary state ID.
+          nullable: true
+          type: string
+        primary_state_income_tax:
+          description: State income tax reported for primary state.
+          format: double
+          nullable: true
+          type: number
+        secondary_state_income_tax:
+          description: State income tax reported for secondary state.
+          format: double
+          nullable: true
+          type: number
+      required:
+      - document_id
+      title: Credit1099
+      type: object
+    Form1099Type:
+      description: Form 1099 Type
+      enum:
+      - FORM_1099_TYPE_UNKNOWN
+      - FORM_1099_TYPE_MISC
+      - FORM_1099_TYPE_K
+      title: Form1099Type
+      type: string
+    Credit1099Payer:
+      additionalProperties: true
+      description: An object representing a payer used by 1099-MISC tax documents.
+      example:
+        address:
+          country: country
+          city: city
+          street: street
+          postal_code: postal_code
+          region: region
+        name: name
+        tin: tin
+        telephone_number: telephone_number
+      properties:
+        address:
+          $ref: '#/components/schemas/CreditPayStubAddress'
+        name:
+          description: Name of payer.
+          nullable: true
+          type: string
+        tin:
+          description: Tax identification number of payer.
+          nullable: true
+          type: string
+        telephone_number:
+          description: Telephone number of payer.
+          nullable: true
+          type: string
+      title: Credit1099Payer
+      type: object
+    Credit1099Recipient:
+      additionalProperties: true
+      description: An object representing a recipient used in both 1099-K and 1099-MISC
+        tax documents.
+      example:
+        account_number: account_number
+        second_tin_exists: second_tin_exists
+        address:
+          country: country
+          city: city
+          street: street
+          postal_code: postal_code
+          region: region
+        name: name
+        tin: tin
+        facta_filing_requirement: facta_filing_requirement
+      properties:
+        address:
+          $ref: '#/components/schemas/CreditPayStubAddress'
+        name:
+          description: Name of recipient.
+          nullable: true
+          type: string
+        tin:
+          description: Tax identification number of recipient.
+          nullable: true
+          type: string
+        account_number:
+          description: Account number number of recipient.
+          nullable: true
+          type: string
+        facta_filing_requirement:
+          description: Checked if FACTA is a filing requirement.
+          nullable: true
+          type: string
+          x-override-enum-values-shown:
+          - CHECKED
+          - NOT CHECKED
+        second_tin_exists:
+          description: Checked if 2nd TIN exists.
+          nullable: true
+          type: string
+          x-override-enum-values-shown:
+          - CHECKED
+          - NOT CHECKED
+      title: Credit1099Recipient
+      type: object
+    Credit1099Filer:
+      additionalProperties: true
+      description: An object representing a filer used by 1099-K tax documents.
+      example:
+        address:
+          country: country
+          city: city
+          street: street
+          postal_code: postal_code
+          region: region
+        name: name
+        tin: tin
+        type: type
+      properties:
+        address:
+          $ref: '#/components/schemas/CreditPayStubAddress'
+        name:
+          description: Name of filer.
+          nullable: true
+          type: string
+        tin:
+          description: Tax identification number of filer.
+          nullable: true
+          type: string
+        type:
+          description: 'One of the following values will be provided: Payment Settlement
+            Entity (PSE), Electronic Payment Fecilitator (EPF), Other Third Party'
+          nullable: true
+          type: string
+          x-override-enum-values-shown:
+          - Payment Settlement Entity (PSE)
+          - Electronic Payment Fecilitator (EPF)
+          - Other Third Party
+      title: Credit1099Filer
       type: object
     CreditPayStub:
       additionalProperties: true
@@ -36988,8 +39171,10 @@ components:
       type: object
     CreditPayStubVerification:
       additionalProperties: true
-      description: An object containing details on the paystub's verification status.
-        This object will only be populated if the [`income_verification.access_tokens`](/docs/api/tokens/#link-token-create-request-income-verification-access-tokens)
+      deprecated: true
+      description: (To be deprecated) Verification info will be moved to a separate
+        endpoint in the future. An object containing details on the paystub's verification
+        status. This object will only be populated if the [`income_verification.access_tokens`](/docs/api/tokens/#link-token-create-request-income-verification-access-tokens)
         parameter was provided during the `/link/token/create` call or if a problem
         was detected with the information supplied by the user; otherwise it will
         be `null`.
@@ -37066,14 +39251,10 @@ components:
         the associated token with the `report_type`. The `token` can be an Asset Report
         token or Income Report token.
       example:
-        report_type: report_type
         token: token
       properties:
         report_type:
-          description: The report type. It can be `assets` or `income`.
-          nullable: false
-          title: ReportType
-          type: string
+          $ref: '#/components/schemas/ReportType'
         token:
           description: The report token. It can be an asset report token or an income
             report token.
@@ -37082,6 +39263,14 @@ components:
           type: string
       title: ReportToken
       type: object
+    ReportType:
+      description: The report type. It can be `assets` or `income`.
+      enum:
+      - assets
+      - income
+      nullable: false
+      title: ReportType
+      type: string
     DocumentRiskSignal:
       additionalProperties: true
       description: Details about a certain reason as to why a document could potentially
@@ -37920,10 +40109,8 @@ components:
       description: CreditRelayCreateRequest defines the request schema for `/credit/relay/create`
       example:
         report_tokens:
-        - report_type: report_type
-          token: token
-        - report_type: report_type
-          token: token
+        - token: token
+        - token: token
         webhook: webhook
         secret: secret
         secondary_client_id: secondary_client_id
@@ -37978,6 +40165,138 @@ components:
           type: string
       required:
       - relay_token
+      - request_id
+      type: object
+    CreditRelayGetRequest:
+      description: CreditRelayGetRequest defines the request schema for `/credit/relay/get`
+      example:
+        secret: secret
+        relay_token: relay_token
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        relay_token:
+          description: The `relay_token` granting access to the report you would like
+            to get.
+          type: string
+        report_type:
+          $ref: '#/components/schemas/ReportType'
+      required:
+      - relay_token
+      - report_type
+      title: CreditRelayGetRequest
+      type: object
+    CreditRelayRefreshRequest:
+      description: CreditRelayRefreshRequest defines the request schema for `/credit/relay/refresh`
+      example:
+        webhook: webhook
+        secret: secret
+        relay_token: relay_token
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        relay_token:
+          description: The `relay_token` granting access to the report you would like
+            to refresh.
+          type: string
+        report_type:
+          $ref: '#/components/schemas/ReportType'
+        webhook:
+          description: The URL registered to receive webhooks when the report of a
+            Relay Token has been refreshed.
+          nullable: true
+          type: string
+      required:
+      - relay_token
+      - report_type
+      type: object
+    CreditRelayRefreshResponse:
+      additionalProperties: true
+      description: CreditRelayRefreshResponse defines the response schema for `/credit/relay/refresh`
+      example:
+        relay_token: relay_token
+        request_id: request_id
+        asset_report_id: asset_report_id
+      properties:
+        relay_token:
+          type: string
+        asset_report_id:
+          description: A unique ID identifying an Asset Report. Like all Plaid identifiers,
+            this ID is case sensitive.
+          title: AssetReportId
+          type: string
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - relay_token
+      - request_id
+      type: object
+    CreditRelayRemoveRequest:
+      description: CreditRelayRemoveRequest defines the request schema for `/credit/relay/remove`
+      example:
+        secret: secret
+        relay_token: relay_token
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        relay_token:
+          description: The `relay_token` you would like to revoke.
+          type: string
+      required:
+      - relay_token
+      type: object
+    CreditRelayRemoveResponse:
+      additionalProperties: true
+      description: CreditRelayRemoveResponse defines the response schema for `/credit/relay/remove`
+      example:
+        removed: true
+        request_id: request_id
+      properties:
+        removed:
+          description: '`true` if the Relay token was successfully removed.'
+          type: boolean
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - removed
       - request_id
       type: object
     SandboxBankTransferFireWebhookRequest:
@@ -40458,6 +42777,7 @@ components:
         enhanced_transactions:
         - amount: 0.8008281904610115
           enhancements:
+            personal_finance_category_icon_url: personal_finance_category_icon_url
             website: website
             check_number: check_number
             category_id: category_id
@@ -40483,6 +42803,7 @@ components:
           id: id
         - amount: 0.8008281904610115
           enhancements:
+            personal_finance_category_icon_url: personal_finance_category_icon_url
             website: website
             check_number: check_number
             category_id: category_id
@@ -40522,6 +42843,7 @@ components:
       example:
         amount: 0.8008281904610115
         enhancements:
+          personal_finance_category_icon_url: personal_finance_category_icon_url
           website: website
           check_number: check_number
           category_id: category_id
@@ -40593,6 +42915,7 @@ components:
       additionalProperties: true
       description: A grouping of the Plaid produced transaction enhancement fields.
       example:
+        personal_finance_category_icon_url: personal_finance_category_icon_url
         website: website
         check_number: check_number
         category_id: category_id
@@ -40649,6 +42972,10 @@ components:
           $ref: '#/components/schemas/Location'
         personal_finance_category:
           $ref: '#/components/schemas/PersonalFinanceCategory'
+        personal_finance_category_icon_url:
+          description: A link to the icon associated with the primary personal finance
+            category. The logo will always be 100x100 resolution.
+          type: string
       required:
       - category
       - category_id
@@ -40811,6 +43138,85 @@ components:
           type: string
       required:
       - request_id
+      type: object
+    PartnerCustomersCreateRequest:
+      description: Request schema for `/partner/v1/customers/create`.
+      example:
+        is_diligence_attested: true
+        company_name: company_name
+        secret: secret
+        client_id: client_id
+        products:
+        - null
+        - null
+        create_link_customization: true
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        company_name:
+          description: The company name of the end customer being created.
+          type: string
+        is_diligence_attested:
+          description: Denotes whether or not the partner has completed attestation
+            of diligence for the end customer to be created.
+          type: boolean
+        products:
+          description: The products to be enabled on for the end customer.
+          items:
+            $ref: '#/components/schemas/Products'
+          type: array
+        create_link_customization:
+          description: If true, sets end customer's link customization to match partner's
+            link customization.
+          type: boolean
+      required:
+      - company_name
+      - is_diligence_attested
+      - products
+    PartnerCustomersCreateResponse:
+      additionalProperties: true
+      description: Response schema for `/partner/v1/customers/create`.
+      example:
+        end_customer:
+          company_name: company_name
+          client_id: client_id
+        request_id: request_id
+        production_secret: production_secret
+      properties:
+        end_customer:
+          $ref: '#/components/schemas/PartnerEndCustomerClient'
+        production_secret:
+          type: string
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      type: object
+    PartnerEndCustomerClient:
+      description: The end customer details for the newly-created customer client.
+      example:
+        company_name: company_name
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        company_name:
+          type: string
       type: object
     AddressPurposeLabel:
       description: |-
@@ -45793,7 +48199,7 @@ components:
           nullable: true
       type: object
     UserAddress:
-      description: Home address for user supplied to `/identity_verification/create`
+      description: Home address for the user.
       example:
         country: US
         city: Pawnee
@@ -46584,18 +48990,6 @@ components:
           - null
           - null
           consent_expiration_time: 2000-01-23T04:56:07.000+00:00
-          error:
-            error_message: error_message
-            suggested_action: suggested_action
-            error_type: INVALID_REQUEST
-            causes:
-            - ""
-            - ""
-            display_message: display_message
-            error_code: error_code
-            documentation_url: documentation_url
-            request_id: request_id
-            status: 0.8008281904610115
           consented_products:
           - null
           - null
@@ -46707,18 +49101,6 @@ components:
           - null
           - null
           consent_expiration_time: 2000-01-23T04:56:07.000+00:00
-          error:
-            error_message: error_message
-            suggested_action: suggested_action
-            error_type: INVALID_REQUEST
-            causes:
-            - ""
-            - ""
-            display_message: display_message
-            error_code: error_code
-            documentation_url: documentation_url
-            request_id: request_id
-            status: 0.8008281904610115
           consented_products:
           - null
           - null
@@ -47011,18 +49393,6 @@ components:
         - null
         - null
         consent_expiration_time: 2000-01-23T04:56:07.000+00:00
-        error:
-          error_message: error_message
-          suggested_action: suggested_action
-          error_type: INVALID_REQUEST
-          causes:
-          - ""
-          - ""
-          display_message: display_message
-          error_code: error_code
-          documentation_url: documentation_url
-          request_id: request_id
-          status: 0.8008281904610115
         consented_products:
         - null
         - null
@@ -47050,7 +49420,7 @@ components:
           nullable: true
           type: string
         error:
-          $ref: '#/components/schemas/Error'
+          $ref: '#/components/schemas/PlaidError'
         available_products:
           description: A list of products available for the Item that have not yet
             been accessed. The contents of this array will be mutually exclusive with
@@ -47320,11 +49690,6 @@ components:
           items:
             $ref: '#/components/schemas/HistoricalBalance'
           type: array
-      required:
-      - days_available
-      - historical_balances
-      - owners
-      - transactions
       type: object
     AssetReportTransaction_allOf:
       properties:
@@ -47332,8 +49697,6 @@ components:
           description: The date on which the transaction took place, in IS0 8601 format.
           nullable: true
           type: string
-      required:
-      - original_description
       type: object
   securitySchemes:
     clientId:
