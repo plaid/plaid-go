@@ -106,7 +106,7 @@ const Sandbox Environment = "https://sandbox.plaid.com"
 func NewConfiguration() *Configuration {
 	cfg := &Configuration{
 		DefaultHeader:    map[string]string{ "Plaid-Version": "2020-09-14" },
-		UserAgent:        "Plaid Go v8.2.0",
+		UserAgent:        "Plaid Go v8.3.0",
 		Debug:            false,
 		Servers:          ServerConfigurations{
 			{

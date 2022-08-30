@@ -6,4 +6,6 @@ WORKDIR /usr/src/app
 # Copy app to directory
 COPY . /usr/src/app
 
+RUN go mod tidy
+
 CMD ["make", "test"]
