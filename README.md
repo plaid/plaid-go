@@ -23,10 +23,10 @@ For more information about the Plaid API, including reference documentation, see
 
 Library versions follow Semantic Versioning ("SemVer") and are formatted as `v1.0.0`. The plaid-go client library is typically updated on a monthly basis, and the canonical source for the latest version number is the [client library changelog](https://github.com/plaid/plaid-go/blob/master/CHANGELOG.md). As of `v1.0.0`, we've moved to support `GOMODULES`.
 
-Edit your go.mod to include `github.com/plaid/plaid-go/v8 {VERSION}`
+Edit your go.mod to include `github.com/plaid/plaid-go/v9 {VERSION}`
 
 ```console
-$ go get github.com/plaid/plaid-go/v8@{VERSION}
+$ go get github.com/plaid/plaid-go/v9@{VERSION}
 ```
 
 ## Getting Started
@@ -135,7 +135,17 @@ exchangePublicTokenResp, _, err := client.PlaidApi.ItemPublicTokenExchange(ctx).
 accessToken := exchangePublicTokenResp.GetAccessToken()
 ```
 
-#### Retrieve transactions
+#### Retrieve transactions (preferred method)
+
+```go
+request := plaid.NewTransactionsSyncRequest(
+  accessToken
+)
+
+transactionsResp, _, err := testClient.PlaidApi.TransactionsSync(ctx).TransactionsSyncRequest(*request).Execute()
+```
+
+#### Retrieve transactions (older method)
 
 ```go
 const iso8601TimeFormat = "2006-01-02"
@@ -177,7 +187,7 @@ import (
     "context"
     "os"
 
-    "github.com/plaid/plaid-go/v8/plaid"
+    "github.com/plaid/plaid-go/v9/plaid"
 )
 
 configuration := plaid.NewConfiguration()

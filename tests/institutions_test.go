@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/plaid/plaid-go/v8/plaid"
+	"github.com/plaid/plaid-go/v9/plaid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,26 +23,26 @@ func TestInstitutionsGet(t *testing.T) {
 		{
 			desc:           "succeeds without options",
 			countryCodes:   []plaid.CountryCode{plaid.COUNTRYCODE_US},
-			count:          2,
-			offset:         1,
+			count:          3,
+			offset:         4,
 			options:        plaid.InstitutionsGetRequestOptions{},
-			expectedLength: 2,
+			expectedLength: 3,
 		},
 		{
 			desc:           "succeeds with optional metadata",
 			countryCodes:   []plaid.CountryCode{plaid.COUNTRYCODE_US},
-			count:          2,
-			offset:         1,
+			count:          3,
+			offset:         4,
 			options:        plaid.InstitutionsGetRequestOptions{IncludeOptionalMetadata: plaid.PtrBool(true)},
-			expectedLength: 2,
+			expectedLength: 3,
 		},
 		{
 			desc:           "succeeds for oauth institutions",
 			countryCodes:   []plaid.CountryCode{plaid.COUNTRYCODE_GB},
-			count:          2,
+			count:          3,
 			offset:         1,
 			options:        plaid.InstitutionsGetRequestOptions{Oauth: *plaid.NewNullableBool(plaid.PtrBool(true))},
-			expectedLength: 2,
+			expectedLength: 3,
 		},
 		{
 			desc:           "errors with invalid offset",
