@@ -61,7 +61,8 @@ func TestAssetReportFullFlow(t *testing.T) {
 	assert.NotEmpty(t, refreshResponse.AssetReportToken)
 
 	// Create an audit copy
-	auditCopyCreateRequest := plaid.NewAssetReportAuditCopyCreateRequest(assetReportToken, clientID)
+	auditCopyCreateRequest := plaid.NewAssetReportAuditCopyCreateRequest(assetReportToken)
+	auditCopyCreateRequest.SetAuditorId(clientID)
 	auditCopyCreateResponse, _, err := testClient.PlaidApi.AssetReportAuditCopyCreate(ctx).AssetReportAuditCopyCreateRequest(*auditCopyCreateRequest).Execute()
 	assert.NoError(t, err)
 	auditCopyToken := auditCopyCreateResponse.AuditCopyToken

@@ -141,6 +141,8 @@ func commonPaymentTestFlows(t *testing.T, ctx context.Context, testClient *plaid
 	assert.NotEmpty(t, paymentCreateResp.PaymentId)
 	assert.NotEmpty(t, paymentCreateResp.Status)
 	paymentID := paymentCreateResp.PaymentId
+	paymentInitiation := plaid.NewLinkTokenCreateRequestPaymentInitiation()
+	paymentInitiation.SetPaymentId(paymentID)
 
 	if useLinkToken {
 		user := plaid.NewLinkTokenCreateRequestUser(time.Now().String())
@@ -149,7 +151,7 @@ func commonPaymentTestFlows(t *testing.T, ctx context.Context, testClient *plaid
 			Products:          &[]plaid.Products{plaid.PRODUCTS_PAYMENT_INITIATION},
 			CountryCodes:      []plaid.CountryCode{plaid.COUNTRYCODE_US},
 			Language:          "en",
-			PaymentInitiation: plaid.NewLinkTokenCreateRequestPaymentInitiation(paymentID),
+			PaymentInitiation: paymentInitiation,
 			User:              *user,
 		}
 		linkTokenCreateResp, _, err := testClient.PlaidApi.LinkTokenCreate(ctx).LinkTokenCreateRequest(request).Execute()
