@@ -187,7 +187,7 @@ import (
     "context"
     "os"
 
-    "github.com/plaid/plaid-go/v9/plaid"
+    "github.com/plaid/plaid-go/v10/plaid"
 )
 
 configuration := plaid.NewConfiguration()
