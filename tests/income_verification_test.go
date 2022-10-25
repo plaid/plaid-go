@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/plaid/plaid-go/v9/plaid"
+	"github.com/plaid/plaid-go/v10/plaid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -66,5 +66,5 @@ func TestPreCheck(t *testing.T) {
 	resp, _, err := testClient.PlaidApi.IncomeVerificationPrecheck(ctx).IncomeVerificationPrecheckRequest(*request).Execute()
 	assert.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.Equal(t, plaid.IncomeVerificationPrecheckConfidence("UNKNOWN"), resp.GetConfidence())
+	assert.Equal(t, plaid.IncomeVerificationPrecheckConfidence("HIGH"), resp.GetConfidence())
 }

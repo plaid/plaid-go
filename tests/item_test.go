@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/plaid/plaid-go/v9/plaid"
+	"github.com/plaid/plaid-go/v10/plaid"
 	"github.com/stretchr/testify/assert"
 )
 
