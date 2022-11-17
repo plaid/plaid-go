@@ -7,7 +7,7 @@ info:
     details.
   termsOfService: https://plaid.com/legal/
   title: The Plaid API
-  version: 2020-09-14_1.197.3
+  version: 2020-09-14_1.205.3
 servers:
 - description: Production
   url: https://production.plaid.com
@@ -875,7 +875,7 @@ paths:
       description: |-
         The `/transactions/recurring/get` endpoint allows developers to receive a summary of the recurring outflow and inflow streams (expenses and deposits) from a user’s checking, savings or credit card accounts. Additionally, Plaid provides key insights about each recurring stream including the category, merchant, last amount, and more. Developers can use these insights to build tools and experiences that help their users better manage cash flow, monitor subscriptions, reduce spend, and stay on track with bill payments.
 
-        This endpoint is not included by default as part of Transactions. To request access to this endpoint and learn more about pricing, contact your Plaid account manager.
+        This endpoint is not included by default as part of Transactions. To request access to this endpoint, submit a [product access request](https://dashboard.plaid.com/team/products) or contact your Plaid account manager.
 
         Note that unlike `/transactions/get`, `/transactions/recurring/get` will not initialize an Item with Transactions. The Item must already have been initialized with Transactions (either during Link, by specifying it in `/link/token/create`, or after Link, by calling `/transactions/get`) before calling this endpoint. Data is available to `/transactions/recurring/get` approximately 5 seconds after the [`HISTORICAL_UPDATE`](https://plaid.com/docs/api/products/transactions/#historical_update) webhook has fired (about 1-2 minutes after initialization).
 
@@ -976,24 +976,46 @@ paths:
   /transactions/recurring/deactivate: {}
   /transactions/sync:
     post:
-      description: |-
-        This endpoint replaces `/transactions/get` and its associated webhooks for most common use-cases.
-
-        The `/transactions/sync` endpoint allows developers to subscribe to all transactions associated with an Item and get updates synchronously in a stream-like manner, using a cursor to track which updates have already been seen. `/transactions/sync` provides the same functionality as `/transactions/get` and can be used instead of `/transactions/get` to simplify the process of tracking transactions updates.
-
-        This endpoint provides user-authorized transaction data for `credit`, `depository`, and some loan-type accounts (only those with account subtype `student`; coverage may be limited). For transaction history from `investments` accounts, use `/investments/transactions/get` instead.
-
-        Returned transactions data is grouped into three types of update, indicating whether the transaction was added, removed, or modified since the last call to the API.
-
-        In the first call to `/transactions/sync` for an Item, the endpoint will return all historical transactions data associated with that Item up until the time of the API call (as "adds"), which then generates a `next_cursor` for that Item. In subsequent calls, send the `next_cursor` to receive only the changes that have occurred since the previous call.
-
-        Due to the potentially large number of transactions associated with an Item, results are paginated. The `has_more` field specifies if additional calls are necessary to fetch all available transaction updates.
-
-        Whenever new or updated transaction data becomes available, `/transactions/sync` will provide these updates. Plaid typically checks for new data multiple times a day, but these checks may occur less frequently, such as once a day, depending on the institution. An Item's `status.transactions.last_successful_update` field will show the timestamp of the most recent successful update. To force Plaid to check for new transactions, use the `/transactions/refresh` endpoint.
-
-        Note that for newly created Items, data may not be immediately available to `/transactions/sync`. Plaid begins preparing transactions data when the Item is created, but the process can take anywhere from a few seconds to several minutes to complete, depending on the number of transactions available.
-
-        To be alerted when new data is available, listen for the [`SYNC_UPDATES_AVAILABLE`](https://plaid.com/docs/api/products/transactions/#sync_updates_available) webhook.
+      description: "This endpoint replaces `/transactions/get` and its associated\
+        \ webhooks for most common use-cases.\n\nThe `/transactions/sync` endpoint\
+        \ allows developers to subscribe to all transactions associated with an Item\
+        \ and get updates synchronously in a stream-like manner, using a cursor to\
+        \ track which updates have already been seen. `/transactions/sync` provides\
+        \ the same functionality as `/transactions/get` and can be used instead of\
+        \ `/transactions/get` to simplify the process of tracking transactions updates.\n\
+        \nThis endpoint provides user-authorized transaction data for `credit`, `depository`,\
+        \ and some loan-type accounts (only those with account subtype `student`;\
+        \ coverage may be limited). For transaction history from `investments` accounts,\
+        \ use `/investments/transactions/get` instead.\n\nReturned transactions data\
+        \ is grouped into three types of update, indicating whether the transaction\
+        \ was added, removed, or modified since the last call to the API.\n\nIn the\
+        \ first call to `/transactions/sync` for an Item, the endpoint will return\
+        \ all historical transactions data associated with that Item up until the\
+        \ time of the API call (as \"adds\"), which then generates a `next_cursor`\
+        \ for that Item. In subsequent calls, send the `next_cursor` to receive only\
+        \ the changes that have occurred since the previous call.\n\nDue to the potentially\
+        \ large number of transactions associated with an Item, results are paginated.\
+        \ The `has_more` field specifies if additional calls are necessary to fetch\
+        \ all available transaction updates. Call `/transactions/sync` with the new\
+        \ cursor, pulling all updates, until `has_more` is `false`. \n\nWhen retrieving\
+        \ paginated updates, track both the `next_cursor` from the latest response\
+        \ and the original cursor from the first call in which `has_more` was `true`;\
+        \ if a call to `/transactions/sync` fails when retrieving a paginated update,\
+        \ the entire pagination request loop must be restarted beginning with the\
+        \ cursor for the first page of the update, rather than retrying only the single\
+        \ request that failed. \n\nWhenever new or updated transaction data becomes\
+        \ available, `/transactions/sync` will provide these updates. Plaid typically\
+        \ checks for new data multiple times a day, but these checks may occur less\
+        \ frequently, such as once a day, depending on the institution. An Item's\
+        \ `status.transactions.last_successful_update` field will show the timestamp\
+        \ of the most recent successful update. To force Plaid to check for new transactions,\
+        \ use the `/transactions/refresh` endpoint.\n\nNote that for newly created\
+        \ Items, data may not be immediately available to `/transactions/sync`. Plaid\
+        \ begins preparing transactions data when the Item is created, but the process\
+        \ can take anywhere from a few seconds to several minutes to complete, depending\
+        \ on the number of transactions available.\n\nTo be alerted when new data\
+        \ is available, listen for the [`SYNC_UPDATES_AVAILABLE`](https://plaid.com/docs/api/products/transactions/#sync_updates_available)\
+        \ webhook."
       externalDocs:
         url: /api/products/transactions/#transactionssync
       operationId: transactionsSync
@@ -1107,6 +1129,103 @@ paths:
                 $ref: '#/components/schemas/PlaidError'
           description: Error response
       summary: Get incremental transaction updates on an Item
+      tags:
+      - plaid
+  /transactions/enrich:
+    post:
+      description: |-
+        The '/transactions/enrich' endpoint enriches raw transaction data generated by your own banking products or retrieved from other non-Plaid sources.
+
+        The product is currently in beta. To request access, contact transactions-feedback@plaid.com
+      externalDocs:
+        url: /api/products/enrich/#transactionsenrich
+      operationId: transactionsEnrich
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionsEnrichGetRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    enriched_transactions:
+                    - id: 6135818adda16500147e7c1d
+                      description: 'PURCHASE WM SUPERCENTER #1700 POWAY CAUS'
+                      amount: 72.1
+                      direction: OUTFLOW
+                      iso_currency_code: USD
+                      enrichments:
+                        check_number: null
+                        counterparties:
+                        - name: Walmart
+                          type: merchant
+                          logo_url: https://plaid-merchant-logos.plaid.com/walmart_1100.png
+                          website: walmart.com
+                        location:
+                          address: 13425 Community Rd
+                          city: Poway
+                          region: CA
+                          postal_code: "92064"
+                          country: US
+                          store_number: "1700"
+                          lat: null
+                          lon: null
+                        logo_url: https://plaid-merchant-logos.plaid.com/walmart_1100.png
+                        merchant_name: Walmart
+                        payment_channel: in store
+                        personal_finance_category:
+                          detailed: GENERAL_MERCHANDISE_SUPERSTORES
+                          primary: GENERAL_MERCHANDISE
+                        personal_finance_category_icon_url: https://plaid-category-icons.plaid.com/PFC_GENERAL_MERCHANDISE.png
+                        website: walmart.com
+                    - id: 3958434bhde9384bcmeo3401
+                      description: DD DOORDASH BURGERKIN 855-123-4567 CA
+                      amount: 28.34
+                      direction: OUTFLOW
+                      iso_currency_code: USD
+                      enrichments:
+                        check_number: null
+                        counterparties:
+                        - name: Doordash
+                          type: delivery_marketplace
+                          logo_url: https://plaid-counterparty-logos.plaid.com/doordash_1.png
+                          website: doordash.com
+                        - name: Burger King
+                          type: merchant
+                          logo_url: https://plaid-merchant-logos.plaid.com/burger_king_155.png
+                          website: burgerking.com
+                        location:
+                          address: null
+                          city: null
+                          region: null
+                          postal_code: null
+                          country: null
+                          store_number: null
+                          lat: null
+                          lon: null
+                        logo_url: https://plaid-merchant-logos.plaid.com/burger_king_155.png
+                        merchant_name: Burger King
+                        payment_channel: online
+                        personal_finance_category:
+                          detailed: FOOD_AND_DRINK_FAST_FOOD
+                          primary: FOOD_AND_DRINK
+                        personal_finance_category_icon_url: https://plaid-category-icons.plaid.com/PFC_FOOD_AND_DRINK.png
+                        website: burgerking.com
+              schema:
+                $ref: '#/components/schemas/TransactionsEnrichGetResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidError'
+          description: Error response
+      summary: Enrich locally-held transaction data
       tags:
       - plaid
   /institutions/get:
@@ -1723,6 +1842,8 @@ paths:
         `AUTH_DATA_UPDATE`: Webhook to be fired for a given Sandbox Item created with Auth as an enabled product.
 
         `RECURRING_TRANSACTIONS_UPDATE`: Recurring Transactions webhook to be fired for a given Sandbox Item. If the Item does not support Recurring Transactions, a `SANDBOX_PRODUCT_NOT_ENABLED` error will result.
+
+        `SYNC_UPDATES_AVAILABLE`: Transactions webhook to be fired for a given Sandbox Item.  If the Item does not support Transactions, a `SANDBOX_PRODUCT_NOT_ENABLED` error will result.
 
         Note that this endpoint is provided for developer ease-of-use and is not required for testing webhooks; webhooks will also fire in Sandbox under the same conditions that they would in Production or Development.
       externalDocs:
@@ -5441,8 +5562,8 @@ paths:
       - plaid
   /transfer/get:
     post:
-      description: The `/transfer/get` fetches information about the transfer corresponding
-        to the given `transfer_id`.
+      description: The `/transfer/get` endpoint fetches information about the transfer
+        corresponding to the given `transfer_id`.
       externalDocs:
         url: /api/products/transfer/#transferget
       operationId: transferGet
@@ -5479,6 +5600,8 @@ paths:
                         key2: value2
                       network: ach
                       origination_account_id: 8945fedc-e703-463d-86b1-dc0607b55460
+                      originator_client_id: null
+                      refunds: []
                       status: pending
                       type: credit
                       iso_currency_code: USD
@@ -5505,6 +5628,73 @@ paths:
                 $ref: '#/components/schemas/PlaidError'
           description: Error response
       summary: Retrieve a transfer
+      tags:
+      - plaid
+  /transfer/recurring/get:
+    post:
+      description: The `/transfer/recurring/get` fetches information about the recurring
+        transfer corresponding to the given `recurring_transfer_id`.
+      externalDocs:
+        url: /api/products/transfer/#transferrecurringget
+      operationId: transferRecurringGet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRecurringGetRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    recurring_transfer:
+                      recurring_transfer_id: 460cbe92-2dcc-8eae-5ad6-b37d0ec90fd9
+                      created: 2022-07-05T12:48:37Z
+                      next_origination_date: 2022-10-28
+                      test_clock_id: null
+                      status: active
+                      amount: "12.34"
+                      type: debit
+                      ach_class: ppd
+                      network: ach
+                      origination_account_id: 8945fedc-e703-463d-86b1-dc0607b55460
+                      account_id: 3gE5gnRzNyfXpBK5wEEKcymJ5albGVUqg77gr
+                      iso_currency_code: USD
+                      transfer_ids:
+                      - 271ef220-dbf8-caeb-a7dc-a2b3e8a80963
+                      - c8dbaf75-2abb-e2dc-4171-12448e13b848
+                      decision: approved
+                      decision_rationale: null
+                      user:
+                        legal_name: Anne Charleston
+                        phone_number: 510-555-0128
+                        email_address: acharleston@email.com
+                        address:
+                          street: 123 Main St.
+                          city: San Francisco
+                          region: CA
+                          postal_code: "94053"
+                          country: US
+                      schedule:
+                        start_date: 2022-10-01
+                        end_date: 2023-10-01
+                        interval_unit: week
+                        interval_count: 1
+                        interval_execution_day: 5
+                    request_id: saKrIBuEB9qJZno
+              schema:
+                $ref: '#/components/schemas/TransferRecurringGetResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidError'
+          description: Error response
+      summary: Retrieve a recurring transfer
       tags:
       - plaid
   /bank_transfer/get:
@@ -5628,6 +5818,7 @@ paths:
                         network: ach
                         iso_currency_code: USD
                         origination_account_id: 8945fedc-e703-463d-86b1-dc0607b55460
+                        originator_client_id: null
                     request_id: saKrIBuEB9qJZno
               schema:
                 $ref: '#/components/schemas/TransferAuthorizationCreateResponse'
@@ -5678,6 +5869,7 @@ paths:
                       amount: "12.34"
                       description: payment
                       created: 2020-08-06T17:27:15Z
+                      refunds: []
                       status: pending
                       network: ach
                       cancellable: true
@@ -5691,6 +5883,7 @@ paths:
                       iso_currency_code: USD
                       standard_return_window: 2020-08-07
                       unauthorized_return_window: 2020-10-07
+                      originator_client_id: 569ed2f36b3a3a021713abc1
                     request_id: saKrIBuEB9qJZno
               schema:
                 $ref: '#/components/schemas/TransferCreateResponse'
@@ -5702,6 +5895,71 @@ paths:
                 $ref: '#/components/schemas/PlaidError'
           description: Error response
       summary: Create a transfer
+      tags:
+      - plaid
+  /transfer/recurring/create:
+    post:
+      description: Use the `/transfer/recurring/create` endpoint to initiate a new
+        recurring transfer.
+      externalDocs:
+        url: /api/products/transfer/#transferrecurringcreate
+      operationId: transferRecurringCreate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRecurringCreateRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    recurring_transfer:
+                      recurring_transfer_id: 460cbe92-2dcc-8eae-5ad6-b37d0ec90fd9
+                      created: 2022-07-05T12:48:37Z
+                      next_origination_date: 2022-10-28
+                      test_clock_id: b33a6eda-5e97-5d64-244a-a9274110151c
+                      status: active
+                      amount: "12.34"
+                      type: debit
+                      ach_class: ppd
+                      network: ach
+                      origination_account_id: 8945fedc-e703-463d-86b1-dc0607b55460
+                      account_id: 3gE5gnRzNyfXpBK5wEEKcymJ5albGVUqg77gr
+                      iso_currency_code: USD
+                      transfer_ids: []
+                      decision: approved
+                      decision_rationale: null
+                      user:
+                        legal_name: Anne Charleston
+                        phone_number: 510-555-0128
+                        email_address: acharleston@email.com
+                        address:
+                          street: 123 Main St.
+                          city: San Francisco
+                          region: CA
+                          postal_code: "94053"
+                          country: US
+                      schedule:
+                        start_date: 2022-10-01
+                        end_date: 2023-10-01
+                        interval_unit: week
+                        interval_count: 1
+                        interval_execution_day: 5
+                    request_id: saKrIBuEB9qJZno
+              schema:
+                $ref: '#/components/schemas/TransferRecurringCreateResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidError'
+          description: Error response
+      summary: Create a recurring transfer
       tags:
       - plaid
   /bank_transfer/create:
@@ -5798,6 +6056,8 @@ paths:
                         key2: value2
                       network: ach
                       origination_account_id: 8945fedc-e703-463d-86b1-dc0607b55460
+                      originator_client_id: null
+                      refunds: []
                       status: pending
                       type: credit
                       iso_currency_code: USD
@@ -5824,6 +6084,72 @@ paths:
                 $ref: '#/components/schemas/PlaidError'
           description: Error response
       summary: List transfers
+      tags:
+      - plaid
+  /transfer/recurring/list:
+    post:
+      description: |
+        Use the `/transfer/recurring/list` endpoint to see a list of all your recurring transfers and their statuses. Results are paginated; use the `count` and `offset` query parameters to retrieve the desired recurring transfers.
+      externalDocs:
+        url: /api/products/transfer/#transferrecurringlist
+      operationId: transferRecurringList
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRecurringListRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    recurring_transfers:
+                    - recurring_transfer_id: 460cbe92-2dcc-8eae-5ad6-b37d0ec90fd9
+                      created: 2022-07-05T12:48:37Z
+                      next_origination_date: 2022-10-28
+                      test_clock_id: null
+                      status: active
+                      amount: "12.34"
+                      type: debit
+                      ach_class: ppd
+                      network: ach
+                      origination_account_id: 8945fedc-e703-463d-86b1-dc0607b55460
+                      account_id: 3gE5gnRzNyfXpBK5wEEKcymJ5albGVUqg77gr
+                      iso_currency_code: USD
+                      transfer_ids:
+                      - 4242fc8d-3ec6-fb38-fa0c-a8e37d03cd57
+                      decision: approved
+                      decision_rationale: null
+                      user:
+                        legal_name: Anne Charleston
+                        phone_number: 510-555-0128
+                        email_address: acharleston@email.com
+                        address:
+                          street: 123 Main St.
+                          city: San Francisco
+                          region: CA
+                          postal_code: "94053"
+                          country: US
+                      schedule:
+                        start_date: 2022-10-01
+                        end_date: 2023-10-01
+                        interval_unit: week
+                        interval_count: 1
+                        interval_execution_day: 5
+                    request_id: saKrIBuEB9qJZno
+              schema:
+                $ref: '#/components/schemas/TransferRecurringListResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidError'
+          description: Error response
+      summary: List recurring transfers
       tags:
       - plaid
   /bank_transfer/list:
@@ -5865,6 +6191,7 @@ paths:
                         key2: value2
                       network: ach
                       origination_account_id: 8945fedc-e703-463d-86b1-dc0607b55460
+                      originator_client_id: 569ed2f36b3a3a021713abc1
                       status: pending
                       type: credit
                       user:
@@ -5916,6 +6243,39 @@ paths:
                 $ref: '#/components/schemas/PlaidError'
           description: Error response
       summary: Cancel a transfer
+      tags:
+      - plaid
+  /transfer/recurring/cancel:
+    post:
+      description: Use the `/transfer/recurring/cancel` endpoint to cancel a recurring
+        transfer.  Scheduled transfer that hasn't been submitted to bank will be cancelled.
+      externalDocs:
+        url: /api/products/transfer/#transferrecurringcancel
+      operationId: transferRecurringCancel
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRecurringCancelRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    request_id: saKrIBuEB9qJZno
+              schema:
+                $ref: '#/components/schemas/TransferRecurringCancelResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidError'
+          description: Error response
+      summary: Cancel a recurring transfer.
       tags:
       - plaid
   /bank_transfer/cancel:
@@ -5981,6 +6341,8 @@ paths:
                       event_type: posted
                       failure_reason: null
                       origination_account_id: 8945fedc-e703-463d-86b1-dc0607b55460
+                      originator_client_id: 569ed2f36b3a3a021713abc1
+                      refund_id: null
                       sweep_amount: null
                       sweep_id: null
                       timestamp: 2019-12-09T17:27:15Z
@@ -6072,6 +6434,8 @@ paths:
                       event_type: pending
                       failure_reason: null
                       origination_account_id: null
+                      originator_client_id: null
+                      refund_id: null
                       sweep_amount: null
                       sweep_id: null
                       timestamp: 2019-12-09T17:27:15Z
@@ -6244,6 +6608,7 @@ paths:
                       amount: -12.34
                       iso_currency_code: USD
                       settled: 2019-12-10
+                      originator_client_id: null
                     request_id: saKrIBuEB9qJZno
               schema:
                 $ref: '#/components/schemas/TransferSweepListResponse'
@@ -6629,6 +6994,277 @@ paths:
       summary: List the returns included in a repayment
       tags:
       - plaid
+  /transfer/originator/create:
+    post:
+      description: Use the `/transfer/originator/create` endpoint to create a new
+        originator and return an `originator_client_id`.
+      externalDocs:
+        url: /api/products/transfer/#transferoriginatorcreate
+      operationId: transferOriginatorCreate
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            examples: {}
+            schema:
+              $ref: '#/components/schemas/TransferOriginatorCreateRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    originator_client_id: 6a65dh3d1h0d1027121ak184
+                    company_name: Marketplace of Shannon
+                    request_id: 4zlKapIkTm8p5KM
+              schema:
+                $ref: '#/components/schemas/TransferOriginatorCreateResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidError'
+          description: Error response
+      summary: Create a new originator
+      tags:
+      - plaid
+  /transfer/questionnaire/create:
+    post:
+      description: The `/transfer/questionnaire/create` endpoint generates a Plaid-hosted
+        onboarding UI URL. Redirect the originator to this URL to provide their due
+        diligence information and agree to Plaid’s terms for ACH money movement.
+      externalDocs:
+        url: /api/products/transfer/#transferquestionnairecreate
+      operationId: transferQuestionnaireCreate
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            examples: {}
+            schema:
+              $ref: '#/components/schemas/TransferQuestionnaireCreateRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    onboarding_url: https://plaid.com/originator/hIFGXx1zM5pFerygu7lw
+                    request_id: saKrIBuEB9qJZno
+              schema:
+                $ref: '#/components/schemas/TransferQuestionnaireCreateResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidError'
+          description: Error response
+      summary: Generate a Plaid-hosted onboarding UI URL.
+      tags:
+      - plaid
+  /transfer/originator/get:
+    post:
+      description: The `/transfer/originator/get` endpoint gets status updates for
+        an originator's onboarding process. This information is also available via
+        the Transfer page on the Plaid dashboard.
+      externalDocs:
+        url: /api/products/transfer/#transferoriginatorget
+      operationId: transferOriginatorGet
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferOriginatorGetRequest'
+          examples: {}
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    originator:
+                      client_id: 6a65dh3d1h0d1027121ak184
+                      transfer_diligence_status: approved
+                    request_id: saKrIBuEB9qJZno
+              schema:
+                $ref: '#/components/schemas/TransferOriginatorGetResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidError'
+          description: Error response
+      summary: Get status of an originator's onboarding
+      tags:
+      - plaid
+  /transfer/originator/list:
+    post:
+      description: The `/transfer/originator/list` endpoint gets status updates for
+        all of your originators' onboarding. This information is also available via
+        the Plaid dashboard.
+      externalDocs:
+        url: /api/products/transfer/#transferoriginatorlist
+      operationId: transferOriginatorList
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            examples: {}
+            schema:
+              $ref: '#/components/schemas/TransferOriginatorListRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    originators:
+                    - client_id: 6a65dh3d1h0d1027121ak184
+                      transfer_diligence_status: approved
+                    - client_id: 8g89as4d2k1d9852938ba019
+                      transfer_diligence_status: denied
+                    request_id: 4zlKapIkTm8p5KM
+              schema:
+                $ref: '#/components/schemas/TransferOriginatorListResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidError'
+          description: Error response
+      summary: Get status of all originators' onboarding
+      tags:
+      - plaid
+  /transfer/refund/create:
+    post:
+      description: |-
+        Use the `/transfer/refund/create` endpoint to create a refund for a transfer. A transfer can be refunded if the transfer was initiated in the past 180 days.
+
+        Processing of the refund will not occur until at least 3 business days following the transfer's settlement date, plus any hold/settlement delays. This 3-day window helps better protect your business from regular ACH returns. Consumer initiated returns (unauthorized returns) could still happen for about 60 days from the settlement date. If the original transfer is canceled, returned or failed, all pending refunds will automatically be canceled. Processed refunds cannot be revoked.
+      externalDocs:
+        url: /api/products/transfer/#transferrefundcreate
+      operationId: transferRefundCreate
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRefundCreateRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    refund:
+                      id: 667af684-9ee1-4f5f-862a-633ec4c545cc
+                      transfer_id: 460cbe92-2dcc-8eae-5ad6-b37d0ec90fd9
+                      amount: "12.34"
+                      status: pending
+                      created: 2020-08-06T17:27:15Z
+                    request_id: saKrIBuEB9qJZno
+              schema:
+                $ref: '#/components/schemas/TransferRefundCreateResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidError'
+          description: Error response
+      summary: Create a refund
+      tags:
+      - plaid
+  /transfer/refund/get:
+    post:
+      description: The `/transfer/refund/get` endpoint fetches information about the
+        refund corresponding to the given `refund_id`.
+      externalDocs:
+        url: /api/products/transfer/#transferrefundget
+      operationId: transferRefundGet
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            examples: {}
+            schema:
+              $ref: '#/components/schemas/TransferRefundGetRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    refund:
+                      id: 667af684-9ee1-4f5f-862a-633ec4c545cc
+                      transfer_id: 460cbe92-2dcc-8eae-5ad6-b37d0ec90fd9
+                      amount: "12.34"
+                      status: pending
+                      created: 2020-08-06T17:27:15Z
+                    request_id: saKrIBuEB9qJZno
+              schema:
+                $ref: '#/components/schemas/TransferRefundGetResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidError'
+          description: Error response
+      summary: Retrieve a refund
+      tags:
+      - plaid
+  /transfer/refund/cancel:
+    post:
+      description: Use the `/transfer/refund/cancel` endpoint to cancel a refund.  A
+        refund is eligible for cancellation if it has not yet been submitted to the
+        payment network.
+      externalDocs:
+        url: /api/products/transfer/#transferrefundcancel
+      operationId: transferRefundCancel
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRefundCancelRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    request_id: saKrIBuEB9qJZno
+              schema:
+                $ref: '#/components/schemas/TransferRefundCancelResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidError'
+          description: Error response
+      summary: Cancel a refund
+      tags:
+      - plaid
   /sandbox/bank_transfer/simulate:
     post:
       description: Use the `/sandbox/bank_transfer/simulate` endpoint to simulate
@@ -6811,12 +7447,136 @@ paths:
       summary: Manually fire a Transfer webhook
       tags:
       - plaid
+  /sandbox/transfer/test_clock/create:
+    post:
+      description: "Use the `/sandbox/transfer/test_clock/create` endpoint to create\
+        \ a `test_clock` in the Sandbox environment. \n\nA test clock object represents\
+        \ an independent timeline and has a `frozen_timestamp` field indicating the\
+        \ current timestamp of the timeline. Test clock allows clients to easily test\
+        \ and integrate with recurring transfer product in sandbox environment.\n\n\
+        A test clock can be associated with up to 5 recurring transfers."
+      externalDocs:
+        url: /api/sandbox/#sandboxtransfertestclockcreate
+      operationId: sandboxTransferTestClockCreate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SandboxTransferTestClockCreateRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    test_clock:
+                      test_clock_id: b33a6eda-5e97-5d64-244a-a9274110151c
+                      frozen_timestamp: 2006-01-02T15:04:05Z
+                    request_id: mdqfuVxeoza6mhu
+              schema:
+                $ref: '#/components/schemas/SandboxTransferTestClockCreateResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidError'
+          description: Error response
+      summary: Create a test clock
+      tags:
+      - plaid
+  /sandbox/transfer/test_clock/advance:
+    post:
+      description: "Use the `/sandbox/transfer/test_clock/advance` endpoint to advance\
+        \ a `test_clock` in the Sandbox environment. \n\nA test clock object represents\
+        \ an independent timeline and has a `frozen_timestamp` field indicating the\
+        \ current timestamp of the timeline. A test clock can be advanced by incrementing\
+        \ `frozen_timestamp`, but may never go back to a lower `frozen_timestamp`.\n\
+        \nIf a test clock is advanced from T1 to T2, we will simulate the changes\
+        \ that ought to occur during the period of (T1, T2]. \nFor instance, a client\
+        \ creates a weekly recurring transfer with a test clock set at t. When the\
+        \ client advances the test clock by setting `frozen_timestamp` = t + 15 days,\
+        \ 2 new originations should be created, along with the webhook events.\nThe\
+        \ timestamps of the objects and webhook events created/updated in step 2 should\
+        \ also fall in (T1, T2] time range.\n\nThe advancement of the test clock from\
+        \ its current `frozen_timestamp` should be limited such that there are no\
+        \ more than 20 originations resulted from the advance operation on each `recurring_transfer`\
+        \ associated with this `test_clock`. \nFor instance, if the recurring transfer\
+        \ associated with this test clock originates once every 4 weeks, you can advance\
+        \ the `frozen_timestamp` up to 80 weeks on each advance call."
+      externalDocs:
+        url: /api/sandbox/#sandboxtransfertestclockadvance
+      operationId: sandboxTransferTestClockAdvance
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SandboxTransferTestClockAdvanceRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    request_id: mdqfuVxeoza6mhu
+              schema:
+                $ref: '#/components/schemas/SandboxTransferTestClockAdvanceResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidError'
+          description: Error response
+      summary: Advance a test clock
+      tags:
+      - plaid
+  /sandbox/transfer/test_clock/get:
+    post:
+      description: Use the `/sandbox/transfer/test_clock/get` endpoint to get a `test_clock`
+        in the Sandbox environment.
+      externalDocs:
+        url: /api/sandbox/#sandboxtransfertestclockget
+      operationId: sandboxTransferTestClockGet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SandboxTransferTestClockGetRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    test_clock:
+                      test_clock_id: b33a6eda-5e97-5d64-244a-a9274110151c
+                      frozen_timestamp: 2006-01-02T15:04:05Z
+                    request_id: mdqfuVxeoza6mhu
+              schema:
+                $ref: '#/components/schemas/SandboxTransferTestClockGetResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidError'
+          description: Error response
+      summary: Get a test clock
+      tags:
+      - plaid
   /sandbox/payment_profile/reset_login:
     post:
       description: |-
         `/sandbox/payment_profile/reset_login/` forces a Payment Profile into a state where the login is no longer valid. This makes it easy to test update mode for Payment Profile in the Sandbox environment.
 
-         After calling `/sandbox/payment_profile/reset_login`, calls to the `/transfer/authorization/create` with the Payment Profile will result in a decision_rationale `PAYMENT_PROFILE_LOGIN_REQUIRED``. You can then use update mode for Payment Profile to restore it into a good state.
+         After calling `/sandbox/payment_profile/reset_login`, calls to the `/transfer/authorization/create` with the Payment Profile will result in a `decision_rationale` `PAYMENT_PROFILE_LOGIN_REQUIRED`. You can then use update mode for Payment Profile to restore it into a good state.
 
          In order to invoke this endpoint, you must first [create a Payment Profile](https://plaid.com/docs/transfer/add-to-app/#create-a-payment-profile-optional) and [go through the Link flow](https://plaid.com/docs/transfer/add-to-app/#create-a-link-token).
       externalDocs:
@@ -7063,40 +7823,6 @@ paths:
           description: A ZIP file containing source documents(s) used as the basis
             for income verification.
       summary: (Deprecated) Download the original documents used for income verification
-      tags:
-      - plaid
-  /income/verification/refresh:
-    post:
-      deprecated: true
-      description: '`/income/verification/refresh` refreshes a given income verification.'
-      externalDocs:
-        url: /api/products/income/#incomeverificationrefresh
-      operationId: incomeVerificationRefresh
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/IncomeVerificationRefreshRequest'
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              examples:
-                example-1:
-                  value:
-                    request_id: nTkbCH41HYmpbm5
-                    verification_refresh_status: VERIFICATION_REFRESH_STATUS_USER_PRESENCE_REQUIRED
-              schema:
-                $ref: '#/components/schemas/IncomeVerificationRefreshResponse'
-          description: success
-        default:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PlaidError'
-          description: Error response.
-      summary: (Deprecated) Refresh an income verification
       tags:
       - plaid
   /income/verification/taxforms/get:
@@ -7730,6 +8456,8 @@ paths:
                   value:
                     items:
                     - item_id: eVBnVMp7zdTJLkRNr33Rs6zr7KNJqBFL9DrE6
+                      institution_id: ins_92
+                      institution_name: ADP
                       accounts:
                       - account_id: GeooLPBGDEunl54q7N3ZcyD5aLPLEai1nkzM9
                         rate_of_pay:
@@ -8510,9 +9238,11 @@ paths:
       description: |-
         Use `/signal/evaluate` to evaluate a planned ACH transaction to get a return risk assessment (such as a risk score and risk tier) and additional risk signals.
 
-        In order to obtain a valid score for an ACH transaction, Plaid must have an access token for the account, and the Item must be healthy (receiving product updates) or have recently been in a healthy state. If the transaction does not meet eligibility requirements, an error will be returned corresponding to the underlying cause. If `/signal/evaluate` is called on the same transaction multiple times within a 24-hour period, cached results may be returned.
+        In order to obtain a valid score for an ACH transaction, Plaid must have an access token for the account, and the Item must be healthy (receiving product updates) or have recently been in a healthy state. If the transaction does not meet eligibility requirements, an error will be returned corresponding to the underlying cause. If `/signal/evaluate` is called on the same transaction multiple times within a 24-hour period, cached results may be returned. For more information please refer to our error documentation on [item errors](/docs/errors/item/) and [Link in Update Mode](/docs/link/update-mode/).
+
+        Note: This request may take some time to complete if Signal is being added to an existing Item. This is because Plaid must communicate directly with the institution when retrieving the data for the first time.
       externalDocs:
-        url: /signal/reference#signalevaluate
+        url: /api/products/signal#signalevaluate
       operationId: signalEvaluate
       requestBody:
         content:
@@ -8557,10 +9287,10 @@ paths:
     post:
       description: After calling `/signal/evaluate`, call `/signal/decision/report`
         to report whether the transaction was initiated. This endpoint will return
-        an `INVALID_REQUEST` error if called a second time with a different value
-        for `initiated`.
+        an [`INVALID_FIELD`](/docs/errors/invalid-request/#invalid_field) error if
+        called a second time with a different value for `initiated`.
       externalDocs:
-        url: /signal/reference#signaldecisionreport
+        url: /api/products/signal#signaldecisionreport
       operationId: signalDecisionReport
       requestBody:
         content:
@@ -8595,7 +9325,7 @@ paths:
         feedback will be used by the model to incorporate the latest risk trend in
         your portfolio.
       externalDocs:
-        url: /signal/reference#signalreturnreport
+        url: /api/products/signal#signalreturnreport
       operationId: signalReturnReport
       requestBody:
         content:
@@ -8625,11 +9355,14 @@ paths:
       - plaid
   /signal/prepare:
     post:
-      description: Call `/signal/prepare` with Plaid-linked bank account information
-        at least 10 seconds before calling `/signal/evaluate` or as soon as an end-user
-        enters the ACH deposit flow in your application.
+      description: |-
+        When Link is not initialized with Signal, call `/signal/prepare` to opt-in that Item to the Signal data collection process, developing a Signal score.
+
+        If you are using other Plaid products after Link, e.g. Identity or Assets, call `/signal/prepare` after those product calls are complete.
+
+        Example flow: Link is initialized with Auth, call `/auth/get` for the account & routing number, call `/identity/get` to retrieve bank ownership details, call `/signal/prepare` to begin Signal data collection, then call `/signal/evaluate` for a Signal score. For more information please see [Recommendations for initializing Link with specific product combinations](/docs/link/best-practices/#recommendations-for-initializing-link-with-specific-product-combinations).
       externalDocs:
-        url: /signal/reference#signalprepare
+        url: /api/products/signal#signalprepare
       operationId: signalPrepare
       requestBody:
         content:
@@ -8654,7 +9387,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PlaidError'
           description: Error response.
-      summary: Prepare the Signal product before calling `/signal/evaluate`
+      summary: Opt-in an Item to Signal
       tags:
       - plaid
   /wallet/create:
@@ -8846,6 +9579,7 @@ paths:
                       value: 123.12
                     status: EXECUTED
                     created_at: 2020-12-02T21:14:54Z
+                    last_status_update: 2020-12-02T21:15:01Z
                     counterparty:
                       numbers:
                         bacs:
@@ -8863,6 +9597,7 @@ paths:
                       value: 456.78
                     status: EXECUTED
                     created_at: 2020-12-02T21:14:54Z
+                    last_status_update: 2020-12-02T21:15:01Z
                     counterparty:
                       numbers:
                         international:
@@ -8875,12 +9610,70 @@ paths:
       summary: Fetch an e-wallet transaction
       tags:
       - plaid
+  /wallet/transaction/list:
+    post:
+      description: This endpoint lists the latest transactions of the specified e-wallet.
+        Transactions are returned in descending order by the `created_at` time.
+      externalDocs:
+        url: /api/products/virtual-accounts/#wallettransactionlist
+      operationId: walletTransactionList
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletTransactionListRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    next_cursor: YWJjMTIzIT8kKiYoKSctPUB
+                    transactions:
+                    - transaction_id: wallet-transaction-id-sandbox-feca8a7a-5591-4aef-9297-f3062bb735d3
+                      type: PAYOUT
+                      reference: Payout 99744
+                      amount:
+                        iso_currency_code: GBP
+                        value: 123.12
+                      status: EXECUTED
+                      created_at: 2020-12-02T21:14:54Z
+                      last_status_update: 2020-12-02T21:15:01Z
+                      counterparty:
+                        numbers:
+                          bacs:
+                            account: "31926819"
+                            sort_code: "601613"
+                        name: John Smith
+                    - transaction_id: wallet-transaction-id-sandbox-feca8a7a-5591-4aef-9297-f3062bb735d3
+                      type: PAYOUT
+                      reference: Payout 99744
+                      amount:
+                        iso_currency_code: EUR
+                        value: 456.78
+                      status: EXECUTED
+                      created_at: 2020-12-02T21:14:54Z
+                      last_status_update: 2020-12-02T21:15:01Z
+                      counterparty:
+                        numbers:
+                          international:
+                            iban: GB33BUKB20201555555555
+                        name: John Smith
+                    request_id: 4zlKapIkTm8p5KM
+              schema:
+                $ref: '#/components/schemas/WalletTransactionListResponse'
+          description: OK
+      summary: List e-wallet transactions
+      tags:
+      - plaid
   /wallet/transactions/list:
     post:
       description: This endpoint lists the latest transactions of the specified e-wallet.
         Transactions are returned in descending order by the `created_at` time.
       externalDocs:
-        url: /api/products/virtual-accounts/#wallettransactionslist
+        url: /api/products/virtual-accounts/#wallettransactionlist
       operationId: walletTransactionsList
       requestBody:
         content:
@@ -8905,6 +9698,7 @@ paths:
                         value: 123.12
                       status: EXECUTED
                       created_at: 2020-12-02T21:14:54Z
+                      last_status_update: 2020-12-02T21:15:01Z
                       counterparty:
                         numbers:
                           bacs:
@@ -8919,6 +9713,7 @@ paths:
                         value: 456.78
                       status: EXECUTED
                       created_at: 2020-12-02T21:14:54Z
+                      last_status_update: 2020-12-02T21:15:01Z
                       counterparty:
                         numbers:
                           international:
@@ -8926,11 +9721,12 @@ paths:
                         name: John Smith
                     request_id: 4zlKapIkTm8p5KM
               schema:
-                $ref: '#/components/schemas/WalletTransactionsListResponse'
+                $ref: '#/components/schemas/WalletTransactionListResponse'
           description: OK
       summary: List e-wallet transactions
       tags:
       - plaid
+    x-hidden-from-docs: true
   /beta/transactions/v1/enhance:
     post:
       description: |-
@@ -9201,6 +9997,7 @@ paths:
                     status: READY
                     updated_at: 2022-07-07T12:48:37Z
                     created_at: 2022-07-05T12:48:37Z
+                    deleted_at: null
                     request_id: 4ciYmmesdqSiUAB
               schema:
                 $ref: '#/components/schemas/PaymentProfileGetResponse'
@@ -9397,6 +10194,47 @@ paths:
                 $ref: '#/components/schemas/PlaidError'
           description: Error response
       summary: Enables a Plaid reseller's end customer in the Production environment.
+      tags:
+      - plaid
+  /partner/customer/remove:
+    post:
+      description: The `/partner/customer/remove` endpoint is used by reseller partners
+        to remove an end customer. Removing an end customer will remove it from view
+        in the Plaid Dashboard and deactivate its API keys. This endpoint can only
+        be used to remove an end customer that has not yet been enabled in Production.
+      externalDocs:
+        url: /api/partner/#partnercustomerremove
+      operationId: partnerCustomerRemove
+      requestBody:
+        content:
+          application/json:
+            examples:
+              example-1:
+                value:
+                  client_id: 7f57eb3d2a9j6480121fx361
+                  secret: 79g03eoofwl8240v776r2h667442119
+                  end_customer_client_id: 7f57eb3d2a9j6480121fx361
+            schema:
+              $ref: '#/components/schemas/PartnerCustomerRemoveRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    request_id: 4zlKapIkTm8p5KM
+              schema:
+                $ref: '#/components/schemas/PartnerCustomerRemoveResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidError'
+          description: Error response
+      summary: Removes a Plaid reseller's end customer.
       tags:
       - plaid
   /link_delivery/create:
@@ -9606,12 +10444,16 @@ components:
             account: account
           ach:
           - wire_routing: wire_routing
+            can_transfer_out: true
             routing: routing
             account_id: account_id
+            can_transfer_in: true
             account: account
           - wire_routing: wire_routing
+            can_transfer_out: true
             routing: routing
             account_id: account_id
+            can_transfer_in: true
             account: account
           international:
           - account_id: account_id
@@ -9695,12 +10537,16 @@ components:
           account: account
         ach:
         - wire_routing: wire_routing
+          can_transfer_out: true
           routing: routing
           account_id: account_id
+          can_transfer_in: true
           account: account
         - wire_routing: wire_routing
+          can_transfer_out: true
           routing: routing
           account_id: account_id
+          can_transfer_in: true
           account: account
         international:
         - account_id: account_id
@@ -10458,12 +11304,16 @@ components:
           type: array
         next_cursor:
           description: Cursor used for fetching any future updates after the latest
-            update provided in this response.
+            update provided in this response. The cursor obtained after all pages
+            have been pulled (indicated by `has_more` being `false`) will be valid
+            for at least 1 year. This cursor should be persisted for later calls.
           type: string
         has_more:
           description: Represents if more than requested count of transaction updates
             exist. If true, the additional updates can be fetched by making an additional
-            request with `cursor` set to `next_cursor`.
+            request with `cursor` set to `next_cursor`. If `has_more` is true, it’s
+            important to pull all available pages, to make it less likely for underlying
+            data changes to conflict with pagination.
           type: boolean
         request_id:
           description: A unique identifier for the request, which can be used for
@@ -11930,6 +12780,7 @@ components:
           - NEW_ACCOUNTS_AVAILABLE
           - AUTH_DATA_UPDATE
           - RECURRING_TRANSACTIONS_UPDATE
+          - SYNC_UPDATES_AVAILABLE
           type: string
       required:
       - access_token
@@ -13342,6 +14193,8 @@ components:
           maxLength: 18
           minLength: 1
           type: string
+        amount:
+          $ref: '#/components/schemas/PaymentAmountToRefund'
       required:
       - idempotency_key
       - payment_id
@@ -14021,6 +14874,7 @@ components:
       additionalProperties: true
       description: PaymentInitiationPayment defines a payment initiation payment
       example:
+        transaction_id: transaction_id
         amount:
           value: 0.8008281904610115
         adjusted_reference: adjusted_reference
@@ -14079,6 +14933,8 @@ components:
             type: string
           nullable: true
           type: array
+        amount_refunded:
+          $ref: '#/components/schemas/PaymentAmountRefunded'
         wallet_id:
           description: The EMI (E-Money Institution) wallet that this payment is associated
             with, if any. This wallet is used as an intermediary account to enable
@@ -14092,6 +14948,11 @@ components:
         consent_id:
           description: The payment consent ID that this payment was initiated with.
             Is present only when payment was initiated using the payment consent.
+          nullable: true
+          type: string
+        transaction_id:
+          description: The transaction ID that this payment is associated with, if
+            any. This is present only when a payment was initiated using virtual accounts.
           nullable: true
           type: string
       required:
@@ -14495,7 +15356,8 @@ components:
       example:
         next_cursor: 2000-01-23T04:56:07.000+00:00
         payments:
-        - amount:
+        - transaction_id: transaction_id
+          amount:
             value: 0.8008281904610115
           adjusted_reference: adjusted_reference
           refund_details:
@@ -14511,7 +15373,8 @@ components:
           last_status_update: 2000-01-23T04:56:07.000+00:00
           consent_id: consent_id
           recipient_id: recipient_id
-        - amount:
+        - transaction_id: transaction_id
+          amount:
             value: 0.8008281904610115
           adjusted_reference: adjusted_reference
           refund_details:
@@ -15046,6 +15909,8 @@ components:
           - apex_clearing
           - gusto
           - adyen
+          - atomic
+          - i2c
           type: string
       required:
       - access_token
@@ -15492,7 +16357,7 @@ components:
           type: string
         country_codes:
           description: |-
-            Specify an array of Plaid-supported country codes using the ISO-3166-1 alpha-2 country code standard. Institutions from all listed countries will be shown.  Supported country codes are: `US`, `CA`, `DE`, `ES`, `FR`, `GB`, `IE`, `IT`, `NL`. For a complete mapping of supported products by country, see https://plaid.com/global/.
+            Specify an array of Plaid-supported country codes using the ISO-3166-1 alpha-2 country code standard. Institutions from all listed countries will be shown. For a complete mapping of supported products by country, see https://plaid.com/global/.
 
             If Link is launched with multiple country codes, only products that you are enabled for in all countries will be used by Link. Note that while all countries are enabled by default in Sandbox and Development, in Production only US and Canada are enabled by default. To gain access to European institutions in the Production environment, [file a product access Support ticket](https://dashboard.plaid.com/support/new/product-and-development/product-troubleshooting/request-product-access) via the Plaid dashboard. If you initialize with a European country code, your users will see the European consent panel during the Link flow.
 
@@ -15806,10 +16671,8 @@ components:
           type: boolean
         instant_match_enabled:
           description: Specifies whether the Link session is enabled for the Instant
-            Match flow. As of October 5th, 2022, Instant Match has been enabled by
-            default for all new customers; this field is only necessary to enable
-            Instant Match for customers who enabled auth before October 5th, 2022
-            and who have not previously enabled Instant Match via their Account Manager.
+            Match flow. As of November 2022, Instant Match will be enabled by default.
+            Instant Match can be disabled by setting this field to `false`.
           type: boolean
         same_day_microdeposits_enabled:
           description: Specifies whether the Link session is enabled for the Same
@@ -15899,9 +16762,9 @@ components:
         name:
           allOf:
           - $ref: '#/components/schemas/UserName'
-          description: The user's full name. Optional if using the [Identity Verification](https://plaid.com/docs/api/products/identity-verification)
-            product; if not using Identity Verification, this field is not allowed.
-            Users will not be asked for their name when this field is provided.
+          - description: The user's full name. Optional if using the [Identity Verification](https://plaid.com/docs/api/products/identity-verification)
+              product; if not using Identity Verification, this field is not allowed.
+              Users will not be asked for their name when this field is provided.
         phone_number:
           description: The user's phone number in [E.164](https://en.wikipedia.org/wiki/E.164)
             format. This field is optional, but required to enable the [returning
@@ -16650,8 +17513,10 @@ components:
         account via ACH or wire transfer.
       example:
         wire_routing: wire_routing
+        can_transfer_out: true
         routing: routing
         account_id: account_id
+        can_transfer_in: true
         account: account
       properties:
         account_id:
@@ -16672,6 +17537,16 @@ components:
           description: The wire transfer routing number for the account, if available
           nullable: true
           type: string
+        can_transfer_in:
+          description: Whether the account supports ACH transfers into the account
+          nullable: true
+          type: boolean
+          x-hidden-from-docs: true
+        can_transfer_out:
+          description: Whether the account supports ACH transfers out of the account
+          nullable: true
+          type: boolean
+          x-hidden-from-docs: true
       required:
       - account
       - account_id
@@ -17854,10 +18729,10 @@ components:
       description: |-
         The counterparty type.
 
-        merchant: a provider of goods or services for purchase
-        financial_institution: a financial entity (bank, credit union, BNPL, fintech)
-        payment_app: a transfer or P2P app (e.g. Zelle)
-        delivery_marketplace: a food delivery marketplace (e.g DoorDash)
+        `merchant`: a provider of goods or services for purchase
+        `financial_institution`: a financial entity (bank, credit union, BNPL, fintech)
+        `payment_app`: a transfer or P2P app (e.g. Zelle)
+        `delivery_marketplace`: a food delivery marketplace (e.g DoorDash)
       enum:
       - merchant
       - financial_institution
@@ -18162,7 +19037,9 @@ components:
 
         After receipt of this webhook, the new changes can be fetched for the Item from `/transactions/sync`.
 
-        Note that to receive this webhook for an Item, `/transactions/sync` must have been called at least once on that Item.
+        Note that to receive this webhook for an Item, `/transactions/sync` must have been called at least once on that Item. This means that, unlike the `INITIAL_UPDATE` and `HISTORICAL_UPDATE` webhooks, it will not fire immediately upon Item creation. If `/transactions/sync` is called on an Item that was *not* initialized with Transactions, the webhook will fire twice: once the first 30 days of transactions data has been fetched, and a second time when all available historical transactions data has been fetched.
+
+        This webhook will typically not fire in the Sandbox environment, due to the lack of dynamic transactions data. To test this webhook in Sandbox, call `/sandbox/item/fire_webhook`.
       properties:
         webhook_type:
           description: '`TRANSACTIONS`'
@@ -18978,7 +19855,7 @@ components:
         payment_reference_number:
           description: The relevant account number that should be used to reference
             this loan for payments. In the majority of cases, `payment_reference_number`
-            will match a`ccount_number,` but in some institutions, such as Great Lakes
+            will match `account_number,` but in some institutions, such as Great Lakes
             (`ins_116861`), it will be different.
           nullable: true
           type: string
@@ -19970,6 +20847,7 @@ components:
           success: 0.8008281904610115
           error_institution: 1.4658129805029452
         status: HEALTHY
+      nullable: true
       properties:
         status:
           deprecated: true
@@ -20314,10 +21192,20 @@ components:
       properties:
         isin:
           description: 12-character ISIN, a globally unique securities identifier.
+            Please note that CGS requires Plaid's customers to hold a license directly
+            from them to receive CUSIP & ISIN data. This field will be null by default
+            for new customers. For existing customers, this field will be null by
+            default starting on Sept 15, 2023. If you would like access to this field,
+            please contact your Plaid Account Manager or reach out to investments-vendors@plaid.com.
           type: string
         cusip:
           description: 9-character CUSIP, an identifier assigned to North American
-            securities.
+            securities. Please note that CGS requires Plaid's customers to hold a
+            license directly from them to receive CUSIP & ISIN data. This field will
+            be null by default for new customers. For existing customers, this field
+            will be null by default starting on Sept 15, 2023. If you would like access
+            to this field, please contact your Plaid Account Manager or reach out
+            to investments-vendors@plaid.com.
           type: string
         sedol:
           description: 7-character SEDOL, an identifier assigned to securities in
@@ -21148,7 +22036,7 @@ components:
           description: |
             An object with keys of `account_id`'s that are mapped to their respective liabilities fields that changed.
 
-            Example: `{ "XMBvvyMGQ1UoLbKByoMqH3nXMj84ALSdE5B58": ["past_amount_due"] }
+            Example: `{ "XMBvvyMGQ1UoLbKByoMqH3nXMj84ALSdE5B58": ["past_amount_due"] }`
           type: object
         environment:
           $ref: '#/components/schemas/WebhookEnvironmentValues'
@@ -21182,7 +22070,7 @@ components:
       description: |
         An object with keys of `account_id`'s that are mapped to their respective liabilities fields that changed.
 
-        Example: `{ "XMBvvyMGQ1UoLbKByoMqH3nXMj84ALSdE5B58": ["past_amount_due"] }
+        Example: `{ "XMBvvyMGQ1UoLbKByoMqH3nXMj84ALSdE5B58": ["past_amount_due"] }`
       type: object
     Cause:
       additionalProperties: true
@@ -21233,6 +22121,33 @@ components:
       - value
       title: PaymentAmount
       type: object
+    PaymentAmountNullable:
+      additionalProperties: true
+      description: The amount and currency of a payment
+      nullable: true
+      properties:
+        currency:
+          $ref: '#/components/schemas/PaymentAmountCurrency'
+        value:
+          description: The amount of the payment. Must contain at most two digits
+            of precision e.g. `1.23`. Minimum accepted value is `1`.
+          format: double
+          type: number
+      required:
+      - currency
+      - value
+      title: PaymentAmount
+      type: object
+    PaymentAmountToRefund:
+      allOf:
+      - $ref: '#/components/schemas/PaymentAmountNullable'
+      description: An amount to refund the payment partially. If this amount is not
+        specified, the payment is refunded fully for the remaining amount.
+    PaymentAmountRefunded:
+      allOf:
+      - $ref: '#/components/schemas/PaymentAmountNullable'
+      description: The amount that has been refunded already. Subtract this from the
+        payment amount to calculate the amount still available to refund.
     PaymentConsentValidDateTime:
       additionalProperties: true
       description: Life span for the payment consent. After the `to` date the payment
@@ -22428,11 +23343,21 @@ components:
           type: string
         isin:
           description: 12-character ISIN, a globally unique securities identifier.
+            Please note that CGS requires Plaid's customers to hold a license directly
+            from them to receive CUSIP & ISIN data. This field will be null by default
+            for new customers. For existing customers, this field will be null by
+            default starting on Sept 15, 2023. If you would like access to this field,
+            please contact your Plaid Account Manager or reach out to investments-vendors@plaid.com.
           nullable: true
           type: string
         cusip:
           description: 9-character CUSIP, an identifier assigned to North American
-            securities.
+            securities. Please note that CGS requires Plaid's customers to hold a
+            license directly from them to receive CUSIP & ISIN data. This field will
+            be null by default for new customers. For existing customers, this field
+            will be null by default starting on Sept 15, 2023. If you would like access
+            to this field, please contact your Plaid Account Manager or reach out
+            to investments-vendors@plaid.com.
           nullable: true
           type: string
         sedol:
@@ -23473,6 +24398,34 @@ components:
       - transfer_id
       title: TransferGetRequest
       type: object
+    TransferRecurringGetRequest:
+      description: Defines the request schema for `/transfer/recurring/get`
+      example:
+        recurring_transfer_id: recurring_transfer_id
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        recurring_transfer_id:
+          description: Plaid’s unique identifier for a recurring transfer.
+          title: RecurringTransferID
+          type: string
+      required:
+      - client_id
+      - recurring_transfer_id
+      - secret
+      title: TransferRecurringGetRequest
+      type: object
     BankTransferGetRequest:
       description: Defines the request schema for `/bank_transfer/get`
       example:
@@ -23514,6 +24467,16 @@ components:
             description: description
           cancellable: true
           standard_return_window: 2000-01-23
+          refunds:
+          - amount: amount
+            created: 2000-01-23T04:56:07.000+00:00
+            id: id
+            transfer_id: transfer_id
+          - amount: amount
+            created: 2000-01-23T04:56:07.000+00:00
+            id: id
+            transfer_id: transfer_id
+          originator_client_id: originator_client_id
           account_id: account_id
           guarantee_decision_rationale:
             description: description
@@ -23545,6 +24508,54 @@ components:
       - request_id
       - transfer
       title: TransferGetResponse
+      type: object
+    TransferRecurringGetResponse:
+      additionalProperties: true
+      description: Defines the response schema for `/transfer/recurring/get`
+      example:
+        recurring_transfer:
+          amount: amount
+          transfer_ids:
+          - null
+          - null
+          created: 2000-01-23T04:56:07.000+00:00
+          schedule:
+            end_date: 2000-01-23
+            interval_count: 0
+            interval_execution_day: 6
+            start_date: 2000-01-23
+          account_id: account_id
+          next_origination_date: 2000-01-23
+          iso_currency_code: iso_currency_code
+          recurring_transfer_id: recurring_transfer_id
+          origination_account_id: origination_account_id
+          decision_rationale:
+            description: description
+          test_clock_id: test_clock_id
+          user:
+            email_address: email_address
+            address:
+              country: country
+              city: city
+              street: street
+              region: region
+              postal_code: postal_code
+            phone_number: phone_number
+            legal_name: legal_name
+        request_id: request_id
+      properties:
+        recurring_transfer:
+          $ref: '#/components/schemas/RecurringTransfer'
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - recurring_transfer
+      - request_id
+      title: TransferRecurringGetResponse
       type: object
     BankTransferGetResponse:
       additionalProperties: true
@@ -23588,10 +24599,27 @@ components:
       description: Plaid’s unique identifier for a transfer.
       title: TransferID
       type: string
+    RecurringTransferID:
+      description: Plaid’s unique identifier for a recurring transfer.
+      title: RecurringTransferID
+      type: string
+    TransferTestClockID:
+      description: Plaid’s unique identifier for a test clock.
+      nullable: true
+      title: TransferTestClockID
+      type: string
     TransferSweepID:
       description: Plaid’s unique identifier for a sweep.
       nullable: true
       title: TransferSweepID
+      type: string
+    TransferRefundID:
+      description: Plaid’s unique identifier for a refund.
+      title: TransferRefundID
+      type: string
+    TransferIDForRefund:
+      description: The ID of the transfer to refund.
+      title: TransferID
       type: string
     TransferAuthorizationID:
       description: Plaid’s unique identifier for a transfer authorization.
@@ -23615,6 +24643,16 @@ components:
           description: description
         cancellable: true
         standard_return_window: 2000-01-23
+        refunds:
+        - amount: amount
+          created: 2000-01-23T04:56:07.000+00:00
+          id: id
+          transfer_id: transfer_id
+        - amount: amount
+          created: 2000-01-23T04:56:07.000+00:00
+          id: id
+          transfer_id: transfer_id
+        originator_client_id: originator_client_id
         account_id: account_id
         guarantee_decision_rationale:
           description: description
@@ -23709,8 +24747,18 @@ components:
           format: date
           nullable: true
           type: string
+        originator_client_id:
+          description: The Plaid client ID that is the originator of this transfer.
+            Only present if created on behalf of another client as a third-party sender
+            (TPS).
+          nullable: true
+          type: string
+        refunds:
+          description: A list of refunds associated with this transfer.
+          items:
+            $ref: '#/components/schemas/TransferRefund'
+          type: array
       required:
-      - account_id
       - amount
       - cancellable
       - created
@@ -23723,6 +24771,8 @@ components:
       - metadata
       - network
       - origination_account_id
+      - originator_client_id
+      - refunds
       - standard_return_window
       - status
       - type
@@ -23730,6 +24780,138 @@ components:
       - user
       title: Transfer
       type: object
+    RecurringTransfer:
+      additionalProperties: true
+      description: Represents a transfer within the Transfers API.
+      example:
+        amount: amount
+        transfer_ids:
+        - null
+        - null
+        created: 2000-01-23T04:56:07.000+00:00
+        schedule:
+          end_date: 2000-01-23
+          interval_count: 0
+          interval_execution_day: 6
+          start_date: 2000-01-23
+        account_id: account_id
+        next_origination_date: 2000-01-23
+        iso_currency_code: iso_currency_code
+        recurring_transfer_id: recurring_transfer_id
+        origination_account_id: origination_account_id
+        decision_rationale:
+          description: description
+        test_clock_id: test_clock_id
+        user:
+          email_address: email_address
+          address:
+            country: country
+            city: city
+            street: street
+            region: region
+            postal_code: postal_code
+          phone_number: phone_number
+          legal_name: legal_name
+      properties:
+        recurring_transfer_id:
+          description: Plaid’s unique identifier for a recurring transfer.
+          title: RecurringTransferID
+          type: string
+        created:
+          description: The datetime when this transfer was created. This will be of
+            the form `2006-01-02T15:04:05Z`
+          format: date-time
+          type: string
+        next_origination_date:
+          description: "A date in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)\
+            \ format (YYYY-MM-DD). \n\nThe next transfer origination date after bank\
+            \ holiday adjustment."
+          format: date
+          type: string
+        test_clock_id:
+          description: Plaid’s unique identifier for a test clock.
+          nullable: true
+          title: TransferTestClockID
+          type: string
+        type:
+          $ref: '#/components/schemas/TransferType'
+        amount:
+          description: The amount of the transfer (decimal string with two digits
+            of precision e.g. "10.00").
+          title: TransferAmount
+          type: string
+        status:
+          $ref: '#/components/schemas/TransferRecurringStatus'
+        ach_class:
+          $ref: '#/components/schemas/ACHClass'
+        network:
+          $ref: '#/components/schemas/TransferNetwork'
+        origination_account_id:
+          description: Plaid’s unique identifier for the origination account that
+            was used for this transfer.
+          type: string
+        account_id:
+          description: The account ID that should be credited/debited for this transfer.
+          type: string
+        iso_currency_code:
+          description: The currency of the transfer amount, e.g. "USD"
+          type: string
+        transfer_ids:
+          items:
+            $ref: '#/components/schemas/TransferID'
+          type: array
+        decision:
+          $ref: '#/components/schemas/TransferAuthorizationDecision'
+        decision_rationale:
+          $ref: '#/components/schemas/TransferAuthorizationDecisionRationale'
+        user:
+          $ref: '#/components/schemas/TransferUserInResponse'
+        schedule:
+          $ref: '#/components/schemas/TransferRecurringSchedule'
+      required:
+      - account_id
+      - amount
+      - created
+      - iso_currency_code
+      - network
+      - next_origination_date
+      - origination_account_id
+      - recurring_transfer_id
+      - schedule
+      - status
+      - type
+      - user
+      title: RecurringTransfer
+      type: object
+    TransferTestClock:
+      additionalProperties: true
+      description: Defines the test clock for a transfer.
+      example:
+        frozen_timestamp: 2000-01-23T04:56:07.000+00:00
+        test_clock_id: test_clock_id
+      properties:
+        test_clock_id:
+          description: Plaid’s unique identifier for a test clock.
+          nullable: true
+          title: TransferTestClockID
+          type: string
+        frozen_timestamp:
+          description: The frozen timestamp on the test clock. This will be of the
+            form `2006-01-02T15:04:05Z`.
+          format: date-time
+          title: FrozenTimestamp
+          type: string
+      required:
+      - frozen_timestamp
+      - test_clock_id
+      title: TransferTestClock
+      type: object
+    FrozenTimestamp:
+      description: The frozen timestamp on the test clock. This will be of the form
+        `2006-01-02T15:04:05Z`.
+      format: date-time
+      title: FrozenTimestamp
+      type: string
     BankTransfer:
       additionalProperties: true
       description: Represents a bank transfer within the Bank Transfers API.
@@ -23837,6 +25019,69 @@ components:
       - user
       title: BankTransfer
       type: object
+    DisbursementLimits:
+      additionalProperties: true
+      description: Requested disbursement (i.e. sending money) limits for the end
+        customer.
+      example:
+        average_amount: 0
+        monthly_amount: 1
+        maximum_amount: 6
+      properties:
+        average_amount:
+          description: Average disbursement amount in a single transaction, in dollars.
+          type: integer
+        maximum_amount:
+          description: Maximum disbursement amount in a single transaction, in dollars.
+          type: integer
+        monthly_amount:
+          description: Monthly disbursement amount, in dollars.
+          type: integer
+      required:
+      - average_amount
+      - maximum_amount
+      - monthly_amount
+      title: DisbursementLimits
+      type: object
+    PaymentLimits:
+      additionalProperties: true
+      description: Requested payment (i.e. receiving money) limits for the end customer.
+      example:
+        average_amount: 5
+        monthly_amount: 2
+        maximum_amount: 5
+      properties:
+        average_amount:
+          description: Average payment amount, in dollars.
+          type: integer
+        maximum_amount:
+          description: Maximum payment amount, in dollars.
+          type: integer
+        monthly_amount:
+          description: Monthly payment amount, in dollars.
+          type: integer
+      required:
+      - average_amount
+      - maximum_amount
+      - monthly_amount
+      title: PaymentLimits
+      type: object
+    Originator:
+      additionalProperties: true
+      description: Originator and their status.
+      example:
+        client_id: client_id
+      properties:
+        client_id:
+          description: Originator’s client ID.
+          type: string
+        transfer_diligence_status:
+          $ref: '#/components/schemas/TransferDiligenceStatus'
+      required:
+      - client_id
+      - transfer_diligence_status
+      title: Originator
+      type: object
     ACHClass:
       description: |-
         Specifies the use case of the transfer. Required for transfers on an ACH network.
@@ -23865,6 +25110,11 @@ components:
         string with two digits of precision e.g. "-5.50").
       nullable: true
       title: TransferSweepAmount
+      type: string
+    TransferRefundAmount:
+      description: The amount of the refund (decimal string with two digits of precision
+        e.g. "10.00").
+      title: TransferRefundAmount
       type: string
     TransferIntentGetFailureReason:
       additionalProperties: true
@@ -23930,6 +25180,14 @@ components:
       maxLength: 50
       nullable: true
       title: TransferAuthorizationIdempotencyKey
+      type: string
+    TransferRefundIdempotencyKey:
+      description: |-
+        A random key provided by the client, per unique refund. Maximum of 50 characters.
+
+        The API supports idempotency for safely retrying requests without accidentally performing the same operation twice. For example, if a request to create a refund fails due to a network connection error, you can retry the request with the same idempotency key to guarantee that only a single refund is created.
+      maxLength: 50
+      title: TransferRefundIdempotencyKey
       type: string
     BankTransferIdempotencyKey:
       description: |-
@@ -24205,6 +25463,49 @@ components:
       - description
       title: TransferAuthorizationDecisionRationale
       type: object
+    SignalPaymentMethod:
+      description: "The payment method to complete the transaction after the risk\
+        \ assessment. It may be different from the default payment method.\n\n`SAME_DAY_ACH`:\
+        \ Same Day ACH by NACHA. The debit transaction is processed and settled on\
+        \ the same day\n\n`NEXT_DAY_ACH`: Next Day ACH settlement for debit transactions,\
+        \ offered by some payment processors \n\n`STANDARD_ACH`: standard ACH by NACHA\n\
+        \n`REAL_TIME_PAYMENTS`: real-time payments such as RTP and FedNow\n\n`DEBIT_CARD`:\
+        \ if the default payment is over debit card networks\n\n`MULTIPLE_PAYMENT_METHODS`:\
+        \ if there is no default debit rail or there are multiple payment methods\
+        \ \n\nPossible values: `SAME_DAY_ACH`, `NEXT_DAY_ACH`, `STANDARD_ACH`, `REAL_TIME_PAYMENTS`,\
+        \ `DEBIT_CARD`, `MULTIPLE_PAYMENT_METHODS`\n"
+      enum:
+      - SAME_DAY_ACH
+      - NEXT_DAY_ACH
+      - STANDARD_ACH
+      - REAL_TIME_PAYMENTS
+      - DEBIT_CARD
+      - MULTIPLE_PAYMENT_METHODS
+      nullable: true
+      type: string
+    SignalDecisionOutcome:
+      description: |
+        The payment decision from the risk assessment.
+
+        `APPROVE`: approve the transaction without requiring further actions from your customers. For example, use this field if you are placing a standard hold for all the approved transactions before making funds available to your customers. You should also use this field if you decide to accelerate the fund availability for your customers.
+
+        `REVIEW`: the transaction requires manual review
+
+        `REJECT`: reject the transaction
+
+        `TAKE_OTHER_RISK_MEASURES`: for example, placing a longer hold on funds than those approved transactions or introducing customer frictions such as step-up verification/authentication
+
+        `NOT_EVALUATED`: if only logging the Signal results without using them
+
+        Possible values:  `APPROVE`, `REVIEW`, `REJECT`, `TAKE_OTHER_RISK_MEASURES`, `NOT_EVALUATED`
+      enum:
+      - APPROVE
+      - REVIEW
+      - REJECT
+      - TAKE_OTHER_RISK_MEASURES
+      - NOT_EVALUATED
+      nullable: true
+      type: string
     TransferAuthorizationGuaranteeDecision:
       description: Indicates whether the transfer is guaranteed by Plaid (Guarantee
         customers only). This field will contain either `GUARANTEED` or `NOT_GUARANTEED`
@@ -24261,6 +25562,7 @@ components:
       description: Details regarding the proposed transfer.
       example:
         amount: amount
+        originator_client_id: originator_client_id
         account_id: account_id
         iso_currency_code: iso_currency_code
         origination_account_id: origination_account_id
@@ -24301,12 +25603,18 @@ components:
         iso_currency_code:
           description: The currency of the transfer amount. The default value is "USD".
           type: string
+        originator_client_id:
+          description: The Plaid client ID that is the originator of this transfer.
+            Only present if created on behalf of another client as a third-party sender
+            (TPS).
+          nullable: true
+          type: string
       required:
-      - account_id
       - amount
       - iso_currency_code
       - network
       - origination_account_id
+      - originator_client_id
       - type
       - user
       title: TransferAuthorizationProposedTransfer
@@ -24328,6 +25636,84 @@ components:
           type: string
       title: TransferAuthorizationDevice
       type: object
+    TransferDevice:
+      additionalProperties: true
+      description: Information about the device being used to initiate the authorization.
+      example:
+        ip_address: ip_address
+        user_agent: user_agent
+      properties:
+        ip_address:
+          description: The IP address of the device being used to initiate the authorization.
+          type: string
+        user_agent:
+          description: The user agent of the device being used to initiate the authorization.
+          type: string
+      required:
+      - ip_address
+      - user_agent
+      title: TransferDevice
+      type: object
+    TransferRecurringSchedule:
+      description: The schedule that the recurring transfer will be executed on.
+      example:
+        end_date: 2000-01-23
+        interval_count: 0
+        interval_execution_day: 6
+        start_date: 2000-01-23
+      properties:
+        interval_unit:
+          $ref: '#/components/schemas/TransferScheduleIntervalUnit'
+        interval_count:
+          description: "The number of recurring `interval_units` between originations.\
+            \ The recurring interval(before holiday adjustment) is calculated by multiplying\
+            \ `interval_unit` and `interval_count`. \nFor instance, to schedule a\
+            \ recurring transfer which originates once every two weeks, set `interval_unit`\
+            \ = `week` and `interval_count` = 2."
+          title: TransferScheduleIntervalCount
+          type: integer
+        interval_execution_day:
+          description: |-
+            The day of the interval on which to schedule the transfer.
+
+            If the `interval_unit` is `week`, `interval_execution_day` should be an integer from 1 (Monday) to 5 (Friday).
+
+            If the `interval_unit` is `month`, `interval_execution_day` should be an integer indicating which day of the month to make the transfer on. Integers from 1 to 28 can be used to make a transfer on that day of the month. Negative integers from -1 to -5 can be used to make a transfer relative to the end of the month. To make a transfer on the last day of the month, use -1; to make the transfer on the second-to-last day, use -2, and so on.
+
+            The transfer will be originated on next available banking day if the designated day is a non banking day.
+          type: integer
+        start_date:
+          description: |-
+            A date in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format (YYYY-MM-DD). The recurring transfer will begin on the first `interval_execution_day` on or after the `start_date`.
+
+            If the first `interval_execution_day` on or after the start date is also the same day that `/transfer/recurring/create` was called, the bank *may* make the first payment on that day, but it is not guaranteed to do so.
+          format: date
+          type: string
+        end_date:
+          description: |-
+            A date in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format (YYYY-MM-DD). The recurring transfer will end on the last `interval_execution_day` on or before the `end_date`.
+            If the `interval_execution_day` between the start date and the end date (inclusive) is also the same day that `/transfer/recurring/create` was called, the bank *may* make a payment on that day, but it is not guaranteed to do so.
+          format: date
+          nullable: true
+          type: string
+      title: TransferRecurringSchedule
+      type: object
+    TransferScheduleIntervalUnit:
+      description: The unit of the recurring interval.
+      enum:
+      - week
+      - month
+      minLength: 1
+      title: TransferScheduleIntervalUnit
+      type: string
+    TransferScheduleIntervalCount:
+      description: "The number of recurring `interval_units` between originations.\
+        \ The recurring interval(before holiday adjustment) is calculated by multiplying\
+        \ `interval_unit` and `interval_count`. \nFor instance, to schedule a recurring\
+        \ transfer which originates once every two weeks, set `interval_unit` = `week`\
+        \ and `interval_count` = 2."
+      title: TransferScheduleIntervalCount
+      type: integer
     TransferMetadata:
       additionalProperties:
         type: string
@@ -24374,6 +25760,23 @@ components:
       - credit
       title: BankTransferType
       type: string
+    TransactionFrequency:
+      description: Best guess frequency of transactions of the end customer.
+      enum:
+      - once_per_month
+      - twice_per_month
+      - four_times_per_month
+      - daily
+      title: TransactionFrequency
+      type: string
+    TransferDiligenceStatus:
+      description: Originator’s diligence status.
+      enum:
+      - under_review
+      - approved
+      - denied
+      title: TransferDiligenceStatus
+      type: string
     TransferStatus:
       description: |-
         The status of the transfer.
@@ -24393,6 +25796,20 @@ components:
       - returned
       title: TransferStatus
       type: string
+    TransferRecurringStatus:
+      description: |-
+        The status of the recurring transfer.
+
+        `active`: The recurring transfer is currently active.
+        `cancelled`: The recurring transfer was cancelled by the client or Plaid.
+        `expired`: The recurring transfer has completed all originations according to its recurring schedule.
+      enum:
+      - active
+      - cancelled
+      - expired
+      nullable: true
+      title: TransferRecurringStatus
+      type: string
     TransferSweepStatus:
       description: |-
         The status of the sweep for the transfer.
@@ -24410,6 +25827,21 @@ components:
       - return_swept
       nullable: true
       title: TransferSweepStatus
+      type: string
+    TransferRefundStatus:
+      description: |-
+        The status of the refund.
+
+        `pending`: A new refund was created; it is in the pending state.
+        `posted`: The refund has been successfully submitted to the payment network.
+        `cancelled`: The refund was cancelled by the client.
+        `failed`: The refund failed or was returned.
+      enum:
+      - pending
+      - posted
+      - cancelled
+      - failed
+      title: TransferRefundStatus
       type: string
     BankTransferStatus:
       description: The status of the transfer.
@@ -24493,6 +25925,7 @@ components:
         with_guarantee: true
         access_token: access_token
         user_present: true
+        originator_client_id: originator_client_id
         account_id: account_id
         beacon_session_id: beacon_session_id
         iso_currency_code: iso_currency_code
@@ -24551,9 +25984,11 @@ components:
         device:
           $ref: '#/components/schemas/TransferAuthorizationDevice'
         origination_account_id:
+          deprecated: true
           description: Plaid's unique identifier for the origination account for this
             authorization. If not specified, the default account will be used.
           type: string
+          x-hidden-from-docs: true
         iso_currency_code:
           description: The currency of the transfer amount. The default value is "USD".
           type: string
@@ -24588,6 +26023,12 @@ components:
             when it is run on your webpage. Required for Guarantee customers who are
             not using [Transfer UI](https://plaid.com/docs/transfer/using-transfer-ui/)
             and have a web checkout experience.
+          nullable: true
+          type: string
+        originator_client_id:
+          description: The Plaid client ID that is the originator of this transfer.
+            Only needed if creating transfers on behalf of another client as a third-party
+            sender (TPS).
           nullable: true
           type: string
       required:
@@ -24724,6 +26165,118 @@ components:
       - description
       title: TransferCreateRequest
       type: object
+    TransferRecurringCreateRequest:
+      description: Defines the request schema for `/transfer/recurring/create`
+      example:
+        amount: amount
+        secret: secret
+        client_id: client_id
+        access_token: access_token
+        user_present: true
+        schedule:
+          end_date: 2000-01-23
+          interval_count: 0
+          interval_execution_day: 6
+          start_date: 2000-01-23
+        account_id: account_id
+        iso_currency_code: iso_currency_code
+        idempotency_key: idempotency_key
+        test_clock_id: test_clock_id
+        user:
+          email_address: email_address
+          address:
+            country: country
+            city: city
+            street: street
+            region: region
+            postal_code: postal_code
+          phone_number: phone_number
+          legal_name: legal_name
+        device:
+          ip_address: ip_address
+          user_agent: user_agent
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        access_token:
+          description: The Plaid `access_token` for the account that will be debited
+            or credited. Required if not using `payment_profile_token`.
+          type: string
+        idempotency_key:
+          description: |-
+            A random key provided by the client, per unique authorization. Maximum of 50 characters.
+
+            The API supports idempotency for safely retrying requests without accidentally performing the same operation twice. For example, if a request to create an authorization fails due to a network connection error, you can retry the request with the same idempotency key to guarantee that only a single authorization is created.
+
+            Failure to provide this key may result in duplicate charges.
+
+            Required for guaranteed ACH customers.
+          maxLength: 50
+          nullable: true
+          title: TransferAuthorizationIdempotencyKey
+          type: string
+        account_id:
+          description: The Plaid `account_id` for the account that will be debited
+            or credited. Required if not using `payment_profile_token`.
+          type: string
+        type:
+          $ref: '#/components/schemas/TransferType'
+        network:
+          $ref: '#/components/schemas/TransferNetwork'
+        ach_class:
+          $ref: '#/components/schemas/ACHClass'
+        amount:
+          description: The amount of the transfer (decimal string with two digits
+            of precision e.g. "10.00").
+          title: TransferAmount
+          type: string
+        user_present:
+          description: If the end user is initiating the specific transfer themselves
+            via an interactive UI, this should be `true`; for automatic recurring
+            payments where the end user is not actually initiating each individual
+            transfer, it should be `false`.
+          nullable: true
+          type: boolean
+        iso_currency_code:
+          deprecated: true
+          description: The currency of the transfer amount. The default value is "USD".
+          type: string
+          x-hidden-from-docs: true
+        test_clock_id:
+          description: Plaid’s unique identifier for a test clock.
+          nullable: true
+          title: TransferTestClockID
+          type: string
+        schedule:
+          $ref: '#/components/schemas/TransferRecurringSchedule'
+        user:
+          $ref: '#/components/schemas/TransferUserInRequest'
+        device:
+          $ref: '#/components/schemas/TransferDevice'
+      required:
+      - access_token
+      - account_id
+      - amount
+      - client_id
+      - device
+      - idempotency_key
+      - network
+      - schedule
+      - secret
+      - type
+      - user
+      - user_present
+      title: TransferRecurringCreateRequest
+      type: object
     BankTransferCreateRequest:
       description: Defines the request schema for `/bank_transfer/create`
       example:
@@ -24836,6 +26389,7 @@ components:
         authorization:
           proposed_transfer:
             amount: amount
+            originator_client_id: originator_client_id
             account_id: account_id
             iso_currency_code: iso_currency_code
             origination_account_id: origination_account_id
@@ -24889,6 +26443,7 @@ components:
       example:
         proposed_transfer:
           amount: amount
+          originator_client_id: originator_client_id
           account_id: account_id
           iso_currency_code: iso_currency_code
           origination_account_id: origination_account_id
@@ -24954,6 +26509,16 @@ components:
             description: description
           cancellable: true
           standard_return_window: 2000-01-23
+          refunds:
+          - amount: amount
+            created: 2000-01-23T04:56:07.000+00:00
+            id: id
+            transfer_id: transfer_id
+          - amount: amount
+            created: 2000-01-23T04:56:07.000+00:00
+            id: id
+            transfer_id: transfer_id
+          originator_client_id: originator_client_id
           account_id: account_id
           guarantee_decision_rationale:
             description: description
@@ -24985,6 +26550,54 @@ components:
       - request_id
       - transfer
       title: TransferCreateResponse
+      type: object
+    TransferRecurringCreateResponse:
+      additionalProperties: true
+      description: Defines the response schema for `/transfer/recurring/create`
+      example:
+        recurring_transfer:
+          amount: amount
+          transfer_ids:
+          - null
+          - null
+          created: 2000-01-23T04:56:07.000+00:00
+          schedule:
+            end_date: 2000-01-23
+            interval_count: 0
+            interval_execution_day: 6
+            start_date: 2000-01-23
+          account_id: account_id
+          next_origination_date: 2000-01-23
+          iso_currency_code: iso_currency_code
+          recurring_transfer_id: recurring_transfer_id
+          origination_account_id: origination_account_id
+          decision_rationale:
+            description: description
+          test_clock_id: test_clock_id
+          user:
+            email_address: email_address
+            address:
+              country: country
+              city: city
+              street: street
+              region: region
+              postal_code: postal_code
+            phone_number: phone_number
+            legal_name: legal_name
+        request_id: request_id
+      properties:
+        recurring_transfer:
+          $ref: '#/components/schemas/RecurringTransfer'
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - recurring_transfer
+      - request_id
+      title: TransferRecurringCreateResponse
       type: object
     BankTransferCreateResponse:
       additionalProperties: true
@@ -25028,6 +26641,7 @@ components:
       description: Defines the request schema for `/transfer/list`
       example:
         end_date: 2000-01-23T04:56:07.000+00:00
+        originator_client_id: originator_client_id
         offset: 0
         count: 2
         origination_account_id: origination_account_id
@@ -25074,7 +26688,61 @@ components:
             origination account.
           nullable: true
           type: string
+        originator_client_id:
+          description: Filter transfers to only those with the specified originator
+            client.
+          nullable: true
+          type: string
       title: TransferListRequest
+      type: object
+    TransferRecurringListRequest:
+      description: Defines the request schema for `/transfer/recurring/list`
+      example:
+        end_date: 2000-01-23T04:56:07.000+00:00
+        offset: 0
+        count: 2
+        secret: secret
+        client_id: client_id
+        start_date: 2000-01-23T04:56:07.000+00:00
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        start_date:
+          description: The start datetime of recurring transfers to list. This should
+            be in RFC 3339 format (i.e. `2019-12-06T22:35:49Z`)
+          format: date-time
+          nullable: true
+          type: string
+        end_date:
+          description: The end datetime of recurring transfers to list. This should
+            be in RFC 3339 format (i.e. `2019-12-06T22:35:49Z`)
+          format: date-time
+          nullable: true
+          type: string
+        count:
+          default: 25
+          description: The maximum number of transfers to return.
+          maximum: 25
+          minimum: 1
+          type: integer
+        offset:
+          default: 0
+          description: The number of transfers to skip before returning results.
+          minimum: 0
+          type: integer
+      required:
+      - client_id
+      - secret
+      title: TransferRecurringListRequest
       type: object
     BankTransferListRequest:
       description: Defines the request schema for `/bank_transfer/list`
@@ -25145,6 +26813,16 @@ components:
             description: description
           cancellable: true
           standard_return_window: 2000-01-23
+          refunds:
+          - amount: amount
+            created: 2000-01-23T04:56:07.000+00:00
+            id: id
+            transfer_id: transfer_id
+          - amount: amount
+            created: 2000-01-23T04:56:07.000+00:00
+            id: id
+            transfer_id: transfer_id
+          originator_client_id: originator_client_id
           account_id: account_id
           guarantee_decision_rationale:
             description: description
@@ -25172,6 +26850,16 @@ components:
             description: description
           cancellable: true
           standard_return_window: 2000-01-23
+          refunds:
+          - amount: amount
+            created: 2000-01-23T04:56:07.000+00:00
+            id: id
+            transfer_id: transfer_id
+          - amount: amount
+            created: 2000-01-23T04:56:07.000+00:00
+            id: id
+            transfer_id: transfer_id
+          originator_client_id: originator_client_id
           account_id: account_id
           guarantee_decision_rationale:
             description: description
@@ -25205,6 +26893,84 @@ components:
       - request_id
       - transfers
       title: TransferListResponse
+      type: object
+    TransferRecurringListResponse:
+      additionalProperties: true
+      description: Defines the response schema for `/transfer/recurring/list`
+      example:
+        recurring_transfers:
+        - amount: amount
+          transfer_ids:
+          - null
+          - null
+          created: 2000-01-23T04:56:07.000+00:00
+          schedule:
+            end_date: 2000-01-23
+            interval_count: 0
+            interval_execution_day: 6
+            start_date: 2000-01-23
+          account_id: account_id
+          next_origination_date: 2000-01-23
+          iso_currency_code: iso_currency_code
+          recurring_transfer_id: recurring_transfer_id
+          origination_account_id: origination_account_id
+          decision_rationale:
+            description: description
+          test_clock_id: test_clock_id
+          user:
+            email_address: email_address
+            address:
+              country: country
+              city: city
+              street: street
+              region: region
+              postal_code: postal_code
+            phone_number: phone_number
+            legal_name: legal_name
+        - amount: amount
+          transfer_ids:
+          - null
+          - null
+          created: 2000-01-23T04:56:07.000+00:00
+          schedule:
+            end_date: 2000-01-23
+            interval_count: 0
+            interval_execution_day: 6
+            start_date: 2000-01-23
+          account_id: account_id
+          next_origination_date: 2000-01-23
+          iso_currency_code: iso_currency_code
+          recurring_transfer_id: recurring_transfer_id
+          origination_account_id: origination_account_id
+          decision_rationale:
+            description: description
+          test_clock_id: test_clock_id
+          user:
+            email_address: email_address
+            address:
+              country: country
+              city: city
+              street: street
+              region: region
+              postal_code: postal_code
+            phone_number: phone_number
+            legal_name: legal_name
+        request_id: request_id
+      properties:
+        recurring_transfers:
+          items:
+            $ref: '#/components/schemas/RecurringTransfer'
+          type: array
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - recurring_transfers
+      - request_id
+      title: TransferRecurringListResponse
       type: object
     BankTransferListResponse:
       additionalProperties: true
@@ -25300,6 +27066,34 @@ components:
       - transfer_id
       title: TransferCancelRequest
       type: object
+    TransferRecurringCancelRequest:
+      description: Defines the request schema for `/transfer/recurring/cancel`
+      example:
+        recurring_transfer_id: recurring_transfer_id
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        recurring_transfer_id:
+          description: Plaid’s unique identifier for a recurring transfer.
+          title: RecurringTransferID
+          type: string
+      required:
+      - client_id
+      - recurring_transfer_id
+      - secret
+      title: TransferRecurringCancelRequest
+      type: object
     BankTransferCancelRequest:
       description: Defines the request schema for `/bank_transfer/cancel`
       example:
@@ -25342,6 +27136,22 @@ components:
       - request_id
       title: TransferCancelResponse
       type: object
+    TransferRecurringCancelResponse:
+      additionalProperties: true
+      description: Defines the response schema for `/transfer/recurring/cancel`
+      example:
+        request_id: request_id
+      properties:
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      title: TransferRecurringCancelResponse
+      type: object
     BankTransferCancelResponse:
       additionalProperties: true
       description: Defines the response schema for `/bank_transfer/cancel`
@@ -25373,17 +27183,18 @@ components:
       description: Defines the request schema for `/transfer/event/list`
       example:
         end_date: 2000-01-23T04:56:07.000+00:00
+        offset: 0
+        sweep_id: sweep_id
+        count: 2
+        secret: secret
+        transfer_id: transfer_id
+        client_id: client_id
+        originator_client_id: originator_client_id
         account_id: account_id
         event_types:
         - null
         - null
-        offset: 0
-        sweep_id: sweep_id
-        count: 2
         origination_account_id: origination_account_id
-        secret: secret
-        transfer_id: transfer_id
-        client_id: client_id
         start_date: 2000-01-23T04:56:07.000+00:00
       properties:
         client_id:
@@ -25449,6 +27260,11 @@ components:
         origination_account_id:
           description: The origination account ID to get events for transfers from
             a specific origination account.
+          nullable: true
+          type: string
+        originator_client_id:
+          description: Filter transfer events to only those with the specified originator
+            client.
           nullable: true
           type: string
       title: TransferEventListRequest
@@ -25615,16 +27431,18 @@ components:
       additionalProperties: true
       description: Represents an event in the Transfers API.
       example:
-        event_id: 0
-        account_id: account_id
-        transfer_amount: transfer_amount
         sweep_id: sweep_id
         sweep_amount: sweep_amount
-        origination_account_id: origination_account_id
         transfer_id: transfer_id
         failure_reason:
           ach_return_code: ach_return_code
           description: description
+        refund_id: refund_id
+        originator_client_id: originator_client_id
+        event_id: 0
+        account_id: account_id
+        transfer_amount: transfer_amount
+        origination_account_id: origination_account_id
         timestamp: 2000-01-23T04:56:07.000+00:00
       properties:
         event_id:
@@ -25671,12 +27489,25 @@ components:
           nullable: true
           title: TransferSweepAmount
           type: string
+        refund_id:
+          description: Plaid’s unique identifier for a refund. A non-null value indicates
+            the event is for the associated refund of the transfer.
+          nullable: true
+          type: string
+        originator_client_id:
+          description: The Plaid client ID that is the originator of the transfer
+            that this event applies to. Only present if the transfer was created on
+            behalf of another client as a third-party sender (TPS).
+          nullable: true
+          type: string
       required:
       - account_id
       - event_id
       - event_type
       - failure_reason
       - origination_account_id
+      - originator_client_id
+      - refund_id
       - sweep_amount
       - sweep_id
       - timestamp
@@ -25755,27 +27586,31 @@ components:
       description: Defines the response schema for `/transfer/event/list`
       example:
         transfer_events:
-        - event_id: 0
-          account_id: account_id
-          transfer_amount: transfer_amount
-          sweep_id: sweep_id
+        - sweep_id: sweep_id
           sweep_amount: sweep_amount
-          origination_account_id: origination_account_id
           transfer_id: transfer_id
           failure_reason:
             ach_return_code: ach_return_code
             description: description
+          refund_id: refund_id
+          originator_client_id: originator_client_id
+          event_id: 0
+          account_id: account_id
+          transfer_amount: transfer_amount
+          origination_account_id: origination_account_id
           timestamp: 2000-01-23T04:56:07.000+00:00
-        - event_id: 0
-          account_id: account_id
-          transfer_amount: transfer_amount
-          sweep_id: sweep_id
+        - sweep_id: sweep_id
           sweep_amount: sweep_amount
-          origination_account_id: origination_account_id
           transfer_id: transfer_id
           failure_reason:
             ach_return_code: ach_return_code
             description: description
+          refund_id: refund_id
+          originator_client_id: originator_client_id
+          event_id: 0
+          account_id: account_id
+          transfer_amount: transfer_amount
+          origination_account_id: origination_account_id
           timestamp: 2000-01-23T04:56:07.000+00:00
         request_id: request_id
       properties:
@@ -25953,27 +27788,31 @@ components:
       description: Defines the response schema for `/transfer/event/sync`
       example:
         transfer_events:
-        - event_id: 0
-          account_id: account_id
-          transfer_amount: transfer_amount
-          sweep_id: sweep_id
+        - sweep_id: sweep_id
           sweep_amount: sweep_amount
-          origination_account_id: origination_account_id
           transfer_id: transfer_id
           failure_reason:
             ach_return_code: ach_return_code
             description: description
+          refund_id: refund_id
+          originator_client_id: originator_client_id
+          event_id: 0
+          account_id: account_id
+          transfer_amount: transfer_amount
+          origination_account_id: origination_account_id
           timestamp: 2000-01-23T04:56:07.000+00:00
-        - event_id: 0
-          account_id: account_id
-          transfer_amount: transfer_amount
-          sweep_id: sweep_id
+        - sweep_id: sweep_id
           sweep_amount: sweep_amount
-          origination_account_id: origination_account_id
           transfer_id: transfer_id
           failure_reason:
             ach_return_code: ach_return_code
             description: description
+          refund_id: refund_id
+          originator_client_id: originator_client_id
+          event_id: 0
+          account_id: account_id
+          transfer_amount: transfer_amount
+          origination_account_id: origination_account_id
           timestamp: 2000-01-23T04:56:07.000+00:00
         request_id: request_id
       properties:
@@ -26140,6 +27979,7 @@ components:
       description: Defines the request schema for `/transfer/sweep/list`
       example:
         end_date: 2000-01-23T04:56:07.000+00:00
+        originator_client_id: originator_client_id
         offset: 0
         count: 2
         secret: secret
@@ -26179,6 +28019,10 @@ components:
           description: The number of sweeps to skip before returning results.
           minimum: 0
           type: integer
+        originator_client_id:
+          description: Filter sweeps to only those with the specified originator client.
+          nullable: true
+          type: string
       title: TransferSweepListRequest
       type: object
     TransferSweepListResponse:
@@ -26535,6 +28379,231 @@ components:
       - account_id
       - request_id
       title: TransferMigrateAccountResponse
+      type: object
+    TransferOriginatorCreateRequest:
+      description: Defines the request schema for `/transfer/originator/create`
+      example:
+        company_name: company_name
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        company_name:
+          description: The company name of the end customer being created. This will
+            be displayed in public-facing surfaces, e.g. Plaid Dashboard.
+          type: string
+      required:
+      - company_name
+      title: TransferOriginatorCreateRequest
+      type: object
+    TransferOriginatorCreateResponse:
+      additionalProperties: true
+      description: Defines the response schema for `/transfer/originator/create`
+      example:
+        originator_client_id: originator_client_id
+        company_name: company_name
+        request_id: request_id
+      properties:
+        originator_client_id:
+          description: Client ID of the originator. This identifier will be used when
+            creating transfers and should be stored associated with end user information.
+          type: string
+        company_name:
+          description: The company name of the end customer.
+          type: string
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - company_name
+      - originator_client_id
+      - request_id
+      title: TransferOriginatorCreateResponse
+      type: object
+    TransferQuestionnaireCreateRequest:
+      description: Defines the request schema for `/transfer/questionnaire/create`
+      example:
+        disbursement_limits:
+          average_amount: 0
+          monthly_amount: 1
+          maximum_amount: 6
+        originator_client_id: originator_client_id
+        payment_limits:
+          average_amount: 5
+          monthly_amount: 2
+          maximum_amount: 5
+        secret: secret
+        redirect_uri: redirect_uri
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        originator_client_id:
+          description: Client ID of the end customer.
+          type: string
+        redirect_uri:
+          description: URL the end customer will be redirected to after completing
+            questions in Plaid-hosted onboarding flow.
+          type: string
+        disbursement_limits:
+          $ref: '#/components/schemas/DisbursementLimits'
+        payment_limits:
+          $ref: '#/components/schemas/PaymentLimits'
+        transaction_frequency:
+          $ref: '#/components/schemas/TransactionFrequency'
+      required:
+      - disbursement_limits
+      - originator_client_id
+      - payment_limits
+      - redirect_uri
+      - transaction_frequency
+      title: TransferQuestionnaireCreateRequest
+      type: object
+    TransferQuestionnaireCreateResponse:
+      additionalProperties: true
+      description: Defines the response schema for `/transfer/questionnaire/create`
+      example:
+        onboarding_url: onboarding_url
+        request_id: request_id
+      properties:
+        onboarding_url:
+          description: Plaid-hosted onboarding URL that you will redirect the end
+            customer to.
+          type: string
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - onboarding_url
+      - request_id
+      title: TransferQuestionnaireCreateResponse
+      type: object
+    TransferOriginatorGetRequest:
+      description: Defines the request schema for `/transfer/originator/get`
+      example:
+        originator_client_id: originator_client_id
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        originator_client_id:
+          description: Client ID of the end customer (i.e. the originator).
+          type: string
+      required:
+      - originator_client_id
+      title: TransferOriginatorGetRequest
+      type: object
+    TransferOriginatorGetResponse:
+      additionalProperties: true
+      description: Defines the response schema for `/transfer/originator/get`
+      example:
+        originator:
+          client_id: client_id
+        request_id: request_id
+      properties:
+        originator:
+          $ref: '#/components/schemas/Originator'
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - originator
+      - request_id
+      title: TransferOriginatorGetResponse
+      type: object
+    TransferOriginatorListRequest:
+      description: Defines the request schema for `/transfer/originator/list`
+      example:
+        offset: 0
+        count: 2
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        count:
+          default: 25
+          description: The maximum number of transfers to return.
+          maximum: 25
+          minimum: 1
+          type: integer
+        offset:
+          default: 0
+          description: The number of transfers to skip before returning results.
+          minimum: 0
+          type: integer
+      title: TransferOriginatorListRequest
+      type: object
+    TransferOriginatorListResponse:
+      additionalProperties: true
+      description: Defines the response schema for `/transfer/originator/list`
+      example:
+        request_id: request_id
+        originators:
+        - client_id: client_id
+        - client_id: client_id
+      properties:
+        originators:
+          items:
+            $ref: '#/components/schemas/Originator'
+          type: array
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - originators
+      - request_id
+      title: TransferOriginatorListResponse
       type: object
     TransferRepaymentListRequest:
       description: Defines the request schema for `/transfer/repayment/list`
@@ -27186,6 +29255,202 @@ components:
       - transfer_intent
       title: TransferIntentGetResponse
       type: object
+    TransferRefundCreateRequest:
+      description: Defines the request schema for `/transfer/refund/create`
+      example:
+        amount: amount
+        idempotency_key: idempotency_key
+        secret: secret
+        transfer_id: transfer_id
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        transfer_id:
+          description: The ID of the transfer to refund.
+          title: TransferID
+          type: string
+        amount:
+          description: The amount of the refund (decimal string with two digits of
+            precision e.g. "10.00").
+          title: TransferRefundAmount
+          type: string
+        idempotency_key:
+          description: |-
+            A random key provided by the client, per unique refund. Maximum of 50 characters.
+
+            The API supports idempotency for safely retrying requests without accidentally performing the same operation twice. For example, if a request to create a refund fails due to a network connection error, you can retry the request with the same idempotency key to guarantee that only a single refund is created.
+          maxLength: 50
+          title: TransferRefundIdempotencyKey
+          type: string
+      required:
+      - amount
+      - idempotency_key
+      - transfer_id
+      title: TransferRefundCreateRequest
+      type: object
+    TransferRefundCreateResponse:
+      additionalProperties: true
+      description: Defines the response schema for `/transfer/refund/create`
+      example:
+        request_id: request_id
+        refund:
+          amount: amount
+          created: 2000-01-23T04:56:07.000+00:00
+          id: id
+          transfer_id: transfer_id
+      properties:
+        refund:
+          $ref: '#/components/schemas/TransferRefund'
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - refund
+      - request_id
+      title: TransferRefundCreateResponse
+      type: object
+    TransferRefund:
+      additionalProperties: true
+      description: Represents a refund within the Transfers API.
+      example:
+        amount: amount
+        created: 2000-01-23T04:56:07.000+00:00
+        id: id
+        transfer_id: transfer_id
+      properties:
+        id:
+          description: Plaid’s unique identifier for a refund.
+          title: TransferRefundID
+          type: string
+        transfer_id:
+          description: The ID of the transfer to refund.
+          title: TransferID
+          type: string
+        amount:
+          description: The amount of the refund (decimal string with two digits of
+            precision e.g. "10.00").
+          title: TransferRefundAmount
+          type: string
+        status:
+          $ref: '#/components/schemas/TransferRefundStatus'
+        created:
+          description: The datetime when this refund was created. This will be of
+            the form `2006-01-02T15:04:05Z`
+          format: date-time
+          type: string
+      required:
+      - amount
+      - created
+      - id
+      - status
+      - transfer_id
+      title: TransferRefund
+      type: object
+    TransferRefundGetRequest:
+      description: Defines the request schema for `/transfer/refund/get`
+      example:
+        secret: secret
+        refund_id: refund_id
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        refund_id:
+          description: Plaid’s unique identifier for a refund.
+          title: TransferRefundID
+          type: string
+      required:
+      - refund_id
+      title: TransferRefundGetRequest
+      type: object
+    TransferRefundGetResponse:
+      additionalProperties: true
+      description: Defines the response schema for `/transfer/refund/get`
+      example:
+        request_id: request_id
+        refund:
+          amount: amount
+          created: 2000-01-23T04:56:07.000+00:00
+          id: id
+          transfer_id: transfer_id
+      properties:
+        refund:
+          $ref: '#/components/schemas/TransferRefund'
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - refund
+      - request_id
+      title: TransferRefundCreateResponse
+      type: object
+    TransferRefundCancelRequest:
+      description: Defines the request schema for `/transfer/refund/cancel`
+      example:
+        secret: secret
+        refund_id: refund_id
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        refund_id:
+          description: Plaid’s unique identifier for a refund.
+          title: TransferRefundID
+          type: string
+      required:
+      - refund_id
+      title: TransferRefundCancelRequest
+      type: object
+    TransferRefundCancelResponse:
+      additionalProperties: true
+      description: Defines the response schema for `/transfer/refund/cancel`
+      example:
+        request_id: request_id
+      properties:
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      title: TransferRefundCancelResponse
+      type: object
     SandboxBankTransferSimulateRequest:
       description: Defines the request schema for `/sandbox/bank_transfer/simulate`
       example:
@@ -27297,6 +29562,102 @@ components:
           type: string
       title: SandboxTransferSweepSimulateRequest
       type: object
+    SandboxTransferTestClockCreateRequest:
+      description: Defines the request schema for `/sandbox/transfer/test_clock/create`
+      example:
+        frozen_timestamp: 2000-01-23T04:56:07.000+00:00
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        frozen_timestamp:
+          description: The frozen timestamp on the test clock. This will be of the
+            form `2006-01-02T15:04:05Z`.
+          format: date-time
+          title: FrozenTimestamp
+          type: string
+      required:
+      - client_id
+      - frozen_timestamp
+      - secret
+      title: SandboxTransferTestClockCreateRequest
+      type: object
+    SandboxTransferTestClockAdvanceRequest:
+      description: Defines the request schema for `/sandbox/transfer/test_clock/advance`
+      example:
+        new_frozen_timestamp: 2000-01-23T04:56:07.000+00:00
+        secret: secret
+        test_clock_id: test_clock_id
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        test_clock_id:
+          description: Plaid’s unique identifier for a test clock.
+          nullable: true
+          title: TransferTestClockID
+          type: string
+        new_frozen_timestamp:
+          description: The frozen timestamp on the test clock. This will be of the
+            form `2006-01-02T15:04:05Z`.
+          format: date-time
+          title: FrozenTimestamp
+          type: string
+      required:
+      - client_id
+      - new_frozen_timestamp
+      - secret
+      - test_clock_id
+      title: SandboxTransferTestClockAdvanceRequest
+      type: object
+    SandboxTransferTestClockGetRequest:
+      description: Defines the request schema for `/sandbox/transfer/test_clock/get`
+      example:
+        secret: secret
+        test_clock_id: test_clock_id
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        test_clock_id:
+          description: Plaid’s unique identifier for a test clock.
+          nullable: true
+          title: TransferTestClockID
+          type: string
+      required:
+      - client_id
+      - secret
+      - test_clock_id
+      title: SandboxTransferTestClockGetRequest
+      type: object
     SandboxBankTransferSimulateResponse:
       additionalProperties: true
       description: Defines the response schema for `/sandbox/bank_transfer/simulate`
@@ -27346,6 +29707,66 @@ components:
       required:
       - request_id
       title: SandboxTransferSweepSimulateResponse
+      type: object
+    SandboxTransferTestClockCreateResponse:
+      additionalProperties: true
+      description: Defines the response schema for `/sandbox/transfer/test_clock/create`
+      example:
+        test_clock:
+          frozen_timestamp: 2000-01-23T04:56:07.000+00:00
+          test_clock_id: test_clock_id
+        request_id: request_id
+      properties:
+        test_clock:
+          $ref: '#/components/schemas/TransferTestClock'
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      - test_clock
+      title: SandboxTransferTestClockCreateResponse
+      type: object
+    SandboxTransferTestClockAdvanceResponse:
+      additionalProperties: true
+      description: Defines the response schema for `/sandbox/transfer/test_clock/advance`
+      example:
+        request_id: request_id
+      properties:
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      title: SandboxTransferTestClockAdvanceResponse
+      type: object
+    SandboxTransferTestClockGetResponse:
+      additionalProperties: true
+      description: Defines the response schema for `/sandbox/transfer/test_clock/get`
+      example:
+        test_clock:
+          frozen_timestamp: 2000-01-23T04:56:07.000+00:00
+          test_clock_id: test_clock_id
+        request_id: request_id
+      properties:
+        test_clock:
+          $ref: '#/components/schemas/TransferTestClock'
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      - test_clock
+      title: SandboxTransferTestClockGetResponse
       type: object
     SandboxTransferRepaymentSimulateRequest:
       description: Defines the request schema for `/sandbox/transfer/repayment/simulate`
@@ -27487,7 +29908,7 @@ components:
         multiple owners, the maximum match score is filled.
       nullable: true
       properties:
-        scores:
+        score:
           description: Match score for normalized phone number. 100 is a perfect match
             and 0 is a no match. If the phone number is missing from either the API
             or financial institution, this is empty.
@@ -27502,7 +29923,7 @@ components:
         owners, the maximum match score is filled.
       nullable: true
       properties:
-        scores:
+        score:
           description: Match score for normalized email. 100 is a perfect match and
             0 is a no match. If the email is missing from either the API or financial
             institution, this is empty.
@@ -28309,56 +30730,6 @@ components:
           user_id: 9eaba3c2fdc916bc197f279185b986607dd21682a5b04eab04a5a03e8b3f3334
           verification_status: VERIFICATION_STATUS_PROCESSING_COMPLETE
           environment: production
-    IncomeVerificationRefreshRequest:
-      description: IncomeVerificationRefreshRequest defines the request schema for
-        `/income/verification/refresh`
-      example:
-        access_token: access_token
-        income_verification_id: income_verification_id
-        secret: secret
-        client_id: client_id
-      properties:
-        client_id:
-          description: Your Plaid API `client_id`. The `client_id` is required and
-            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
-            request body.
-          title: ClientID
-          type: string
-        secret:
-          description: Your Plaid API `secret`. The `secret` is required and may be
-            provided either in the `PLAID-SECRET` header or as part of a request body.
-          title: APISecret
-          type: string
-        income_verification_id:
-          deprecated: true
-          description: The ID of the verification.
-          nullable: true
-          type: string
-        access_token:
-          description: The access token associated with the Item data is being requested
-            for.
-          nullable: true
-          type: string
-      type: object
-    IncomeVerificationRefreshResponse:
-      additionalProperties: true
-      description: IncomeVerificationRequestResponse defines the response schema for
-        `/income/verification/refresh`
-      example:
-        request_id: request_id
-      properties:
-        request_id:
-          description: A unique identifier for the request, which can be used for
-            troubleshooting. This identifier, like all Plaid identifiers, is case
-            sensitive.
-          title: RequestID
-          type: string
-        verification_refresh_status:
-          $ref: '#/components/schemas/VerificationRefreshStatus'
-      required:
-      - request_id
-      - verification_refresh_status
-      type: object
     IncomeSummary:
       additionalProperties: true
       description: The verified fields from a paystub verification. All fields are
@@ -29100,7 +31471,7 @@ components:
 
         `DOCUMENT_TYPE_US_MILITARY_LES`: A Leave and Earnings Statement (LES) issued by the US military.
 
-        `DOCUMENT_TYPE_US_MILITARY_CLES`: A Civilian Leave and Earnings Statment (CLES) issued by the US military.
+        `DOCUMENT_TYPE_US_MILITARY_CLES`: A Civilian Leave and Earnings Statement (CLES) issued by the US military.
 
         `DOCUMENT_TYPE_GIG`: Used to indicate that the income is related to gig work. Does not necessarily correspond to a specific document type.
 
@@ -34053,6 +36424,20 @@ components:
           type: string
       title: RiskSignalDocumentReference
       type: object
+    DocumentRiskSummary:
+      additionalProperties: true
+      description: A summary across all risk signals associated with a document
+      properties:
+        risk_score:
+          description: A number between 0 and 100, inclusive, where a score closer
+            to 0 indicates a document is likely to be trustworthy and a score closer
+            to 100 indicates a document is likely to be fraudulent
+          nullable: true
+          type: number
+      required:
+      - risk_score
+      title: DocumentRiskSummary
+      type: object
     SingleDocumentRiskSignal:
       additionalProperties: true
       description: Object containing all risk signals and relevant metadata for a
@@ -34066,9 +36451,12 @@ components:
           items:
             $ref: '#/components/schemas/DocumentRiskSignal'
           type: array
+        risk_summary:
+          $ref: '#/components/schemas/DocumentRiskSummary'
       required:
       - document_reference
       - risk_signals
+      - risk_summary
       title: SingleDocumentRiskSignal
       type: object
     MultiDocumentRiskSignal:
@@ -35235,6 +37623,8 @@ components:
               pay_amount: 0.8008281904610115
               pay_rate: pay_rate
             pay_frequency: pay_frequency
+          institution_name: institution_name
+          institution_id: institution_id
           status:
             processing_status: processing_status
         - updated_at: 2000-01-23T04:56:07.000+00:00
@@ -36235,6 +38625,8 @@ components:
               pay_amount: 0.8008281904610115
               pay_rate: pay_rate
             pay_frequency: pay_frequency
+          institution_name: institution_name
+          institution_id: institution_id
           status:
             processing_status: processing_status
         request_id: request_id
@@ -37359,6 +39751,8 @@ components:
             pay_amount: 0.8008281904610115
             pay_rate: pay_rate
           pay_frequency: pay_frequency
+        institution_name: institution_name
+        institution_id: institution_id
         status:
           processing_status: processing_status
       properties:
@@ -37366,6 +39760,13 @@ components:
           description: The `item_id` of the Item associated with this webhook, warning,
             or error
           title: ItemId
+          type: string
+        institution_id:
+          description: The unique identifier of the institution associated with the
+            Item.
+          type: string
+        institution_name:
+          description: The name of the institution associated with the Item.
           type: string
         accounts:
           items:
@@ -37386,6 +39787,8 @@ components:
           type: string
       required:
       - accounts
+      - institution_id
+      - institution_name
       - item_id
       - payroll_income
       - status
@@ -39195,12 +41598,18 @@ components:
           nullable: true
           title: DocumentRiskSignalDescription
           type: string
+        page_number:
+          description: The relevant page associated with the risk signal
+          nullable: true
+          title: DocumentRiskPageNumber
+          type: integer
       required:
       - actual_value
       - expected_value
       - field
       - has_fraud_risk
       - institution_metadata
+      - page_number
       - signal_description
       - type
       title: DocumentRiskSignal
@@ -40923,6 +43332,7 @@ components:
         amount: 0.8008281904610115
         account_id: account_id
         client_user_id: client_user_id
+        default_payment_method: default_payment_method
         secret: secret
         client_transaction_id: client_transaction_id
         user:
@@ -40944,6 +43354,7 @@ components:
           ip_address: ip_address
           user_agent: user_agent
         client_id: client_id
+        is_recurring: true
       properties:
         client_id:
           description: Your Plaid API `client_id`. The `client_id` is required and
@@ -40962,8 +43373,10 @@ components:
           title: AccessToken
           type: string
         account_id:
-          description: The `account_id` of the account whose verification status is
-            to be modified
+          description: |-
+            The Plaid `account_id` of the account whose verification status is to be modified. The `account_id` is returned in the `/accounts/get` endpoint as well as the [`onSuccess`](/docs/link/ios/#link-ios-onsuccess-linkSuccess-metadata-accounts-id) callback metadata.
+
+            This will return an [`INVALID_ACCOUNT_ID`](/docs/errors/invalid-input/#invalid_account_id) error if the account has been removed at the bank or if the `account_id` is no longer valid.
           type: string
         client_transaction_id:
           description: The unique ID that you would like to use to refer to this transaction.
@@ -40988,8 +43401,27 @@ components:
         client_user_id:
           description: A unique ID that identifies the end user in your system. This
             ID is used to correlate requests by a user with multiple Items. The max
-            length for this field is 36 characters.
+            length for this field is 36 characters. Personally identifiable information,
+            such as an email address or phone number, should not be used in the `client_user_id`.
           maxLength: 36
+          type: string
+        is_recurring:
+          description: '**true** if the ACH transaction is a recurring transaction;
+            **false** otherwise '
+          nullable: true
+          type: boolean
+        default_payment_method:
+          description: "The default ACH or non-ACH payment method to complete the\
+            \ transaction.\n`SAME_DAY_ACH`: Same Day ACH by NACHA. The debit transaction\
+            \ is processed and settled on the same day\n`NEXT_DAY_ACH`: Next Day ACH\
+            \ settlement for debit transactions, offered by some payment processors\
+            \ \n`STANDARD_ACH`: standard ACH by NACHA\n`REAL_TIME_PAYMENTS`: real-time\
+            \ payments such as RTP and FedNow\n`DEBIT_CARD`: if the default payment\
+            \ is over debit card networks\n`MULTIPLE_PAYMENT_METHODS`: if there is\
+            \ no default debit rail or there are multiple payment methods \nPossible\
+            \ values:  `SAME_DAY_ACH`, `NEXT_DAY_ACH`, `STANDARD_ACH`, `REAL_TIME_PAYMENTS`,\
+            \ `DEBIT_CARD`, `MULTIPLE_PAYMENT_METHODS`"
+          nullable: true
           type: string
         user:
           $ref: '#/components/schemas/SignalUser'
@@ -41163,6 +43595,7 @@ components:
           credit_transactions_count_60d: 3
           nsf_overdraft_transactions_count_30d: 2
           email_change_count_28d: 6
+          transactions_last_updated: 2000-01-23T04:56:07.000+00:00
           unauthorized_transactions_count_7d: 5
           p10_eod_balance_30d: 3.5571952270680973
           nsf_overdraft_transactions_count_90d: 7
@@ -41376,6 +43809,7 @@ components:
         credit_transactions_count_60d: 3
         nsf_overdraft_transactions_count_30d: 2
         email_change_count_28d: 6
+        transactions_last_updated: 2000-01-23T04:56:07.000+00:00
         unauthorized_transactions_count_7d: 5
         p10_eod_balance_30d: 3.5571952270680973
         nsf_overdraft_transactions_count_90d: 7
@@ -41771,6 +44205,13 @@ components:
           format: double
           nullable: true
           type: number
+        transactions_last_updated:
+          description: Timestamp in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            format (YYYY-MM-DDTHH:mm:ssZ) indicating the last time that the transactions
+            for the given account have been updated.
+          format: date-time
+          nullable: true
+          type: string
       title: SignalEvaluateCoreAttributes
       type: object
     SignalDecisionReportRequest:
@@ -41778,6 +44219,7 @@ components:
       example:
         days_funds_on_hold: 0
         initiated: true
+        amount_instantly_available: 6.027456183070403
         secret: secret
         client_transaction_id: client_transaction_id
         client_id: client_id
@@ -41800,18 +44242,30 @@ components:
           minLength: 1
           type: string
         initiated:
-          description: '`true` if the ACH transaction was initiated, `false` otherwise.'
+          description: |-
+            `true` if the ACH transaction was initiated, `false` otherwise.
+
+            This field must be returned as a boolean. If formatted incorrectly, this will result in an [`INVALID_FIELD`](/docs/errors/invalid-request/#invalid_field) error.
           type: boolean
         days_funds_on_hold:
-          description: The actual number of days (hold time) since the ACH debit transaction
-            that you wait before making funds available to your customers. The holding
-            time could affect the ACH return rate. For example, use 0 if you make
-            funds available to your customers instantly or the same day following
-            the debit transaction, or 1 if you make funds available the next day following
-            the debit initialization.
+          description: |-
+            The actual number of days (hold time) since the ACH debit transaction that you wait before making funds available to your customers. The holding time could affect the ACH return rate.
+
+            For example, use 0 if you make funds available to your customers instantly or the same day following the debit transaction, or 1 if you make funds available the next day following the debit initialization.
           minimum: 0
           nullable: true
           type: integer
+        decision_outcome:
+          $ref: '#/components/schemas/SignalDecisionOutcome'
+        payment_method:
+          $ref: '#/components/schemas/SignalPaymentMethod'
+        amount_instantly_available:
+          description: 'The amount (in USD) made available to your customers instantly
+            following the debit transaction. It could be a partial amount of the requested
+            transaction (example: 102.05).'
+          format: double
+          nullable: true
+          type: number
       required:
       - client_transaction_id
       - initiated
@@ -41836,6 +44290,7 @@ components:
     SignalReturnReportRequest:
       description: SignalReturnReportRequest defines the request schema for `/signal/return/report`
       example:
+        returned_at: 2000-01-23T04:56:07.000+00:00
         secret: secret
         client_transaction_id: client_transaction_id
         return_code: return_code
@@ -41859,7 +44314,16 @@ components:
           minLength: 1
           type: string
         return_code:
-          description: Must be a valid ACH return code (e.g. "R01")
+          description: |-
+            Must be a valid ACH return code (e.g. "R01")
+
+            If formatted incorrectly, this will result in an [`INVALID_FIELD`](/docs/errors/invalid-request/#invalid_field) error.
+          type: string
+        returned_at:
+          description: Date and time when you receive the returns from your payment
+            processors, in ISO 8601 format (`YYYY-MM-DDTHH:mm:ssZ`).
+          format: date-time
+          nullable: true
           type: string
       required:
       - client_transaction_id
@@ -42442,12 +44906,15 @@ components:
       - type
       title: WalletTransactionGetResponse
       type: object
-    WalletTransactionsListRequest:
-      description: WalletTransactionsListRequest defines the request schema for `/wallet/transactions/list`
+    WalletTransactionListRequest:
+      description: WalletTransactionListRequest defines the request schema for `/wallet/transaction/list`
       example:
         cursor: cursor
         wallet_id: wallet_id
         count: 16
+        options:
+          start_time: 2000-01-23T04:56:07.000+00:00
+          end_time: 2000-01-23T04:56:07.000+00:00
         secret: secret
         client_id: client_id
       properties:
@@ -42469,7 +44936,7 @@ components:
         cursor:
           description: A base64 value representing the latest transaction that has
             already been requested. Set this to `next_cursor` received from the previous
-            `/wallet/transactions/list` request. If provided, the response will only
+            `/wallet/transaction/list` request. If provided, the response will only
             contain transactions created before that transaction. If omitted, the
             response will contain transactions starting from the most recent, and
             in descending order by the `created_at` time.
@@ -42481,13 +44948,81 @@ components:
           maximum: 200
           minimum: 1
           type: integer
+        options:
+          $ref: '#/components/schemas/WalletTransactionListRequestOptions'
       required:
       - wallet_id
       type: object
-    WalletTransactionsListResponse:
+    WalletTransactionsListRequest:
+      description: WalletTransactionListRequest defines the request schema for `/wallet/transaction/list`
+      example:
+        cursor: cursor
+        wallet_id: wallet_id
+        count: 16
+        options:
+          start_time: 2000-01-23T04:56:07.000+00:00
+          end_time: 2000-01-23T04:56:07.000+00:00
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        wallet_id:
+          description: The ID of the e-wallet to fetch transactions from
+          minLength: 1
+          type: string
+        cursor:
+          description: A base64 value representing the latest transaction that has
+            already been requested. Set this to `next_cursor` received from the previous
+            `/wallet/transaction/list` request. If provided, the response will only
+            contain transactions created before that transaction. If omitted, the
+            response will contain transactions starting from the most recent, and
+            in descending order by the `created_at` time.
+          maxLength: 256
+          type: string
+        count:
+          default: 10
+          description: The number of transactions to fetch
+          maximum: 200
+          minimum: 1
+          type: integer
+        options:
+          $ref: '#/components/schemas/WalletTransactionListRequestOptions'
+      required:
+      - wallet_id
+      type: object
+    WalletTransactionListRequestOptions:
+      description: Additional wallet transaction options
+      example:
+        start_time: 2000-01-23T04:56:07.000+00:00
+        end_time: 2000-01-23T04:56:07.000+00:00
+      nullable: true
+      properties:
+        start_time:
+          description: Timestamp in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            format (YYYY-MM-DDThh:mm:ssZ) for filtering transactions, inclusive of
+            the provided date.
+          format: date-time
+          type: string
+        end_time:
+          description: Timestamp in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            format (YYYY-MM-DDThh:mm:ssZ) for filtering transactions, inclusive of
+            the provided date.
+          format: date-time
+          type: string
+      type: object
+    WalletTransactionListResponse:
       additionalProperties: true
-      description: WalletTransactionsListResponse defines the response schema for
-        `/wallet/transactions/list`
+      description: WalletTransactionListResponse defines the response schema for `/wallet/transaction/list`
       example:
         next_cursor: next_cursor
         transactions:
@@ -42495,6 +45030,7 @@ components:
           reference: reference
           amount:
             value: 1.0800828190461012
+          payment_id: payment_id
           counterparty:
             name: name
             numbers:
@@ -42502,10 +45038,12 @@ components:
                 iban: iban
           created_at: 2000-01-23T04:56:07.000+00:00
           type: BANK_TRANSFER
+          last_status_update: 2000-01-23T04:56:07.000+00:00
         - transaction_id: transaction_id
           reference: reference
           amount:
             value: 1.0800828190461012
+          payment_id: payment_id
           counterparty:
             name: name
             numbers:
@@ -42513,6 +45051,7 @@ components:
                 iban: iban
           created_at: 2000-01-23T04:56:07.000+00:00
           type: BANK_TRANSFER
+          last_status_update: 2000-01-23T04:56:07.000+00:00
         request_id: request_id
       properties:
         transactions:
@@ -42543,6 +45082,7 @@ components:
         reference: reference
         amount:
           value: 1.0800828190461012
+        payment_id: payment_id
         counterparty:
           name: name
           numbers:
@@ -42550,6 +45090,7 @@ components:
               iban: iban
         created_at: 2000-01-23T04:56:07.000+00:00
         type: BANK_TRANSFER
+        last_status_update: 2000-01-23T04:56:07.000+00:00
       properties:
         transaction_id:
           description: A unique ID identifying the transaction
@@ -42566,7 +45107,7 @@ components:
 
             `PIS_PAY_IN:` a payment which credits an e-wallet through Plaid's Payment Initiation Services (PIS) APIs. For more information see the [Payment Initiation endpoints](https://plaid.com/docs/api/products/payment-initiation/).
 
-            `REFUND:` a transaction which debits an e-wallet by refunding a previously initated payment made through Plaid's [PIS APIs](https://plaid.com/docs/api/products/payment-initiation/).
+            `REFUND:` a transaction which debits an e-wallet by refunding a previously initiated payment made through Plaid's [PIS APIs](https://plaid.com/docs/api/products/payment-initiation/).
           enum:
           - BANK_TRANSFER
           - PAYOUT
@@ -42584,10 +45125,21 @@ components:
             format.
           format: date-time
           type: string
+        last_status_update:
+          description: The date and time of the last time the `status` was updated,
+            in IS0 8601 format
+          format: date-time
+          type: string
+        payment_id:
+          description: The payment id that this transaction is associated with, if
+            any. This is present only for transaction types `PIS_PAY_IN` and `REFUND`.
+          nullable: true
+          type: string
       required:
       - amount
       - counterparty
       - created_at
+      - last_status_update
       - reference
       - status
       - transaction_id
@@ -42634,6 +45186,97 @@ components:
       - account_type
       - transactions
       type: object
+    TransactionsEnrichGetRequest:
+      description: TransactionsEnrichGetRequest defines the request schema for `/transactions/enrich`.
+      example:
+        account_type: account_type
+        include_legacy_categories: false
+        secret: secret
+        transactions:
+        - amount: 0.8008281904610115
+          iso_currency_code: iso_currency_code
+          description: description
+          id: id
+        - amount: 0.8008281904610115
+          iso_currency_code: iso_currency_code
+          description: description
+          id: id
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        account_type:
+          description: The account type for the requested transactions (either `depository`
+            or `credit`).
+          type: string
+        transactions:
+          description: An array of transaction objects to be enriched by Plaid. Maximum
+            of 100 transactions per request.
+          items:
+            $ref: '#/components/schemas/ClientProvidedTransaction'
+          type: array
+        include_legacy_categories:
+          default: false
+          description: Include legacy categories in Enrich responses
+          type: boolean
+          x-hidden-from-docs: true
+      required:
+      - account_type
+      - transactions
+      type: object
+    ClientProvidedTransaction:
+      additionalProperties: true
+      description: A client-provided transaction for Plaid to enrich.
+      example:
+        amount: 0.8008281904610115
+        iso_currency_code: iso_currency_code
+        description: description
+        id: id
+      properties:
+        id:
+          description: A unique ID for the transaction used to help you tie data back
+            to your systems.
+          type: string
+        description:
+          description: The raw description of the transaction.
+          type: string
+        amount:
+          description: The absolute value of the transaction (>= 0)
+          format: double
+          type: number
+        direction:
+          $ref: '#/components/schemas/EnrichTransactionDirection'
+        iso_currency_code:
+          description: The ISO-4217 currency code of the transaction, e.g., USD.
+          type: string
+      required:
+      - amount
+      - description
+      - id
+      - iso_currency_code
+      title: ClientProvidedTransaction
+      type: object
+    EnrichTransactionDirection:
+      description: |-
+        The direction of the transaction from the perspective of the account holder:
+
+        `OUTFLOW` - Includes outgoing transfers, purchases, and fees. (Typically represented as a negative value on checking accounts and debit cards and a positive value on credit cards.)
+
+        `INFLOW` - Includes incoming transfers, refunds, and income. (Typically represented as a positive value on checking accounts and debit cards and a negative value on credit cards.)
+      enum:
+      - INFLOW
+      - OUTFLOW
+      title: EnrichTransactionDirection
+      type: string
     ClientProvidedRawTransaction:
       additionalProperties: true
       description: A client-provided transaction for Plaid to enhance.
@@ -42644,22 +45287,21 @@ components:
         id: id
       properties:
         id:
-          description: Unique transaction identifier to tie transactions back to clients'
-            systems.
+          description: A unique ID for the transaction used to help you tie data back
+            to your systems.
           type: string
         description:
           description: The raw description of the transaction.
           type: string
         amount:
-          description: The value of the transaction, denominated in the account's
-            currency, as stated in `iso_currency_code`. Positive values when money
-            moves out of the account; negative values when money moves in. For example,
-            debit card purchases are positive; credit card payments, direct deposits,
-            and refunds are negative.
+          description: |-
+            The value of the transaction with direction. (NOTE: this will affect enrichment results, so directions are important):.
+              Negative (-) for credits (e.g., incoming transfers, refunds)
+              Positive (+) for debits (e.g., purchases, fees, outgoing transfers)
           format: double
           type: number
         iso_currency_code:
-          description: The ISO-4217 currency code of the transaction.
+          description: The ISO-4217 currency code of the transaction, e.g., USD.
           type: string
       required:
       - amount
@@ -42671,7 +45313,7 @@ components:
     TransactionsEnhanceGetResponse:
       additionalProperties: true
       description: TransactionsEnhanceGetResponse defines the response schema for
-        `/transactions/enhance`.
+        `/beta/transactions/v1/enhance`.
       example:
         enhanced_transactions:
         - amount: 0.8008281904610115
@@ -42742,6 +45384,86 @@ components:
       - enhanced_transactions
       type: object
       x-examples: {}
+    TransactionsEnrichGetResponse:
+      additionalProperties: true
+      description: TransactionsEnrichGetResponse defines the response schema for `/transactions/enrich`.
+      example:
+        enriched_transactions:
+        - amount: 0.8008281904610115
+          iso_currency_code: iso_currency_code
+          description: description
+          id: id
+          enrichments:
+            personal_finance_category_icon_url: personal_finance_category_icon_url
+            website: website
+            check_number: check_number
+            logo_url: logo_url
+            merchant_name: merchant_name
+            location:
+              country: country
+              address: address
+              city: city
+              store_number: store_number
+              lon: 1.4658129805029452
+              region: region
+              postal_code: postal_code
+              lat: 6.027456183070403
+            legacy_category:
+            - legacy_category
+            - legacy_category
+            counterparties:
+            - name: name
+            - name: name
+            legacy_category_id: legacy_category_id
+            personal_finance_category:
+              detailed: detailed
+              primary: primary
+        - amount: 0.8008281904610115
+          iso_currency_code: iso_currency_code
+          description: description
+          id: id
+          enrichments:
+            personal_finance_category_icon_url: personal_finance_category_icon_url
+            website: website
+            check_number: check_number
+            logo_url: logo_url
+            merchant_name: merchant_name
+            location:
+              country: country
+              address: address
+              city: city
+              store_number: store_number
+              lon: 1.4658129805029452
+              region: region
+              postal_code: postal_code
+              lat: 6.027456183070403
+            legacy_category:
+            - legacy_category
+            - legacy_category
+            counterparties:
+            - name: name
+            - name: name
+            legacy_category_id: legacy_category_id
+            personal_finance_category:
+              detailed: detailed
+              primary: primary
+        request_id: request_id
+      properties:
+        enriched_transactions:
+          description: A list of enriched transactions.
+          items:
+            $ref: '#/components/schemas/ClientProvidedEnrichedTransaction'
+          type: array
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - enriched_transactions
+      type: object
+      x-examples: {}
     ClientProvidedEnhancedTransaction:
       additionalProperties: true
       description: A client-provided transaction that Plaid has enhanced.
@@ -42803,6 +45525,67 @@ components:
       - id
       - iso_currency_code
       title: ClientProvidedEnhancedTransaction
+      type: object
+      x-examples: {}
+    ClientProvidedEnrichedTransaction:
+      additionalProperties: true
+      description: A client-provided transaction that Plaid has enriched.
+      example:
+        amount: 0.8008281904610115
+        iso_currency_code: iso_currency_code
+        description: description
+        id: id
+        enrichments:
+          personal_finance_category_icon_url: personal_finance_category_icon_url
+          website: website
+          check_number: check_number
+          logo_url: logo_url
+          merchant_name: merchant_name
+          location:
+            country: country
+            address: address
+            city: city
+            store_number: store_number
+            lon: 1.4658129805029452
+            region: region
+            postal_code: postal_code
+            lat: 6.027456183070403
+          legacy_category:
+          - legacy_category
+          - legacy_category
+          counterparties:
+          - name: name
+          - name: name
+          legacy_category_id: legacy_category_id
+          personal_finance_category:
+            detailed: detailed
+            primary: primary
+      properties:
+        id:
+          description: The unique ID for the transaction as provided by you in the
+            request.
+          type: string
+        description:
+          description: The raw description of the transaction.
+          type: string
+        amount:
+          description: The absolute value of the transaction (>= 0)
+          format: double
+          type: number
+        direction:
+          $ref: '#/components/schemas/EnrichTransactionDirection'
+        iso_currency_code:
+          description: The ISO-4217 currency code of the transaction, e.g., USD.
+          type: string
+        enrichments:
+          $ref: '#/components/schemas/Enrichments'
+      required:
+      - amount
+      - description
+      - enrichments
+      - id
+      - iso_currency_code
+      title: ClientProvidedEnrichedTransaction
       type: object
       x-examples: {}
     PaymentChannel:
@@ -42902,6 +45685,91 @@ components:
       - payment_channel
       title: Enhancements
       type: object
+    Enrichments:
+      additionalProperties: true
+      description: A grouping of the Plaid produced transaction enrichment fields.
+      example:
+        personal_finance_category_icon_url: personal_finance_category_icon_url
+        website: website
+        check_number: check_number
+        logo_url: logo_url
+        merchant_name: merchant_name
+        location:
+          country: country
+          address: address
+          city: city
+          store_number: store_number
+          lon: 1.4658129805029452
+          region: region
+          postal_code: postal_code
+          lat: 6.027456183070403
+        legacy_category:
+        - legacy_category
+        - legacy_category
+        counterparties:
+        - name: name
+        - name: name
+        legacy_category_id: legacy_category_id
+        personal_finance_category:
+          detailed: detailed
+          primary: primary
+      properties:
+        merchant_name:
+          description: The name of the primary counterparty, such as the merchant
+            or the financial institution, as extracted by Plaid from the raw description.
+          nullable: true
+          type: string
+        website:
+          description: The website associated with this transaction.
+          nullable: true
+          type: string
+        logo_url:
+          description: A link to the logo associated with this transaction. The logo
+            will always be 100x100 resolution.
+          nullable: true
+          type: string
+        check_number:
+          description: The check number of the transaction. This field is only populated
+            for check transactions.
+          nullable: true
+          type: string
+        payment_channel:
+          $ref: '#/components/schemas/PaymentChannel'
+        legacy_category_id:
+          description: The ID of the category to which this transaction belongs. For
+            a full list of categories, see [`/categories/get`](https://plaid.com/docs/api/products/transactions/#categoriesget).
+          nullable: true
+          type: string
+          x-hidden-from-docs: true
+        legacy_category:
+          description: A hierarchical array of the categories to which this transaction
+            belongs. For a full list of categories, see [`/categories/get`](https://plaid.com/docs/api/products/transactions/#categoriesget).
+          items:
+            type: string
+          type: array
+          x-hidden-from-docs: true
+        location:
+          $ref: '#/components/schemas/Location'
+        personal_finance_category:
+          $ref: '#/components/schemas/PersonalFinanceCategory'
+        personal_finance_category_icon_url:
+          description: A link to the icon associated with the primary personal finance
+            category. The logo will always be 100x100 resolution.
+          type: string
+        counterparties:
+          description: The counterparties present in the transaction. Counterparties,
+            such as the merchant or the financial institution, are extracted by Plaid
+            from the raw description.
+          items:
+            $ref: '#/components/schemas/Counterparty'
+          type: array
+      required:
+      - location
+      - payment_channel
+      - personal_finance_category
+      - personal_finance_category_icon_url
+      title: Enrichments
+      type: object
     PaymentProfileCreateRequest:
       description: PaymentProfileCreateRequest defines the request schema for `/payment_profile/create`
       example:
@@ -42979,6 +45847,7 @@ components:
       example:
         updated_at: 2000-01-23T04:56:07.000+00:00
         created_at: 2000-01-23T04:56:07.000+00:00
+        deleted_at: 2000-01-23T04:56:07.000+00:00
         request_id: request_id
       properties:
         updated_at:
@@ -42993,6 +45862,14 @@ components:
             Profile was created at
           format: date-time
           type: string
+        deleted_at:
+          description: Timestamp in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            format (`YYYY-MM-DDTHH:mm:ssZ`) indicating the time the given Payment
+            Profile was deleted at. Always `null` if the Payment Profile has not been
+            deleted
+          format: date-time
+          nullable: true
+          type: string
         status:
           $ref: '#/components/schemas/PaymentProfileStatus'
         request_id:
@@ -43003,6 +45880,7 @@ components:
           type: string
       required:
       - created_at
+      - deleted_at
       - request_id
       - status
       - updated_at
@@ -43079,6 +45957,9 @@ components:
           email: email
         is_bank_addendum_completed: true
         secret: secret
+        assets_under_management:
+          amount: 0.8008281904610115
+          iso_currency_code: iso_currency_code
         client_id: client_id
         products:
         - null
@@ -43116,14 +45997,24 @@ components:
           items:
             $ref: '#/components/schemas/Products'
           type: array
+          x-override-enum-values-shown:
+          - assets
+          - auth
+          - balance
+          - identity
+          - investments
+          - liabilities
+          - transactions
         create_link_customization:
           description: If true, the end customer's default Link customization will
             be set to match the partner's.
           type: boolean
         logo:
           description: Base64-encoded representation of the end customer's logo. Must
-            be a PNG of size 1024x1024 under 4MB. Defaults to the partner's logo if
-            omitted.
+            be a PNG of size 1024x1024 under 4MB. The logo will be shared with financial
+            institutions and shown to the end user during Link flows. A logo is required
+            if `create_link_customization` is `true`. If `create_link_customization`
+            is `false` and the logo is omitted, a stock logo will be used.
           type: string
         legal_entity_name:
           description: The end customer's legal name.
@@ -43144,6 +46035,8 @@ components:
           description: Denotes whether the partner has forwarded the Plaid bank addendum
             to the end customer.
           type: boolean
+        assets_under_management:
+          $ref: '#/components/schemas/PartnerEndCustomerAssetsUnderManagement'
       required:
       - address
       - application_name
@@ -43247,6 +46140,41 @@ components:
           title: RequestID
           type: string
       type: object
+    PartnerCustomerRemoveRequest:
+      description: Request schema for `/partner/customer/remove`.
+      example:
+        end_customer_client_id: end_customer_client_id
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        end_customer_client_id:
+          type: string
+      required:
+      - end_customer_client_id
+    PartnerCustomerRemoveResponse:
+      additionalProperties: true
+      description: Response schema for `/partner/customer/remove`.
+      example:
+        request_id: request_id
+      properties:
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      type: object
     PartnerEndCustomer:
       additionalProperties: true
       description: The details for an end customer.
@@ -43270,17 +46198,16 @@ components:
         for non-Production environments.
       type: object
     PartnerEndCustomerStatus:
-      description: "The status of the given end customer.\n\n`UNDER REVIEW`: The end\
-        \ customer has been created and enabled in the non-Production environments.\
-        \ The end customer must be manually reviewed by the Plaid team before it can\
-        \ be enabled in production, at which point its status will automatically transition\
-        \ to `READY FOR ENABLEMENT` or `DENIED`.\n\n`READY FOR ENABLEMENT`: The end\
-        \ customer is ready to be enabled in the Production environment. Call the\
-        \ `/partner/customer/enable` endpoint to enable the end customer in Production.\n\
-        \n`ACTIVE`: The end customer has been enabled in all environments. \n\n`DENIED`:\
-        \ The end customer has been created and enabled in the non-Production environments,\
-        \ but it did not pass review by the Plaid team and therefore cannot be enabled\
-        \ in the Production environment. Talk to your Account Manager for more information."
+      description: |-
+        The status of the given end customer.
+
+        `UNDER REVIEW`: The end customer has been created and enabled in the non-Production environments. The end customer must be manually reviewed by the Plaid team before it can be enabled in production, at which point its status will automatically transition to `READY FOR ENABLEMENT` or `DENIED`.
+
+        `READY FOR ENABLEMENT`: The end customer is ready to be enabled in the Production environment. Call the `/partner/customer/enable` endpoint to enable the end customer in Production.
+
+        `ACTIVE`: The end customer has been enabled in all environments.
+
+        `DENIED`: The end customer has been created and enabled in the non-Production environments, but it did not pass review by the Plaid team and therefore cannot be enabled in the Production environment. Talk to your Account Manager for more information.
       enum:
       - UNDER REVIEW
       - READY FOR ENABLEMENT
@@ -43314,6 +46241,23 @@ components:
           type: string
         email:
           type: string
+      type: object
+    PartnerEndCustomerAssetsUnderManagement:
+      additionalProperties: true
+      description: Assets under management for the given end customer. Required for
+        end customers with monthly service commitments.
+      example:
+        amount: 0.8008281904610115
+        iso_currency_code: iso_currency_code
+      properties:
+        amount:
+          format: double
+          type: number
+        iso_currency_code:
+          type: string
+      required:
+      - amount
+      - iso_currency_code
       type: object
     PartnerEndCustomerBillingContact:
       additionalProperties: true
@@ -53895,10 +56839,7 @@ components:
         authorized_date:
           description: The date that the transaction was authorized. Dates are returned
             in an [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format ( `YYYY-MM-DD`
-            ). The `authorized_date` field uses machine learning to determine a transaction
-            date for transactions where the `date_transacted` is not available. If
-            the `date_transacted` field is present and not `null`, the `authorized_date`
-            field will have the same value as the `date_transacted` field.
+            ).
           format: date
           nullable: true
           type: string
