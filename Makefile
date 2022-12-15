@@ -1,5 +1,5 @@
 # Go embeds the package version in the generator.
-GO_PACKAGE_VERSION=10.1.0
+GO_PACKAGE_VERSION=10.2.0
 
 .PHONY: test
 test:

@@ -27,14 +27,15 @@ func TestLinkTokenCreateOptional(t *testing.T) {
 	testClient := NewTestClient()
 	ctx := context.Background()
 	now := time.Now()
+	nullableNow := *plaid.NewNullableTime(&now)
 
 	user := plaid.LinkTokenCreateRequestUser{
 		ClientUserId:             time.Now().String(),
 		LegalName:                plaid.PtrString("Legal Name"),
 		PhoneNumber:              plaid.PtrString("2025550165"),
-		PhoneNumberVerifiedTime:  &now,
+		PhoneNumberVerifiedTime:  nullableNow,
 		EmailAddress:             plaid.PtrString("test@email.com"),
-		EmailAddressVerifiedTime: &now,
+		EmailAddressVerifiedTime: nullableNow,
 		Ssn:                      plaid.PtrString("123-22-1234"),
 	}
 	request := plaid.NewLinkTokenCreateRequest(
@@ -63,14 +64,15 @@ func TestLinkTokenCreateThenGet(t *testing.T) {
 	testClient := NewTestClient()
 	ctx := context.Background()
 	now := time.Now()
+	nullableNow := *plaid.NewNullableTime(&now)
 
 	user := plaid.LinkTokenCreateRequestUser{
 		ClientUserId:             time.Now().String(),
 		LegalName:                plaid.PtrString("Legal Name"),
 		PhoneNumber:              plaid.PtrString("2025550165"),
-		PhoneNumberVerifiedTime:  &now,
+		PhoneNumberVerifiedTime:  nullableNow,
 		EmailAddress:             plaid.PtrString("test@email.com"),
-		EmailAddressVerifiedTime: &now,
+		EmailAddressVerifiedTime: nullableNow,
 		Ssn:                      plaid.PtrString("123-22-1234"),
 	}
 

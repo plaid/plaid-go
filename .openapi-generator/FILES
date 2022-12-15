@@ -128,6 +128,7 @@ model_client_provided_enhanced_transaction.go
 model_client_provided_enriched_transaction.go
 model_client_provided_raw_transaction.go
 model_client_provided_transaction.go
+model_client_provided_transaction_location.go
 model_connected_application.go
 model_counterparty.go
 model_counterparty_type.go
@@ -137,6 +138,7 @@ model_credit1099_filer.go
 model_credit1099_payer.go
 model_credit1099_recipient.go
 model_credit_account_subtype.go
+model_credit_amount_with_currency.go
 model_credit_audit_copy_token_create_request.go
 model_credit_audit_copy_token_create_response.go
 model_credit_audit_copy_token_remove_request.go
@@ -179,6 +181,7 @@ model_credit_pay_stub_earnings.go
 model_credit_pay_stub_employee.go
 model_credit_pay_stub_employer.go
 model_credit_pay_stub_net_pay.go
+model_credit_pay_stub_pay_basis_type.go
 model_credit_payroll_income_get_request.go
 model_credit_payroll_income_get_response.go
 model_credit_payroll_income_precheck_request.go
@@ -233,7 +236,6 @@ model_deposit_switch_token_create_request.go
 model_deposit_switch_token_create_response.go
 model_depository_account_subtype.go
 model_depository_filter.go
-model_disbursement_limits.go
 model_distribution_breakdown.go
 model_doc_type.go
 model_document_analysis.go
@@ -386,6 +388,7 @@ model_inflow_model.go
 model_initial_update_webhook.go
 model_institution.go
 model_institution_status.go
+model_institution_supported_networks.go
 model_institutions_get_by_id_request.go
 model_institutions_get_by_id_request_options.go
 model_institutions_get_by_id_response.go
@@ -536,6 +539,7 @@ model_partner_end_customer.go
 model_partner_end_customer_address.go
 model_partner_end_customer_assets_under_management.go
 model_partner_end_customer_billing_contact.go
+model_partner_end_customer_customer_support_info.go
 model_partner_end_customer_secrets.go
 model_partner_end_customer_status.go
 model_partner_end_customer_technical_contact.go
@@ -604,7 +608,6 @@ model_payment_initiation_recipient_get_response_all_of.go
 model_payment_initiation_recipient_list_request.go
 model_payment_initiation_recipient_list_response.go
 model_payment_initiation_standing_order_metadata.go
-model_payment_limits.go
 model_payment_meta.go
 model_payment_profile_create_request.go
 model_payment_profile_create_response.go
@@ -671,9 +674,13 @@ model_pslf_status.go
 model_recaptcha_required_error.go
 model_recipient_bacs.go
 model_recipient_bacs_nullable.go
+model_recurring_cancelled_webhook.go
+model_recurring_new_transfer_webhook.go
 model_recurring_transaction_frequency.go
 model_recurring_transactions_update_webhook.go
 model_recurring_transfer.go
+model_recurring_transfer_nullable.go
+model_recurring_transfer_skipped_webhook.go
 model_removed_transaction.go
 model_report_type.go
 model_reporting_information.go
@@ -719,6 +726,8 @@ model_sandbox_transfer_test_clock_create_request.go
 model_sandbox_transfer_test_clock_create_response.go
 model_sandbox_transfer_test_clock_get_request.go
 model_sandbox_transfer_test_clock_get_response.go
+model_sandbox_transfer_test_clock_list_request.go
+model_sandbox_transfer_test_clock_list_response.go
 model_scopes.go
 model_scopes_context.go
 model_scopes_nullable.go
@@ -778,8 +787,8 @@ model_transaction.go
 model_transaction_all_of.go
 model_transaction_base.go
 model_transaction_code.go
+model_transaction_counterparty.go
 model_transaction_data.go
-model_transaction_frequency.go
 model_transaction_override.go
 model_transaction_stream.go
 model_transaction_stream_amount.go
@@ -789,6 +798,7 @@ model_transactions_enhance_get_request.go
 model_transactions_enhance_get_response.go
 model_transactions_enrich_get_request.go
 model_transactions_enrich_get_response.go
+model_transactions_enrich_request_options.go
 model_transactions_get_request.go
 model_transactions_get_request_options.go
 model_transactions_get_response.go
@@ -825,6 +835,9 @@ model_transfer_authorization_proposed_transfer.go
 model_transfer_authorization_user_in_request.go
 model_transfer_cancel_request.go
 model_transfer_cancel_response.go
+model_transfer_capabilities_get_request.go
+model_transfer_capabilities_get_response.go
+model_transfer_capabilities_get_rtp.go
 model_transfer_create_request.go
 model_transfer_create_response.go
 model_transfer_device.go

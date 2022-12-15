@@ -7,7 +7,7 @@ info:
     details.
   termsOfService: https://plaid.com/legal/
   title: The Plaid API
-  version: 2020-09-14_1.205.3
+  version: 2020-09-14_1.210.4
 servers:
 - description: Production
   url: https://production.plaid.com
@@ -877,9 +877,9 @@ paths:
 
         This endpoint is not included by default as part of Transactions. To request access to this endpoint, submit a [product access request](https://dashboard.plaid.com/team/products) or contact your Plaid account manager.
 
-        Note that unlike `/transactions/get`, `/transactions/recurring/get` will not initialize an Item with Transactions. The Item must already have been initialized with Transactions (either during Link, by specifying it in `/link/token/create`, or after Link, by calling `/transactions/get`) before calling this endpoint. Data is available to `/transactions/recurring/get` approximately 5 seconds after the [`HISTORICAL_UPDATE`](https://plaid.com/docs/api/products/transactions/#historical_update) webhook has fired (about 1-2 minutes after initialization).
+        This endpoint can only be called on an Item that has already been initialized with Transactions (either during Link, by specifying it in `/link/token/create`; or after Link, by calling `/transactions/get`). After the [`HISTORICAL_UPDATE`](https://plaid.com/docs/api/products/transactions/#historical_update) webhook has fired, call `/transactions/recurring/get` to receive the Recurring Transactions streams and subscribe to the [`RECURRING_TRANSACTIONS_UPDATE`](https://plaid.com/docs/api/products/transactions/#recurring_transactions_update) webhook.
 
-        After the initial call, you can call `/transactions/recurring/get` endpoint at any point in the future to retrieve the latest summary of recurring streams. Since recurring streams do not change often, it will typically not be necessary to call this endpoint more than once per day.
+        After the initial call, you can call `/transactions/recurring/get` endpoint at any point in the future to retrieve the latest summary of recurring streams. Listen to the [`RECURRING_TRANSACTIONS_UPDATE`](https://plaid.com/docs/api/products/transactions/#recurring_transactions_update) webhook to be notified when new updates are available.
       externalDocs:
         url: /api/products/transactions/#transactionsrecurringget
       operationId: transactionsRecurringGet
@@ -976,46 +976,26 @@ paths:
   /transactions/recurring/deactivate: {}
   /transactions/sync:
     post:
-      description: "This endpoint replaces `/transactions/get` and its associated\
-        \ webhooks for most common use-cases.\n\nThe `/transactions/sync` endpoint\
-        \ allows developers to subscribe to all transactions associated with an Item\
-        \ and get updates synchronously in a stream-like manner, using a cursor to\
-        \ track which updates have already been seen. `/transactions/sync` provides\
-        \ the same functionality as `/transactions/get` and can be used instead of\
-        \ `/transactions/get` to simplify the process of tracking transactions updates.\n\
-        \nThis endpoint provides user-authorized transaction data for `credit`, `depository`,\
-        \ and some loan-type accounts (only those with account subtype `student`;\
-        \ coverage may be limited). For transaction history from `investments` accounts,\
-        \ use `/investments/transactions/get` instead.\n\nReturned transactions data\
-        \ is grouped into three types of update, indicating whether the transaction\
-        \ was added, removed, or modified since the last call to the API.\n\nIn the\
-        \ first call to `/transactions/sync` for an Item, the endpoint will return\
-        \ all historical transactions data associated with that Item up until the\
-        \ time of the API call (as \"adds\"), which then generates a `next_cursor`\
-        \ for that Item. In subsequent calls, send the `next_cursor` to receive only\
-        \ the changes that have occurred since the previous call.\n\nDue to the potentially\
-        \ large number of transactions associated with an Item, results are paginated.\
-        \ The `has_more` field specifies if additional calls are necessary to fetch\
-        \ all available transaction updates. Call `/transactions/sync` with the new\
-        \ cursor, pulling all updates, until `has_more` is `false`. \n\nWhen retrieving\
-        \ paginated updates, track both the `next_cursor` from the latest response\
-        \ and the original cursor from the first call in which `has_more` was `true`;\
-        \ if a call to `/transactions/sync` fails when retrieving a paginated update,\
-        \ the entire pagination request loop must be restarted beginning with the\
-        \ cursor for the first page of the update, rather than retrying only the single\
-        \ request that failed. \n\nWhenever new or updated transaction data becomes\
-        \ available, `/transactions/sync` will provide these updates. Plaid typically\
-        \ checks for new data multiple times a day, but these checks may occur less\
-        \ frequently, such as once a day, depending on the institution. An Item's\
-        \ `status.transactions.last_successful_update` field will show the timestamp\
-        \ of the most recent successful update. To force Plaid to check for new transactions,\
-        \ use the `/transactions/refresh` endpoint.\n\nNote that for newly created\
-        \ Items, data may not be immediately available to `/transactions/sync`. Plaid\
-        \ begins preparing transactions data when the Item is created, but the process\
-        \ can take anywhere from a few seconds to several minutes to complete, depending\
-        \ on the number of transactions available.\n\nTo be alerted when new data\
-        \ is available, listen for the [`SYNC_UPDATES_AVAILABLE`](https://plaid.com/docs/api/products/transactions/#sync_updates_available)\
-        \ webhook."
+      description: |-
+        This endpoint replaces `/transactions/get` and its associated webhooks for most common use-cases.
+
+        The `/transactions/sync` endpoint allows developers to subscribe to all transactions associated with an Item and get updates synchronously in a stream-like manner, using a cursor to track which updates have already been seen. `/transactions/sync` provides the same functionality as `/transactions/get` and can be used instead of `/transactions/get` to simplify the process of tracking transactions updates.
+
+        This endpoint provides user-authorized transaction data for `credit`, `depository`, and some loan-type accounts (only those with account subtype `student`; coverage may be limited). For transaction history from `investments` accounts, use `/investments/transactions/get` instead.
+
+        Returned transactions data is grouped into three types of update, indicating whether the transaction was added, removed, or modified since the last call to the API.
+
+        In the first call to `/transactions/sync` for an Item, the endpoint will return all historical transactions data associated with that Item up until the time of the API call (as "adds"), which then generates a `next_cursor` for that Item. In subsequent calls, send the `next_cursor` to receive only the changes that have occurred since the previous call.
+
+        Due to the potentially large number of transactions associated with an Item, results are paginated. The `has_more` field specifies if additional calls are necessary to fetch all available transaction updates. Call `/transactions/sync` with the new cursor, pulling all updates, until `has_more` is `false`.
+
+        When retrieving paginated updates, track both the `next_cursor` from the latest response and the original cursor from the first call in which `has_more` was `true`; if a call to `/transactions/sync` fails when retrieving a paginated update, the entire pagination request loop must be restarted beginning with the cursor for the first page of the update, rather than retrying only the single request that failed.
+
+        Whenever new or updated transaction data becomes available, `/transactions/sync` will provide these updates. Plaid typically checks for new data multiple times a day, but these checks may occur less frequently, such as once a day, depending on the institution. An Item's `status.transactions.last_successful_update` field will show the timestamp of the most recent successful update. To force Plaid to check for new transactions, use the `/transactions/refresh` endpoint.
+
+        Note that for newly created Items, data may not be immediately available to `/transactions/sync`. Plaid begins preparing transactions data when the Item is created, but the process can take anywhere from a few seconds to several minutes to complete, depending on the number of transactions available.
+
+        To be alerted when new data is available, listen for the [`SYNC_UPDATES_AVAILABLE`](https://plaid.com/docs/api/products/transactions/#sync_updates_available) webhook.
       externalDocs:
         url: /api/products/transactions/#transactionssync
       operationId: transactionsSync
@@ -1134,9 +1114,9 @@ paths:
   /transactions/enrich:
     post:
       description: |-
-        The '/transactions/enrich' endpoint enriches raw transaction data generated by your own banking products or retrieved from other non-Plaid sources.
+        The `/transactions/enrich` endpoint enriches raw transaction data generated by your own banking products or retrieved from other non-Plaid sources.
 
-        The product is currently in beta. To request access, contact transactions-feedback@plaid.com
+        The product is currently in beta. To request access, contact enrich-feedback@plaid.com
       externalDocs:
         url: /api/products/enrich/#transactionsenrich
       operationId: transactionsEnrich
@@ -1155,12 +1135,11 @@ paths:
                   value:
                     enriched_transactions:
                     - id: 6135818adda16500147e7c1d
-                      description: 'PURCHASE WM SUPERCENTER #1700 POWAY CAUS'
+                      description: 'PURCHASE WM SUPERCENTER #1700'
                       amount: 72.1
                       direction: OUTFLOW
                       iso_currency_code: USD
                       enrichments:
-                        check_number: null
                         counterparties:
                         - name: Walmart
                           type: merchant
@@ -1189,10 +1168,9 @@ paths:
                       direction: OUTFLOW
                       iso_currency_code: USD
                       enrichments:
-                        check_number: null
                         counterparties:
                         - name: Doordash
-                          type: delivery_marketplace
+                          type: marketplace
                           logo_url: https://plaid-counterparty-logos.plaid.com/doordash_1.png
                           website: doordash.com
                         - name: Burger King
@@ -1216,6 +1194,7 @@ paths:
                           primary: FOOD_AND_DRINK
                         personal_finance_category_icon_url: https://plaid-category-icons.plaid.com/PFC_FOOD_AND_DRINK.png
                         website: burgerking.com
+                    request_id: Wvhy9PZHQLV8njG
               schema:
                 $ref: '#/components/schemas/TransactionsEnrichGetResponse'
           description: OK
@@ -4136,7 +4115,7 @@ paths:
   /payment_initiation/recipient/create:
     post:
       description: |
-        Create a payment recipient for payment initiation.  The recipient must be in Europe, within a country that is a member of the Single Euro Payment Area (SEPA).  For a standing order (recurring) payment, the recipient must be in the UK.
+        Create a payment recipient for payment initiation.  The recipient must be in Europe, within a country that is a member of the Single Euro Payment Area (SEPA) or a non-Eurozone country [supported](https://plaid.com/global) by Plaid. For a standing order (recurring) payment, the recipient must be in the UK.
 
         It is recommended to use `bacs` in the UK and `iban` in EU.
 
@@ -4168,14 +4147,18 @@ paths:
   /payment_initiation/payment/reverse:
     post:
       description: |
-        Reverse a previously settled payment from a Plaid virtual account.
+        Reverse a settled payment from a Plaid virtual account.
 
-        The original payment must be in a settled state to be refunded and only full payment refunds are currently supported.
-        To power partial refunds, use `/wallet/transaction/execute`, where you can specify the exact amount for a payout to an end user.
+        The original payment must be in a settled state to be refunded.
+        To refund partially, specify the amount as part of the request.
+        If the amount is not specified, the refund amount will be equal to all
+        of the remaining payment amount that has not been refunded yet.
+        If the remaining amount is less than one unit of currency
+        (e.g. 1 GBP or 1 EUR), the refund will fail.
 
-        A payment can only be reversed once and will be refunded back to the same source account that initiated the payment.
-        The original payment must have been initiated to a Plaid virtual account.
-        The refund will be initiated from the same virtual account that the payment was paid into.
+        The refund will go back to the source account that initiated the payment.
+        The original payment must have been initiated to a Plaid virtual account
+        so that this account can be used to initiate the refund.
       externalDocs:
         url: /api/products/payment-initiation/#payment_initiationpaymentreverse
       operationId: paymentInitiationPaymentReverse
@@ -4278,11 +4261,11 @@ paths:
   /payment_initiation/payment/create:
     post:
       description: |-
-        After creating a payment recipient, you can use the `/payment_initiation/payment/create` endpoint to create a payment to that recipient.  Payments can be one-time or standing order (recurring) and can be denominated in either EUR or GBP.  If making domestic GBP-denominated payments, your recipient must have been created with BACS numbers. In general, EUR-denominated payments will be sent via SEPA Credit Transfer and GBP-denominated payments will be sent via the Faster Payments network, but the payment network used will be determined by the institution. Payments sent via Faster Payments will typically arrive immediately, while payments sent via SEPA Credit Transfer will typically arrive in one business day.
+        After creating a payment recipient, you can use the `/payment_initiation/payment/create` endpoint to create a payment to that recipient.  Payments can be one-time or standing order (recurring) and can be denominated in either EUR, GBP or other chosen [currency](https://plaid.com/docs/api/products/payment-initiation/#payment_initiation-payment-create-request-amount-currency).  If making domestic GBP-denominated payments, your recipient must have been created with BACS numbers. In general, EUR-denominated payments will be sent via SEPA Credit Transfer, GBP-denominated payments will be sent via the Faster Payments network and for non-Eurozone markets typically via the local payment scheme, but the payment network used will be determined by the institution. Payments sent via Faster Payments will typically arrive immediately, while payments sent via SEPA Credit Transfer or other local payment schemes will typically arrive in one business day.
 
         Standing orders (recurring payments) must be denominated in GBP and can only be sent to recipients in the UK. Once created, standing order payments cannot be modified or canceled via the API. An end user can cancel or modify a standing order directly on their banking application or website, or by contacting the bank. Standing orders will follow the payment rules of the underlying rails (Faster Payments in UK). Payments can be sent Monday to Friday, excluding bank holidays. If the pre-arranged date falls on a weekend or bank holiday, the payment is made on the next working day. It is not possible to guarantee the exact time the payment will reach the recipient’s account, although at least 90% of standing order payments are sent by 6am.
 
-        In the Development environment, payments must be below 5 GBP / EUR. For details on any payment limits in Production, contact your Plaid Account Manager.
+        In the Development environment, payments must be below 5 GBP or other chosen [currency](https://plaid.com/docs/api/products/payment-initiation/#payment_initiation-payment-create-request-amount-currency). For details on any payment limits in Production, contact your Plaid Account Manager.
       externalDocs:
         url: /api/products/payment-initiation/#payment_initiationpaymentcreate
       operationId: paymentInitiationPaymentCreate
@@ -5617,6 +5600,7 @@ paths:
                           region: CA
                           postal_code: "94053"
                           country: US
+                      recurring_transfer_id: null
                     request_id: saKrIBuEB9qJZno
               schema:
                 $ref: '#/components/schemas/TransferGetResponse'
@@ -5657,6 +5641,7 @@ paths:
                       test_clock_id: null
                       status: active
                       amount: "12.34"
+                      description: payment
                       type: debit
                       ach_class: ppd
                       network: ach
@@ -5666,8 +5651,6 @@ paths:
                       transfer_ids:
                       - 271ef220-dbf8-caeb-a7dc-a2b3e8a80963
                       - c8dbaf75-2abb-e2dc-4171-12448e13b848
-                      decision: approved
-                      decision_rationale: null
                       user:
                         legal_name: Anne Charleston
                         phone_number: 510-555-0128
@@ -5832,6 +5815,42 @@ paths:
       summary: Create a transfer authorization
       tags:
       - plaid
+  /transfer/capabilities/get:
+    post:
+      description: Use the `/transfer/capabilities/get` endpoint to determine the
+        RTP eligibility information of a transfer.
+      externalDocs:
+        url: /api/products/transfer/#transfercapabilitiesget
+      operationId: transferCapabilitiesGet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferCapabilitiesGetRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    institution_supported_networks:
+                      rtp:
+                        credit: true
+                    request_id: saKrIBuEB9qJZno
+              schema:
+                $ref: '#/components/schemas/TransferCapabilitiesGetResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidError'
+          description: Error response
+      summary: Get RTP eligibility information of a transfer
+      tags:
+      - plaid
   /transfer/create:
     post:
       description: Use the `/transfer/create` endpoint to initiate a new transfer.
@@ -5883,7 +5902,8 @@ paths:
                       iso_currency_code: USD
                       standard_return_window: 2020-08-07
                       unauthorized_return_window: 2020-10-07
-                      originator_client_id: 569ed2f36b3a3a021713abc1
+                      originator_client_id: 569ed2f36b3a3a021713abc1,
+                      recurring_transfer_id: null
                     request_id: saKrIBuEB9qJZno
               schema:
                 $ref: '#/components/schemas/TransferCreateResponse'
@@ -5924,6 +5944,7 @@ paths:
                       test_clock_id: b33a6eda-5e97-5d64-244a-a9274110151c
                       status: active
                       amount: "12.34"
+                      description: payment
                       type: debit
                       ach_class: ppd
                       network: ach
@@ -5931,8 +5952,6 @@ paths:
                       account_id: 3gE5gnRzNyfXpBK5wEEKcymJ5albGVUqg77gr
                       iso_currency_code: USD
                       transfer_ids: []
-                      decision: approved
-                      decision_rationale: null
                       user:
                         legal_name: Anne Charleston
                         phone_number: 510-555-0128
@@ -5949,6 +5968,8 @@ paths:
                         interval_unit: week
                         interval_count: 1
                         interval_execution_day: 5
+                    decision: approved
+                    decision_rationale: null
                     request_id: saKrIBuEB9qJZno
               schema:
                 $ref: '#/components/schemas/TransferRecurringCreateResponse'
@@ -6073,6 +6094,7 @@ paths:
                           region: CA
                           postal_code: "94053"
                           country: US
+                      recurring_transfer_id: null
                     request_id: saKrIBuEB9qJZno
               schema:
                 $ref: '#/components/schemas/TransferListResponse'
@@ -6113,6 +6135,7 @@ paths:
                       test_clock_id: null
                       status: active
                       amount: "12.34"
+                      description: payment
                       type: debit
                       ach_class: ppd
                       network: ach
@@ -6121,8 +6144,6 @@ paths:
                       iso_currency_code: USD
                       transfer_ids:
                       - 4242fc8d-3ec6-fb38-fa0c-a8e37d03cd57
-                      decision: approved
-                      decision_rationale: null
                       user:
                         legal_name: Anne Charleston
                         phone_number: 510-555-0128
@@ -7449,12 +7470,12 @@ paths:
       - plaid
   /sandbox/transfer/test_clock/create:
     post:
-      description: "Use the `/sandbox/transfer/test_clock/create` endpoint to create\
-        \ a `test_clock` in the Sandbox environment. \n\nA test clock object represents\
-        \ an independent timeline and has a `frozen_timestamp` field indicating the\
-        \ current timestamp of the timeline. Test clock allows clients to easily test\
-        \ and integrate with recurring transfer product in sandbox environment.\n\n\
-        A test clock can be associated with up to 5 recurring transfers."
+      description: |-
+        Use the `/sandbox/transfer/test_clock/create` endpoint to create a `test_clock` in the Sandbox environment.
+
+        A test clock object represents an independent timeline and has a `virtual_time` field indicating the current timestamp of the timeline. Test clocks are used for testing recurring transfers in Sandbox.
+
+        A test clock can be associated with up to 5 recurring transfers.
       externalDocs:
         url: /api/sandbox/#sandboxtransfertestclockcreate
       operationId: sandboxTransferTestClockCreate
@@ -7473,7 +7494,7 @@ paths:
                   value:
                     test_clock:
                       test_clock_id: b33a6eda-5e97-5d64-244a-a9274110151c
-                      frozen_timestamp: 2006-01-02T15:04:05Z
+                      virtual_time: 2006-01-02T15:04:05Z
                     request_id: mdqfuVxeoza6mhu
               schema:
                 $ref: '#/components/schemas/SandboxTransferTestClockCreateResponse'
@@ -7489,23 +7510,16 @@ paths:
       - plaid
   /sandbox/transfer/test_clock/advance:
     post:
-      description: "Use the `/sandbox/transfer/test_clock/advance` endpoint to advance\
-        \ a `test_clock` in the Sandbox environment. \n\nA test clock object represents\
-        \ an independent timeline and has a `frozen_timestamp` field indicating the\
-        \ current timestamp of the timeline. A test clock can be advanced by incrementing\
-        \ `frozen_timestamp`, but may never go back to a lower `frozen_timestamp`.\n\
-        \nIf a test clock is advanced from T1 to T2, we will simulate the changes\
-        \ that ought to occur during the period of (T1, T2]. \nFor instance, a client\
-        \ creates a weekly recurring transfer with a test clock set at t. When the\
-        \ client advances the test clock by setting `frozen_timestamp` = t + 15 days,\
-        \ 2 new originations should be created, along with the webhook events.\nThe\
-        \ timestamps of the objects and webhook events created/updated in step 2 should\
-        \ also fall in (T1, T2] time range.\n\nThe advancement of the test clock from\
-        \ its current `frozen_timestamp` should be limited such that there are no\
-        \ more than 20 originations resulted from the advance operation on each `recurring_transfer`\
-        \ associated with this `test_clock`. \nFor instance, if the recurring transfer\
-        \ associated with this test clock originates once every 4 weeks, you can advance\
-        \ the `frozen_timestamp` up to 80 weeks on each advance call."
+      description: |-
+        Use the `/sandbox/transfer/test_clock/advance` endpoint to advance a `test_clock` in the Sandbox environment.
+
+        A test clock object represents an independent timeline and has a `virtual_time` field indicating the current timestamp of the timeline. A test clock can be advanced by incrementing `virtual_time`, but may never go back to a lower `virtual_time`.
+
+        If a test clock is advanced, we will simulate the changes that ought to occur during the time that elapsed.
+        For instance, a client creates a weekly recurring transfer with a test clock set at t. When the client advances the test clock by setting `virtual_time` = t + 15 days, 2 new originations should be created, along with the webhook events.
+
+        The advancement of the test clock from its current `virtual_time` should be limited such that there are no more than 20 originations resulting from the advance operation on each `recurring_transfer` associated with the `test_clock`.
+        For instance, if the recurring transfer associated with this test clock originates once every 4 weeks, you can advance the `virtual_time` up to 80 weeks on each API call.
       externalDocs:
         url: /api/sandbox/#sandboxtransfertestclockadvance
       operationId: sandboxTransferTestClockAdvance
@@ -7557,7 +7571,7 @@ paths:
                   value:
                     test_clock:
                       test_clock_id: b33a6eda-5e97-5d64-244a-a9274110151c
-                      frozen_timestamp: 2006-01-02T15:04:05Z
+                      virtual_time: 2006-01-02T15:04:05Z
                     request_id: mdqfuVxeoza6mhu
               schema:
                 $ref: '#/components/schemas/SandboxTransferTestClockGetResponse'
@@ -7569,6 +7583,46 @@ paths:
                 $ref: '#/components/schemas/PlaidError'
           description: Error response
       summary: Get a test clock
+      tags:
+      - plaid
+  /sandbox/transfer/test_clock/list:
+    post:
+      description: Use the `/sandbox/transfer/test_clock/list` endpoint to see a list
+        of all your test clocks in the Sandbox environment, by ascending `virtual_time`.
+        Results are paginated; use the `count` and `offset` query parameters to retrieve
+        the desired test clocks.
+      externalDocs:
+        url: /api/sandbox/#sandboxtransfertestclocklist
+      operationId: sandboxTransferTestClockList
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SandboxTransferTestClockListRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    test_clocks:
+                    - test_clock_id: b33a6eda-5e97-5d64-244a-a9274110151c
+                      virtual_time: 2006-01-02T15:04:05Z
+                    - test_clock_id: a33a6eda-5e97-5d64-244a-a9274110152d
+                      virtual_time: 2006-02-02T15:04:05Z
+                    request_id: mdqfuVxeoza6mhu
+              schema:
+                $ref: '#/components/schemas/SandboxTransferTestClockListResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidError'
+          description: Error response
+      summary: List test clocks
       tags:
       - plaid
   /sandbox/payment_profile/reset_login:
@@ -8817,9 +8871,9 @@ paths:
       description: |-
         Plaid can share an Asset Report directly with a participating third party on your behalf. The shared Asset Report is the exact same Asset Report originally created in `/asset_report/create`.
 
-        To grant access to an Asset Report to a third party, use the `/credit/relay/create` endpoint to create a `relay_token` and then pass that token to the third party who needs access. Each third party has its own `secondary_client_id`, for example `ce5bd328dcd34123456`. You'll need to create a separate `relay_token` for each third party to whom you want to grant access to the Report.
+        To grant a third party access to an Asset Report, use the `/credit/relay/create` endpoint to create a `relay_token` and then pass that token to your third party. Each third party has its own `secondary_client_id`; for example, `ce5bd328dcd34123456`. You'll need to create a separate `relay_token` for each third party that needs access to the report on your behalf.
       externalDocs:
-        url: /none/
+        url: /api/products/assets/#creditrelaycreate
       operationId: creditRelayCreate
       requestBody:
         content:
@@ -8839,16 +8893,17 @@ paths:
               schema:
                 $ref: '#/components/schemas/CreditRelayCreateResponse'
           description: OK
-      summary: Create a `relay_token` to share an Asset Report with a partner client
+      summary: Create a relay token to share an Asset Report with a partner client
+        (beta)
       tags:
       - plaid
   /credit/relay/get:
     post:
-      description: '`/credit/relay/get` allows third parties to get a report that
-        was shared with them, using an `relay_token` that was created by the report
+      description: '`/credit/relay/get` allows third parties to receive a report that
+        was shared with them, using a `relay_token` that was created by the report
         owner.'
       externalDocs:
-        url: /none/
+        url: /api/products/assets/#creditrelayget
       operationId: creditRelayGet
       requestBody:
         content:
@@ -9073,18 +9128,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/AssetReportGetResponse'
           description: OK
-      summary: Retrieve the reports associated with a Relay token that was shared
-        with you
+      summary: Retrieve the reports associated with a relay token that was shared
+        with you (beta)
       tags:
       - plaid
   /credit/relay/refresh:
     post:
       description: The `/credit/relay/refresh` endpoint allows third parties to refresh
-        an report that was relayed to them, using a `relay_token` that was created
-        by the report owner. A new report will be created based on the old one, but
-        with the most recent data available.
+        a report that was relayed to them, using a `relay_token` that was created
+        by the report owner. A new report will be created with the original report
+        parameters, but with the most recent data available based on the `days_requested`
+        value of the original report.
       externalDocs:
-        url: /api/products/#creditrelayrefresh
+        url: /api/products/assets/#creditrelayrefresh
       operationId: creditRelayRefresh
       requestBody:
         content:
@@ -9105,19 +9161,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/CreditRelayRefreshResponse'
           description: OK
-      summary: Refresh a report of a Relay Token
+      summary: Refresh a report of a relay token (beta)
       tags:
       - plaid
   /credit/relay/remove:
     post:
       description: The `/credit/relay/remove` endpoint allows you to invalidate a
-        `relay_token`, meaning the third party holding the token will no longer be
-        able to use it to access the reports to which the `relay_token` gives access
-        to. The report, items associated with it, and other Relay tokens that provide
-        access to the same report are not affected and will remain accessible after
-        removing the given `relay_token.
+        `relay_token`. The third party holding the token will no longer be able to
+        access or refresh the reports which the `relay_token` gives access to. The
+        original report, associated Items, and other relay tokens that provide access
+        to the same report are not affected and will remain accessible after removing
+        the given `relay_token`.
       externalDocs:
-        url: /none/
+        url: /api/products/assets/#creditrelayremove
       operationId: creditRelayRemove
       requestBody:
         content:
@@ -9137,7 +9193,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/CreditRelayRemoveResponse'
           description: OK
-      summary: Remove Credit Relay Token
+      summary: Remove relay token (beta)
       tags:
       - plaid
   /sandbox/bank_transfer/fire_webhook:
@@ -9730,7 +9786,7 @@ paths:
   /beta/transactions/v1/enhance:
     post:
       description: |-
-        The '/beta/transactions/v1/enhance' endpoint enriches raw transaction data provided directly by clients.
+        The `/beta/transactions/v1/enhance` endpoint enriches raw transaction data provided directly by clients.
 
         The product is currently in beta.
       operationId: transactionsEnhance
@@ -9761,6 +9817,8 @@ paths:
                         counterparties:
                         - name: Apple
                           type: merchant
+                          logo_url: https://plaid-merchant-logos.plaid.com/apple_63.png
+                          website: apple.com
                         location:
                           address: 300 Post St
                           city: San Francisco
@@ -10083,6 +10141,11 @@ paths:
                     postal_code: "12345"
                     country_code: US
                   is_bank_addendum_completed: true
+                  customer_support_info:
+                    email: support@example.com
+                    phone_number: "1234567890"
+                    contact_url: example.com/contact
+                    link_update_url: example.com/update
             schema:
               $ref: '#/components/schemas/PartnerCustomerCreateRequest'
         required: true
@@ -10592,6 +10655,7 @@ components:
           - account_ids
           - account_ids
           include_personal_finance_category_beta: false
+          include_logo_and_counterparty_beta: false
           offset: 0
           count: 40
           include_original_description: false
@@ -10641,6 +10705,7 @@ components:
         - account_ids
         - account_ids
         include_personal_finance_category_beta: false
+        include_logo_and_counterparty_beta: false
         offset: 0
         count: 40
         include_original_description: false
@@ -10688,6 +10753,13 @@ components:
 
             We’re introducing Category Rules - a new beta endpoint that will enable you to change the `personal_finance_category` for a transaction based on your users’ needs. When rules are set, the selected category will override the Plaid provided category. To learn more, send a note to transactions-feedback@plaid.com.
           type: boolean
+        include_logo_and_counterparty_beta:
+          default: false
+          description: Include counterparties and extran merchant fields in the transaction.
+            This field is disabled by default. If you need this information in addition
+            to the parsed data provided, contact your Plaid Account Manager.
+          type: boolean
+          x-hidden-from-docs: true
       type: object
     TransactionsGetResponse:
       additionalProperties: true
@@ -11204,6 +11276,7 @@ components:
         cursor: cursor
         count: 40
         options:
+          include_logo_and_counterparty_beta: false
           include_original_description: false
           include_personal_finance_category: false
         secret: secret
@@ -11247,6 +11320,7 @@ components:
       description: An optional object to be used with the request. If specified, `options`
         must not be `null`.
       example:
+        include_logo_and_counterparty_beta: false
         include_original_description: false
         include_personal_finance_category: false
       properties:
@@ -11266,6 +11340,13 @@ components:
 
             We’re introducing Category Rules - a new beta endpoint that will enable you to change the `personal_finance_category` for a transaction based on your users’ needs. When rules are set, the selected category will override the Plaid provided category. To learn more, send a note to transactions-feedback@plaid.com.
           type: boolean
+        include_logo_and_counterparty_beta:
+          default: false
+          description: Include counterparties and extra merchant fields in the transaction.
+            This field is disabled by default. If you need this information in addition
+            to the parsed data provided, contact your Plaid Account Manager.
+          type: boolean
+          x-hidden-from-docs: true
       type: object
     TransactionsSyncResponse:
       additionalProperties: true
@@ -13556,11 +13637,13 @@ components:
           type: string
         x:
           description: The x member contains the x coordinate for the elliptic curve
-            point.
+            point, provided as a base64url-encoded string of the coordinate's big
+            endian representation.
           type: string
         y:
           description: The y member contains the y coordinate for the elliptic curve
-            point.
+            point, provided as a base64url-encoded string of the coordinate's big
+            endian representation.
           type: string
         created_at:
           description: The timestamp when the key was created, in Unix time.
@@ -14777,6 +14860,13 @@ components:
       - NO_DEPOSITS_FOUND
       - USER_REPORTED_NO_INCOME
       type: string
+    CreditPayStubPayBasisType:
+      description: The explicit pay basis on the paystub (if present).
+      enum:
+      - SALARY
+      - HOURLY
+      - COMMISSION
+      type: string
     PaymentInitiationPaymentGetRequest:
       description: PaymentInitiationPaymentGetRequest defines the request schema for
         `/payment_initiation/payment/get`
@@ -15832,7 +15922,7 @@ components:
           description: The total number of transactions available within the date
             range specified. If `total_investment_transactions` is larger than the
             size of the `transactions` array, more transactions are available and
-            can be fetched via manipulating the `offset` parameter.'
+            can be fetched via manipulating the `offset` parameter.
           type: integer
         request_id:
           description: A unique identifier for the request, which can be used for
@@ -16778,6 +16868,7 @@ components:
 
              Example: `2020-01-01T00:00:00Z`
           format: date-time
+          nullable: true
           type: string
         email_address:
           description: The user's email address. This field is optional, but required
@@ -16791,6 +16882,7 @@ components:
 
              Example: `2020-01-01T00:00:00Z`
           format: date-time
+          nullable: true
           type: string
         ssn:
           deprecated: true
@@ -16800,6 +16892,7 @@ components:
           deprecated: true
           description: To be provided in the format "yyyy-mm-dd". Not currently used.
           format: date
+          nullable: true
           type: string
         address:
           $ref: '#/components/schemas/UserAddress'
@@ -17943,6 +18036,17 @@ components:
           description: The merchant name, as extracted by Plaid from the `name` field.
           nullable: true
           type: string
+        logo_url:
+          description: The logo associated with the merchant, if available. Formatted
+            as a 100x100 pixels PNG file path.
+          nullable: true
+          type: string
+          x-hidden-from-docs: true
+        website:
+          description: The website associated with the merchant, if available.
+          nullable: true
+          type: string
+          x-hidden-from-docs: true
         check_number:
           description: The check number of the transaction. This field is only populated
             for check transactions.
@@ -18712,6 +18816,8 @@ components:
       description: The counterparty, such as the merchant or financial institution,
         is extracted by Plaid from the raw description.
       example:
+        website: website
+        logo_url: logo_url
         name: name
       properties:
         name:
@@ -18720,9 +18826,47 @@ components:
           type: string
         type:
           $ref: '#/components/schemas/CounterpartyType'
+        website:
+          description: The website associated with the counterparty.
+          nullable: true
+          type: string
+        logo_url:
+          description: The URL of a logo associated with the counterparty, if available.
+            The logo is formatted as a 100x100 pixel PNG file.
+          nullable: true
+          type: string
       required:
+      - logo_url
       - name
       - type
+      - website
+      title: Counterparty
+      type: object
+    TransactionCounterparty:
+      additionalProperties: true
+      description: The counterparty, such as the merchant or financial institution,
+        is extracted by Plaid from the raw description.
+      properties:
+        name:
+          description: The name of the counterparty, such as the merchant or the financial
+            institution, as extracted by Plaid from the raw description.
+          type: string
+        type:
+          $ref: '#/components/schemas/CounterpartyType'
+        website:
+          description: The website associated with the counterparty.
+          nullable: true
+          type: string
+        logo_url:
+          description: The URL of a logo associated with the counterparty, if available.
+            The logo is formatted as a 100x100 pixel PNG filepath.
+          nullable: true
+          type: string
+      required:
+      - logo_url
+      - name
+      - type
+      - website
       title: Counterparty
       type: object
     CounterpartyType:
@@ -18732,12 +18876,14 @@ components:
         `merchant`: a provider of goods or services for purchase
         `financial_institution`: a financial entity (bank, credit union, BNPL, fintech)
         `payment_app`: a transfer or P2P app (e.g. Zelle)
-        `delivery_marketplace`: a food delivery marketplace (e.g DoorDash)
+        `marketplace`: a marketplace (e.g DoorDash, Google Play Store)
+        `payment_terminal`: a point-of-sale payment terminal (e.g Square, Toast)
       enum:
       - merchant
       - financial_institution
       - payment_app
-      - delivery_marketplace
+      - marketplace
+      - payment_terminal
       title: CounterpartyType
       type: string
     PersonalFinanceCategory:
@@ -19079,8 +19225,10 @@ components:
           environment: production
     RecurringTransactionsUpdateWebhook:
       additionalProperties: true
-      description: Fired when an Item's recurring transactions data is updated. After
-        receipt of this webhook, the updated data can be fetched from `/transactions/recurring/get`.
+      description: |-
+        Fired when recurring transactions data is updated. This includes when a new recurring stream is detected or when a new transaction is added to an existing recurring stream. The `RECURRING_TRANSACTIONS_UPDATE` webhook will also fire when one or more attributes of the recurring stream changes, which is usually a result of the addition, update, or removal of transactions to the stream.
+
+        After receipt of this webhook, the updated data can be fetched from `/transactions/recurring/get`.
       properties:
         webhook_type:
           description: '`TRANSACTIONS`'
@@ -20632,14 +20780,17 @@ components:
       description: |-
         Payment scheme. If not specified - the default in the region will be used (e.g. `SEPA_CREDIT_TRANSFER` for EU). Using unsupported values will result in a failed payment.
 
-        `FASTER_PAYMENTS`: Enables payments to move quickly between UK bank accounts. Default value in the UK.
+        `LOCAL_DEFAULT`: The default payment scheme for the selected market and currency will be used.
+
+        `LOCAL_INSTANT`: The instant payment scheme for the selected market and currency will be used (if applicable). Fees may be applied by the institution. If the market does not support an Instant Scheme (e.g. Denmark), the default in the region will be used.
 
         `SEPA_CREDIT_TRANSFER`: The standard payment to a beneficiary within the SEPA area.
 
         `SEPA_CREDIT_TRANSFER_INSTANT`: Instant payment within the SEPA area. May involve additional fees and may not be available at some banks.
       enum:
       - null
-      - FASTER_PAYMENTS
+      - LOCAL_DEFAULT
+      - LOCAL_INSTANT
       - SEPA_CREDIT_TRANSFER
       - SEPA_CREDIT_TRANSFER_INSTANT
       nullable: true
@@ -21192,16 +21343,17 @@ components:
       properties:
         isin:
           description: 12-character ISIN, a globally unique securities identifier.
-            Please note that CGS requires Plaid's customers to hold a license directly
-            from them to receive CUSIP & ISIN data. This field will be null by default
-            for new customers. For existing customers, this field will be null by
-            default starting on Sept 15, 2023. If you would like access to this field,
-            please contact your Plaid Account Manager or reach out to investments-vendors@plaid.com.
+            Please note that Plaid's customers must hold a license directly from CUSIP
+            Global Services to receive CUSIP & ISIN data. This field will be null
+            by default for new customers. For existing customers, this field will
+            be null by default starting on Sept 15, 2023. If you would like access
+            to this field, please contact your Plaid Account Manager or reach out
+            to investments-vendors@plaid.com.
           type: string
         cusip:
           description: 9-character CUSIP, an identifier assigned to North American
-            securities. Please note that CGS requires Plaid's customers to hold a
-            license directly from them to receive CUSIP & ISIN data. This field will
+            securities. Please note that Plaid's customers must hold a license directly
+            from CUSIP Global Services to receive CUSIP & ISIN data. This field will
             be null by default for new customers. For existing customers, this field
             will be null by default starting on Sept 15, 2023. If you would like access
             to this field, please contact your Plaid Account Manager or reach out
@@ -21914,6 +22066,114 @@ components:
           webhook_type: TRANSFER
           webhook_code: TRANSFER_EVENTS_UPDATE
           environment: production
+    RecurringNewTransferWebhook:
+      additionalProperties: true
+      description: Fired when a new transfer of a recurring transfer is originated.
+      properties:
+        webhook_type:
+          description: '`TRANSFER`'
+          type: string
+        webhook_code:
+          description: '`RECURRING_NEW_TRANSFER`'
+          type: string
+        recurring_transfer_id:
+          description: Plaid’s unique identifier for a recurring transfer.
+          title: RecurringTransferID
+          type: string
+        transfer_id:
+          description: Plaid’s unique identifier for a transfer.
+          title: TransferID
+          type: string
+        environment:
+          $ref: '#/components/schemas/WebhookEnvironmentValues'
+      required:
+      - environment
+      - recurring_transfer_id
+      - transfer_id
+      - webhook_code
+      - webhook_type
+      title: RecurringNewTransferWebhook
+      type: object
+      x-examples:
+        example-1:
+          webhook_type: TRANSFER
+          webhook_code: RECURRING_NEW_TRANSFER
+          recurring_transfer_id: 460cbe92-2dcc-8eae-5ad6-b37d0ec90fd9
+          transfer_id: 271ef220-dbf8-caeb-a7dc-a2b3e8a80963
+          environment: production
+    RecurringTransferSkippedWebhook:
+      additionalProperties: true
+      description: Fired when Plaid is unable to originate a new ACH transaction of
+        the recurring transfer on the planned date.
+      properties:
+        webhook_type:
+          description: '`TRANSFER`'
+          type: string
+        webhook_code:
+          description: '`RECURRING_TRANSFER_SKIPPED`'
+          type: string
+        recurring_transfer_id:
+          description: Plaid’s unique identifier for a recurring transfer.
+          title: RecurringTransferID
+          type: string
+        authorization_decision:
+          $ref: '#/components/schemas/TransferAuthorizationDecision'
+        authorization_decision_rationale_code:
+          $ref: '#/components/schemas/TransferAuthorizationDecisionRationaleCode'
+        skipped_origination_date:
+          description: The planned date on which Plaid is unable to originate a new
+            ACH transaction of the recurring transfer. This will be of the form YYYY-MM-DD.
+          format: date
+          type: string
+        environment:
+          $ref: '#/components/schemas/WebhookEnvironmentValues'
+      required:
+      - authorization_decision
+      - environment
+      - recurring_transfer_id
+      - skipped_origination_date
+      - webhook_code
+      - webhook_type
+      title: RecurringTransferSkippedWebhook
+      type: object
+      x-examples:
+        example-1:
+          webhook_type: TRANSFER
+          webhook_code: RECURRING_TRANSFER_SKIPPED
+          recurring_transfer_id: 460cbe92-2dcc-8eae-5ad6-b37d0ec90fd9
+          authorization_decision: declined
+          authorization_decision_rationale_code: NSF
+          skipped_origination_date: 2022-11-30
+          environment: production
+    RecurringCancelledWebhook:
+      additionalProperties: true
+      description: Fired when a recurring transfer is cancelled by Plaid.
+      properties:
+        webhook_type:
+          description: '`TRANSFER`'
+          type: string
+        webhook_code:
+          description: '`RECURRING_CANCELLED`'
+          type: string
+        recurring_transfer_id:
+          description: Plaid’s unique identifier for a recurring transfer.
+          title: RecurringTransferID
+          type: string
+        environment:
+          $ref: '#/components/schemas/WebhookEnvironmentValues'
+      required:
+      - environment
+      - recurring_transfer_id
+      - webhook_code
+      - webhook_type
+      title: RecurringCancelledWebhook
+      type: object
+      x-examples:
+        example-1:
+          webhook_type: TRANSFER
+          webhook_code: RECURRING_CANCELLED
+          recurring_transfer_id: 460cbe92-2dcc-8eae-5ad6-b37d0ec90fd9
+          environment: production
     InvestmentsDefaultUpdateWebhook:
       additionalProperties: true
       description: Fired when new transactions have been detected on an investment
@@ -22098,8 +22358,6 @@ components:
       - SEK
       - DKK
       - NOK
-      - CHF
-      - CZK
       maxLength: 3
       minLength: 3
       type: string
@@ -22141,13 +22399,19 @@ components:
     PaymentAmountToRefund:
       allOf:
       - $ref: '#/components/schemas/PaymentAmountNullable'
-      description: An amount to refund the payment partially. If this amount is not
-        specified, the payment is refunded fully for the remaining amount.
+      - additionalProperties: true
+        description: An amount to refund the payment partially. If this amount is
+          not specified, the payment is refunded fully for the remaining amount.
+        type: object
+      description: The amount and currency of a payment
     PaymentAmountRefunded:
       allOf:
       - $ref: '#/components/schemas/PaymentAmountNullable'
-      description: The amount that has been refunded already. Subtract this from the
-        payment amount to calculate the amount still available to refund.
+      - additionalProperties: true
+        description: The amount that has been refunded already. Subtract this from
+          the payment amount to calculate the amount still available to refund.
+        type: object
+      description: The amount and currency of a payment
     PaymentConsentValidDateTime:
       additionalProperties: true
       description: Life span for the payment consent. After the `to` date the payment
@@ -23343,17 +23607,18 @@ components:
           type: string
         isin:
           description: 12-character ISIN, a globally unique securities identifier.
-            Please note that CGS requires Plaid's customers to hold a license directly
-            from them to receive CUSIP & ISIN data. This field will be null by default
-            for new customers. For existing customers, this field will be null by
-            default starting on Sept 15, 2023. If you would like access to this field,
-            please contact your Plaid Account Manager or reach out to investments-vendors@plaid.com.
+            Please note that Plaid's customers must hold a license directly from CUSIP
+            Global Services to receive CUSIP & ISIN data. This field will be null
+            by default for new customers. For existing customers, this field will
+            be null by default starting on Sept 15, 2023. If you would like access
+            to this field, please contact your Plaid Account Manager or reach out
+            to investments-vendors@plaid.com.
           nullable: true
           type: string
         cusip:
           description: 9-character CUSIP, an identifier assigned to North American
-            securities. Please note that CGS requires Plaid's customers to hold a
-            license directly from them to receive CUSIP & ISIN data. This field will
+            securities. Please note that Plaid's customers must hold a license directly
+            from CUSIP Global Services to receive CUSIP & ISIN data. This field will
             be null by default for new customers. For existing customers, this field
             will be null by default starting on Sept 15, 2023. If you would like access
             to this field, please contact your Plaid Account Manager or reach out
@@ -23424,7 +23689,7 @@ components:
 
             If the security is a foreign currency this field will be updated daily and will be priced in USD.
 
-            If the security is a cryptocurrency, this field will be updated multiple times a day. As crypto prices can fluctuate quickly and data may become stale sooner than other asset classes, please refer to update_datetime with the time when the price was last updated.
+            If the security is a cryptocurrency, this field will be updated multiple times a day. As crypto prices can fluctuate quickly and data may become stale sooner than other asset classes, refer to `update_datetime` with the time when the price was last updated.
           format: double
           nullable: true
           type: number
@@ -23435,8 +23700,8 @@ components:
           nullable: true
           type: string
         update_datetime:
-          description: Date and time at which close_price is accurate, in ISO 8601
-            format (YYYY-MM-DDTHH:mm:ssZ). Always null if close_price is null.
+          description: Date and time at which `close_price` is accurate, in ISO 8601
+            format (YYYY-MM-DDTHH:mm:ssZ). Always `null` if `close_price` is `null`.
           format: date-time
           nullable: true
           type: string
@@ -23588,6 +23853,7 @@ components:
           type: string
         quantity:
           description: The number of units of the security involved in this transaction.
+            Positive for buy transactions; negative for sell transactions.
           format: double
           type: number
         amount:
@@ -24421,9 +24687,7 @@ components:
           title: RecurringTransferID
           type: string
       required:
-      - client_id
       - recurring_transfer_id
-      - secret
       title: TransferRecurringGetRequest
       type: object
     BankTransferGetRequest:
@@ -24482,6 +24746,7 @@ components:
             description: description
           iso_currency_code: iso_currency_code
           origination_account_id: origination_account_id
+          recurring_transfer_id: recurring_transfer_id
           unauthorized_return_window: 2000-01-23
           id: id
           user:
@@ -24519,6 +24784,7 @@ components:
           - null
           - null
           created: 2000-01-23T04:56:07.000+00:00
+          description: description
           schedule:
             end_date: 2000-01-23
             interval_count: 0
@@ -24529,8 +24795,6 @@ components:
           iso_currency_code: iso_currency_code
           recurring_transfer_id: recurring_transfer_id
           origination_account_id: origination_account_id
-          decision_rationale:
-            description: description
           test_clock_id: test_clock_id
           user:
             email_address: email_address
@@ -24605,7 +24869,6 @@ components:
       type: string
     TransferTestClockID:
       description: Plaid’s unique identifier for a test clock.
-      nullable: true
       title: TransferTestClockID
       type: string
     TransferSweepID:
@@ -24658,6 +24921,7 @@ components:
           description: description
         iso_currency_code: iso_currency_code
         origination_account_id: origination_account_id
+        recurring_transfer_id: recurring_transfer_id
         unauthorized_return_window: 2000-01-23
         id: id
         user:
@@ -24758,6 +25022,11 @@ components:
           items:
             $ref: '#/components/schemas/TransferRefund'
           type: array
+        recurring_transfer_id:
+          description: The id of the recurring transfer if this transfer belongs to
+            a recurring transfer.
+          nullable: true
+          type: string
       required:
       - amount
       - cancellable
@@ -24772,6 +25041,7 @@ components:
       - network
       - origination_account_id
       - originator_client_id
+      - recurring_transfer_id
       - refunds
       - standard_return_window
       - status
@@ -24782,13 +25052,14 @@ components:
       type: object
     RecurringTransfer:
       additionalProperties: true
-      description: Represents a transfer within the Transfers API.
+      description: Represents a recurring transfer within the Transfers API.
       example:
         amount: amount
         transfer_ids:
         - null
         - null
         created: 2000-01-23T04:56:07.000+00:00
+        description: description
         schedule:
           end_date: 2000-01-23
           interval_count: 0
@@ -24799,8 +25070,6 @@ components:
         iso_currency_code: iso_currency_code
         recurring_transfer_id: recurring_transfer_id
         origination_account_id: origination_account_id
-        decision_rationale:
-          description: description
         test_clock_id: test_clock_id
         user:
           email_address: email_address
@@ -24823,15 +25092,15 @@ components:
           format: date-time
           type: string
         next_origination_date:
-          description: "A date in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)\
-            \ format (YYYY-MM-DD). \n\nThe next transfer origination date after bank\
-            \ holiday adjustment."
+          description: |-
+            A date in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format (YYYY-MM-DD).
+
+            The next transfer origination date after bank holiday adjustment.
           format: date
           type: string
         test_clock_id:
           description: Plaid’s unique identifier for a test clock.
           nullable: true
-          title: TransferTestClockID
           type: string
         type:
           $ref: '#/components/schemas/TransferType'
@@ -24856,14 +25125,13 @@ components:
         iso_currency_code:
           description: The currency of the transfer amount, e.g. "USD"
           type: string
+        description:
+          description: The description of the recurring transfer.
+          type: string
         transfer_ids:
           items:
             $ref: '#/components/schemas/TransferID'
           type: array
-        decision:
-          $ref: '#/components/schemas/TransferAuthorizationDecision'
-        decision_rationale:
-          $ref: '#/components/schemas/TransferAuthorizationDecisionRationale'
         user:
           $ref: '#/components/schemas/TransferUserInResponse'
         schedule:
@@ -24872,6 +25140,7 @@ components:
       - account_id
       - amount
       - created
+      - description
       - iso_currency_code
       - network
       - next_origination_date
@@ -24879,38 +25148,47 @@ components:
       - recurring_transfer_id
       - schedule
       - status
+      - transfer_ids
       - type
       - user
       title: RecurringTransfer
+      type: object
+    RecurringTransferNullable:
+      additionalProperties: true
+      allOf:
+      - $ref: '#/components/schemas/RecurringTransfer'
+      - nullable: true
+        type: object
+      description: Represents a recurring transfer within the Transfers API.
+      title: RecurringTransferNullable
       type: object
     TransferTestClock:
       additionalProperties: true
       description: Defines the test clock for a transfer.
       example:
-        frozen_timestamp: 2000-01-23T04:56:07.000+00:00
+        virtual_time: 2000-01-23T04:56:07.000+00:00
         test_clock_id: test_clock_id
       properties:
         test_clock_id:
           description: Plaid’s unique identifier for a test clock.
-          nullable: true
           title: TransferTestClockID
           type: string
-        frozen_timestamp:
-          description: The frozen timestamp on the test clock. This will be of the
+        virtual_time:
+          description: The virtual timestamp on the test clock. This will be of the
             form `2006-01-02T15:04:05Z`.
           format: date-time
-          title: FrozenTimestamp
+          title: VirtualTime
           type: string
       required:
-      - frozen_timestamp
       - test_clock_id
+      - virtual_time
       title: TransferTestClock
       type: object
-    FrozenTimestamp:
-      description: The frozen timestamp on the test clock. This will be of the form
+    VirtualTime:
+      description: The virtual timestamp on the test clock. This will be of the form
         `2006-01-02T15:04:05Z`.
       format: date-time
-      title: FrozenTimestamp
+      title: VirtualTime
       type: string
     BankTransfer:
       additionalProperties: true
@@ -25018,53 +25296,6 @@ components:
       - type
       - user
       title: BankTransfer
-      type: object
-    DisbursementLimits:
-      additionalProperties: true
-      description: Requested disbursement (i.e. sending money) limits for the end
-        customer.
-      example:
-        average_amount: 0
-        monthly_amount: 1
-        maximum_amount: 6
-      properties:
-        average_amount:
-          description: Average disbursement amount in a single transaction, in dollars.
-          type: integer
-        maximum_amount:
-          description: Maximum disbursement amount in a single transaction, in dollars.
-          type: integer
-        monthly_amount:
-          description: Monthly disbursement amount, in dollars.
-          type: integer
-      required:
-      - average_amount
-      - maximum_amount
-      - monthly_amount
-      title: DisbursementLimits
-      type: object
-    PaymentLimits:
-      additionalProperties: true
-      description: Requested payment (i.e. receiving money) limits for the end customer.
-      example:
-        average_amount: 5
-        monthly_amount: 2
-        maximum_amount: 5
-      properties:
-        average_amount:
-          description: Average payment amount, in dollars.
-          type: integer
-        maximum_amount:
-          description: Maximum payment amount, in dollars.
-          type: integer
-        monthly_amount:
-          description: Monthly payment amount, in dollars.
-          type: integer
-      required:
-      - average_amount
-      - maximum_amount
-      - monthly_amount
-      title: PaymentLimits
       type: object
     Originator:
       additionalProperties: true
@@ -25180,6 +25411,14 @@ components:
       maxLength: 50
       nullable: true
       title: TransferAuthorizationIdempotencyKey
+      type: string
+    TransferRecurringIdempotencyKey:
+      description: |-
+        A random key provided by the client, per unique recurring transfer. Maximum of 50 characters.
+
+        The API supports idempotency for safely retrying requests without accidentally performing the same operation twice. For example, if a request to create a recurring fails due to a network connection error, you can retry the request with the same idempotency key to guarantee that only a single recurring transfer is created.
+      maxLength: 50
+      title: TransferRecurringIdempotencyKey
       type: string
     TransferRefundIdempotencyKey:
       description: |-
@@ -25464,16 +25703,22 @@ components:
       title: TransferAuthorizationDecisionRationale
       type: object
     SignalPaymentMethod:
-      description: "The payment method to complete the transaction after the risk\
-        \ assessment. It may be different from the default payment method.\n\n`SAME_DAY_ACH`:\
-        \ Same Day ACH by NACHA. The debit transaction is processed and settled on\
-        \ the same day\n\n`NEXT_DAY_ACH`: Next Day ACH settlement for debit transactions,\
-        \ offered by some payment processors \n\n`STANDARD_ACH`: standard ACH by NACHA\n\
-        \n`REAL_TIME_PAYMENTS`: real-time payments such as RTP and FedNow\n\n`DEBIT_CARD`:\
-        \ if the default payment is over debit card networks\n\n`MULTIPLE_PAYMENT_METHODS`:\
-        \ if there is no default debit rail or there are multiple payment methods\
-        \ \n\nPossible values: `SAME_DAY_ACH`, `NEXT_DAY_ACH`, `STANDARD_ACH`, `REAL_TIME_PAYMENTS`,\
-        \ `DEBIT_CARD`, `MULTIPLE_PAYMENT_METHODS`\n"
+      description: |
+        The payment method to complete the transaction after the risk assessment. It may be different from the default payment method.
+
+        `SAME_DAY_ACH`: Same Day ACH by NACHA. The debit transaction is processed and settled on the same day
+
+        `NEXT_DAY_ACH`: Next Day ACH settlement for debit transactions, offered by some payment processors
+
+        `STANDARD_ACH`: standard ACH by NACHA
+
+        `REAL_TIME_PAYMENTS`: real-time payments such as RTP and FedNow
+
+        `DEBIT_CARD`: if the default payment is over debit card networks
+
+        `MULTIPLE_PAYMENT_METHODS`: if there is no default debit rail or there are multiple payment methods
+
+        Possible values: `SAME_DAY_ACH`, `NEXT_DAY_ACH`, `STANDARD_ACH`, `REAL_TIME_PAYMENTS`, `DEBIT_CARD`, `MULTIPLE_PAYMENT_METHODS`
       enum:
       - SAME_DAY_ACH
       - NEXT_DAY_ACH
@@ -25665,11 +25910,9 @@ components:
         interval_unit:
           $ref: '#/components/schemas/TransferScheduleIntervalUnit'
         interval_count:
-          description: "The number of recurring `interval_units` between originations.\
-            \ The recurring interval(before holiday adjustment) is calculated by multiplying\
-            \ `interval_unit` and `interval_count`. \nFor instance, to schedule a\
-            \ recurring transfer which originates once every two weeks, set `interval_unit`\
-            \ = `week` and `interval_count` = 2."
+          description: |-
+            The number of recurring `interval_units` between originations. The recurring interval(before holiday adjustment) is calculated by multiplying `interval_unit` and `interval_count`.
+            For instance, to schedule a recurring transfer which originates once every two weeks, set `interval_unit` = `week` and `interval_count` = 2.
           title: TransferScheduleIntervalCount
           type: integer
         interval_execution_day:
@@ -25696,6 +25939,11 @@ components:
           format: date
           nullable: true
           type: string
+      required:
+      - interval_count
+      - interval_execution_day
+      - interval_unit
+      - start_date
       title: TransferRecurringSchedule
       type: object
     TransferScheduleIntervalUnit:
@@ -25707,11 +25955,9 @@ components:
       title: TransferScheduleIntervalUnit
       type: string
     TransferScheduleIntervalCount:
-      description: "The number of recurring `interval_units` between originations.\
-        \ The recurring interval(before holiday adjustment) is calculated by multiplying\
-        \ `interval_unit` and `interval_count`. \nFor instance, to schedule a recurring\
-        \ transfer which originates once every two weeks, set `interval_unit` = `week`\
-        \ and `interval_count` = 2."
+      description: |-
+        The number of recurring `interval_units` between originations. The recurring interval(before holiday adjustment) is calculated by multiplying `interval_unit` and `interval_count`.
+        For instance, to schedule a recurring transfer which originates once every two weeks, set `interval_unit` = `week` and `interval_count` = 2.
       title: TransferScheduleIntervalCount
       type: integer
     TransferMetadata:
@@ -25760,15 +26006,6 @@ components:
       - credit
       title: BankTransferType
       type: string
-    TransactionFrequency:
-      description: Best guess frequency of transactions of the end customer.
-      enum:
-      - once_per_month
-      - twice_per_month
-      - four_times_per_month
-      - daily
-      title: TransactionFrequency
-      type: string
     TransferDiligenceStatus:
       description: Originator’s diligence status.
       enum:
@@ -25807,7 +26044,6 @@ components:
       - active
       - cancelled
       - expired
-      nullable: true
       title: TransferRecurringStatus
       type: string
     TransferSweepStatus:
@@ -26038,6 +26274,41 @@ components:
       - user
       title: TransferAuthorizationCreateRequest
       type: object
+    TransferCapabilitiesGetRequest:
+      description: Defines the request schema for `/transfer/capabilities/get`
+      example:
+        access_token: access_token
+        account_id: account_id
+        payment_profile_token: payment_profile_token
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        access_token:
+          description: The Plaid `access_token` for the account that will be debited
+            or credited. Required if not using `payment_profile_token`.
+          type: string
+        account_id:
+          description: The Plaid `account_id` for the account that will be debited
+            or credited. Required if not using `payment_profile_token`.
+          type: string
+        payment_profile_token:
+          description: A payment profile token associated with the Payment Profile
+            data that is being requested.
+          title: PaymentProfileToken
+          type: string
+      title: TransferCapabilitiesGetRequest
+      type: object
     TransferCreateRequest:
       description: Defines the request schema for `/transfer/create`
       example:
@@ -26169,6 +26440,7 @@ components:
       description: Defines the request schema for `/transfer/recurring/create`
       example:
         amount: amount
+        description: description
         secret: secret
         client_id: client_id
         access_token: access_token
@@ -26213,16 +26485,11 @@ components:
           type: string
         idempotency_key:
           description: |-
-            A random key provided by the client, per unique authorization. Maximum of 50 characters.
+            A random key provided by the client, per unique recurring transfer. Maximum of 50 characters.
 
-            The API supports idempotency for safely retrying requests without accidentally performing the same operation twice. For example, if a request to create an authorization fails due to a network connection error, you can retry the request with the same idempotency key to guarantee that only a single authorization is created.
-
-            Failure to provide this key may result in duplicate charges.
-
-            Required for guaranteed ACH customers.
+            The API supports idempotency for safely retrying requests without accidentally performing the same operation twice. For example, if a request to create a recurring fails due to a network connection error, you can retry the request with the same idempotency key to guarantee that only a single recurring transfer is created.
           maxLength: 50
-          nullable: true
-          title: TransferAuthorizationIdempotencyKey
+          title: TransferRecurringIdempotencyKey
           type: string
         account_id:
           description: The Plaid `account_id` for the account that will be debited
@@ -26251,10 +26518,12 @@ components:
           description: The currency of the transfer amount. The default value is "USD".
           type: string
           x-hidden-from-docs: true
+        description:
+          description: The description of the recurring transfer.
+          type: string
         test_clock_id:
           description: Plaid’s unique identifier for a test clock.
           nullable: true
-          title: TransferTestClockID
           type: string
         schedule:
           $ref: '#/components/schemas/TransferRecurringSchedule'
@@ -26266,12 +26535,11 @@ components:
       - access_token
       - account_id
       - amount
-      - client_id
+      - description
       - device
       - idempotency_key
       - network
       - schedule
-      - secret
       - type
       - user
       - user_present
@@ -26425,6 +26693,28 @@ components:
       - request_id
       title: TransferAuthorizationCreateResponse
       type: object
+    TransferCapabilitiesGetResponse:
+      additionalProperties: true
+      description: Defines the response schema for `/transfer/capabilities/get`
+      example:
+        institution_supported_networks:
+          rtp:
+            credit: false
+        request_id: request_id
+      properties:
+        institution_supported_networks:
+          $ref: '#/components/schemas/InstitutionSupportedNetworks'
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - institution_supported_networks
+      - request_id
+      title: TransferCapabilitiesGetResponse
+      type: object
     TransferAuthorizationDecision:
       description: |2-
 
@@ -26494,6 +26784,34 @@ components:
       - proposed_transfer
       title: TransferAuthorization
       type: object
+    InstitutionSupportedNetworks:
+      additionalProperties: true
+      description: Contains the supported RTP network and types by the linked item's
+        institution
+      example:
+        rtp:
+          credit: false
+      properties:
+        rtp:
+          $ref: '#/components/schemas/TransferCapabilitiesGetRTP'
+      required:
+      - rtp
+      title: InstitutionSupportedNetworks
+      type: object
+    TransferCapabilitiesGetRTP:
+      additionalProperties: true
+      description: Contains the supported service types in RTP
+      example:
+        credit: false
+      properties:
+        credit:
+          default: false
+          description: When `true`, meaning the linked item's institution supports
+            RTP credit transfer
+          nullable: false
+          type: boolean
+      title: TransferCapabilitiesGetRTP
+      type: object
     TransferCreateResponse:
       additionalProperties: true
       description: Defines the response schema for `/transfer/create`
@@ -26524,6 +26842,7 @@ components:
             description: description
           iso_currency_code: iso_currency_code
           origination_account_id: origination_account_id
+          recurring_transfer_id: recurring_transfer_id
           unauthorized_return_window: 2000-01-23
           id: id
           user:
@@ -26555,39 +26874,16 @@ components:
       additionalProperties: true
       description: Defines the response schema for `/transfer/recurring/create`
       example:
-        recurring_transfer:
-          amount: amount
-          transfer_ids:
-          - null
-          - null
-          created: 2000-01-23T04:56:07.000+00:00
-          schedule:
-            end_date: 2000-01-23
-            interval_count: 0
-            interval_execution_day: 6
-            start_date: 2000-01-23
-          account_id: account_id
-          next_origination_date: 2000-01-23
-          iso_currency_code: iso_currency_code
-          recurring_transfer_id: recurring_transfer_id
-          origination_account_id: origination_account_id
-          decision_rationale:
-            description: description
-          test_clock_id: test_clock_id
-          user:
-            email_address: email_address
-            address:
-              country: country
-              city: city
-              street: street
-              region: region
-              postal_code: postal_code
-            phone_number: phone_number
-            legal_name: legal_name
+        decision_rationale:
+          description: description
         request_id: request_id
       properties:
         recurring_transfer:
-          $ref: '#/components/schemas/RecurringTransfer'
+          $ref: '#/components/schemas/RecurringTransferNullable'
+        decision:
+          $ref: '#/components/schemas/TransferAuthorizationDecision'
+        decision_rationale:
+          $ref: '#/components/schemas/TransferAuthorizationDecisionRationale'
         request_id:
           description: A unique identifier for the request, which can be used for
             troubleshooting. This identifier, like all Plaid identifiers, is case
@@ -26595,7 +26891,7 @@ components:
           title: RequestID
           type: string
       required:
-      - recurring_transfer
+      - decision
       - request_id
       title: TransferRecurringCreateResponse
       type: object
@@ -26698,12 +26994,12 @@ components:
     TransferRecurringListRequest:
       description: Defines the request schema for `/transfer/recurring/list`
       example:
-        end_date: 2000-01-23T04:56:07.000+00:00
+        start_time: 2000-01-23T04:56:07.000+00:00
         offset: 0
+        end_time: 2000-01-23T04:56:07.000+00:00
         count: 2
         secret: secret
         client_id: client_id
-        start_date: 2000-01-23T04:56:07.000+00:00
       properties:
         client_id:
           description: Your Plaid API `client_id`. The `client_id` is required and
@@ -26716,13 +27012,13 @@ components:
             provided either in the `PLAID-SECRET` header or as part of a request body.
           title: APISecret
           type: string
-        start_date:
+        start_time:
           description: The start datetime of recurring transfers to list. This should
             be in RFC 3339 format (i.e. `2019-12-06T22:35:49Z`)
           format: date-time
           nullable: true
           type: string
-        end_date:
+        end_time:
           description: The end datetime of recurring transfers to list. This should
             be in RFC 3339 format (i.e. `2019-12-06T22:35:49Z`)
           format: date-time
@@ -26730,18 +27026,16 @@ components:
           type: string
         count:
           default: 25
-          description: The maximum number of transfers to return.
+          description: The maximum number of recurring transfers to return.
           maximum: 25
           minimum: 1
           type: integer
         offset:
           default: 0
-          description: The number of transfers to skip before returning results.
+          description: The number of recurring transfers to skip before returning
+            results.
           minimum: 0
           type: integer
-      required:
-      - client_id
-      - secret
       title: TransferRecurringListRequest
       type: object
     BankTransferListRequest:
@@ -26828,6 +27122,7 @@ components:
             description: description
           iso_currency_code: iso_currency_code
           origination_account_id: origination_account_id
+          recurring_transfer_id: recurring_transfer_id
           unauthorized_return_window: 2000-01-23
           id: id
           user:
@@ -26865,6 +27160,7 @@ components:
             description: description
           iso_currency_code: iso_currency_code
           origination_account_id: origination_account_id
+          recurring_transfer_id: recurring_transfer_id
           unauthorized_return_window: 2000-01-23
           id: id
           user:
@@ -26904,6 +27200,7 @@ components:
           - null
           - null
           created: 2000-01-23T04:56:07.000+00:00
+          description: description
           schedule:
             end_date: 2000-01-23
             interval_count: 0
@@ -26914,8 +27211,6 @@ components:
           iso_currency_code: iso_currency_code
           recurring_transfer_id: recurring_transfer_id
           origination_account_id: origination_account_id
-          decision_rationale:
-            description: description
           test_clock_id: test_clock_id
           user:
             email_address: email_address
@@ -26932,6 +27227,7 @@ components:
           - null
           - null
           created: 2000-01-23T04:56:07.000+00:00
+          description: description
           schedule:
             end_date: 2000-01-23
             interval_count: 0
@@ -26942,8 +27238,6 @@ components:
           iso_currency_code: iso_currency_code
           recurring_transfer_id: recurring_transfer_id
           origination_account_id: origination_account_id
-          decision_rationale:
-            description: description
           test_clock_id: test_clock_id
           user:
             email_address: email_address
@@ -27089,9 +27383,7 @@ components:
           title: RecurringTransferID
           type: string
       required:
-      - client_id
       - recurring_transfer_id
-      - secret
       title: TransferRecurringCancelRequest
       type: object
     BankTransferCancelRequest:
@@ -28401,6 +28693,7 @@ components:
         company_name:
           description: The company name of the end customer being created. This will
             be displayed in public-facing surfaces, e.g. Plaid Dashboard.
+          minLength: 1
           type: string
       required:
       - company_name
@@ -28436,15 +28729,7 @@ components:
     TransferQuestionnaireCreateRequest:
       description: Defines the request schema for `/transfer/questionnaire/create`
       example:
-        disbursement_limits:
-          average_amount: 0
-          monthly_amount: 1
-          maximum_amount: 6
         originator_client_id: originator_client_id
-        payment_limits:
-          average_amount: 5
-          monthly_amount: 2
-          maximum_amount: 5
         secret: secret
         redirect_uri: redirect_uri
         client_id: client_id
@@ -28466,13 +28751,8 @@ components:
         redirect_uri:
           description: URL the end customer will be redirected to after completing
             questions in Plaid-hosted onboarding flow.
+          minLength: 1
           type: string
-        disbursement_limits:
-          $ref: '#/components/schemas/DisbursementLimits'
-        payment_limits:
-          $ref: '#/components/schemas/PaymentLimits'
-        transaction_frequency:
-          $ref: '#/components/schemas/TransactionFrequency'
       required:
       - disbursement_limits
       - originator_client_id
@@ -28570,14 +28850,16 @@ components:
           type: string
         count:
           default: 25
-          description: The maximum number of transfers to return.
+          description: The maximum number of originators to return.
           maximum: 25
           minimum: 1
+          nullable: true
           type: integer
         offset:
           default: 0
-          description: The number of transfers to skip before returning results.
+          description: The number of originators to skip before returning results.
           minimum: 0
+          nullable: true
           type: integer
       title: TransferOriginatorListRequest
       type: object
@@ -29565,7 +29847,7 @@ components:
     SandboxTransferTestClockCreateRequest:
       description: Defines the request schema for `/sandbox/transfer/test_clock/create`
       example:
-        frozen_timestamp: 2000-01-23T04:56:07.000+00:00
+        virtual_time: 2000-01-23T04:56:07.000+00:00
         secret: secret
         client_id: client_id
       properties:
@@ -29580,25 +29862,23 @@ components:
             provided either in the `PLAID-SECRET` header or as part of a request body.
           title: APISecret
           type: string
-        frozen_timestamp:
-          description: The frozen timestamp on the test clock. This will be of the
+        virtual_time:
+          description: The virtual timestamp on the test clock. This will be of the
             form `2006-01-02T15:04:05Z`.
           format: date-time
-          title: FrozenTimestamp
+          title: VirtualTime
           type: string
       required:
-      - client_id
-      - frozen_timestamp
-      - secret
+      - virtual_time
       title: SandboxTransferTestClockCreateRequest
       type: object
     SandboxTransferTestClockAdvanceRequest:
       description: Defines the request schema for `/sandbox/transfer/test_clock/advance`
       example:
-        new_frozen_timestamp: 2000-01-23T04:56:07.000+00:00
         secret: secret
         test_clock_id: test_clock_id
         client_id: client_id
+        new_virtual_time: 2000-01-23T04:56:07.000+00:00
       properties:
         client_id:
           description: Your Plaid API `client_id`. The `client_id` is required and
@@ -29613,19 +29893,16 @@ components:
           type: string
         test_clock_id:
           description: Plaid’s unique identifier for a test clock.
-          nullable: true
           title: TransferTestClockID
           type: string
-        new_frozen_timestamp:
-          description: The frozen timestamp on the test clock. This will be of the
+        new_virtual_time:
+          description: The virtual timestamp on the test clock. This will be of the
             form `2006-01-02T15:04:05Z`.
           format: date-time
-          title: FrozenTimestamp
+          title: VirtualTime
           type: string
       required:
-      - client_id
-      - new_frozen_timestamp
-      - secret
+      - new_virtual_time
       - test_clock_id
       title: SandboxTransferTestClockAdvanceRequest
       type: object
@@ -29649,14 +29926,58 @@ components:
           type: string
         test_clock_id:
           description: Plaid’s unique identifier for a test clock.
-          nullable: true
           title: TransferTestClockID
           type: string
       required:
-      - client_id
-      - secret
       - test_clock_id
       title: SandboxTransferTestClockGetRequest
+      type: object
+    SandboxTransferTestClockListRequest:
+      description: Defines the request schema for `/sandbox/transfer/test_clock/list`
+      example:
+        offset: 0
+        count: 2
+        secret: secret
+        end_virtual_time: 2000-01-23T04:56:07.000+00:00
+        start_virtual_time: 2000-01-23T04:56:07.000+00:00
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        start_virtual_time:
+          description: The start virtual timestamp of test clocks to return. This
+            should be in RFC 3339 format (i.e. `2019-12-06T22:35:49Z`)
+          format: date-time
+          nullable: true
+          type: string
+        end_virtual_time:
+          description: The end virtual timestamp of test clocks to return. This should
+            be in RFC 3339 format (i.e. `2019-12-06T22:35:49Z`)
+          format: date-time
+          nullable: true
+          type: string
+        count:
+          default: 25
+          description: The maximum number of test clocks to return.
+          maximum: 25
+          minimum: 1
+          nullable: true
+          type: integer
+        offset:
+          default: 0
+          description: The number of test clocks to skip before returning results.
+          minimum: 0
+          type: integer
+      title: SandboxTransferTestClockListRequest
       type: object
     SandboxBankTransferSimulateResponse:
       additionalProperties: true
@@ -29713,7 +30034,7 @@ components:
       description: Defines the response schema for `/sandbox/transfer/test_clock/create`
       example:
         test_clock:
-          frozen_timestamp: 2000-01-23T04:56:07.000+00:00
+          virtual_time: 2000-01-23T04:56:07.000+00:00
           test_clock_id: test_clock_id
         request_id: request_id
       properties:
@@ -29751,7 +30072,7 @@ components:
       description: Defines the response schema for `/sandbox/transfer/test_clock/get`
       example:
         test_clock:
-          frozen_timestamp: 2000-01-23T04:56:07.000+00:00
+          virtual_time: 2000-01-23T04:56:07.000+00:00
           test_clock_id: test_clock_id
         request_id: request_id
       properties:
@@ -29767,6 +30088,32 @@ components:
       - request_id
       - test_clock
       title: SandboxTransferTestClockGetResponse
+      type: object
+    SandboxTransferTestClockListResponse:
+      additionalProperties: true
+      description: Defines the response schema for `/sandbox/transfer/test_clock/list`
+      example:
+        test_clocks:
+        - virtual_time: 2000-01-23T04:56:07.000+00:00
+          test_clock_id: test_clock_id
+        - virtual_time: 2000-01-23T04:56:07.000+00:00
+          test_clock_id: test_clock_id
+        request_id: request_id
+      properties:
+        test_clocks:
+          items:
+            $ref: '#/components/schemas/TransferTestClock'
+          type: array
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      - test_clocks
+      title: SandboxTransferTestClockListResponse
       type: object
     SandboxTransferRepaymentSimulateRequest:
       description: Defines the request schema for `/sandbox/transfer/repayment/simulate`
@@ -29948,7 +30295,7 @@ components:
           description: postal code was provided for both and was a match
           nullable: true
           type: boolean
-      title: address
+      title: AddressMatchScore
       type: object
     DepositoryFilter:
       additionalProperties: true
@@ -33838,11 +34185,18 @@ components:
                 unofficial_currency_code: unofficial_currency_code
                 total_amount: 5.962133916683182
                 iso_currency_code: iso_currency_code
+                total_amounts:
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
                 transactions:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -33851,7 +34205,7 @@ components:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -33862,11 +34216,18 @@ components:
                 unofficial_currency_code: unofficial_currency_code
                 total_amount: 5.962133916683182
                 iso_currency_code: iso_currency_code
+                total_amounts:
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
                 transactions:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -33875,7 +34236,7 @@ components:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -33894,11 +34255,18 @@ components:
                 unofficial_currency_code: unofficial_currency_code
                 total_amount: 5.962133916683182
                 iso_currency_code: iso_currency_code
+                total_amounts:
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
                 transactions:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -33907,7 +34275,7 @@ components:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -33918,11 +34286,18 @@ components:
                 unofficial_currency_code: unofficial_currency_code
                 total_amount: 5.962133916683182
                 iso_currency_code: iso_currency_code
+                total_amounts:
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
                 transactions:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -33931,7 +34306,7 @@ components:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -34094,11 +34469,18 @@ components:
                 unofficial_currency_code: unofficial_currency_code
                 total_amount: 5.962133916683182
                 iso_currency_code: iso_currency_code
+                total_amounts:
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
                 transactions:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -34107,7 +34489,7 @@ components:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -34118,11 +34500,18 @@ components:
                 unofficial_currency_code: unofficial_currency_code
                 total_amount: 5.962133916683182
                 iso_currency_code: iso_currency_code
+                total_amounts:
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
                 transactions:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -34131,7 +34520,7 @@ components:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -34150,11 +34539,18 @@ components:
                 unofficial_currency_code: unofficial_currency_code
                 total_amount: 5.962133916683182
                 iso_currency_code: iso_currency_code
+                total_amounts:
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
                 transactions:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -34163,7 +34559,7 @@ components:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -34174,11 +34570,18 @@ components:
                 unofficial_currency_code: unofficial_currency_code
                 total_amount: 5.962133916683182
                 iso_currency_code: iso_currency_code
+                total_amounts:
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
                 transactions:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -34187,7 +34590,7 @@ components:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -34201,20 +34604,34 @@ components:
           bank_income_summary:
             end_date: 2000-01-23
             unofficial_currency_code: unofficial_currency_code
-            income_categories_count: 9
-            total_amount: 2.3021358869347655
-            income_transactions_count: 3
+            income_categories_count: 3
+            total_amount: 7.061401241503109
+            income_transactions_count: 2
             iso_currency_code: iso_currency_code
+            total_amounts:
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 5.637376656633329
+              iso_currency_code: iso_currency_code
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 5.637376656633329
+              iso_currency_code: iso_currency_code
             historical_summary:
             - end_date: 2000-01-23
               unofficial_currency_code: unofficial_currency_code
               total_amount: 5.962133916683182
               iso_currency_code: iso_currency_code
+              total_amounts:
+              - unofficial_currency_code: unofficial_currency_code
+                amount: 5.637376656633329
+                iso_currency_code: iso_currency_code
+              - unofficial_currency_code: unofficial_currency_code
+                amount: 5.637376656633329
+                iso_currency_code: iso_currency_code
               transactions:
               - date: 2000-01-23
                 transaction_id: transaction_id
                 unofficial_currency_code: unofficial_currency_code
-                amount: 5.637376656633329
+                amount: 2.3021358869347655
                 check_number: check_number
                 pending: true
                 name: name
@@ -34223,7 +34640,7 @@ components:
               - date: 2000-01-23
                 transaction_id: transaction_id
                 unofficial_currency_code: unofficial_currency_code
-                amount: 5.637376656633329
+                amount: 2.3021358869347655
                 check_number: check_number
                 pending: true
                 name: name
@@ -34234,11 +34651,18 @@ components:
               unofficial_currency_code: unofficial_currency_code
               total_amount: 5.962133916683182
               iso_currency_code: iso_currency_code
+              total_amounts:
+              - unofficial_currency_code: unofficial_currency_code
+                amount: 5.637376656633329
+                iso_currency_code: iso_currency_code
+              - unofficial_currency_code: unofficial_currency_code
+                amount: 5.637376656633329
+                iso_currency_code: iso_currency_code
               transactions:
               - date: 2000-01-23
                 transaction_id: transaction_id
                 unofficial_currency_code: unofficial_currency_code
-                amount: 5.637376656633329
+                amount: 2.3021358869347655
                 check_number: check_number
                 pending: true
                 name: name
@@ -34247,7 +34671,7 @@ components:
               - date: 2000-01-23
                 transaction_id: transaction_id
                 unofficial_currency_code: unofficial_currency_code
-                amount: 5.637376656633329
+                amount: 2.3021358869347655
                 check_number: check_number
                 pending: true
                 name: name
@@ -34255,7 +34679,7 @@ components:
                 original_description: original_description
               start_date: 2000-01-23
             start_date: 2000-01-23
-            income_sources_count: 7
+            income_sources_count: 9
           days_requested: 0
         - bank_income_id: bank_income_id
           warnings:
@@ -34423,11 +34847,18 @@ components:
                 unofficial_currency_code: unofficial_currency_code
                 total_amount: 5.962133916683182
                 iso_currency_code: iso_currency_code
+                total_amounts:
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
                 transactions:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -34436,7 +34867,7 @@ components:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -34447,11 +34878,18 @@ components:
                 unofficial_currency_code: unofficial_currency_code
                 total_amount: 5.962133916683182
                 iso_currency_code: iso_currency_code
+                total_amounts:
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
                 transactions:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -34460,7 +34898,7 @@ components:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -34479,11 +34917,18 @@ components:
                 unofficial_currency_code: unofficial_currency_code
                 total_amount: 5.962133916683182
                 iso_currency_code: iso_currency_code
+                total_amounts:
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
                 transactions:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -34492,7 +34937,7 @@ components:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -34503,11 +34948,18 @@ components:
                 unofficial_currency_code: unofficial_currency_code
                 total_amount: 5.962133916683182
                 iso_currency_code: iso_currency_code
+                total_amounts:
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
                 transactions:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -34516,7 +34968,7 @@ components:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -34679,11 +35131,18 @@ components:
                 unofficial_currency_code: unofficial_currency_code
                 total_amount: 5.962133916683182
                 iso_currency_code: iso_currency_code
+                total_amounts:
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
                 transactions:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -34692,7 +35151,7 @@ components:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -34703,11 +35162,18 @@ components:
                 unofficial_currency_code: unofficial_currency_code
                 total_amount: 5.962133916683182
                 iso_currency_code: iso_currency_code
+                total_amounts:
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
                 transactions:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -34716,7 +35182,7 @@ components:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -34735,11 +35201,18 @@ components:
                 unofficial_currency_code: unofficial_currency_code
                 total_amount: 5.962133916683182
                 iso_currency_code: iso_currency_code
+                total_amounts:
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
                 transactions:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -34748,7 +35221,7 @@ components:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -34759,11 +35232,18 @@ components:
                 unofficial_currency_code: unofficial_currency_code
                 total_amount: 5.962133916683182
                 iso_currency_code: iso_currency_code
+                total_amounts:
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
+                - unofficial_currency_code: unofficial_currency_code
+                  amount: 5.637376656633329
+                  iso_currency_code: iso_currency_code
                 transactions:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -34772,7 +35252,7 @@ components:
                 - date: 2000-01-23
                   transaction_id: transaction_id
                   unofficial_currency_code: unofficial_currency_code
-                  amount: 5.637376656633329
+                  amount: 2.3021358869347655
                   check_number: check_number
                   pending: true
                   name: name
@@ -34786,20 +35266,34 @@ components:
           bank_income_summary:
             end_date: 2000-01-23
             unofficial_currency_code: unofficial_currency_code
-            income_categories_count: 9
-            total_amount: 2.3021358869347655
-            income_transactions_count: 3
+            income_categories_count: 3
+            total_amount: 7.061401241503109
+            income_transactions_count: 2
             iso_currency_code: iso_currency_code
+            total_amounts:
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 5.637376656633329
+              iso_currency_code: iso_currency_code
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 5.637376656633329
+              iso_currency_code: iso_currency_code
             historical_summary:
             - end_date: 2000-01-23
               unofficial_currency_code: unofficial_currency_code
               total_amount: 5.962133916683182
               iso_currency_code: iso_currency_code
+              total_amounts:
+              - unofficial_currency_code: unofficial_currency_code
+                amount: 5.637376656633329
+                iso_currency_code: iso_currency_code
+              - unofficial_currency_code: unofficial_currency_code
+                amount: 5.637376656633329
+                iso_currency_code: iso_currency_code
               transactions:
               - date: 2000-01-23
                 transaction_id: transaction_id
                 unofficial_currency_code: unofficial_currency_code
-                amount: 5.637376656633329
+                amount: 2.3021358869347655
                 check_number: check_number
                 pending: true
                 name: name
@@ -34808,7 +35302,7 @@ components:
               - date: 2000-01-23
                 transaction_id: transaction_id
                 unofficial_currency_code: unofficial_currency_code
-                amount: 5.637376656633329
+                amount: 2.3021358869347655
                 check_number: check_number
                 pending: true
                 name: name
@@ -34819,11 +35313,18 @@ components:
               unofficial_currency_code: unofficial_currency_code
               total_amount: 5.962133916683182
               iso_currency_code: iso_currency_code
+              total_amounts:
+              - unofficial_currency_code: unofficial_currency_code
+                amount: 5.637376656633329
+                iso_currency_code: iso_currency_code
+              - unofficial_currency_code: unofficial_currency_code
+                amount: 5.637376656633329
+                iso_currency_code: iso_currency_code
               transactions:
               - date: 2000-01-23
                 transaction_id: transaction_id
                 unofficial_currency_code: unofficial_currency_code
-                amount: 5.637376656633329
+                amount: 2.3021358869347655
                 check_number: check_number
                 pending: true
                 name: name
@@ -34832,7 +35333,7 @@ components:
               - date: 2000-01-23
                 transaction_id: transaction_id
                 unofficial_currency_code: unofficial_currency_code
-                amount: 5.637376656633329
+                amount: 2.3021358869347655
                 check_number: check_number
                 pending: true
                 name: name
@@ -34840,7 +35341,7 @@ components:
                 original_description: original_description
               start_date: 2000-01-23
             start_date: 2000-01-23
-            income_sources_count: 7
+            income_sources_count: 9
           days_requested: 0
         request_id: request_id
       properties:
@@ -35060,11 +35561,18 @@ components:
               unofficial_currency_code: unofficial_currency_code
               total_amount: 5.962133916683182
               iso_currency_code: iso_currency_code
+              total_amounts:
+              - unofficial_currency_code: unofficial_currency_code
+                amount: 5.637376656633329
+                iso_currency_code: iso_currency_code
+              - unofficial_currency_code: unofficial_currency_code
+                amount: 5.637376656633329
+                iso_currency_code: iso_currency_code
               transactions:
               - date: 2000-01-23
                 transaction_id: transaction_id
                 unofficial_currency_code: unofficial_currency_code
-                amount: 5.637376656633329
+                amount: 2.3021358869347655
                 check_number: check_number
                 pending: true
                 name: name
@@ -35073,7 +35581,7 @@ components:
               - date: 2000-01-23
                 transaction_id: transaction_id
                 unofficial_currency_code: unofficial_currency_code
-                amount: 5.637376656633329
+                amount: 2.3021358869347655
                 check_number: check_number
                 pending: true
                 name: name
@@ -35084,11 +35592,18 @@ components:
               unofficial_currency_code: unofficial_currency_code
               total_amount: 5.962133916683182
               iso_currency_code: iso_currency_code
+              total_amounts:
+              - unofficial_currency_code: unofficial_currency_code
+                amount: 5.637376656633329
+                iso_currency_code: iso_currency_code
+              - unofficial_currency_code: unofficial_currency_code
+                amount: 5.637376656633329
+                iso_currency_code: iso_currency_code
               transactions:
               - date: 2000-01-23
                 transaction_id: transaction_id
                 unofficial_currency_code: unofficial_currency_code
-                amount: 5.637376656633329
+                amount: 2.3021358869347655
                 check_number: check_number
                 pending: true
                 name: name
@@ -35097,7 +35612,7 @@ components:
               - date: 2000-01-23
                 transaction_id: transaction_id
                 unofficial_currency_code: unofficial_currency_code
-                amount: 5.637376656633329
+                amount: 2.3021358869347655
                 check_number: check_number
                 pending: true
                 name: name
@@ -35116,11 +35631,18 @@ components:
               unofficial_currency_code: unofficial_currency_code
               total_amount: 5.962133916683182
               iso_currency_code: iso_currency_code
+              total_amounts:
+              - unofficial_currency_code: unofficial_currency_code
+                amount: 5.637376656633329
+                iso_currency_code: iso_currency_code
+              - unofficial_currency_code: unofficial_currency_code
+                amount: 5.637376656633329
+                iso_currency_code: iso_currency_code
               transactions:
               - date: 2000-01-23
                 transaction_id: transaction_id
                 unofficial_currency_code: unofficial_currency_code
-                amount: 5.637376656633329
+                amount: 2.3021358869347655
                 check_number: check_number
                 pending: true
                 name: name
@@ -35129,7 +35651,7 @@ components:
               - date: 2000-01-23
                 transaction_id: transaction_id
                 unofficial_currency_code: unofficial_currency_code
-                amount: 5.637376656633329
+                amount: 2.3021358869347655
                 check_number: check_number
                 pending: true
                 name: name
@@ -35140,11 +35662,18 @@ components:
               unofficial_currency_code: unofficial_currency_code
               total_amount: 5.962133916683182
               iso_currency_code: iso_currency_code
+              total_amounts:
+              - unofficial_currency_code: unofficial_currency_code
+                amount: 5.637376656633329
+                iso_currency_code: iso_currency_code
+              - unofficial_currency_code: unofficial_currency_code
+                amount: 5.637376656633329
+                iso_currency_code: iso_currency_code
               transactions:
               - date: 2000-01-23
                 transaction_id: transaction_id
                 unofficial_currency_code: unofficial_currency_code
-                amount: 5.637376656633329
+                amount: 2.3021358869347655
                 check_number: check_number
                 pending: true
                 name: name
@@ -35153,7 +35682,7 @@ components:
               - date: 2000-01-23
                 transaction_id: transaction_id
                 unofficial_currency_code: unofficial_currency_code
-                amount: 5.637376656633329
+                amount: 2.3021358869347655
                 check_number: check_number
                 pending: true
                 name: name
@@ -35316,11 +35845,18 @@ components:
               unofficial_currency_code: unofficial_currency_code
               total_amount: 5.962133916683182
               iso_currency_code: iso_currency_code
+              total_amounts:
+              - unofficial_currency_code: unofficial_currency_code
+                amount: 5.637376656633329
+                iso_currency_code: iso_currency_code
+              - unofficial_currency_code: unofficial_currency_code
+                amount: 5.637376656633329
+                iso_currency_code: iso_currency_code
               transactions:
               - date: 2000-01-23
                 transaction_id: transaction_id
                 unofficial_currency_code: unofficial_currency_code
-                amount: 5.637376656633329
+                amount: 2.3021358869347655
                 check_number: check_number
                 pending: true
                 name: name
@@ -35329,7 +35865,7 @@ components:
               - date: 2000-01-23
                 transaction_id: transaction_id
                 unofficial_currency_code: unofficial_currency_code
-                amount: 5.637376656633329
+                amount: 2.3021358869347655
                 check_number: check_number
                 pending: true
                 name: name
@@ -35340,11 +35876,18 @@ components:
               unofficial_currency_code: unofficial_currency_code
               total_amount: 5.962133916683182
               iso_currency_code: iso_currency_code
+              total_amounts:
+              - unofficial_currency_code: unofficial_currency_code
+                amount: 5.637376656633329
+                iso_currency_code: iso_currency_code
+              - unofficial_currency_code: unofficial_currency_code
+                amount: 5.637376656633329
+                iso_currency_code: iso_currency_code
               transactions:
               - date: 2000-01-23
                 transaction_id: transaction_id
                 unofficial_currency_code: unofficial_currency_code
-                amount: 5.637376656633329
+                amount: 2.3021358869347655
                 check_number: check_number
                 pending: true
                 name: name
@@ -35353,7 +35896,7 @@ components:
               - date: 2000-01-23
                 transaction_id: transaction_id
                 unofficial_currency_code: unofficial_currency_code
-                amount: 5.637376656633329
+                amount: 2.3021358869347655
                 check_number: check_number
                 pending: true
                 name: name
@@ -35372,11 +35915,18 @@ components:
               unofficial_currency_code: unofficial_currency_code
               total_amount: 5.962133916683182
               iso_currency_code: iso_currency_code
+              total_amounts:
+              - unofficial_currency_code: unofficial_currency_code
+                amount: 5.637376656633329
+                iso_currency_code: iso_currency_code
+              - unofficial_currency_code: unofficial_currency_code
+                amount: 5.637376656633329
+                iso_currency_code: iso_currency_code
               transactions:
               - date: 2000-01-23
                 transaction_id: transaction_id
                 unofficial_currency_code: unofficial_currency_code
-                amount: 5.637376656633329
+                amount: 2.3021358869347655
                 check_number: check_number
                 pending: true
                 name: name
@@ -35385,7 +35935,7 @@ components:
               - date: 2000-01-23
                 transaction_id: transaction_id
                 unofficial_currency_code: unofficial_currency_code
-                amount: 5.637376656633329
+                amount: 2.3021358869347655
                 check_number: check_number
                 pending: true
                 name: name
@@ -35396,11 +35946,18 @@ components:
               unofficial_currency_code: unofficial_currency_code
               total_amount: 5.962133916683182
               iso_currency_code: iso_currency_code
+              total_amounts:
+              - unofficial_currency_code: unofficial_currency_code
+                amount: 5.637376656633329
+                iso_currency_code: iso_currency_code
+              - unofficial_currency_code: unofficial_currency_code
+                amount: 5.637376656633329
+                iso_currency_code: iso_currency_code
               transactions:
               - date: 2000-01-23
                 transaction_id: transaction_id
                 unofficial_currency_code: unofficial_currency_code
-                amount: 5.637376656633329
+                amount: 2.3021358869347655
                 check_number: check_number
                 pending: true
                 name: name
@@ -35409,7 +35966,7 @@ components:
               - date: 2000-01-23
                 transaction_id: transaction_id
                 unofficial_currency_code: unofficial_currency_code
-                amount: 5.637376656633329
+                amount: 2.3021358869347655
                 check_number: check_number
                 pending: true
                 name: name
@@ -35423,20 +35980,34 @@ components:
         bank_income_summary:
           end_date: 2000-01-23
           unofficial_currency_code: unofficial_currency_code
-          income_categories_count: 9
-          total_amount: 2.3021358869347655
-          income_transactions_count: 3
+          income_categories_count: 3
+          total_amount: 7.061401241503109
+          income_transactions_count: 2
           iso_currency_code: iso_currency_code
+          total_amounts:
+          - unofficial_currency_code: unofficial_currency_code
+            amount: 5.637376656633329
+            iso_currency_code: iso_currency_code
+          - unofficial_currency_code: unofficial_currency_code
+            amount: 5.637376656633329
+            iso_currency_code: iso_currency_code
           historical_summary:
           - end_date: 2000-01-23
             unofficial_currency_code: unofficial_currency_code
             total_amount: 5.962133916683182
             iso_currency_code: iso_currency_code
+            total_amounts:
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 5.637376656633329
+              iso_currency_code: iso_currency_code
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 5.637376656633329
+              iso_currency_code: iso_currency_code
             transactions:
             - date: 2000-01-23
               transaction_id: transaction_id
               unofficial_currency_code: unofficial_currency_code
-              amount: 5.637376656633329
+              amount: 2.3021358869347655
               check_number: check_number
               pending: true
               name: name
@@ -35445,7 +36016,7 @@ components:
             - date: 2000-01-23
               transaction_id: transaction_id
               unofficial_currency_code: unofficial_currency_code
-              amount: 5.637376656633329
+              amount: 2.3021358869347655
               check_number: check_number
               pending: true
               name: name
@@ -35456,11 +36027,18 @@ components:
             unofficial_currency_code: unofficial_currency_code
             total_amount: 5.962133916683182
             iso_currency_code: iso_currency_code
+            total_amounts:
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 5.637376656633329
+              iso_currency_code: iso_currency_code
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 5.637376656633329
+              iso_currency_code: iso_currency_code
             transactions:
             - date: 2000-01-23
               transaction_id: transaction_id
               unofficial_currency_code: unofficial_currency_code
-              amount: 5.637376656633329
+              amount: 2.3021358869347655
               check_number: check_number
               pending: true
               name: name
@@ -35469,7 +36047,7 @@ components:
             - date: 2000-01-23
               transaction_id: transaction_id
               unofficial_currency_code: unofficial_currency_code
-              amount: 5.637376656633329
+              amount: 2.3021358869347655
               check_number: check_number
               pending: true
               name: name
@@ -35477,7 +36055,7 @@ components:
               original_description: original_description
             start_date: 2000-01-23
           start_date: 2000-01-23
-          income_sources_count: 7
+          income_sources_count: 9
         days_requested: 0
       properties:
         bank_income_id:
@@ -35663,11 +36241,18 @@ components:
             unofficial_currency_code: unofficial_currency_code
             total_amount: 5.962133916683182
             iso_currency_code: iso_currency_code
+            total_amounts:
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 5.637376656633329
+              iso_currency_code: iso_currency_code
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 5.637376656633329
+              iso_currency_code: iso_currency_code
             transactions:
             - date: 2000-01-23
               transaction_id: transaction_id
               unofficial_currency_code: unofficial_currency_code
-              amount: 5.637376656633329
+              amount: 2.3021358869347655
               check_number: check_number
               pending: true
               name: name
@@ -35676,7 +36261,7 @@ components:
             - date: 2000-01-23
               transaction_id: transaction_id
               unofficial_currency_code: unofficial_currency_code
-              amount: 5.637376656633329
+              amount: 2.3021358869347655
               check_number: check_number
               pending: true
               name: name
@@ -35687,11 +36272,18 @@ components:
             unofficial_currency_code: unofficial_currency_code
             total_amount: 5.962133916683182
             iso_currency_code: iso_currency_code
+            total_amounts:
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 5.637376656633329
+              iso_currency_code: iso_currency_code
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 5.637376656633329
+              iso_currency_code: iso_currency_code
             transactions:
             - date: 2000-01-23
               transaction_id: transaction_id
               unofficial_currency_code: unofficial_currency_code
-              amount: 5.637376656633329
+              amount: 2.3021358869347655
               check_number: check_number
               pending: true
               name: name
@@ -35700,7 +36292,7 @@ components:
             - date: 2000-01-23
               transaction_id: transaction_id
               unofficial_currency_code: unofficial_currency_code
-              amount: 5.637376656633329
+              amount: 2.3021358869347655
               check_number: check_number
               pending: true
               name: name
@@ -35719,11 +36311,18 @@ components:
             unofficial_currency_code: unofficial_currency_code
             total_amount: 5.962133916683182
             iso_currency_code: iso_currency_code
+            total_amounts:
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 5.637376656633329
+              iso_currency_code: iso_currency_code
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 5.637376656633329
+              iso_currency_code: iso_currency_code
             transactions:
             - date: 2000-01-23
               transaction_id: transaction_id
               unofficial_currency_code: unofficial_currency_code
-              amount: 5.637376656633329
+              amount: 2.3021358869347655
               check_number: check_number
               pending: true
               name: name
@@ -35732,7 +36331,7 @@ components:
             - date: 2000-01-23
               transaction_id: transaction_id
               unofficial_currency_code: unofficial_currency_code
-              amount: 5.637376656633329
+              amount: 2.3021358869347655
               check_number: check_number
               pending: true
               name: name
@@ -35743,11 +36342,18 @@ components:
             unofficial_currency_code: unofficial_currency_code
             total_amount: 5.962133916683182
             iso_currency_code: iso_currency_code
+            total_amounts:
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 5.637376656633329
+              iso_currency_code: iso_currency_code
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 5.637376656633329
+              iso_currency_code: iso_currency_code
             transactions:
             - date: 2000-01-23
               transaction_id: transaction_id
               unofficial_currency_code: unofficial_currency_code
-              amount: 5.637376656633329
+              amount: 2.3021358869347655
               check_number: check_number
               pending: true
               name: name
@@ -35756,7 +36362,7 @@ components:
             - date: 2000-01-23
               transaction_id: transaction_id
               unofficial_currency_code: unofficial_currency_code
-              amount: 5.637376656633329
+              amount: 2.3021358869347655
               check_number: check_number
               pending: true
               name: name
@@ -35911,11 +36517,18 @@ components:
           unofficial_currency_code: unofficial_currency_code
           total_amount: 5.962133916683182
           iso_currency_code: iso_currency_code
+          total_amounts:
+          - unofficial_currency_code: unofficial_currency_code
+            amount: 5.637376656633329
+            iso_currency_code: iso_currency_code
+          - unofficial_currency_code: unofficial_currency_code
+            amount: 5.637376656633329
+            iso_currency_code: iso_currency_code
           transactions:
           - date: 2000-01-23
             transaction_id: transaction_id
             unofficial_currency_code: unofficial_currency_code
-            amount: 5.637376656633329
+            amount: 2.3021358869347655
             check_number: check_number
             pending: true
             name: name
@@ -35924,7 +36537,7 @@ components:
           - date: 2000-01-23
             transaction_id: transaction_id
             unofficial_currency_code: unofficial_currency_code
-            amount: 5.637376656633329
+            amount: 2.3021358869347655
             check_number: check_number
             pending: true
             name: name
@@ -35935,11 +36548,18 @@ components:
           unofficial_currency_code: unofficial_currency_code
           total_amount: 5.962133916683182
           iso_currency_code: iso_currency_code
+          total_amounts:
+          - unofficial_currency_code: unofficial_currency_code
+            amount: 5.637376656633329
+            iso_currency_code: iso_currency_code
+          - unofficial_currency_code: unofficial_currency_code
+            amount: 5.637376656633329
+            iso_currency_code: iso_currency_code
           transactions:
           - date: 2000-01-23
             transaction_id: transaction_id
             unofficial_currency_code: unofficial_currency_code
-            amount: 5.637376656633329
+            amount: 2.3021358869347655
             check_number: check_number
             pending: true
             name: name
@@ -35948,7 +36568,7 @@ components:
           - date: 2000-01-23
             transaction_id: transaction_id
             unofficial_currency_code: unofficial_currency_code
-            amount: 5.637376656633329
+            amount: 2.3021358869347655
             check_number: check_number
             pending: true
             name: name
@@ -36033,71 +36653,17 @@ components:
         Unofficial currency codes are used for currencies that do not have official ISO currency codes, such as cryptocurrencies and the currencies of certain countries.
       nullable: true
       type: string
-    CreditBankIncomeSummary:
-      description: Summary for bank income across all income sources and items (max
-        history of 730 days).
+    CreditAmountWithCurrency:
+      additionalProperties: true
+      description: This contains an amount, denominated in the currency specified
+        by either `iso_currency_code` or `unofficial_currency_code`
       example:
-        end_date: 2000-01-23
         unofficial_currency_code: unofficial_currency_code
-        income_categories_count: 9
-        total_amount: 2.3021358869347655
-        income_transactions_count: 3
+        amount: 5.637376656633329
         iso_currency_code: iso_currency_code
-        historical_summary:
-        - end_date: 2000-01-23
-          unofficial_currency_code: unofficial_currency_code
-          total_amount: 5.962133916683182
-          iso_currency_code: iso_currency_code
-          transactions:
-          - date: 2000-01-23
-            transaction_id: transaction_id
-            unofficial_currency_code: unofficial_currency_code
-            amount: 5.637376656633329
-            check_number: check_number
-            pending: true
-            name: name
-            iso_currency_code: iso_currency_code
-            original_description: original_description
-          - date: 2000-01-23
-            transaction_id: transaction_id
-            unofficial_currency_code: unofficial_currency_code
-            amount: 5.637376656633329
-            check_number: check_number
-            pending: true
-            name: name
-            iso_currency_code: iso_currency_code
-            original_description: original_description
-          start_date: 2000-01-23
-        - end_date: 2000-01-23
-          unofficial_currency_code: unofficial_currency_code
-          total_amount: 5.962133916683182
-          iso_currency_code: iso_currency_code
-          transactions:
-          - date: 2000-01-23
-            transaction_id: transaction_id
-            unofficial_currency_code: unofficial_currency_code
-            amount: 5.637376656633329
-            check_number: check_number
-            pending: true
-            name: name
-            iso_currency_code: iso_currency_code
-            original_description: original_description
-          - date: 2000-01-23
-            transaction_id: transaction_id
-            unofficial_currency_code: unofficial_currency_code
-            amount: 5.637376656633329
-            check_number: check_number
-            pending: true
-            name: name
-            iso_currency_code: iso_currency_code
-            original_description: original_description
-          start_date: 2000-01-23
-        start_date: 2000-01-23
-        income_sources_count: 7
       properties:
-        total_amount:
-          description: Total amount of earnings across all the income sources in the
-            end user's Items for the days requested by the client.
+        amount:
+          description: Value of amount with up to 2 decimal places.
           type: number
         iso_currency_code:
           description: The ISO 4217 currency code of the amount or balance.
@@ -36109,6 +36675,120 @@ components:
             Unofficial currency codes are used for currencies that do not have official ISO currency codes, such as cryptocurrencies and the currencies of certain countries.
           nullable: true
           type: string
+      type: object
+    CreditBankIncomeSummary:
+      additionalProperties: true
+      description: Summary for bank income across all income sources and items (max
+        history of 730 days).
+      example:
+        end_date: 2000-01-23
+        unofficial_currency_code: unofficial_currency_code
+        income_categories_count: 3
+        total_amount: 7.061401241503109
+        income_transactions_count: 2
+        iso_currency_code: iso_currency_code
+        total_amounts:
+        - unofficial_currency_code: unofficial_currency_code
+          amount: 5.637376656633329
+          iso_currency_code: iso_currency_code
+        - unofficial_currency_code: unofficial_currency_code
+          amount: 5.637376656633329
+          iso_currency_code: iso_currency_code
+        historical_summary:
+        - end_date: 2000-01-23
+          unofficial_currency_code: unofficial_currency_code
+          total_amount: 5.962133916683182
+          iso_currency_code: iso_currency_code
+          total_amounts:
+          - unofficial_currency_code: unofficial_currency_code
+            amount: 5.637376656633329
+            iso_currency_code: iso_currency_code
+          - unofficial_currency_code: unofficial_currency_code
+            amount: 5.637376656633329
+            iso_currency_code: iso_currency_code
+          transactions:
+          - date: 2000-01-23
+            transaction_id: transaction_id
+            unofficial_currency_code: unofficial_currency_code
+            amount: 2.3021358869347655
+            check_number: check_number
+            pending: true
+            name: name
+            iso_currency_code: iso_currency_code
+            original_description: original_description
+          - date: 2000-01-23
+            transaction_id: transaction_id
+            unofficial_currency_code: unofficial_currency_code
+            amount: 2.3021358869347655
+            check_number: check_number
+            pending: true
+            name: name
+            iso_currency_code: iso_currency_code
+            original_description: original_description
+          start_date: 2000-01-23
+        - end_date: 2000-01-23
+          unofficial_currency_code: unofficial_currency_code
+          total_amount: 5.962133916683182
+          iso_currency_code: iso_currency_code
+          total_amounts:
+          - unofficial_currency_code: unofficial_currency_code
+            amount: 5.637376656633329
+            iso_currency_code: iso_currency_code
+          - unofficial_currency_code: unofficial_currency_code
+            amount: 5.637376656633329
+            iso_currency_code: iso_currency_code
+          transactions:
+          - date: 2000-01-23
+            transaction_id: transaction_id
+            unofficial_currency_code: unofficial_currency_code
+            amount: 2.3021358869347655
+            check_number: check_number
+            pending: true
+            name: name
+            iso_currency_code: iso_currency_code
+            original_description: original_description
+          - date: 2000-01-23
+            transaction_id: transaction_id
+            unofficial_currency_code: unofficial_currency_code
+            amount: 2.3021358869347655
+            check_number: check_number
+            pending: true
+            name: name
+            iso_currency_code: iso_currency_code
+            original_description: original_description
+          start_date: 2000-01-23
+        start_date: 2000-01-23
+        income_sources_count: 9
+      properties:
+        total_amount:
+          deprecated: true
+          description: |-
+            Total amount of earnings across all the income sources in the end user's Items for the days requested by the client.
+            This may return an incorrect value if the summary includes income sources in multiple currencies.
+            Please use [`total_amounts`](https://plaid.com/docs/api/products/income/#credit-bank_income-get-response-bank-income-bank-income-summary-total-amounts) instead.
+          type: number
+        iso_currency_code:
+          deprecated: true
+          description: "The ISO 4217 currency code of the amount or balance. \nPlease\
+            \ use [`total_amounts`](https://plaid.com/docs/api/products/income/#credit-bank_income-get-response-bank-income-bank-income-summary-total-amounts)\
+            \ instead."
+          nullable: true
+          type: string
+        unofficial_currency_code:
+          deprecated: true
+          description: |-
+            The unofficial currency code associated with the amount or balance. Always `null` if `iso_currency_code` is non-null.
+            Unofficial currency codes are used for currencies that do not have official ISO currency codes, such as cryptocurrencies and the currencies of certain countries.
+            Please use [`total_amounts`](https://plaid.com/docs/api/products/income/#credit-bank_income-get-response-bank-income-bank-income-summary-total-amounts) instead.
+          nullable: true
+          type: string
+        total_amounts:
+          description: |-
+            Total amount of earnings across all the income sources in the end user's Items for the days requested by the client.
+            This can contain multiple amounts, with each amount denominated in one unique currency.
+          items:
+            $ref: '#/components/schemas/CreditAmountWithCurrency'
+          type: array
         start_date:
           description: |-
             The earliest date within the days requested in which all income sources identified by Plaid appear in a user's account.
@@ -36136,17 +36816,25 @@ components:
           type: array
       type: object
     CreditBankIncomeHistoricalSummary:
+      additionalProperties: true
       description: The end user's monthly summary for the income source(s).
       example:
         end_date: 2000-01-23
         unofficial_currency_code: unofficial_currency_code
         total_amount: 5.962133916683182
         iso_currency_code: iso_currency_code
+        total_amounts:
+        - unofficial_currency_code: unofficial_currency_code
+          amount: 5.637376656633329
+          iso_currency_code: iso_currency_code
+        - unofficial_currency_code: unofficial_currency_code
+          amount: 5.637376656633329
+          iso_currency_code: iso_currency_code
         transactions:
         - date: 2000-01-23
           transaction_id: transaction_id
           unofficial_currency_code: unofficial_currency_code
-          amount: 5.637376656633329
+          amount: 2.3021358869347655
           check_number: check_number
           pending: true
           name: name
@@ -36155,7 +36843,7 @@ components:
         - date: 2000-01-23
           transaction_id: transaction_id
           unofficial_currency_code: unofficial_currency_code
-          amount: 5.637376656633329
+          amount: 2.3021358869347655
           check_number: check_number
           pending: true
           name: name
@@ -36164,19 +36852,35 @@ components:
         start_date: 2000-01-23
       properties:
         total_amount:
-          description: Total amount of earnings for the income source(s) of the user
-            for the month in the summary.
+          deprecated: true
+          description: "Total amount of earnings for the income source(s) of the user\
+            \ for the month in the summary.\nThis may return an incorrect value if\
+            \ the summary includes income sources in multiple currencies. \nPlease\
+            \ use [`total_amounts`](https://plaid.com/docs/api/products/income/#credit-bank_income-get-response-bank-income-items-bank-income-sources-historical-summary-total-amounts)\
+            \ instead."
           type: number
         iso_currency_code:
-          description: The ISO 4217 currency code of the amount or balance.
+          deprecated: true
+          description: |-
+            The ISO 4217 currency code of the amount or balance.
+            Please use [`total_amounts`](https://plaid.com/docs/api/products/income/#credit-bank_income-get-response-bank-income-items-bank-income-sources-historical-summary-total-amounts) instead.
           nullable: true
           type: string
         unofficial_currency_code:
+          deprecated: true
           description: |-
             The unofficial currency code associated with the amount or balance. Always `null` if `iso_currency_code` is non-null.
             Unofficial currency codes are used for currencies that do not have official ISO currency codes, such as cryptocurrencies and the currencies of certain countries.
+            Please use [`total_amounts`](https://plaid.com/docs/api/products/income/#credit-bank_income-get-response-bank-income-items-bank-income-sources-historical-summary-total-amounts) instead.
           nullable: true
           type: string
+        total_amounts:
+          description: |-
+            Total amount of earnings for the income source(s) of the user for the month in the summary.
+            This can contain multiple amounts, with each amount denominated in one unique currency.
+          items:
+            $ref: '#/components/schemas/CreditAmountWithCurrency'
+          type: array
         start_date:
           description: |-
             The start date of the period covered in this monthly summary.
@@ -36197,12 +36901,13 @@ components:
           type: array
       type: object
     CreditBankIncomeTransaction:
+      additionalProperties: true
       description: The transactions data for the end user's income source(s).
       example:
         date: 2000-01-23
         transaction_id: transaction_id
         unofficial_currency_code: unofficial_currency_code
-        amount: 5.637376656633329
+        amount: 2.3021358869347655
         check_number: check_number
         pending: true
         name: name
@@ -36255,14 +36960,8 @@ components:
           type: string
       type: object
     CreditBankIncomeRefreshRequest:
+      additionalProperties: true
       description: CreditBankIncomeRefreshRequest defines the request schema for `/credit/bank_income/refresh`.
-      example:
-        options:
-          webhook: webhook
-          days_requested: 0
-        secret: secret
-        user_token: user_token
-        client_id: client_id
       properties:
         client_id:
           description: Your Plaid API `client_id`. The `client_id` is required and
@@ -36287,10 +36986,8 @@ components:
       title: CreditBankIncomeRefreshRequest
       type: object
     CreditBankIncomeRefreshRequestOptions:
+      additionalProperties: true
       description: An optional object for `/credit/bank_income/refresh` request options.
-      example:
-        webhook: webhook
-        days_requested: 0
       properties:
         days_requested:
           description: How many days of data to include in the refresh. If not specified,
@@ -41463,6 +42160,8 @@ components:
           - SEMI_MONTHLY
           - MONTHLY
           - null
+        pay_basis:
+          $ref: '#/components/schemas/CreditPayStubPayBasisType'
         start_date:
           description: The date on which the pay period started, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
             format ("yyyy-mm-dd").
@@ -41855,6 +42554,12 @@ components:
           - ANNUAL
           - HOURLY
           - CONTRACT
+          - WEEKLY
+          - BI_WEEKLY
+          - MONTHLY
+          - SEMI_MONTHLY
+          - DAILY
+          - COMMISSION
           - OTHER
           - null
         pay_amount:
@@ -42426,7 +43131,7 @@ components:
           type: array
         secondary_client_id:
           description: The `secondary_client_id` is the client id of the third party
-            with whom you would like to share the Relay Token.
+            with whom you would like to share the relay token.
           type: string
         webhook:
           description: URL to which Plaid will send webhooks when the Secondary Client
@@ -42514,7 +43219,7 @@ components:
           $ref: '#/components/schemas/ReportType'
         webhook:
           description: The URL registered to receive webhooks when the report of a
-            Relay Token has been refreshed.
+            relay token has been refreshed.
           nullable: true
           type: string
       required:
@@ -42578,7 +43283,7 @@ components:
         request_id: request_id
       properties:
         removed:
-          description: '`true` if the Relay token was successfully removed.'
+          description: '`true` if the relay token was successfully removed.'
           type: boolean
         request_id:
           description: A unique identifier for the request, which can be used for
@@ -43411,16 +44116,15 @@ components:
           nullable: true
           type: boolean
         default_payment_method:
-          description: "The default ACH or non-ACH payment method to complete the\
-            \ transaction.\n`SAME_DAY_ACH`: Same Day ACH by NACHA. The debit transaction\
-            \ is processed and settled on the same day\n`NEXT_DAY_ACH`: Next Day ACH\
-            \ settlement for debit transactions, offered by some payment processors\
-            \ \n`STANDARD_ACH`: standard ACH by NACHA\n`REAL_TIME_PAYMENTS`: real-time\
-            \ payments such as RTP and FedNow\n`DEBIT_CARD`: if the default payment\
-            \ is over debit card networks\n`MULTIPLE_PAYMENT_METHODS`: if there is\
-            \ no default debit rail or there are multiple payment methods \nPossible\
-            \ values:  `SAME_DAY_ACH`, `NEXT_DAY_ACH`, `STANDARD_ACH`, `REAL_TIME_PAYMENTS`,\
-            \ `DEBIT_CARD`, `MULTIPLE_PAYMENT_METHODS`"
+          description: |-
+            The default ACH or non-ACH payment method to complete the transaction.
+            `SAME_DAY_ACH`: Same Day ACH by NACHA. The debit transaction is processed and settled on the same day
+            `NEXT_DAY_ACH`: Next Day ACH settlement for debit transactions, offered by some payment processors
+            `STANDARD_ACH`: standard ACH by NACHA
+            `REAL_TIME_PAYMENTS`: real-time payments such as RTP and FedNow
+            `DEBIT_CARD`: if the default payment is over debit card networks
+            `MULTIPLE_PAYMENT_METHODS`: if there is no default debit rail or there are multiple payment methods
+            Possible values:  `SAME_DAY_ACH`, `NEXT_DAY_ACH`, `STANDARD_ACH`, `REAL_TIME_PAYMENTS`, `DEBIT_CARD`, `MULTIPLE_PAYMENT_METHODS`
           nullable: true
           type: string
         user:
@@ -45108,11 +45812,14 @@ components:
             `PIS_PAY_IN:` a payment which credits an e-wallet through Plaid's Payment Initiation Services (PIS) APIs. For more information see the [Payment Initiation endpoints](https://plaid.com/docs/api/products/payment-initiation/).
 
             `REFUND:` a transaction which debits an e-wallet by refunding a previously initiated payment made through Plaid's [PIS APIs](https://plaid.com/docs/api/products/payment-initiation/).
+
+            `FUNDS_SWEEP`: an automated transaction which debits funds from an e-wallet to a designated client-owned account.
           enum:
           - BANK_TRANSFER
           - PAYOUT
           - PIS_PAY_IN
           - REFUND
+          - FUNDS_SWEEP
           type: string
         amount:
           $ref: '#/components/schemas/WalletTransactionAmount'
@@ -45190,17 +45897,34 @@ components:
       description: TransactionsEnrichGetRequest defines the request schema for `/transactions/enrich`.
       example:
         account_type: account_type
-        include_legacy_categories: false
+        options:
+          include_legacy_category: false
         secret: secret
         transactions:
         - amount: 0.8008281904610115
+          date_posted: 2000-01-23
           iso_currency_code: iso_currency_code
           description: description
+          location:
+            country: country
+            address: address
+            city: city
+            region: region
+            postal_code: postal_code
           id: id
+          mcc: mcc
         - amount: 0.8008281904610115
+          date_posted: 2000-01-23
           iso_currency_code: iso_currency_code
           description: description
+          location:
+            country: country
+            address: address
+            city: city
+            region: region
+            postal_code: postal_code
           id: id
+          mcc: mcc
         client_id: client_id
       properties:
         client_id:
@@ -45224,23 +45948,41 @@ components:
           items:
             $ref: '#/components/schemas/ClientProvidedTransaction'
           type: array
-        include_legacy_categories:
-          default: false
-          description: Include legacy categories in Enrich responses
-          type: boolean
-          x-hidden-from-docs: true
+        options:
+          $ref: '#/components/schemas/TransactionsEnrichRequestOptions'
       required:
       - account_type
       - transactions
+      type: object
+    TransactionsEnrichRequestOptions:
+      description: An optional object to be used with the request.
+      example:
+        include_legacy_category: false
+      properties:
+        include_legacy_category:
+          default: false
+          description: "Include `legacy_category` and `legacy_category_id` in the\
+            \ response (in addition to the default `personal_finance_category`). \n\
+            \nCategories are based on Plaid's legacy taxonomy. For a full list of\
+            \ legacy categories, see [`/categories/get`](https://plaid.com/docs/api/products/transactions/#categoriesget)."
+          type: boolean
       type: object
     ClientProvidedTransaction:
       additionalProperties: true
       description: A client-provided transaction for Plaid to enrich.
       example:
         amount: 0.8008281904610115
+        date_posted: 2000-01-23
         iso_currency_code: iso_currency_code
         description: description
+        location:
+          country: country
+          address: address
+          city: city
+          region: region
+          postal_code: postal_code
         id: id
+        mcc: mcc
       properties:
         id:
           description: A unique ID for the transaction used to help you tie data back
@@ -45256,11 +45998,23 @@ components:
         direction:
           $ref: '#/components/schemas/EnrichTransactionDirection'
         iso_currency_code:
-          description: The ISO-4217 currency code of the transaction, e.g., USD.
+          description: The ISO-4217 currency code of the transaction e.g. USD.
+          type: string
+        location:
+          $ref: '#/components/schemas/ClientProvidedTransactionLocation'
+        mcc:
+          description: Merchant category codes (MCCs) are four-digit numbers that
+            describe a merchant's primary business activities.
+          type: string
+        date_posted:
+          description: The date the transaction posted, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            (YYYY-MM-DD) format.
+          format: date
           type: string
       required:
       - amount
       - description
+      - direction
       - id
       - iso_currency_code
       title: ClientProvidedTransaction
@@ -45277,6 +46031,36 @@ components:
       - OUTFLOW
       title: EnrichTransactionDirection
       type: string
+    ClientProvidedTransactionLocation:
+      additionalProperties: true
+      description: |-
+        A representation of where a transaction took place.
+
+        Use this field to pass in structured location information you may have about your transactions.
+      example:
+        country: country
+        address: address
+        city: city
+        region: region
+        postal_code: postal_code
+      properties:
+        country:
+          description: The country where the transaction occurred.
+          type: string
+        region:
+          description: The region or state where the transaction occurred.
+          type: string
+        city:
+          description: The city where the transaction occurred.
+          type: string
+        address:
+          description: The street address where the transaction occurred.
+          type: string
+        postal_code:
+          description: The postal code where the transaction occurred.
+          type: string
+      title: ClientProvidedTransactionLocation
+      type: object
     ClientProvidedRawTransaction:
       additionalProperties: true
       description: A client-provided transaction for Plaid to enhance.
@@ -45301,7 +46085,7 @@ components:
           format: double
           type: number
         iso_currency_code:
-          description: The ISO-4217 currency code of the transaction, e.g., USD.
+          description: The ISO-4217 currency code of the transaction e.g. USD.
           type: string
       required:
       - amount
@@ -45337,8 +46121,12 @@ components:
             - category
             - category
             counterparties:
-            - name: name
-            - name: name
+            - website: website
+              logo_url: logo_url
+              name: name
+            - website: website
+              logo_url: logo_url
+              name: name
             personal_finance_category:
               detailed: detailed
               primary: primary
@@ -45366,8 +46154,12 @@ components:
             - category
             - category
             counterparties:
-            - name: name
-            - name: name
+            - website: website
+              logo_url: logo_url
+              name: name
+            - website: website
+              logo_url: logo_url
+              name: name
             personal_finance_category:
               detailed: detailed
               primary: primary
@@ -45395,8 +46187,8 @@ components:
           id: id
           enrichments:
             personal_finance_category_icon_url: personal_finance_category_icon_url
-            website: website
             check_number: check_number
+            website: website
             logo_url: logo_url
             merchant_name: merchant_name
             location:
@@ -45408,12 +46200,16 @@ components:
               region: region
               postal_code: postal_code
               lat: 6.027456183070403
+            counterparties:
+            - website: website
+              logo_url: logo_url
+              name: name
+            - website: website
+              logo_url: logo_url
+              name: name
             legacy_category:
             - legacy_category
             - legacy_category
-            counterparties:
-            - name: name
-            - name: name
             legacy_category_id: legacy_category_id
             personal_finance_category:
               detailed: detailed
@@ -45424,8 +46220,8 @@ components:
           id: id
           enrichments:
             personal_finance_category_icon_url: personal_finance_category_icon_url
-            website: website
             check_number: check_number
+            website: website
             logo_url: logo_url
             merchant_name: merchant_name
             location:
@@ -45437,12 +46233,16 @@ components:
               region: region
               postal_code: postal_code
               lat: 6.027456183070403
+            counterparties:
+            - website: website
+              logo_url: logo_url
+              name: name
+            - website: website
+              logo_url: logo_url
+              name: name
             legacy_category:
             - legacy_category
             - legacy_category
-            counterparties:
-            - name: name
-            - name: name
             legacy_category_id: legacy_category_id
             personal_finance_category:
               detailed: detailed
@@ -45489,8 +46289,12 @@ components:
           - category
           - category
           counterparties:
-          - name: name
-          - name: name
+          - website: website
+            logo_url: logo_url
+            name: name
+          - website: website
+            logo_url: logo_url
+            name: name
           personal_finance_category:
             detailed: detailed
             primary: primary
@@ -45537,8 +46341,8 @@ components:
         id: id
         enrichments:
           personal_finance_category_icon_url: personal_finance_category_icon_url
-          website: website
           check_number: check_number
+          website: website
           logo_url: logo_url
           merchant_name: merchant_name
           location:
@@ -45550,12 +46354,16 @@ components:
             region: region
             postal_code: postal_code
             lat: 6.027456183070403
+          counterparties:
+          - website: website
+            logo_url: logo_url
+            name: name
+          - website: website
+            logo_url: logo_url
+            name: name
           legacy_category:
           - legacy_category
           - legacy_category
-          counterparties:
-          - name: name
-          - name: name
           legacy_category_id: legacy_category_id
           personal_finance_category:
             detailed: detailed
@@ -45575,7 +46383,7 @@ components:
         direction:
           $ref: '#/components/schemas/EnrichTransactionDirection'
         iso_currency_code:
-          description: The ISO-4217 currency code of the transaction, e.g., USD.
+          description: The ISO-4217 currency code of the transaction e.g. USD.
           type: string
         enrichments:
           $ref: '#/components/schemas/Enrichments'
@@ -45625,8 +46433,12 @@ components:
         - category
         - category
         counterparties:
-        - name: name
-        - name: name
+        - website: website
+          logo_url: logo_url
+          name: name
+        - website: website
+          logo_url: logo_url
+          name: name
         personal_finance_category:
           detailed: detailed
           primary: primary
@@ -45637,12 +46449,12 @@ components:
           nullable: true
           type: string
         website:
-          description: The website associated with this transaction.
+          description: The website associated with this transaction, if available.
           nullable: true
           type: string
         logo_url:
-          description: A link to the logo associated with this transaction. The logo
-            will always be 100x100 resolution.
+          description: The URL of a logo associated with this transaction, if available.
+            The logo is formatted as a 100x100 pixel PNG file.
           nullable: true
           type: string
         check_number:
@@ -45669,7 +46481,7 @@ components:
           $ref: '#/components/schemas/PersonalFinanceCategory'
         personal_finance_category_icon_url:
           description: A link to the icon associated with the primary personal finance
-            category. The logo will always be 100x100 resolution.
+            category. The logo will always be 100x100 pixels.
           type: string
         counterparties:
           description: The counterparties present in the transaction. Counterparties,
@@ -45690,8 +46502,8 @@ components:
       description: A grouping of the Plaid produced transaction enrichment fields.
       example:
         personal_finance_category_icon_url: personal_finance_category_icon_url
-        website: website
         check_number: check_number
+        website: website
         logo_url: logo_url
         merchant_name: merchant_name
         location:
@@ -45703,59 +46515,27 @@ components:
           region: region
           postal_code: postal_code
           lat: 6.027456183070403
+        counterparties:
+        - website: website
+          logo_url: logo_url
+          name: name
+        - website: website
+          logo_url: logo_url
+          name: name
         legacy_category:
         - legacy_category
         - legacy_category
-        counterparties:
-        - name: name
-        - name: name
         legacy_category_id: legacy_category_id
         personal_finance_category:
           detailed: detailed
           primary: primary
       properties:
-        merchant_name:
-          description: The name of the primary counterparty, such as the merchant
-            or the financial institution, as extracted by Plaid from the raw description.
-          nullable: true
-          type: string
-        website:
-          description: The website associated with this transaction.
-          nullable: true
-          type: string
-        logo_url:
-          description: A link to the logo associated with this transaction. The logo
-            will always be 100x100 resolution.
-          nullable: true
-          type: string
         check_number:
           description: The check number of the transaction. This field is only populated
             for check transactions.
           nullable: true
           type: string
-        payment_channel:
-          $ref: '#/components/schemas/PaymentChannel'
-        legacy_category_id:
-          description: The ID of the category to which this transaction belongs. For
-            a full list of categories, see [`/categories/get`](https://plaid.com/docs/api/products/transactions/#categoriesget).
-          nullable: true
-          type: string
           x-hidden-from-docs: true
-        legacy_category:
-          description: A hierarchical array of the categories to which this transaction
-            belongs. For a full list of categories, see [`/categories/get`](https://plaid.com/docs/api/products/transactions/#categoriesget).
-          items:
-            type: string
-          type: array
-          x-hidden-from-docs: true
-        location:
-          $ref: '#/components/schemas/Location'
-        personal_finance_category:
-          $ref: '#/components/schemas/PersonalFinanceCategory'
-        personal_finance_category_icon_url:
-          description: A link to the icon associated with the primary personal finance
-            category. The logo will always be 100x100 resolution.
-          type: string
         counterparties:
           description: The counterparties present in the transaction. Counterparties,
             such as the merchant or the financial institution, are extracted by Plaid
@@ -45763,11 +46543,56 @@ components:
           items:
             $ref: '#/components/schemas/Counterparty'
           type: array
+        legacy_category_id:
+          deprecated: true
+          description: |-
+            The ID of the legacy category to which this transaction belongs. For a full list of legacy categories, see [`/categories/get`](https://plaid.com/docs/api/products/transactions/#categoriesget).
+
+            We recommend using the `personal_finance_category` for transaction categorization to obtain the best results.
+          nullable: true
+          type: string
+        legacy_category:
+          deprecated: true
+          description: |-
+            A hierarchical array of the legacy categories to which this transaction belongs. For a full list of legacy categories, see [`/categories/get`](https://plaid.com/docs/api/products/transactions/#categoriesget).
+
+            We recommend using the `personal_finance_category` for transaction categorization to obtain the best results.
+          items:
+            type: string
+          type: array
+        location:
+          $ref: '#/components/schemas/Location'
+        logo_url:
+          description: The URL of a logo associated with this transaction, if available.
+            The logo is formatted as a 100x100 pixel PNG file.
+          nullable: true
+          type: string
+        merchant_name:
+          description: The name of the primary counterparty, such as the merchant
+            or the financial institution, as extracted by Plaid from the raw description.
+          nullable: true
+          type: string
+        payment_channel:
+          $ref: '#/components/schemas/PaymentChannel'
+        personal_finance_category:
+          $ref: '#/components/schemas/PersonalFinanceCategory'
+        personal_finance_category_icon_url:
+          description: A link to the icon associated with the primary personal finance
+            category. The logo will always be 100x100 pixels.
+          type: string
+        website:
+          description: The website associated with this transaction.
+          nullable: true
+          type: string
       required:
+      - counterparties
       - location
+      - logo_url
+      - merchant_name
       - payment_channel
       - personal_finance_category
       - personal_finance_category_icon_url
+      - website
       title: Enrichments
       type: object
     PaymentProfileCreateRequest:
@@ -45972,6 +46797,11 @@ components:
           email: email
         company_name: company_name
         logo: logo
+        customer_support_info:
+          contact_url: contact_url
+          phone_number: phone_number
+          link_update_url: link_update_url
+          email: email
         legal_entity_name: legal_entity_name
       properties:
         client_id:
@@ -45986,7 +46816,9 @@ components:
           title: APISecret
           type: string
         company_name:
-          description: The company name of the end customer being created.
+          description: The company name of the end customer being created. This will
+            be used to display the end customer in the Plaid Dashboard. It will not
+            be shown to end users.
           type: string
         is_diligence_attested:
           description: Denotes whether or not the partner has completed attestation
@@ -46006,8 +46838,10 @@ components:
           - liabilities
           - transactions
         create_link_customization:
-          description: If true, the end customer's default Link customization will
-            be set to match the partner's.
+          description: If `true`, the end customer's default Link customization will
+            be set to match the partner's. You can always change the end customer's
+            Link customization in the Plaid Dashboard. See the [Link Customization
+            docs](https://plaid.com/docs/link/customization/) for more information.
           type: boolean
         logo:
           description: Base64-encoded representation of the end customer's logo. Must
@@ -46017,18 +46851,23 @@ components:
             is `false` and the logo is omitted, a stock logo will be used.
           type: string
         legal_entity_name:
-          description: The end customer's legal name.
+          description: The end customer's legal name. This will be shared with financial
+            institutions as part of the OAuth registration process. It will not be
+            shown to end users.
           type: string
         website:
           description: The end customer's website.
           type: string
         application_name:
-          description: The name of the end customer's application.
+          description: The name of the end customer's application. This will be shown
+            to end users when they go through the Plaid Link flow.
           type: string
         technical_contact:
           $ref: '#/components/schemas/PartnerEndCustomerTechnicalContact'
         billing_contact:
           $ref: '#/components/schemas/PartnerEndCustomerBillingContact'
+        customer_support_info:
+          $ref: '#/components/schemas/PartnerEndCustomerCustomerSupportInfo'
         address:
           $ref: '#/components/schemas/PartnerEndCustomerAddress'
         is_bank_addendum_completed:
@@ -46240,6 +47079,26 @@ components:
         family_name:
           type: string
         email:
+          type: string
+      type: object
+    PartnerEndCustomerCustomerSupportInfo:
+      additionalProperties: true
+      description: This information is public. Users of your app will see this information
+        when managing connections between your app and their bank accounts in Plaid
+        Portal. Defaults to partner's customer support info if omitted.
+      example:
+        contact_url: contact_url
+        phone_number: phone_number
+        link_update_url: link_update_url
+        email: email
+      properties:
+        email:
+          type: string
+        phone_number:
+          type: string
+        contact_url:
+          type: string
+        link_update_url:
           type: string
       type: object
     PartnerEndCustomerAssetsUnderManagement:
@@ -56863,6 +57722,19 @@ components:
           $ref: '#/components/schemas/TransactionCode'
         personal_finance_category:
           $ref: '#/components/schemas/PersonalFinanceCategory'
+        personal_finance_category_icon_url:
+          description: A link to the icon associated with the primary personal finance
+            category. The logo will always be 100x100 pixels.
+          type: string
+          x-hidden-from-docs: true
+        counterparties:
+          description: The counterparties present in the transaction. Counterparties,
+            such as the financial institutions, are extracted by Plaid from the raw
+            description.
+          items:
+            $ref: '#/components/schemas/TransactionCounterparty'
+          type: array
+          x-hidden-from-docs: true
       required:
       - account_owner
       - authorized_date
