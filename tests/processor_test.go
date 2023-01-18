@@ -2,6 +2,7 @@ package tests
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -35,7 +36,7 @@ func TestProcessorCreateApexToken(t *testing.T) {
 	prepValues := processorTokenTestPrep(t, ctx, testClient)
 	apexTokenResp, _, err := testClient.PlaidApi.ProcessorApexProcessorTokenCreate(ctx).ProcessorApexProcessorTokenCreateRequest(*plaid.NewProcessorApexProcessorTokenCreateRequest(prepValues.accessToken, prepValues.accountID)).Execute()
 	assert.NoError(t, err)
-	assert.True(t, strings.HasPrefix(apexTokenResp.ProcessorToken, "processor-sandbox-"))
+	assert.True(t, strings.HasPrefix(apexTokenResp.ProcessorToken, fmt.Sprintf("processor-%s", PlaidEnv())))
 }
 
 func TestProcessorCreateDwollaToken(t *testing.T) {
@@ -45,5 +46,5 @@ func TestProcessorCreateDwollaToken(t *testing.T) {
 	prepValues := processorTokenTestPrep(t, ctx, testClient)
 	dwollaTokenResp, _, err := testClient.PlaidApi.ProcessorTokenCreate(ctx).ProcessorTokenCreateRequest(*plaid.NewProcessorTokenCreateRequest(prepValues.accessToken, prepValues.accountID, "dwolla")).Execute()
 	assert.NoError(t, err)
-	assert.True(t, strings.HasPrefix(dwollaTokenResp.ProcessorToken, "processor-sandbox-"))
+	assert.True(t, strings.HasPrefix(dwollaTokenResp.ProcessorToken, fmt.Sprintf("processor-%s", PlaidEnv())))
 }

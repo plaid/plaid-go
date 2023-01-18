@@ -2,6 +2,7 @@ package tests
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -65,7 +66,7 @@ func TestItemPublicTokenCreate(t *testing.T) {
 	resp, _, err := testClient.PlaidApi.ItemCreatePublicToken(ctx).ItemPublicTokenCreateRequest(*request).Execute()
 
 	assert.NoError(t, err)
-	assert.True(t, strings.HasPrefix(resp.GetPublicToken(), "public-sandbox"))
+	assert.True(t, strings.HasPrefix(resp.GetPublicToken(), fmt.Sprintf("public-%s", PlaidEnv())))
 }
 
 func TestItemPublicTokenExchange(t *testing.T) {
@@ -80,7 +81,7 @@ func TestItemPublicTokenExchange(t *testing.T) {
 	tokenResp, _, err := testClient.PlaidApi.ItemPublicTokenExchange(ctx).ItemPublicTokenExchangeRequest(*tokenReq).Execute()
 	assert.NoError(t, err)
 
-	assert.True(t, strings.HasPrefix(tokenResp.GetAccessToken(), "access-sandbox"))
+	assert.True(t, strings.HasPrefix(tokenResp.GetAccessToken(), fmt.Sprintf("access-%s", PlaidEnv())))
 	assert.NotEmpty(t, tokenResp.GetItemId())
 }
 
@@ -93,7 +94,7 @@ func TestItemImportWithoutOptions(t *testing.T) {
 		*plaid.NewItemImportRequestUserAuth("user_good", "pass_good"))
 	resp, _, err := testClient.PlaidApi.ItemImport(ctx).ItemImportRequest(*request).Execute()
 	assert.NoError(t, err)
-	assert.True(t, strings.HasPrefix(resp.GetAccessToken(), "access-sandbox"))
+	assert.True(t, strings.HasPrefix(resp.GetAccessToken(), fmt.Sprintf("access-%s", PlaidEnv())))
 }
 
 func TestItemImportWithOptions(t *testing.T) {
@@ -109,5 +110,5 @@ func TestItemImportWithOptions(t *testing.T) {
 	})
 	resp, _, err := testClient.PlaidApi.ItemImport(ctx).ItemImportRequest(*request).Execute()
 	assert.NoError(t, err)
-	assert.True(t, strings.HasPrefix(resp.GetAccessToken(), "access-sandbox"))
+	assert.True(t, strings.HasPrefix(resp.GetAccessToken(), fmt.Sprintf("access-%s", PlaidEnv())))
 }

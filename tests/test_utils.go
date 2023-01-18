@@ -26,9 +26,21 @@ func NewTestClient() *plaid.APIClient {
 	configuration := plaid.NewConfiguration()
 	configuration.AddDefaultHeader("PLAID-CLIENT-ID", os.Getenv("CLIENT_ID"))
 	configuration.AddDefaultHeader("PLAID-SECRET", os.Getenv("SECRET"))
-	configuration.UseEnvironment(plaid.Sandbox)
+	if plaidApiUri, ok := os.LookupEnv("PLAID_API_URI"); ok {
+		configuration.UseEnvironment(plaid.Environment(plaidApiUri))
+	} else {
+		configuration.UseEnvironment(plaid.Sandbox)
+	}
 
 	return plaid.NewAPIClient(configuration)
+}
+
+func PlaidEnv() string {
+	if plaidEnv, ok := os.LookupEnv("PLAID_ENV"); ok {
+		return plaidEnv
+	} else {
+		return "sandbox"
+	}
 }
 
 func createSandboxItem(t *testing.T, ctx context.Context, client *plaid.APIClient, institutionID string, products []plaid.Products) string {
