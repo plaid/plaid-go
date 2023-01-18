@@ -18,32 +18,32 @@ func TestEnrichGet(t *testing.T) {
 	sampleTransactionsToEnrich := []plaid.ClientProvidedTransaction{
 		{
 			Id:              "1",
-			Description:     "DDA PURCHASE *XXXX XXXXXXXX FAMILY DOLLAR",
+			Description:     "TST *JETTIES BAGELS",
 			Amount:          10.00,
 			IsoCurrencyCode: "USD",
 			Location: &plaid.ClientProvidedTransactionLocation{
-				City:   plaid.PtrString("Philadelphia"),
-				Region: plaid.PtrString("PA"),
+				City:   plaid.PtrString("Ipswich"),
+				Region: plaid.PtrString("MA"),
 			},
 			Direction: *outflowDirection,
 		},
 		{
 			Id:              "2",
-			Description:     "PURCHASE JUNIATA SUPE PHILADELPHIA PA CARDXXXX",
+			Description:     "AMAZON.COM*MJ3LO9AN2",
 			Amount:          10.00,
 			IsoCurrencyCode: "USD",
 			Direction:       *outflowDirection,
 		},
 		{
 			Id:              "3",
-			Description:     "DEBIT CARD PURCHASE",
+			Description:     "GOOGLE *FRESHBOOKS",
 			Amount:          10.00,
 			IsoCurrencyCode: "USD",
 			Direction:       *outflowDirection,
 		},
 		{
 			Id:              "4",
-			Description:     "DIRECT DEP* UBER.COM",
+			Description:     "EARNIN TRANSFER",
 			Amount:          100.00,
 			IsoCurrencyCode: "USD",
 			Direction:       *inflowDirection,

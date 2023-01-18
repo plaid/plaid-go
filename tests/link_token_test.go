@@ -2,6 +2,7 @@ package tests
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -18,7 +19,7 @@ func TestLinkTokenCreateRequired(t *testing.T) {
 	request.SetProducts([]plaid.Products{plaid.PRODUCTS_AUTH})
 	resp, _, err := testClient.PlaidApi.LinkTokenCreate(ctx).LinkTokenCreateRequest(*request).Execute()
 	assert.NoError(t, err)
-	assert.True(t, strings.HasPrefix(resp.GetLinkToken(), "link-sandbox"))
+	assert.True(t, strings.HasPrefix(resp.GetLinkToken(), fmt.Sprintf("link-%s", PlaidEnv())))
 	assert.NotZero(t, resp.GetExpiration())
 	assert.NotZero(t, resp.GetRequestId())
 }
@@ -55,7 +56,7 @@ func TestLinkTokenCreateOptional(t *testing.T) {
 	resp, _, err := testClient.PlaidApi.LinkTokenCreate(ctx).LinkTokenCreateRequest(*request).Execute()
 
 	assert.NoError(t, err)
-	assert.True(t, strings.HasPrefix(resp.LinkToken, "link-sandbox"))
+	assert.True(t, strings.HasPrefix(resp.LinkToken, fmt.Sprintf("link-%s", PlaidEnv())))
 	assert.NotZero(t, resp.Expiration)
 	assert.NotZero(t, resp.RequestId)
 }
@@ -93,7 +94,7 @@ func TestLinkTokenCreateThenGet(t *testing.T) {
 	createLinkTokenResp, _, err := testClient.PlaidApi.LinkTokenCreate(ctx).LinkTokenCreateRequest(*request).Execute()
 
 	assert.NoError(t, err)
-	assert.True(t, strings.HasPrefix(createLinkTokenResp.LinkToken, "link-sandbox"))
+	assert.True(t, strings.HasPrefix(createLinkTokenResp.LinkToken, fmt.Sprintf("link-%s", PlaidEnv())))
 	assert.NotZero(t, createLinkTokenResp.Expiration)
 	assert.NotZero(t, createLinkTokenResp.RequestId)
 
@@ -132,7 +133,7 @@ func TestLinkTokenCreateThenGet_ExtendedAuth(t *testing.T) {
 	createLinkTokenResp, _, err := testClient.PlaidApi.LinkTokenCreate(ctx).LinkTokenCreateRequest(*request).Execute()
 
 	assert.NoError(t, err)
-	assert.True(t, strings.HasPrefix(createLinkTokenResp.LinkToken, "link-sandbox"))
+	assert.True(t, strings.HasPrefix(createLinkTokenResp.LinkToken, fmt.Sprintf("link-%s", PlaidEnv())))
 	assert.NotZero(t, createLinkTokenResp.Expiration)
 	assert.NotZero(t, createLinkTokenResp.RequestId)
 }
