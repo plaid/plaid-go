@@ -234,6 +234,7 @@ model_credit_payroll_income_get_response.go
 model_credit_payroll_income_precheck_request.go
 model_credit_payroll_income_precheck_response.go
 model_credit_payroll_income_refresh_request.go
+model_credit_payroll_income_refresh_request_options.go
 model_credit_payroll_income_refresh_response.go
 model_credit_payroll_income_risk_signals_get_request.go
 model_credit_payroll_income_risk_signals_get_response.go
@@ -246,6 +247,8 @@ model_credit_relay_refresh_response.go
 model_credit_relay_remove_request.go
 model_credit_relay_remove_response.go
 model_credit_session.go
+model_credit_session_bank_employment_result.go
+model_credit_session_bank_employment_status.go
 model_credit_session_bank_income_result.go
 model_credit_session_bank_income_status.go
 model_credit_session_document_income_result.go
@@ -391,6 +394,8 @@ model_identity_verification_get_response.go
 model_identity_verification_list_request.go
 model_identity_verification_list_response.go
 model_identity_verification_request_user.go
+model_identity_verification_request_user_name.go
+model_identity_verification_response_user_name.go
 model_identity_verification_retried_webhook.go
 model_identity_verification_retry_request.go
 model_identity_verification_retry_request_steps_object.go
@@ -483,6 +488,7 @@ model_item_import_request.go
 model_item_import_request_options.go
 model_item_import_request_user_auth.go
 model_item_import_response.go
+model_item_login_repaired_webhook.go
 model_item_product_ready_webhook.go
 model_item_public_token_create_request.go
 model_item_public_token_create_response.go
@@ -505,6 +511,7 @@ model_kyc_check_details.go
 model_kyc_check_id_number_summary.go
 model_kyc_check_name_summary.go
 model_kyc_check_phone_summary.go
+model_last_data_access_times.go
 model_liabilities_default_update_webhook.go
 model_liabilities_get_request.go
 model_liabilities_get_request_options.go
@@ -522,10 +529,14 @@ model_link_delivery_get_request.go
 model_link_delivery_get_response.go
 model_link_delivery_institution.go
 model_link_delivery_metadata.go
+model_link_delivery_options.go
+model_link_delivery_recipient.go
 model_link_delivery_session_status.go
 model_link_delivery_verification_status.go
+model_link_delivery_webhook_callback_type.go
 model_link_delivery_webhook_communication_method.go
 model_link_delivery_webhook_delivery_status.go
+model_link_event_name.go
 model_link_o_auth_correlation_id_exchange_request.go
 model_link_o_auth_correlation_id_exchange_response.go
 model_link_token_account_filters.go
@@ -751,6 +762,7 @@ model_product_status_breakdown.go
 model_products.go
 model_program_name_sensitivity.go
 model_projected_income_summary_field_number.go
+model_proxy_type.go
 model_pslf_status.go
 model_recaptcha_required_error.go
 model_recipient_bacs.go
@@ -765,6 +777,20 @@ model_recurring_transfer_skipped_webhook.go
 model_removed_transaction.go
 model_report_type.go
 model_reporting_information.go
+model_risk_check_behavior.go
+model_risk_check_behavior_bot_detected_label.go
+model_risk_check_behavior_fraud_ring_detected_label.go
+model_risk_check_behavior_user_interactions_label.go
+model_risk_check_details.go
+model_risk_check_device.go
+model_risk_check_email.go
+model_risk_check_email_domain_is_custom.go
+model_risk_check_email_domain_is_disposable.go
+model_risk_check_email_domain_is_free_provider.go
+model_risk_check_email_is_deliverable_status.go
+model_risk_check_email_top_level_domain_is_suspicious.go
+model_risk_check_linked_service.go
+model_risk_check_phone.go
 model_risk_signal_document_reference.go
 model_role.go
 model_role_detail.go
@@ -843,6 +869,7 @@ model_signal_return_report_request.go
 model_signal_return_report_response.go
 model_signal_scores.go
 model_signal_user.go
+model_signal_warning.go
 model_simulated_transfer_sweep.go
 model_single_document_risk_signal.go
 model_source.go
@@ -919,6 +946,8 @@ model_transfer_cancel_response.go
 model_transfer_capabilities_get_request.go
 model_transfer_capabilities_get_response.go
 model_transfer_capabilities_get_rtp.go
+model_transfer_configuration_get_request.go
+model_transfer_configuration_get_response.go
 model_transfer_create_request.go
 model_transfer_create_response.go
 model_transfer_device.go
@@ -947,6 +976,8 @@ model_transfer_intent_get_response.go
 model_transfer_intent_status.go
 model_transfer_list_request.go
 model_transfer_list_response.go
+model_transfer_metrics_get_request.go
+model_transfer_metrics_get_response.go
 model_transfer_migrate_account_request.go
 model_transfer_migrate_account_response.go
 model_transfer_network.go
@@ -1004,7 +1035,6 @@ model_user_create_request.go
 model_user_create_response.go
 model_user_custom_password.go
 model_user_id_number.go
-model_user_name.go
 model_user_permission_revoked_webhook.go
 model_user_stated_income_source_category.go
 model_user_stated_income_source_frequency.go

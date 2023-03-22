@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/plaid/plaid-go/v10/plaid"
+	"github.com/plaid/plaid-go/v11/plaid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -25,7 +25,7 @@ func TestPayStubsGet(t *testing.T) {
 	resp, _, err := testClient.PlaidApi.IncomeVerificationPaystubsGet(ctx).IncomeVerificationPaystubsGetRequest(*request).Execute()
 
 	assert.NoError(t, err)
-	assert.Equal(t, 3, len(resp.GetPaystubs()))
+	assert.Equal(t, 2, len(resp.GetPaystubs()))
 }
 
 func TestDocumentsDownload(t *testing.T) {
