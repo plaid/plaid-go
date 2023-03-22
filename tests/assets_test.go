@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/plaid/plaid-go/v10/plaid"
+	"github.com/plaid/plaid-go/v11/plaid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -24,8 +24,10 @@ func TestAssetReportFullFlow(t *testing.T) {
 	)
 
 	// Create an asset report
+	createRequest := plaid.NewAssetReportCreateRequest(2)
+	createRequest.SetAccessTokens([]string{accessToken})
 	assetReportCreateResp, _, err := testClient.PlaidApi.AssetReportCreate(ctx).AssetReportCreateRequest(
-		*plaid.NewAssetReportCreateRequest([]string{accessToken}, 2),
+		*createRequest,
 	).Execute()
 
 	assert.NoError(t, err)
