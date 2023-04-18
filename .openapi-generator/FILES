@@ -368,7 +368,6 @@ model_fdx_party_registry.go
 model_fdx_party_type.go
 model_fdxfi_attribute.go
 model_form1099_type.go
-model_freddie_report_type.go
 model_generic_screening_hit_location_items.go
 model_health_incident.go
 model_historical_balance.go
@@ -767,6 +766,7 @@ model_pslf_status.go
 model_recaptcha_required_error.go
 model_recipient_bacs.go
 model_recipient_bacs_nullable.go
+model_recurrence.go
 model_recurring_cancelled_webhook.go
 model_recurring_new_transfer_webhook.go
 model_recurring_transaction_frequency.go
@@ -960,6 +960,7 @@ model_transfer_event_sync_request.go
 model_transfer_event_sync_response.go
 model_transfer_event_type.go
 model_transfer_events_update_webhook.go
+model_transfer_expected_settlement_schedule_item.go
 model_transfer_failure.go
 model_transfer_get_request.go
 model_transfer_get_response.go
