@@ -1,4 +1,6 @@
-module github.com/visor-tax/plaid-go
+module github.com/plaid/plaid-go
+
+replace github.com/plaid/plaid-go v1.8.0 => github.com/visor-tax/plaid-go v1.8.0
 
 go 1.13
 
