@@ -20,20 +20,23 @@ type Products string
 
 // List of Products
 const (
-	PRODUCTS_ASSETS Products = "assets"
-	PRODUCTS_AUTH Products = "auth"
-	PRODUCTS_BALANCE Products = "balance"
-	PRODUCTS_IDENTITY Products = "identity"
-	PRODUCTS_INVESTMENTS Products = "investments"
-	PRODUCTS_LIABILITIES Products = "liabilities"
-	PRODUCTS_PAYMENT_INITIATION Products = "payment_initiation"
-	PRODUCTS_TRANSACTIONS Products = "transactions"
-	PRODUCTS_CREDIT_DETAILS Products = "credit_details"
-	PRODUCTS_INCOME Products = "income"
-	PRODUCTS_INCOME_VERIFICATION Products = "income_verification"
-	PRODUCTS_DEPOSIT_SWITCH Products = "deposit_switch"
-	PRODUCTS_STANDING_ORDERS Products = "standing_orders"
-	PRODUCTS_TRANSFER Products = "transfer"
+	PRODUCTS_ASSETS                 Products = "assets"
+	PRODUCTS_AUTH                   Products = "auth"
+	PRODUCTS_BALANCE                Products = "balance"
+	PRODUCTS_IDENTITY               Products = "identity"
+	PRODUCTS_INVESTMENTS            Products = "investments"
+	PRODUCTS_LIABILITIES            Products = "liabilities"
+	PRODUCTS_PAYMENT_INITIATION     Products = "payment_initiation"
+	PRODUCTS_TRANSACTIONS           Products = "transactions"
+	PRODUCTS_CREDIT_DETAILS         Products = "credit_details"
+	PRODUCTS_INCOME                 Products = "income"
+	PRODUCTS_INCOME_VERIFICATION    Products = "income_verification"
+	PRODUCTS_DEPOSIT_SWITCH         Products = "deposit_switch"
+	PRODUCTS_STANDING_ORDERS        Products = "standing_orders"
+	PRODUCTS_TRANSFER               Products = "transfer"
+	PRODUCTS_EMPLOYMENT             Products = "employment"
+	PRODUCTS_RECURRING_TRANSACTIONS Products = "recurring_transactions"
+	PRODUCTS_SIGNAL                 Products = "signal"
 )
 
 var allowedProductsEnumValues = []Products{
@@ -51,6 +54,9 @@ var allowedProductsEnumValues = []Products{
 	"deposit_switch",
 	"standing_orders",
 	"transfer",
+	"employment",
+	"recurring_transactions",
+	"signal",
 }
 
 func (v *Products) UnmarshalJSON(src []byte) error {
@@ -131,4 +137,3 @@ func (v *NullableProducts) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
