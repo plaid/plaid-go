@@ -6,10 +6,10 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/plaid/plaid-go/v12/plaid"
+	"github.com/plaid/plaid-go/v13/plaid"
 )
 
-// TestJsonUnmarshal tests the case where a null response unmarshalled to a NullableString
+// TestJsonUnmarshal tests the case where a null response unmarshalled to a Nullable type
 // sets the isSet property to true.
 func TestJsonUnmarshal(t *testing.T) {
 	var testValue plaid.Location
@@ -31,6 +31,9 @@ func TestJsonUnmarshal(t *testing.T) {
 	// Null should not be set and contain an empty value
 	assert.False(t, testValue.Address.IsSet())
 	assert.Empty(t, testValue.Address.Get())
+	// This should also work for non-String types
+	assert.False(t, testValue.Lat.IsSet())
+	assert.Empty(t, testValue.Lat.Get())
 	// Field not present should not be set and contain an empty value
 	assert.False(t, testValue.Region.IsSet())
 	assert.Empty(t, testValue.Region.Get())

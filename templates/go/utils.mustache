@@ -61,9 +61,15 @@ func (v NullableBool) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
+{{! Modified by Plaid - Resolves https://github.com/plaid/plaid-go/issues/271 }}
 func (v *NullableBool) UnmarshalJSON(src []byte) error {
-	v.isSet = true
-	return json.Unmarshal(src, &v.value)
+	var err error
+	if err = json.Unmarshal(src, &v.value); err == nil {
+		if v.Get() != nil {
+			v.isSet = true
+		}
+	}
+	return err
 }
 
 type NullableInt struct {
@@ -97,9 +103,15 @@ func (v NullableInt) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
+{{! Modified by Plaid - Resolves https://github.com/plaid/plaid-go/issues/271 }}
 func (v *NullableInt) UnmarshalJSON(src []byte) error {
-	v.isSet = true
-	return json.Unmarshal(src, &v.value)
+	var err error
+	if err = json.Unmarshal(src, &v.value); err == nil {
+		if v.Get() != nil {
+			v.isSet = true
+		}
+	}
+	return err
 }
 
 type NullableInt32 struct {
@@ -133,9 +145,15 @@ func (v NullableInt32) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
+{{! Modified by Plaid - Resolves https://github.com/plaid/plaid-go/issues/271 }}
 func (v *NullableInt32) UnmarshalJSON(src []byte) error {
-	v.isSet = true
-	return json.Unmarshal(src, &v.value)
+	var err error
+	if err = json.Unmarshal(src, &v.value); err == nil {
+		if v.Get() != nil {
+			v.isSet = true
+		}
+	}
+	return err
 }
 
 type NullableInt64 struct {
@@ -169,9 +187,15 @@ func (v NullableInt64) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
+{{! Modified by Plaid - Resolves https://github.com/plaid/plaid-go/issues/271 }}
 func (v *NullableInt64) UnmarshalJSON(src []byte) error {
-	v.isSet = true
-	return json.Unmarshal(src, &v.value)
+	var err error
+	if err = json.Unmarshal(src, &v.value); err == nil {
+		if v.Get() != nil {
+			v.isSet = true
+		}
+	}
+	return err
 }
 
 type NullableFloat32 struct {
@@ -206,8 +230,13 @@ func (v NullableFloat32) MarshalJSON() ([]byte, error) {
 }
 
 func (v *NullableFloat32) UnmarshalJSON(src []byte) error {
-	v.isSet = true
-	return json.Unmarshal(src, &v.value)
+	var err error
+	if err = json.Unmarshal(src, &v.value); err == nil {
+		if v.Get() != nil {
+			v.isSet = true
+		}
+	}
+	return err
 }
 
 type NullableFloat64 struct {
@@ -241,9 +270,15 @@ func (v NullableFloat64) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
+{{! Modified by Plaid - Resolves https://github.com/plaid/plaid-go/issues/271 }}
 func (v *NullableFloat64) UnmarshalJSON(src []byte) error {
-	v.isSet = true
-	return json.Unmarshal(src, &v.value)
+	var err error
+	if err = json.Unmarshal(src, &v.value); err == nil {
+		if v.Get() != nil {
+			v.isSet = true
+		}
+	}
+	return err
 }
 
 type NullableString struct {
@@ -319,7 +354,13 @@ func (v NullableTime) MarshalJSON() ([]byte, error) {
 	return v.value.MarshalJSON()
 }
 
+{{! Modified by Plaid - Resolves https://github.com/plaid/plaid-go/issues/271 }}
 func (v *NullableTime) UnmarshalJSON(src []byte) error {
-	v.isSet = true
-	return json.Unmarshal(src, &v.value)
+	var err error
+	if err = json.Unmarshal(src, &v.value); err == nil {
+		if v.Get() != nil {
+			v.isSet = true
+		}
+	}
+	return err
 }

@@ -7,7 +7,7 @@ info:
     details.
   termsOfService: https://plaid.com/legal/
   title: The Plaid API
-  version: 2020-09-14_1.370.0
+  version: 2020-09-14_1.379.0
 servers:
 - description: Production
   url: https://production.plaid.com
@@ -560,6 +560,7 @@ paths:
                   value:
                     request_id: m8MDnv9okwxFNBV
                     activities: []
+                    last_data_access_times: []
               schema:
                 $ref: '#/components/schemas/ItemActivityListResponse'
           description: OK
@@ -792,6 +793,8 @@ paths:
   /transactions/get:
     post:
       description: |-
+        Note: All new implementations are encouraged to use `/transactions/sync` rather than `/transactions/get`. `/transactions/sync` provides the same functionality as `/transactions/get` and improves developer ease-of-use for handling transactions updates.
+
         The `/transactions/get` endpoint allows developers to receive user-authorized transaction data for credit, depository, and some loan-type accounts (only those with account subtype `student`; coverage may be limited). For transaction history from investments accounts, use the [Investments endpoint](https://plaid.com/docs/api/products/investments/) instead. Transaction data is standardized across financial institutions, and in many cases transactions are linked to a clean name, entity type, location, and category. Similarly, account data is standardized and returned with a clean name, number, balance, and other meta information where available.
 
         Transactions are returned in reverse-chronological order, and the sequence of transaction ordering is stable and will not shift.  Transactions are not immutable and can also be removed altogether by the institution; a removed transaction will no longer appear in `/transactions/get`.  For more details, see [Pending and posted transactions](https://plaid.com/docs/transactions/transactions-data/#pending-and-posted-transactions).
@@ -868,6 +871,9 @@ paths:
                       payment_channel: in store
                       pending: false
                       pending_transaction_id: null
+                      personal_finance_category:
+                        primary: GENERAL_MERCHANDISE
+                        detailed: GENERAL_MERCHANDISE_ELECTRONICS
                       account_owner: null
                       transaction_id: lPNjeW1nR6CDn5okmGQ6hEpMo4lLNoSrzqDje
                       transaction_code: null
@@ -1144,6 +1150,9 @@ paths:
                       payment_channel: in store
                       pending: false
                       pending_transaction_id: null
+                      personal_finance_category:
+                        primary: GENERAL_MERCHANDISE
+                        detailed: GENERAL_MERCHANDISE_ELECTRONICS
                       account_owner: null
                       transaction_id: lPNjeW1nR6CDn5okmGQ6hEpMo4lLNoSrzqDje
                       transaction_code: null
@@ -1185,6 +1194,9 @@ paths:
                       payment_channel: online
                       pending: false
                       pending_transaction_id: null
+                      personal_finance_category:
+                        primary: RENT_AND_UTILITIES
+                        detailed: RENT_AND_UTILITIES_GAS_AND_ELECTRICITY
                       account_owner: null
                       transaction_id: yhnUVvtcGGcCKU0bcz8PDQr5ZUxUXebUvbKC0
                       transaction_code: null
@@ -1246,8 +1258,8 @@ paths:
                           postal_code: "92064"
                           country: US
                           store_number: "1700"
-                          lat: null
-                          lon: null
+                          lat: 32.959068
+                          lon: -117.037666
                         logo_url: https://plaid-merchant-logos.plaid.com/walmart_1100.png
                         merchant_name: Walmart
                         payment_channel: in store
@@ -1796,9 +1808,13 @@ paths:
       - plaid
   /categories/get:
     post:
-      description: Send a request to the `/categories/get` endpoint to get detailed
-        information on categories returned by Plaid. This endpoint does not require
-        authentication.
+      description: "Send a request to the `/categories/get` endpoint to get detailed\
+        \ information on categories returned by Plaid. This endpoint does not require\
+        \ authentication. \n\nAll implementations are recommended to use the newer\
+        \ `personal_finance_category` taxonomy instead of the older `category` taxonomy\
+        \ supported by this endpoint. The [`personal_finance_category taxonomy` CSV\
+        \ file](https://plaid.com/documents/transactions-personal-finance-category-taxonomy.csv)\
+        \ is available for download and is not accessible via API."
       externalDocs:
         url: /api/products/transactions/#categoriesget
       operationId: categoriesGet
@@ -1841,7 +1857,7 @@ paths:
                 $ref: '#/components/schemas/PlaidError'
           description: Error response.
       security: []
-      summary: Get Categories
+      summary: Get categories
       tags:
       - plaid
   /sandbox/processor_token/create:
@@ -2308,6 +2324,40 @@ paths:
                 $ref: '#/components/schemas/IdentityMatchResponse'
           description: OK
       summary: Retrieve identity match score
+      tags:
+      - plaid
+  /identity/refresh:
+    post:
+      description: |-
+        `/identity/refresh` is an optional endpoint for users of the Identity product. It initiates an on-demand extraction to fetch the most up to date Identity information from the Financial Institution. This on-demand extraction takes place in addition to the periodic extractions that automatically occur any Identity-enabled Item. If changes to Identity are discovered after calling `/identity/refresh`, Plaid will fire a webhook [`DEFAULT_UPDATE`](https://plaid.com/docs/api/products/identity/#default_update).
+        `/identity/refresh` is offered as an add-on to Identity and has a separate [fee model](/docs/account/billing/#per-request-flat-fee). To request access to this endpoint, submit a [product access request](https://dashboard.plaid.com/team/products) or contact your Plaid account manager.
+      externalDocs:
+        url: /api/products/identity/#identityrefresh
+      operationId: identityRefresh
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IdentityRefreshRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    request_id: 1vwmF5TBQwiqfwP
+              schema:
+                $ref: '#/components/schemas/IdentityRefreshResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidError'
+          description: Error response
+      summary: Refresh identity data
       tags:
       - plaid
   /dashboard_user/get:
@@ -3977,6 +4027,9 @@ paths:
                       payment_channel: in store
                       pending: false
                       pending_transaction_id: null
+                      personal_finance_category:
+                        detailed: GENERAL_MERCHANDISE_ELECTRONICS
+                        primary: GENERAL_MERCHANDISE
                       account_owner: null
                       transaction_id: lPNjeW1nR6CDn5okmGQ6hEpMo4lLNoSrzqDje
                       transaction_code: null
@@ -4084,6 +4137,9 @@ paths:
                         reference_number: null
                       payment_channel: in store
                       pending: false
+                      personal_finance_category:
+                        detailed: GENERAL_MERCHANDISE_ELECTRONICS
+                        primary: GENERAL_MERCHANDISE
                       pending_transaction_id: null
                       account_owner: null
                       transaction_id: lPNjeW1nR6CDn5okmGQ6hEpMo4lLNoSrzqDje
@@ -4126,6 +4182,9 @@ paths:
                       payment_channel: online
                       pending: false
                       pending_transaction_id: null
+                      personal_finance_category:
+                        detailed: RENT_AND_UTILITIES_GAS_AND_ELECTRICITY
+                        primary: RENT_AND_UTILITIES
                       account_owner: null
                       transaction_id: yhnUVvtcGGcCKU0bcz8PDQr5ZUxUXebUvbKC0
                       transaction_code: null
@@ -6113,6 +6172,277 @@ paths:
       tags:
       - plaid
     x-hidden-from-docs: true
+  /investments/auth/get:
+    post:
+      description: The `/investments/auth/get` endpoint allows developers to receive
+        user-authorized data to facilitate the transfer of holdings
+      externalDocs:
+        url: /api/products/investments/#investmentsauth
+      operationId: investmentsAuthGet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvestmentsAuthGetRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    accounts:
+                    - account_id: 5Bvpj4QknlhVWk7GygpwfVKdd133GoCxB814g
+                      balances:
+                        available: 43200
+                        current: 43200
+                        iso_currency_code: USD
+                        limit: null
+                        unofficial_currency_code: null
+                      mask: "4444"
+                      name: Plaid Money Market
+                      official_name: Plaid Platinum Standard 1.85% Interest Money
+                        Market
+                      subtype: money market
+                      type: depository
+                    - account_id: JqMLm4rJwpF6gMPJwBqdh9ZjjPvvpDcb7kDK1
+                      balances:
+                        available: null
+                        current: 110.01
+                        iso_currency_code: USD
+                        limit: null
+                        unofficial_currency_code: null
+                      mask: "5555"
+                      name: Plaid IRA
+                      official_name: null
+                      subtype: ira
+                      type: investment
+                    - account_id: k67E4xKvMlhmleEa4pg9hlwGGNnnEeixPolGm
+                      balances:
+                        available: null
+                        current: 23631.9805
+                        iso_currency_code: USD
+                        limit: null
+                        unofficial_currency_code: null
+                      mask: "6666"
+                      name: Plaid Roth IRA
+                      official_name: null
+                      subtype: roth
+                      type: investment
+                    holdings:
+                    - account_id: JqMLm4rJwpF6gMPJwBqdh9ZjjPvvpDcb7kDK1
+                      cost_basis: 1
+                      institution_price: 1
+                      institution_price_as_of: 2021-04-13
+                      institution_price_datetime: null
+                      institution_value: 0.01
+                      iso_currency_code: USD
+                      quantity: 0.01
+                      security_id: d6ePmbPxgWCWmMVv66q9iPV94n91vMtov5Are
+                      unofficial_currency_code: null
+                    - account_id: k67E4xKvMlhmleEa4pg9hlwGGNnnEeixPolGm
+                      cost_basis: 1.5
+                      institution_price: 2.11
+                      institution_price_as_of: 2021-04-13
+                      institution_price_datetime: null
+                      institution_value: 2.11
+                      iso_currency_code: USD
+                      quantity: 1
+                      security_id: KDwjlXj1Rqt58dVvmzRguxJybmyQL8FgeWWAy
+                      unofficial_currency_code: null
+                    - account_id: k67E4xKvMlhmleEa4pg9hlwGGNnnEeixPolGm
+                      cost_basis: 10
+                      institution_price: 10.42
+                      institution_price_as_of: 2021-04-13
+                      institution_price_datetime: null
+                      institution_value: 20.84
+                      iso_currency_code: USD
+                      quantity: 2
+                      security_id: NDVQrXQoqzt5v3bAe8qRt4A7mK7wvZCLEBBJk
+                      unofficial_currency_code: null
+                    - account_id: JqMLm4rJwpF6gMPJwBqdh9ZjjPvvpDcb7kDK1
+                      cost_basis: 0.01
+                      institution_price: 0.011
+                      institution_price_as_of: 2021-04-13
+                      institution_price_datetime: null
+                      institution_value: 110
+                      iso_currency_code: USD
+                      quantity: 10000
+                      security_id: 8E4L9XLl6MudjEpwPAAgivmdZRdBPJuvMPlPb
+                      unofficial_currency_code: null
+                    - account_id: k67E4xKvMlhmleEa4pg9hlwGGNnnEeixPolGm
+                      cost_basis: 23
+                      institution_price: 27
+                      institution_price_as_of: 2021-04-13
+                      institution_price_datetime: null
+                      institution_value: 636.309
+                      iso_currency_code: USD
+                      quantity: 23.567
+                      security_id: JDdP7XPMklt5vwPmDN45t3KAoWAPmjtpaW7DP
+                      unofficial_currency_code: null
+                    - account_id: k67E4xKvMlhmleEa4pg9hlwGGNnnEeixPolGm
+                      cost_basis: 15
+                      institution_price: 13.73
+                      institution_price_as_of: 2021-04-13
+                      institution_price_datetime: null
+                      institution_value: 1373.6865
+                      iso_currency_code: USD
+                      quantity: 100.05
+                      security_id: nnmo8doZ4lfKNEDe3mPJipLGkaGw3jfPrpxoN
+                      unofficial_currency_code: null
+                    - account_id: k67E4xKvMlhmleEa4pg9hlwGGNnnEeixPolGm
+                      cost_basis: 1
+                      institution_price: 1
+                      institution_price_as_of: 2021-04-13
+                      institution_price_datetime: null
+                      institution_value: 12345.67
+                      iso_currency_code: USD
+                      quantity: 12345.67
+                      security_id: d6ePmbPxgWCWmMVv66q9iPV94n91vMtov5Are
+                      unofficial_currency_code: null
+                    item:
+                      available_products:
+                      - balance
+                      - identity
+                      - liabilities
+                      - transactions
+                      billed_products:
+                      - assets
+                      - auth
+                      - investments_auth
+                      consent_expiration_time: null
+                      error: null
+                      institution_id: ins_3
+                      item_id: 4z9LPae1nRHWy8pvg9jrsgbRP4ZNQvIdbLq7g
+                      update_type: background
+                      webhook: https://www.genericwebhookurl.com/webhook
+                    numbers:
+                      acats:
+                      - account: TR4444
+                        account_id: 5Bvpj4QknlhVWk7GygpwfVKdd133GoCxB814g
+                        dtc_numbers: []
+                      - account: TR5555
+                        account_id: JqMLm4rJwpF6gMPJwBqdh9ZjjPvvpDcb7kDK1
+                        dtc_numbers: []
+                      - account: TR6666
+                        account_id: k67E4xKvMlhmleEa4pg9hlwGGNnnEeixPolGm
+                        dtc_numbers: []
+                    request_id: l68wb8zpS0hqmsJ
+                    owners:
+                    - account_id: 5Bvpj4QknlhVWk7GygpwfVKdd133GoCxB814g
+                      names:
+                      - Alberta Bobbeth Charleson
+                    - account_id: JqMLm4rJwpF6gMPJwBqdh9ZjjPvvpDcb7kDK1
+                      names:
+                      - Alberta Bobbeth Charleson
+                    - account_id: k67E4xKvMlhmleEa4pg9hlwGGNnnEeixPolGm
+                      names:
+                      - Alberta Bobbeth Charleson
+                    securities:
+                    - close_price: 0.011
+                      close_price_as_of: 2021-04-13
+                      cusip: null
+                      institution_id: null
+                      institution_security_id: null
+                      is_cash_equivalent: false
+                      isin: null
+                      iso_currency_code: USD
+                      name: Nflx Feb 01'18 $355 Call
+                      proxy_security_id: null
+                      security_id: 8E4L9XLl6MudjEpwPAAgivmdZRdBPJuvMPlPb
+                      sedol: null
+                      ticker_symbol: NFLX180201C00355000
+                      type: derivative
+                      unofficial_currency_code: null
+                      update_datetime: null
+                    - close_price: 27
+                      close_price_as_of: null
+                      cusip: "577130834"
+                      institution_id: null
+                      institution_security_id: null
+                      is_cash_equivalent: false
+                      isin: US5771308344
+                      iso_currency_code: USD
+                      name: Matthews Pacific Tiger Fund Insti Class
+                      proxy_security_id: null
+                      security_id: JDdP7XPMklt5vwPmDN45t3KAoWAPmjtpaW7DP
+                      sedol: null
+                      ticker_symbol: MIPTX
+                      type: mutual fund
+                      unofficial_currency_code: null
+                      update_datetime: null
+                    - close_price: 2.11
+                      close_price_as_of: null
+                      cusip: 00448Q201
+                      institution_id: null
+                      institution_security_id: null
+                      is_cash_equivalent: false
+                      isin: US00448Q2012
+                      iso_currency_code: USD
+                      name: Achillion Pharmaceuticals Inc.
+                      proxy_security_id: null
+                      security_id: KDwjlXj1Rqt58dVvmzRguxJybmyQL8FgeWWAy
+                      sedol: null
+                      ticker_symbol: ACHN
+                      type: equity
+                      unofficial_currency_code: null
+                      update_datetime: null
+                    - close_price: 10.42
+                      close_price_as_of: null
+                      cusip: "258620103"
+                      institution_id: null
+                      institution_security_id: null
+                      is_cash_equivalent: false
+                      isin: US2586201038
+                      iso_currency_code: USD
+                      name: DoubleLine Total Return Bond Fund
+                      proxy_security_id: null
+                      security_id: NDVQrXQoqzt5v3bAe8qRt4A7mK7wvZCLEBBJk
+                      sedol: null
+                      ticker_symbol: DBLTX
+                      type: mutual fund
+                      unofficial_currency_code: null
+                      update_datetime: null
+                    - close_price: 1
+                      close_price_as_of: null
+                      cusip: null
+                      institution_id: null
+                      institution_security_id: null
+                      is_cash_equivalent: true
+                      isin: null
+                      iso_currency_code: USD
+                      name: U S Dollar
+                      proxy_security_id: null
+                      security_id: d6ePmbPxgWCWmMVv66q9iPV94n91vMtov5Are
+                      sedol: null
+                      ticker_symbol: USD
+                      type: cash
+                      unofficial_currency_code: null
+                      update_datetime: null
+                    - close_price: 13.73
+                      close_price_as_of: null
+                      cusip: null
+                      institution_id: ins_3
+                      institution_security_id: NHX105509
+                      is_cash_equivalent: false
+                      isin: null
+                      iso_currency_code: USD
+                      name: NH PORTFOLIO 1055 (FIDELITY INDEX)
+                      proxy_security_id: null
+                      security_id: nnmo8doZ4lfKNEDe3mPJipLGkaGw3jfPrpxoN
+                      sedol: null
+                      ticker_symbol: NHX105509
+                      type: etf
+                      unofficial_currency_code: null
+                      update_datetime: null
+              schema:
+                $ref: '#/components/schemas/InvestmentsAuthGetResponse'
+          description: OK
+      summary: Get data needed to authorize an investments transfer
+      tags:
+      - plaid
+    x-hidden-from-docs: true
   /processor/token/create:
     post:
       description: Used to create a token suitable for sending to one of Plaid's partners
@@ -6217,7 +6547,7 @@ paths:
 
         Note that the Stripe bank account token is a one-time use token. To store bank account information for later use, you can use a Stripe customer object and create an associated bank account from the token, or you can use a Stripe Custom account and create an associated external bank account from the token. This bank account information should work indefinitely, unless the user's bank account information changes or they revoke Plaid's permissions to access their account. Stripe bank account information cannot be modified once the bank account token has been created. If you ever need to change the bank account details used by Stripe for a specific customer, have the user go through Link again and create a new bank account token from the new `access_token`.
 
-        Bank account tokens can also be revoked, using `/item/remove`.'
+        Bank account tokens can also be revoked, using `/item/remove`.
       externalDocs:
         url: /api/processors/#processorstripebank_account_tokencreate
       operationId: processorStripeBankAccountTokenCreate
@@ -6298,7 +6628,7 @@ paths:
       description: |-
         `/item/import` creates an Item via your Plaid Exchange Integration and returns an `access_token`. As part of an `/item/import` request, you will include a User ID (`user_auth.user_id`) and Authentication Token (`user_auth.auth_token`) that enable data aggregation through your Plaid Exchange API endpoints. These authentication principals are to be chosen by you.
 
-        Upon creating an Item via `/item/import`, Plaid will automatically begin an extraction of that Item through the Plaid Exchange infrastructure you have already integrated. This will automatically generate the Plaid native account ID for the account the user will switch their direct deposit to (`target_account_id`).
+        Upon creating an Item via `/item/import`, Plaid will automatically begin an extraction of that Item through the Plaid Exchange infrastructure you have already integrated.
       operationId: itemImport
       requestBody:
         content:
@@ -6463,6 +6793,7 @@ paths:
       externalDocs:
         url: /deposit-switch/reference#deposit_switchget
       operationId: depositSwitchGet
+      parameters: []
       requestBody:
         content:
           application/json:
@@ -6717,8 +7048,6 @@ paths:
           - To decline a transfer with the rationale code `RISK`, the available balance on the account must be exactly $0. See [Create Sandbox test data](https://plaid.com/docs/sandbox/user-custom/) for details on how to customize data in Sandbox.
 
         The fields `device.ip_address` and `device.user_agent` are required for all sessions where the end-user is present. For example, when a user is authorizing a one-time payment from their device.
-
-        For [Guarantee](https://www.plaid.com/docs//transfer/guarantee/), the following fields are required : `idempotency_key`, `user.phone_number` (optional if `email_address` provided), `user.email_address` (optional if `phone_number` provided), `device.ip_address`, `device.user_agent`, and `user_present`.
       externalDocs:
         url: /api/products/transfer/#transferauthorizationcreate
       operationId: transferAuthorizationCreate
@@ -7513,9 +7842,7 @@ paths:
     post:
       description: '`/transfer/event/sync` allows you to request up to the next 25
         transfer events that happened after a specific `event_id`. Use the `/transfer/event/sync`
-        endpoint to guarantee you have seen all transfer events. When using Auth with
-        micro-deposit verification enabled, this endpoint can be used to fetch status
-        updates on ACH micro-deposits. For more details, see [micro-deposit events](https://www.plaid.com/docs/auth/coverage/microdeposit-events/).'
+        endpoint to guarantee you have seen all transfer events.'
       externalDocs:
         url: /api/products/transfer/#transfereventsync
       operationId: transferEventSync
@@ -8990,6 +9317,7 @@ paths:
       externalDocs:
         url: /api/products/income/#incomeverificationdocumentsdownload
       operationId: incomeVerificationDocumentsDownload
+      parameters: []
       requestBody:
         content:
           application/json:
@@ -9644,7 +9972,6 @@ paths:
       summary: Retrieve information from the bank accounts used for employment verification
       tags:
       - plaid
-    x-hidden-from-docs: true
   /credit/bank_income/get:
     post:
       description: '`/credit/bank_income/get` returns the bank income report(s) for
@@ -9915,6 +10242,103 @@ paths:
                 $ref: '#/components/schemas/CreditBankIncomeRefreshResponse'
           description: OK
       summary: Refresh a user's bank income information
+      tags:
+      - plaid
+  /credit/bank_income/webhook/update:
+    post:
+      description: "`/credit/bank_income/webhook/update` allows you to subscribe or\
+        \ unsubscribe a user for income webhook notifications. \n\nIf a user is subscribed,\
+        \ on significant changes to the user's income profile, you will receive a\
+        \ `BANK_INCOME_REFRESH_UPDATE` webhook, prompting you to refresh bank income\
+        \ data for the user."
+      externalDocs:
+        url: /api/products/income/#creditbank_incomewebhookupdate
+      operationId: creditBankIncomeWebhookUpdate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreditBankIncomeWebhookUpdateRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    request_id: LhQf0THi8SH1yJm
+          description: OK
+      summary: Subscribe and unsubscribe to proactive notifications for a user's income
+        profile
+      tags:
+      - plaid
+  /credit/bank_statements/uploads/get:
+    post:
+      description: '`/credit/bank_statements/uploads/get` returns data from user-uploaded
+        bank statements.'
+      externalDocs:
+        url: /api/products/income/#creditbank_statementsuploadsget
+      operationId: creditBankStatementsUploadsGet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreditBankStatementsUploadsGetRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    items:
+                    - item_id: eVBnVMp7zdTJLkRNr33Rs6zr7KNJqBFL9DrE6
+                      bank_statements:
+                      - transactions:
+                        - amount: -1000
+                          date: 2023-01-01
+                          original_description: PAYCHECK
+                        document_metadata:
+                          document_type: BANK_STATEMENT
+                          name: statement_01.pdf
+                          status: PROCESSING_COMPLETE
+                          download_url: null
+                          page_count: 2
+                        document_id: 2jkflanbd
+                        bank_accounts:
+                        - name: CHASE CHECKING
+                          bank_name: CHASE
+                          account_type: CHECKING
+                          account_number: "000009752"
+                          owner:
+                            name: JANE DOE
+                            address:
+                              postal_code: "94133"
+                              country: US
+                              region: CA
+                              city: SAN FRANCISCO
+                              street: 2140 TAYLOR ST
+                          periods:
+                          - start_date: 2023-01-01
+                            end_date: 2023-02-01
+                            starting_balance: 2500
+                            ending_balance: 3500
+                      status:
+                        processing_status: PROCESSING_COMPLETE
+                      updated_at: 2023-02-01T21:14:54Z
+                    request_id: LhQf0THi8SH1yJm
+              schema:
+                $ref: '#/components/schemas/CreditBankStatementsUploadsGetResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidError'
+          description: Error response.
+      summary: Retrieve data for a user's uploaded bank statements
       tags:
       - plaid
   /credit/payroll_income/get:
@@ -10190,7 +10614,7 @@ paths:
   /credit/payroll_income/risk_signals/get:
     post:
       description: |-
-        `/credit/payroll_income/risk_signals/get` can be used as part of the Document Income flow to assess a user-uploaded document for signs of potential fraud or tampering. It returns a risk score for each uploaded document that indicates the likelihood of the document being fraudulent, in addition to details on the individual risk signals contributing to the score. `/credit/payroll_income/risk_signals/get` can be called at any time after the `INCOME_VERIFICATION` webhook has been fired.
+        `/credit/payroll_income/risk_signals/get` can be used as part of the Document Income flow to assess a user-uploaded document for signs of potential fraud or tampering. It returns a risk score for each uploaded document that indicates the likelihood of the document being fraudulent, in addition to details on the individual risk signals contributing to the score. `/credit/payroll_income/risk_signals/get` can be called at any time after the `INCOME_VERIFICATION_RISK_SIGNALS` webhook has been fired.
 
         `/credit/payroll_income/risk_signals/get` is offered as an add-on to Document Income and is billed separately. To request access to this endpoint, submit a product access request or contact your Plaid account manager.
       externalDocs:
@@ -11274,7 +11698,7 @@ paths:
                         payment_channel: in store
                         personal_finance_category:
                           primary: GENERAL_MERCHANDISE
-                          detailed: ELECTRONICS
+                          detailed: GENERAL_MERCHANDISE_ELECTRONICS
                         personal_finance_category_icon_url: https://plaid-category-icons.plaid.com/PFC_GENERAL_MERCHANDISE.png
               schema:
                 $ref: '#/components/schemas/TransactionsEnhanceGetResponse'
@@ -11805,10 +12229,10 @@ paths:
       - plaid
   /link_delivery/create:
     post:
-      description: Use the `/link_delivery/create` endpoint to create a Link Delivery
+      description: Use the `/link_delivery/create` endpoint to create a Hosted Link
         session.
       externalDocs:
-        url: /docs/assets/waitlist/link-delivery/
+        url: /assets/waitlist/hosted-link/
       operationId: linkDeliveryCreate
       requestBody:
         content:
@@ -11835,15 +12259,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/PlaidError'
           description: Error response
-      summary: Create Link Delivery session
+      summary: Create Hosted Link session
       tags:
       - plaid
   /link_delivery/get:
     post:
-      description: Use the `/link_delivery/get` endpoint to get the status of a Link
-        Delivery session.
+      description: Use the `/link_delivery/get` endpoint to get the status of a Hosted
+        Link session.
       externalDocs:
-        url: /docs/assets/waitlist/link-delivery/
+        url: /assets/waitlist/hosted-link/
       operationId: linkDeliveryGet
       requestBody:
         content:
@@ -11873,7 +12297,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PlaidError'
           description: Error response
-      summary: Get Link Delivery session
+      summary: Get Hosted Link session
       tags:
       - plaid
   /fdx/notifications:
@@ -12261,14 +12685,20 @@ components:
           description: Please use [`include_personal_finance_category`](https://plaid.com/docs/api/products/transactions/#transactions-get-request-options-include-personal-finance-category)
             instead.
           type: boolean
+          x-hidden-from-docs: true
         include_personal_finance_category:
           default: false
-          description: |-
-            Include the [`personal_finance_category`](https://plaid.com/docs/api/products/transactions/#transactions-get-response-transactions-personal-finance-category) object in the response.
-
-            See the [`taxonomy csv file`](https://plaid.com/documents/transactions-personal-finance-category-taxonomy.csv) for a full list of personal finance categories.
-
-            We’re introducing Category Rules - a new beta endpoint that will enable you to change the `personal_finance_category` for a transaction based on your users’ needs. When rules are set, the selected category will override the Plaid provided category. To learn more, send a note to transactions-feedback@plaid.com.
+          description: "Include the [`personal_finance_category`](https://plaid.com/docs/api/products/transactions/#transactions-get-response-transactions-personal-finance-category)\
+            \ object in the response. \n\nAll implementations are encouraged to set\
+            \ this field to `true` and use the `personal_finance_category` instead\
+            \ of `category`. Personal finance categories are the preferred categorization\
+            \ system for transactions, providing higher accuracy and more meaningful\
+            \ categories. \n\nSee the [`taxonomy csv file`](https://plaid.com/documents/transactions-personal-finance-category-taxonomy.csv)\
+            \ for a full list of personal finance categories.\n\nPlaid is also introducing\
+            \ Category Rules - a new endpoint that will enable you to change the `personal_finance_category`\
+            \ for a transaction based on your users’ needs. When rules are set, the\
+            \ selected category will override the Plaid provided category. To learn\
+            \ more, send a note to transactions-feedback@plaid.com."
           type: boolean
         include_logo_and_counterparty_beta:
           default: false
@@ -12472,10 +12902,13 @@ components:
       properties:
         include_personal_finance_category:
           default: false
-          description: |-
-            Include the [`personal_finance_category`](https://plaid.com/docs/api/products/transactions/#transactions-get-response-transactions-personal-finance-category) object for each transaction stream in the response.
-
-            See the [`taxonomy csv file`](https://plaid.com/documents/transactions-personal-finance-category-taxonomy.csv) for a full list of personal finance categories.
+          description: "Include the [`personal_finance_category`](https://plaid.com/docs/api/products/transactions/#transactions-get-response-transactions-personal-finance-category)\
+            \ object for each transaction stream in the response.\n\nAll implementations\
+            \ are encouraged to set this field to `true` and to use the `personal_finance_category`\
+            \ field instead of `category`. Personal finance categories are the preferred\
+            \ categorization system for transactions, providing higher accuracy and\
+            \ more meaningful categories. \n\nSee the [`taxonomy csv file`](https://plaid.com/documents/transactions-personal-finance-category-taxonomy.csv)\
+            \ for a full list of personal finance categories."
           type: boolean
       type: object
     TransactionsRecurringGetResponse:
@@ -12645,6 +13078,8 @@ components:
         personal_finance_category:
           description: |
             Personal finance detailed category.
+
+            All implementations are encouraged to use this field instead of `category`, as it provides more meaningful and accurate categorization.
 
             See the [`taxonomy csv file`](https://plaid.com/documents/transactions-personal-finance-category-taxonomy.csv) for a full list of personal finance categories.
           type: string
@@ -12857,9 +13292,11 @@ components:
           description: |-
             Include the [`personal_finance_category`](https://plaid.com/docs/api/products/transactions/#transactions-sync-response-added-personal-finance-category) object in the response.
 
+            All implementations are encouraged to use set this field to `true` and to use the `personal_finance_category` instead of `category` for more meaningful and accurate categorization.
+
             See the [`taxonomy csv file`](https://plaid.com/documents/transactions-personal-finance-category-taxonomy.csv) for a full list of personal finance categories.
 
-            We’re introducing Category Rules - a new beta endpoint that will enable you to change the `personal_finance_category` for a transaction based on your users’ needs. When rules are set, the selected category will override the Plaid provided category. To learn more, send a note to transactions-feedback@plaid.com.
+            We’re also introducing Category Rules - a new beta endpoint that will enable you to change the `personal_finance_category` for a transaction based on your users’ needs. When rules are set, the selected category will override the Plaid provided category. To learn more, send a note to transactions-feedback@plaid.com.
           type: boolean
         include_logo_and_counterparty_beta:
           default: false
@@ -13036,11 +13473,10 @@ components:
           nullable: true
           type: array
         oauth:
-          description: Limit results to institutions with or without mandatory OAuth
-            login flows. Note that institutions will only have `oauth` set to `true`
-            if *all* Items associated with that institution are required to use OAuth
-            flows; institutions in a state of migration to OAuth may have the `oauth`
-            attribute set to `false` even if they support OAuth.
+          description: Limit results to institutions with or without OAuth login flows.
+            Note that institutions will have `oauth` set to `true` if some Items associated
+            with that institution are required to use OAuth flows; institutions in
+            a state of migration to OAuth will have the `oauth` attribute set to `true`.
           nullable: true
           type: boolean
         include_optional_metadata:
@@ -13417,11 +13853,10 @@ components:
         include_auth_metadata: false
       properties:
         oauth:
-          description: Limit results to institutions with or without mandatory OAuth
-            login flows. Note that institutions will only have `oauth` set to `true`
-            if *all* Items associated with that institution are required to use OAuth
-            flows; institutions in a state of migration to OAuth may have the `oauth`
-            attribute set to `false` even if they support OAuth.
+          description: Limit results to institutions with or without OAuth login flows.
+            Note that institutions will have `oauth` set to `true` if some Items associated
+            with that institution are required to use OAuth flows; institutions in
+            a state of migration to OAuth will have the `oauth` attribute set to `true`.
           nullable: true
           type: boolean
         include_optional_metadata:
@@ -14747,6 +15182,47 @@ components:
       required:
       - accounts
       - item
+      - request_id
+      type: object
+    IdentityRefreshRequest:
+      description: IdentityRefreshRequest defines the request schema for `/identity/refresh`
+      example:
+        access_token: access_token
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        access_token:
+          description: The access token associated with the Item data is being requested
+            for.
+          title: AccessToken
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+      required:
+      - access_token
+      type: object
+    IdentityRefreshResponse:
+      additionalProperties: true
+      description: IdentityRefreshResponse defines the response schema for `/identity/refresh`
+      example:
+        request_id: request_id
+      properties:
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
       - request_id
       type: object
     ProcessorAuthGetRequest:
@@ -17017,6 +17493,7 @@ components:
             - item_id: item_id
               institution_id: institution_id
             document_income_results:
+              num_bank_statements_uploaded: 5
               num_paystubs_uploaded: 1
               num_w2s_uploaded: 5
             item_add_results:
@@ -17058,6 +17535,7 @@ components:
             - item_id: item_id
               institution_id: institution_id
             document_income_results:
+              num_bank_statements_uploaded: 5
               num_paystubs_uploaded: 1
               num_w2s_uploaded: 5
             item_add_results:
@@ -17119,6 +17597,7 @@ components:
           - item_id: item_id
             institution_id: institution_id
           document_income_results:
+            num_bank_statements_uploaded: 5
             num_paystubs_uploaded: 1
             num_w2s_uploaded: 5
           item_add_results:
@@ -17178,6 +17657,7 @@ components:
         - item_id: item_id
           institution_id: institution_id
         document_income_results:
+          num_bank_statements_uploaded: 5
           num_paystubs_uploaded: 1
           num_w2s_uploaded: 5
         item_add_results:
@@ -17323,6 +17803,7 @@ components:
     CreditSessionDocumentIncomeResult:
       description: The details of a document income verification in Link
       example:
+        num_bank_statements_uploaded: 5
         num_paystubs_uploaded: 1
         num_w2s_uploaded: 5
       nullable: true
@@ -17333,7 +17814,11 @@ components:
         num_w2s_uploaded:
           description: The number of w2s uploaded by the user.
           type: integer
+        num_bank_statements_uploaded:
+          description: The number of bank statements uploaded by the user.
+          type: integer
       required:
+      - num_bank_statements_uploaded
       - num_paystubs_uploaded
       - num_w2s_uploaded
       type: object
@@ -17428,7 +17913,7 @@ components:
 
         `PAYMENT_STATUS_INPUT_NEEDED`: This is the initial state of all payments. It indicates that the payment is waiting on user input to continue processing. A payment may re-enter this state later on if further input is needed.
 
-        `PAYMENT_STATUS_INITIATED`: The payment has been successfully authorised and accepted by the financial institution but has not been executed.
+        `PAYMENT_STATUS_INITIATED`: The payment has been successfully authorised and accepted by the financial institution. Further status transitions can be to REJECTED and, when supported by the institution, to EXECUTED.
 
         `PAYMENT_STATUS_INSUFFICIENT_FUNDS`: The payment has failed due to insufficient funds.
 
@@ -17440,7 +17925,7 @@ components:
 
         `PAYMENT_STATUS_CANCELLED`: The payment was cancelled during authorisation.
 
-        `PAYMENT_STATUS_EXECUTED`: The payment has been successfully executed and is considered complete.
+        `PAYMENT_STATUS_EXECUTED`: The funds have successfully left the payer account and payment is considered complete. This status isn’t supported by some institutions.
 
         `PAYMENT_STATUS_SETTLED`: The payment has settled and funds are available for use. Payment settlement can only be guaranteed by using Plaid virtual accounts. A payment will typically settle within seconds to several days, depending on which payment rail is used.
 
@@ -18209,6 +18694,236 @@ components:
       - request_id
       - securities
       type: object
+    InvestmentsAuthGetRequest:
+      description: InvestmentsAuthGetRequest defines the request schema for `/investments/auth/get`
+      example:
+        access_token: access_token
+        options:
+          account_ids:
+          - account_ids
+          - account_ids
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        access_token:
+          description: The access token associated with the Item data is being requested
+            for.
+          title: AccessToken
+          type: string
+        options:
+          $ref: '#/components/schemas/InvestmentsAuthGetRequestOptions'
+      required:
+      - access_token
+      type: object
+      x-hidden-from-docs: true
+    InvestmentsAuthGetRequestOptions:
+      description: An optional object to filter `/investments/auth/get` results.
+      example:
+        account_ids:
+        - account_ids
+        - account_ids
+      properties:
+        account_ids:
+          description: An array of `account_id`s to retrieve for the Item. An error
+            will be returned if a provided `account_id` is not associated with the
+            Item.
+          items:
+            type: string
+          type: array
+      type: object
+      x-hidden-from-docs: true
+    InvestmentsAuthGetResponse:
+      additionalProperties: true
+      description: InvestmentsAuthGetResponse defines the response schema for `/investments/auth/get`
+      example:
+        item:
+          update_type: background
+          webhook: webhook
+          item_id: item_id
+          billed_products:
+          - null
+          - null
+          consent_expiration_time: 2000-01-23T04:56:07.000+00:00
+          error:
+            error_message: error_message
+            suggested_action: suggested_action
+            causes:
+            - ""
+            - ""
+            display_message: display_message
+            error_code: error_code
+            documentation_url: documentation_url
+            request_id: request_id
+            status: 0
+          consented_products:
+          - null
+          - null
+          available_products:
+          - null
+          - null
+          institution_id: institution_id
+          products:
+          - null
+          - null
+        numbers:
+          acats:
+          - account_id: account_id
+            dtc_numbers:
+            - dtc_numbers
+            - dtc_numbers
+            account: account
+          - account_id: account_id
+            dtc_numbers:
+            - dtc_numbers
+            - dtc_numbers
+            account: account
+        owners:
+        - account_id: account_id
+          names:
+          - names
+          - names
+        - account_id: account_id
+          names:
+          - names
+          - names
+        accounts:
+        - official_name: official_name
+          persistent_account_id: persistent_account_id
+          balances:
+            unofficial_currency_code: unofficial_currency_code
+            current: 6.027456183070403
+            available: 0.8008281904610115
+            limit: 1.4658129805029452
+            iso_currency_code: iso_currency_code
+            last_updated_datetime: 2000-01-23T04:56:07.000+00:00
+          account_id: account_id
+          name: name
+          verification_status: automatically_verified
+          mask: mask
+        - official_name: official_name
+          persistent_account_id: persistent_account_id
+          balances:
+            unofficial_currency_code: unofficial_currency_code
+            current: 6.027456183070403
+            available: 0.8008281904610115
+            limit: 1.4658129805029452
+            iso_currency_code: iso_currency_code
+            last_updated_datetime: 2000-01-23T04:56:07.000+00:00
+          account_id: account_id
+          name: name
+          verification_status: automatically_verified
+          mask: mask
+        holdings:
+        - cost_basis: 1.4658129805029452
+          unofficial_currency_code: unofficial_currency_code
+          institution_price: 0.8008281904610115
+          account_id: account_id
+          quantity: 5.962133916683182
+          institution_value: 6.027456183070403
+          iso_currency_code: iso_currency_code
+          institution_price_datetime: 2000-01-23T04:56:07.000+00:00
+          institution_price_as_of: 2000-01-23
+          security_id: security_id
+        - cost_basis: 1.4658129805029452
+          unofficial_currency_code: unofficial_currency_code
+          institution_price: 0.8008281904610115
+          account_id: account_id
+          quantity: 5.962133916683182
+          institution_value: 6.027456183070403
+          iso_currency_code: iso_currency_code
+          institution_price_datetime: 2000-01-23T04:56:07.000+00:00
+          institution_price_as_of: 2000-01-23
+          security_id: security_id
+        request_id: request_id
+        securities:
+        - unofficial_currency_code: unofficial_currency_code
+          cusip: cusip
+          ticker_symbol: ticker_symbol
+          institution_security_id: institution_security_id
+          close_price_as_of: 2000-01-23
+          update_datetime: 2000-01-23T04:56:07.000+00:00
+          sedol: sedol
+          type: type
+          institution_id: institution_id
+          close_price: 5.637376656633329
+          proxy_security_id: proxy_security_id
+          name: name
+          iso_currency_code: iso_currency_code
+          is_cash_equivalent: true
+          security_id: security_id
+          isin: isin
+        - unofficial_currency_code: unofficial_currency_code
+          cusip: cusip
+          ticker_symbol: ticker_symbol
+          institution_security_id: institution_security_id
+          close_price_as_of: 2000-01-23
+          update_datetime: 2000-01-23T04:56:07.000+00:00
+          sedol: sedol
+          type: type
+          institution_id: institution_id
+          close_price: 5.637376656633329
+          proxy_security_id: proxy_security_id
+          name: name
+          iso_currency_code: iso_currency_code
+          is_cash_equivalent: true
+          security_id: security_id
+          isin: isin
+      properties:
+        accounts:
+          description: The accounts for which data is being retrieved
+          items:
+            $ref: '#/components/schemas/AccountBase'
+          type: array
+        holdings:
+          description: 'The holdings belonging to investment accounts associated with
+            the Item. Details of the securities in the holdings are provided in the
+            `securities` field. '
+          items:
+            $ref: '#/components/schemas/Holding'
+          type: array
+        securities:
+          description: 'Objects describing the securities held in the accounts associated
+            with the Item. '
+          items:
+            $ref: '#/components/schemas/Security'
+          type: array
+        owners:
+          description: 'Information about the account owners for the accounts associated
+            with the Item. '
+          items:
+            $ref: '#/components/schemas/InvestmentsAuthOwner'
+          type: array
+        numbers:
+          $ref: '#/components/schemas/InvestmentsAuthGetNumbers'
+        item:
+          $ref: '#/components/schemas/Item'
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - accounts
+      - holdings
+      - item
+      - numbers
+      - owners
+      - request_id
+      - securities
+      type: object
+      x-hidden-from-docs: true
     InvestmentsTransactionsGetRequest:
       description: InvestmentsTransactionsGetRequest defines the request schema for
         `/investments/transactions/get`
@@ -18970,6 +19685,7 @@ components:
           auth_type_select_enabled: false
           automated_microdeposits_enabled: true
           same_day_microdeposits_enabled: true
+          reroute_to_credentials: "OFF"
         additional_consented_products:
         - null
         - null
@@ -19034,6 +19750,9 @@ components:
           gave_consent: true
           template_id: idvtmp_4FrXJvfQU3zGUR
           consent: ""
+        investments_auth:
+          masked_number_match_enabled: false
+          manual_entry_enabled: false
         transfer:
           payment_profile_token: payment_profile_token
           intent_id: intent_id
@@ -19070,6 +19789,9 @@ components:
         payment_initiation:
           payment_id: payment_id
           consent_id: consent_id
+        required_if_supported_products:
+        - null
+        - null
       properties:
         client_id:
           description: Your Plaid API `client_id`. The `client_id` is required and
@@ -19155,7 +19877,7 @@ components:
           - signal
         additional_consented_products:
           description: |-
-            (Beta) This field has no effect unless you are participating in the Product Scope Transparency beta program.
+            (Beta) This field has no effect unless you are participating in the [Data Transparency](https://plaid.com/docs/link/data-transparency-messaging-migration-guide) beta program.
             List of additional Plaid product(s) you wish to collect consent for. These products will not be billed until you start using them by calling the relevant endpoints.
 
             `balance` is *not* a valid value, the Balance product does not require explicit initialization and will automatically have consent collected.
@@ -19171,6 +19893,30 @@ components:
           - liabilities
           - transactions
           - signal
+        required_if_supported_products:
+          description: |-
+            List of Plaid product(s) you wish to use only if the institution and accounts selected by the user support the product. Institutions that do not support these products will still be shown in Link. The products will only be extracted if the user selects an institution that supports them.
+
+            If the institution and accounts selected by the user support a product specified in this field, but Plaid is unable to successfully fetch data for the product (for example, because the institution uses an OAuth connection and the end user does not grant the required product permission(s) in the institution's OAuth flow) the error will be presented to the user in Link and they will be prompted to fix the error.
+
+            There should be no overlap between `products` and `required_if_supported_products`. The `products` array must have at least one product. Valid `required_if_supported_products` are:
+
+            `transactions`, `auth`, `identity`, `investments`, `liabilities`
+
+            Example: `['identity']`
+
+            In Production, you will only be billed for required if supported products when they are supported and added to the Item. To see the full list of products added to the item during Link, call `/item/get`.
+          items:
+            $ref: '#/components/schemas/Products'
+          type: array
+          x-hidden-from-docs: true
+          x-override-enum-values-shown:
+          - auth
+          - identity
+          - investments
+          - liabilities
+          - transactions
+          - statements
         webhook:
           description: The destination URL to which any webhooks should be sent. Note
             that webhooks for Payment Initiation (e-wallet transactions only), Transfer,
@@ -19244,6 +19990,8 @@ components:
           type: string
         investments:
           $ref: '#/components/schemas/LinkTokenInvestments'
+        investments_auth:
+          $ref: '#/components/schemas/LinkTokenInvestmentsAuth'
       required:
       - client_name
       - country_codes
@@ -19300,6 +20048,25 @@ components:
         allow_unverified_crypto_wallets:
           description: If `true`, allow self-custody crypto wallets to be added without
             requiring signature verification. Defaults to `false`.
+          type: boolean
+      type: object
+    LinkTokenInvestmentsAuth:
+      description: Configuration parameters for the Investments Auth Product
+      example:
+        masked_number_match_enabled: false
+        manual_entry_enabled: false
+      properties:
+        manual_entry_enabled:
+          default: false
+          description: If `true`, show institutions that use the manual entry fallback
+            flow.
+          nullable: true
+          type: boolean
+        masked_number_match_enabled:
+          default: false
+          description: If `true`, show institutions that use the masked number match
+            fallback flow.
+          nullable: true
           type: boolean
       type: object
     LinkTokenCreateRequestPaymentInitiation:
@@ -19419,6 +20186,7 @@ components:
         auth_type_select_enabled: false
         automated_microdeposits_enabled: true
         same_day_microdeposits_enabled: true
+        reroute_to_credentials: "OFF"
       properties:
         auth_type_select_enabled:
           default: false
@@ -19440,6 +20208,14 @@ components:
           description: Specifies whether the Link session is enabled for the Same
             Day Micro-deposits flow.
           type: boolean
+        reroute_to_credentials:
+          description: Specifies what type of Reroute to Credentials pane should be
+            used in the Link session for the Same Day Micro-deposits flow.
+          enum:
+          - "OFF"
+          - OPTIONAL
+          - FORCED
+          type: string
         flow_type:
           deprecated: true
           description: This field has been deprecated in favor of `auth_type_select_enabled`.
@@ -20326,15 +21102,15 @@ components:
     LinkDeliveryWebhookCommunicationMethod:
       description: The communication method used to deliver the hosted link session
       enum:
-      - sms
-      - email
+      - SMS
+      - EMAIL
       title: LinkDeliveryWebhookCommunicationMethod
       type: string
     LinkDeliveryWebhookDeliveryStatus:
       description: The status of the delivery of the hosted link to the user
       enum:
-      - succeeded
-      - failed
+      - SUCCESS
+      - FAILURE
       title: LinkDeliveryWebhookDeliveryStatus
       type: string
     LinkDeliveryInstitution:
@@ -20629,6 +21405,61 @@ components:
       description: International Bank Account Number (IBAN).
       nullable: true
       type: string
+    InvestmentsAuthGetNumbers:
+      additionalProperties: true
+      description: Identifying information for transferring holdings to an investments
+        account.
+      example:
+        acats:
+        - account_id: account_id
+          dtc_numbers:
+          - dtc_numbers
+          - dtc_numbers
+          account: account
+        - account_id: account_id
+          dtc_numbers:
+          - dtc_numbers
+          - dtc_numbers
+          account: account
+      properties:
+        acats:
+          items:
+            $ref: '#/components/schemas/NumbersACATS'
+          type: array
+      type: object
+      x-hidden-from-docs: true
+    NumbersACATS:
+      additionalProperties: true
+      description: Identifying information for transferring holdings to an investments
+        account via ACATS.
+      example:
+        account_id: account_id
+        dtc_numbers:
+        - dtc_numbers
+        - dtc_numbers
+        account: account
+      properties:
+        account_id:
+          description: The Plaid account ID associated with the account numbers
+          type: string
+        account:
+          description: The full account number for the account
+          type: string
+        dtc_numbers:
+          description: Identifiers for the clearinghouses that are assocciated with
+            the account in order of relevance. This array will be empty if we can't
+            provide any account level data. Institution level data can be retrieved
+            from the institutions/get endpoints.
+          items:
+            type: string
+          type: array
+      required:
+      - account
+      - account_id
+      - dtc_numbers
+      title: NumbersACATS
+      type: object
+      x-hidden-from-docs: true
     RecipientBACS:
       additionalProperties: true
       description: An object containing a BACS account number and sort code. If an
@@ -20796,6 +21627,8 @@ components:
           description: |-
             A hierarchical array of the categories to which this transaction belongs. For a full list of categories, see [`/categories/get`](https://plaid.com/docs/api/products/transactions/#categoriesget).
 
+            All Transactions implementations are recommended to use the new `personal_finance_category` instead of `category`. `personal_finance_category` provides more meaningful categorization and greater accuracy.
+
             If the `transactions` object was returned by an Assets endpoint such as `/asset_report/get/` or `/asset_report/pdf/get`, this field will only appear in an Asset Report with Insights.
           items:
             type: string
@@ -20804,6 +21637,8 @@ components:
         category_id:
           description: |-
             The ID of the category to which this transaction belongs. For a full list of categories, see [`/categories/get`](https://plaid.com/docs/api/products/transactions/#categoriesget).
+
+            All Transactions implementations are recommended to use the new `personal_finance_category` instead of `category_id`, as it provides greater accuracy and more meaningful categorization.
 
             If the `transactions` object was returned by an Assets endpoint such as `/asset_report/get/` or `/asset_report/pdf/get`, this field will only appear in an Asset Report with Insights.
           nullable: true
@@ -21009,14 +21844,19 @@ components:
           description: A unique id for the stream
           type: string
         category:
-          description: A hierarchical array of the categories to which this transaction
-            belongs. See [Categories](https://plaid.com/docs/api/products/transactions/#categoriesget).
+          description: "A hierarchical array of the categories to which this transaction\
+            \ belongs. See [Categories](https://plaid.com/docs/api/products/transactions/#categoriesget).\
+            \ \n\nAll implementations are encouraged to use the new `personal_finance_category`\
+            \ instead of `category`. `personal_finance_category` provides more meaningful\
+            \ categorization and greater accuracy."
           items:
             type: string
           type: array
         category_id:
-          description: The ID of the category to which this transaction belongs. See
-            [Categories](https://plaid.com/docs/api/products/transactions/#categoriesget).
+          description: |-
+            The ID of the category to which this transaction belongs. See [Categories](https://plaid.com/docs/api/products/transactions/#categoriesget).
+
+            All implementations are encouraged to use the new `personal_finance_category` instead of `category`. `personal_finance_category` provides more meaningful categorization and greater accuracy.
           type: string
         description:
           description: A description of the transaction stream.
@@ -21140,6 +21980,30 @@ components:
       - TOMBSTONED
       title: TransactionStreamStatus
       type: string
+    InvestmentsAuthOwner:
+      additionalProperties: true
+      description: Information on the ownership of an investments account
+      example:
+        account_id: account_id
+        names:
+        - names
+        - names
+      properties:
+        account_id:
+          description: The ID of the account that this identity information pertains
+            to
+          type: string
+        names:
+          description: |-
+            A list of names associated with the account by the financial institution. In the case of a joint account, Plaid will make a best effort to report the names of all account holders.
+
+            If an Item contains multiple accounts with different owner names, some institutions will report all names associated with the Item in each account's `names` array.
+          items:
+            type: string
+          type: array
+      title: Investments Auth Owner
+      type: object
+      x-hidden-from-docs: true
     Institution:
       additionalProperties: true
       description: Details relating to a specific financial institution
@@ -21315,10 +22179,9 @@ components:
             type: string
           type: array
         oauth:
-          description: Indicates that the institution has a mandatory OAuth login
-            flow. Note that `oauth` may be `false` even for institutions that support
-            OAuth, if the institution is in the process of migrating to OAuth and
-            some active Items still exist that do not use OAuth.
+          description: Indicates that the institution has an OAuth login flow. This
+            will be `true` if OAuth is supported for any Items associated with the
+            institution, even if the institution also supports non-OAuth connections.
           type: boolean
         status:
           $ref: '#/components/schemas/InstitutionStatus'
@@ -21738,12 +22601,14 @@ components:
         `payment_app`: a transfer or P2P app (e.g. Zelle)
         `marketplace`: a marketplace (e.g DoorDash, Google Play Store)
         `payment_terminal`: a point-of-sale payment terminal (e.g Square, Toast)
+        `income_source`: the payer in an income transaction (e.g., an employer, client, or government agency)
       enum:
       - merchant
       - financial_institution
       - payment_app
       - marketplace
       - payment_terminal
+      - income_source
       title: CounterpartyType
       type: string
     PersonalFinanceCategory:
@@ -23684,6 +24549,22 @@ components:
       - SEPA_CREDIT_TRANSFER_INSTANT
       nullable: true
       type: string
+    WalletPaymentScheme:
+      description: |-
+        The payment scheme used to execute this transaction. This is present only for transaction types `PAYOUT` and `REFUND`.
+
+        `FASTER_PAYMENTS`: The standard payment scheme within the UK.
+
+        `SEPA_CREDIT_TRANSFER`: The standard payment to a beneficiary within the SEPA area.
+
+        `SEPA_CREDIT_TRANSFER_INSTANT`: Instant payment to a beneficiary within the SEPA area.
+      enum:
+      - null
+      - FASTER_PAYMENTS
+      - SEPA_CREDIT_TRANSFER
+      - SEPA_CREDIT_TRANSFER_INSTANT
+      nullable: true
+      type: string
     PaymentInitiationConsentScope:
       description: |-
         Payment consent scope. Defines possible directions for payments made with the given consent.
@@ -23837,6 +24718,7 @@ components:
       - balance
       - identity
       - investments
+      - investments_auth
       - liabilities
       - payment_initiation
       - identity_verification
@@ -24869,6 +25751,72 @@ components:
           webhook_code: PRODUCT_READY
           item_id: wz666MBjYWTp2PDzzggYhM6oWWmBb
           environment: production
+    ProductPermissionsRequiredAuthWebhook:
+      additionalProperties: true
+      description: Fired when an `ACCESS_NOT_GRANTED` error is hit for Auth. The error
+        can be resolved by putting the user through update mode with `auth` in the
+        `products` array, as well as through the limited beta for update mode Authentication
+        product validations.
+      properties:
+        webhook_type:
+          description: '`AUTH`'
+          type: string
+        webhook_code:
+          description: '`PRODUCT_PERMISSIONS_REQUIRED`'
+          type: string
+        item_id:
+          description: The `item_id` of the Item associated with this webhook, warning,
+            or error
+          title: ItemId
+          type: string
+        environment:
+          $ref: '#/components/schemas/WebhookEnvironmentValues'
+      required:
+      - environment
+      - item_id
+      - webhook_code
+      - webhook_type
+      title: ProductPermissionsRequiredAuthWebhook
+      type: object
+      x-examples:
+        example-1:
+          webhook_type: AUTH
+          webhook_code: PRODUCT_PERMISSIONS_REQUIRED
+          item_id: wz666MBjYWTp2PDzzggYhM6oWWmBb
+          environment: production
+    ProductPermissionsRequiredIdentityWebhook:
+      additionalProperties: true
+      description: Fired when an `ACCESS_NOT_GRANTED` error is hit for Identity. The
+        error can be resolved by putting the user through update mode with `identity`
+        in the `products` array, as well as through the limited beta for update mode
+        Identity product validations.
+      properties:
+        webhook_type:
+          description: '`IDENTITY`'
+          type: string
+        webhook_code:
+          description: '`PRODUCT_PERMISSIONS_REQUIRED`'
+          type: string
+        item_id:
+          description: The `item_id` of the Item associated with this webhook, warning,
+            or error
+          title: ItemId
+          type: string
+        environment:
+          $ref: '#/components/schemas/WebhookEnvironmentValues'
+      required:
+      - environment
+      - item_id
+      - webhook_code
+      - webhook_type
+      title: ProductPermissionsRequiredIdentityWebhook
+      type: object
+      x-examples:
+        example-1:
+          webhook_type: IDENTITY
+          webhook_code: PRODUCT_PERMISSIONS_REQUIRED
+          item_id: wz666MBjYWTp2PDzzggYhM6oWWmBb
+          environment: production
     Recaptcha_RequiredError:
       additionalProperties: true
       description: The request was flagged by Plaid's fraud system, and requires additional
@@ -25328,7 +26276,8 @@ components:
       type: object
     PaymentAmountCurrency:
       description: The ISO-4217 currency code of the payment. For standing orders
-        and payment consents, `"GBP"` must be used.
+        and payment consents, `"GBP"` must be used. For Poland, Denmark, Sweden and
+        Norway, only the local currency is currently supported.
       enum:
       - GBP
       - EUR
@@ -28935,6 +29884,7 @@ components:
       - null
       nullable: true
       type: string
+      x-hidden-from-docs: true
     TransferAuthorizationGuaranteeDecisionRationaleCode:
       description: |-
         A code representing the reason Plaid declined to guarantee this transfer:
@@ -28955,6 +29905,7 @@ components:
       - RISK_ESTIMATE_UNAVAILABLE
       - REQUIRED_PARAM_MISSING
       type: string
+      x-hidden-from-docs: true
     TransferAuthorizationGuaranteeDecisionRationale:
       additionalProperties: true
       description: The rationale for Plaid's decision to not guarantee a transfer.
@@ -28974,6 +29925,7 @@ components:
       - description
       title: TransferAuthorizationGuaranteeDecisionRationale
       type: object
+      x-hidden-from-docs: true
     TransferAuthorizationProposedTransfer:
       additionalProperties: true
       description: Details regarding the proposed transfer.
@@ -29058,13 +30010,11 @@ components:
       properties:
         ip_address:
           description: The IP address of the device being used to initiate the authorization.
-            Required for Guarantee or when the end-user is present at authorization
-            create time.
+            Required when the end-user is present at authorization create time.
           type: string
         user_agent:
           description: The user agent of the device being used to initiate the authorization.
-            Required for Guarantee or when the end-user is present at authorization
-            create time.
+            Required when the end-user is present at authorization create time.
           type: string
       title: TransferAuthorizationDevice
       type: object
@@ -29448,23 +30398,22 @@ components:
           title: TransferAuthorizationIdempotencyKey
           type: string
         user_present:
-          description: Required for Guarantee. If the end user is initiating the specific
-            transfer themselves via an interactive UI, this should be `true`; for
-            automatic recurring payments where the end user is not actually initiating
-            each individual transfer, it should be `false`.
+          description: If the end user is initiating the specific transfer themselves
+            via an interactive UI, this should be `true`; for automatic recurring
+            payments where the end user is not actually initiating each individual
+            transfer, it should be `false`.
           nullable: true
           type: boolean
         with_guarantee:
           default: true
           description: If set to `false`, Plaid will not offer a `guarantee_decision`
-            for this request(Guarantee customers only).
+            for this request (Guarantee customers only).
           nullable: true
           type: boolean
+          x-hidden-from-docs: true
         beacon_session_id:
           description: The unique identifier returned by Plaid's [beacon](https://plaid.com/docs/transfer/guarantee/#using-a-beacon)
-            when it is run on your webpage. Required for Guarantee customers who are
-            not using [Transfer UI](https://plaid.com/docs/transfer/using-transfer-ui/)
-            and have a web checkout experience.
+            when it is run on your webpage.
           nullable: true
           type: string
         originator_client_id:
@@ -29587,6 +30536,7 @@ components:
         iso_currency_code: iso_currency_code
         idempotency_key: idempotency_key
         origination_account_id: origination_account_id
+        test_clock_id: test_clock_id
         user:
           email_address: email_address
           address:
@@ -29697,6 +30647,12 @@ components:
           description: The currency of the transfer amount. The default value is "USD".
           type: string
           x-hidden-from-docs: true
+        test_clock_id:
+          description: Plaid’s unique identifier for a test clock. This field may
+            only be used when using `sandbox` environment. If provided, the `transfer`
+            is created at the `virtual_time` on the provided `test_clock`.
+          nullable: true
+          type: string
       required:
       - authorization_id
       - description
@@ -29796,7 +30752,10 @@ components:
           description: The description of the recurring transfer.
           type: string
         test_clock_id:
-          description: Plaid’s unique identifier for a test clock.
+          description: Plaid’s unique identifier for a test clock. This field may
+            only be used when using `sandbox` environment. If provided, the created
+            `recurring_transfer` is associated with the `test_clock`. New originations
+            are automatically generated when the associated `test_clock` advances.
           nullable: true
           type: string
         schedule:
@@ -32393,6 +33352,7 @@ components:
           type: string
         tax_id:
           description: The tax ID of the originator.
+          minLength: 1
           type: string
         credit_usage_configuration:
           $ref: '#/components/schemas/TransferCreditUsageConfiguration'
@@ -32405,6 +33365,8 @@ components:
           type: string
         naics_code:
           description: The NAICS code of the originator.
+          maxLength: 6
+          minLength: 6
           type: string
       required:
       - address
@@ -32474,11 +33436,9 @@ components:
 
             `"ppd"` - Prearranged Payment or Deposit - the transfer is part of a pre-existing relationship with a consumer, eg. bill payment
 
-            `"tel"` - Telephone-Initiated Entry
-
             `"web"` - A credit Entry initiated by or on behalf of a holder of a Consumer Account that is intended for a Consumer Account of a Receiver
           items:
-            $ref: '#/components/schemas/ACHClass'
+            $ref: '#/components/schemas/CreditACHClass'
           type: array
       required:
       - expected_average_amount
@@ -32487,6 +33447,21 @@ components:
       - expected_monthly_amount
       - sec_codes
       type: object
+    CreditACHClass:
+      description: |-
+        Specifies the use case of the transfer. Required for transfers on an ACH network.
+
+        `"ccd"` - Corporate Credit or Debit - fund transfer between two corporate bank accounts
+
+        `"ppd"` - Prearranged Payment or Deposit - the transfer is part of a pre-existing relationship with a consumer, eg. bill payment
+
+        `"web"` - A credit Entry initiated by or on behalf of a holder of a Consumer Account that is intended for a Consumer Account of a Receiver
+      enum:
+      - ccd
+      - ppd
+      - web
+      title: CreditACHClass
+      type: string
     TransferDebitUsageConfiguration:
       description: Specifies the originator's expected usage of debits. For all dollar
         amounts, use a decimal string with two digits of precision e.g. "10.00". This
@@ -32951,6 +33926,7 @@ components:
             by Plaid to proceed (Guarantee customers only).
           nullable: true
           type: boolean
+          x-hidden-from-docs: true
       required:
       - amount
       - description
@@ -33061,6 +34037,7 @@ components:
             by Plaid to proceed (Guarantee customers only).
           nullable: true
           type: boolean
+          x-hidden-from-docs: true
       required:
       - amount
       - created
@@ -33261,6 +34238,7 @@ components:
             by Plaid to proceed (Guarantee customers only).
           nullable: true
           type: boolean
+          x-hidden-from-docs: true
         guarantee_decision:
           $ref: '#/components/schemas/TransferAuthorizationGuaranteeDecision'
         guarantee_decision_rationale:
@@ -33581,6 +34559,7 @@ components:
         event_type: event_type
         secret: secret
         transfer_id: transfer_id
+        test_clock_id: test_clock_id
         failure_reason:
           ach_return_code: ach_return_code
           description: description
@@ -33600,6 +34579,12 @@ components:
         transfer_id:
           description: Plaid’s unique identifier for a transfer.
           title: TransferID
+          type: string
+        test_clock_id:
+          description: Plaid’s unique identifier for a test clock. If provided, the
+            event to be simulated is created at the `virtual_time` on the provided
+            `test_clock`.
+          nullable: true
           type: string
         event_type:
           description: |
@@ -33626,6 +34611,7 @@ components:
       description: Defines the request schema for `/sandbox/transfer/sweep/simulate`
       example:
         secret: secret
+        test_clock_id: test_clock_id
         client_id: client_id
       properties:
         client_id:
@@ -33638,6 +34624,13 @@ components:
           description: Your Plaid API `secret`. The `secret` is required and may be
             provided either in the `PLAID-SECRET` header or as part of a request body.
           title: APISecret
+          type: string
+        test_clock_id:
+          description: Plaid’s unique identifier for a test clock. If provided, the
+            sweep to be simulated is created on the day of the `virtual_time` on the
+            `test_clock`. If the date of `virtual_time` is on weekend or a federal
+            holiday, the next available banking day is used.
+          nullable: true
           type: string
       title: SandboxTransferSweepSimulateRequest
       type: object
@@ -33660,13 +34653,12 @@ components:
           title: APISecret
           type: string
         virtual_time:
-          description: The virtual timestamp on the test clock. This will be of the
-            form `2006-01-02T15:04:05Z`.
+          description: The virtual timestamp on the test clock. If not provided, the
+            current timestamp will be used. This will be of the form `2006-01-02T15:04:05Z`.
           format: date-time
+          nullable: true
           title: VirtualTime
           type: string
-      required:
-      - virtual_time
       title: SandboxTransferTestClockCreateRequest
       type: object
     SandboxTransferTestClockAdvanceRequest:
@@ -34890,10 +35882,11 @@ components:
           environment: production
     IncomeVerificationRiskSignalsStatusWebhook:
       additionalProperties: true
-      description: Fired when the risk signal computation for all uploaded documents
-        in an income verification is completed. It will typically take several minutes
-        for this webhook to fire after the end user has uploaded their documents in
-        the Document Income flow.
+      description: Fired when a risk signal is available for documents uploaded via
+        Document Income. It will typically take a minute or two for this webhook to
+        fire after the end user has uploaded their documents in the Document Income
+        flow. Once this webhook has fired, `/credit/payroll_income/risk_signals/get`
+        may then be called to retrieve risk data.
       properties:
         webhook_type:
           description: '`"INCOME"`'
@@ -41883,7 +42876,11 @@ components:
           type: array
       type: object
     CreditBankIncomeCategory:
-      description: The income category.
+      description: The income category. Note that the `CASH` value has been deprecated
+        and is used only for existing legacy implementations. It has been replaced
+        by the new categories `CASH_DEPOSIT` (representing cash or check deposits)
+        and `TRANSFER_FROM_APPLICATION` (representing cash transfers originating from
+        apps, such as Zelle or Venmo).
       enum:
       - SALARY
       - UNEMPLOYMENT
@@ -42230,7 +43227,6 @@ components:
       description: CreditBankIncomeRefreshRequest defines the request schema for `/credit/bank_income/refresh`.
       example:
         options:
-          webhook: webhook
           days_requested: 0
         secret: secret
         user_token: user_token
@@ -42261,7 +43257,6 @@ components:
     CreditBankIncomeRefreshRequestOptions:
       description: An optional object for `/credit/bank_income/refresh` request options.
       example:
-        webhook: webhook
         days_requested: 0
       properties:
         days_requested:
@@ -42269,9 +43264,6 @@ components:
             this will default to the days requested in the most recently generated
             bank income report for the user.
           type: integer
-        webhook:
-          description: The URL where Plaid will send the bank income webhook.
-          type: string
       type: object
     CreditBankIncomeRefreshResponse:
       additionalProperties: true
@@ -42289,6 +43281,330 @@ components:
       required:
       - request_id
       title: CreditBankIncomeRefreshResponse
+      type: object
+    CreditBankIncomeWebhookUpdateRequest:
+      description: CreditBankIncomeWebhookUpdateRequest defines the request schema
+        for `/credit/bank_income/webhook/update`.
+      example:
+        enable_webhooks: true
+        secret: secret
+        user_token: user_token
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        user_token:
+          description: The user token associated with the User data is being requested
+            for.
+          title: UserToken
+          type: string
+        enable_webhooks:
+          description: Whether the user should be enabled for proactive webhook notifications
+            when their income changes
+          type: boolean
+      required:
+      - enable_webhooks
+      - user_token
+      title: CreditBankIncomeWebhookUpdateRequest
+      type: object
+    CreditBankStatementsUploadsGetRequest:
+      description: CreditBankStatementsUploadsGetRequest defines the request schema
+        for `/credit/bank_statements/uploads/get`
+      example:
+        secret: secret
+        user_token: user_token
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        user_token:
+          description: The user token associated with the User data is being requested
+            for.
+          title: UserToken
+          type: string
+      required:
+      - user_token
+      title: CreditBankStatementsUploadsGetRequest
+      type: object
+    CreditBankStatementsUploadsGetResponse:
+      additionalProperties: true
+      description: CreditBankStatementsUploadsGetResponse defines the response schema
+        for `/credit/bank_statements/uploads/get`
+      example:
+        items:
+        - updated_at: 2000-01-23T04:56:07.000+00:00
+          item_id: item_id
+          bank_statements:
+          - bank_accounts:
+            - owner:
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+              account_number: account_number
+              account_type: account_type
+              name: name
+              bank_name: bank_name
+              periods:
+              - end_date: 2000-01-23
+                ending_balance: 5.962133916683182
+                starting_balance: 1.4658129805029452
+                start_date: 2000-01-23
+              - end_date: 2000-01-23
+                ending_balance: 5.962133916683182
+                starting_balance: 1.4658129805029452
+                start_date: 2000-01-23
+            - owner:
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+              account_number: account_number
+              account_type: account_type
+              name: name
+              bank_name: bank_name
+              periods:
+              - end_date: 2000-01-23
+                ending_balance: 5.962133916683182
+                starting_balance: 1.4658129805029452
+                start_date: 2000-01-23
+              - end_date: 2000-01-23
+                ending_balance: 5.962133916683182
+                starting_balance: 1.4658129805029452
+                start_date: 2000-01-23
+            transactions:
+            - date: 2000-01-23
+              amount: 0.8008281904610115
+              original_description: original_description
+            - date: 2000-01-23
+              amount: 0.8008281904610115
+              original_description: original_description
+            document_metadata:
+              name: name
+              download_url: download_url
+              page_count: 6
+              document_type: document_type
+              status: status
+            document_id: document_id
+          - bank_accounts:
+            - owner:
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+              account_number: account_number
+              account_type: account_type
+              name: name
+              bank_name: bank_name
+              periods:
+              - end_date: 2000-01-23
+                ending_balance: 5.962133916683182
+                starting_balance: 1.4658129805029452
+                start_date: 2000-01-23
+              - end_date: 2000-01-23
+                ending_balance: 5.962133916683182
+                starting_balance: 1.4658129805029452
+                start_date: 2000-01-23
+            - owner:
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+              account_number: account_number
+              account_type: account_type
+              name: name
+              bank_name: bank_name
+              periods:
+              - end_date: 2000-01-23
+                ending_balance: 5.962133916683182
+                starting_balance: 1.4658129805029452
+                start_date: 2000-01-23
+              - end_date: 2000-01-23
+                ending_balance: 5.962133916683182
+                starting_balance: 1.4658129805029452
+                start_date: 2000-01-23
+            transactions:
+            - date: 2000-01-23
+              amount: 0.8008281904610115
+              original_description: original_description
+            - date: 2000-01-23
+              amount: 0.8008281904610115
+              original_description: original_description
+            document_metadata:
+              name: name
+              download_url: download_url
+              page_count: 6
+              document_type: document_type
+              status: status
+            document_id: document_id
+          status:
+            processing_status: processing_status
+        - updated_at: 2000-01-23T04:56:07.000+00:00
+          item_id: item_id
+          bank_statements:
+          - bank_accounts:
+            - owner:
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+              account_number: account_number
+              account_type: account_type
+              name: name
+              bank_name: bank_name
+              periods:
+              - end_date: 2000-01-23
+                ending_balance: 5.962133916683182
+                starting_balance: 1.4658129805029452
+                start_date: 2000-01-23
+              - end_date: 2000-01-23
+                ending_balance: 5.962133916683182
+                starting_balance: 1.4658129805029452
+                start_date: 2000-01-23
+            - owner:
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+              account_number: account_number
+              account_type: account_type
+              name: name
+              bank_name: bank_name
+              periods:
+              - end_date: 2000-01-23
+                ending_balance: 5.962133916683182
+                starting_balance: 1.4658129805029452
+                start_date: 2000-01-23
+              - end_date: 2000-01-23
+                ending_balance: 5.962133916683182
+                starting_balance: 1.4658129805029452
+                start_date: 2000-01-23
+            transactions:
+            - date: 2000-01-23
+              amount: 0.8008281904610115
+              original_description: original_description
+            - date: 2000-01-23
+              amount: 0.8008281904610115
+              original_description: original_description
+            document_metadata:
+              name: name
+              download_url: download_url
+              page_count: 6
+              document_type: document_type
+              status: status
+            document_id: document_id
+          - bank_accounts:
+            - owner:
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+              account_number: account_number
+              account_type: account_type
+              name: name
+              bank_name: bank_name
+              periods:
+              - end_date: 2000-01-23
+                ending_balance: 5.962133916683182
+                starting_balance: 1.4658129805029452
+                start_date: 2000-01-23
+              - end_date: 2000-01-23
+                ending_balance: 5.962133916683182
+                starting_balance: 1.4658129805029452
+                start_date: 2000-01-23
+            - owner:
+                address:
+                  country: country
+                  city: city
+                  street: street
+                  postal_code: postal_code
+                  region: region
+                name: name
+              account_number: account_number
+              account_type: account_type
+              name: name
+              bank_name: bank_name
+              periods:
+              - end_date: 2000-01-23
+                ending_balance: 5.962133916683182
+                starting_balance: 1.4658129805029452
+                start_date: 2000-01-23
+              - end_date: 2000-01-23
+                ending_balance: 5.962133916683182
+                starting_balance: 1.4658129805029452
+                start_date: 2000-01-23
+            transactions:
+            - date: 2000-01-23
+              amount: 0.8008281904610115
+              original_description: original_description
+            - date: 2000-01-23
+              amount: 0.8008281904610115
+              original_description: original_description
+            document_metadata:
+              name: name
+              download_url: download_url
+              page_count: 6
+              document_type: document_type
+              status: status
+            document_id: document_id
+          status:
+            processing_status: processing_status
+        request_id: request_id
+      properties:
+        items:
+          description: Array of bank statement upload items.
+          items:
+            $ref: '#/components/schemas/CreditBankStatementUploadItem'
+          type: array
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - items
+      - request_id
+      title: CreditBankStatementsUploadsGetResponse
       type: object
     CreditPayrollIncomeRiskSignalsGetRequest:
       description: CreditPayrollIncomeRiskSignalsGetRequest defines the request schema
@@ -43457,6 +44773,7 @@ components:
               document_metadata:
                 name: name
                 download_url: download_url
+                page_count: 6
                 document_type: document_type
                 status: status
               employee:
@@ -43554,6 +44871,7 @@ components:
               document_metadata:
                 name: name
                 download_url: download_url
+                page_count: 6
                 document_type: document_type
                 status: status
               employee:
@@ -43594,6 +44912,7 @@ components:
               document_metadata:
                 name: name
                 download_url: download_url
+                page_count: 6
                 document_type: document_type
                 status: status
               october_amount: 3.0576100241049344
@@ -43678,6 +44997,7 @@ components:
               document_metadata:
                 name: name
                 download_url: download_url
+                page_count: 6
                 document_type: document_type
                 status: status
               october_amount: 3.0576100241049344
@@ -43798,6 +45118,7 @@ components:
               document_metadata:
                 name: name
                 download_url: download_url
+                page_count: 6
                 document_type: document_type
                 status: status
               box_9: box_9
@@ -43861,6 +45182,7 @@ components:
               document_metadata:
                 name: name
                 download_url: download_url
+                page_count: 6
                 document_type: document_type
                 status: status
               box_9: box_9
@@ -43949,6 +45271,7 @@ components:
               document_metadata:
                 name: name
                 download_url: download_url
+                page_count: 6
                 document_type: document_type
                 status: status
               employee:
@@ -44046,6 +45369,7 @@ components:
               document_metadata:
                 name: name
                 download_url: download_url
+                page_count: 6
                 document_type: document_type
                 status: status
               employee:
@@ -44086,6 +45410,7 @@ components:
               document_metadata:
                 name: name
                 download_url: download_url
+                page_count: 6
                 document_type: document_type
                 status: status
               october_amount: 3.0576100241049344
@@ -44170,6 +45495,7 @@ components:
               document_metadata:
                 name: name
                 download_url: download_url
+                page_count: 6
                 document_type: document_type
                 status: status
               october_amount: 3.0576100241049344
@@ -44290,6 +45616,7 @@ components:
               document_metadata:
                 name: name
                 download_url: download_url
+                page_count: 6
                 document_type: document_type
                 status: status
               box_9: box_9
@@ -44353,6 +45680,7 @@ components:
               document_metadata:
                 name: name
                 download_url: download_url
+                page_count: 6
                 document_type: document_type
                 status: status
               box_9: box_9
@@ -44459,6 +45787,7 @@ components:
               document_metadata:
                 name: name
                 download_url: download_url
+                page_count: 6
                 document_type: document_type
                 status: status
               employee:
@@ -44556,6 +45885,7 @@ components:
               document_metadata:
                 name: name
                 download_url: download_url
+                page_count: 6
                 document_type: document_type
                 status: status
               employee:
@@ -44596,6 +45926,7 @@ components:
               document_metadata:
                 name: name
                 download_url: download_url
+                page_count: 6
                 document_type: document_type
                 status: status
               october_amount: 3.0576100241049344
@@ -44680,6 +46011,7 @@ components:
               document_metadata:
                 name: name
                 download_url: download_url
+                page_count: 6
                 document_type: document_type
                 status: status
               october_amount: 3.0576100241049344
@@ -44800,6 +46132,7 @@ components:
               document_metadata:
                 name: name
                 download_url: download_url
+                page_count: 6
                 document_type: document_type
                 status: status
               box_9: box_9
@@ -44863,6 +46196,7 @@ components:
               document_metadata:
                 name: name
                 download_url: download_url
+                page_count: 6
                 document_type: document_type
                 status: status
               box_9: box_9
@@ -44951,6 +46285,7 @@ components:
               document_metadata:
                 name: name
                 download_url: download_url
+                page_count: 6
                 document_type: document_type
                 status: status
               employee:
@@ -45048,6 +46383,7 @@ components:
               document_metadata:
                 name: name
                 download_url: download_url
+                page_count: 6
                 document_type: document_type
                 status: status
               employee:
@@ -45088,6 +46424,7 @@ components:
               document_metadata:
                 name: name
                 download_url: download_url
+                page_count: 6
                 document_type: document_type
                 status: status
               october_amount: 3.0576100241049344
@@ -45172,6 +46509,7 @@ components:
               document_metadata:
                 name: name
                 download_url: download_url
+                page_count: 6
                 document_type: document_type
                 status: status
               october_amount: 3.0576100241049344
@@ -45292,6 +46630,7 @@ components:
               document_metadata:
                 name: name
                 download_url: download_url
+                page_count: 6
                 document_type: document_type
                 status: status
               box_9: box_9
@@ -45355,6 +46694,7 @@ components:
               document_metadata:
                 name: name
                 download_url: download_url
+                page_count: 6
                 document_type: document_type
                 status: status
               box_9: box_9
@@ -45400,6 +46740,7 @@ components:
       example:
         name: name
         download_url: download_url
+        page_count: 6
         document_type: document_type
         status: status
       properties:
@@ -45444,13 +46785,19 @@ components:
           - PLAID_GENERATED_PAYSTUB_PDF
           - NONE
         download_url:
-          description: Signed URL to retrieve the underlying file.
+          description: Signed URL to retrieve the underlying file. This download URL
+            can only be used once. To generate a new download URL, call `/credit/payroll_income/get`
+            again.
           nullable: true
           type: string
         status:
           description: The processing status of the document.
           nullable: true
           type: string
+        page_count:
+          description: The number of pages of the uploaded document (if available).
+          nullable: true
+          type: integer
       required:
       - document_type
       - download_url
@@ -45495,6 +46842,429 @@ components:
       - GIG
       - PLAID_GENERATED_PAYSTUB_PDF
       - NONE
+    CreditBankStatementUploadItem:
+      description: An object containing information about the bank statement upload
+        Item.
+      example:
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        item_id: item_id
+        bank_statements:
+        - bank_accounts:
+          - owner:
+              address:
+                country: country
+                city: city
+                street: street
+                postal_code: postal_code
+                region: region
+              name: name
+            account_number: account_number
+            account_type: account_type
+            name: name
+            bank_name: bank_name
+            periods:
+            - end_date: 2000-01-23
+              ending_balance: 5.962133916683182
+              starting_balance: 1.4658129805029452
+              start_date: 2000-01-23
+            - end_date: 2000-01-23
+              ending_balance: 5.962133916683182
+              starting_balance: 1.4658129805029452
+              start_date: 2000-01-23
+          - owner:
+              address:
+                country: country
+                city: city
+                street: street
+                postal_code: postal_code
+                region: region
+              name: name
+            account_number: account_number
+            account_type: account_type
+            name: name
+            bank_name: bank_name
+            periods:
+            - end_date: 2000-01-23
+              ending_balance: 5.962133916683182
+              starting_balance: 1.4658129805029452
+              start_date: 2000-01-23
+            - end_date: 2000-01-23
+              ending_balance: 5.962133916683182
+              starting_balance: 1.4658129805029452
+              start_date: 2000-01-23
+          transactions:
+          - date: 2000-01-23
+            amount: 0.8008281904610115
+            original_description: original_description
+          - date: 2000-01-23
+            amount: 0.8008281904610115
+            original_description: original_description
+          document_metadata:
+            name: name
+            download_url: download_url
+            page_count: 6
+            document_type: document_type
+            status: status
+          document_id: document_id
+        - bank_accounts:
+          - owner:
+              address:
+                country: country
+                city: city
+                street: street
+                postal_code: postal_code
+                region: region
+              name: name
+            account_number: account_number
+            account_type: account_type
+            name: name
+            bank_name: bank_name
+            periods:
+            - end_date: 2000-01-23
+              ending_balance: 5.962133916683182
+              starting_balance: 1.4658129805029452
+              start_date: 2000-01-23
+            - end_date: 2000-01-23
+              ending_balance: 5.962133916683182
+              starting_balance: 1.4658129805029452
+              start_date: 2000-01-23
+          - owner:
+              address:
+                country: country
+                city: city
+                street: street
+                postal_code: postal_code
+                region: region
+              name: name
+            account_number: account_number
+            account_type: account_type
+            name: name
+            bank_name: bank_name
+            periods:
+            - end_date: 2000-01-23
+              ending_balance: 5.962133916683182
+              starting_balance: 1.4658129805029452
+              start_date: 2000-01-23
+            - end_date: 2000-01-23
+              ending_balance: 5.962133916683182
+              starting_balance: 1.4658129805029452
+              start_date: 2000-01-23
+          transactions:
+          - date: 2000-01-23
+            amount: 0.8008281904610115
+            original_description: original_description
+          - date: 2000-01-23
+            amount: 0.8008281904610115
+            original_description: original_description
+          document_metadata:
+            name: name
+            download_url: download_url
+            page_count: 6
+            document_type: document_type
+            status: status
+          document_id: document_id
+        status:
+          processing_status: processing_status
+      properties:
+        item_id:
+          description: The `item_id` of the Item associated with this webhook, warning,
+            or error
+          title: ItemId
+          type: string
+        bank_statements:
+          items:
+            $ref: '#/components/schemas/CreditBankStatementUploadObject'
+          type: array
+        status:
+          $ref: '#/components/schemas/PayrollItemStatus'
+        updated_at:
+          description: Timestamp in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            format (YYYY-MM-DDTHH:mm:ssZ) indicating the last time that the Item was
+            updated.
+          format: date-time
+          nullable: true
+          type: string
+      required:
+      - bank_statements
+      - item_id
+      - status
+      - updated_at
+      title: CreditBankStatementUploadItem
+      type: object
+    CreditBankStatementUploadObject:
+      additionalProperties: true
+      description: An object containing data that has been parsed from a user-uploaded
+        bank statement.
+      example:
+        bank_accounts:
+        - owner:
+            address:
+              country: country
+              city: city
+              street: street
+              postal_code: postal_code
+              region: region
+            name: name
+          account_number: account_number
+          account_type: account_type
+          name: name
+          bank_name: bank_name
+          periods:
+          - end_date: 2000-01-23
+            ending_balance: 5.962133916683182
+            starting_balance: 1.4658129805029452
+            start_date: 2000-01-23
+          - end_date: 2000-01-23
+            ending_balance: 5.962133916683182
+            starting_balance: 1.4658129805029452
+            start_date: 2000-01-23
+        - owner:
+            address:
+              country: country
+              city: city
+              street: street
+              postal_code: postal_code
+              region: region
+            name: name
+          account_number: account_number
+          account_type: account_type
+          name: name
+          bank_name: bank_name
+          periods:
+          - end_date: 2000-01-23
+            ending_balance: 5.962133916683182
+            starting_balance: 1.4658129805029452
+            start_date: 2000-01-23
+          - end_date: 2000-01-23
+            ending_balance: 5.962133916683182
+            starting_balance: 1.4658129805029452
+            start_date: 2000-01-23
+        transactions:
+        - date: 2000-01-23
+          amount: 0.8008281904610115
+          original_description: original_description
+        - date: 2000-01-23
+          amount: 0.8008281904610115
+          original_description: original_description
+        document_metadata:
+          name: name
+          download_url: download_url
+          page_count: 6
+          document_type: document_type
+          status: status
+        document_id: document_id
+      properties:
+        transactions:
+          description: An array of transactions appearing on the bank statement.
+          items:
+            $ref: '#/components/schemas/CreditBankStatementUploadTransaction'
+          type: array
+        document_metadata:
+          $ref: '#/components/schemas/CreditDocumentMetadata'
+        document_id:
+          description: An identifier of the document referenced by the document metadata.
+          nullable: true
+          type: string
+        bank_accounts:
+          description: An array of bank accounts associated with the uploaded bank
+            statement.
+          items:
+            $ref: '#/components/schemas/CreditBankStatementUploadBankAccount'
+          type: array
+      required:
+      - bank_accounts
+      - document_id
+      - document_metadata
+      - transactions
+      title: CreditBankStatementUploadObject
+      type: object
+    CreditBankStatementUploadTransaction:
+      description: An object containing data about a transaction appearing on a user-uploaded
+        bank statement.
+      example:
+        date: 2000-01-23
+        amount: 0.8008281904610115
+        original_description: original_description
+      properties:
+        amount:
+          description: The value of the transaction. A negative amount indicates that
+            money moved into the account (such as a paycheck being deposited).
+          nullable: true
+          type: number
+        date:
+          description: The date of when the transaction was made, in ISO 8601 format
+            (YYYY-MM-DD).
+          format: date
+          nullable: true
+          type: string
+        original_description:
+          description: The raw description of the transaction as it appears on the
+            bank statement.
+          nullable: true
+          type: string
+      required:
+      - amount
+      - date
+      - original_description
+      title: CreditBankStatementUploadTransaction
+      type: object
+    CreditBankStatementUploadBankAccount:
+      additionalProperties: true
+      description: An object containing data about a user's bank account related to
+        an uploaded bank statement.
+      example:
+        owner:
+          address:
+            country: country
+            city: city
+            street: street
+            postal_code: postal_code
+            region: region
+          name: name
+        account_number: account_number
+        account_type: account_type
+        name: name
+        bank_name: bank_name
+        periods:
+        - end_date: 2000-01-23
+          ending_balance: 5.962133916683182
+          starting_balance: 1.4658129805029452
+          start_date: 2000-01-23
+        - end_date: 2000-01-23
+          ending_balance: 5.962133916683182
+          starting_balance: 1.4658129805029452
+          start_date: 2000-01-23
+      properties:
+        name:
+          description: The name of the bank account
+          nullable: true
+          type: string
+        bank_name:
+          description: The name of the bank institution.
+          nullable: true
+          type: string
+        account_type:
+          description: The type of the bank account.
+          nullable: true
+          type: string
+        account_number:
+          description: The bank account number.
+          nullable: true
+          type: string
+        owner:
+          $ref: '#/components/schemas/CreditBankStatementUploadAccountOwner'
+        periods:
+          description: An array of period objects, containing more data on the overall
+            period of the statement.
+          items:
+            $ref: '#/components/schemas/CreditBankStatementUploadBankAccountPeriod'
+          type: array
+      required:
+      - account_number
+      - account_type
+      - bank_name
+      - name
+      - owner
+      - periods
+      title: CreditBankStatementUploadBankAccount
+      type: object
+    CreditBankStatementUploadAccountOwner:
+      additionalProperties: true
+      description: An object containing data about the owner of the bank account for
+        the uploaded bank statement.
+      example:
+        address:
+          country: country
+          city: city
+          street: street
+          postal_code: postal_code
+          region: region
+        name: name
+      properties:
+        name:
+          description: The name of the account owner
+          nullable: true
+          type: string
+        address:
+          $ref: '#/components/schemas/CreditBankStatementUploadAccountOwnerAddress'
+      required:
+      - address
+      - name
+      title: CreditBankStatementUploadAccountOwner
+      type: object
+    CreditBankStatementUploadAccountOwnerAddress:
+      additionalProperties: true
+      description: Address on the uploaded bank statement
+      example:
+        country: country
+        city: city
+        street: street
+        postal_code: postal_code
+        region: region
+      properties:
+        city:
+          description: The full city name.
+          nullable: true
+          type: string
+        country:
+          description: The ISO 3166-1 alpha-2 country code.
+          nullable: true
+          type: string
+        postal_code:
+          description: The postal code of the address.
+          nullable: true
+          type: string
+        region:
+          description: |-
+            The region or state.
+            Example: `"NC"`
+          nullable: true
+          type: string
+        street:
+          description: The full street address.
+          nullable: true
+          type: string
+      required:
+      - city
+      - country
+      - postal_code
+      - region
+      - street
+      title: CreditBankStatementUploadAccountOwnerAddress
+      type: object
+    CreditBankStatementUploadBankAccountPeriod:
+      description: An object containing data on the overall period of the statement.
+      example:
+        end_date: 2000-01-23
+        ending_balance: 5.962133916683182
+        starting_balance: 1.4658129805029452
+        start_date: 2000-01-23
+      properties:
+        start_date:
+          description: The start date of the statement period in ISO 8601 format (YYYY-MM-DD).
+          format: date
+          nullable: true
+          type: string
+        end_date:
+          description: The end date of the statement period in ISO 8601 format (YYYY-MM-DD).
+          format: date
+          nullable: true
+          type: string
+        starting_balance:
+          description: The starting balance of the bank account for the period.
+          nullable: true
+          type: number
+        ending_balance:
+          description: The ending balance of the bank account for the period.
+          nullable: true
+          type: number
+      required:
+      - end_date
+      - ending_balance
+      - start_date
+      - starting_balance
+      title: CreditBankStatementUploadBankAccountPeriod
+      type: object
     PayrollItem:
       description: An object containing information about the payroll item.
       example:
@@ -45585,6 +47355,7 @@ components:
             document_metadata:
               name: name
               download_url: download_url
+              page_count: 6
               document_type: document_type
               status: status
             employee:
@@ -45682,6 +47453,7 @@ components:
             document_metadata:
               name: name
               download_url: download_url
+              page_count: 6
               document_type: document_type
               status: status
             employee:
@@ -45722,6 +47494,7 @@ components:
             document_metadata:
               name: name
               download_url: download_url
+              page_count: 6
               document_type: document_type
               status: status
             october_amount: 3.0576100241049344
@@ -45806,6 +47579,7 @@ components:
             document_metadata:
               name: name
               download_url: download_url
+              page_count: 6
               document_type: document_type
               status: status
             october_amount: 3.0576100241049344
@@ -45926,6 +47700,7 @@ components:
             document_metadata:
               name: name
               download_url: download_url
+              page_count: 6
               document_type: document_type
               status: status
             box_9: box_9
@@ -45989,6 +47764,7 @@ components:
             document_metadata:
               name: name
               download_url: download_url
+              page_count: 6
               document_type: document_type
               status: status
             box_9: box_9
@@ -46077,6 +47853,7 @@ components:
             document_metadata:
               name: name
               download_url: download_url
+              page_count: 6
               document_type: document_type
               status: status
             employee:
@@ -46174,6 +47951,7 @@ components:
             document_metadata:
               name: name
               download_url: download_url
+              page_count: 6
               document_type: document_type
               status: status
             employee:
@@ -46214,6 +47992,7 @@ components:
             document_metadata:
               name: name
               download_url: download_url
+              page_count: 6
               document_type: document_type
               status: status
             october_amount: 3.0576100241049344
@@ -46298,6 +48077,7 @@ components:
             document_metadata:
               name: name
               download_url: download_url
+              page_count: 6
               document_type: document_type
               status: status
             october_amount: 3.0576100241049344
@@ -46418,6 +48198,7 @@ components:
             document_metadata:
               name: name
               download_url: download_url
+              page_count: 6
               document_type: document_type
               status: status
             box_9: box_9
@@ -46481,6 +48262,7 @@ components:
             document_metadata:
               name: name
               download_url: download_url
+              page_count: 6
               document_type: document_type
               status: status
             box_9: box_9
@@ -46667,6 +48449,7 @@ components:
           document_metadata:
             name: name
             download_url: download_url
+            page_count: 6
             document_type: document_type
             status: status
           employee:
@@ -46764,6 +48547,7 @@ components:
           document_metadata:
             name: name
             download_url: download_url
+            page_count: 6
             document_type: document_type
             status: status
           employee:
@@ -46804,6 +48588,7 @@ components:
           document_metadata:
             name: name
             download_url: download_url
+            page_count: 6
             document_type: document_type
             status: status
           october_amount: 3.0576100241049344
@@ -46888,6 +48673,7 @@ components:
           document_metadata:
             name: name
             download_url: download_url
+            page_count: 6
             document_type: document_type
             status: status
           october_amount: 3.0576100241049344
@@ -47008,6 +48794,7 @@ components:
           document_metadata:
             name: name
             download_url: download_url
+            page_count: 6
             document_type: document_type
             status: status
           box_9: box_9
@@ -47071,6 +48858,7 @@ components:
           document_metadata:
             name: name
             download_url: download_url
+            page_count: 6
             document_type: document_type
             status: status
           box_9: box_9
@@ -47130,6 +48918,7 @@ components:
         document_metadata:
           name: name
           download_url: download_url
+          page_count: 6
           document_type: document_type
           status: status
         october_amount: 3.0576100241049344
@@ -47639,6 +49428,7 @@ components:
         document_metadata:
           name: name
           download_url: download_url
+          page_count: 6
           document_type: document_type
           status: status
         employee:
@@ -48512,6 +50302,7 @@ components:
         document_metadata:
           name: name
           download_url: download_url
+          page_count: 6
           document_type: document_type
           status: status
         box_9: box_9
@@ -50162,6 +51953,7 @@ components:
       required:
       - activities
       - last_data_access_times
+      - request_id
       type: object
     LastDataAccessTimes:
       additionalProperties: true
@@ -51824,6 +53616,14 @@ components:
           value: 0.09008281904610115
         idempotency_key: idempotency_key
         counterparty:
+          address:
+            country: country
+            city: city
+            street:
+            - street
+            - street
+            postal_code: postal_code
+          date_of_birth: 2000-01-23
           name: name
           numbers:
             international:
@@ -51886,6 +53686,14 @@ components:
       additionalProperties: true
       description: An object representing the e-wallet transaction's counterparty
       example:
+        address:
+          country: country
+          city: city
+          street:
+          - street
+          - street
+          postal_code: postal_code
+        date_of_birth: 2000-01-23
         name: name
         numbers:
           international:
@@ -51897,6 +53705,14 @@ components:
           type: string
         numbers:
           $ref: '#/components/schemas/WalletTransactionCounterpartyNumbers'
+        address:
+          $ref: '#/components/schemas/PaymentInitiationAddress'
+        date_of_birth:
+          description: The counterparty's birthdate, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            (YYYY-MM-DD) format.
+          format: date
+          nullable: true
+          type: string
       required:
       - name
       - numbers
@@ -52161,6 +53977,14 @@ components:
             value: 0.09008281904610115
           payment_id: payment_id
           counterparty:
+            address:
+              country: country
+              city: city
+              street:
+              - street
+              - street
+              postal_code: postal_code
+            date_of_birth: 2000-01-23
             name: name
             numbers:
               international:
@@ -52175,6 +53999,14 @@ components:
             value: 0.09008281904610115
           payment_id: payment_id
           counterparty:
+            address:
+              country: country
+              city: city
+              street:
+              - street
+              - street
+              postal_code: postal_code
+            date_of_birth: 2000-01-23
             name: name
             numbers:
               international:
@@ -52215,6 +54047,14 @@ components:
           value: 0.09008281904610115
         payment_id: payment_id
         counterparty:
+          address:
+            country: country
+            city: city
+            street:
+            - street
+            - street
+            postal_code: postal_code
+          date_of_birth: 2000-01-23
           name: name
           numbers:
             international:
@@ -52253,6 +54093,8 @@ components:
           - REFUND
           - FUNDS_SWEEP
           type: string
+        scheme:
+          $ref: '#/components/schemas/WalletPaymentScheme'
         amount:
           $ref: '#/components/schemas/WalletTransactionAmount'
         counterparty:
@@ -52334,8 +54176,12 @@ components:
           include_legacy_category: false
         secret: secret
         transactions:
-        - amount: 0.8008281904610115
+        - client_account_id: client_account_id
+          account_type: account_type
+          amount: 0.8008281904610115
           date_posted: 2000-01-23
+          client_user_id: client_user_id
+          account_subtype: account_subtype
           iso_currency_code: iso_currency_code
           description: description
           location:
@@ -52346,8 +54192,12 @@ components:
             postal_code: postal_code
           id: id
           mcc: mcc
-        - amount: 0.8008281904610115
+        - client_account_id: client_account_id
+          account_type: account_type
+          amount: 0.8008281904610115
           date_posted: 2000-01-23
+          client_user_id: client_user_id
+          account_subtype: account_subtype
           iso_currency_code: iso_currency_code
           description: description
           location:
@@ -52404,8 +54254,12 @@ components:
       additionalProperties: true
       description: A client-provided transaction for Plaid to enrich.
       example:
+        client_account_id: client_account_id
+        account_type: account_type
         amount: 0.8008281904610115
         date_posted: 2000-01-23
+        client_user_id: client_user_id
+        account_subtype: account_subtype
         iso_currency_code: iso_currency_code
         description: description
         location:
@@ -52421,6 +54275,30 @@ components:
           description: A unique ID for the transaction used to help you tie data back
             to your systems.
           type: string
+        client_user_id:
+          description: A unique user id used to group transactions for a given user,
+            as a unique identifier from your application. Personally identifiable
+            information, such as an email address or phone number, should not be used
+            in the client_user_id.
+          type: string
+          x-hidden-from-docs: true
+        client_account_id:
+          description: A unique account id used to group transactions for a given
+            account, as a unique identifier from your application. Personally identifiable
+            information, such as an email address or phone number, should not be used
+            in the client_account_id.
+          type: string
+          x-hidden-from-docs: true
+        account_type:
+          description: The account type associated with the transaction. For a full
+            list of valid types and subtypes, see the [Account schema](https://plaid.com/docs/api/accounts#account-type-schema).
+          type: string
+          x-hidden-from-docs: true
+        account_subtype:
+          description: The account subtype associated with the transaction. For a
+            full list of valid types and subtypes, see the [Account schema](https://plaid.com/docs/api/accounts#account-type-schema).
+          type: string
+          x-hidden-from-docs: true
         description:
           description: The raw description of the transaction. If you have location
             data in available an unstructured format, it may be appended to the `description`
@@ -52622,7 +54500,11 @@ components:
       description: TransactionsEnrichGetResponse defines the response schema for `/transactions/enrich`.
       example:
         enriched_transactions:
-        - amount: 0.8008281904610115
+        - client_account_id: client_account_id
+          account_type: account_type
+          amount: 0.8008281904610115
+          client_user_id: client_user_id
+          account_subtype: account_subtype
           iso_currency_code: iso_currency_code
           description: description
           id: id
@@ -52660,7 +54542,11 @@ components:
             personal_finance_category:
               detailed: detailed
               primary: primary
-        - amount: 0.8008281904610115
+        - client_account_id: client_account_id
+          account_type: account_type
+          amount: 0.8008281904610115
+          client_user_id: client_user_id
+          account_subtype: account_subtype
           iso_currency_code: iso_currency_code
           description: description
           id: id
@@ -52788,7 +54674,11 @@ components:
       additionalProperties: true
       description: A client-provided transaction that Plaid has enriched.
       example:
+        client_account_id: client_account_id
+        account_type: account_type
         amount: 0.8008281904610115
+        client_user_id: client_user_id
+        account_subtype: account_subtype
         iso_currency_code: iso_currency_code
         description: description
         id: id
@@ -52831,6 +54721,30 @@ components:
           description: The unique ID for the transaction as provided by you in the
             request.
           type: string
+        client_user_id:
+          description: A unique user id used to group transactions for a given user,
+            as a unique identifier from your application. Personally identifiable
+            information, such as an email address or phone number, should not be used
+            in the client_user_id.
+          type: string
+          x-hidden-from-docs: true
+        client_account_id:
+          description: A unique account id used to group transactions for a given
+            account, as a unique identifier from your application. Personally identifiable
+            information, such as an email address or phone number, should not be used
+            in the client_account_id.
+          type: string
+          x-hidden-from-docs: true
+        account_type:
+          description: The account type associated with the transaction. For a full
+            list of valid types and subtypes, see the [Account schema](https://plaid.com/docs/api/accounts#account-type-schema).
+          type: string
+          x-hidden-from-docs: true
+        account_subtype:
+          description: The account subtype associated with the transaction. For a
+            full list of valid types and subtypes, see the [Account schema](https://plaid.com/docs/api/accounts#account-type-schema).
+          type: string
+          x-hidden-from-docs: true
         description:
           description: The raw description of the transaction.
           type: string
@@ -53785,7 +55699,7 @@ components:
       type: object
     LinkDeliverySessionStatus:
       description: |-
-        The status of the given Link Delivery Session.
+        The status of the given Hosted Link session.
 
         `CREATED`: The session is created but not yet accessed by the user
 
@@ -53802,7 +55716,7 @@ components:
       type: string
     LinkDeliveryDeliveryMethod:
       description: |-
-        The delivery method to be used to deliver the Link Delivery URL.
+        The delivery method to be used to deliver the Hosted Link session URL.
 
         `SMS`: The URL will be delivered through SMS
 
@@ -53820,7 +55734,7 @@ components:
         method:
           $ref: '#/components/schemas/LinkDeliveryDeliveryMethod'
         address:
-          description: The phone number / email address that link delivery sessions
+          description: The phone number / email address that Hosted Link sessions
             are delivered to. Phone numbers must be in E.164 format.
           type: string
       type: object
@@ -53834,7 +55748,7 @@ components:
         first_name: first_name
       properties:
         communication_methods:
-          description: The list of communication methods to send the Link Delivery
+          description: The list of communication methods to send the Hosted Link session
             URL to. If delivery is not required, leave this field blank.
           items:
             $ref: '#/components/schemas/LinkDeliveryCommunicationMethod'
@@ -53846,7 +55760,7 @@ components:
           type: string
       type: object
     LinkDeliveryOptions:
-      description: Optional metadata related to the link delivery session
+      description: Optional metadata related to the Hosted Link session
       example:
         recipient:
           communication_methods:
@@ -53882,8 +55796,7 @@ components:
           title: APISecret
           type: string
         link_token:
-          description: A `link_token` from a previous invocation of `/link/token/create`
-            with Link Delivery enabled.
+          description: A `link_token` from a previous invocation of `/link/token/create`.
           type: string
         options:
           $ref: '#/components/schemas/LinkDeliveryOptions'
@@ -53899,11 +55812,11 @@ components:
         request_id: request_id
       properties:
         link_delivery_url:
-          description: The URL to the Link Delivery session, which will be delivered
+          description: The URL to the Hosted Link session, which will be delivered
             by the specified delivery method.
           type: string
         link_delivery_session_id:
-          description: The ID for the Link Delivery session. Same as the `link_token`
+          description: The ID for the Hosted Link session. Same as the `link_token`
             string excluding the "link-{env}-" prefix.
           type: string
         request_id:
@@ -53936,7 +55849,7 @@ components:
           title: APISecret
           type: string
         link_delivery_session_id:
-          description: The ID for the Link Delivery session from a previous invocation
+          description: The ID for the Hosted Link session from a previous invocation
             of `/link_delivery/create`.
           type: string
       required:
@@ -53960,14 +55873,14 @@ components:
           $ref: '#/components/schemas/LinkDeliverySessionStatus'
         created_at:
           description: Timestamp in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
-            format (`YYYY-MM-DDTHH:mm:ssZ`) indicating the time the given Link Delivery
-            Session was created at.
+            format (`YYYY-MM-DDTHH:mm:ssZ`) indicating the time the given Hosted Link
+            session was created at.
           format: date-time
           type: string
         completed_at:
           description: Timestamp in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
-            format (`YYYY-MM-DDTHH:mm:ssZ`) indicating the time the given Link Delivery
-            Session was completed at.
+            format (`YYYY-MM-DDTHH:mm:ssZ`) indicating the time the given Hosted Link
+            session was completed at.
           format: date-time
           nullable: true
           type: string
@@ -53978,14 +55891,13 @@ components:
           title: RequestID
           type: string
         access_tokens:
-          description: An array of access tokens associated with the Link Delivery
-            session.
+          description: An array of access tokens associated with the Hosted Link session.
           items:
             $ref: '#/components/schemas/AccessToken'
           nullable: true
           type: array
         item_ids:
-          description: An array of `item_id`s associated with the Link Delivery session.
+          description: An array of `item_id`s associated with the Hosted Link session.
           items:
             $ref: '#/components/schemas/ItemId'
           nullable: true
@@ -54007,7 +55919,7 @@ components:
           description: '`DELIVERY_STATUS`'
           type: string
         link_delivery_session_id:
-          description: The ID of the link delivery session.
+          description: The ID of the Hosted Link session.
           type: string
         timestamp:
           description: Timestamp in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
@@ -54037,7 +55949,7 @@ components:
           description: '`LINK_CALLBACK`'
           type: string
         link_delivery_session_id:
-          description: The ID of the link delivery session.
+          description: The ID of the Hosted Link session.
           type: string
         timestamp:
           description: Timestamp in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
@@ -54078,6 +55990,81 @@ components:
       - primary
       title: CreditCategory
       type: object
+    BankIncomeRefreshUpdateWebhook:
+      additionalProperties: true
+      description: Fired when a change to the user's income is detected. You should
+        call `/credit/bank_income/refresh` to get updated income data for the user
+      properties:
+        webhook_type:
+          description: '`INCOME`'
+          type: string
+        webhook_code:
+          description: '`BANK_INCOME_REFRESH_UPDATE`'
+          type: string
+        user_id:
+          description: The `user_id` corresponding to the user the webhook has fired
+            for.
+          type: string
+        environment:
+          $ref: '#/components/schemas/WebhookEnvironmentValues'
+      required:
+      - environment
+      - user_id
+      - webhook_code
+      - webhook_type
+      title: BankIncomeRefreshUpdateWebhook
+      type: object
+      x-examples:
+        example-1:
+          webhook_type: INCOME
+          webhook_code: BANK_INCOME_REFRESH_UPDATE
+          user_id: wz666MBjYWTp2PDzzggYhM6oWWmBb
+          environment: production
+    BankIncomeRefreshCompleteWebhook:
+      additionalProperties: true
+      description: Fired when a refreshed bank income report has finished generating
+        or failed to generate, triggered by calling `/credit/bank_income/refresh`.
+      properties:
+        webhook_type:
+          description: '`INCOME`'
+          type: string
+        webhook_code:
+          description: '`BANK_INCOME_REFRESH_COMPLETE`'
+          type: string
+        user_id:
+          description: The `user_id` corresponding to the user the webhook has fired
+            for.
+          type: string
+        result:
+          $ref: '#/components/schemas/BankIncomeRefreshCompleteResult'
+        environment:
+          $ref: '#/components/schemas/WebhookEnvironmentValues'
+      required:
+      - environment
+      - result
+      - user_id
+      - webhook_code
+      - webhook_type
+      title: BankIncomeRefreshCompleteWebhook
+      type: object
+      x-examples:
+        example-1:
+          webhook_type: INCOME
+          webhook_code: BANK_INCOME_REFRESH_COMPLETE
+          user_id: wz666MBjYWTp2PDzzggYhM6oWWmBb
+          result: SUCCESS
+          environment: production
+    BankIncomeRefreshCompleteResult:
+      description: |-
+        The result of the bank income refresh report generation
+
+        `SUCCESS`: The refreshed report was successfully generated and can be retrieved via /credit/bank_income/get
+
+        `FAILURE`: The refreshed report failed to be generated
+      enum:
+      - SUCCESS
+      - FAILURE
+      type: string
     LinkEventMetadata:
       additionalProperties: true
       description: Metadata about an event that occured while the user was going through
@@ -59675,7 +61662,7 @@ components:
     SelfieAnalysis:
       additionalProperties: true
       description: High level descriptions of how the associated selfie was processed.
-        If a seflfie fails verification, the details in the `analysis` object should
+        If a selfie fails verification, the details in the `analysis` object should
         help clarify why the selfie was rejected.
       example: {}
       properties:
@@ -68780,13 +70767,13 @@ components:
           type: array
         products:
           description: |
-            A list of authorized products for the Item.
+            A list of initialized products for the Item. In almost all cases, this will be the same as the `billed_products` field. For some products, it is possible for the product to be initialized on an Item but not yet billed (e.g. Assets, before `/asset_report/create` has been called), in which case the product may appear in `products` but not in `billed_products`.
           items:
             $ref: '#/components/schemas/Products'
           type: array
         consented_products:
           description: |
-            Beta: A list of products that have gone through consent collection for the Item. Only present for those enabled in the beta.
+            A list of products that have gone through consent collection for the Item. Only present for those enabled in the [Data Transparency](https://plaid.com/docs/link/data-transparency-messaging-migration-guide) beta. If you are not enrolled in Data Transparency, this field is not used.
           items:
             $ref: '#/components/schemas/Products'
           type: array
