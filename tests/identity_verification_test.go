@@ -2,11 +2,12 @@ package tests
 
 import (
 	"context"
+	"github.com/stretchr/testify/require"
 	"strconv"
 	"testing"
 	"time"
 
-	"github.com/plaid/plaid-go/v12/plaid"
+	"github.com/plaid/plaid-go/v13/plaid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -24,7 +25,7 @@ func TestIdentityVerification(t *testing.T) {
 	createResponse, _, err := testClient.PlaidApi.IdentityVerificationCreate(ctx).IdentityVerificationCreateRequest(
 		*createRequest,
 	).Execute()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, createResponse.ShareableUrl)
 	assert.Equal(t, plaid.IdentityVerificationStatus("active"), createResponse.Status, "Response status should be active")
 
@@ -33,7 +34,7 @@ func TestIdentityVerification(t *testing.T) {
 	retryResponse, _, err := testClient.PlaidApi.IdentityVerificationRetry(ctx).IdentityVerificationRetryRequest(
 		*retryRequest,
 	).Execute()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, retryResponse.ShareableUrl)
 	assert.Equal(t, retryResponse.Status, plaid.IdentityVerificationStatus("active"), "Response status should be active")
 
@@ -42,7 +43,7 @@ func TestIdentityVerification(t *testing.T) {
 	listResponse, _, err := testClient.PlaidApi.IdentityVerificationList(ctx).IdentityVerificationListRequest(
 		*listRequest,
 	).Execute()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, listResponse.IdentityVerifications[0])
 	assert.Equal(t, CLIENT_USER_ID, listResponse.IdentityVerifications[0].ClientUserId, "Client User ID should match create request")
 
@@ -51,6 +52,6 @@ func TestIdentityVerification(t *testing.T) {
 	getResponse, _, err := testClient.PlaidApi.IdentityVerificationGet(ctx).IdentityVerificationGetRequest(
 		*getRequest,
 	).Execute()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, listResponse.IdentityVerifications[0].Id, getResponse.Id, "Requested id should match with response")
 }

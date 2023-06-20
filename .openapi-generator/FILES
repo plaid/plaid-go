@@ -89,6 +89,9 @@ model_auth_get_response.go
 model_auth_metadata.go
 model_auth_supported_methods.go
 model_automatically_verified_webhook.go
+model_bank_income_refresh_complete_result.go
+model_bank_income_refresh_complete_webhook.go
+model_bank_income_refresh_update_webhook.go
 model_bank_initiated_return_risk.go
 model_bank_transfer.go
 model_bank_transfer_balance.go
@@ -143,6 +146,7 @@ model_credit1099_filer.go
 model_credit1099_payer.go
 model_credit1099_recipient.go
 model_credit_account_subtype.go
+model_credit_ach_class.go
 model_credit_amount_with_currency.go
 model_credit_audit_copy_token_create_request.go
 model_credit_audit_copy_token_create_response.go
@@ -180,6 +184,16 @@ model_credit_bank_income_transaction.go
 model_credit_bank_income_warning.go
 model_credit_bank_income_warning_code.go
 model_credit_bank_income_warning_type.go
+model_credit_bank_income_webhook_update_request.go
+model_credit_bank_statement_upload_account_owner.go
+model_credit_bank_statement_upload_account_owner_address.go
+model_credit_bank_statement_upload_bank_account.go
+model_credit_bank_statement_upload_bank_account_period.go
+model_credit_bank_statement_upload_item.go
+model_credit_bank_statement_upload_object.go
+model_credit_bank_statement_upload_transaction.go
+model_credit_bank_statements_uploads_get_request.go
+model_credit_bank_statements_uploads_get_response.go
 model_credit_card_liability.go
 model_credit_category.go
 model_credit_document_metadata.go
@@ -385,6 +399,8 @@ model_identity_match_request.go
 model_identity_match_request_options.go
 model_identity_match_response.go
 model_identity_match_user.go
+model_identity_refresh_request.go
+model_identity_refresh_response.go
 model_identity_update_types.go
 model_identity_verification.go
 model_identity_verification_create_request.go
@@ -464,6 +480,11 @@ model_investment_holdings_get_request_options.go
 model_investment_transaction.go
 model_investment_transaction_subtype.go
 model_investment_transaction_type.go
+model_investments_auth_get_numbers.go
+model_investments_auth_get_request.go
+model_investments_auth_get_request_options.go
+model_investments_auth_get_response.go
+model_investments_auth_owner.go
 model_investments_default_update_webhook.go
 model_investments_holdings_get_request.go
 model_investments_holdings_get_response.go
@@ -572,6 +593,7 @@ model_link_token_get_metadata_response.go
 model_link_token_get_request.go
 model_link_token_get_response.go
 model_link_token_investments.go
+model_link_token_investments_auth.go
 model_link_user_delivery_status_webhook.go
 model_loan.go
 model_loan_account_subtype.go
@@ -593,6 +615,7 @@ model_name_match_score.go
 model_net_pay.go
 model_new_accounts_available_webhook.go
 model_numbers.go
+model_numbers_acats.go
 model_numbers_ach.go
 model_numbers_ach_nullable.go
 model_numbers_bacs.go
@@ -778,6 +801,8 @@ model_processor_transactions_refresh_response.go
 model_processor_transactions_sync_request.go
 model_processor_transactions_sync_response.go
 model_product_access.go
+model_product_permissions_required_auth_webhook.go
+model_product_permissions_required_identity_webhook.go
 model_product_status.go
 model_product_status_breakdown.go
 model_products.go
@@ -1100,6 +1125,7 @@ model_wallet_iso_currency_code.go
 model_wallet_list_request.go
 model_wallet_list_response.go
 model_wallet_numbers.go
+model_wallet_payment_scheme.go
 model_wallet_status.go
 model_wallet_transaction.go
 model_wallet_transaction_amount.go
