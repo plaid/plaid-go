@@ -7,21 +7,26 @@ import (
 	"testing"
 	"time"
 
-	"github.com/plaid/plaid-go/v13/plaid"
+	"github.com/plaid/plaid-go/v14/plaid"
 	"github.com/stretchr/testify/assert"
 )
 
 const TEMPLATE_ID = "flwtmp_aWogUuKsL6NEHU"
 
+var CLIENT_USER_ID = "idv-user-" + strconv.FormatInt(time.Now().Unix(), 10)
+var EMAIL = CLIENT_USER_ID + "@example.com"
+
 func TestIdentityVerification(t *testing.T) {
 	testClient := NewTestClient()
 	ctx := context.Background()
-	CLIENT_USER_ID := "idv-user-" + strconv.FormatInt(time.Now().Unix(), 10)
-	user := plaid.NewIdentityVerificationRequestUser(CLIENT_USER_ID)
-	user.SetEmailAddress(CLIENT_USER_ID + "@example.com")
+
+	user := plaid.NewIdentityVerificationCreateRequestUser()
+	user.SetEmailAddress(EMAIL)
 
 	// POST /identity_verification/create
-	createRequest := plaid.NewIdentityVerificationCreateRequest(true, TEMPLATE_ID, true, *user)
+	createRequest := plaid.NewIdentityVerificationCreateRequest(true, TEMPLATE_ID, true)
+	createRequest.SetClientUserId(CLIENT_USER_ID)
+	createRequest.SetUser(*user)
 	createResponse, _, err := testClient.PlaidApi.IdentityVerificationCreate(ctx).IdentityVerificationCreateRequest(
 		*createRequest,
 	).Execute()
@@ -30,7 +35,10 @@ func TestIdentityVerification(t *testing.T) {
 	assert.Equal(t, plaid.IdentityVerificationStatus("active"), createResponse.Status, "Response status should be active")
 
 	// POST /identity_verification/retry
+	retryUser := plaid.NewIdentityVerificationRequestUser()
+	retryUser.SetEmailAddress(EMAIL)
 	retryRequest := plaid.NewIdentityVerificationRetryRequest(CLIENT_USER_ID, TEMPLATE_ID, plaid.Strategy("reset"))
+	retryRequest.SetUser(*retryUser)
 	retryResponse, _, err := testClient.PlaidApi.IdentityVerificationRetry(ctx).IdentityVerificationRetryRequest(
 		*retryRequest,
 	).Execute()
