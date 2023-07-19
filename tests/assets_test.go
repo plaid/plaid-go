@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/plaid/plaid-go/v14/plaid"
+	"github.com/plaid/plaid-go/v15/plaid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -92,7 +92,8 @@ func TestAssetReportFullFlow(t *testing.T) {
 const numRetries = 20
 
 func pollForAssetReport(t *testing.T, ctx context.Context, testClient *plaid.APIClient, assetReportToken string) (*plaid.AssetReportGetResponse, error) {
-	request := plaid.NewAssetReportGetRequest(assetReportToken)
+	request := plaid.NewAssetReportGetRequest()
+	request.SetAssetReportToken(assetReportToken)
 	for i := 0; i < numRetries; i++ {
 		response, _, err := testClient.PlaidApi.AssetReportGet(ctx).AssetReportGetRequest(*request).Execute()
 		if err != nil {

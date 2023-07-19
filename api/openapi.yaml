@@ -7,7 +7,7 @@ info:
     details.
   termsOfService: https://plaid.com/legal/
   title: The Plaid API
-  version: 2020-09-14_1.385.1
+  version: 2020-09-14_1.391.2
 servers:
 - description: Production
   url: https://production.plaid.com
@@ -28,7 +28,7 @@ paths:
       description: |-
         The `/asset_report/create` endpoint initiates the process of creating an Asset Report, which can then be retrieved by passing the `asset_report_token` return value to the `/asset_report/get` or `/asset_report/pdf/get` endpoints.
 
-        The Asset Report takes some time to be created and is not available immediately after calling `/asset_report/create`. When the Asset Report is ready to be retrieved using `/asset_report/get` or `/asset_report/pdf/get`, Plaid will fire a `PRODUCT_READY` webhook. For full details of the webhook schema, see [Asset Report webhooks](https://plaid.com/docs/api/products/assets/#webhooks).
+        The Asset Report takes some time to be created and is not available immediately after calling `/asset_report/create`. The exact amount of time to create the report will vary depending on how many days of history are requested and will typically range from a few seconds to about one minute. When the Asset Report is ready to be retrieved using `/asset_report/get` or `/asset_report/pdf/get`, Plaid will fire a `PRODUCT_READY` webhook. For full details of the webhook schema, see [Asset Report webhooks](https://plaid.com/docs/api/products/assets/#webhooks).
 
         The `/asset_report/create` endpoint creates an Asset Report at a moment in time. Asset Reports are immutable. To get an updated Asset Report, use the `/asset_report/refresh` endpoint.
       externalDocs:
@@ -5985,7 +5985,9 @@ paths:
 
         Due to the potentially large number of investment transactions associated with an Item, results are paginated. Manipulate the count and offset parameters in conjunction with the `total_investment_transactions` response body field to fetch all available investment transactions.
 
-        Note that Investments does not have a webhook to indicate when initial transaction data has loaded. Instead, if transactions data is not ready when `/investments/transactions/get` is first called, Plaid will wait for the data. For this reason, calling `/investments/transactions/get` immediately after Link may take up to one to two minutes to return.
+        Note that Investments does not have a webhook to indicate when initial transaction data has loaded (unless you use the `async_update` option). Instead, if transactions data is not ready when `/investments/transactions/get` is first called, Plaid will wait for the data. For this reason, calling `/investments/transactions/get` immediately after Link may take up to one to two minutes to return.
+
+        Data returned by the asynchronous investments extraction flow (when `async_update` is set to true) may not be immediately available to `/investments/transactions/get`. To be alerted when the data is ready to be fetched, listen for the `HISTORICAL_UPDATE` webhook. If no investments history is ready when `/investments/transactions/get` is called, it will return a `PRODUCT_NOT_READY` error.
       externalDocs:
         url: /api/products/investments/#investmentstransactionsget
       operationId: investmentsTransactionsGet
@@ -6554,6 +6556,34 @@ paths:
                 $ref: '#/components/schemas/ProcessorTokenPermissionsGetResponse'
           description: OK
       summary: Get a processor token's product permissions
+      tags:
+      - plaid
+  /processor/token/webhook/update:
+    post:
+      description: This endpoint allows you to update the webhook URL associated with
+        a processor token. This request triggers a `WEBHOOK_UPDATE_ACKNOWLEDGED` webhook
+        to the newly specified webhook URL.
+      externalDocs:
+        url: /api/processors/#processortokenwebhookupdate
+      operationId: processorTokenWebhookUpdate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProcessorTokenWebhookUpdateRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    request_id: vYK11LNTfRoAMbj
+              schema:
+                $ref: '#/components/schemas/ProcessorTokenWebhookUpdateResponse'
+          description: OK
+      summary: Update a processor token's webhook URL
       tags:
       - plaid
   /processor/stripe/bank_account_token/create:
@@ -7987,6 +8017,7 @@ paths:
                       amount: "12.34"
                       iso_currency_code: USD
                       settled: 2020-08-07
+                      status: settled
                     request_id: saKrIBuEB9qJZno
               schema:
                 $ref: '#/components/schemas/TransferSweepGetResponse'
@@ -8069,6 +8100,7 @@ paths:
                       amount: -12.34
                       iso_currency_code: USD
                       settled: 2019-12-10
+                      status: settled
                       originator_client_id: null
                     request_id: saKrIBuEB9qJZno
               schema:
@@ -13504,7 +13536,7 @@ components:
           type: integer
         country_codes:
           description: |
-            Specify an array of Plaid-supported country codes this institution supports, using the ISO-3166-1 alpha-2 country code standard.
+            Specify which country or countries to include institutions from, using the ISO-3166-1 alpha-2 country code standard.
 
             In API versions 2019-05-29 and earlier, the `country_codes` parameter is an optional parameter within the `options` object and will default to `[US]` if it is not supplied.
           items:
@@ -13921,7 +13953,7 @@ components:
           - transfer
         country_codes:
           description: |
-            Specify an array of Plaid-supported country codes this institution supports, using the ISO-3166-1 alpha-2 country code standard. In API versions 2019-05-29 and earlier, the `country_codes` parameter is an optional parameter within the `options` object and will default to `[US]` if it is not supplied.
+            Specify which country or countries to include institutions from, using the ISO-3166-1 alpha-2 country code standard. In API versions 2019-05-29 and earlier, the `country_codes` parameter is an optional parameter within the `options` object and will default to `[US]` if it is not supplied.
           items:
             $ref: '#/components/schemas/CountryCode'
           type: array
@@ -14282,7 +14314,7 @@ components:
           type: string
         country_codes:
           description: |
-            Specify an array of Plaid-supported country codes this institution supports, using the ISO-3166-1 alpha-2 country code standard. In API versions 2019-05-29 and earlier, the `country_codes` parameter is an optional parameter within the `options` object and will default to `[US]` if it is not supplied.
+            Specify which country or countries to include institutions from, using the ISO-3166-1 alpha-2 country code standard. In API versions 2019-05-29 and earlier, the `country_codes` parameter is an optional parameter within the `options` object and will default to `[US]` if it is not supplied.
           items:
             $ref: '#/components/schemas/CountryCode'
           type: array
@@ -17998,39 +18030,40 @@ components:
       - request_id
       - status
     PaymentInitiationPaymentStatus:
-      description: |-
-        The status of the payment.
-
-        `PAYMENT_STATUS_INPUT_NEEDED`: This is the initial state of all payments. It indicates that the payment is waiting on user input to continue processing. A payment may re-enter this state later on if further input is needed.
-
-        `PAYMENT_STATUS_INITIATED`: The payment has been successfully authorised and accepted by the financial institution. Further status transitions can be to REJECTED and, when supported by the institution, to EXECUTED.
-
-        `PAYMENT_STATUS_INSUFFICIENT_FUNDS`: The payment has failed due to insufficient funds.
-
-        `PAYMENT_STATUS_FAILED`: The payment has failed to be initiated. This error is retryable once the root cause is resolved.
-
-        `PAYMENT_STATUS_BLOCKED`: The payment has been blocked. This is a retryable error.
-
-        `PAYMENT_STATUS_AUTHORISING`: The payment is currently being processed. The payment will automatically exit this state when the financial institution has authorised the transaction.
-
-        `PAYMENT_STATUS_CANCELLED`: The payment was cancelled during authorisation.
-
-        `PAYMENT_STATUS_EXECUTED`: The funds have successfully left the payer account and payment is considered complete. This status isn’t supported by some institutions.
-
-        `PAYMENT_STATUS_SETTLED`: The payment has settled and funds are available for use. Payment settlement can only be guaranteed by using Plaid virtual accounts. A payment will typically settle within seconds to several days, depending on which payment rail is used.
-
-        `PAYMENT_STATUS_ESTABLISHED`: Indicates that the standing order has been successfully established. This state is only used for standing orders.
-
-        `PAYMENT_STATUS_REJECTED`: The payment was rejected by the financial institution.
-
-        Deprecated:
-        These statuses will be removed in a future release.
-
-        `PAYMENT_STATUS_UNKNOWN`: The payment status is unknown.
-
-        `PAYMENT_STATUS_PROCESSING`: The payment is currently being processed. The payment will automatically exit this state when processing is complete.
-
-        `PAYMENT_STATUS_COMPLETED`: Indicates that the standing order has been successfully established. This state is only used for standing orders.
+      description: "The status of the payment.\n\n`PAYMENT_STATUS_INPUT_NEEDED`: This\
+        \ is the initial state of all payments. It indicates that the payment is waiting\
+        \ on user input to continue processing. A payment may re-enter this state\
+        \ later on if further input is needed.\n\n`PAYMENT_STATUS_INITIATED`: The\
+        \ payment has been successfully authorised and accepted by the financial institution.\
+        \ For successful payments, this is a potential terminal status. Further status\
+        \ transitions can be to REJECTED and, when supported by the institution, to\
+        \ EXECUTED.\n\n`PAYMENT_STATUS_INSUFFICIENT_FUNDS`: The payment has failed\
+        \ due to insufficient funds.\n\n`PAYMENT_STATUS_FAILED`: The payment has failed\
+        \ to be initiated. This error may be caused by transient system outages and\
+        \ is retryable once the root cause is resolved.\n\n`PAYMENT_STATUS_BLOCKED`:\
+        \ The payment has been blocked by Plaid. This can occur, for example, due\
+        \ to Plaid flagging the payment as potentially risky. This is a retryable\
+        \ error.\n\n`PAYMENT_STATUS_AUTHORISING`: The payment is currently being processed.\
+        \ The payment will automatically exit this state when the financial institution\
+        \ has authorised the transaction.\n\n`PAYMENT_STATUS_CANCELLED`: The payment\
+        \ was cancelled (typically by the end user) during authorisation.\n\n`PAYMENT_STATUS_EXECUTED`:\
+        \ The funds have successfully left the payer account and payment is considered\
+        \ complete. Not all institutions support this status: support is more common\
+        \ in the UK, and less common in the EU. For institutions where this status\
+        \ is not supported, the terminal status for a successful payment will be `PAYMENT_STATUS_INITIATED`.\n\
+        \n`PAYMENT_STATUS_SETTLED`: The payment has settled and funds are available\
+        \ for use. A payment will typically settle within seconds to several days,\
+        \ depending on which payment rail is used. This status is only available to\
+        \ customers using [Plaid Virtual Accounts](https://plaid.com/docs/virtual-accounts/).\
+        \ \n\n`PAYMENT_STATUS_ESTABLISHED`: Indicates that the standing order has\
+        \ been successfully established. This state is only used for standing orders.\n\
+        \n`PAYMENT_STATUS_REJECTED`: The payment was rejected by the financial institution.\n\
+        \nDeprecated:\nThese statuses will be removed in a future release.\n\n`PAYMENT_STATUS_UNKNOWN`:\
+        \ The payment status is unknown.\n\n`PAYMENT_STATUS_PROCESSING`: The payment\
+        \ is currently being processed. The payment will automatically exit this state\
+        \ when processing is complete.\n\n`PAYMENT_STATUS_COMPLETED`: Indicates that\
+        \ the standing order has been successfully established. This state is only\
+        \ used for standing orders."
       enum:
       - PAYMENT_STATUS_INPUT_NEEDED
       - PAYMENT_STATUS_PROCESSING
@@ -19021,6 +19054,7 @@ components:
         access_token: access_token
         end_date: 2000-01-23
         options:
+          async_update: false
           account_ids:
           - account_ids
           - account_ids
@@ -19067,6 +19101,7 @@ components:
       description: An optional object to filter `/investments/transactions/get` results.
         If provided, must be non-`null`.
       example:
+        async_update: false
         account_ids:
         - account_ids
         - account_ids
@@ -19091,6 +19126,16 @@ components:
             history
           minimum: 0
           type: integer
+        async_update:
+          default: false
+          description: When `true`, any Investments extraction will happen asynchronously
+            and Plaid will subsequently fire a `HISTORICAL_UPDATE` webhook when the
+            extraction completes. When `false`, Plaid will wait to return a response
+            until extraction completion and no `HISTORICAL_UPDATE` webhook will fire.
+            Note that while the extraction is happening asynchronously, calls to `/investments/transactions/get`
+            and `/investments/refresh` will return `PRODUCT_NOT_READY` errors until
+            the extraction completes.
+          type: boolean
       type: object
     InvestmentsTransactionsGetResponse:
       additionalProperties: true
@@ -19364,6 +19409,7 @@ components:
           - utb
           - adp_roll
           - fortress_trust
+          - bond
           type: string
       required:
       - access_token
@@ -19497,6 +19543,56 @@ components:
           type: array
       required:
       - products
+      - request_id
+      type: object
+    ProcessorTokenWebhookUpdateRequest:
+      description: ProcessorTokenWebhookUpdateRequest defines the request schema for
+        `/processor/token/webhook/update`
+      example:
+        webhook: webhook
+        secret: secret
+        processor_token: processor_token
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        processor_token:
+          description: 'The processor token obtained from the Plaid integration partner.
+            Processor tokens are in the format: `processor-<environment>-<identifier>`'
+          title: ProcessorToken
+          type: string
+        webhook:
+          description: The new webhook URL to associate with the processor token.
+            To remove a webhook from a processor token, set to `null`.
+          nullable: true
+          type: string
+      required:
+      - processor_token
+      - webhook
+      type: object
+    ProcessorTokenWebhookUpdateResponse:
+      additionalProperties: true
+      description: ProcessorTokenWebhookUpdateResponse defines the response schema
+        for `/processor/token/webhook/update`
+      example:
+        request_id: request_id
+      properties:
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
       - request_id
       type: object
     ProcessorStripeBankAccountTokenCreateRequest:
@@ -19918,7 +20014,7 @@ components:
             - Portuguese (`'pt'`)
             - Romanian (`'ro'`)
             - Spanish (`'es'`)
-            - Swedish (`'se'`)
+            - Swedish (`'sv'`)
 
             When using a Link customization, the language configured here must match the setting in the customization, or the customization will not be applied.
           type: string
@@ -20449,7 +20545,12 @@ components:
       properties:
         account_selection_enabled:
           default: false
-          description: If `true`, enables [update mode with Account Select](https://plaid.com/docs/link/update-mode/#using-update-mode-to-request-new-accounts).
+          description: If `true`, enables [update mode with Account Select](https://plaid.com/docs/link/update-mode/#using-update-mode-to-request-new-accounts)
+            for institutions that do not use OAuth, or that use OAuth but do not have
+            their own account selection flow. For institutions that have an OAuth
+            account selection flow (i.e. most OAuth-enabled institutions), update
+            mode with Account Select will always be enabled, regardless of the value
+            of this field.
           type: boolean
       type: object
     LinkTokenCreateRequestAccountSubtypes:
@@ -20944,7 +21045,7 @@ components:
             \ only.\n\n`pending_automatic_verification`: The Item is pending automatic\
             \ verification\n\n`pending_manual_verification`: The Item is pending manual\
             \ micro-deposit verification. Items remain in this state until the user\
-            \ successfully verifies the two amounts.\n\n`automatically_verified`:\
+            \ successfully verifies the micro-deposit.\n\n`automatically_verified`:\
             \ The Item has successfully been automatically verified\t\n\n`manually_verified`:\
             \ The Item has successfully been manually verified\n\n`verification_expired`:\
             \ Plaid was unable to automatically verify the deposit within 7 calendar\
@@ -22214,10 +22315,15 @@ components:
             status: HEALTHY
       properties:
         institution_id:
-          description: Unique identifier for the institution
+          description: Unique identifier for the institution. Note that the same institution
+            may have multiple records, each with different institution IDs; for example,
+            if the institution has migrated to OAuth, there may be separate `institution_id`s
+            for the OAuth and non-OAuth versions of the institution. Institutions
+            that operate in different countries or with multiple login portals may
+            also have separate `institution_id`s for each country or portal.
           type: string
         name:
-          description: The official name of the institution
+          description: The official name of the institution.
           type: string
         products:
           description: A list of the Plaid products supported by the institution.
@@ -22739,8 +22845,7 @@ components:
       type: string
     TransferAccountID:
       description: The Plaid `account_id` corresponding to the end-user account that
-        will be debited or credited. Returned only if `account_id` was set on intent
-        creation.
+        will be debited or credited. Required when creating a transfer using an `access_token`.
       type: string
     TransferFundingAccountIDRequest:
       description: The id of the funding account to use, available in the Plaid Dashboard.
@@ -22968,6 +23073,51 @@ components:
           - yBVBEwrPyJs8GvR77N7QTxnGg6wG74H7dEDN6
           - kgygNvAVPzSX9KkddNdWHaVGRVex1MHm3k9no
           environment: production
+    ProcessorTransactionsRemovedWebhook:
+      additionalProperties: true
+      description: |-
+        This webhook is only sent to [Plaid processor partners](https://plaid.com/docs/auth/partnerships/).
+
+        Fired when transaction(s) for an Item are deleted. The deleted transaction IDs are included in the webhook payload. Plaid will typically check for deleted transaction data several times a day.
+
+        This webhook is intended for use with `/processor/transactions/get`; if you are using the newer `/processor/transactions/sync` endpoint, this webhook will still be fired to maintain backwards compatibility, but it is recommended to listen for and respond to the `SYNC_UPDATES_AVAILABLE` webhook instead.
+      properties:
+        webhook_type:
+          description: '`TRANSACTIONS`'
+          type: string
+        webhook_code:
+          description: '`TRANSACTIONS_REMOVED`'
+          type: string
+        error:
+          $ref: '#/components/schemas/PlaidError'
+        removed_transactions:
+          description: An array of `transaction_ids` corresponding to the removed
+            transactions
+          items:
+            type: string
+          type: array
+        account_id:
+          description: The ID of the account.
+          type: string
+        environment:
+          $ref: '#/components/schemas/WebhookEnvironmentValues'
+      required:
+      - account_id
+      - environment
+      - removed_transactions
+      - webhook_code
+      - webhook_type
+      title: ProcessorTransactionsRemovedWebhook
+      type: object
+      x-examples:
+        example-1:
+          webhook_type: TRANSACTIONS
+          webhook_code: TRANSACTIONS_REMOVED
+          account_id: dVzbVMLjrxTnLjX4G66XUp5GLklm4oiZy88yK
+          removed_transactions:
+          - yBVBEwrPyJs8GvR77N7QTxnGg6wG74H7dEDN6
+          - kgygNvAVPzSX9KkddNdWHaVGRVex1MHm3k9no
+          environment: production
     DefaultUpdateWebhook:
       additionalProperties: true
       description: |
@@ -23006,6 +23156,48 @@ components:
           webhook_type: TRANSACTIONS
           webhook_code: DEFAULT_UPDATE
           item_id: wz666MBjYWTp2PDzzggYhM6oWWmBb
+          new_transactions: 3
+          environment: production
+    ProcessorDefaultUpdateWebhook:
+      additionalProperties: true
+      description: |
+        This webhook is only sent to [Plaid processor partners](https://plaid.com/docs/auth/partnerships/).
+
+        Fired when new transaction data is available for an Item. Plaid will typically check for new transaction data several times a day.
+
+        This webhook is intended for use with `/processor/transactions/get`; if you are using the newer `/processor/transactions/sync` endpoint, this webhook will still be fired to maintain backwards compatibility, but it is recommended to listen for and respond to the `SYNC_UPDATES_AVAILABLE` webhook instead.
+      properties:
+        webhook_type:
+          description: '`TRANSACTIONS`'
+          type: string
+        webhook_code:
+          description: '`DEFAULT_UPDATE`'
+          type: string
+        error:
+          $ref: '#/components/schemas/PlaidError'
+        new_transactions:
+          description: The number of new transactions detected since the last time
+            this webhook was fired.
+          title: DefaultUpdateWebhook
+          type: number
+        account_id:
+          description: The ID of the account.
+          type: string
+        environment:
+          $ref: '#/components/schemas/WebhookEnvironmentValues'
+      required:
+      - account_id
+      - environment
+      - new_transactions
+      - webhook_code
+      - webhook_type
+      title: ProcessorDefaultUpdateWebhook
+      type: object
+      x-examples:
+        example-1:
+          webhook_type: TRANSACTIONS
+          webhook_code: DEFAULT_UPDATE
+          account_id: dVzbVMLjrxTnLjX4G66XUp5GLklm4oiZy88yK
           new_transactions: 3
           environment: production
     SyncUpdatesAvailableWebhook:
@@ -23055,6 +23247,53 @@ components:
           initial_update_complete: true
           historical_update_complete: false
           environment: production
+    ProcessorSyncUpdatesAvailableWebhook:
+      additionalProperties: true
+      description: |-
+        This webhook is only sent to [Plaid processor partners](https://plaid.com/docs/auth/partnerships/).
+
+        Fired when an Item's transactions change. This can be due to any event resulting in new changes, such as an initial 30-day transactions fetch upon the initialization of an Item with transactions, the backfill of historical transactions that occurs shortly after, or when changes are populated from a regularly-scheduled transactions update job. It is recommended to listen for the `SYNC_UPDATES_AVAILABLE` webhook when using the `/processor/transactions/sync` endpoint. Note that when using `/processor/transactions/sync` the older webhooks `INITIAL_UPDATE`, `HISTORICAL_UPDATE`, `DEFAULT_UPDATE`, and `TRANSACTIONS_REMOVED`, which are intended for use with `/processor/transactions/get`, will also continue to be sent in order to maintain backwards compatibility. It is not necessary to listen for and respond to those webhooks when using `/processor/transactions/sync`.
+
+        After receipt of this webhook, the new changes can be fetched for the Item from `/processor/transactions/sync`.
+
+        Note that to receive this webhook for an Item, `/processor/transactions/sync` must have been called at least once on that Item. This means that, unlike the `INITIAL_UPDATE` and `HISTORICAL_UPDATE` webhooks, it will not fire immediately upon Item creation. If `/transactions/sync` is called on an Item that was *not* initialized with Transactions, the webhook will fire twice: once the first 30 days of transactions data has been fetched, and a second time when all available historical transactions data has been fetched.
+
+        This webhook will typically not fire in the Sandbox environment, due to the lack of dynamic transactions data. To test this webhook in Sandbox, call `/sandbox/item/fire_webhook`.
+      properties:
+        webhook_type:
+          description: '`TRANSACTIONS`'
+          type: string
+        webhook_code:
+          description: '`SYNC_UPDATES_AVAILABLE`'
+          type: string
+        account_id:
+          description: The ID of the account.
+          type: string
+        initial_update_complete:
+          description: Indicates if initial pull information is available.
+          type: boolean
+        historical_update_complete:
+          description: Indicates if historical pull information is available.
+          type: boolean
+        environment:
+          $ref: '#/components/schemas/WebhookEnvironmentValues'
+      required:
+      - account_id
+      - environment
+      - historical_update_complete
+      - initial_update_complete
+      - webhook_code
+      - webhook_type
+      title: ProcessorSyncUpdatesAvailableWebhook
+      type: object
+      x-examples:
+        example-1:
+          webhook_type: TRANSACTIONS
+          webhook_code: SYNC_UPDATES_AVAILABLE
+          account_id: dVzbVMLjrxTnLjX4G66XUp5GLklm4oiZy88yK
+          initial_update_complete: true
+          historical_update_complete: false
+          environment: production
     RecurringTransactionsUpdateWebhook:
       additionalProperties: true
       description: |-
@@ -23097,6 +23336,39 @@ components:
           account_ids:
           - lPNjeW1nR6CDn5okmGQ6hEpMo4lLNoSrzqDje
           - lPNjeW1nR6CDn5okmGQ6hEpMo4lLNoSrzqDff
+          environment: production
+    ProcessorRecurringTransactionsUpdateWebhook:
+      additionalProperties: true
+      description: |-
+        This webhook is only sent to [Plaid processor partners](https://plaid.com/docs/auth/partnerships/).
+
+        Fired when recurring transactions data is updated. This includes when a new recurring stream is detected or when a new transaction is added to an existing recurring stream. The `RECURRING_TRANSACTIONS_UPDATE` webhook will also fire when one or more attributes of the recurring stream changes, which is usually a result of the addition, update, or removal of transactions to the stream.
+
+        After receipt of this webhook, the updated data can be fetched from `/processor/transactions/recurring/get`.
+      properties:
+        webhook_type:
+          description: '`TRANSACTIONS`'
+          type: string
+        webhook_code:
+          description: '`RECURRING_TRANSACTIONS_UPDATE`'
+          type: string
+        account_id:
+          description: The ID of the account.
+          type: string
+        environment:
+          $ref: '#/components/schemas/WebhookEnvironmentValues'
+      required:
+      - account_id
+      - environment
+      - webhook_code
+      - webhook_type
+      title: ProcessorRecurringTransactionsUpdateWebhook
+      type: object
+      x-examples:
+        example-1:
+          webhook_type: TRANSACTIONS
+          webhook_code: RECURRING_TRANSACTIONS_UPDATE
+          account_id: dVzbVMLjrxTnLjX4G66XUp5GLklm4oiZy88yK
           environment: production
     IdentityDefaultUpdateWebhook:
       additionalProperties: true
@@ -23208,6 +23480,46 @@ components:
           item_id: wz666MBjYWTp2PDzzggYhM6oWWmBb
           new_transactions: 231
           environment: production
+    ProcessorHistoricalUpdateWebhook:
+      additionalProperties: true
+      description: |-
+        This webhook is only sent to [Plaid processor partners](https://plaid.com/docs/auth/partnerships/).
+
+        Fired when an Item's historical transaction pull is completed and Plaid has prepared as much historical transaction data as possible for the Item. Once this webhook has been fired, transaction data beyond the most recent 30 days can be fetched for the Item. If [Account Select v2](https://plaid.com/docs/link/customization/#account-select) is enabled, this webhook will also be fired if account selections for the Item are updated, with `new_transactions` set to the number of net new transactions pulled after the account selection update.
+
+        This webhook is intended for use with `/processor/transactions/get`; if you are using the newer `/processor/transactions/sync` endpoint, this webhook will still be fired to maintain backwards compatibility, but it is recommended to listen for and respond to the `SYNC_UPDATES_AVAILABLE` webhook instead.
+      properties:
+        webhook_type:
+          description: '`TRANSACTIONS`'
+          type: string
+        webhook_code:
+          description: '`HISTORICAL_UPDATE`'
+          type: string
+        error:
+          $ref: '#/components/schemas/PlaidError'
+        new_transactions:
+          description: The number of new, unfetched transactions available
+          type: number
+        account_id:
+          description: The ID of the account.
+          type: string
+        environment:
+          $ref: '#/components/schemas/WebhookEnvironmentValues'
+      required:
+      - account_id
+      - environment
+      - new_transactions
+      - webhook_code
+      - webhook_type
+      title: ProcessorHistoricalUpdateWebhook
+      type: object
+      x-examples:
+        example-1:
+          webhook_type: TRANSACTIONS
+          webhook_code: HISTORICAL_UPDATE
+          account_id: dVzbVMLjrxTnLjX4G66XUp5GLklm4oiZy88yK
+          new_transactions: 231
+          environment: production
     InitialUpdateWebhook:
       additionalProperties: true
       description: |-
@@ -23249,6 +23561,86 @@ components:
           webhook_code: INITIAL_UPDATE
           item_id: wz666MBjYWTp2PDzzggYhM6oWWmBb
           new_transactions: 19
+          environment: production
+    ProcessorInitialUpdateWebhook:
+      additionalProperties: true
+      description: |-
+        This webhook is only sent to [Plaid processor partners](https://plaid.com/docs/auth/partnerships/).
+
+        Fired when an Item's initial transaction pull is completed. Once this webhook has been fired, transaction data for the most recent 30 days can be fetched for the Item. If [Account Select v2](https://plaid.com/docs/link/customization/#account-select) is enabled, this webhook will also be fired if account selections for the Item are updated, with `new_transactions` set to the number of net new transactions pulled after the account selection update.
+
+        This webhook is intended for use with `/processor/transactions/get`; if you are using the newer `/processor/transactions/sync` endpoint, this webhook will still be fired to maintain backwards compatibility, but it is recommended to listen for and respond to the `SYNC_UPDATES_AVAILABLE` webhook instead.
+      properties:
+        webhook_type:
+          description: '`TRANSACTIONS`'
+          type: string
+        webhook_code:
+          description: '`INITIAL_UPDATE`'
+          type: string
+        error:
+          description: The error code associated with the webhook.
+          nullable: true
+          type: string
+        new_transactions:
+          description: The number of new, unfetched transactions available.
+          type: number
+        account_id:
+          description: The ID of the account.
+          type: string
+        environment:
+          $ref: '#/components/schemas/WebhookEnvironmentValues'
+      required:
+      - account_id
+      - environment
+      - new_transactions
+      - webhook_code
+      - webhook_type
+      title: ProcessorInitialUpdateWebhook
+      type: object
+      x-examples:
+        example-1:
+          webhook_type: TRANSACTIONS
+          webhook_code: INITIAL_UPDATE
+          account_id: dVzbVMLjrxTnLjX4G66XUp5GLklm4oiZy88yK
+          new_transactions: 19
+          environment: production
+    ProcessorTokenWebhookUpdate:
+      additionalProperties: true
+      description: |-
+        This webhook is only sent to [Plaid processor partners](https://plaid.com/docs/auth/partnerships/).
+
+        Fired when a processor updates the webhook URL for a processor token via `/processor/token/webhook/update`.
+      properties:
+        webhook_type:
+          description: '`PROCESSOR_TOKEN`'
+          type: string
+        webhook_code:
+          description: '`WEBHOOK_UPDATE_ACKNOWLEDGED`'
+          type: string
+        error:
+          $ref: '#/components/schemas/PlaidError'
+        account_id:
+          description: The ID of the account.
+          type: string
+        new_webhook_url:
+          description: The new webhook URL.
+          type: string
+        environment:
+          $ref: '#/components/schemas/WebhookEnvironmentValues'
+      required:
+      - account_id
+      - environment
+      - new_webhook_url
+      - webhook_code
+      - webhook_type
+      title: ProcessorTokenWebhookUpdate
+      type: object
+      x-examples:
+        example-1:
+          webhook_type: PROCESSOR_TOKEN
+          webhook_code: WEBHOOK_UPDATE_ACKNOWLEDGED
+          account_id: dVzbVMLjrxTnLjX4G66XUp5GLklm4oiZy88yK
+          new_webhook_url: https://www.example.com
           environment: production
     PhoneNumber:
       additionalProperties: true
@@ -25081,12 +25473,10 @@ components:
           format: double
           type: number
         mask:
-          description: The account's mask. Should be a string of 2-4 alphanumeric
-            characters. This allows you to model a mask which does not match the account
-            number (such as with a virtual account number).
-          maxLength: 4
-          minLength: 2
-          pattern: ^[A-Za-z0-9]{2,4}$
+          description: The account's mask. Should be an empty string or a string of
+            2-4 alphanumeric characters. This allows you to model a mask which does
+            not match the account number (such as with a virtual account number).
+          pattern: ^$|^[A-Za-z0-9]{2,4}$
           type: string
       required:
       - limit
@@ -26181,6 +26571,50 @@ components:
         example-1:
           webhook_type: INVESTMENTS_TRANSACTIONS
           webhook_code: DEFAULT_UPDATE
+          item_id: wz666MBjYWTp2PDzzggYhM6oWWmBb
+          new_investments_transactions: 16
+          canceled_investments_transactions: 0
+          environment: production
+    InvestmentsHistoricalUpdateWebhook:
+      additionalProperties: true
+      description: Fired after an asynchronous extraction on an investments account.
+      properties:
+        webhook_type:
+          description: '`INVESTMENTS_TRANSACTIONS`'
+          type: string
+        webhook_code:
+          description: '`HISTORICAL_UPDATE`'
+          type: string
+        item_id:
+          description: The `item_id` of the Item associated with this webhook, warning,
+            or error
+          title: ItemId
+          type: string
+        error:
+          $ref: '#/components/schemas/PlaidError'
+        new_investments_transactions:
+          description: The number of new transactions reported since the last time
+            this webhook was fired.
+          type: number
+        canceled_investments_transactions:
+          description: The number of canceled transactions reported since the last
+            time this webhook was fired.
+          type: number
+        environment:
+          $ref: '#/components/schemas/WebhookEnvironmentValues'
+      required:
+      - canceled_investments_transactions
+      - environment
+      - item_id
+      - new_investments_transactions
+      - webhook_code
+      - webhook_type
+      title: InvestmentsHistoricalUpdateWebhook
+      type: object
+      x-examples:
+        example-1:
+          webhook_type: INVESTMENTS_TRANSACTIONS
+          webhook_code: HISTORICAL_UPDATE
           item_id: wz666MBjYWTp2PDzzggYhM6oWWmBb
           new_investments_transactions: 16
           canceled_investments_transactions: 0
@@ -29263,6 +29697,7 @@ components:
 
             The next transfer origination date after bank holiday adjustment.
           format: date
+          nullable: true
           type: string
         test_clock_id:
           description: Plaid’s unique identifier for a test clock.
@@ -30433,8 +30868,8 @@ components:
           type: string
         account_id:
           description: The Plaid `account_id` corresponding to the end-user account
-            that will be debited or credited. Returned only if `account_id` was set
-            on intent creation.
+            that will be debited or credited. Required when creating a transfer using
+            an `access_token`.
           type: string
         funding_account_id:
           description: The id of the funding account to use, available in the Plaid
@@ -30549,8 +30984,8 @@ components:
           type: string
         account_id:
           description: The Plaid `account_id` corresponding to the end-user account
-            that will be debited or credited. Returned only if `account_id` was set
-            on intent creation.
+            that will be debited or credited. Required when creating a transfer using
+            an `access_token`.
           type: string
         payment_profile_token:
           description: A payment profile token associated with the Payment Profile
@@ -30669,8 +31104,8 @@ components:
           type: string
         account_id:
           description: The Plaid `account_id` corresponding to the end-user account
-            that will be debited or credited. Returned only if `account_id` was set
-            on intent creation.
+            that will be debited or credited. Required when creating a transfer using
+            an `access_token`.
           type: string
         payment_profile_token:
           description: The payment profile token associated with the Payment Profile
@@ -30808,8 +31243,8 @@ components:
           type: string
         account_id:
           description: The Plaid `account_id` corresponding to the end-user account
-            that will be debited or credited. Returned only if `account_id` was set
-            on intent creation.
+            that will be debited or credited. Required when creating a transfer using
+            an `access_token`.
           type: string
         funding_account_id:
           description: The id of the funding account to use, available in the Plaid
@@ -32945,6 +33380,25 @@ components:
           type: integer
       title: BankTransferSweepListRequest
       type: object
+    SweepStatus:
+      description: |-
+        The status of a sweep transfer
+
+        `"pending"` - The sweep is currently pending
+        `"posted"` - The sweep has been posted
+        `"settled"` - The sweep has settled
+        `"returned"` - The sweep has been returned
+        `"failed"` - The sweep has failed
+      enum:
+      - pending
+      - posted
+      - settled
+      - returned
+      - failed
+      - null
+      nullable: true
+      title: SweepStatus
+      type: string
     TransferSweepListRequest:
       description: Defines the request schema for `/transfer/sweep/list`
       example:
@@ -32955,6 +33409,7 @@ components:
         offset: 0
         count: 2
         secret: secret
+        transfer_id: transfer_id
         client_id: client_id
         start_date: 2000-01-23T04:56:07.000+00:00
       properties:
@@ -32995,12 +33450,18 @@ components:
           description: Filter sweeps to only those with the specified amount.
           nullable: true
           type: string
+        status:
+          $ref: '#/components/schemas/SweepStatus'
         originator_client_id:
           description: Filter sweeps to only those with the specified originator client.
           nullable: true
           type: string
         funding_account_id:
           description: Filter sweeps to only those with the specified `funding_account_id`.
+          nullable: true
+          type: string
+        transfer_id:
+          description: Filter sweeps to only those with the included `transfer_id`.
           nullable: true
           type: string
       title: TransferSweepListRequest
@@ -33142,6 +33603,8 @@ components:
           format: date
           nullable: true
           type: string
+        status:
+          $ref: '#/components/schemas/SweepStatus'
       required:
       - amount
       - created
@@ -52991,7 +53454,9 @@ components:
       type: object
     SignalInsights:
       additionalProperties: true
-      description: Signal insights including scores and attributes.
+      description: Signal insights including scores and attributes. This response
+        is offered as an add-on to `/transfer/authorization/create`. To request access
+        to these fields please contact your Plaid account manager.
       example:
         scores:
           customer_initiated_return_risk:
@@ -57140,6 +57605,7 @@ components:
         options:
           days_to_include: 58
         secret: secret
+        user_token: user_token
         client_id: client_id
       properties:
         client_id:
@@ -57156,8 +57622,14 @@ components:
         asset_report_token:
           description: A token that can be provided to endpoints such as `/asset_report/get`
             or `/asset_report/pdf/get` to fetch or update an Asset Report.
-          title: AssetReportToken
+          title: AssetReportTokenNullable
           type: string
+        user_token:
+          description: The user token associated with the User for which to create
+            an asset report for. The latest asset report associated with the User
+            will be returned
+          type: string
+          x-hidden-from-docs: true
         include_insights:
           default: false
           description: '`true` if you would like to retrieve the Asset Report with
@@ -57171,8 +57643,6 @@ components:
           type: boolean
         options:
           $ref: '#/components/schemas/AssetReportGetRequestOptions'
-      required:
-      - asset_report_token
       type: object
     AssetReportGetRequestOptions:
       description: An optional object to filter or add data to `/asset_report/get`
@@ -57648,6 +58118,11 @@ components:
       description: A token that can be provided to endpoints such as `/asset_report/get`
         or `/asset_report/pdf/get` to fetch or update an Asset Report.
       title: AssetReportToken
+      type: string
+    AssetReportTokenNullable:
+      description: A token that can be provided to endpoints such as `/asset_report/get`
+        or `/asset_report/pdf/get` to fetch or update an Asset Report.
+      title: AssetReportTokenNullable
       type: string
     AssetReportRefreshAssetReportToken:
       description: The `asset_report_token` returned by the original call to `/asset_report/create`
@@ -61930,12 +62405,6 @@ components:
       description: The postal code for the associated address. Between 2 and 10 alphanumeric
         characters. For US-based addresses this must be 5 numeric digits.
       example: "46001"
-      title: PostalCode
-      type: string
-    PostalCodeNullable:
-      description: The postal code for the associated address. Between 2 and 10 alphanumeric
-        characters. For US-based addresses this must be 5 numeric digits.
-      example: "46001"
       nullable: true
       title: PostalCode
       type: string
@@ -61993,12 +62462,6 @@ components:
       nullable: true
       type: string
     Region:
-      description: An ISO 3166-2 subdivision code. Related terms would be "state",
-        "province", "prefecture", "zone", "subdivision", etc.
-      example: IN
-      title: Region
-      type: string
-    RegionNullable:
       description: An ISO 3166-2 subdivision code. Related terms would be "state",
         "province", "prefecture", "zone", "subdivision", etc.
       example: IN
@@ -62870,7 +63333,8 @@ components:
       type: object
     UserAddress:
       additionalProperties: true
-      description: Home address for the user.
+      description: Home address for the user. For more context on this field, see
+        [Input Validation by Country](https://plaid.com/docs/identity-verification/hybrid-input-validation/#input-validation-by-country).
       example:
         country: US
         city: Pawnee
@@ -62901,6 +63365,7 @@ components:
           description: An ISO 3166-2 subdivision code. Related terms would be "state",
             "province", "prefecture", "zone", "subdivision", etc.
           example: IN
+          nullable: true
           title: Region
           type: string
         postal_code:
@@ -62908,6 +63373,7 @@ components:
             alphanumeric characters. For US-based addresses this must be 5 numeric
             digits.
           example: "46001"
+          nullable: true
           title: PostalCode
           type: string
         country:
@@ -62920,8 +63386,6 @@ components:
       required:
       - city
       - country
-      - postal_code
-      - region
       - street
       type: object
     UserIDNumber:
