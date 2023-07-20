@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/plaid/plaid-go/v14/plaid"
+	"github.com/plaid/plaid-go/v15/plaid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,26 +26,6 @@ func TestPayStubsGet(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(resp.GetPaystubs()))
-}
-
-func TestDocumentsDownload(t *testing.T) {
-	testClient := NewTestClient()
-	ctx := context.Background()
-
-	accessToken := createSandboxItem(
-		t,
-		ctx,
-		testClient,
-		"ins_129618",
-		[]plaid.Products{plaid.PRODUCTS_INCOME_VERIFICATION},
-	)
-
-	request := plaid.NewIncomeVerificationDocumentsDownloadRequest()
-	request.SetAccessToken(accessToken)
-
-	resp, _, err := testClient.PlaidApi.IncomeVerificationDocumentsDownload(ctx).IncomeVerificationDocumentsDownloadRequest(*request).Execute()
-	assert.NoError(t, err)
-	assert.NotNil(t, resp)
 }
 
 func TestPreCheck(t *testing.T) {
