@@ -2,10 +2,11 @@ package tests
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
-	"github.com/plaid/plaid-go/v14/plaid"
+	"github.com/plaid/plaid-go/v15/plaid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,11 +18,13 @@ func TestTransactionsGet(t *testing.T) {
 
 	startDate := time.Now().Add(-365 * 24 * time.Hour).Format(iso8601TimeFormat)
 	endDate := time.Now().Format(iso8601TimeFormat)
-	transactionsResp, _, err := testClient.PlaidApi.TransactionsGet(ctx).TransactionsGetRequest(*plaid.NewTransactionsGetRequest(
+	request := plaid.NewTransactionsGetRequest(
 		accessToken,
 		startDate,
 		endDate,
-	)).Execute()
+	)
+
+	transactionsResp, err := pollForTransactionsGet(t, ctx, testClient, request)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, transactionsResp.Accounts)
@@ -46,7 +49,8 @@ func TestTransactionsGetWithOptions(t *testing.T) {
 		endDate,
 	)
 	request.SetOptions(options)
-	transactionsResp, _, err := testClient.PlaidApi.TransactionsGet(ctx).TransactionsGetRequest(*request).Execute()
+
+	transactionsResp, err := pollForTransactionsGet(t, ctx, testClient, request)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, transactionsResp.Accounts)
@@ -62,4 +66,26 @@ func TestTransactionsRefresh(t *testing.T) {
 	_, _, err := testClient.PlaidApi.TransactionsRefresh(ctx).TransactionsRefreshRequest(*plaid.NewTransactionsRefreshRequest(accessToken)).Execute()
 
 	assert.NoError(t, err)
+}
+
+func pollForTransactionsGet(t *testing.T, ctx context.Context, testClient *plaid.APIClient, request *plaid.TransactionsGetRequest) (*plaid.TransactionsGetResponse, error) {
+
+	for i := 0; i < 10; i++ {
+		response, _, err := testClient.PlaidApi.TransactionsGet(ctx).TransactionsGetRequest(*request).Execute()
+
+		if err == nil {
+			return &response, nil
+		}
+
+		plaidErr, conversionErr := plaid.ToPlaidError(err)
+		assert.NoError(t, conversionErr)
+		if plaidErr.ErrorCode == "PRODUCT_NOT_READY" {
+			time.Sleep(2 * time.Second)
+			continue
+		}
+
+		return &response, err
+	}
+
+	return nil, errors.New("failed to get transactions")
 }

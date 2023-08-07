@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/plaid/plaid-go/v14/plaid"
+	"github.com/plaid/plaid-go/v15/plaid"
 )
 
 // TestJsonUnmarshal tests the case where a null response unmarshalled to a Nullable type
