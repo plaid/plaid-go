@@ -545,21 +545,31 @@ func (e GenericOpenAPIError) Model() interface{} {
 }
 
 // ToPlaidError returns a PlaidError object if the error returned
-// has the right fields. Otherwise, it returns an error
+// has the right fields. Otherwise, it returns an error.
 func ToPlaidError(err error) (PlaidError, error) {
-  genericOpenAPIError, ok := err.(GenericOpenAPIError)
-  if !ok {
-    return PlaidError{}, errors.New("PlaidError is not a GenericOpenAPIError")
-  }
+	genericOpenAPIError, ok := err.(GenericOpenAPIError)
+	if !ok {
+		return PlaidError{}, errors.New("provided error is not a PlaidOpenAPIError")
+	}
 
-  plaidError := PlaidError{}
-  if plaidError, ok = genericOpenAPIError.Model().(PlaidError); ok {
-    return plaidError, nil
-  }
+	plaidError := PlaidError{}
+	if plaidError, ok = genericOpenAPIError.Model().(PlaidError); ok {
+		return plaidError, nil
+	}
 
-  if err := json.Unmarshal(genericOpenAPIError.Body(), &plaidError); err != nil {
-    return PlaidError{}, err
-  } else {
-    return plaidError, nil
-  }
+	if err := json.Unmarshal(genericOpenAPIError.Body(), &plaidError); err != nil {
+		return PlaidError{}, err
+	} else {
+		return plaidError, nil
+	}
+}
+
+// MakeGenericOpenAPIError creates an error with an embedded plaid error for testing.
+// The needed PlaidError for testing can be provided raw as the model or in JSON format as the body.
+func MakeGenericOpenAPIError(body []byte, error string, model interface{}) GenericOpenAPIError {
+	return GenericOpenAPIError{
+		body: body,
+		error: error,
+		model: model,
+	}
 }
