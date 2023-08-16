@@ -2,6 +2,21 @@ This library is generated from an OpenAPI schema (OAS). See full changelog [here
 
 - Updated unmarshalling methods to fix bug where unset values for nullable non-String types were incorrectly marked as set after being unmarshalled.
 
+# 15.2.0
+- Updating to OAS 2020-09-14_1.413.0
+
+## OpenAPI Schema Changes
+### 2020-09-14_1.413.0
+- Add `statements` to `/link/token/create` request
+
+### 2020-09-14_1.412.0
+- Add `hosted_link_url` to `/link/token/create` response
+- Add `hosted_link.delivery_method` to `/link/token/create`
+
+### 2020-09-14_1.411.0
+- Add `link_sessions` to `/link/token/get`
+- Add `LINK:SESSION_FINISHED` webhook
+
 # 15.1.0
 - Updating to OAS 2020-09-14_1.410.1
 
