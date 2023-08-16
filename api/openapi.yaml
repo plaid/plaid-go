@@ -7,7 +7,7 @@ info:
     details.
   termsOfService: https://plaid.com/legal/
   title: The Plaid API
-  version: 2020-09-14_1.410.1
+  version: 2020-09-14_1.413.0
 servers:
 - description: Production
   url: https://production.plaid.com
@@ -842,7 +842,7 @@ paths:
                           next_payment_date: 2022-12-15
                           historical_average_monthly_gross_income: 390
                           historical_average_monthly_income: 300
-                          forcasted_average_monthly_income: 300
+                          forecasted_average_monthly_income: 300
                           employer:
                             name: Plaid Inc
                           historical_summary:
@@ -909,7 +909,7 @@ paths:
                         - amount: 300
                           iso_currency_code: USD
                           unofficial_currency_code: null
-                        forcasted_average_monthly_income:
+                        forecasted_average_monthly_income:
                         - amount: 300
                           iso_currency_code: USD
                           unofficial_currency_code: null
@@ -20162,6 +20162,7 @@ components:
           - adp_roll
           - fortress_trust
           - bond
+          - bakkt
           type: string
       required:
       - access_token
@@ -20631,6 +20632,9 @@ components:
         update:
           account_selection_enabled: false
         language: language
+        statements:
+          end_date: 2000-01-23
+          start_date: 2000-01-23
         secret: secret
         deposit_switch:
           deposit_switch_id: deposit_switch_id
@@ -20647,6 +20651,7 @@ components:
         - null
         - null
         user_token: user_token
+        hosted_link: {}
         client_name: client_name
         income_verification:
           bank_income:
@@ -20923,6 +20928,8 @@ components:
           $ref: '#/components/schemas/LinkTokenCreateRequestUpdate'
         identity_verification:
           $ref: '#/components/schemas/LinkTokenCreateRequestIdentityVerification'
+        statements:
+          $ref: '#/components/schemas/LinkTokenCreateRequestStatements'
         user_token:
           description: A user token generated using `/user/create`. Any Item created
             during the Link session will be associated with the user.
@@ -20931,6 +20938,8 @@ components:
           $ref: '#/components/schemas/LinkTokenInvestments'
         investments_auth:
           $ref: '#/components/schemas/LinkTokenInvestmentsAuth'
+        hosted_link:
+          $ref: '#/components/schemas/LinkTokenCreateHostedLink'
       required:
       - client_name
       - country_codes
@@ -21009,6 +21018,25 @@ components:
           type: boolean
       type: object
       x-hidden-from-docs: true
+    LinkTokenCreateHostedLink:
+      additionalProperties: true
+      description: Configuration parameters for Hosted Link
+      example: {}
+      properties:
+        delivery_method:
+          $ref: '#/components/schemas/HostedLinkDeliveryMethod'
+      type: object
+      x-hidden-from-docs: true
+    HostedLinkDeliveryMethod:
+      description: |
+        How Plaid should deliver the Plaid Link session to the customer.
+        'sms' will deliver via SMS. Must pass `user.phone_number`.
+        'email' will deliver via email. Must pass `user.email_address`.
+      enum:
+      - sms
+      - email
+      type: string
+      x-hidden-from-docs: true
     LinkTokenCreateRequestPaymentInitiation:
       description: Specifies options for initializing Link for use with the Payment
         Initiation (Europe) product. This field is required if `payment_initiation`
@@ -21082,6 +21110,26 @@ components:
           $ref: '#/components/schemas/UserStatedIncomeSourcePayType'
         pay_frequency:
           $ref: '#/components/schemas/UserStatedIncomeSourceFrequency'
+      type: object
+    LinkTokenCreateRequestStatements:
+      description: Specifies options for initializing Link for use with the Statements
+        product.
+      example:
+        end_date: 2000-01-23
+        start_date: 2000-01-23
+      properties:
+        start_date:
+          description: The start date for statements, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            “YYYY-MM-DD” format, e.g. "2020-10-30". If no value is provided, this
+            will default to 3 months prior to the current date.
+          format: date
+          type: string
+        end_date:
+          description: The end date for statements, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            “YYYY-MM-DD” format, e.g. "2020-10-30". If no value is provided, this
+            will default to the current date.
+          format: date
+          type: string
       type: object
     UserStatedIncomeSourceCategory:
       description: The income category for a specified income source
@@ -21465,6 +21513,95 @@ components:
         link_token: link_token
         created_at: 2000-01-23T04:56:07.000+00:00
         expiration: 2000-01-23T04:56:07.000+00:00
+        link_sessions:
+        - finished_at: 2000-01-23T04:56:07.000+00:00
+          on_success:
+            public_token: public_token
+            metadata:
+              institution:
+                name: name
+                institution_id: institution_id
+              link_session_id: link_session_id
+              accounts:
+              - class_type: class_type
+                subtype: subtype
+                name: name
+                id: id
+                type: type
+                verification_status: verification_status
+                mask: mask
+              - class_type: class_type
+                subtype: subtype
+                name: name
+                id: id
+                type: type
+                verification_status: verification_status
+                mask: mask
+          link_session_id: link_session_id
+          started_at: 2000-01-23T04:56:07.000+00:00
+          on_exit:
+            metadata:
+              institution:
+                name: name
+                institution_id: institution_id
+              link_session_id: link_session_id
+              request_id: request_id
+              status: status
+            error:
+              error_message: error_message
+              suggested_action: suggested_action
+              causes:
+              - ""
+              - ""
+              display_message: display_message
+              error_code: error_code
+              documentation_url: documentation_url
+              request_id: request_id
+              status: 0
+        - finished_at: 2000-01-23T04:56:07.000+00:00
+          on_success:
+            public_token: public_token
+            metadata:
+              institution:
+                name: name
+                institution_id: institution_id
+              link_session_id: link_session_id
+              accounts:
+              - class_type: class_type
+                subtype: subtype
+                name: name
+                id: id
+                type: type
+                verification_status: verification_status
+                mask: mask
+              - class_type: class_type
+                subtype: subtype
+                name: name
+                id: id
+                type: type
+                verification_status: verification_status
+                mask: mask
+          link_session_id: link_session_id
+          started_at: 2000-01-23T04:56:07.000+00:00
+          on_exit:
+            metadata:
+              institution:
+                name: name
+                institution_id: institution_id
+              link_session_id: link_session_id
+              request_id: request_id
+              status: status
+            error:
+              error_message: error_message
+              suggested_action: suggested_action
+              causes:
+              - ""
+              - ""
+              display_message: display_message
+              error_code: error_code
+              documentation_url: documentation_url
+              request_id: request_id
+              status: 0
         request_id: request_id
       properties:
         link_token:
@@ -21483,6 +21620,12 @@ components:
           format: date-time
           nullable: true
           type: string
+        link_sessions:
+          description: Information about link sessions created using this `link_token`.
+          items:
+            $ref: '#/components/schemas/LinkTokenGetSessionsResponse'
+          type: array
+          x-hidden-from-docs: true
         metadata:
           $ref: '#/components/schemas/LinkTokenGetMetadataResponse'
         request_id:
@@ -21497,6 +21640,337 @@ components:
       - link_token
       - metadata
       - request_id
+      type: object
+    LinkTokenGetSessionsResponse:
+      additionalProperties: true
+      description: An object containing information about a link session.
+      example:
+        finished_at: 2000-01-23T04:56:07.000+00:00
+        on_success:
+          public_token: public_token
+          metadata:
+            institution:
+              name: name
+              institution_id: institution_id
+            link_session_id: link_session_id
+            accounts:
+            - class_type: class_type
+              subtype: subtype
+              name: name
+              id: id
+              type: type
+              verification_status: verification_status
+              mask: mask
+            - class_type: class_type
+              subtype: subtype
+              name: name
+              id: id
+              type: type
+              verification_status: verification_status
+              mask: mask
+        link_session_id: link_session_id
+        started_at: 2000-01-23T04:56:07.000+00:00
+        on_exit:
+          metadata:
+            institution:
+              name: name
+              institution_id: institution_id
+            link_session_id: link_session_id
+            request_id: request_id
+            status: status
+          error:
+            error_message: error_message
+            suggested_action: suggested_action
+            causes:
+            - ""
+            - ""
+            display_message: display_message
+            error_code: error_code
+            documentation_url: documentation_url
+            request_id: request_id
+            status: 0
+      properties:
+        link_session_id:
+          description: The unique ID for the link session.
+          type: string
+        started_at:
+          description: The timestamp at which the link session was first started,
+            in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format.
+          format: date-time
+          type: string
+        finished_at:
+          description: The timestamp at which the link session was finished, if available,
+            in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format.
+          format: date-time
+          nullable: true
+          type: string
+        on_success:
+          $ref: '#/components/schemas/LinkSessionSuccess'
+        on_exit:
+          $ref: '#/components/schemas/LinkSessionExit'
+      required:
+      - link_session_id
+      type: object
+      x-hidden-from-docs: true
+    LinkSessionSuccess:
+      description: An object representing an [onSuccess](https://plaid.com/docs/link/web/#onsuccess)
+        callback from Link.
+      example:
+        public_token: public_token
+        metadata:
+          institution:
+            name: name
+            institution_id: institution_id
+          link_session_id: link_session_id
+          accounts:
+          - class_type: class_type
+            subtype: subtype
+            name: name
+            id: id
+            type: type
+            verification_status: verification_status
+            mask: mask
+          - class_type: class_type
+            subtype: subtype
+            name: name
+            id: id
+            type: type
+            verification_status: verification_status
+            mask: mask
+      nullable: true
+      properties:
+        public_token:
+          description: Displayed once a user has successfully linked their Item.
+          type: string
+        metadata:
+          $ref: '#/components/schemas/LinkSessionSuccessMetadata'
+      required:
+      - metadata
+      - public_token
+      type: object
+      x-hidden-from-docs: true
+    LinkSessionSuccessMetadata:
+      description: Displayed once a user has successfully linked their Item.
+      example:
+        institution:
+          name: name
+          institution_id: institution_id
+        link_session_id: link_session_id
+        accounts:
+        - class_type: class_type
+          subtype: subtype
+          name: name
+          id: id
+          type: type
+          verification_status: verification_status
+          mask: mask
+        - class_type: class_type
+          subtype: subtype
+          name: name
+          id: id
+          type: type
+          verification_status: verification_status
+          mask: mask
+      nullable: true
+      properties:
+        institution:
+          $ref: '#/components/schemas/LinkSessionSuccessMetadataInstitution'
+        accounts:
+          description: A list of accounts attached to the connected Item. If Account
+            Select is enabled via the developer dashboard, `accounts` will only include
+            selected accounts.
+          items:
+            $ref: '#/components/schemas/LinkSessionSuccessMetadataAccount'
+          type: array
+        link_session_id:
+          description: A unique identifier associated with a user's actions and events
+            through the Link flow. Include this identifier when opening a support
+            ticket for faster turnaround.
+          type: string
+        transfer_status:
+          $ref: '#/components/schemas/LinkSessionSuccessMetadataTransferStatus'
+      type: object
+    LinkSessionSuccessMetadataInstitution:
+      description: An institution object. If the Item was created via Same-Day micro-deposit
+        verification, will be `null`.
+      example:
+        name: name
+        institution_id: institution_id
+      nullable: true
+      properties:
+        name:
+          description: The full institution name, such as `'Wells Fargo'`
+          type: string
+        institution_id:
+          description: The Plaid institution identifier
+          type: string
+      type: object
+    LinkSessionSuccessMetadataAccount:
+      description: An account attached to the connected Item.
+      example:
+        class_type: class_type
+        subtype: subtype
+        name: name
+        id: id
+        type: type
+        verification_status: verification_status
+        mask: mask
+      properties:
+        id:
+          description: |
+            The Plaid `account_id`
+          type: string
+        name:
+          description: The official account name
+          type: string
+        mask:
+          description: The last 2-4 alphanumeric characters of an account's official
+            account number. Note that the mask may be non-unique between an Item's
+            accounts. It may also not match the mask that the bank displays to the
+            user.
+          nullable: true
+          type: string
+        type:
+          description: The account type. See the [Account schema](/docs/api/accounts#account-type-schema)
+            for a full list of possible values
+          type: string
+        subtype:
+          description: The account subtype. See the [Account schema](/docs/api/accounts#account-type-schema)
+            for a full list of possible values
+          type: string
+        verification_status:
+          description: |
+            Indicates an Item's micro-deposit-based verification status. Possible values are:
+
+            `pending_automatic_verification`: The Item is pending automatic verification
+
+            `pending_manual_verification`: The Item is pending manual micro-deposit verification. Items remain in this state until the user successfully verifies the two amounts.
+
+            `automatically_verified`: The Item has successfully been automatically verified
+
+            `manually_verified`: The Item has successfully been manually verified
+
+            `verification_expired`: Plaid was unable to automatically verify the deposit within 7 calendar days and will no longer attempt to validate the Item. Users may retry by submitting their information again through Link.
+
+            `verification_failed`: The Item failed manual micro-deposit verification because the user exhausted all 3 verification attempts. Users may retry by submitting their information again through Link.
+
+            `null`: micro-deposit-based verification is not being used for the Item.
+          nullable: true
+          type: string
+        class_type:
+          description: If micro-deposit verification is being used, indicates whether
+            the account being verified is a `business` or `personal` account.
+          nullable: true
+          type: string
+      type: object
+    LinkSessionSuccessMetadataTransferStatus:
+      description: |-
+        The status of a transfer. Returned only when [Transfer UI](/docs/transfer/using-transfer-ui) is implemented.
+
+        - `COMPLETE` – The transfer was completed.
+        - `INCOMPLETE` – The transfer could not be completed. For help, see [Troubleshooting transfers](/docs/transfer/using-transfer-ui#troubleshooting-transfers).
+      enum:
+      - COMPLETE
+      - INCOMPLETE
+      nullable: true
+      type: string
+    LinkSessionExit:
+      additionalProperties: true
+      description: An object representing an [onExit](https://plaid.com/docs/link/web/#onexit)
+        callback from Link.
+      example:
+        metadata:
+          institution:
+            name: name
+            institution_id: institution_id
+          link_session_id: link_session_id
+          request_id: request_id
+          status: status
+        error:
+          error_message: error_message
+          suggested_action: suggested_action
+          causes:
+          - ""
+          - ""
+          display_message: display_message
+          error_code: error_code
+          documentation_url: documentation_url
+          request_id: request_id
+          status: 0
+      nullable: true
+      properties:
+        error:
+          $ref: '#/components/schemas/PlaidError'
+        metadata:
+          $ref: '#/components/schemas/LinkSessionExitMetadata'
+      required:
+      - error
+      - metadata
+      type: object
+      x-hidden-from-docs: true
+    LinkSessionExitMetadata:
+      description: Displayed if a user exits Link without successfully linking an
+        Item.
+      example:
+        institution:
+          name: name
+          institution_id: institution_id
+        link_session_id: link_session_id
+        request_id: request_id
+        status: status
+      nullable: true
+      properties:
+        institution:
+          $ref: '#/components/schemas/LinkSessionExitMetadataInstitution'
+        status:
+          description: The point at which the user exited the Link flow. One of the
+            following values.
+          properties:
+            requires_questions:
+              description: User prompted to answer security questions
+            requires_selections:
+              description: User prompted to answer multiple choice question(s)
+            requires_code:
+              description: User prompted to provide a one-time passcode
+            choose_device:
+              description: User prompted to select a device on which to receive a
+                one-time passcode
+            requires_credentials:
+              description: User prompted to provide credentials for the selected financial
+                institution or has not yet selected a financial institution
+            requires_account_selection:
+              description: User prompted to select one or more financial accounts
+                to share
+            requires_oauth:
+              description: User prompted to enter an OAuth flow
+            institution_not_found:
+              description: User exited the Link flow after unsuccessfully (no results
+                returned) searching for a financial institution
+          type: string
+        link_session_id:
+          description: A unique identifier associated with a user's actions and events
+            through the Link flow. Include this identifier when opening a support
+            ticket for faster turnaround.
+          type: string
+        request_id:
+          description: The request ID for the last request made by Link. This can
+            be shared with Plaid Support to expedite investigation.
+          type: string
+      type: object
+    LinkSessionExitMetadataInstitution:
+      description: An institution object. If the Item was created via Same-Day micro-deposit
+        verification, will be `null`.
+      example:
+        name: name
+        institution_id: institution_id
+      nullable: true
+      properties:
+        name:
+          description: The full institution name, such as `Wells Fargo`
+          type: string
+        institution_id:
+          description: The Plaid institution identifier
+          type: string
       type: object
     LinkTokenGetMetadataResponse:
       additionalProperties: true
@@ -21589,6 +22063,7 @@ components:
       description: LinkTokenCreateResponse defines the response schema for `/link/token/create`
       example:
         link_token: link_token
+        hosted_link_url: hosted_link_url
         expiration: 2000-01-23T04:56:07.000+00:00
         request_id: request_id
       properties:
@@ -21610,6 +22085,11 @@ components:
             sensitive.
           title: RequestID
           type: string
+        hosted_link_url:
+          description: A URL of a Plaid-hosted Link flow that will use the Link token
+            returned by this request
+          type: string
+          x-hidden-from-docs: true
       required:
       - expiration
       - link_token
@@ -58136,6 +58616,39 @@ components:
       title: LinkEventsWebhook
       type: object
       x-hidden-from-docs: true
+    LinkSessionFinishedWebhook:
+      additionalProperties: true
+      description: Contains the state of a completed link session, along with the
+        public token if available.
+      properties:
+        webhook_type:
+          description: '`LINK`'
+          type: string
+        webhook_code:
+          description: '`SESSION_FINISHED`'
+          type: string
+        status:
+          description: The final status of the link session. Will always be "SUCCESS"
+            or "EXITED".
+          type: string
+        link_session_id:
+          description: The identifier for the link session.
+          type: string
+        link_token:
+          description: The link token used to create the link session.
+          type: string
+        public_token:
+          description: The public token generated by the link session.
+          type: string
+      required:
+      - link_session_id
+      - link_token
+      - status
+      - webhook_code
+      - webhook_type
+      title: LinkSessionFinishedWebhook
+      type: object
+      x-hidden-from-docs: true
     AssetReportCreateRequest:
       description: AssetReportCreateRequest defines the request schema for `/asset_report/create`
       example:
@@ -67209,15 +67722,17 @@ components:
       description: |-
         The type of identity document detected in the images provided. Will always be one of the following values:
 
-          `drivers_license` - A driver's license for the associated country
+          `drivers_license` - A driver's license issued by the associated country, establishing identity without any guarantee as to citizenship, and granting driving privileges
 
-          `id_card` - A general national identification card, distinct from driver's licenses
+          `id_card` - A general national identification card, distinct from driver's licenses as it only establishes identity
 
-          `passport` - A passport for the associated country
+          `passport` - A travel passport issued by the associated country for one of its citizens
 
-          `residence_permit_card` - An identity document permitting a foreign citizen to <em>temporarily</em> reside in the associated country
+          `residence_permit_card` - An identity document issued by the associated country permitting a foreign citizen to <em>temporarily</em> reside there
 
-          `resident_card` - An identity document permitting a foreign citizen to <em>permanently</em> reside in the associated country
+          `resident_card` - An identity document issued by the associated country permitting a foreign citizen to <em>permanently</em> reside there
+
+          `visa` - An identity document issued by the associated country permitting a foreign citizen entry for a short duration and for a specific purpose, typically no longer than 6 months
 
         Note: This value may be different from the ID type that the user selects within Link. For example, if they select "Driver's License" but then submit a picture of a passport, this field will say `passport`
       enum:
@@ -67226,6 +67741,7 @@ components:
       - passport
       - residence_permit_card
       - resident_card
+      - visa
       example: drivers_license
       type: string
     PhysicalDocumentExtractedData:
@@ -71438,6 +71954,7 @@ components:
               historical_average_monthly_gross_income: 5.962133916683182
               income_description: income_description
               transaction_count: 1
+              forecasted_average_monthly_income: 2.3021358869347655
               historical_summary:
               - end_date: 2000-01-23
                 total_amounts:
@@ -71498,13 +72015,13 @@ components:
                 name: name
               income_source_id: income_source_id
               historical_average_monthly_income: 5.637376656633329
-              forcasted_average_monthly_income: 2.3021358869347655
               start_date: 2000-01-23
             - end_date: 2000-01-23
               unofficial_currency_code: unofficial_currency_code
               historical_average_monthly_gross_income: 5.962133916683182
               income_description: income_description
               transaction_count: 1
+              forecasted_average_monthly_income: 2.3021358869347655
               historical_summary:
               - end_date: 2000-01-23
                 total_amounts:
@@ -71565,7 +72082,6 @@ components:
                 name: name
               income_source_id: income_source_id
               historical_average_monthly_income: 5.637376656633329
-              forcasted_average_monthly_income: 2.3021358869347655
               start_date: 2000-01-23
             institution_name: institution_name
             institution_id: institution_id
@@ -71713,6 +72229,7 @@ components:
               historical_average_monthly_gross_income: 5.962133916683182
               income_description: income_description
               transaction_count: 1
+              forecasted_average_monthly_income: 2.3021358869347655
               historical_summary:
               - end_date: 2000-01-23
                 total_amounts:
@@ -71773,13 +72290,13 @@ components:
                 name: name
               income_source_id: income_source_id
               historical_average_monthly_income: 5.637376656633329
-              forcasted_average_monthly_income: 2.3021358869347655
               start_date: 2000-01-23
             - end_date: 2000-01-23
               unofficial_currency_code: unofficial_currency_code
               historical_average_monthly_gross_income: 5.962133916683182
               income_description: income_description
               transaction_count: 1
+              forecasted_average_monthly_income: 2.3021358869347655
               historical_summary:
               - end_date: 2000-01-23
                 total_amounts:
@@ -71840,7 +72357,6 @@ components:
                 name: name
               income_source_id: income_source_id
               historical_average_monthly_income: 5.637376656633329
-              forcasted_average_monthly_income: 2.3021358869347655
               start_date: 2000-01-23
             institution_name: institution_name
             institution_id: institution_id
@@ -71857,6 +72373,13 @@ components:
               iso_currency_code: iso_currency_code
             income_transactions_count: 2
             total_amounts:
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 1.0246457001441578
+              iso_currency_code: iso_currency_code
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 1.0246457001441578
+              iso_currency_code: iso_currency_code
+            forecasted_average_monthly_income:
             - unofficial_currency_code: unofficial_currency_code
               amount: 1.0246457001441578
               iso_currency_code: iso_currency_code
@@ -71917,13 +72440,6 @@ components:
                 original_description: original_description
               start_date: 2000-01-23
             historical_average_monthly_income:
-            - unofficial_currency_code: unofficial_currency_code
-              amount: 1.0246457001441578
-              iso_currency_code: iso_currency_code
-            - unofficial_currency_code: unofficial_currency_code
-              amount: 1.0246457001441578
-              iso_currency_code: iso_currency_code
-            forcasted_average_monthly_income:
             - unofficial_currency_code: unofficial_currency_code
               amount: 1.0246457001441578
               iso_currency_code: iso_currency_code
@@ -72088,6 +72604,7 @@ components:
               historical_average_monthly_gross_income: 5.962133916683182
               income_description: income_description
               transaction_count: 1
+              forecasted_average_monthly_income: 2.3021358869347655
               historical_summary:
               - end_date: 2000-01-23
                 total_amounts:
@@ -72148,13 +72665,13 @@ components:
                 name: name
               income_source_id: income_source_id
               historical_average_monthly_income: 5.637376656633329
-              forcasted_average_monthly_income: 2.3021358869347655
               start_date: 2000-01-23
             - end_date: 2000-01-23
               unofficial_currency_code: unofficial_currency_code
               historical_average_monthly_gross_income: 5.962133916683182
               income_description: income_description
               transaction_count: 1
+              forecasted_average_monthly_income: 2.3021358869347655
               historical_summary:
               - end_date: 2000-01-23
                 total_amounts:
@@ -72215,7 +72732,6 @@ components:
                 name: name
               income_source_id: income_source_id
               historical_average_monthly_income: 5.637376656633329
-              forcasted_average_monthly_income: 2.3021358869347655
               start_date: 2000-01-23
             institution_name: institution_name
             institution_id: institution_id
@@ -72363,6 +72879,7 @@ components:
               historical_average_monthly_gross_income: 5.962133916683182
               income_description: income_description
               transaction_count: 1
+              forecasted_average_monthly_income: 2.3021358869347655
               historical_summary:
               - end_date: 2000-01-23
                 total_amounts:
@@ -72423,13 +72940,13 @@ components:
                 name: name
               income_source_id: income_source_id
               historical_average_monthly_income: 5.637376656633329
-              forcasted_average_monthly_income: 2.3021358869347655
               start_date: 2000-01-23
             - end_date: 2000-01-23
               unofficial_currency_code: unofficial_currency_code
               historical_average_monthly_gross_income: 5.962133916683182
               income_description: income_description
               transaction_count: 1
+              forecasted_average_monthly_income: 2.3021358869347655
               historical_summary:
               - end_date: 2000-01-23
                 total_amounts:
@@ -72490,7 +73007,6 @@ components:
                 name: name
               income_source_id: income_source_id
               historical_average_monthly_income: 5.637376656633329
-              forcasted_average_monthly_income: 2.3021358869347655
               start_date: 2000-01-23
             institution_name: institution_name
             institution_id: institution_id
@@ -72507,6 +73023,13 @@ components:
               iso_currency_code: iso_currency_code
             income_transactions_count: 2
             total_amounts:
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 1.0246457001441578
+              iso_currency_code: iso_currency_code
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 1.0246457001441578
+              iso_currency_code: iso_currency_code
+            forecasted_average_monthly_income:
             - unofficial_currency_code: unofficial_currency_code
               amount: 1.0246457001441578
               iso_currency_code: iso_currency_code
@@ -72567,13 +73090,6 @@ components:
                 original_description: original_description
               start_date: 2000-01-23
             historical_average_monthly_income:
-            - unofficial_currency_code: unofficial_currency_code
-              amount: 1.0246457001441578
-              iso_currency_code: iso_currency_code
-            - unofficial_currency_code: unofficial_currency_code
-              amount: 1.0246457001441578
-              iso_currency_code: iso_currency_code
-            forcasted_average_monthly_income:
             - unofficial_currency_code: unofficial_currency_code
               amount: 1.0246457001441578
               iso_currency_code: iso_currency_code
@@ -72757,6 +73273,7 @@ components:
             historical_average_monthly_gross_income: 5.962133916683182
             income_description: income_description
             transaction_count: 1
+            forecasted_average_monthly_income: 2.3021358869347655
             historical_summary:
             - end_date: 2000-01-23
               total_amounts:
@@ -72817,13 +73334,13 @@ components:
               name: name
             income_source_id: income_source_id
             historical_average_monthly_income: 5.637376656633329
-            forcasted_average_monthly_income: 2.3021358869347655
             start_date: 2000-01-23
           - end_date: 2000-01-23
             unofficial_currency_code: unofficial_currency_code
             historical_average_monthly_gross_income: 5.962133916683182
             income_description: income_description
             transaction_count: 1
+            forecasted_average_monthly_income: 2.3021358869347655
             historical_summary:
             - end_date: 2000-01-23
               total_amounts:
@@ -72884,7 +73401,6 @@ components:
               name: name
             income_source_id: income_source_id
             historical_average_monthly_income: 5.637376656633329
-            forcasted_average_monthly_income: 2.3021358869347655
             start_date: 2000-01-23
           institution_name: institution_name
           institution_id: institution_id
@@ -73032,6 +73548,7 @@ components:
             historical_average_monthly_gross_income: 5.962133916683182
             income_description: income_description
             transaction_count: 1
+            forecasted_average_monthly_income: 2.3021358869347655
             historical_summary:
             - end_date: 2000-01-23
               total_amounts:
@@ -73092,13 +73609,13 @@ components:
               name: name
             income_source_id: income_source_id
             historical_average_monthly_income: 5.637376656633329
-            forcasted_average_monthly_income: 2.3021358869347655
             start_date: 2000-01-23
           - end_date: 2000-01-23
             unofficial_currency_code: unofficial_currency_code
             historical_average_monthly_gross_income: 5.962133916683182
             income_description: income_description
             transaction_count: 1
+            forecasted_average_monthly_income: 2.3021358869347655
             historical_summary:
             - end_date: 2000-01-23
               total_amounts:
@@ -73159,7 +73676,6 @@ components:
               name: name
             income_source_id: income_source_id
             historical_average_monthly_income: 5.637376656633329
-            forcasted_average_monthly_income: 2.3021358869347655
             start_date: 2000-01-23
           institution_name: institution_name
           institution_id: institution_id
@@ -73176,6 +73692,13 @@ components:
             iso_currency_code: iso_currency_code
           income_transactions_count: 2
           total_amounts:
+          - unofficial_currency_code: unofficial_currency_code
+            amount: 1.0246457001441578
+            iso_currency_code: iso_currency_code
+          - unofficial_currency_code: unofficial_currency_code
+            amount: 1.0246457001441578
+            iso_currency_code: iso_currency_code
+          forecasted_average_monthly_income:
           - unofficial_currency_code: unofficial_currency_code
             amount: 1.0246457001441578
             iso_currency_code: iso_currency_code
@@ -73236,13 +73759,6 @@ components:
               original_description: original_description
             start_date: 2000-01-23
           historical_average_monthly_income:
-          - unofficial_currency_code: unofficial_currency_code
-            amount: 1.0246457001441578
-            iso_currency_code: iso_currency_code
-          - unofficial_currency_code: unofficial_currency_code
-            amount: 1.0246457001441578
-            iso_currency_code: iso_currency_code
-          forcasted_average_monthly_income:
           - unofficial_currency_code: unofficial_currency_code
             amount: 1.0246457001441578
             iso_currency_code: iso_currency_code
@@ -73427,6 +73943,7 @@ components:
           historical_average_monthly_gross_income: 5.962133916683182
           income_description: income_description
           transaction_count: 1
+          forecasted_average_monthly_income: 2.3021358869347655
           historical_summary:
           - end_date: 2000-01-23
             total_amounts:
@@ -73487,13 +74004,13 @@ components:
             name: name
           income_source_id: income_source_id
           historical_average_monthly_income: 5.637376656633329
-          forcasted_average_monthly_income: 2.3021358869347655
           start_date: 2000-01-23
         - end_date: 2000-01-23
           unofficial_currency_code: unofficial_currency_code
           historical_average_monthly_gross_income: 5.962133916683182
           income_description: income_description
           transaction_count: 1
+          forecasted_average_monthly_income: 2.3021358869347655
           historical_summary:
           - end_date: 2000-01-23
             total_amounts:
@@ -73554,7 +74071,6 @@ components:
             name: name
           income_source_id: income_source_id
           historical_average_monthly_income: 5.637376656633329
-          forcasted_average_monthly_income: 2.3021358869347655
           start_date: 2000-01-23
         institution_name: institution_name
         institution_id: institution_id
@@ -73695,6 +74211,7 @@ components:
         historical_average_monthly_gross_income: 5.962133916683182
         income_description: income_description
         transaction_count: 1
+        forecasted_average_monthly_income: 2.3021358869347655
         historical_summary:
         - end_date: 2000-01-23
           total_amounts:
@@ -73755,7 +74272,6 @@ components:
           name: name
         income_source_id: income_source_id
         historical_average_monthly_income: 5.637376656633329
-        forcasted_average_monthly_income: 2.3021358869347655
         start_date: 2000-01-23
       properties:
         income_source_id:
@@ -73804,18 +74320,22 @@ components:
             The expected date of the end user’s next paycheck for the income source.
             The date will be returned in an ISO 8601 format (YYYY-MM-DD).
           format: date
+          nullable: true
           type: string
         historical_average_monthly_gross_income:
           description: An estimate of the average gross monthly income based on the
             historical net amount and income category for the income source(s).
+          nullable: true
           type: number
         historical_average_monthly_income:
           description: The average monthly net income amount estimated based on the
             historical data for the income source(s).
+          nullable: true
           type: number
-        forcasted_average_monthly_income:
+        forecasted_average_monthly_income:
           description: The predicted average monthly net income amount for the income
             source(s).
+          nullable: true
           type: number
         employer:
           $ref: '#/components/schemas/CraBankIncomeEmployer'
@@ -73859,6 +74379,13 @@ components:
         - unofficial_currency_code: unofficial_currency_code
           amount: 1.0246457001441578
           iso_currency_code: iso_currency_code
+        forecasted_average_monthly_income:
+        - unofficial_currency_code: unofficial_currency_code
+          amount: 1.0246457001441578
+          iso_currency_code: iso_currency_code
+        - unofficial_currency_code: unofficial_currency_code
+          amount: 1.0246457001441578
+          iso_currency_code: iso_currency_code
         historical_summary:
         - end_date: 2000-01-23
           total_amounts:
@@ -73913,13 +74440,6 @@ components:
             original_description: original_description
           start_date: 2000-01-23
         historical_average_monthly_income:
-        - unofficial_currency_code: unofficial_currency_code
-          amount: 1.0246457001441578
-          iso_currency_code: iso_currency_code
-        - unofficial_currency_code: unofficial_currency_code
-          amount: 1.0246457001441578
-          iso_currency_code: iso_currency_code
-        forcasted_average_monthly_income:
         - unofficial_currency_code: unofficial_currency_code
           amount: 1.0246457001441578
           iso_currency_code: iso_currency_code
@@ -73969,7 +74489,7 @@ components:
           items:
             $ref: '#/components/schemas/CreditAmountWithCurrency'
           type: array
-        forcasted_average_monthly_income:
+        forecasted_average_monthly_income:
           description: The predicted average monthly income amount for the income
             source(s).
           items:
@@ -74153,6 +74673,51 @@ components:
       - error_message
       - error_type
       type: object
+    BankIncomeCompleteWebhook:
+      additionalProperties: true
+      description: Fired when a refreshed bank income report has finished generating
+        or failed to generate, triggered by calling `/cra/bank_income/get`.
+      properties:
+        webhook_type:
+          description: '`CRA_INCOME`'
+          type: string
+        webhook_code:
+          description: '`BANK_INCOME_COMPLETE`'
+          type: string
+        user_id:
+          description: The `user_id` corresponding to the user the webhook has fired
+            for.
+          type: string
+        result:
+          $ref: '#/components/schemas/BankIncomeCompleteResult'
+        environment:
+          $ref: '#/components/schemas/WebhookEnvironmentValues'
+      required:
+      - environment
+      - result
+      - user_id
+      - webhook_code
+      - webhook_type
+      title: BankIncomeCompleteWebhook
+      type: object
+      x-examples:
+        example-1:
+          webhook_type: CRA_INCOME
+          webhook_code: BANK_INCOME_COMPLETE
+          user_id: wz666MBjYWTp2PDzzggYhM6oWWmBb
+          result: SUCCESS
+          environment: production
+    BankIncomeCompleteResult:
+      description: |-
+        The result of the bank income refresh report generation
+
+        `SUCCESS`: The refreshed report was successfully generated and can be retrieved via `/cra/bank_income/get`.
+
+        `FAILURE`: The refreshed report failed to be generated
+      enum:
+      - SUCCESS
+      - FAILURE
+      type: string
     AssetReportFreddieGetRequest:
       additionalProperties: true
       description: AssetReportFreddieGetRequest defines the request schema for `credit/asset_report/freddie_mac/get`
