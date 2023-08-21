@@ -624,3 +624,12 @@ func ToPlaidError(err error) (PlaidError, error) {
     return plaidError, nil
   }
 }
+
+{{! Modified by Plaid - helper for GenericOpenAPIError type }}
+func MakeGenericOpenAPIError(body []byte, error string, model interface{}) GenericOpenAPIError {
+	return GenericOpenAPIError{
+		body: body,
+		error: error,
+		model: model,
+	}
+}
