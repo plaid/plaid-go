@@ -7,7 +7,7 @@ info:
     details.
   termsOfService: https://plaid.com/legal/
   title: The Plaid API
-  version: 2020-09-14_1.413.0
+  version: 2020-09-14_1.419.0
 servers:
 - description: Production
   url: https://production.plaid.com
@@ -5111,9 +5111,7 @@ paths:
   /processor/signal/decision/report:
     post:
       description: After calling `/processor/signal/evaluate`, call `/processor/signal/decision/report`
-        to report whether the transaction was initiated. This endpoint will return
-        an [`INVALID_FIELD`](/docs/errors/invalid-request/#invalid_field) error if
-        called a second time with a different value for `initiated`.
+        to report whether the transaction was initiated.
       externalDocs:
         url: /api/processors/#processorsignaldecisionreport
       operationId: processorSignalDecisionReport
@@ -20920,6 +20918,8 @@ components:
           $ref: '#/components/schemas/LinkTokenCreateRequestIncomeVerification'
         base_report:
           $ref: '#/components/schemas/LinkTokenCreateRequestBaseReport'
+        consumer_report_permissible_purpose:
+          $ref: '#/components/schemas/ConsumerReportPermissiblePurpose'
         auth:
           $ref: '#/components/schemas/LinkTokenCreateRequestAuth'
         transfer:
@@ -23860,21 +23860,36 @@ components:
       - PT
       title: CountryCode
       type: string
+    ConsumerReportPermissiblePurpose:
+      description: |-
+        This enum describes the reason a consumer report is created for
+
+        `ACCOUNT_REVIEW_CREDIT`: In connection with a consumer credit transaction for the review or collection of an account pursuant to FCRA Section 604(a)(3)(A).
+        `ACCOUNT_REVIEW_NON_CREDIT`: For a legitimate business need of the information to review a non-credit account provided primarily for personal, family, or household purposes to determine whether the consumer continues to meet the terms of the account pursuant to FCRA Section 604(a)(3)(F)(2).
+        `EMPLOYMENT`: For employment purposes pursuant to FCRA 604(a)(3)(B), including hiring, retention and promotion purposes.
+        `EXTENSION_OF_CREDIT`: In connection with a credit transaction initiated by and involving the consumer pursuant to FCRA Section 604(a)(3)(A).
+        `LEGITIMATE_BUSINESS_NEED_TENANT_SCREENING`: For a legitimate business need in connection with a business transaction initiated by the consumer primarily for personal, family, or household purposes in connection with a property rental assessment pursuant to FCRA Section 604(a)(3)(F)(i).
+        `LEGITIMATE_BUSINESS_NEED_TENANT_OTHER`: For a legitimate business need in connection with a business transaction made primarily for personal, family, or household initiated by the consumer pursuant to FCRA Section 604(a)(3)(F)(i).
+        `WRITTEN_INSTRUCTION_PREQUALIFICATION`: In accordance with the written instructions of the consumer pursuant to FCRA Section 604(a)(2), to evaluate an application’s profile to make an offer to the consumer.
+        `WRITTEN_INSTRUCTION_OTHER`: In accordance with the written instructions of the consumer pursuant to FCRA Section 604(a)(2), such as when an individual agrees to act as a guarantor or assumes personal liability for a consumer, business, or commercial loan.
+      enum:
+      - ACCOUNT_REVIEW_CREDIT
+      - ACCOUNT_REVIEW_NON_CREDIT
+      - EMPLOYMENT
+      - EXTENSION_OF_CREDIT
+      - LEGITIMATE_BUSINESS_NEED_TENANT_SCREENING
+      - LEGITIMATE_BUSINESS_NEED_TENANT_OTHER
+      - WRITTEN_INSTRUCTION_PREQUALIFICATION
+      - WRITTEN_INSTRUCTION_OTHER
+      title: ConsumerReportPermissiblePurpose
+      type: string
+      x-hidden-from-docs: true
     PaymentMeta:
       additionalProperties: true
       description: |-
         Transaction information specific to inter-bank transfers. If the transaction was not an inter-bank transfer, all fields will be `null`.
 
         If the `transactions` object was returned by a Transactions endpoint such as `/transactions/sync` or `/transactions/get`, the `payment_meta` key will always appear, but no data elements are guaranteed. If the `transactions` object was returned by an Assets endpoint such as `/asset_report/get/` or `/asset_report/pdf/get`, this field will only appear in an Asset Report with Insights.
-      example:
-        payee: payee
-        ppd_id: ppd_id
-        reason: reason
-        by_order_of: by_order_of
-        payment_processor: payment_processor
-        reference_number: reference_number
-        payer: payer
-        payment_method: payment_method
       properties:
         reference_number:
           description: The transaction reference number supplied by the financial
@@ -57415,8 +57430,36 @@ components:
           description: Whether or not the transaction is periodically recurring.
           nullable: true
           type: boolean
+        frequency:
+          $ref: '#/components/schemas/RecurringFrequency'
       title: Recurrence
       type: object
+    RecurringFrequency:
+      description: "Describes the frequency of the transaction stream.\n\n`WEEKLY`:\
+        \ Assigned to a transaction stream that occurs approximately every week.\n\
+        \n`BIWEEKLY`: Assigned to a transaction stream that occurs approximately every\
+        \ 2 weeks.\n\n`SEMI_MONTHLY`: Assigned to a transaction stream that occurs\
+        \ approximately twice per month. This frequency is typically seen for inflow\
+        \ transaction streams.\n\n`MONTHLY`: Assigned to a transaction stream that\
+        \ occurs approximately every month.\n\n`ANNUALLY`: Assigned to a transaction\
+        \ stream that occurs approximately every year.\n\n`DAILY`: Assigned to a transaction\
+        \ stream that occurs approximately every day.\n\n`DYNAMIC`: Assigned to a\
+        \ transaction stream that varies in recurrence frequency. This frequency is\
+        \ typically seen for inflow streams in the gig economy. \n\n`UNKNOWN`: Assigned\
+        \ to a transaction stream that isn't recurring in nature."
+      enum:
+      - UNKNOWN
+      - WEEKLY
+      - BIWEEKLY
+      - SEMI_MONTHLY
+      - MONTHLY
+      - ANNUALLY
+      - DAILY
+      - DYNAMIC
+      - null
+      nullable: true
+      title: RecurringFrequency
+      type: string
     PaymentProfileCreateRequest:
       description: PaymentProfileCreateRequest defines the request schema for `/payment_profile/create`
       example:
@@ -58393,7 +58436,7 @@ components:
     CreditCategory:
       additionalProperties: true
       description: |-
-        Information describing the intent of the transaction. Most relevant for credit use cases, but not limited to such use cases. Please reach out to your account manager or sales representative if you would like to receive this field.
+        Information describing the intent of the transaction. Most relevant for credit use cases, but not limited to such use cases.
 
         See the [`taxonomy csv file`](https://plaid.com/documents/credit-category-taxonomy.csv) for a full list of credit categories.
       example:
@@ -59503,27 +59546,14 @@ components:
               - date: 2000-01-23
                 unofficial_currency_code: unofficial_currency_code
                 amount: 2.3021358869347655
-                payment_meta:
-                  payee: payee
-                  ppd_id: ppd_id
-                  reason: reason
-                  by_order_of: by_order_of
-                  payment_processor: payment_processor
-                  reference_number: reference_number
-                  payer: payer
-                  payment_method: payment_method
-                pending: true
-                original_description: original_description
-                merchant_name: merchant_name
-                account_owner: account_owner
-                date_transacted: date_transacted
                 check_number: check_number
-                category_id: category_id
                 credit_category:
                   detailed: detailed
                   primary: primary
+                pending: true
                 iso_currency_code: iso_currency_code
-                name: name
+                original_description: original_description
+                merchant_name: merchant_name
                 location:
                   country: country
                   address: address
@@ -59533,33 +59563,19 @@ components:
                   region: region
                   postal_code: postal_code
                   lat: 7.061401241503109
-                category:
-                - category
-                - category
+                account_owner: account_owner
+                date_transacted: date_transacted
               - date: 2000-01-23
                 unofficial_currency_code: unofficial_currency_code
                 amount: 2.3021358869347655
-                payment_meta:
-                  payee: payee
-                  ppd_id: ppd_id
-                  reason: reason
-                  by_order_of: by_order_of
-                  payment_processor: payment_processor
-                  reference_number: reference_number
-                  payer: payer
-                  payment_method: payment_method
-                pending: true
-                original_description: original_description
-                merchant_name: merchant_name
-                account_owner: account_owner
-                date_transacted: date_transacted
                 check_number: check_number
-                category_id: category_id
                 credit_category:
                   detailed: detailed
                   primary: primary
+                pending: true
                 iso_currency_code: iso_currency_code
-                name: name
+                original_description: original_description
+                merchant_name: merchant_name
                 location:
                   country: country
                   address: address
@@ -59569,9 +59585,8 @@ components:
                   region: region
                   postal_code: postal_code
                   lat: 7.061401241503109
-                category:
-                - category
-                - category
+                account_owner: account_owner
+                date_transacted: date_transacted
               mask: mask
               days_available: 5.637376656633329
             - official_name: official_name
@@ -59714,27 +59729,14 @@ components:
               - date: 2000-01-23
                 unofficial_currency_code: unofficial_currency_code
                 amount: 2.3021358869347655
-                payment_meta:
-                  payee: payee
-                  ppd_id: ppd_id
-                  reason: reason
-                  by_order_of: by_order_of
-                  payment_processor: payment_processor
-                  reference_number: reference_number
-                  payer: payer
-                  payment_method: payment_method
-                pending: true
-                original_description: original_description
-                merchant_name: merchant_name
-                account_owner: account_owner
-                date_transacted: date_transacted
                 check_number: check_number
-                category_id: category_id
                 credit_category:
                   detailed: detailed
                   primary: primary
+                pending: true
                 iso_currency_code: iso_currency_code
-                name: name
+                original_description: original_description
+                merchant_name: merchant_name
                 location:
                   country: country
                   address: address
@@ -59744,33 +59746,19 @@ components:
                   region: region
                   postal_code: postal_code
                   lat: 7.061401241503109
-                category:
-                - category
-                - category
+                account_owner: account_owner
+                date_transacted: date_transacted
               - date: 2000-01-23
                 unofficial_currency_code: unofficial_currency_code
                 amount: 2.3021358869347655
-                payment_meta:
-                  payee: payee
-                  ppd_id: ppd_id
-                  reason: reason
-                  by_order_of: by_order_of
-                  payment_processor: payment_processor
-                  reference_number: reference_number
-                  payer: payer
-                  payment_method: payment_method
-                pending: true
-                original_description: original_description
-                merchant_name: merchant_name
-                account_owner: account_owner
-                date_transacted: date_transacted
                 check_number: check_number
-                category_id: category_id
                 credit_category:
                   detailed: detailed
                   primary: primary
+                pending: true
                 iso_currency_code: iso_currency_code
-                name: name
+                original_description: original_description
+                merchant_name: merchant_name
                 location:
                   country: country
                   address: address
@@ -59780,9 +59768,8 @@ components:
                   region: region
                   postal_code: postal_code
                   lat: 7.061401241503109
-                category:
-                - category
-                - category
+                account_owner: account_owner
+                date_transacted: date_transacted
               mask: mask
               days_available: 5.637376656633329
             institution_name: institution_name
@@ -59929,27 +59916,14 @@ components:
               - date: 2000-01-23
                 unofficial_currency_code: unofficial_currency_code
                 amount: 2.3021358869347655
-                payment_meta:
-                  payee: payee
-                  ppd_id: ppd_id
-                  reason: reason
-                  by_order_of: by_order_of
-                  payment_processor: payment_processor
-                  reference_number: reference_number
-                  payer: payer
-                  payment_method: payment_method
-                pending: true
-                original_description: original_description
-                merchant_name: merchant_name
-                account_owner: account_owner
-                date_transacted: date_transacted
                 check_number: check_number
-                category_id: category_id
                 credit_category:
                   detailed: detailed
                   primary: primary
+                pending: true
                 iso_currency_code: iso_currency_code
-                name: name
+                original_description: original_description
+                merchant_name: merchant_name
                 location:
                   country: country
                   address: address
@@ -59959,33 +59933,19 @@ components:
                   region: region
                   postal_code: postal_code
                   lat: 7.061401241503109
-                category:
-                - category
-                - category
+                account_owner: account_owner
+                date_transacted: date_transacted
               - date: 2000-01-23
                 unofficial_currency_code: unofficial_currency_code
                 amount: 2.3021358869347655
-                payment_meta:
-                  payee: payee
-                  ppd_id: ppd_id
-                  reason: reason
-                  by_order_of: by_order_of
-                  payment_processor: payment_processor
-                  reference_number: reference_number
-                  payer: payer
-                  payment_method: payment_method
-                pending: true
-                original_description: original_description
-                merchant_name: merchant_name
-                account_owner: account_owner
-                date_transacted: date_transacted
                 check_number: check_number
-                category_id: category_id
                 credit_category:
                   detailed: detailed
                   primary: primary
+                pending: true
                 iso_currency_code: iso_currency_code
-                name: name
+                original_description: original_description
+                merchant_name: merchant_name
                 location:
                   country: country
                   address: address
@@ -59995,9 +59955,8 @@ components:
                   region: region
                   postal_code: postal_code
                   lat: 7.061401241503109
-                category:
-                - category
-                - category
+                account_owner: account_owner
+                date_transacted: date_transacted
               mask: mask
               days_available: 5.637376656633329
             - official_name: official_name
@@ -60140,27 +60099,14 @@ components:
               - date: 2000-01-23
                 unofficial_currency_code: unofficial_currency_code
                 amount: 2.3021358869347655
-                payment_meta:
-                  payee: payee
-                  ppd_id: ppd_id
-                  reason: reason
-                  by_order_of: by_order_of
-                  payment_processor: payment_processor
-                  reference_number: reference_number
-                  payer: payer
-                  payment_method: payment_method
-                pending: true
-                original_description: original_description
-                merchant_name: merchant_name
-                account_owner: account_owner
-                date_transacted: date_transacted
                 check_number: check_number
-                category_id: category_id
                 credit_category:
                   detailed: detailed
                   primary: primary
+                pending: true
                 iso_currency_code: iso_currency_code
-                name: name
+                original_description: original_description
+                merchant_name: merchant_name
                 location:
                   country: country
                   address: address
@@ -60170,33 +60116,19 @@ components:
                   region: region
                   postal_code: postal_code
                   lat: 7.061401241503109
-                category:
-                - category
-                - category
+                account_owner: account_owner
+                date_transacted: date_transacted
               - date: 2000-01-23
                 unofficial_currency_code: unofficial_currency_code
                 amount: 2.3021358869347655
-                payment_meta:
-                  payee: payee
-                  ppd_id: ppd_id
-                  reason: reason
-                  by_order_of: by_order_of
-                  payment_processor: payment_processor
-                  reference_number: reference_number
-                  payer: payer
-                  payment_method: payment_method
-                pending: true
-                original_description: original_description
-                merchant_name: merchant_name
-                account_owner: account_owner
-                date_transacted: date_transacted
                 check_number: check_number
-                category_id: category_id
                 credit_category:
                   detailed: detailed
                   primary: primary
+                pending: true
                 iso_currency_code: iso_currency_code
-                name: name
+                original_description: original_description
+                merchant_name: merchant_name
                 location:
                   country: country
                   address: address
@@ -60206,9 +60138,8 @@ components:
                   region: region
                   postal_code: postal_code
                   lat: 7.061401241503109
-                category:
-                - category
-                - category
+                account_owner: account_owner
+                date_transacted: date_transacted
               mask: mask
               days_available: 5.637376656633329
             institution_name: institution_name
@@ -60959,27 +60890,14 @@ components:
             - date: 2000-01-23
               unofficial_currency_code: unofficial_currency_code
               amount: 2.3021358869347655
-              payment_meta:
-                payee: payee
-                ppd_id: ppd_id
-                reason: reason
-                by_order_of: by_order_of
-                payment_processor: payment_processor
-                reference_number: reference_number
-                payer: payer
-                payment_method: payment_method
-              pending: true
-              original_description: original_description
-              merchant_name: merchant_name
-              account_owner: account_owner
-              date_transacted: date_transacted
               check_number: check_number
-              category_id: category_id
               credit_category:
                 detailed: detailed
                 primary: primary
+              pending: true
               iso_currency_code: iso_currency_code
-              name: name
+              original_description: original_description
+              merchant_name: merchant_name
               location:
                 country: country
                 address: address
@@ -60989,33 +60907,19 @@ components:
                 region: region
                 postal_code: postal_code
                 lat: 7.061401241503109
-              category:
-              - category
-              - category
+              account_owner: account_owner
+              date_transacted: date_transacted
             - date: 2000-01-23
               unofficial_currency_code: unofficial_currency_code
               amount: 2.3021358869347655
-              payment_meta:
-                payee: payee
-                ppd_id: ppd_id
-                reason: reason
-                by_order_of: by_order_of
-                payment_processor: payment_processor
-                reference_number: reference_number
-                payer: payer
-                payment_method: payment_method
-              pending: true
-              original_description: original_description
-              merchant_name: merchant_name
-              account_owner: account_owner
-              date_transacted: date_transacted
               check_number: check_number
-              category_id: category_id
               credit_category:
                 detailed: detailed
                 primary: primary
+              pending: true
               iso_currency_code: iso_currency_code
-              name: name
+              original_description: original_description
+              merchant_name: merchant_name
               location:
                 country: country
                 address: address
@@ -61025,9 +60929,8 @@ components:
                 region: region
                 postal_code: postal_code
                 lat: 7.061401241503109
-              category:
-              - category
-              - category
+              account_owner: account_owner
+              date_transacted: date_transacted
             mask: mask
             days_available: 5.637376656633329
           - official_name: official_name
@@ -61170,27 +61073,14 @@ components:
             - date: 2000-01-23
               unofficial_currency_code: unofficial_currency_code
               amount: 2.3021358869347655
-              payment_meta:
-                payee: payee
-                ppd_id: ppd_id
-                reason: reason
-                by_order_of: by_order_of
-                payment_processor: payment_processor
-                reference_number: reference_number
-                payer: payer
-                payment_method: payment_method
-              pending: true
-              original_description: original_description
-              merchant_name: merchant_name
-              account_owner: account_owner
-              date_transacted: date_transacted
               check_number: check_number
-              category_id: category_id
               credit_category:
                 detailed: detailed
                 primary: primary
+              pending: true
               iso_currency_code: iso_currency_code
-              name: name
+              original_description: original_description
+              merchant_name: merchant_name
               location:
                 country: country
                 address: address
@@ -61200,33 +61090,19 @@ components:
                 region: region
                 postal_code: postal_code
                 lat: 7.061401241503109
-              category:
-              - category
-              - category
+              account_owner: account_owner
+              date_transacted: date_transacted
             - date: 2000-01-23
               unofficial_currency_code: unofficial_currency_code
               amount: 2.3021358869347655
-              payment_meta:
-                payee: payee
-                ppd_id: ppd_id
-                reason: reason
-                by_order_of: by_order_of
-                payment_processor: payment_processor
-                reference_number: reference_number
-                payer: payer
-                payment_method: payment_method
-              pending: true
-              original_description: original_description
-              merchant_name: merchant_name
-              account_owner: account_owner
-              date_transacted: date_transacted
               check_number: check_number
-              category_id: category_id
               credit_category:
                 detailed: detailed
                 primary: primary
+              pending: true
               iso_currency_code: iso_currency_code
-              name: name
+              original_description: original_description
+              merchant_name: merchant_name
               location:
                 country: country
                 address: address
@@ -61236,9 +61112,8 @@ components:
                 region: region
                 postal_code: postal_code
                 lat: 7.061401241503109
-              category:
-              - category
-              - category
+              account_owner: account_owner
+              date_transacted: date_transacted
             mask: mask
             days_available: 5.637376656633329
           institution_name: institution_name
@@ -61385,27 +61260,14 @@ components:
             - date: 2000-01-23
               unofficial_currency_code: unofficial_currency_code
               amount: 2.3021358869347655
-              payment_meta:
-                payee: payee
-                ppd_id: ppd_id
-                reason: reason
-                by_order_of: by_order_of
-                payment_processor: payment_processor
-                reference_number: reference_number
-                payer: payer
-                payment_method: payment_method
-              pending: true
-              original_description: original_description
-              merchant_name: merchant_name
-              account_owner: account_owner
-              date_transacted: date_transacted
               check_number: check_number
-              category_id: category_id
               credit_category:
                 detailed: detailed
                 primary: primary
+              pending: true
               iso_currency_code: iso_currency_code
-              name: name
+              original_description: original_description
+              merchant_name: merchant_name
               location:
                 country: country
                 address: address
@@ -61415,33 +61277,19 @@ components:
                 region: region
                 postal_code: postal_code
                 lat: 7.061401241503109
-              category:
-              - category
-              - category
+              account_owner: account_owner
+              date_transacted: date_transacted
             - date: 2000-01-23
               unofficial_currency_code: unofficial_currency_code
               amount: 2.3021358869347655
-              payment_meta:
-                payee: payee
-                ppd_id: ppd_id
-                reason: reason
-                by_order_of: by_order_of
-                payment_processor: payment_processor
-                reference_number: reference_number
-                payer: payer
-                payment_method: payment_method
-              pending: true
-              original_description: original_description
-              merchant_name: merchant_name
-              account_owner: account_owner
-              date_transacted: date_transacted
               check_number: check_number
-              category_id: category_id
               credit_category:
                 detailed: detailed
                 primary: primary
+              pending: true
               iso_currency_code: iso_currency_code
-              name: name
+              original_description: original_description
+              merchant_name: merchant_name
               location:
                 country: country
                 address: address
@@ -61451,9 +61299,8 @@ components:
                 region: region
                 postal_code: postal_code
                 lat: 7.061401241503109
-              category:
-              - category
-              - category
+              account_owner: account_owner
+              date_transacted: date_transacted
             mask: mask
             days_available: 5.637376656633329
           - official_name: official_name
@@ -61596,27 +61443,14 @@ components:
             - date: 2000-01-23
               unofficial_currency_code: unofficial_currency_code
               amount: 2.3021358869347655
-              payment_meta:
-                payee: payee
-                ppd_id: ppd_id
-                reason: reason
-                by_order_of: by_order_of
-                payment_processor: payment_processor
-                reference_number: reference_number
-                payer: payer
-                payment_method: payment_method
-              pending: true
-              original_description: original_description
-              merchant_name: merchant_name
-              account_owner: account_owner
-              date_transacted: date_transacted
               check_number: check_number
-              category_id: category_id
               credit_category:
                 detailed: detailed
                 primary: primary
+              pending: true
               iso_currency_code: iso_currency_code
-              name: name
+              original_description: original_description
+              merchant_name: merchant_name
               location:
                 country: country
                 address: address
@@ -61626,33 +61460,19 @@ components:
                 region: region
                 postal_code: postal_code
                 lat: 7.061401241503109
-              category:
-              - category
-              - category
+              account_owner: account_owner
+              date_transacted: date_transacted
             - date: 2000-01-23
               unofficial_currency_code: unofficial_currency_code
               amount: 2.3021358869347655
-              payment_meta:
-                payee: payee
-                ppd_id: ppd_id
-                reason: reason
-                by_order_of: by_order_of
-                payment_processor: payment_processor
-                reference_number: reference_number
-                payer: payer
-                payment_method: payment_method
-              pending: true
-              original_description: original_description
-              merchant_name: merchant_name
-              account_owner: account_owner
-              date_transacted: date_transacted
               check_number: check_number
-              category_id: category_id
               credit_category:
                 detailed: detailed
                 primary: primary
+              pending: true
               iso_currency_code: iso_currency_code
-              name: name
+              original_description: original_description
+              merchant_name: merchant_name
               location:
                 country: country
                 address: address
@@ -61662,9 +61482,8 @@ components:
                 region: region
                 postal_code: postal_code
                 lat: 7.061401241503109
-              category:
-              - category
-              - category
+              account_owner: account_owner
+              date_transacted: date_transacted
             mask: mask
             days_available: 5.637376656633329
           institution_name: institution_name
@@ -61845,27 +61664,14 @@ components:
           - date: 2000-01-23
             unofficial_currency_code: unofficial_currency_code
             amount: 2.3021358869347655
-            payment_meta:
-              payee: payee
-              ppd_id: ppd_id
-              reason: reason
-              by_order_of: by_order_of
-              payment_processor: payment_processor
-              reference_number: reference_number
-              payer: payer
-              payment_method: payment_method
-            pending: true
-            original_description: original_description
-            merchant_name: merchant_name
-            account_owner: account_owner
-            date_transacted: date_transacted
             check_number: check_number
-            category_id: category_id
             credit_category:
               detailed: detailed
               primary: primary
+            pending: true
             iso_currency_code: iso_currency_code
-            name: name
+            original_description: original_description
+            merchant_name: merchant_name
             location:
               country: country
               address: address
@@ -61875,33 +61681,19 @@ components:
               region: region
               postal_code: postal_code
               lat: 7.061401241503109
-            category:
-            - category
-            - category
+            account_owner: account_owner
+            date_transacted: date_transacted
           - date: 2000-01-23
             unofficial_currency_code: unofficial_currency_code
             amount: 2.3021358869347655
-            payment_meta:
-              payee: payee
-              ppd_id: ppd_id
-              reason: reason
-              by_order_of: by_order_of
-              payment_processor: payment_processor
-              reference_number: reference_number
-              payer: payer
-              payment_method: payment_method
-            pending: true
-            original_description: original_description
-            merchant_name: merchant_name
-            account_owner: account_owner
-            date_transacted: date_transacted
             check_number: check_number
-            category_id: category_id
             credit_category:
               detailed: detailed
               primary: primary
+            pending: true
             iso_currency_code: iso_currency_code
-            name: name
+            original_description: original_description
+            merchant_name: merchant_name
             location:
               country: country
               address: address
@@ -61911,9 +61703,8 @@ components:
               region: region
               postal_code: postal_code
               lat: 7.061401241503109
-            category:
-            - category
-            - category
+            account_owner: account_owner
+            date_transacted: date_transacted
           mask: mask
           days_available: 5.637376656633329
         - official_name: official_name
@@ -62056,27 +61847,14 @@ components:
           - date: 2000-01-23
             unofficial_currency_code: unofficial_currency_code
             amount: 2.3021358869347655
-            payment_meta:
-              payee: payee
-              ppd_id: ppd_id
-              reason: reason
-              by_order_of: by_order_of
-              payment_processor: payment_processor
-              reference_number: reference_number
-              payer: payer
-              payment_method: payment_method
-            pending: true
-            original_description: original_description
-            merchant_name: merchant_name
-            account_owner: account_owner
-            date_transacted: date_transacted
             check_number: check_number
-            category_id: category_id
             credit_category:
               detailed: detailed
               primary: primary
+            pending: true
             iso_currency_code: iso_currency_code
-            name: name
+            original_description: original_description
+            merchant_name: merchant_name
             location:
               country: country
               address: address
@@ -62086,33 +61864,19 @@ components:
               region: region
               postal_code: postal_code
               lat: 7.061401241503109
-            category:
-            - category
-            - category
+            account_owner: account_owner
+            date_transacted: date_transacted
           - date: 2000-01-23
             unofficial_currency_code: unofficial_currency_code
             amount: 2.3021358869347655
-            payment_meta:
-              payee: payee
-              ppd_id: ppd_id
-              reason: reason
-              by_order_of: by_order_of
-              payment_processor: payment_processor
-              reference_number: reference_number
-              payer: payer
-              payment_method: payment_method
-            pending: true
-            original_description: original_description
-            merchant_name: merchant_name
-            account_owner: account_owner
-            date_transacted: date_transacted
             check_number: check_number
-            category_id: category_id
             credit_category:
               detailed: detailed
               primary: primary
+            pending: true
             iso_currency_code: iso_currency_code
-            name: name
+            original_description: original_description
+            merchant_name: merchant_name
             location:
               country: country
               address: address
@@ -62122,9 +61886,8 @@ components:
               region: region
               postal_code: postal_code
               lat: 7.061401241503109
-            category:
-            - category
-            - category
+            account_owner: account_owner
+            date_transacted: date_transacted
           mask: mask
           days_available: 5.637376656633329
         institution_name: institution_name
@@ -62300,27 +62063,14 @@ components:
         - date: 2000-01-23
           unofficial_currency_code: unofficial_currency_code
           amount: 2.3021358869347655
-          payment_meta:
-            payee: payee
-            ppd_id: ppd_id
-            reason: reason
-            by_order_of: by_order_of
-            payment_processor: payment_processor
-            reference_number: reference_number
-            payer: payer
-            payment_method: payment_method
-          pending: true
-          original_description: original_description
-          merchant_name: merchant_name
-          account_owner: account_owner
-          date_transacted: date_transacted
           check_number: check_number
-          category_id: category_id
           credit_category:
             detailed: detailed
             primary: primary
+          pending: true
           iso_currency_code: iso_currency_code
-          name: name
+          original_description: original_description
+          merchant_name: merchant_name
           location:
             country: country
             address: address
@@ -62330,33 +62080,19 @@ components:
             region: region
             postal_code: postal_code
             lat: 7.061401241503109
-          category:
-          - category
-          - category
+          account_owner: account_owner
+          date_transacted: date_transacted
         - date: 2000-01-23
           unofficial_currency_code: unofficial_currency_code
           amount: 2.3021358869347655
-          payment_meta:
-            payee: payee
-            ppd_id: ppd_id
-            reason: reason
-            by_order_of: by_order_of
-            payment_processor: payment_processor
-            reference_number: reference_number
-            payer: payer
-            payment_method: payment_method
-          pending: true
-          original_description: original_description
-          merchant_name: merchant_name
-          account_owner: account_owner
-          date_transacted: date_transacted
           check_number: check_number
-          category_id: category_id
           credit_category:
             detailed: detailed
             primary: primary
+          pending: true
           iso_currency_code: iso_currency_code
-          name: name
+          original_description: original_description
+          merchant_name: merchant_name
           location:
             country: country
             address: address
@@ -62366,9 +62102,8 @@ components:
             region: region
             postal_code: postal_code
             lat: 7.061401241503109
-          category:
-          - category
-          - category
+          account_owner: account_owner
+          date_transacted: date_transacted
         mask: mask
         days_available: 5.637376656633329
       properties:
@@ -62455,27 +62190,14 @@ components:
         date: 2000-01-23
         unofficial_currency_code: unofficial_currency_code
         amount: 2.3021358869347655
-        payment_meta:
-          payee: payee
-          ppd_id: ppd_id
-          reason: reason
-          by_order_of: by_order_of
-          payment_processor: payment_processor
-          reference_number: reference_number
-          payer: payer
-          payment_method: payment_method
-        pending: true
-        original_description: original_description
-        merchant_name: merchant_name
-        account_owner: account_owner
-        date_transacted: date_transacted
         check_number: check_number
-        category_id: category_id
         credit_category:
           detailed: detailed
           primary: primary
+        pending: true
         iso_currency_code: iso_currency_code
-        name: name
+        original_description: original_description
+        merchant_name: merchant_name
         location:
           country: country
           address: address
@@ -62485,9 +62207,8 @@ components:
           region: region
           postal_code: postal_code
           lat: 7.061401241503109
-        category:
-        - category
-        - category
+        account_owner: account_owner
+        date_transacted: date_transacted
       properties:
         amount:
           description: The settled value of the transaction, denominated in the transaction's
@@ -62514,18 +62235,6 @@ components:
             the transaction.
           nullable: true
           type: string
-        category:
-          description: A hierarchical array of the categories to which this transaction
-            belongs. For a full list of categories, see [`/categories/get`](https://plaid.com/docs/api/products/transactions/#categoriesget).
-          items:
-            type: string
-          nullable: true
-          type: array
-        category_id:
-          description: The ID of the category to which this transaction belongs. For
-            a full list of categories, see [`/categories/get`](https://plaid.com/docs/api/products/transactions/#categoriesget).
-          nullable: true
-          type: string
         credit_category:
           $ref: '#/components/schemas/CreditCategory'
         check_number:
@@ -62546,9 +62255,6 @@ components:
           type: string
         location:
           $ref: '#/components/schemas/Location'
-        name:
-          description: The merchant name or transaction description.
-          type: string
         merchant_name:
           description: The merchant name, as enriched by Plaid from the `name` field.
             This is typically a more human-readable version of the merchant counterparty
@@ -62557,8 +62263,6 @@ components:
             be `null`.
           nullable: true
           type: string
-        payment_meta:
-          $ref: '#/components/schemas/PaymentMeta'
         pending:
           description: When `true`, identifies the transaction as pending or unsettled.
             Pending transaction details (name, type, amount, category ID) may change
@@ -62569,8 +62273,6 @@ components:
             populated and only relevant when dealing with sub-accounts.
           nullable: true
           type: string
-        transaction_type:
-          $ref: '#/components/schemas/BaseReportTransactionType'
       required:
       - amount
       - date
@@ -62771,23 +62473,6 @@ components:
           $ref: '#/components/schemas/CreditAmountWithCurrency'
       title: BaseReportAverageFlowInsights
       type: object
-      x-hidden-from-docs: true
-    BaseReportTransactionType:
-      description: |
-        `digital:` transactions that took place online.
-
-        `place:` transactions that were made at a physical location.
-
-        `special:` transactions that relate to banks, e.g. fees or deposits.
-
-        `unresolved:` transactions that do not fit into the other three types.
-      enum:
-      - digital
-      - place
-      - special
-      - unresolved
-      title: BaseReportTransactionType
-      type: string
       x-hidden-from-docs: true
     AddressPurposeLabel:
       description: |-

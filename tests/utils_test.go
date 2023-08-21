@@ -38,3 +38,12 @@ func TestJsonUnmarshal(t *testing.T) {
 	assert.False(t, testValue.Region.IsSet())
 	assert.Empty(t, testValue.Region.Get())
 }
+
+func TestMakeGenericOpenAPIError(t *testing.T) {
+	plaidError := *plaid.NewPlaidError(plaid.PLAIDERRORTYPE_ITEM_ERROR, "PRODUCT_NOT_READY", "", plaid.NullableString{})
+	genericOpenAPIError := plaid.MakeGenericOpenAPIError([]byte{}, "400 Bad Request", plaidError)
+
+	derivedPlaidError, err := plaid.ToPlaidError(genericOpenAPIError)
+	assert.Nil(t, err)
+	assert.Equal(t, plaidError, derivedPlaidError)
+}

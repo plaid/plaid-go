@@ -2,6 +2,36 @@ This library is generated from an OpenAPI schema (OAS). See full changelog [here
 
 - Updated unmarshalling methods to fix bug where unset values for nullable non-String types were incorrectly marked as set after being unmarshalled.
 
+# 15.3.0
+- Updating to OAS 2020-09-14_1.419.0
+- Added `MakeGenericOpenAPIError` to aid with testing
+
+## OpenAPI Schema Changes
+### 2020-09-14_1.419.0
+
+- Update `/signal/decision/report` description
+  - Overwriting `initiated` field is now supported and no longer returns an `INVALID_FIELD` error
+  
+### 2020-09-14_1.418.0
+
+- Add `frequency` to `/transactions/enrich`
+
+### 2020-09-14_1.417.0
+
+- Remove `category`, `category_id`, `transaction_type`, `name`, `payment_meta` fields from Base Report insights
+
+### 2020-09-14_1.416.0
+
+- Add `card_switch` to `/link/token/create`
+
+### 2020-09-14_1.415.0
+
+- Add `consumer_report_permissible_purpose` to `link/token/create`
+
+### 2020-09-14_1.414.0
+
+- Update `currency` on `payment/reverse` and `amount_refunded` on `payment/get`
+
 # 15.2.0
 - Updating to OAS 2020-09-14_1.413.0
 

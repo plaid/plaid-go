@@ -90,6 +90,12 @@ plaidErr, err := plaid.ToPlaidError(err)
 fmt.Println(plaidErr.ErrorMessage)
 ```
 
+If you need to set up specific plaid errors to test your code, there is a helper function you can use to create a GenericOpenAPIError with embedded PlaidError:
+```go
+	plaidError := plaid.NewPlaidError(plaid.PLAIDERRORTYPE_ITEM_ERROR, "PRODUCT_NOT_READY", "", plaid.NullableString{})
+	genericOpenAPIError := plaid.MakeGenericOpenAPIError([]byte{}, "400 Bad Request", *plaidError)
+````
+
 ## Authentication
 
 First, you get your `client_id` and `secret` from your dashboard account. Authentication is handled by setting the `client_id` and `secret` on the configuration object.
