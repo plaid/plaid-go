@@ -7,7 +7,7 @@ info:
     details.
   termsOfService: https://plaid.com/legal/
   title: The Plaid API
-  version: 2020-09-14_1.419.0
+  version: 2020-09-14_1.431.7
 servers:
 - description: Production
   url: https://production.plaid.com
@@ -63,9 +63,7 @@ paths:
 
         By default, an Asset Report includes transaction descriptions as returned by the bank, as opposed to parsed and categorized by Plaid. You can also receive cleaned and categorized transactions, as well as additional insights like merchant name or location information. We call this an Asset Report with Insights. An Asset Report with Insights provides transaction category, location, and merchant information in addition to the transaction strings provided in a standard Asset Report. To retrieve an Asset Report with Insights, call `/asset_report/get` endpoint with `include_insights` set to `true`.
 
-        If `report_type` was set to `VERIFICATION_OF_EMPLOYMENT` when the Asset Report was created in `/asset_report/create`, debit transactions and transaction amounts won’t be included in the report.
-
-         For latency-sensitive applications, you can optionally call `/asset_report/create` with `options.add_ons` set to `["fast_assets"]`. This will cause Plaid to create two versions of the Asset Report: one with only current and available balance and identity information, and then later on the complete Asset Report. You will receive separate webhooks for each version of the Asset Report.
+        For latency-sensitive applications, you can optionally call `/asset_report/create` with `options.add_ons` set to `["fast_assets"]`. This will cause Plaid to create two versions of the Asset Report: one with only current and available balance and identity information, and then later on the complete Asset Report. You will receive separate webhooks for each version of the Asset Report.
       externalDocs:
         url: /api/products/assets/#asset_reportget
       operationId: assetReportGet
@@ -304,8 +302,6 @@ paths:
         The `/asset_report/pdf/get` endpoint retrieves the Asset Report in PDF format. Before calling `/asset_report/pdf/get`, you must first create the Asset Report using `/asset_report/create` (or filter an Asset Report using `/asset_report/filter`) and then wait for the [`PRODUCT_READY`](https://plaid.com/docs/api/products/assets/#product_ready) webhook to fire, indicating that the Report is ready to be retrieved.
 
         The response to `/asset_report/pdf/get` is the PDF binary data. The `request_id`  is returned in the `Plaid-Request-ID` header.
-
-        If `report_type` was set to `VERIFICATION_OF_EMPLOYMENT` when the Asset Report was created in `/asset_report/create`, debit transactions and transaction amounts won’t be included in the report.
 
         [View a sample PDF Asset Report](https://plaid.com/documents/sample-asset-report.pdf).
       externalDocs:
@@ -971,7 +967,7 @@ paths:
       description: The `/statements/list` endpoint retrieves a list of all statements
         associated with the provided item.
       externalDocs:
-        url: /none/
+        url: /api/products/statements#statementslist
       operationId: statementsList
       requestBody:
         content:
@@ -1006,9 +1002,13 @@ paths:
       - plaid
   /statements/download:
     post:
-      description: The `/statements/download` endpoint retrieves a single statement.
+      description: The `/statements/download` endpoint retrieves a single statement
+        PDF in binary format.  The response will contain a `Plaid-Content-Hash` header
+        containing a SHA 256 checksum of the statement. This can be used to verify
+        that the file being sent by Plaid is the same file that was downloaded to
+        your system.
       externalDocs:
-        url: /none/
+        url: /api/products/statements#statementsdownload
       operationId: statementsDownload
       requestBody:
         content:
@@ -1355,7 +1355,7 @@ paths:
                         reference_number: null
                       payment_channel: in store
                       pending: false
-                      pending_transaction_id: null
+                      pending_transaction_id: no86Eox18VHMvaOVL7gPUM9ap3aR1LsAVZ5nc
                       personal_finance_category:
                         primary: GENERAL_MERCHANDISE
                         detailed: GENERAL_MERCHANDISE_ELECTRONICS
@@ -1608,10 +1608,10 @@ paths:
                       - Computers and Electronics
                       category_id: "19013000"
                       check_number: null
-                      date: 2022-02-03
-                      datetime: 2022-02-03T11:00:00Z
-                      authorized_date: 2022-02-03
-                      authorized_datetime: 2022-02-03T10:34:50Z
+                      date: 2023-01-29
+                      datetime: 2023-01-27T11:00:00Z
+                      authorized_date: 2023-01-27
+                      authorized_datetime: 2023-01-27T10:34:50Z
                       location:
                         address: 300 Post St
                         city: San Francisco
@@ -1634,13 +1634,14 @@ paths:
                         reference_number: null
                       payment_channel: in store
                       pending: false
-                      pending_transaction_id: null
+                      pending_transaction_id: no86Eox18VHMvaOVL7gPUM9ap3aR1LsAVZ5nc
                       personal_finance_category:
                         primary: GENERAL_MERCHANDISE
                         detailed: GENERAL_MERCHANDISE_ELECTRONICS
                       account_owner: null
                       transaction_id: lPNjeW1nR6CDn5okmGQ6hEpMo4lLNoSrzqDje
                       transaction_code: null
+                      transaction_type: place
                     modified:
                     - account_id: BxBXxLj1m4HMXBm9WZZmCWVbPjX16EHwv99vp
                       amount: 98.05
@@ -1652,10 +1653,10 @@ paths:
                       - Electric
                       category_id: "18068005"
                       check_number: null
-                      date: 2022-02-28
-                      datetime: 2022-02-28T11:00:00Z
-                      authorized_date: 2022-02-28
-                      authorized_datetime: 2022-02-28T10:34:50Z
+                      date: 2023-02-28
+                      datetime: 2023-02-28T11:00:00Z
+                      authorized_date: 2023-02-28
+                      authorized_datetime: 2023-02-28T10:34:50Z
                       location:
                         address: null
                         city: null
@@ -1666,7 +1667,7 @@ paths:
                         lon: null
                         store_number: null
                       name: ConEd Bill Payment
-                      merchant_name: ConEd
+                      merchant_name: Con Ed
                       payment_meta:
                         by_order_of: null
                         payee: null
@@ -1685,6 +1686,7 @@ paths:
                       account_owner: null
                       transaction_id: yhnUVvtcGGcCKU0bcz8PDQr5ZUxUXebUvbKC0
                       transaction_code: null
+                      transaction_type: digital
                     removed:
                     - transaction_id: CmdQTNgems8BT1B7ibkoUXVPyAeehT3Tmzk0l
                     next_cursor: tVUUL15lYQN5rBnfDIc1I8xudpGdIlw9nsgeXWvhOfkECvUeR663i3Dt1uf/94S8ASkitgLcIiOSqNwzzp+bh89kirazha5vuZHBb2ZA5NtCDkkV
@@ -2437,6 +2439,8 @@ paths:
 
         `AUTH_DATA_UPDATE`: Webhook to be fired for a given Sandbox Item created with Auth as an enabled product.
 
+        `LOGIN_REPAIRED`: Fired when an Item recovers from the `ITEM_LOGIN_REQUIRED` without the user going through update mode in your app.
+
         `RECURRING_TRANSACTIONS_UPDATE`: Recurring Transactions webhook to be fired for a given Sandbox Item. If the Item does not support Recurring Transactions, a `SANDBOX_PRODUCT_NOT_ENABLED` error will result.
 
         `SYNC_UPDATES_AVAILABLE`: Transactions webhook to be fired for a given Sandbox Item.  If the Item does not support Transactions, a `SANDBOX_PRODUCT_NOT_ENABLED` error will result.
@@ -2445,7 +2449,7 @@ paths:
 
         `ERROR`: Assets webhook to be fired when asset report generation has failed. If the Item does not support Assets, a `SANDBOX_PRODUCT_NOT_ENABLED` error will result.
 
-        Note that this endpoint is provided for developer ease-of-use and is not required for testing webhooks; webhooks will also fire in Sandbox under the same conditions that they would in Production or Development.
+        Note that this endpoint is provided for developer ease-of-use and is not required for testing webhooks; webhooks will also fire in Sandbox under the same conditions that they would in Production or Development (except for webhooks of type `TRANSFER`).
       externalDocs:
         url: /api/sandbox/#sandboxitemfire_webhook
       operationId: sandboxItemFireWebhook
@@ -4645,6 +4649,48 @@ paths:
       summary: Retrieve Auth data
       tags:
       - plaid
+  /processor/account/get:
+    post:
+      description: |
+        This endpoint returns the account associated with a given processor token.
+
+        This endpoint retrieves cached information, rather than extracting fresh information from the institution. As a result, the account balance returned may not be up-to-date; for realtime balance information, use `/processor/balance/get` instead. Note that some information is nullable.
+      externalDocs:
+        url: /api/processors/#processoraccountget
+      operationId: processorAccountGet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProcessorAccountGetRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    account:
+                      account_id: QKKzevvp33HxPWpoqn6rI13BxW4awNSjnw4xv
+                      balances:
+                        available: 100
+                        current: 110
+                        limit: null
+                        iso_currency_code: USD
+                        unofficial_currency_code: null
+                      mask: "0000"
+                      name: Plaid Checking
+                      official_name: Plaid Gold Checking
+                      subtype: checking
+                      type: depository
+                    request_id: 1zlMf
+              schema:
+                $ref: '#/components/schemas/ProcessorAccountGetResponse'
+          description: OK
+      summary: Retrieve the account associated with a processor token
+      tags:
+      - plaid
   /processor/transactions/get:
     post:
       description: |-
@@ -6219,6 +6265,37 @@ paths:
       summary: Create user
       tags:
       - plaid
+  /user/update:
+    post:
+      description: "This endpoint is used to update user information associated with\
+        \ an existing `user_token`. The `user_token` should be in the response of\
+        \ `/user/create` call \n\nIf you call the endpoint with a non-exist `user_token`,\
+        \ the call will fail with an error message indicating that the user token\
+        \ is not found."
+      externalDocs:
+        url: /api/products/income/#userupdate
+      operationId: userUpdate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    request_id: Aim3b
+              schema:
+                $ref: '#/components/schemas/UserUpdateResponse'
+          description: OK
+      summary: Update user information
+      tags:
+      - plaid
+    x-hidden-from-docs: true
   /credit/sessions/get:
     post:
       description: |-
@@ -7229,9 +7306,9 @@ paths:
       - plaid
   /processor/token/webhook/update:
     post:
-      description: This endpoint allows you to update the webhook URL associated with
-        a processor token. This request triggers a `WEBHOOK_UPDATE_ACKNOWLEDGED` webhook
-        to the newly specified webhook URL.
+      description: This endpoint allows you, the processor, to update the webhook
+        URL associated with a processor token. This request triggers a `WEBHOOK_UPDATE_ACKNOWLEDGED`
+        webhook to the newly specified webhook URL.
       externalDocs:
         url: /api/processors/#processortokenwebhookupdate
       operationId: processorTokenWebhookUpdate
@@ -7749,22 +7826,31 @@ paths:
       - plaid
   /transfer/authorization/create:
     post:
-      description: |-
-        Use the `/transfer/authorization/create` endpoint to determine transfer failure risk.
-
-        In Plaid's Sandbox environment the decisions will be returned as follows:
-
-          - To approve a transfer with null rationale code, make an authorization request with an `amount` less than the available balance in the account.
-
-          - To approve a transfer with the rationale code `MANUALLY_VERIFIED_ITEM`, create an Item in Link through the [Same Day Micro-deposits flow](https://plaid.com/docs/auth/coverage/testing/#testing-same-day-micro-deposits).
-
-          - To approve a transfer with the rationale code `ITEM_LOGIN_REQUIRED`, [reset the login for an Item](https://plaid.com/docs/sandbox/#item_login_required).
-
-          - To decline a transfer with the rationale code `NSF`, the available balance on the account must be less than the authorization `amount`. See [Create Sandbox test data](https://plaid.com/docs/sandbox/user-custom/) for details on how to customize data in Sandbox.
-
-          - To decline a transfer with the rationale code `RISK`, the available balance on the account must be exactly $0. See [Create Sandbox test data](https://plaid.com/docs/sandbox/user-custom/) for details on how to customize data in Sandbox.
-
-        The fields `device.ip_address` and `device.user_agent` are required for all sessions where the end-user is present. For example, when a user is authorizing a one-time payment from their device.
+      description: "Use the `/transfer/authorization/create` endpoint to authorize\
+        \ a transfer. This endpoint must be called prior to calling `/transfer/create`.\
+        \ \n\nThere are three possible outcomes to calling this endpoint: If the `authorization.decision`\
+        \ in the response is `declined`, the proposed transfer has failed the risk\
+        \ check and you cannot proceed with the transfer. If the `authorization.decision`\
+        \ is `approved`, and the `authorization.rationale_code` is `null`, the transfer\
+        \ has passed the risk check and you can proceed to call `/transfer/create`.\
+        \ If the `authorization.decision` is `approved` and the `authorization.rationale_code`\
+        \ is non-`null`, the risk check could not be run: you may proceed with the\
+        \ transfer, but should perform your own risk evaluation. For more details,\
+        \ see the response schema.\n\nIn Plaid's Sandbox environment the decisions\
+        \ will be returned as follows:\n\n  - To approve a transfer with `null` rationale\
+        \ code, make an authorization request with an `amount` less than the available\
+        \ balance in the account.\n\n  - To approve a transfer with the rationale\
+        \ code `MANUALLY_VERIFIED_ITEM`, create an Item in Link through the [Same\
+        \ Day Micro-deposits flow](https://plaid.com/docs/auth/coverage/testing/#testing-same-day-micro-deposits).\n\
+        \n  - To approve a transfer with the rationale code `ITEM_LOGIN_REQUIRED`,\
+        \ [reset the login for an Item](https://plaid.com/docs/sandbox/#item_login_required).\n\
+        \n  - To decline a transfer with the rationale code `NSF`, the available balance\
+        \ on the account must be less than the authorization `amount`. See [Create\
+        \ Sandbox test data](https://plaid.com/docs/sandbox/user-custom/) for details\
+        \ on how to customize data in Sandbox.\n\n  - To decline a transfer with the\
+        \ rationale code `RISK`, the available balance on the account must be exactly\
+        \ $0. See [Create Sandbox test data](https://plaid.com/docs/sandbox/user-custom/)\
+        \ for details on how to customize data in Sandbox."
       externalDocs:
         url: /api/products/transfer/#transferauthorizationcreate
       operationId: transferAuthorizationCreate
@@ -7786,7 +7872,7 @@ paths:
                       created: 2020-08-06T17:27:15Z
                       decision: approved
                       decision_rationale: null
-                      guarantee_decision: GUARANTEED
+                      guarantee_decision: null
                       guarantee_decision_rationale: null
                       proposed_transfer:
                         ach_class: ppd
@@ -7936,6 +8022,161 @@ paths:
       summary: Get transfer product configuration
       tags:
       - plaid
+  /transfer/ledger/get:
+    post:
+      description: Use the `/transfer/ledger/get` endpoint to view a balance on the
+        ledger held with Plaid.
+      externalDocs:
+        url: /api/products/transfer/#transferledgerget
+      operationId: transferLedgerGet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferLedgerGetRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    balance:
+                      available: "1721.70"
+                      pending: "123.45"
+                    request_id: saKrIBuEB9qJZno
+              schema:
+                $ref: '#/components/schemas/TransferLedgerGetResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidError'
+          description: Error response
+      summary: Retrieve Plaid Ledger balance
+      tags:
+      - plaid
+  /transfer/ledger/deposit:
+    post:
+      description: Use the `/transfer/ledger/deposit` endpoint to deposit funds into
+        Plaid Ledger.
+      externalDocs:
+        url: /api/products/transfer/#transferledgerdeposit
+      operationId: transferLedgerDeposit
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferLedgerDepositRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    sweep:
+                      id: 8c2fda9a-aa2f-4735-a00f-f4e0d2d2faee
+                      funding_account_id: 8945fedc-e703-463d-86b1-dc0607b55460
+                      created: 2020-08-06T17:27:15Z
+                      amount: -12.34
+                      iso_currency_code: USD
+                      settled: 2020-08-07
+                      status: settled
+                      trigger: manual
+                      description: deposit
+                    request_id: saKrIBuEB9qJZno
+              schema:
+                $ref: '#/components/schemas/TransferLedgerDepositResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidError'
+          description: Error response
+      summary: Deposit funds into a Plaid Ledger balance
+      tags:
+      - plaid
+  /transfer/ledger/withdraw:
+    post:
+      description: Use the `/transfer/ledger/withdraw` endpoint to withdraw funds
+        from a Plaid Ledger balance.
+      externalDocs:
+        url: /api/products/transfer/#transferledgerwithdraw
+      operationId: transferLedgerWithdraw
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferLedgerWithdrawRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    sweep:
+                      id: 8c2fda9a-aa2f-4735-a00f-f4e0d2d2faee
+                      funding_account_id: 8945fedc-e703-463d-86b1-dc0607b55460
+                      created: 2020-08-06T17:27:15Z
+                      amount: -12.34
+                      iso_currency_code: USD
+                      settled: 2020-08-07
+                      status: settled
+                      trigger: manual
+                      description: withdraw
+                    request_id: saKrIBuEB9qJZno
+              schema:
+                $ref: '#/components/schemas/TransferLedgerWithdrawResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidError'
+          description: Error response
+      summary: Withdraw funds from a Plaid Ledger balance
+      tags:
+      - plaid
+  /transfer/originator/funding_account/update:
+    post:
+      description: Use the `/transfer/originator/funding_account/update` endpoint
+        to update the funding account associated with the originator.
+      externalDocs:
+        url: /api/products/transfer/#transferoriginatorfundingaccountupdate
+      operationId: transferOriginatorFundingAccountUpdate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferOriginatorFundingAccountUpdateRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    request_id: saKrIBuEB9qJZno
+              schema:
+                $ref: '#/components/schemas/TransferOriginatorFundingAccountUpdateResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidError'
+          description: Error response
+      summary: Update the funding account associated with the originator
+      tags:
+      - plaid
   /transfer/metrics/get:
     post:
       description: Use the `/transfer/metrics/get` endpoint to view your transfer
@@ -8018,7 +8259,7 @@ paths:
                       status: pending
                       network: ach
                       cancellable: true
-                      guarantee_decision: GUARANTEED
+                      guarantee_decision: null
                       guarantee_decision_rationale: null
                       failure_reason: null
                       metadata:
@@ -8026,9 +8267,9 @@ paths:
                         key2: value2
                       origination_account_id: ""
                       iso_currency_code: USD
-                      standard_return_window: 2020-08-07
-                      unauthorized_return_window: 2020-10-07
-                      expected_settlement_date: 2020-08-04
+                      standard_return_window: 2023-08-07
+                      unauthorized_return_window: 2023-10-07
+                      expected_settlement_date: 2023-08-04
                       originator_client_id: 569ed2f36b3a3a021713abc1
                       recurring_transfer_id: null
                       credit_funds_source: sweep
@@ -9623,6 +9864,106 @@ paths:
       summary: Simulate a transfer event in Sandbox
       tags:
       - plaid
+  /sandbox/transfer/ledger/simulate_available:
+    post:
+      description: Use the `/sandbox/transfer/ledger/simulate_available` endpoint
+        to simulate converting pending balance to available balance for all originators
+        in the Sandbox environment.
+      externalDocs:
+        url: /api/sandbox/#sandboxtransferledgersimulate_available
+      operationId: sandboxTransferLedgerSimulateAvailable
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SandboxTransferLedgerSimulateAvailableRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    request_id: mdqfuVxeoza6mhu
+              schema:
+                $ref: '#/components/schemas/SandboxTransferLedgerSimulateAvailableResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidError'
+          description: Error response
+      summary: Simulate converting pending balance to available balance
+      tags:
+      - plaid
+  /sandbox/transfer/ledger/deposit/simulate:
+    post:
+      description: Use the `/sandbox/transfer/ledger/deposit/simulate` endpoint to
+        simulate a ledger deposit event in the Sandbox environment.
+      externalDocs:
+        url: /api/sandbox/#sandboxtransferledgerdepositsimulate
+      operationId: sandboxTransferLedgerDepositSimulate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SandboxTransferLedgerDepositSimulateRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    request_id: mdqfuVxeoza6mhu
+              schema:
+                $ref: '#/components/schemas/SandboxTransferLedgerDepositSimulateResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidError'
+          description: Error response
+      summary: Simulate a ledger deposit event in Sandbox
+      tags:
+      - plaid
+  /sandbox/transfer/ledger/withdraw/simulate:
+    post:
+      description: Use the `/sandbox/transfer/ledger/withdraw/simulate` endpoint to
+        simulate a ledger withdraw event in the Sandbox environment.
+      externalDocs:
+        url: /api/sandbox/#sandboxtransferledgerwithdrawsimulate
+      operationId: sandboxTransferLedgerWithdrawSimulate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SandboxTransferLedgerWithdrawSimulateRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    request_id: mdqfuVxeoza6mhu
+              schema:
+                $ref: '#/components/schemas/SandboxTransferLedgerWithdrawSimulateResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidError'
+          description: Error response
+      summary: Simulate a ledger withdraw event in Sandbox
+      tags:
+      - plaid
   /sandbox/transfer/repayment/simulate:
     post:
       description: Use the `/sandbox/transfer/repayment/simulate` endpoint to trigger
@@ -9661,7 +10002,7 @@ paths:
   /sandbox/transfer/fire_webhook:
     post:
       description: Use the `/sandbox/transfer/fire_webhook` endpoint to manually trigger
-        a Transfer webhook in the Sandbox environment.
+        a `TRANSFER_EVENTS_UPDATE` webhook in the Sandbox environment.
       externalDocs:
         url: /api/sandbox/#sandboxtransferfire_webhook
       operationId: sandboxTransferFireWebhook
@@ -9739,10 +10080,12 @@ paths:
         A test clock object represents an independent timeline and has a `virtual_time` field indicating the current timestamp of the timeline. A test clock can be advanced by incrementing `virtual_time`, but may never go back to a lower `virtual_time`.
 
         If a test clock is advanced, we will simulate the changes that ought to occur during the time that elapsed.
-        For instance, a client creates a weekly recurring transfer with a test clock set at t. When the client advances the test clock by setting `virtual_time` = t + 15 days, 2 new originations should be created, along with the webhook events.
+
+        For example, a client creates a weekly recurring transfer with a test clock set at t. When the client advances the test clock by setting `virtual_time` = t + 15 days, 2 new originations should be created, along with the webhook events.
 
         The advancement of the test clock from its current `virtual_time` should be limited such that there are no more than 20 originations resulting from the advance operation on each `recurring_transfer` associated with the `test_clock`.
-        For instance, if the recurring transfer associated with this test clock originates once every 4 weeks, you can advance the `virtual_time` up to 80 weeks on each API call.
+
+        For example, if the recurring transfer associated with this test clock originates once every 4 weeks, you can advance the `virtual_time` up to 80 weeks on each API call.
       externalDocs:
         url: /api/sandbox/#sandboxtransfertest_clockadvance
       operationId: sandboxTransferTestClockAdvance
@@ -9850,6 +10193,7 @@ paths:
       - plaid
   /sandbox/payment_profile/reset_login:
     post:
+      deprecated: true
       description: |-
         `/sandbox/payment_profile/reset_login/` forces a Payment Profile into a state where the login is no longer valid. This makes it easy to test update mode for Payment Profile in the Sandbox environment.
 
@@ -10517,7 +10861,8 @@ paths:
                             VERIFICATION_OF_ASSET:
                             - REPORTING_INFORMATION:
                                 ReportDateTime: ""
-                                ReportingInformationIdentifier: a-prod-kol4xb5y4nf2zecqalb2d55mze
+                                ReportingInformationParentIdentifier: a-prod-kol4xb5y4nf2zecqalb2d55mze
+                                ReportingInformationIdentifier: assets-prod-20746587-2ad7-407f-a201-0669e1368cf7
                                 ReportIdentifierType: ReportID
                               SERVICE_PRODUCT_FULFILLMENT:
                                 SERVICE_PRODUCT_FULFILLMENT_DETAIL:
@@ -10596,9 +10941,10 @@ paths:
                           SERVICE:
                             VERIFICATION_OF_ASSET:
                             - REPORTING_INFORMATION:
-                                ReportIdentifierType": ReportID
-                                ReportingInformationIdentifier: a-prod-kol4xb5y4nf2zecqalb2d55mze
+                                ReportIdentifierType: ReportID
                                 ReportDateTime: ""
+                                ReportingInformationParentIdentifier: a-prod-kol4xb5y4nf2zecqalb2d55mze
+                                ReportingInformationIdentifier: assets-prod-20746587-2ad7-407f-a201-0669e1368cf7
                               SERVICE_PRODUCT_FULFILLMENT:
                                 SERVICE_PRODUCT_FULFILLMENT_DETAIL:
                                   VendorOrderIdentifier: PLAD
@@ -12089,9 +12435,7 @@ paths:
   /signal/decision/report:
     post:
       description: After calling `/signal/evaluate`, call `/signal/decision/report`
-        to report whether the transaction was initiated. This endpoint will return
-        an [`INVALID_FIELD`](/docs/errors/invalid-request/#invalid_field) error if
-        called a second time with a different value for `initiated`.
+        to report whether the transaction was initiated.
       externalDocs:
         url: /api/products/signal#signaldecisionreport
       operationId: signalDecisionReport
@@ -12158,12 +12502,19 @@ paths:
       - plaid
   /signal/prepare:
     post:
-      description: |-
-        When Link is not initialized with Signal, call `/signal/prepare` to opt-in that Item to the Signal data collection process, developing a Signal score.
-
-        If you are using other Plaid products after Link, e.g. Identity or Assets, call `/signal/prepare` after those product calls are complete.
-
-        Example flow: Link is initialized with Auth, call `/auth/get` for the account and routing number, call `/identity/get` to retrieve bank ownership details, then call `/signal/prepare` to begin Signal data collection. Later, once you have obtained details about the proposed transaction from the user, call `/signal/evaluate` for a Signal score. For more information please see [Recommendations for initializing Link with specific product combinations](https://www.plaid.com/docs/link/initializing-products/#recommendations-for-initializing-link-with-specific-product-combinations).
+      description: "When Link is not initialized with Signal, call `/signal/prepare`\
+        \ to opt-in that Item to the Signal data collection process, developing a\
+        \ Signal score.\n\nIf you are using other Plaid products after Link, e.g.\
+        \ Identity or Assets, call `/signal/prepare` after those product calls are\
+        \ complete.\n\nExample flow: Link is initialized with Auth, call `/auth/get`\
+        \ for the account and routing number, call `/identity/get` to retrieve bank\
+        \ ownership details, then call `/signal/prepare` to begin Signal data collection.\
+        \ Later, once you have obtained details about the proposed transaction from\
+        \ the user, call `/signal/evaluate` for a Signal score. For more information\
+        \ please see [Recommendations for initializing Link with specific product\
+        \ combinations](https://www.plaid.com/docs/link/initializing-products/#recommendations-for-initializing-link-with-specific-product-combinations).\n\
+        \nIf run on an Item that is already initialized with Signal, this endpoint\
+        \ will return a 200 response and will not modify the Item. "
       externalDocs:
         url: /api/products/signal#signalprepare
       operationId: signalPrepare
@@ -12696,6 +13047,7 @@ paths:
       - plaid
   /payment_profile/create:
     post:
+      deprecated: true
       description: |-
         Use `/payment_profile/create` endpoint to create a new payment profile.
         To initiate the account linking experience, call `/link/token/create` and provide the `payment_profile_token` in the `transfer.payment_profile_token` field.
@@ -12732,6 +13084,7 @@ paths:
       - plaid
   /payment_profile/get:
     post:
+      deprecated: true
       description: Use `/payment_profile/get` endpoint to get the status of a given
         Payment Profile.
       externalDocs:
@@ -12769,6 +13122,7 @@ paths:
       - plaid
   /payment_profile/remove:
     post:
+      deprecated: true
       description: Use the `/payment_profile/remove` endpoint to remove a given Payment
         Profile. Once it’s removed, it can no longer be used to create transfers.
       externalDocs:
@@ -13531,9 +13885,7 @@ components:
           type: boolean
         include_logo_and_counterparty_beta:
           default: false
-          description: Include counterparties and extran merchant fields in the transaction.
-            This field is disabled by default. If you need this information in addition
-            to the parsed data provided, contact your Plaid Account Manager.
+          description: Include counterparties and extra merchant fields in the response.
           type: boolean
           x-hidden-from-docs: true
       type: object
@@ -14130,9 +14482,7 @@ components:
           type: boolean
         include_logo_and_counterparty_beta:
           default: false
-          description: Include counterparties and extra merchant fields in the transaction.
-            This field is disabled by default. If you need this information in addition
-            to the parsed data provided, contact your Plaid Account Manager.
+          description: Include counterparties and extra merchant fields in the response.
           type: boolean
           x-hidden-from-docs: true
       type: object
@@ -16115,6 +16465,64 @@ components:
       required:
       - account
       - numbers
+      - request_id
+      type: object
+    ProcessorAccountGetRequest:
+      description: ProcessorAccountGetRequest defines the request schema for `/processor/account/get`
+      example:
+        processor_token: processor_token
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        processor_token:
+          description: 'The processor token obtained from the Plaid integration partner.
+            Processor tokens are in the format: `processor-<environment>-<identifier>`'
+          title: ProcessorToken
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+      required:
+      - processor_token
+      type: object
+    ProcessorAccountGetResponse:
+      additionalProperties: true
+      description: ProcessorAccountGetResponse defines the response schema for `/processor/account/get`
+      example:
+        request_id: request_id
+        account:
+          official_name: official_name
+          persistent_account_id: persistent_account_id
+          balances:
+            unofficial_currency_code: unofficial_currency_code
+            current: 1.4658129805029452
+            available: 6.027456183070403
+            limit: 5.962133916683182
+            iso_currency_code: iso_currency_code
+            last_updated_datetime: 2000-01-23T04:56:07.000+00:00
+          account_id: account_id
+          name: name
+          verification_status: automatically_verified
+          mask: mask
+      properties:
+        account:
+          $ref: '#/components/schemas/AccountBase'
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - account
       - request_id
       type: object
     ProcessorTransactionsGetRequest:
@@ -18110,6 +18518,7 @@ components:
             data that is being requested.
           title: PaymentProfileToken
           type: string
+          x-hidden-from-docs: true
       required:
       - payment_profile_token
       type: object
@@ -18266,6 +18675,66 @@ components:
       - user_id
       - user_token
       type: object
+    UserUpdateRequest:
+      description: UserUpdateRequest defines the request schema for `/user/update`
+      example:
+        consumer_report_user_identity:
+          emails:
+          - emails
+          - emails
+          phone_numbers:
+          - phone_numbers
+          - phone_numbers
+          primary_address:
+            country: country
+            city: city
+            street: street
+            region: region
+            postal_code: postal_code
+          last_name: last_name
+          first_name: first_name
+        secret: secret
+        user_token: user_token
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        user_token:
+          description: The user token associated with the User data is being requested
+            for.
+          title: UserToken
+          type: string
+        consumer_report_user_identity:
+          $ref: '#/components/schemas/ConsumerReportUserIdentity'
+      required:
+      - user_token
+      type: object
+      x-hidden-from-docs: true
+    UserUpdateResponse:
+      additionalProperties: true
+      description: UserUpdateResponse defines the response schema for `/user/update`
+      example:
+        request_id: request_id
+      properties:
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      type: object
+      x-hidden-from-docs: true
     ConsumerReportUserIdentity:
       additionalProperties: true
       description: ConsumerReportUserIdentity defines the user identity data collected
@@ -18295,7 +18764,9 @@ components:
           description: The user's last name
           type: string
         phone_numbers:
-          description: The user's phone numbers
+          description: The user's phone numbers. The format of phone number will be
+            validated and for better normalization, it is expected to be in E.164
+            format +{countrycode}{number}, for example `+14151234567`.
           items:
             type: string
           type: array
@@ -20161,6 +20632,8 @@ components:
           - fortress_trust
           - bond
           - bakkt
+          - teal
+          - zero_hash
           type: string
       required:
       - access_token
@@ -20821,30 +21294,11 @@ components:
           - transactions
           - transfer
           - signal
-        additional_consented_products:
-          description: |-
-            (Beta) This field has no effect unless you are participating in the [Data Transparency](https://plaid.com/docs/link/data-transparency-messaging-migration-guide) beta program.
-            List of additional Plaid product(s) you wish to collect consent for. These products will not be billed until you start using them by calling the relevant endpoints.
-
-            `balance` is *not* a valid value, the Balance product does not require explicit initialization and will automatically have consent collected.
-
-            Institutions that do not support these products will still be shown in Link
-          items:
-            $ref: '#/components/schemas/Products'
-          type: array
-          x-override-enum-values-shown:
-          - assets
-          - auth
-          - identity
-          - investments
-          - liabilities
-          - transactions
-          - signal
         required_if_supported_products:
           description: |-
             List of Plaid product(s) you wish to use only if the institution and account(s) selected by the user support the product. Institutions that do not support these products will still be shown in Link. The products will only be extracted and billed if the user selects an institution and account type that supports them.
 
-            There should be no overlap between `products` and `required_if_supported_products`. The `products` array must have at least one product.
+            There should be no overlap between this array and the `products` or `additional_consented_products` arrays. The `products` array must have at least one product.
 
             For more details on using this feature, see [Required if Supported Products](https://www.plaid.com/docs/link/initializing-products/#required-if-supported-products).
           items:
@@ -20857,6 +21311,27 @@ components:
           - liabilities
           - transactions
           - statements
+        additional_consented_products:
+          description: |-
+            (Beta) This field has no effect unless you are participating in the [Data Transparency](https://plaid.com/docs/link/data-transparency-messaging-migration-guide) beta program.
+            List of additional Plaid product(s) you wish to collect consent for. These products will not be billed until you start using them by calling the relevant endpoints.
+
+            `balance` is *not* a valid value, the Balance product does not require explicit initialization and will automatically have consent collected.
+
+            Institutions that do not support these products will still be shown in Link.
+
+            There should be no overlap between this array and the `products` or `required_if_supported_products` arrays.
+          items:
+            $ref: '#/components/schemas/Products'
+          type: array
+          x-override-enum-values-shown:
+          - assets
+          - auth
+          - identity
+          - investments
+          - liabilities
+          - transactions
+          - signal
         webhook:
           description: The destination URL to which any webhooks should be sent. Note
             that webhooks for Payment Initiation (e-wallet transactions only), Transfer,
@@ -21084,6 +21559,7 @@ components:
           description: The `payment_profile_token` returned by the `/payment_profile/create`
             endpoint.
           type: string
+          x-hidden-from-docs: true
       type: object
     LinkTokenCreateRequestUserStatedIncomeSource:
       description: Specifies user stated income sources for the Income product
@@ -21197,8 +21673,9 @@ components:
             Day Micro-deposits flow.
           type: boolean
         reroute_to_credentials:
-          description: Specifies what type of Reroute to Credentials pane should be
-            used in the Link session for the Same Day Micro-deposits flow.
+          description: Specifies what type of [Reroute to Credentials](https://plaid.com/docs/auth/coverage/same-day/#reroute-to-credentials)
+            pane should be used in the Link session for the Same Day Micro-deposits
+            flow. As of October 15 2023, the default setting is `OPTIONAL`.
           enum:
           - "OFF"
           - OPTIONAL
@@ -21946,6 +22423,9 @@ components:
             institution_not_found:
               description: User exited the Link flow after unsuccessfully (no results
                 returned) searching for a financial institution
+            institution_not_supported:
+              description: User exited the Link flow after discovering their selected
+                institution is no longer supported by Plaid
           type: string
         link_session_id:
           description: A unique identifier associated with a user's actions and events
@@ -22504,6 +22984,7 @@ components:
       - SELECT_BRAND
       - SELECT_DEGRADED_INSTITUTION
       - SELECT_DOWN_INSTITUTION
+      - SELECT_FILTERED_INSTITUTION
       - SELECT_INSTITUTION
       - SUBMIT_ACCOUNT_NUMBER
       - SUBMIT_CREDENTIALS
@@ -23081,7 +23562,7 @@ components:
           description: |-
             A hierarchical array of the categories to which this transaction belongs. For a full list of categories, see [`/categories/get`](https://plaid.com/docs/api/products/transactions/#categoriesget).
 
-            All Transactions implementations are recommended to use the new `personal_finance_category` instead of `category`. `personal_finance_category` provides more meaningful categorization and greater accuracy.
+            All Transactions implementations are recommended to use the new `personal_finance_category` instead of `category_id`, as it provides greater accuracy and more meaningful categorization.
 
             If the `transactions` object was returned by an Assets endpoint such as `/asset_report/get/` or `/asset_report/pdf/get`, this field will only appear in an Asset Report with Insights.
           items:
@@ -23174,8 +23655,8 @@ components:
           - unresolved
           type: string
         logo_url:
-          description: The logo associated with the merchant, if available. Formatted
-            as a 100x100 pixels PNG file path.
+          description: The URL of a logo associated with the merchant, if available.
+            The logo will always be 100×100 pixel PNG file.
           nullable: true
           type: string
           x-hidden-from-docs: true
@@ -23869,7 +24350,7 @@ components:
         `EMPLOYMENT`: For employment purposes pursuant to FCRA 604(a)(3)(B), including hiring, retention and promotion purposes.
         `EXTENSION_OF_CREDIT`: In connection with a credit transaction initiated by and involving the consumer pursuant to FCRA Section 604(a)(3)(A).
         `LEGITIMATE_BUSINESS_NEED_TENANT_SCREENING`: For a legitimate business need in connection with a business transaction initiated by the consumer primarily for personal, family, or household purposes in connection with a property rental assessment pursuant to FCRA Section 604(a)(3)(F)(i).
-        `LEGITIMATE_BUSINESS_NEED_TENANT_OTHER`: For a legitimate business need in connection with a business transaction made primarily for personal, family, or household initiated by the consumer pursuant to FCRA Section 604(a)(3)(F)(i).
+        `LEGITIMATE_BUSINESS_NEED_OTHER`: For a legitimate business need in connection with a business transaction made primarily for personal, family, or household initiated by the consumer pursuant to FCRA Section 604(a)(3)(F)(i).
         `WRITTEN_INSTRUCTION_PREQUALIFICATION`: In accordance with the written instructions of the consumer pursuant to FCRA Section 604(a)(2), to evaluate an application’s profile to make an offer to the consumer.
         `WRITTEN_INSTRUCTION_OTHER`: In accordance with the written instructions of the consumer pursuant to FCRA Section 604(a)(2), such as when an individual agrees to act as a guarantor or assumes personal liability for a consumer, business, or commercial loan.
       enum:
@@ -23878,7 +24359,7 @@ components:
       - EMPLOYMENT
       - EXTENSION_OF_CREDIT
       - LEGITIMATE_BUSINESS_NEED_TENANT_SCREENING
-      - LEGITIMATE_BUSINESS_NEED_TENANT_OTHER
+      - LEGITIMATE_BUSINESS_NEED_OTHER
       - WRITTEN_INSTRUCTION_PREQUALIFICATION
       - WRITTEN_INSTRUCTION_OTHER
       title: ConsumerReportPermissiblePurpose
@@ -24029,7 +24510,7 @@ components:
             institution, as extracted by Plaid from the raw description.
           type: string
         entity_id:
-          description: A unique, stable, Plaid-generated id that maps to the counterparty.
+          description: A unique, stable, Plaid-generated ID that maps to the counterparty.
           nullable: true
           type: string
         type:
@@ -24040,7 +24521,7 @@ components:
           type: string
         logo_url:
           description: The URL of a logo associated with the counterparty, if available.
-            The logo is formatted as a 100x100 pixel PNG file.
+            The logo will always be 100×100 pixel PNG file.
           nullable: true
           type: string
         confidence_level:
@@ -24051,7 +24532,7 @@ components:
             `HIGH`: We recognize this counterparty and we are more than 90% confident that it is involved in this transaction.
             `MEDIUM`: We are moderately confident that this counterparty was involved in this transaction, but some details may differ from our records.
             `LOW`: We didn’t find a matching counterparty in our records, so we are returning a cleansed name parsed out of the request description.
-            `UNKNOWN`: Error
+            `UNKNOWN`: We don’t know the confidence level for this counterparty.
           nullable: true
           type: string
       required:
@@ -24070,6 +24551,10 @@ components:
           description: The name of the counterparty, such as the merchant or the financial
             institution, as extracted by Plaid from the raw description.
           type: string
+        entity_id:
+          description: A unique, stable, Plaid-generated ID that maps to the counterparty.
+          nullable: true
+          type: string
         type:
           $ref: '#/components/schemas/CounterpartyType'
         website:
@@ -24078,7 +24563,18 @@ components:
           type: string
         logo_url:
           description: The URL of a logo associated with the counterparty, if available.
-            The logo is formatted as a 100x100 pixel PNG filepath.
+            The logo will always be 100×100 pixel PNG file.
+          nullable: true
+          type: string
+        confidence_level:
+          description: |-
+            A description of how confident we are that the provided counterparty is involved in the transaction.
+
+            `VERY_HIGH`: We recognize this counterparty and we are more than 98% confident that it is involved in this transaction.
+            `HIGH`: We recognize this counterparty and we are more than 90% confident that it is involved in this transaction.
+            `MEDIUM`: We are moderately confident that this counterparty was involved in this transaction, but some details may differ from our records.
+            `LOW`: We didn’t find a matching counterparty in our records, so we are returning a cleansed name parsed out of the request description.
+            `UNKNOWN`: We don’t know the confidence level for this counterparty.
           nullable: true
           type: string
       required:
@@ -24129,14 +24625,15 @@ components:
           type: string
         confidence_level:
           description: |-
-            Note: This field is only available for `/transactions/enrich` endpoint currently.
+            This field is currently only available for the `/transactions/enrich` endpoint.
+
             A description of how confident we are that the provided categories accurately describe the transaction intent.
 
             `VERY_HIGH`: We are more than 98% confident that this category reflects the intent of the transaction.
             `HIGH`: We are more than 90% confident that this category reflects the intent of the transaction.
             `MEDIUM`: We are moderately confident that this category reflects the intent of the transaction.
             `LOW`: This category may reflect the intent, but there may be other categories that are more accurate.
-            `UNKNOWN`: Error
+            `UNKNOWN`: We don’t know the confidence level for this category.
           nullable: true
           type: string
       required:
@@ -24161,16 +24658,24 @@ components:
       type: string
     TransferAccessToken:
       description: The Plaid `access_token` for the account that will be debited or
-        credited. Required if not using `payment_profile_token`.
+        credited.
       type: string
     TransferAccountID:
       description: The Plaid `account_id` corresponding to the end-user account that
-        will be debited or credited. Required when creating a transfer using an `access_token`.
+        will be debited or credited.
+      type: string
+    TransferOriginatorClientID:
+      description: Client ID of the customer that owns the Ledger balance. This is
+        so Plaid knows which of your customers to payout or collect funds. Only applicable
+        for Platform customers. Do not include if you’re paying out to yourself.
+      nullable: true
       type: string
     TransferFundingAccountIDRequest:
       description: The id of the funding account to use, available in the Plaid Dashboard.
         This determines which of your business checking accounts will be credited
-        or debited. Defaults to the account configured during onboarding.
+        or debited. Defaults to the account configured during onboarding. You can
+        find your list of `funding_account_id`s in the Accounts page of your Plaid
+        Dashboard, under the "Account ID" column.
       nullable: true
       type: string
     TransferFundingAccountIDResponse:
@@ -24188,6 +24693,7 @@ components:
       description: The payment profile token associated with the Payment Profile that
         will be debited or credited. Required if not using `access_token`.
       type: string
+      x-hidden-from-docs: true
     BankTransferAccessToken:
       description: The Plaid `access_token` for the account that will be debited or
         credited.
@@ -26003,6 +26509,7 @@ components:
           - pay as you earn
           - revised pay as you earn
           - standard
+          - saving on a valuable education
           - null
           nullable: true
           type: string
@@ -27134,7 +27641,7 @@ components:
             if `type` is `student`. Possible values are: `"extended graduated"`, `"extended
             standard"`, `"graduated"`, `"income-contingent repayment"`, `"income-based
             repayment"`, `"interest only"`, `"other"`, `"pay as you earn"`, `"revised
-            pay as you earn"`, or `"standard"`.'
+            pay as you earn"`, `"standard"`, or `"saving on a valuable education"`.'
           type: string
         sequence_number:
           description: Override the `sequence_number` field. Can only be set if `type`
@@ -27517,12 +28024,11 @@ components:
           environment: production
     ItemLoginRepairedWebhook:
       additionalProperties: true
-      description: Fired when an Item login is repaired and the Item no longer needs
-        to go through update mode. This will occur when the user completed the update
-        mode flow for the Item, either in your application or in another Plaid-connected
-        app. If you have messaging that tells the user to complete the update mode
-        flow (such as in-app banners or out-of-band notifications) you should silence
-        this messaging upon receiving the `LOGIN_REPAIRED` webhook.
+      description: Fired when an Item has exited the `ITEM_LOGIN_REQUIRED` state without
+        the user having gone through the update mode flow in your app (this can happen
+        if the user completed the update mode in a different app). If you have messaging
+        that tells the user to complete the update mode flow, you should silence this
+        messaging upon receiving the `LOGIN_REPAIRED` webhook.
       properties:
         webhook_type:
           description: '`ITEM`'
@@ -29274,7 +29780,7 @@ components:
           type: string
         payment_id:
           description: The `payment_id` associated with the transaction. This will
-            be present in case of `REFUND` and `PIS_PAY_IN`
+            be present in case of `REFUND` and `PIS_PAY_IN`.
           nullable: true
           type: string
         wallet_id:
@@ -30551,10 +31057,12 @@ components:
           title: TransferID
           type: string
         originator_client_id:
+          deprecated: true
           description: The Plaid client ID of the transfer originator. Should only
             be present if `client_id` is a third-party sender (TPS).
           nullable: true
           type: string
+          x-hidden-from-docs: true
       required:
       - transfer_id
       title: TransferGetRequest
@@ -30782,6 +31290,10 @@ components:
       title: TransferTestClockID
       type: string
     TransferSweepID:
+      description: Plaid’s unique identifier for a sweep.
+      title: TransferSweepID
+      type: string
+    TransferSweepIDNullable:
       description: Plaid’s unique identifier for a sweep.
       nullable: true
       title: TransferSweepID
@@ -31429,8 +31941,6 @@ components:
         The API supports idempotency for safely retrying requests without accidentally performing the same operation twice. For example, if a request to create an authorization fails due to a network connection error, you can retry the request with the same idempotency key to guarantee that only a single authorization is created.
 
         This idempotency key expires after 48 hours, after which the same key can be reused. Failure to provide this key may result in duplicate charges.
-
-        Required for guaranteed ACH customers.
       maxLength: 50
       nullable: true
       title: TransferAuthorizationIdempotencyKey
@@ -31451,6 +31961,22 @@ components:
       maxLength: 50
       title: TransferRefundIdempotencyKey
       type: string
+    LedgerDepositIdempotencyKey:
+      description: |-
+        A unique key provided by the client, per unique ledger deposit. Maximum of 50 characters.
+
+        The API supports idempotency for safely retrying the request without accidentally performing the same operation twice. For example, if a request to create a ledger deposit fails due to a network connection error, you can retry the request with the same idempotency key to guarantee that only a single deposit is created.
+      maxLength: 50
+      title: LedgerDepositIdempotencyKey
+      type: string
+    LedgerWithdrawIdempotencyKey:
+      description: |-
+        A unique key provided by the client, per unique ledger withdraw. Maximum of 50 characters.
+
+        The API supports idempotency for safely retrying the request without accidentally performing the same operation twice. For example, if a request to create a ledger withdraw fails due to a network connection error, you can retry the request with the same idempotency key to guarantee that only a single withdraw is created.
+      maxLength: 50
+      title: LedgerWithdrawIdempotencyKey
+      type: string
     BankTransferIdempotencyKey:
       description: |-
         A random key provided by the client, per unique bank transfer. Maximum of 50 characters.
@@ -31460,7 +31986,9 @@ components:
       title: BankTransferIdempotencyKey
       type: string
     TransferAuthorizationUserInRequest:
-      description: The legal name and other information for the account holder.
+      description: The legal name and other information for the account holder. The
+        `user.legal_name` field is required. Other fields are not currently used and
+        are present to support planned future functionality.
       example:
         email_address: email_address
         address:
@@ -31473,15 +32001,14 @@ components:
         legal_name: legal_name
       properties:
         legal_name:
-          description: The user's legal name.
+          description: The user's legal name. If the user is a business, provide the
+            business name.
           type: string
         phone_number:
-          description: The user's phone number. In order to qualify for a guaranteed
-            transfer, at least one of `phone_number` or `email_address` must be provided.
+          description: The user's phone number.
           type: string
         email_address:
-          description: The user's email address. In order to qualify for a guaranteed
-            transfer, at least one of `phone_number` or `email_address` must be provided.
+          description: The user's email address.
           type: string
         address:
           $ref: '#/components/schemas/TransferUserAddressInRequest'
@@ -31581,9 +32108,7 @@ components:
       title: TransferUserInResponse
       type: object
     TransferUserAddressInRequest:
-      description: The address associated with the account holder. Providing this
-        data will improve the likelihood that Plaid will be able to guarantee the
-        transfer, if applicable.
+      description: The address associated with the account holder.
       example:
         country: country
         city: city
@@ -31673,24 +32198,23 @@ components:
       title: BankTransferUser
       type: object
     TransferAuthorizationDecisionRationaleCode:
-      description: |-
-        A code representing the rationale for approving or declining the proposed transfer. Possible values are:
-
-        `MANUALLY_VERIFIED_ITEM` – Item created via same-day micro deposits, limited information available. Plaid will offer `approved` as a transaction decision.
-
-        `ITEM_LOGIN_REQUIRED` – Unable to collect the account information due to Item staleness. Can be rectified using Link in update mode. Plaid will offer `approved` as a transaction decision.
-
-        `PAYMENT_PROFILE_LOGIN_REQUIRED` - Unable to collect the account information due to invalid login when using Payment Profiles. Can be rectified using update mode for Payment Profile. Plaid will offer `approved` as a transaction decision.
-
-        `ERROR` – Unable to collect the account information due to an error. Plaid will offer `approved` as a transaction decision.
-
-        `NSF` – Transaction likely to result in a return due to insufficient funds. Plaid will offer `declined` as a transaction decision.
-
-        `RISK` - Transaction is high-risk. Plaid will offer `declined` as a transaction decision.
-
-        `TRANSFER_LIMIT_REACHED` - One or several transfer limits are reached, e.g. monthly transfer limit. Plaid will offer `declined` as a transaction decision.
-
-        `MIGRATED_ACCOUNT_ITEM` - Item created via `/transfer/account_migration` endpoint, limited information available. Plaid will offer `approved` as a transaction decision.
+      description: "A code representing the rationale for approving or declining the\
+        \ proposed transfer. \n\nIf the `rationale_code` is `null`, the transfer passed\
+        \ the authorization check. \n\nAny non-`null` value for an `approved` transfer\
+        \ indicates that the the authorization check could not be run and that you\
+        \ should perform your own risk assessment on the transfer. The code will indicate\
+        \ why the check could not be run. Possible values for an `approved` transfer\
+        \ are:\n\n`MANUALLY_VERIFIED_ITEM` – Item created via same-day micro deposits,\
+        \ limited information available. \n\n`ITEM_LOGIN_REQUIRED` – Unable to collect\
+        \ the account information due to Item staleness. Can be resolved by using\
+        \ Link in [update mode](https://www.plaid.com/docs/link/update-mode). \n\n\
+        `MIGRATED_ACCOUNT_ITEM` - Item created via `/transfer/account_migration` endpoint,\
+        \ limited information available.\n\n`ERROR` – Unable to collect the account\
+        \ information due to an unspecified error.\n\nThe following codes indicate\
+        \ that the authorization decision was `declined`:\n\n`NSF` – Transaction likely\
+        \ to result in a return due to insufficient funds. \n\n`RISK` - Transaction\
+        \ is high-risk. \n\n`TRANSFER_LIMIT_REACHED` - One or several transfer limits\
+        \ are reached, e.g. monthly transfer limit."
       enum:
       - NSF
       - RISK
@@ -31700,6 +32224,7 @@ components:
       - PAYMENT_PROFILE_LOGIN_REQUIRED
       - ERROR
       - MIGRATED_ACCOUNT_ITEM
+      - null
       type: string
     TransferAuthorizationDecisionRationale:
       additionalProperties: true
@@ -31902,17 +32427,16 @@ components:
     TransferAuthorizationDevice:
       additionalProperties: true
       description: Information about the device being used to initiate the authorization.
+        These fields are not currently incorporated into the risk check.
       example:
         ip_address: ip_address
         user_agent: user_agent
       properties:
         ip_address:
           description: The IP address of the device being used to initiate the authorization.
-            Required when the end-user is present at authorization create time.
           type: string
         user_agent:
           description: The user agent of the device being used to initiate the authorization.
-            Required when the end-user is present at authorization create time.
           type: string
       title: TransferAuthorizationDevice
       type: object
@@ -31946,8 +32470,8 @@ components:
           $ref: '#/components/schemas/TransferScheduleIntervalUnit'
         interval_count:
           description: |-
-            The number of recurring `interval_units` between originations. The recurring interval(before holiday adjustment) is calculated by multiplying `interval_unit` and `interval_count`.
-            For instance, to schedule a recurring transfer which originates once every two weeks, set `interval_unit` = `week` and `interval_count` = 2.
+            The number of recurring `interval_units` between originations. The recurring interval (before holiday adjustment) is calculated by multiplying `interval_unit` and `interval_count`.
+            For example, to schedule a recurring transfer which originates once every two weeks, set `interval_unit` = `week` and `interval_count` = 2.
           title: TransferScheduleIntervalCount
           type: integer
         interval_execution_day:
@@ -31958,7 +32482,7 @@ components:
 
             If the `interval_unit` is `month`, `interval_execution_day` should be an integer indicating which day of the month to make the transfer on. Integers from 1 to 28 can be used to make a transfer on that day of the month. Negative integers from -1 to -5 can be used to make a transfer relative to the end of the month. To make a transfer on the last day of the month, use -1; to make the transfer on the second-to-last day, use -2, and so on.
 
-            The transfer will be originated on next available banking day if the designated day is a non banking day.
+            The transfer will be originated on the next available banking day if the designated day is a non banking day.
           type: integer
         start_date:
           description: |-
@@ -31991,8 +32515,8 @@ components:
       type: string
     TransferScheduleIntervalCount:
       description: |-
-        The number of recurring `interval_units` between originations. The recurring interval(before holiday adjustment) is calculated by multiplying `interval_unit` and `interval_count`.
-        For instance, to schedule a recurring transfer which originates once every two weeks, set `interval_unit` = `week` and `interval_count` = 2.
+        The number of recurring `interval_units` between originations. The recurring interval (before holiday adjustment) is calculated by multiplying `interval_unit` and `interval_count`.
+        For example, to schedule a recurring transfer which originates once every two weeks, set `interval_unit` = `week` and `interval_count` = 2.
       title: TransferScheduleIntervalCount
       type: integer
     TransferMetadata:
@@ -32032,6 +32556,16 @@ components:
       - credit
       title: TransferType
       type: string
+    OmittableTransferType:
+      description: The type of transfer. Valid values are `debit` or `credit`.  A
+        `debit` indicates a transfer of money into the origination account; a `credit`
+        indicates a transfer of money out of the origination account. This field is
+        omitted for Plaid Ledger Sweep events.
+      enum:
+      - debit
+      - credit
+      title: OmittableTransferType
+      type: string
     BankTransferType:
       description: The type of bank transfer. This will be either `debit` or `credit`.  A
         `debit` indicates a transfer of money into the origination account; a `credit`
@@ -32044,6 +32578,8 @@ components:
     TransferDiligenceStatus:
       description: Originator’s diligence status.
       enum:
+      - not_submitted
+      - submitted
       - under_review
       - approved
       - denied
@@ -32144,11 +32680,23 @@ components:
         The network or rails used for the transfer.
 
         For transfers submitted as either `ach` or `same-day-ach` the cutoff for same-day is 3:30 PM Eastern Time and the cutoff for next-day transfers is 5:30 PM Eastern Time. It is recommended to submit a transfer at least 15 minutes before the cutoff time in order to ensure that it will be processed before the cutoff. Any transfer that is indicated as `same-day-ach` and that misses the same-day cutoff, but is submitted in time for the next-day cutoff, will be sent over next-day rails and will not incur same-day charges. Note that both legs of the transfer will be downgraded if applicable.
+
+        For transfers submitted as `rtp`,  Plaid will automatically route between Real Time Payment rail by TCH or FedNow rails as necessary. If a transfer is submitted as `rtp` and the counterparty account is not eligible for RTP, the `/transfer/authorization/create` request will fail with an `INVALID_FIELD` error code. To pre-check to determine whether a counterparty account can support RTP, call `/transfer/eligibility/get` before calling `/transfer/authorization/create`.
       enum:
       - ach
       - same-day-ach
       - rtp
       title: TransferNetwork
+      type: string
+    TransferACHNetwork:
+      description: |-
+        The ACH networks used for the funds flow.
+
+        For requests submitted as either `ach` or `same-day-ach` the cutoff for same-day is 3:30 PM Eastern Time and the cutoff for next-day transfers is 5:30 PM Eastern Time. It is recommended to submit a request at least 15 minutes before the cutoff time in order to ensure that it will be processed before the cutoff. Any request that is indicated as `same-day-ach` and that misses the same-day cutoff, but is submitted in time for the next-day cutoff, will be sent over next-day rails and will not incur same-day charges.
+      enum:
+      - ach
+      - same-day-ach
+      title: TransferACHNetwork
       type: string
     BankTransferNetwork:
       description: The network or rails used for the transfer. Valid options are `ach`,
@@ -32246,23 +32794,25 @@ components:
           type: string
         access_token:
           description: The Plaid `access_token` for the account that will be debited
-            or credited. Required if not using `payment_profile_token`.
+            or credited.
           type: string
         account_id:
           description: The Plaid `account_id` corresponding to the end-user account
-            that will be debited or credited. Required when creating a transfer using
-            an `access_token`.
+            that will be debited or credited.
           type: string
         funding_account_id:
           description: The id of the funding account to use, available in the Plaid
             Dashboard. This determines which of your business checking accounts will
             be credited or debited. Defaults to the account configured during onboarding.
+            You can find your list of `funding_account_id`s in the Accounts page of
+            your Plaid Dashboard, under the "Account ID" column.
           nullable: true
           type: string
         payment_profile_token:
           description: The payment profile token associated with the Payment Profile
             that will be debited or credited. Required if not using `access_token`.
           type: string
+          x-hidden-from-docs: true
         type:
           $ref: '#/components/schemas/TransferType'
         network:
@@ -32294,8 +32844,6 @@ components:
             The API supports idempotency for safely retrying requests without accidentally performing the same operation twice. For example, if a request to create an authorization fails due to a network connection error, you can retry the request with the same idempotency key to guarantee that only a single authorization is created.
 
             This idempotency key expires after 48 hours, after which the same key can be reused. Failure to provide this key may result in duplicate charges.
-
-            Required for guaranteed ACH customers.
           maxLength: 50
           nullable: true
           title: TransferAuthorizationIdempotencyKey
@@ -32304,7 +32852,8 @@ components:
           description: If the end user is initiating the specific transfer themselves
             via an interactive UI, this should be `true`; for automatic recurring
             payments where the end user is not actually initiating each individual
-            transfer, it should be `false`.
+            transfer, it should be `false`. This field is not currently used and is
+            present to support planned future functionality.
           nullable: true
           type: boolean
         with_guarantee:
@@ -32319,6 +32868,7 @@ components:
             when it is run on your webpage.
           nullable: true
           type: string
+          x-hidden-from-docs: true
         originator_client_id:
           description: The Plaid client ID that is the originator of this transfer.
             Only needed if creating transfers on behalf of another client as a third-party
@@ -32330,10 +32880,12 @@ components:
         test_clock_id:
           description: Plaid’s unique identifier for a test clock. This field may
             only be used when using `sandbox` environment. If provided, the `authorization`
-            is created at the `virtual_time` on the provided `test_clock`.
+            is created at the `virtual_time` on the provided test clock.
           nullable: true
           type: string
       required:
+      - access_token
+      - account_id
       - amount
       - network
       - type
@@ -32362,18 +32914,18 @@ components:
           type: string
         access_token:
           description: The Plaid `access_token` for the account that will be debited
-            or credited. Required if not using `payment_profile_token`.
+            or credited.
           type: string
         account_id:
           description: The Plaid `account_id` corresponding to the end-user account
-            that will be debited or credited. Required when creating a transfer using
-            an `access_token`.
+            that will be debited or credited.
           type: string
         payment_profile_token:
           description: A payment profile token associated with the Payment Profile
             data that is being requested.
           title: PaymentProfileToken
           type: string
+          x-hidden-from-docs: true
       title: TransferCapabilitiesGetRequest
       type: object
     TransferConfigurationGetRequest:
@@ -32433,7 +32985,6 @@ components:
         metadata:
           key: metadata
         authorization_id: authorization_id
-        payment_profile_token: payment_profile_token
         description: description
         secret: secret
         type: ""
@@ -32482,16 +33033,11 @@ components:
           x-hidden-from-docs: true
         access_token:
           description: The Plaid `access_token` for the account that will be debited
-            or credited. Required if not using `payment_profile_token`.
+            or credited.
           type: string
         account_id:
           description: The Plaid `account_id` corresponding to the end-user account
-            that will be debited or credited. Required when creating a transfer using
-            an `access_token`.
-          type: string
-        payment_profile_token:
-          description: The payment profile token associated with the Payment Profile
-            that will be debited or credited. Required if not using `access_token`.
+            that will be debited or credited.
           type: string
         authorization_id:
           description: Plaid’s unique identifier for a transfer authorization. This
@@ -32613,7 +33159,7 @@ components:
           type: string
         access_token:
           description: The Plaid `access_token` for the account that will be debited
-            or credited. Required if not using `payment_profile_token`.
+            or credited.
           type: string
         idempotency_key:
           description: |-
@@ -32625,13 +33171,14 @@ components:
           type: string
         account_id:
           description: The Plaid `account_id` corresponding to the end-user account
-            that will be debited or credited. Required when creating a transfer using
-            an `access_token`.
+            that will be debited or credited.
           type: string
         funding_account_id:
           description: The id of the funding account to use, available in the Plaid
             Dashboard. This determines which of your business checking accounts will
             be credited or debited. Defaults to the account configured during onboarding.
+            You can find your list of `funding_account_id`s in the Accounts page of
+            your Plaid Dashboard, under the "Account ID" column.
           nullable: true
           type: string
         type:
@@ -33712,10 +34259,12 @@ components:
           title: TransferID
           type: string
         originator_client_id:
+          deprecated: true
           description: The Plaid client ID of the transfer originator. Should only
             be present if `client_id` is a third-party sender (TPS).
           nullable: true
           type: string
+          x-hidden-from-docs: true
       required:
       - transfer_id
       title: TransferCancelRequest
@@ -34034,7 +34583,7 @@ components:
       type: object
     TransferEventType:
       description: |-
-        The type of event that this transfer represents.
+        The type of event that this transfer represents. Event types with prefix `sweep` represents events for Plaid Ledger sweeps.
 
         `pending`: A new transfer was created; it is in the pending state.
 
@@ -34053,6 +34602,16 @@ components:
         `swept_settled`: Credits are available to be withdrawn or debits have been deducted from the customer’s business checking account.
 
         `return_swept`: Due to the transfer being returned, funds were pulled from or pushed back to the sweep account.
+
+        `sweep.pending`: A new ledger sweep was created; it is in the pending state.
+
+        `sweep.posted`: The ledger sweep has been successfully submitted to the payment network.
+
+        `sweep.settled`: The transaction has settled in the funding account. This means that funds withdrawn from Plaid Ledger balance have reached the funding account, or funds to be deposited into the Plaid Ledger Balance have been pulled, and the hold period has begun.
+
+        `sweep.returned`: A posted ledger sweep was returned.
+
+        `sweep.failed`: The ledger sweep failed, no funds were moved.
       enum:
       - pending
       - cancelled
@@ -34063,7 +34622,34 @@ components:
       - swept
       - swept_settled
       - return_swept
+      - sweep.pending
+      - sweep.posted
+      - sweep.settled
+      - sweep.returned
+      - sweep.failed
       title: TransferEventType
+      type: string
+    TransferLedgerSweepSimulateEventType:
+      description: |
+        The asynchronous event to be simulated. May be: `posted`, `settled`, `failed`, or `returned`.
+
+        An error will be returned if the event type is incompatible with the current ledger sweep status. Compatible status --> event type transitions include:
+
+        `pending` --> `posted`
+
+        `pending` --> `failed`
+
+        `posted` --> `settled`
+
+        `posted` --> `returned`
+
+        `settled` --> `returned`
+      enum:
+      - sweep.posted
+      - sweep.settled
+      - sweep.returned
+      - sweep.failed
+      title: TransferLedgerSweepSimulateEventType
       type: string
     BankTransferEventType:
       description: |-
@@ -34118,7 +34704,8 @@ components:
         event_type:
           $ref: '#/components/schemas/TransferEventType'
         account_id:
-          description: The account ID associated with the transfer.
+          description: The account ID associated with the transfer. This field is
+            omitted for Plaid Ledger Sweep events.
           type: string
         funding_account_id:
           description: The id of the associated funding account, available in the
@@ -34127,8 +34714,8 @@ components:
           nullable: true
           type: string
         transfer_id:
-          description: Plaid’s unique identifier for a transfer.
-          title: TransferID
+          description: Plaid’s unique identifier for a transfer. This field is `null`
+            for Plaid Ledger Sweep events.
           type: string
         origination_account_id:
           deprecated: true
@@ -34138,10 +34725,11 @@ components:
           type: string
           x-hidden-from-docs: true
         transfer_type:
-          $ref: '#/components/schemas/TransferType'
+          $ref: '#/components/schemas/OmittableTransferType'
         transfer_amount:
           description: The amount of the transfer (decimal string with two digits
-            of precision e.g. "10.00").
+            of precision e.g. "10.00"). This field is omitted for Plaid Ledger Sweep
+            events.
           title: TransferAmount
           type: string
         failure_reason:
@@ -34169,7 +34757,6 @@ components:
           nullable: true
           type: string
       required:
-      - account_id
       - event_id
       - event_type
       - failure_reason
@@ -34180,9 +34767,7 @@ components:
       - sweep_amount
       - sweep_id
       - timestamp
-      - transfer_amount
       - transfer_id
-      - transfer_type
       title: TransferEvent
       type: object
     BankTransferEvent:
@@ -34590,6 +35175,7 @@ components:
           created: 2000-01-23T04:56:07.000+00:00
           settled: 2000-01-23
           iso_currency_code: iso_currency_code
+          description: description
           id: id
         request_id: request_id
       properties:
@@ -34670,6 +35256,30 @@ components:
       nullable: true
       title: SweepStatus
       type: string
+    SweepTrigger:
+      description: |-
+        The trigger of the sweep
+
+        `"manual"` - The sweep is created manually by the customer
+        `"incoming"` - The sweep is created by incoming funds flow (e.g. Incoming Wire)
+        `"balance_threshold"` - The sweep is created by balance threshold setting
+        `"automatic_aggregate"` - The sweep is created by the Plaid automatic aggregation process. These funds did not pass through the Plaid Ledger balance.
+      enum:
+      - manual
+      - incoming
+      - balance_threshold
+      - automatic_aggregate
+      nullable: true
+      title: SweepTrigger
+      type: string
+    SweepDescription:
+      description: The description of the deposit that will be passed to the receiving
+        bank (up to 10 characters). Note that banks utilize this field differently,
+        and may or may not show it on the bank statement.
+      maxLength: 10
+      nullable: true
+      title: SweepDescription
+      type: string
     TransferSweepListRequest:
       description: Defines the request schema for `/transfer/sweep/list`
       example:
@@ -34735,6 +35345,8 @@ components:
           description: Filter sweeps to only those with the included `transfer_id`.
           nullable: true
           type: string
+        trigger:
+          $ref: '#/components/schemas/SweepTrigger'
       title: TransferSweepListRequest
       type: object
     TransferSweepListResponse:
@@ -34748,12 +35360,14 @@ components:
           created: 2000-01-23T04:56:07.000+00:00
           settled: 2000-01-23
           iso_currency_code: iso_currency_code
+          description: description
           id: id
         - funding_account_id: funding_account_id
           amount: amount
           created: 2000-01-23T04:56:07.000+00:00
           settled: 2000-01-23
           iso_currency_code: iso_currency_code
+          description: description
           id: id
       properties:
         sweeps:
@@ -34846,6 +35460,7 @@ components:
         created: 2000-01-23T04:56:07.000+00:00
         settled: 2000-01-23
         iso_currency_code: iso_currency_code
+        description: description
         id: id
       properties:
         id:
@@ -34876,6 +35491,13 @@ components:
           type: string
         status:
           $ref: '#/components/schemas/SweepStatus'
+        trigger:
+          $ref: '#/components/schemas/SweepTrigger'
+        description:
+          description: The description of the deposit that will be passed to the receiving
+            bank (up to 10 characters). Note that banks utilize this field differently,
+            and may or may not show it on the bank statement.
+          type: string
       required:
       - amount
       - created
@@ -34985,9 +35607,11 @@ components:
           title: ClientID
           type: string
         originator_client_id:
+          deprecated: true
           description: Client ID of the end customer.
           nullable: true
           type: string
+          x-hidden-from-docs: true
         secret:
           description: Your Plaid API `secret`. The `secret` is required and may be
             provided either in the `PLAID-SECRET` header or as part of a request body.
@@ -35041,6 +35665,256 @@ components:
       - type
       title: TransferBalance
       type: object
+    TransferLedgerGetRequest:
+      description: Defines the request schema for `/transfer/ledger/get`
+      example:
+        originator_client_id: originator_client_id
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        originator_client_id:
+          description: Client ID of the end customer.
+          nullable: true
+          type: string
+      title: TransferLedgerGetRequest
+      type: object
+    TransferLedgerGetResponse:
+      additionalProperties: true
+      description: Defines the response schema for `/transfer/ledger/get`
+      example:
+        balance:
+          pending: pending
+          available: available
+        request_id: request_id
+      properties:
+        balance:
+          $ref: '#/components/schemas/TransferLedgerBalance'
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - balance
+      - request_id
+      title: TransferLedgerGetResponse
+      type: object
+    TransferLedgerBalance:
+      additionalProperties: true
+      description: Information about the balance of the ledger held with Plaid.
+      example:
+        pending: pending
+        available: available
+      properties:
+        available:
+          description: The amount of this balance available for use (decimal string
+            with two digits of precision e.g. "10.00").
+          type: string
+        pending:
+          description: The amount of pending funds that are in processing (decimal
+            string with two digits of precision e.g. "10.00").
+          type: string
+      required:
+      - available
+      - pending
+      title: TransferLedgerBalance
+      type: object
+    TransferLedgerDepositRequest:
+      description: Defines the request schema for `/transfer/ledger/deposit`
+      example:
+        funding_account_id: funding_account_id
+        originator_client_id: originator_client_id
+        amount: amount
+        description: description
+        idempotency_key: idempotency_key
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        originator_client_id:
+          description: Client ID of the customer that owns the Ledger balance. This
+            is so Plaid knows which of your customers to payout or collect funds.
+            Only applicable for Platform customers. Do not include if you’re paying
+            out to yourself.
+          nullable: true
+          type: string
+        funding_account_id:
+          description: The id of the funding account to use, available in the Plaid
+            Dashboard. This determines which of your business checking accounts will
+            be credited or debited. Defaults to the account configured during onboarding.
+            You can find your list of `funding_account_id`s in the Accounts page of
+            your Plaid Dashboard, under the "Account ID" column.
+          nullable: true
+          type: string
+        amount:
+          description: A positive amount of how much will be deposited into ledger
+            (decimal string with two digits of precision e.g. "5.50").
+          type: string
+        description:
+          description: The description of the deposit that will be passed to the receiving
+            bank (up to 10 characters). Note that banks utilize this field differently,
+            and may or may not show it on the bank statement.
+          maxLength: 10
+          nullable: true
+          title: SweepDescription
+          type: string
+        idempotency_key:
+          description: |-
+            A unique key provided by the client, per unique ledger deposit. Maximum of 50 characters.
+
+            The API supports idempotency for safely retrying the request without accidentally performing the same operation twice. For example, if a request to create a ledger deposit fails due to a network connection error, you can retry the request with the same idempotency key to guarantee that only a single deposit is created.
+          maxLength: 50
+          title: LedgerDepositIdempotencyKey
+          type: string
+        network:
+          $ref: '#/components/schemas/TransferACHNetwork'
+      required:
+      - amount
+      - idempotency_key
+      - network
+      title: TransferLedgerDepositRequest
+      type: object
+    TransferLedgerWithdrawRequest:
+      description: Defines the request schema for `/transfer/ledger/withdraw`
+      example:
+        funding_account_id: funding_account_id
+        originator_client_id: originator_client_id
+        amount: amount
+        description: description
+        idempotency_key: idempotency_key
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        originator_client_id:
+          description: Client ID of the customer that owns the Ledger balance. This
+            is so Plaid knows which of your customers to payout or collect funds.
+            Only applicable for Platform customers. Do not include if you’re paying
+            out to yourself.
+          nullable: true
+          type: string
+        funding_account_id:
+          description: The id of the funding account to use, available in the Plaid
+            Dashboard. This determines which of your business checking accounts will
+            be credited or debited. Defaults to the account configured during onboarding.
+            You can find your list of `funding_account_id`s in the Accounts page of
+            your Plaid Dashboard, under the "Account ID" column.
+          nullable: true
+          type: string
+        amount:
+          description: A positive amount of how much will be withdrawn from the ledger
+            balance (decimal string with two digits of precision e.g. "5.50").
+          type: string
+        description:
+          description: The description of the deposit that will be passed to the receiving
+            bank (up to 10 characters). Note that banks utilize this field differently,
+            and may or may not show it on the bank statement.
+          maxLength: 10
+          nullable: true
+          title: SweepDescription
+          type: string
+        idempotency_key:
+          description: |-
+            A unique key provided by the client, per unique ledger withdraw. Maximum of 50 characters.
+
+            The API supports idempotency for safely retrying the request without accidentally performing the same operation twice. For example, if a request to create a ledger withdraw fails due to a network connection error, you can retry the request with the same idempotency key to guarantee that only a single withdraw is created.
+          maxLength: 50
+          title: LedgerWithdrawIdempotencyKey
+          type: string
+        network:
+          $ref: '#/components/schemas/TransferNetwork'
+      required:
+      - amount
+      - idempotency_key
+      - network
+      title: TransferLedgerWithdrawRequest
+      type: object
+    TransferLedgerDepositResponse:
+      additionalProperties: true
+      description: Defines the response schema for `/transfer/ledger/deposit`
+      example:
+        sweep:
+          funding_account_id: funding_account_id
+          amount: amount
+          created: 2000-01-23T04:56:07.000+00:00
+          settled: 2000-01-23
+          iso_currency_code: iso_currency_code
+          description: description
+          id: id
+        request_id: request_id
+      properties:
+        sweep:
+          $ref: '#/components/schemas/TransferSweep'
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      - sweep
+      title: TransferLedgerDepositResponse
+      type: object
+    TransferLedgerWithdrawResponse:
+      additionalProperties: true
+      description: Defines the response schema for `/transfer/ledger/withdraw`
+      example:
+        sweep:
+          funding_account_id: funding_account_id
+          amount: amount
+          created: 2000-01-23T04:56:07.000+00:00
+          settled: 2000-01-23
+          iso_currency_code: iso_currency_code
+          description: description
+          id: id
+        request_id: request_id
+      properties:
+        sweep:
+          $ref: '#/components/schemas/TransferSweep'
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      - sweep
+      title: TransferLedgerWithdrawResponse
+      type: object
     TransferBalanceType:
       description: |-
         The type of balance.
@@ -35052,6 +35926,53 @@ components:
       - prefunded_ach_credits
       title: TransferBalanceType
       type: string
+    TransferOriginatorFundingAccountUpdateRequest:
+      description: Defines the request schema for `/transfer/originator/funding_account/update`
+      example:
+        originator_client_id: originator_client_id
+        funding_account:
+          access_token: access_token
+          account_id: account_id
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        originator_client_id:
+          description: The Plaid client ID of the transfer originator.
+          type: string
+        funding_account:
+          $ref: '#/components/schemas/TransferFundingAccount'
+      required:
+      - funding_account
+      - originator_client_id
+      title: TransferOriginatorFundingAccountUpdateRequest
+      type: object
+    TransferOriginatorFundingAccountUpdateResponse:
+      additionalProperties: true
+      description: Defines the response schema for `/transfer/originator/funding_account/update`
+      example:
+        request_id: request_id
+      properties:
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      title: TransferOriginatorFundingAccountUpdateResponse
+      type: object
     BankTransferMigrateAccountRequest:
       description: Defines the request schema for `/bank_transfer/migrate_account`
       example:
@@ -35311,6 +36232,9 @@ components:
             street: street
             region: region
             postal_code: postal_code
+          funding_account:
+            access_token: access_token
+            account_id: account_id
           credit_usage_configuration:
             expected_monthly_amount: expected_monthly_amount
             expected_average_amount: expected_average_amount
@@ -35428,6 +36352,9 @@ components:
           street: street
           region: region
           postal_code: postal_code
+        funding_account:
+          access_token: access_token
+          account_id: account_id
         credit_usage_configuration:
           expected_monthly_amount: expected_monthly_amount
           expected_average_amount: expected_average_amount
@@ -35458,9 +36385,12 @@ components:
           maxLength: 6
           minLength: 6
           type: string
+        funding_account:
+          $ref: '#/components/schemas/TransferFundingAccount'
       required:
       - address
       - dba
+      - funding_account
       - naics_code
       - tax_id
       - website
@@ -35608,6 +36538,25 @@ components:
       - daily
       title: OriginatorExpectedTransferFrequency
       type: string
+    TransferFundingAccount:
+      description: The originator's funding account, linked with Plaid Link or /transfer/migrate_account.
+      example:
+        access_token: access_token
+        account_id: account_id
+      properties:
+        access_token:
+          description: The access token associated with the Item data is being requested
+            for.
+          title: AccessToken
+          type: string
+        account_id:
+          description: The Plaid `account_id` for the newly created Item.
+          type: string
+      required:
+      - access_token
+      - account_id
+      title: TransferFundingAccount
+      type: object
     TransferOriginatorGetRequest:
       description: Defines the request schema for `/transfer/originator/get`
       example:
@@ -35966,6 +36915,8 @@ components:
           description: The id of the funding account to use, available in the Plaid
             Dashboard. This determines which of your business checking accounts will
             be credited or debited. Defaults to the account configured during onboarding.
+            You can find your list of `funding_account_id`s in the Accounts page of
+            your Plaid Dashboard, under the "Account ID" column.
           nullable: true
           type: string
         mode:
@@ -36730,6 +37681,74 @@ components:
       - transfer_id
       title: SandboxTransferSimulateRequest
       type: object
+    SandboxTransferLedgerDepositSimulateRequest:
+      description: Defines the request schema for `/sandbox/transfer/ledger/deposit/simulate`
+      example:
+        sweep_id: sweep_id
+        secret: secret
+        failure_reason:
+          ach_return_code: ach_return_code
+          description: description
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        sweep_id:
+          description: Plaid’s unique identifier for a sweep.
+          title: TransferSweepID
+          type: string
+        event_type:
+          $ref: '#/components/schemas/TransferLedgerSweepSimulateEventType'
+        failure_reason:
+          $ref: '#/components/schemas/TransferFailure'
+      required:
+      - event_type
+      - sweep_id
+      title: SandboxTransferLedgerDepositSimulateRequest
+      type: object
+    SandboxTransferLedgerWithdrawSimulateRequest:
+      description: Defines the request schema for `/sandbox/transfer/ledger/withdraw/simulate`
+      example:
+        sweep_id: sweep_id
+        secret: secret
+        failure_reason:
+          ach_return_code: ach_return_code
+          description: description
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        sweep_id:
+          description: Plaid’s unique identifier for a sweep.
+          title: TransferSweepID
+          type: string
+        event_type:
+          $ref: '#/components/schemas/TransferLedgerSweepSimulateEventType'
+        failure_reason:
+          $ref: '#/components/schemas/TransferFailure'
+      required:
+      - event_type
+      - sweep_id
+      title: SandboxTransferLedgerWithdrawSimulateRequest
+      type: object
     SandboxTransferSweepSimulateRequest:
       description: Defines the request schema for `/sandbox/transfer/sweep/simulate`
       example:
@@ -36756,6 +37775,32 @@ components:
           nullable: true
           type: string
       title: SandboxTransferSweepSimulateRequest
+      type: object
+    SandboxTransferLedgerSimulateAvailableRequest:
+      description: Defines the request schema for `/sandbox/transfer/ledger/simulate_available`
+      example:
+        secret: secret
+        test_clock_id: test_clock_id
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        test_clock_id:
+          description: Plaid’s unique identifier for a test clock. If provided, only
+            the pending balance that is due before the `virtual_timestamp` on the
+            test clock will be converted.
+          nullable: true
+          type: string
+      title: SandboxTransferLedgerSimulateAvailableRequest
       type: object
     SandboxTransferTestClockCreateRequest:
       description: Defines the request schema for `/sandbox/transfer/test_clock/create`
@@ -36922,6 +37967,54 @@ components:
       required:
       - request_id
       title: SandboxTransferSimulateResponse
+      type: object
+    SandboxTransferLedgerSimulateAvailableResponse:
+      additionalProperties: true
+      description: Defines the response schema for `/sandbox/transfer/ledger/simulate_available`
+      example:
+        request_id: request_id
+      properties:
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      title: SandboxTransferLedgerSimulateAvailableResponse
+      type: object
+    SandboxTransferLedgerDepositSimulateResponse:
+      additionalProperties: true
+      description: Defines the response schema for `/sandbox/transfer/ledger/deposit/simulate`
+      example:
+        request_id: request_id
+      properties:
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      title: SandboxTransferLedgerDepositSimulateResponse
+      type: object
+    SandboxTransferLedgerWithdrawSimulateResponse:
+      additionalProperties: true
+      description: Defines the response schema for `/sandbox/transfer/ledger/withdraw/simulate`
+      example:
+        request_id: request_id
+      properties:
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      title: SandboxTransferLedgerWithdrawSimulateResponse
       type: object
     SandboxTransferSweepSimulateResponse:
       additionalProperties: true
@@ -37210,9 +38303,9 @@ components:
       properties:
         score:
           description: Match score for address. 100 is a perfect match, 99-90 is a
-            strong match, 89-80 is a partial match, anything below 80 is considered
+            strong match, 89-70 is a partial match, anything below 70 is considered
             a weak match. Typically, the match threshold should be set to a score
-            of 80 or higher. If the address is missing from either the API or financial
+            of 70 or higher. If the address is missing from either the API or financial
             institution, this is null.
           nullable: true
           type: integer
@@ -38012,9 +39105,9 @@ components:
           type: string
         verification_status:
           description: |-
-            `VERIFICATION_STATUS_PROCESSING_COMPLETE`: The income verification status processing has completed. If the user uploaded multiple documents, this webhook will fire when all documents have finished processing. Call the `/credit/payroll_income/get` endpoint and check the document metadata to see which documents were successfully parsed.
+            `VERIFICATION_STATUS_PROCESSING_COMPLETE`:  The income verification processing has completed. This indicates that the documents have been parsed successfully or that the documents were not parsable. If the user uploaded multiple documents, this webhook will fire when all documents have finished processing. Call the `/credit/payroll_income/get` endpoint and check the document metadata to see which documents were successfully parsed.
 
-            `VERIFICATION_STATUS_PROCESSING_FAILED`: A failure occurred when attempting to process the verification documentation.
+            `VERIFICATION_STATUS_PROCESSING_FAILED`: An unexpected internal error occurred when attempting to process the verification documentation.
 
             `VERIFICATION_STATUS_PENDING_APPROVAL`: (deprecated) The income verification has been sent to the user for review.
           type: string
@@ -51907,6 +53000,24 @@ components:
           - BASIC_ALLOWANCE_HOUSING
           - BASIC_ALLOWANCE_SUBSISTENCE
           - OTHER
+          - ALLOWANCE
+          - BEREAVEMENT
+          - HOLIDAY_PAY
+          - JURY_DUTY
+          - LEAVE
+          - LONG_TERM_DISABILITY_PAY
+          - MILITARY_PAY
+          - PER_DIEM
+          - REFERRAL_BONUS
+          - REIMBURSEMENTS
+          - RETENTION_BONUS
+          - RETROACTIVE_PAY
+          - SEVERANCE_PAY
+          - SHIFT_DIFFERENTIAL
+          - SHORT_TERM_DISABILITY_PAY
+          - SICK_PAY
+          - SIGNING_BONUS
+          - TIPS_INCOME
           - null
         current_amount:
           description: Raw amount of the earning line item.
@@ -51968,6 +53079,24 @@ components:
       - BASIC_ALLOWANCE_HOUSING
       - BASIC_ALLOWANCE_SUBSISTENCE
       - OTHER
+      - ALLOWANCE
+      - BEREAVEMENT
+      - HOLIDAY_PAY
+      - JURY_DUTY
+      - LEAVE
+      - LONG_TERM_DISABILITY_PAY
+      - MILITARY_PAY
+      - PER_DIEM
+      - REFERRAL_BONUS
+      - REIMBURSEMENTS
+      - RETENTION_BONUS
+      - RETROACTIVE_PAY
+      - SEVERANCE_PAY
+      - SHIFT_DIFFERENTIAL
+      - SHORT_TERM_DISABILITY_PAY
+      - SICK_PAY
+      - SIGNING_BONUS
+      - TIPS_INCOME
       - null
     PayStubEarningsTotal:
       additionalProperties: true
@@ -52037,12 +53166,14 @@ components:
           nullable: true
           type: string
         marital_status:
-          description: Marital status of the employee - either `SINGLE` or `MARRIED`.
+          description: Marital status of the employee - either `SINGLE` or `MARRIED`
+            or `NOT LISTED`.
           nullable: true
           type: string
           x-override-enum-values-shown:
           - SINGLE
           - MARRIED
+          - NOT LISTED
           - null
         taxpayer_id:
           $ref: '#/components/schemas/PayStubTaxpayerID'
@@ -52336,10 +53467,10 @@ components:
       title: PayStubDistributionBreakdown
       type: object
     ReportType:
-      description: The report type. It can be `assets` or `income`.
+      description: The report type. It can be `asset`. Income report types are not
+        yet supported.
       enum:
-      - assets
-      - income
+      - asset
       nullable: false
       title: ReportType
       type: string
@@ -55506,10 +56637,10 @@ components:
           description: The warning code identifies a specific kind of warning that
             pertains to the error causing bank data to be missing. Safe for programmatic
             use. For more details on warning codes, please refer to Plaid standard
-            error codes documentation. In case you receive the `ITEM_LOGIN_REQUIRED`
-            warning, we recommend re-authenticating your user by implementing Link's
-            update mode. This will guide your user to fix their credentials, allowing
-            Plaid to start fetching data again for future Signal requests.
+            error codes documentation. If you receive the `ITEM_LOGIN_REQUIRED` warning,
+            we recommend re-authenticating your user by implementing Link's update
+            mode. This will guide your user to fix their credentials, allowing Plaid
+            to start fetching data again for future Signal requests.
           type: string
         warning_message:
           description: A developer-friendly representation of the warning type. This
@@ -57258,7 +58389,7 @@ components:
           type: string
         logo_url:
           description: The URL of a logo associated with this transaction, if available.
-            The logo is formatted as a 100x100 pixel PNG file.
+            The logo will always be 100×100 pixel PNG file.
           nullable: true
           type: string
         check_number:
@@ -57284,8 +58415,8 @@ components:
         personal_finance_category:
           $ref: '#/components/schemas/PersonalFinanceCategory'
         personal_finance_category_icon_url:
-          description: A link to the icon associated with the primary personal finance
-            category. The logo will always be 100x100 pixels.
+          description: The URL of an icon associated with the primary personal finance
+            category. The icon will always be 100×100 pixel PNG file.
           type: string
         counterparties:
           description: The counterparties present in the transaction. Counterparties,
@@ -57356,7 +58487,7 @@ components:
             $ref: '#/components/schemas/Counterparty'
           type: array
         entity_id:
-          description: A unique, stable, Plaid-generated id that maps to the primary
+          description: A unique, stable, Plaid-generated ID that maps to the primary
             counterparty.
           nullable: true
           type: string
@@ -57381,7 +58512,7 @@ components:
           $ref: '#/components/schemas/Location'
         logo_url:
           description: The URL of a logo associated with this transaction, if available.
-            The logo is formatted as a 100x100 pixel PNG file.
+            The logo will always be 100×100 pixel PNG file.
           nullable: true
           type: string
         merchant_name:
@@ -57394,8 +58525,8 @@ components:
         personal_finance_category:
           $ref: '#/components/schemas/PersonalFinanceCategory'
         personal_finance_category_icon_url:
-          description: A link to the icon associated with the primary personal finance
-            category. The logo will always be 100x100 pixels.
+          description: The URL of an icon associated with the primary personal finance
+            category. The icon will always be 100×100 pixel PNG file.
           type: string
         recurrence:
           $ref: '#/components/schemas/Recurrence'
@@ -57435,18 +58566,24 @@ components:
       title: Recurrence
       type: object
     RecurringFrequency:
-      description: "Describes the frequency of the transaction stream.\n\n`WEEKLY`:\
-        \ Assigned to a transaction stream that occurs approximately every week.\n\
-        \n`BIWEEKLY`: Assigned to a transaction stream that occurs approximately every\
-        \ 2 weeks.\n\n`SEMI_MONTHLY`: Assigned to a transaction stream that occurs\
-        \ approximately twice per month. This frequency is typically seen for inflow\
-        \ transaction streams.\n\n`MONTHLY`: Assigned to a transaction stream that\
-        \ occurs approximately every month.\n\n`ANNUALLY`: Assigned to a transaction\
-        \ stream that occurs approximately every year.\n\n`DAILY`: Assigned to a transaction\
-        \ stream that occurs approximately every day.\n\n`DYNAMIC`: Assigned to a\
-        \ transaction stream that varies in recurrence frequency. This frequency is\
-        \ typically seen for inflow streams in the gig economy. \n\n`UNKNOWN`: Assigned\
-        \ to a transaction stream that isn't recurring in nature."
+      description: |-
+        Describes the frequency of the transaction stream.
+
+        `WEEKLY`: Assigned to a transaction stream that occurs approximately every week.
+
+        `BIWEEKLY`: Assigned to a transaction stream that occurs approximately every 2 weeks.
+
+        `SEMI_MONTHLY`: Assigned to a transaction stream that occurs approximately twice per month. This frequency is typically seen for inflow transaction streams.
+
+        `MONTHLY`: Assigned to a transaction stream that occurs approximately every month.
+
+        `ANNUALLY`: Assigned to a transaction stream that occurs approximately every year.
+
+        `DAILY`: Assigned to a transaction stream that occurs approximately every day.
+
+        `DYNAMIC`: Assigned to a transaction stream that varies in recurrence frequency. This frequency is typically seen for inflow streams in the gig economy.
+
+        `UNKNOWN`: Assigned to a transaction stream that isn't recurring in nature.
       enum:
       - UNKNOWN
       - WEEKLY
@@ -57490,6 +58627,7 @@ components:
             data that is being requested.
           title: PaymentProfileToken
           type: string
+          x-hidden-from-docs: true
         request_id:
           description: A unique identifier for the request, which can be used for
             troubleshooting. This identifier, like all Plaid identifiers, is case
@@ -57505,6 +58643,7 @@ components:
         that is being requested.
       title: PaymentProfileToken
       type: string
+      x-hidden-from-docs: true
     PaymentProfileGetRequest:
       description: PaymentProfileGetRequest defines the request schema for `/payment_profile/get`
       example:
@@ -57528,6 +58667,7 @@ components:
             data that is being requested.
           title: PaymentProfileToken
           type: string
+          x-hidden-from-docs: true
       required:
       - payment_profile_token
       type: object
@@ -57612,6 +58752,7 @@ components:
             data that is being requested.
           title: PaymentProfileToken
           type: string
+          x-hidden-from-docs: true
       required:
       - payment_profile_token
       type: object
@@ -58457,6 +59598,168 @@ components:
       - primary
       title: CreditCategory
       type: object
+    BaseReportsProductReadyWebhook:
+      additionalProperties: true
+      description: Fired when the Base Report has been generated and `/cra/base_report/get`
+        is ready to be called.  If you attempt to retrieve a Base Report before this
+        webhook has fired, you’ll receive a response with the HTTP status code 400
+        and a Plaid error code of `PRODUCT_NOT_READY`.
+      properties:
+        webhook_type:
+          description: '`BASE_REPORT`'
+          type: string
+        webhook_code:
+          description: '`PRODUCT_READY`'
+          type: string
+        user_id:
+          description: The `user_id` corresponding to the User ID the webhook has
+            fired for.
+          type: string
+        environment:
+          $ref: '#/components/schemas/WebhookEnvironmentValues'
+      required:
+      - environment
+      - user_id
+      - webhook_code
+      - webhook_type
+      title: BaseReportsProductReadyWebhook
+      type: object
+      x-hidden-from-docs: true
+      x-examples:
+        example-1:
+          webhook_type: BASE_REPORT
+          webhook_code: PRODUCT_READY
+          user_id: wz666MBjYWTp2PDzzggYhM6oWWmBb
+    BaseReportsErrorWebhook:
+      additionalProperties: true
+      description: Fired when Base Report generation has failed. The resulting `error`
+        will have an `error_type` of `BASE_REPORT_ERROR`.
+      properties:
+        webhook_type:
+          description: '`BASE_REPORT`'
+          type: string
+        webhook_code:
+          description: '`ERROR`'
+          type: string
+        error:
+          $ref: '#/components/schemas/PlaidError'
+        user_id:
+          description: The `user_id` corresponding to the User ID the webhook has
+            fired for.
+          type: string
+        environment:
+          $ref: '#/components/schemas/WebhookEnvironmentValues'
+      required:
+      - environment
+      - error
+      - user_id
+      - webhook_code
+      - webhook_type
+      title: BaseReportsErrorWebhook
+      type: object
+      x-hidden-from-docs: true
+      x-examples:
+        example-1:
+          webhook_type: BASE_REPORT
+          webhook_code: ERROR
+          user_id: wz666MBjYWTp2PDzzggYhM6oWWmBb
+          error:
+            error_code: PRODUCT_NOT_ENABLED
+            error_message: 'The following products are not supported by this institution:
+              Identity'
+            error_type: BASE_REPORT_ERROR
+            request_id: m8MDnv9okwxFNBV
+    CraBankIncomeCompleteWebhook:
+      additionalProperties: true
+      description: Fired when a bank income report has finished generating or failed
+        to generate, triggered by calling `/cra/bank_income/get`.
+      properties:
+        webhook_type:
+          description: '`CRA_INCOME`'
+          type: string
+        webhook_code:
+          description: '`BANK_INCOME_COMPLETE`'
+          type: string
+        user_id:
+          description: The `user_id` corresponding to the user the webhook has fired
+            for.
+          type: string
+        result:
+          $ref: '#/components/schemas/CraBankIncomeCompleteResult'
+        environment:
+          $ref: '#/components/schemas/WebhookEnvironmentValues'
+      required:
+      - environment
+      - result
+      - user_id
+      - webhook_code
+      - webhook_type
+      title: CraBankIncomeCompleteWebhook
+      type: object
+      x-examples:
+        example-1:
+          webhook_type: CRA_INCOME
+          webhook_code: BANK_INCOME_COMPLETE
+          user_id: wz666MBjYWTp2PDzzggYhM6oWWmBb
+          result: SUCCESS
+          environment: production
+    CraBankIncomeCompleteResult:
+      description: |-
+        The result of the bank income report generation
+
+        `SUCCESS`: The bank income report was successfully generated and can be retrieved via `/cra/bank_income/get`.
+
+        `FAILURE`: The bank income report failed to be generated
+      enum:
+      - SUCCESS
+      - FAILURE
+      type: string
+    BankIncomeCompleteWebhook:
+      additionalProperties: true
+      description: Fired when a bank income report has finished generating or failed
+        to generate, triggered by calling `/credit/bank_income/get` in CRA enabled
+        client.
+      properties:
+        webhook_type:
+          description: '`INCOME`'
+          type: string
+        webhook_code:
+          description: '`BANK_INCOME_COMPLETE`'
+          type: string
+        user_id:
+          description: The `user_id` corresponding to the user the webhook has fired
+            for.
+          type: string
+        result:
+          $ref: '#/components/schemas/BankIncomeCompleteResult'
+        environment:
+          $ref: '#/components/schemas/WebhookEnvironmentValues'
+      required:
+      - environment
+      - result
+      - user_id
+      - webhook_code
+      - webhook_type
+      title: BankIncomeCompleteWebhook
+      type: object
+      x-examples:
+        example-1:
+          webhook_type: INCOME
+          webhook_code: BANK_INCOME_COMPLETE
+          user_id: wz666MBjYWTp2PDzzggYhM6oWWmBb
+          result: SUCCESS
+          environment: production
+    BankIncomeCompleteResult:
+      description: |-
+        The result of the bank income report generation
+
+        `SUCCESS`: The bank income report was successfully generated and can be retrieved via `/credit/bank_income/get`.
+
+        `FAILURE`: The bank income report failed to be generated
+      enum:
+      - SUCCESS
+      - FAILURE
+      type: string
     BankIncomeRefreshUpdateWebhook:
       additionalProperties: true
       description: Fired when a change to the user's income is detected. You should
@@ -60276,76 +61579,6 @@ components:
               initializing Link and create the Item(s) again.'
             error_type: ASSET_REPORT_ERROR
             request_id: m8MDnv9okwxFNBV
-    BaseReportsProductReadyWebhook:
-      additionalProperties: true
-      description: Fired when the Base Report has been generated and `/cra/base_report/get`
-        is ready to be called.  If you attempt to retrieve a Base Report before this
-        webhook has fired, you’ll receive a response with the HTTP status code 400
-        and a Plaid error code of `PRODUCT_NOT_READY`.
-      properties:
-        webhook_type:
-          description: '`BASE_REPORT`'
-          type: string
-        webhook_code:
-          description: '`PRODUCT_READY`'
-          type: string
-        user_id:
-          description: The `user_id` corresponding to the User ID the webhook has
-            fired for.
-          type: string
-        environment:
-          $ref: '#/components/schemas/WebhookEnvironmentValues'
-      required:
-      - asset_report_id
-      - environment
-      - webhook_code
-      - webhook_type
-      title: BaseReportsProductReadyWebhook
-      type: object
-      x-hidden-from-docs: true
-      x-examples:
-        example-1:
-          webhook_type: BASE_REPORT
-          webhook_code: PRODUCT_READY
-          user_id: wz666MBjYWTp2PDzzggYhM6oWWmBb
-    BaseReportsErrorWebhook:
-      additionalProperties: true
-      description: Fired when Base Report generation has failed. The resulting `error`
-        will have an `error_type` of `BASE_REPORT_ERROR`.
-      properties:
-        webhook_type:
-          description: '`BASE_REPORT`'
-          type: string
-        webhook_code:
-          description: '`ERROR`'
-          type: string
-        error:
-          $ref: '#/components/schemas/PlaidError'
-        asset_report_id:
-          description: The ID associated with the Asset Report.
-          type: string
-        environment:
-          $ref: '#/components/schemas/WebhookEnvironmentValues'
-      required:
-      - environment
-      - error
-      - user_id
-      - webhook_code
-      - webhook_type
-      title: BaseReportsErrorWebhook
-      type: object
-      x-hidden-from-docs: true
-      x-examples:
-        example-1:
-          webhook_type: BASE_REPORT
-          webhook_code: ERROR
-          user_id: wz666MBjYWTp2PDzzggYhM6oWWmBb
-          error:
-            error_code: PRODUCT_NOT_ENABLED
-            error_message: 'The following products are not supported by this institution:
-              Identity'
-            error_type: BASE_REPORT_ERROR
-            request_id: m8MDnv9okwxFNBV
     Warning:
       additionalProperties: true
       description: It is possible for an Asset Report to be returned with missing
@@ -60590,6 +61823,207 @@ components:
       - owners
       - transactions
       title: AccountAssets
+    AssetReportInvestments:
+      additionalProperties: true
+      description: A transaction within an investment account.
+      properties:
+        investment_transaction_id:
+          description: The ID of the Investment transaction, unique across all Plaid
+            transactions. Like all Plaid identifiers, the `investment_transaction_id`
+            is case sensitive.
+          type: string
+        account_id:
+          description: The `account_id` of the account against which this transaction
+            posted.
+          type: string
+        security_id:
+          description: The `security_id` to which this transaction is related.
+          nullable: true
+          type: string
+        date:
+          description: The [ISO 8601](https://wikipedia.org/wiki/ISO_8601) posting
+            date for the transaction.
+          format: date
+          type: string
+        name:
+          description: The institution’s description of the transaction.
+          type: string
+        quantity:
+          description: The number of units of the security involved in this transaction.
+            Positive for buy transactions; negative for sell transactions.
+          format: double
+          type: number
+        amount:
+          description: The complete value of the transaction. Positive values when
+            cash is debited, e.g. purchases of stock; negative values when cash is
+            credited, e.g. sales of stock. Treatment remains the same for cash-only
+            movements unassociated with securities.
+          format: double
+          type: number
+        price:
+          description: The price of the security at which this transaction occurred.
+          format: double
+          type: number
+        fees:
+          description: The combined value of all fees applied to this transaction
+          format: double
+          nullable: true
+          type: number
+        type:
+          $ref: '#/components/schemas/InvestmentTransactionType'
+        subtype:
+          $ref: '#/components/schemas/InvestmentTransactionSubtype'
+        iso_currency_code:
+          description: The ISO-4217 currency code of the transaction. Always `null`
+            if `unofficial_currency_code` is non-`null`.
+          nullable: true
+          type: string
+        unofficial_currency_code:
+          description: |-
+            The unofficial currency code associated with the holding. Always `null` if `iso_currency_code` is non-`null`. Unofficial currency codes are used for currencies that do not have official ISO currency codes, such as cryptocurrencies and the currencies of certain countries.
+
+            See the [currency code schema](https://plaid.com/docs/api/accounts#currency-code-schema) for a full listing of supported `iso_currency_code`s.
+          nullable: true
+          type: string
+      required:
+      - account_id
+      - amount
+      - date
+      - fees
+      - investment_transaction_id
+      - iso_currency_code
+      - name
+      - price
+      - quantity
+      - security_id
+      - subtype
+      - type
+      - unofficial_currency_code
+      title: AssetReportInvestments
+      type: object
+    AssetReportInvestmentHolding:
+      additionalProperties: true
+      description: A securities holding at an institution.
+      properties:
+        account_id:
+          description: The Plaid `account_id` associated with the holding.
+          type: string
+        security_id:
+          description: The Plaid `security_id` associated with the holding. Security
+            data is not specific to a user's account; any user who held the same security
+            at the same financial institution at the same time would have identical
+            security data. The `security_id` for the same security will typically
+            be the same across different institutions, but this is not guaranteed.
+            The `security_id` does not typically change, but may change if inherent
+            details of the security change due to a corporate action, for example,
+            in the event of a ticker symbol change or CUSIP change.
+          type: string
+        ticker_symbol:
+          description: The holding's trading symbol for publicly traded holdings,
+            and otherwise a short identifier if available.
+          nullable: true
+          type: string
+        institution_price:
+          description: The last price given by the institution for this security.
+          format: double
+          type: number
+        institution_price_as_of:
+          description: The date at which `institution_price` was current.
+          format: date
+          nullable: true
+          type: string
+        institution_value:
+          description: The value of the holding, as reported by the institution.
+          format: double
+          type: number
+        cost_basis:
+          description: The original total value of the holding. This field is calculated
+            by Plaid as the sum of the purchase price of all of the shares in the
+            holding.
+          format: double
+          nullable: true
+          type: number
+        quantity:
+          description: The total quantity of the asset held, as reported by the financial
+            institution. If the security is an option, `quantity` will reflect the
+            total number of options (typically the number of contracts multiplied
+            by 100), not the number of contracts.
+          format: double
+          type: number
+        iso_currency_code:
+          description: The ISO-4217 currency code of the holding. Always `null` if
+            `unofficial_currency_code` is non-`null`.
+          nullable: true
+          type: string
+        unofficial_currency_code:
+          description: |
+            The unofficial currency code associated with the holding. Always `null` if `iso_currency_code` is non-`null`. Unofficial currency codes are used for currencies that do not have official ISO currency codes, such as cryptocurrencies and the currencies of certain countries.
+
+            See the [currency code schema](https://plaid.com/docs/api/accounts#currency-code-schema) for a full listing of supported `iso_currency_code`s.
+          nullable: true
+          type: string
+      required:
+      - account_id
+      - cost_basis
+      - institution_price
+      - institution_value
+      - iso_currency_code
+      - quantity
+      - security_id
+      - ticker_symbol
+      - unofficial_currency_code
+      title: AssetReportInvestmentHolding
+      type: object
+    AssetReportInvestmentSecurity:
+      additionalProperties: true
+      description: Investment security associated with the account.
+      properties:
+        security_id:
+          description: A unique, Plaid-specific identifier for the security, used
+            to associate securities with holdings. Like all Plaid identifiers, the
+            `security_id` is case sensitive. The `security_id` may change if inherent
+            details of the security change due to a corporate action, for example,
+            in the event of a ticker symbol change or CUSIP change.
+          type: string
+        name:
+          description: A descriptive name for the security, suitable for display.
+          nullable: true
+          type: string
+        ticker_symbol:
+          description: The security’s trading symbol for publicly traded securities,
+            and otherwise a short identifier if available.
+          nullable: true
+          type: string
+        type:
+          description: |-
+            The security type of the holding. Valid security types are:
+
+            `cash`: Cash, currency, and money market funds
+
+            `cryptocurrency`: Digital or virtual currencies
+
+            `derivative`: Options, warrants, and other derivative instruments
+
+            `equity`: Domestic and foreign equities
+
+            `etf`: Multi-asset exchange-traded investment funds
+
+            `fixed income`: Bonds and certificates of deposit (CDs)
+
+            `loan`: Loans and loan receivables
+
+            `mutual fund`: Open- and closed-end vehicles pooling funds of multiple investors
+
+            `other`: Unknown or other investment types
+          nullable: true
+          type: string
+      required:
+      - name
+      - security_id
+      - ticker_symbol
+      - type
+      title: AssetReportInvestmentSecurity
+      type: object
     OwnershipType:
       description: |-
         How an asset is owned.
@@ -74358,51 +75792,6 @@ components:
       - error_message
       - error_type
       type: object
-    BankIncomeCompleteWebhook:
-      additionalProperties: true
-      description: Fired when a refreshed bank income report has finished generating
-        or failed to generate, triggered by calling `/cra/bank_income/get`.
-      properties:
-        webhook_type:
-          description: '`CRA_INCOME`'
-          type: string
-        webhook_code:
-          description: '`BANK_INCOME_COMPLETE`'
-          type: string
-        user_id:
-          description: The `user_id` corresponding to the user the webhook has fired
-            for.
-          type: string
-        result:
-          $ref: '#/components/schemas/BankIncomeCompleteResult'
-        environment:
-          $ref: '#/components/schemas/WebhookEnvironmentValues'
-      required:
-      - environment
-      - result
-      - user_id
-      - webhook_code
-      - webhook_type
-      title: BankIncomeCompleteWebhook
-      type: object
-      x-examples:
-        example-1:
-          webhook_type: CRA_INCOME
-          webhook_code: BANK_INCOME_COMPLETE
-          user_id: wz666MBjYWTp2PDzzggYhM6oWWmBb
-          result: SUCCESS
-          environment: production
-    BankIncomeCompleteResult:
-      description: |-
-        The result of the bank income refresh report generation
-
-        `SUCCESS`: The refreshed report was successfully generated and can be retrieved via `/cra/bank_income/get`.
-
-        `FAILURE`: The refreshed report failed to be generated
-      enum:
-      - SUCCESS
-      - FAILURE
-      type: string
     AssetReportFreddieGetRequest:
       additionalProperties: true
       description: AssetReportFreddieGetRequest defines the request schema for `credit/asset_report/freddie_mac/get`
@@ -76240,6 +77629,7 @@ components:
                       VendorOrderIdentifier: VendorOrderIdentifier
                   REPORTING_INFORMATION:
                     ReportDateTime: ReportDateTime
+                    ReportingInformationParentIdentifier: ReportingInformationParentIdentifier
                     ReportingInformationIdentifier: ReportingInformationIdentifier
                     ReportIdentifierType: ReportIdentifierType
                   VERIFICATION_OF_ASSET_RESPONSE:
@@ -76344,6 +77734,7 @@ components:
                       VendorOrderIdentifier: VendorOrderIdentifier
                   REPORTING_INFORMATION:
                     ReportDateTime: ReportDateTime
+                    ReportingInformationParentIdentifier: ReportingInformationParentIdentifier
                     ReportingInformationIdentifier: ReportingInformationIdentifier
                     ReportIdentifierType: ReportIdentifierType
                   VERIFICATION_OF_ASSET_RESPONSE:
@@ -76489,6 +77880,7 @@ components:
                       VendorOrderIdentifier: VendorOrderIdentifier
                   REPORTING_INFORMATION:
                     ReportDateTime: ReportDateTime
+                    ReportingInformationParentIdentifier: ReportingInformationParentIdentifier
                     ReportingInformationIdentifier: ReportingInformationIdentifier
                     ReportIdentifierType: ReportIdentifierType
                   VERIFICATION_OF_ASSET_RESPONSE:
@@ -76577,6 +77969,7 @@ components:
                       VendorOrderIdentifier: VendorOrderIdentifier
                   REPORTING_INFORMATION:
                     ReportDateTime: ReportDateTime
+                    ReportingInformationParentIdentifier: ReportingInformationParentIdentifier
                     ReportingInformationIdentifier: ReportingInformationIdentifier
                     ReportIdentifierType: ReportIdentifierType
                   VERIFICATION_OF_ASSET_RESPONSE:
@@ -76725,6 +78118,7 @@ components:
                     VendorOrderIdentifier: VendorOrderIdentifier
                 REPORTING_INFORMATION:
                   ReportDateTime: ReportDateTime
+                  ReportingInformationParentIdentifier: ReportingInformationParentIdentifier
                   ReportingInformationIdentifier: ReportingInformationIdentifier
                   ReportIdentifierType: ReportIdentifierType
                 VERIFICATION_OF_ASSET_RESPONSE:
@@ -76829,6 +78223,7 @@ components:
                     VendorOrderIdentifier: VendorOrderIdentifier
                 REPORTING_INFORMATION:
                   ReportDateTime: ReportDateTime
+                  ReportingInformationParentIdentifier: ReportingInformationParentIdentifier
                   ReportingInformationIdentifier: ReportingInformationIdentifier
                   ReportIdentifierType: ReportIdentifierType
                 VERIFICATION_OF_ASSET_RESPONSE:
@@ -76989,6 +78384,7 @@ components:
                     VendorOrderIdentifier: VendorOrderIdentifier
                 REPORTING_INFORMATION:
                   ReportDateTime: ReportDateTime
+                  ReportingInformationParentIdentifier: ReportingInformationParentIdentifier
                   ReportingInformationIdentifier: ReportingInformationIdentifier
                   ReportIdentifierType: ReportIdentifierType
                 VERIFICATION_OF_ASSET_RESPONSE:
@@ -77077,6 +78473,7 @@ components:
                     VendorOrderIdentifier: VendorOrderIdentifier
                 REPORTING_INFORMATION:
                   ReportDateTime: ReportDateTime
+                  ReportingInformationParentIdentifier: ReportingInformationParentIdentifier
                   ReportingInformationIdentifier: ReportingInformationIdentifier
                   ReportIdentifierType: ReportIdentifierType
                 VERIFICATION_OF_ASSET_RESPONSE:
@@ -77220,6 +78617,7 @@ components:
                   VendorOrderIdentifier: VendorOrderIdentifier
               REPORTING_INFORMATION:
                 ReportDateTime: ReportDateTime
+                ReportingInformationParentIdentifier: ReportingInformationParentIdentifier
                 ReportingInformationIdentifier: ReportingInformationIdentifier
                 ReportIdentifierType: ReportIdentifierType
               VERIFICATION_OF_ASSET_RESPONSE:
@@ -77324,6 +78722,7 @@ components:
                   VendorOrderIdentifier: VendorOrderIdentifier
               REPORTING_INFORMATION:
                 ReportDateTime: ReportDateTime
+                ReportingInformationParentIdentifier: ReportingInformationParentIdentifier
                 ReportingInformationIdentifier: ReportingInformationIdentifier
                 ReportIdentifierType: ReportIdentifierType
               VERIFICATION_OF_ASSET_RESPONSE:
@@ -77530,6 +78929,7 @@ components:
                 VendorOrderIdentifier: VendorOrderIdentifier
             REPORTING_INFORMATION:
               ReportDateTime: ReportDateTime
+              ReportingInformationParentIdentifier: ReportingInformationParentIdentifier
               ReportingInformationIdentifier: ReportingInformationIdentifier
               ReportIdentifierType: ReportIdentifierType
             VERIFICATION_OF_ASSET_RESPONSE:
@@ -77634,6 +79034,7 @@ components:
                 VendorOrderIdentifier: VendorOrderIdentifier
             REPORTING_INFORMATION:
               ReportDateTime: ReportDateTime
+              ReportingInformationParentIdentifier: ReportingInformationParentIdentifier
               ReportingInformationIdentifier: ReportingInformationIdentifier
               ReportIdentifierType: ReportIdentifierType
             VERIFICATION_OF_ASSET_RESPONSE:
@@ -77755,6 +79156,7 @@ components:
               VendorOrderIdentifier: VendorOrderIdentifier
           REPORTING_INFORMATION:
             ReportDateTime: ReportDateTime
+            ReportingInformationParentIdentifier: ReportingInformationParentIdentifier
             ReportingInformationIdentifier: ReportingInformationIdentifier
             ReportIdentifierType: ReportIdentifierType
           VERIFICATION_OF_ASSET_RESPONSE:
@@ -77859,6 +79261,7 @@ components:
               VendorOrderIdentifier: VendorOrderIdentifier
           REPORTING_INFORMATION:
             ReportDateTime: ReportDateTime
+            ReportingInformationParentIdentifier: ReportingInformationParentIdentifier
             ReportingInformationIdentifier: ReportingInformationIdentifier
             ReportIdentifierType: ReportIdentifierType
           VERIFICATION_OF_ASSET_RESPONSE:
@@ -77984,6 +79387,7 @@ components:
             VendorOrderIdentifier: VendorOrderIdentifier
         REPORTING_INFORMATION:
           ReportDateTime: ReportDateTime
+          ReportingInformationParentIdentifier: ReportingInformationParentIdentifier
           ReportingInformationIdentifier: ReportingInformationIdentifier
           ReportIdentifierType: ReportIdentifierType
         VERIFICATION_OF_ASSET_RESPONSE:
@@ -78101,6 +79505,7 @@ components:
       description: Information about an report identifier and a report name.
       example:
         ReportDateTime: ReportDateTime
+        ReportingInformationParentIdentifier: ReportingInformationParentIdentifier
         ReportingInformationIdentifier: ReportingInformationIdentifier
         ReportIdentifierType: ReportIdentifierType
       properties:
@@ -78111,6 +79516,10 @@ components:
         ReportIdentifierType:
           description: Documentation not found in the MISMO model viewer and not provided
             by Freddie Mac. The value can only be "ReportID"
+          type: string
+        ReportingInformationParentIdentifier:
+          description: Documentation not found in the MISMO model viewer and not provided
+            by Freddie Mac.
           type: string
         ReportingInformationIdentifier:
           description: Documentation not found in the MISMO model viewer and not provided
@@ -78605,6 +80014,7 @@ components:
                   VendorOrderIdentifier: VendorOrderIdentifier
               REPORTING_INFORMATION:
                 ReportDateTime: ReportDateTime
+                ReportingInformationParentIdentifier: ReportingInformationParentIdentifier
                 ReportingInformationIdentifier: ReportingInformationIdentifier
                 ReportIdentifierType: ReportIdentifierType
               VERIFICATION_OF_ASSET_RESPONSE:
@@ -78693,6 +80103,7 @@ components:
                   VendorOrderIdentifier: VendorOrderIdentifier
               REPORTING_INFORMATION:
                 ReportDateTime: ReportDateTime
+                ReportingInformationParentIdentifier: ReportingInformationParentIdentifier
                 ReportingInformationIdentifier: ReportingInformationIdentifier
                 ReportIdentifierType: ReportIdentifierType
               VERIFICATION_OF_ASSET_RESPONSE:
@@ -78829,6 +80240,7 @@ components:
                 VendorOrderIdentifier: VendorOrderIdentifier
             REPORTING_INFORMATION:
               ReportDateTime: ReportDateTime
+              ReportingInformationParentIdentifier: ReportingInformationParentIdentifier
               ReportingInformationIdentifier: ReportingInformationIdentifier
               ReportIdentifierType: ReportIdentifierType
             VERIFICATION_OF_ASSET_RESPONSE:
@@ -78917,6 +80329,7 @@ components:
                 VendorOrderIdentifier: VendorOrderIdentifier
             REPORTING_INFORMATION:
               ReportDateTime: ReportDateTime
+              ReportingInformationParentIdentifier: ReportingInformationParentIdentifier
               ReportingInformationIdentifier: ReportingInformationIdentifier
               ReportIdentifierType: ReportIdentifierType
             VERIFICATION_OF_ASSET_RESPONSE:
@@ -79022,6 +80435,7 @@ components:
               VendorOrderIdentifier: VendorOrderIdentifier
           REPORTING_INFORMATION:
             ReportDateTime: ReportDateTime
+            ReportingInformationParentIdentifier: ReportingInformationParentIdentifier
             ReportingInformationIdentifier: ReportingInformationIdentifier
             ReportIdentifierType: ReportIdentifierType
           VERIFICATION_OF_ASSET_RESPONSE:
@@ -79110,6 +80524,7 @@ components:
               VendorOrderIdentifier: VendorOrderIdentifier
           REPORTING_INFORMATION:
             ReportDateTime: ReportDateTime
+            ReportingInformationParentIdentifier: ReportingInformationParentIdentifier
             ReportingInformationIdentifier: ReportingInformationIdentifier
             ReportIdentifierType: ReportIdentifierType
           VERIFICATION_OF_ASSET_RESPONSE:
@@ -79219,6 +80634,7 @@ components:
             VendorOrderIdentifier: VendorOrderIdentifier
         REPORTING_INFORMATION:
           ReportDateTime: ReportDateTime
+          ReportingInformationParentIdentifier: ReportingInformationParentIdentifier
           ReportingInformationIdentifier: ReportingInformationIdentifier
           ReportIdentifierType: ReportIdentifierType
         VERIFICATION_OF_ASSET_RESPONSE:
@@ -80699,20 +82115,20 @@ components:
           account_name: account_name
           statements:
           - month: 0
-            year: 6
+            year: 2010
             statement_id: statement_id
           - month: 0
-            year: 6
+            year: 2010
             statement_id: statement_id
         - account_type: account_type
           account_id: account_id
           account_name: account_name
           statements:
           - month: 0
-            year: 6
+            year: 2010
             statement_id: statement_id
           - month: 0
-            year: 6
+            year: 2010
             statement_id: statement_id
         institution_name: institution_name
         request_id: request_id
@@ -80750,17 +82166,17 @@ components:
       type: object
     StatementsAccount:
       additionalProperties: true
-      description: Account associated with the item.
+      description: Account associated with the Item.
       example:
         account_type: account_type
         account_id: account_id
         account_name: account_name
         statements:
         - month: 0
-          year: 6
+          year: 2010
           statement_id: statement_id
         - month: 0
-          year: 6
+          year: 2010
           statement_id: statement_id
       properties:
         account_id:
@@ -80791,7 +82207,7 @@ components:
       description: A statement's metadata associated with an account
       example:
         month: 0
-        year: 6
+        year: 2010
         statement_id: statement_id
       properties:
         statement_id:
@@ -80802,7 +82218,8 @@ components:
             through December).'
           type: integer
         year:
-          description: 'Year. Possible values: 2010-{current_year}.'
+          description: The year of statement.
+          minimum: 2010
           type: integer
       required:
       - month
@@ -80909,8 +82326,8 @@ components:
         transaction_code:
           $ref: '#/components/schemas/TransactionCode'
         personal_finance_category_icon_url:
-          description: A link to the icon associated with the primary personal finance
-            category. The logo will always be 100x100 pixels.
+          description: The URL of an icon associated with the primary personal finance
+            category. The icon will always be 100×100 pixel PNG file.
           type: string
           x-hidden-from-docs: true
         counterparties:
@@ -80920,6 +82337,11 @@ components:
           items:
             $ref: '#/components/schemas/TransactionCounterparty'
           type: array
+          x-hidden-from-docs: true
+        merchant_entity_id:
+          description: A unique, stable, Plaid-generated ID that maps to the merchant.
+          nullable: true
+          type: string
           x-hidden-from-docs: true
       required:
       - account_owner
@@ -80989,6 +82411,8 @@ components:
           items:
             $ref: '#/components/schemas/AssetReportTransaction'
           type: array
+        investments:
+          $ref: '#/components/schemas/AssetReportInvestments'
         owners:
           description: Data returned by the financial institution about the account
             owner or owners.For business accounts, the name reported may be either
