@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/plaid/plaid-go/v16/plaid"
+	"github.com/plaid/plaid-go/v17/plaid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -50,8 +50,8 @@ func TestEnrichGet(t *testing.T) {
 		},
 	}
 
-	enrichGetResp, _, err := testClient.PlaidApi.TransactionsEnrich(ctx).TransactionsEnrichGetRequest(
-		*plaid.NewTransactionsEnrichGetRequest(
+	enrichGetResp, _, err := testClient.PlaidApi.TransactionsEnrich(ctx).TransactionsEnrichRequest(
+		*plaid.NewTransactionsEnrichRequest(
 			"depository",
 			sampleTransactionsToEnrich,
 		),
