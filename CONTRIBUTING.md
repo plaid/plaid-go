@@ -1,6 +1,8 @@
 # Contributing
 
-Instructions for contributing to [plaid-go][1]. A go client library for the [Plaid API][2]. This library is fully generated from the [Plaid OpenAPI spec](3). The library is generated internally, so don't try to iterate from this repo.
+Instructions for contributing to [plaid-go][1]. A go client library for the [Plaid API][2]. This library is fully generated from the [Plaid OpenAPI spec](3). 
+
+This library cannot directly accept PRs from the public as it is generated from internal Plaid sources on the internal Plaid GitHub instance and any changes made directly to this repo will be overwritten. If you submit a PR and it is accepted, a member of Plaid engineering will copy and paste your change into the upstream, internal version of this repo rather than merging your PR. Plaid employees should make any changes on the internal Plaid GitHub and not on the public repo. 
 
 ## Running Tests
 
