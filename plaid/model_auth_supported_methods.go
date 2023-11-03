@@ -22,6 +22,8 @@ type AuthSupportedMethods struct {
 	InstantMatch bool `json:"instant_match"`
 	// Indicates if automated microdeposits are supported.
 	AutomatedMicroDeposits bool `json:"automated_micro_deposits"`
+	// Indicates if instant microdeposits are supported
+	InstantMicroDeposits bool `json:"instant_micro_deposits"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -31,11 +33,12 @@ type _AuthSupportedMethods AuthSupportedMethods
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAuthSupportedMethods(instantAuth bool, instantMatch bool, automatedMicroDeposits bool) *AuthSupportedMethods {
+func NewAuthSupportedMethods(instantAuth bool, instantMatch bool, automatedMicroDeposits bool, instantMicroDeposits bool) *AuthSupportedMethods {
 	this := AuthSupportedMethods{}
 	this.InstantAuth = instantAuth
 	this.InstantMatch = instantMatch
 	this.AutomatedMicroDeposits = automatedMicroDeposits
+	this.InstantMicroDeposits = instantMicroDeposits
 	return &this
 }
 
@@ -60,7 +63,7 @@ func (o *AuthSupportedMethods) GetInstantAuth() bool {
 // GetInstantAuthOk returns a tuple with the InstantAuth field value
 // and a boolean to check if the value has been set.
 func (o *AuthSupportedMethods) GetInstantAuthOk() (*bool, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.InstantAuth, true
@@ -84,7 +87,7 @@ func (o *AuthSupportedMethods) GetInstantMatch() bool {
 // GetInstantMatchOk returns a tuple with the InstantMatch field value
 // and a boolean to check if the value has been set.
 func (o *AuthSupportedMethods) GetInstantMatchOk() (*bool, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.InstantMatch, true
@@ -108,7 +111,7 @@ func (o *AuthSupportedMethods) GetAutomatedMicroDeposits() bool {
 // GetAutomatedMicroDepositsOk returns a tuple with the AutomatedMicroDeposits field value
 // and a boolean to check if the value has been set.
 func (o *AuthSupportedMethods) GetAutomatedMicroDepositsOk() (*bool, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.AutomatedMicroDeposits, true
@@ -117,6 +120,29 @@ func (o *AuthSupportedMethods) GetAutomatedMicroDepositsOk() (*bool, bool) {
 // SetAutomatedMicroDeposits sets field value
 func (o *AuthSupportedMethods) SetAutomatedMicroDeposits(v bool) {
 	o.AutomatedMicroDeposits = v
+}
+
+func (o *AuthSupportedMethods) GetInstantMicroDeposits() bool {
+	if o == nil {
+		var ret bool
+		return ret
+	}
+
+	return o.InstantMicroDeposits
+}
+
+// GetInstantMicroDeposits return a tuple with the InstantMicroDeposits field value
+// and a boolean to check if the value has been set.
+func (o *AuthSupportedMethods) GetInstantMicroDepositsOk() (*bool, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.InstantMicroDeposits, true
+}
+
+// SetInstantMicroDeposits sets field value
+func (o *AuthSupportedMethods) SetInstantMicroDeposits(v bool) {
+	o.InstantMicroDeposits = v
 }
 
 func (o AuthSupportedMethods) MarshalJSON() ([]byte, error) {
@@ -129,6 +155,9 @@ func (o AuthSupportedMethods) MarshalJSON() ([]byte, error) {
 	}
 	if true {
 		toSerialize["automated_micro_deposits"] = o.AutomatedMicroDeposits
+	}
+	if true {
+		toSerialize["instant_micro_deposits"] = o.InstantMicroDeposits
 	}
 
 	for key, value := range o.AdditionalProperties {
@@ -151,6 +180,7 @@ func (o *AuthSupportedMethods) UnmarshalJSON(bytes []byte) (err error) {
 		delete(additionalProperties, "instant_auth")
 		delete(additionalProperties, "instant_match")
 		delete(additionalProperties, "automated_micro_deposits")
+		delete(additionalProperties, "instant_micro_deposits")
 		o.AdditionalProperties = additionalProperties
 	}
 
@@ -192,5 +222,3 @@ func (v *NullableAuthSupportedMethods) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-
