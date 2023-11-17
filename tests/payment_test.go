@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/plaid/plaid-go/v17/plaid"
+	"github.com/plaid/plaid-go/v18/plaid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -146,15 +146,15 @@ func commonPaymentTestFlows(t *testing.T, ctx context.Context, testClient *plaid
 
 	if useLinkToken {
 		user := plaid.NewLinkTokenCreateRequestUser(time.Now().String())
-		request := plaid.LinkTokenCreateRequest{
-			ClientName:        "Plaid Test",
-			Products:          &[]plaid.Products{plaid.PRODUCTS_PAYMENT_INITIATION},
-			CountryCodes:      []plaid.CountryCode{plaid.COUNTRYCODE_US},
-			Language:          "en",
-			PaymentInitiation: paymentInitiation,
-			User:              *user,
-		}
-		linkTokenCreateResp, _, err := testClient.PlaidApi.LinkTokenCreate(ctx).LinkTokenCreateRequest(request).Execute()
+		request := plaid.NewLinkTokenCreateRequest(
+			"Plaid Test",
+			"en",
+			[]plaid.CountryCode{plaid.COUNTRYCODE_US},
+			*user,
+		)
+		request.SetProducts([]plaid.Products{plaid.PRODUCTS_PAYMENT_INITIATION})
+		request.SetPaymentInitiation(*paymentInitiation)
+		linkTokenCreateResp, _, err := testClient.PlaidApi.LinkTokenCreate(ctx).LinkTokenCreateRequest(*request).Execute()
 
 		assert.NoError(t, err)
 		assert.NotNil(t, linkTokenCreateResp.LinkToken)
