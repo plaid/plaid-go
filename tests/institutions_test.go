@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/plaid/plaid-go/v18/plaid"
+	"github.com/plaid/plaid-go/v19/plaid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -98,7 +98,6 @@ func TestInstitutionsSearch(t *testing.T) {
 
 	sandboxInstitutionQuery := "Platypus"
 	paymentInitiationMetadataSandboxInstitutionQuery := "Royal Bank of Plaid"
-	products := []plaid.Products{plaid.PRODUCTS_TRANSACTIONS}
 	testCases := []struct {
 		desc         string
 		query        string
@@ -137,8 +136,9 @@ func TestInstitutionsSearch(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			request := plaid.NewInstitutionsSearchRequest(tc.query, products, tc.countryCodes)
+			request := plaid.NewInstitutionsSearchRequest(tc.query, tc.countryCodes)
 			request.SetOptions(tc.options)
+			request.SetProducts([]plaid.Products{plaid.PRODUCTS_TRANSACTIONS})
 			instsResp, _, err := testClient.PlaidApi.InstitutionsSearch(ctx).InstitutionsSearchRequest(*request).Execute()
 			if len(tc.countryCodes) == 0 {
 				assert.Error(t, err)
