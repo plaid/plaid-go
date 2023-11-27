@@ -7,7 +7,7 @@ info:
     details.
   termsOfService: https://plaid.com/legal/
   title: The Plaid API
-  version: 2020-09-14_1.470.1
+  version: 2020-09-14_1.474.0
 servers:
 - description: Production
   url: https://production.plaid.com
@@ -14727,6 +14727,7 @@ components:
           count: 40
           include_original_description: false
           include_personal_finance_category: false
+          days_requested: 107
         secret: secret
         client_id: client_id
         start_date: 2000-01-23
@@ -14777,6 +14778,7 @@ components:
         count: 40
         include_original_description: false
         include_personal_finance_category: false
+        days_requested: 107
       properties:
         account_ids:
           description: |-
@@ -14825,6 +14827,15 @@ components:
             default.
           type: boolean
           x-hidden-from-docs: true
+        days_requested:
+          default: 90
+          description: If Transactions has not already been added to the Item, this
+            option controls the maximum number of days of transaction history Plaid
+            will request from the financial institution. If Transactions has already
+            been added to the Item, this field will have no effect.
+          maximum: 730
+          minimum: 1
+          type: integer
       type: object
     TransactionsGetResponse:
       additionalProperties: true
@@ -15564,6 +15575,7 @@ components:
           include_logo_and_counterparty_beta: false
           include_original_description: false
           include_personal_finance_category: false
+          days_requested: 440
         secret: secret
         client_id: client_id
       properties:
@@ -15609,6 +15621,7 @@ components:
         include_logo_and_counterparty_beta: false
         include_original_description: false
         include_personal_finance_category: false
+        days_requested: 440
       properties:
         include_original_description:
           default: false
@@ -15631,6 +15644,15 @@ components:
             default.
           type: boolean
           x-hidden-from-docs: true
+        days_requested:
+          default: 90
+          description: If Transactions has not already been added to the Item, this
+            option controls the maximum number of days of transaction history Plaid
+            will request from the financial institution. If Transactions has already
+            been added to the Item, this field will have no effect.
+          maximum: 730
+          minimum: 1
+          type: integer
       type: object
     TransactionsSyncResponse:
       additionalProperties: true
@@ -16166,7 +16188,6 @@ components:
           $ref: '#/components/schemas/InstitutionsSearchRequestOptions'
       required:
       - country_codes
-      - products
       - query
       type: object
     InstitutionsSearchRequestOptions:
@@ -16961,7 +16982,7 @@ components:
           override_password: pass_good
           income_verification:
             bank_income:
-              days_requested: 0
+              days_requested: 6
             income_source_types:
             - null
             - null
@@ -16970,6 +16991,7 @@ components:
           transactions:
             end_date: 2000-01-23
             start_date: 2000-01-23
+            days_requested: 59
         secret: secret
         user_token: user_token
         initial_products:
@@ -17031,7 +17053,7 @@ components:
         override_password: pass_good
         income_verification:
           bank_income:
-            days_requested: 0
+            days_requested: 6
           income_source_types:
           - null
           - null
@@ -17040,6 +17062,7 @@ components:
         transactions:
           end_date: 2000-01-23
           start_date: 2000-01-23
+          days_requested: 59
       properties:
         webhook:
           description: Specify a webhook to associate with the new Item.
@@ -17066,6 +17089,7 @@ components:
       example:
         end_date: 2000-01-23
         start_date: 2000-01-23
+        days_requested: 59
       properties:
         start_date:
           description: The earliest date for which to fetch transaction history. Dates
@@ -17077,6 +17101,14 @@ components:
             Dates should be formatted as YYYY-MM-DD.
           format: date
           type: string
+        days_requested:
+          default: 90
+          description: The maximum number of days of transaction history to request
+            for the Transactions product.
+          maximum: 730
+          minimum: 1
+          type: integer
+          x-hidden-from-docs: true
       title: SandboxPublicTokenCreateRequestOptionsTransactions
       type: object
     SandboxPublicTokenCreateRequestOptionsIncomeVerification:
@@ -17085,7 +17117,7 @@ components:
         array.
       example:
         bank_income:
-          days_requested: 0
+          days_requested: 6
         income_source_types:
         - null
         - null
@@ -17104,7 +17136,7 @@ components:
       description: Specifies options for Bank Income. This field is required if `income_verification`
         is included in the `initial_products` array and `bank` is specified in `income_source_types`.
       example:
-        days_requested: 0
+        days_requested: 6
       properties:
         days_requested:
           description: The number of days of data to request for the Bank Income product
@@ -17841,6 +17873,7 @@ components:
           include_logo_and_counterparty_beta: false
           include_original_description: false
           include_personal_finance_category: false
+          days_requested: 440
         processor_token: processor_token
         secret: secret
         client_id: client_id
@@ -21867,6 +21900,7 @@ components:
           - teal
           - zero_hash
           - taba_pay
+          - knot
           type: string
       required:
       - access_token
@@ -22407,6 +22441,8 @@ components:
           employment_source_types:
           - null
           - null
+        transactions:
+          days_requested: 515
         access_token: access_token
         android_package_name: android_package_name
         identity_verification:
@@ -22700,6 +22736,8 @@ components:
           $ref: '#/components/schemas/LinkTokenInvestmentsAuth'
         hosted_link:
           $ref: '#/components/schemas/LinkTokenCreateHostedLink'
+        transactions:
+          $ref: '#/components/schemas/LinkTokenTransactions'
         cra_enabled:
           description: If `true`, request a CRA connection. Defaults to `false`.
           type: boolean
@@ -22793,6 +22831,23 @@ components:
           type: boolean
       type: object
       x-hidden-from-docs: true
+    LinkTokenTransactions:
+      description: Configuration parameters for the Transactions product
+      example:
+        days_requested: 515
+      properties:
+        days_requested:
+          default: 90
+          description: The maximum number of days of transaction history to request
+            for the Transactions product. For developer accounts created after December
+            3, 2023, if no value is specified, this will default to 90 days. For developer
+            accounts created on December 3, 2023 or earlier, if no value is specified,
+            this will default to 730 days until June 24, 2024, at which point it will
+            default to 90 days.
+          maximum: 730
+          minimum: 1
+          type: integer
+      type: object
     LinkTokenCreateHostedLink:
       additionalProperties: true
       description: Configuration parameters for Hosted Link
@@ -22927,7 +22982,7 @@ components:
         end_date:
           description: The end date for statements, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
             “YYYY-MM-DD” format, e.g. "2020-10-30". If no value is provided, this
-            will default to the current date.
+            will default to the current date. You can request up to two years of data.
           format: date
           type: string
       type: object
@@ -26173,6 +26228,122 @@ components:
           webhook_type: BEACON
           webhook_code: USER_STATUS_UPDATED
           beacon_user_id: becusr_4WciCrtbxF76T8
+          environment: production
+    BeaconReportCreatedWebhook:
+      additionalProperties: true
+      description: Fired when one of your Beacon Users is first reported to the Beacon
+        network.
+      properties:
+        webhook_type:
+          description: '`BEACON`'
+          type: string
+        webhook_code:
+          description: '`REPORT_CREATED`'
+          type: string
+        beacon_report_id:
+          description: The ID of the associated Beacon Report.
+          type: string
+        environment:
+          $ref: '#/components/schemas/WebhookEnvironmentValues'
+      required:
+      - beacon_report_id
+      - environment
+      - webhook_code
+      - webhook_type
+      title: BeaconReportCreatedWebhook
+      type: object
+      x-examples:
+        example-1:
+          webhook_type: BEACON
+          webhook_code: REPORT_CREATED
+          beacon_report_id: becrpt_2zugxV6hWQZG91
+          environment: production
+    BeaconReportUpdatedWebhook:
+      additionalProperties: true
+      description: Fired when one of your existing Beacon Reports has been modified
+        or removed from the Beacon Network.
+      properties:
+        webhook_type:
+          description: '`BEACON`'
+          type: string
+        webhook_code:
+          description: '`REPORT_UPDATED`'
+          type: string
+        beacon_report_id:
+          description: The ID of the associated Beacon Report.
+          type: string
+        environment:
+          $ref: '#/components/schemas/WebhookEnvironmentValues'
+      required:
+      - beacon_report_id
+      - environment
+      - webhook_code
+      - webhook_type
+      title: BeaconReportUpdatedWebhook
+      type: object
+      x-examples:
+        example-1:
+          webhook_type: BEACON
+          webhook_code: REPORT_UPDATED
+          beacon_report_id: becrpt_2zugxV6hWQZG91
+          environment: production
+    BeaconReportSyndicationCreatedWebhook:
+      additionalProperties: true
+      description: Fired when a report created on the Beacon Network matches with
+        one of your Beacon Users.
+      properties:
+        webhook_type:
+          description: '`BEACON`'
+          type: string
+        webhook_code:
+          description: '`REPORT_SYNDICATION_CREATED`'
+          type: string
+        beacon_report_syndication_id:
+          description: The ID of the associated Beacon Report Syndication.
+          type: string
+        environment:
+          $ref: '#/components/schemas/WebhookEnvironmentValues'
+      required:
+      - beacon_report_syndication_id
+      - environment
+      - webhook_code
+      - webhook_type
+      title: BeaconReportSyndicationCreatedWebhook
+      type: object
+      x-examples:
+        example-1:
+          webhook_type: BEACON
+          webhook_code: REPORT_SYNDICATION_CREATED
+          beacon_report_syndication_id: becrsn_eZPgiiv3JH8rfT
+          environment: production
+    BeaconDuplicateDetectedWebhook:
+      additionalProperties: true
+      description: Fired when a Beacon User created within your organization matches
+        one of your existing users.
+      properties:
+        webhook_type:
+          description: '`BEACON`'
+          type: string
+        webhook_code:
+          description: '`DUPLICATE_DETECTED`'
+          type: string
+        beacon_duplicate_id:
+          description: The ID of the associated Beacon Duplicate.
+          type: string
+        environment:
+          $ref: '#/components/schemas/WebhookEnvironmentValues'
+      required:
+      - beacon_duplicate_id
+      - environment
+      - webhook_code
+      - webhook_type
+      title: BeaconDuplicateDetectedWebhook
+      type: object
+      x-examples:
+        example-1:
+          webhook_type: BEACON
+          webhook_code: DUPLICATE_DETECTED
+          beacon_duplicate_id: becdup_erJcFn97r9sugZ
           environment: production
     IdentityVerificationStepUpdatedWebhook:
       additionalProperties: true
@@ -83476,6 +83647,61 @@ components:
       format: binary
       title: StatementsDownloadResponse
       type: string
+    StatementsRefreshRequest:
+      description: StatementsRefreshRequest defines the request schema for `/statements/refresh`
+      properties:
+        access_token:
+          description: The access token associated with the Item data is being requested
+            for.
+          title: AccessToken
+          type: string
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        start_date:
+          description: The start date for statements, in “YYYY-MM-DD” format, e.g.
+            "2023-08-30". To determine whether a statement falls within the specified
+            date range, Plaid will use the statement posted date. The statement posted
+            date is typically either the last day of the statement period, or the
+            following day.
+          format: date
+          type: string
+        end_date:
+          description: The end date for statements, in “YYYY-MM-DD” format, e.g. "2023-10-30".
+            You can request up to two years of data. To determine whether a statement
+            falls within the specified date range, Plaid will use the statement posted
+            date. The statement posted date is typically either the last day of the
+            statement period, or the following day.
+          format: date
+          type: string
+      required:
+      - access_token
+      - end_date
+      - start_date
+      title: StatementsRefreshRequest
+      type: object
+    StatementsRefreshResponse:
+      additionalProperties: true
+      description: StatementsRefreshResponse defines the response schema for `/statements/refresh`
+      properties:
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      title: StatementsRefreshResponse
+      type: object
     PaymentInitiationRecipientGetResponse_allOf:
       properties:
         request_id:
