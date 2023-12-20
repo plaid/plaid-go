@@ -20,6 +20,8 @@ model_account_subtype.go
 model_account_type.go
 model_accounts_balance_get_request.go
 model_accounts_balance_get_request_options.go
+model_accounts_balance_get_request_payment_details.go
+model_accounts_balance_get_response_payment_risk_assessment.go
 model_accounts_get_request.go
 model_accounts_get_request_options.go
 model_accounts_get_response.go
@@ -160,11 +162,15 @@ model_beacon_report.go
 model_beacon_report_create_request.go
 model_beacon_report_create_response.go
 model_beacon_report_created_webhook.go
+model_beacon_report_get_request.go
+model_beacon_report_get_response.go
 model_beacon_report_list_request.go
 model_beacon_report_list_response.go
 model_beacon_report_syndication.go
 model_beacon_report_syndication_analysis.go
 model_beacon_report_syndication_created_webhook.go
+model_beacon_report_syndication_get_request.go
+model_beacon_report_syndication_get_response.go
 model_beacon_report_syndication_list_request.go
 model_beacon_report_syndication_list_response.go
 model_beacon_report_syndication_original_report.go
@@ -178,11 +184,16 @@ model_beacon_user_get_request.go
 model_beacon_user_get_response.go
 model_beacon_user_id_number.go
 model_beacon_user_name.go
+model_beacon_user_name_nullable.go
 model_beacon_user_request_address.go
+model_beacon_user_request_address_nullable.go
 model_beacon_user_request_data.go
 model_beacon_user_review_request.go
 model_beacon_user_status.go
 model_beacon_user_status_updated_webhook.go
+model_beacon_user_update_request.go
+model_beacon_user_update_request_data.go
+model_beacon_user_update_response.go
 model_categories_get_response.go
 model_category.go
 model_category_insight_details.go
@@ -460,8 +471,11 @@ model_holding.go
 model_holdings_default_update_webhook.go
 model_holdings_override.go
 model_hosted_link_delivery_method.go
+model_hosted_mmd_verification_webhook.go
 model_id_number_type.go
 model_identity_default_update_webhook.go
+model_identity_document.go
+model_identity_document_metadata.go
 model_identity_get_request.go
 model_identity_get_request_options.go
 model_identity_get_response.go
@@ -655,6 +669,7 @@ model_link_session_success_metadata_account.go
 model_link_session_success_metadata_institution.go
 model_link_session_success_metadata_transfer_status.go
 model_link_token_account_filters.go
+model_link_token_create_card_switch.go
 model_link_token_create_credit_filter.go
 model_link_token_create_depository_filter.go
 model_link_token_create_hosted_link.go
@@ -722,6 +737,7 @@ model_numbers_international.go
 model_numbers_international_iban.go
 model_numbers_international_nullable.go
 model_omittable_transfer_type.go
+model_option_contract.go
 model_originator.go
 model_originator_expected_transfer_frequency.go
 model_other_account_subtype.go
@@ -1066,6 +1082,8 @@ model_statements_account.go
 model_statements_download_request.go
 model_statements_list_request.go
 model_statements_list_response.go
+model_statements_refresh_complete_result.go
+model_statements_refresh_complete_webhook.go
 model_statements_refresh_request.go
 model_statements_refresh_response.go
 model_statements_statement.go
@@ -1268,6 +1286,7 @@ model_transfer_user_in_request_deprecated.go
 model_transfer_user_in_response.go
 model_update_entity_screening_request_search_terms.go
 model_update_individual_screening_request_search_terms.go
+model_user_account_revoked_webhook.go
 model_user_address.go
 model_user_create_request.go
 model_user_create_response.go
