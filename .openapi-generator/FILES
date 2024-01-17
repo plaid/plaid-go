@@ -157,6 +157,9 @@ model_base_reports_product_ready_webhook.go
 model_beacon_audit_trail.go
 model_beacon_audit_trail_source.go
 model_beacon_duplicate_detected_webhook.go
+model_beacon_duplicate_get_request.go
+model_beacon_duplicate_get_response.go
+model_beacon_match_summary_analysis.go
 model_beacon_match_summary_code.go
 model_beacon_report.go
 model_beacon_report_create_request.go
@@ -189,6 +192,7 @@ model_beacon_user_request_address.go
 model_beacon_user_request_address_nullable.go
 model_beacon_user_request_data.go
 model_beacon_user_review_request.go
+model_beacon_user_revision.go
 model_beacon_user_status.go
 model_beacon_user_status_updated_webhook.go
 model_beacon_user_update_request.go
@@ -487,6 +491,11 @@ model_identity_refresh_request.go
 model_identity_refresh_response.go
 model_identity_update_types.go
 model_identity_verification.go
+model_identity_verification_autofill_address.go
+model_identity_verification_autofill_create_request.go
+model_identity_verification_autofill_create_response.go
+model_identity_verification_autofill_status.go
+model_identity_verification_autofill_user_data.go
 model_identity_verification_create_request.go
 model_identity_verification_create_request_user.go
 model_identity_verification_create_response.go
@@ -782,6 +791,7 @@ model_pay.go
 model_pay_frequency.go
 model_pay_frequency_value.go
 model_pay_period_details.go
+model_pay_period_details_pay_frequency.go
 model_pay_stub_deductions_breakdown.go
 model_pay_stub_deductions_total.go
 model_pay_stub_distribution_breakdown.go
@@ -861,9 +871,11 @@ model_paystub_deduction.go
 model_paystub_details.go
 model_paystub_employer.go
 model_paystub_override.go
+model_paystub_override_distribution_breakdown.go
 model_paystub_override_employee.go
 model_paystub_override_employee_address.go
 model_paystub_override_employer.go
+model_paystub_override_pay_period_details.go
 model_paystub_pay_frequency.go
 model_paystub_ytd_details.go
 model_pending_expiration_webhook.go
@@ -896,6 +908,8 @@ model_processor_identity_get_response.go
 model_processor_identity_match_request.go
 model_processor_identity_match_response.go
 model_processor_initial_update_webhook.go
+model_processor_liabilities_get_request.go
+model_processor_liabilities_get_response.go
 model_processor_number.go
 model_processor_recurring_transactions_update_webhook.go
 model_processor_signal_decision_report_request.go
@@ -972,6 +986,7 @@ model_risk_check_linked_service.go
 model_risk_check_phone.go
 model_risk_check_stolen_identity.go
 model_risk_check_synthetic_identity.go
+model_risk_profile.go
 model_risk_signal_document_reference.go
 model_risk_signal_document_status.go
 model_role.go
