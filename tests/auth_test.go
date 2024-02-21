@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/plaid/plaid-go/v20/plaid"
+	"github.com/plaid/plaid-go/v21/plaid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,7 +17,7 @@ func TestAuthGet(t *testing.T) {
 		ctx,
 		testClient,
 		FIRST_PLATYPUS_BANK,
-		[]plaid.Products{plaid.PRODUCTS_TRANSACTIONS},
+		[]plaid.Products{plaid.PRODUCTS_AUTH},
 	)
 
 	// Get auth for all accounts
