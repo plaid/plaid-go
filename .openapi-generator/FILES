@@ -4,7 +4,6 @@ client.go
 configuration.go
 model_account_access.go
 model_account_assets.go
-model_account_assets_all_of.go
 model_account_balance.go
 model_account_base.go
 model_account_filter.go
@@ -18,6 +17,10 @@ model_account_product_access_nullable.go
 model_account_selection_cardinality.go
 model_account_subtype.go
 model_account_type.go
+model_account_verification_insights.go
+model_account_verification_insights_account_number_format.go
+model_account_verification_insights_network_status.go
+model_account_verification_insights_previous_returns.go
 model_accounts_balance_get_request.go
 model_accounts_balance_get_request_options.go
 model_accounts_balance_get_request_payment_details.go
@@ -48,6 +51,7 @@ model_asset_holder_name.go
 model_asset_owner.go
 model_asset_owners.go
 model_asset_report.go
+model_asset_report_account_balance.go
 model_asset_report_add_ons.go
 model_asset_report_audit_copy_create_request.go
 model_asset_report_audit_copy_create_response.go
@@ -96,6 +100,7 @@ model_auth_get_response.go
 model_auth_metadata.go
 model_auth_supported_methods.go
 model_automatically_verified_webhook.go
+model_balance_plus_attributes.go
 model_bank_income_complete_result.go
 model_bank_income_complete_webhook.go
 model_bank_income_refresh_complete_result.go
@@ -231,6 +236,15 @@ model_cra_bank_income_summary.go
 model_cra_bank_income_transaction.go
 model_cra_bank_income_warning.go
 model_cra_bank_income_warning_code.go
+model_cra_partner_insights.go
+model_cra_partner_insights_complete_result.go
+model_cra_partner_insights_complete_webhook.go
+model_cra_partner_insights_get_request.go
+model_cra_partner_insights_get_response.go
+model_cra_partner_insights_item.go
+model_cra_partner_insights_item_account.go
+model_cra_partner_insights_prism.go
+model_cra_prediction_interval.go
 model_credit1099.go
 model_credit1099_filer.go
 model_credit1099_payer.go
@@ -284,6 +298,7 @@ model_credit_bank_statement_upload_item.go
 model_credit_bank_statement_upload_object.go
 model_credit_bank_statement_upload_transaction.go
 model_credit_bank_statements_uploads_get_request.go
+model_credit_bank_statements_uploads_get_request_options.go
 model_credit_bank_statements_uploads_get_response.go
 model_credit_card_liability.go
 model_credit_category.go
@@ -322,6 +337,7 @@ model_credit_pay_stub_employer.go
 model_credit_pay_stub_net_pay.go
 model_credit_pay_stub_pay_basis_type.go
 model_credit_payroll_income_get_request.go
+model_credit_payroll_income_get_request_options.go
 model_credit_payroll_income_get_response.go
 model_credit_payroll_income_parsing_config_update_request.go
 model_credit_payroll_income_parsing_config_update_response.go
@@ -682,6 +698,7 @@ model_link_token_create_card_switch.go
 model_link_token_create_credit_filter.go
 model_link_token_create_depository_filter.go
 model_link_token_create_hosted_link.go
+model_link_token_create_identity.go
 model_link_token_create_institution_data.go
 model_link_token_create_investment_filter.go
 model_link_token_create_loan_filter.go
@@ -689,6 +706,7 @@ model_link_token_create_request.go
 model_link_token_create_request_account_subtypes.go
 model_link_token_create_request_auth.go
 model_link_token_create_request_base_report.go
+model_link_token_create_request_credit_partner_insights.go
 model_link_token_create_request_deposit_switch.go
 model_link_token_create_request_employment.go
 model_link_token_create_request_employment_bank_income.go
@@ -891,6 +909,11 @@ model_plaid_error.go
 model_plaid_error_type.go
 model_platform_ids.go
 model_po_box_status.go
+model_prism_cash_score.go
+model_prism_cash_score_metadata.go
+model_prism_detect.go
+model_prism_insights.go
+model_prism_product.go
 model_processor_account_get_request.go
 model_processor_account_get_response.go
 model_processor_apex_processor_token_create_request.go
@@ -948,6 +971,12 @@ model_product_permissions_required_identity_webhook.go
 model_product_status.go
 model_product_status_breakdown.go
 model_products.go
+model_profile_get_request.go
+model_profile_get_response.go
+model_profile_identity.go
+model_profile_identity_address.go
+model_profile_identity_name.go
+model_profile_item.go
 model_program_name_sensitivity.go
 model_projected_income_summary_field_number.go
 model_proxy_type.go
@@ -987,6 +1016,7 @@ model_risk_check_phone.go
 model_risk_check_stolen_identity.go
 model_risk_check_synthetic_identity.go
 model_risk_profile.go
+model_risk_reason.go
 model_risk_signal_document_reference.go
 model_risk_signal_document_status.go
 model_role.go
@@ -1299,6 +1329,7 @@ model_transfer_user_address_in_response.go
 model_transfer_user_in_request.go
 model_transfer_user_in_request_deprecated.go
 model_transfer_user_in_response.go
+model_transfer_wire_details.go
 model_update_entity_screening_request_search_terms.go
 model_update_individual_screening_request_search_terms.go
 model_user_account_revoked_webhook.go
