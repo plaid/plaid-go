@@ -52,3 +52,5 @@ file_owners:
     owner: "TEAM_DASHBOARD_PLATFORM"
   - match: "webhooks_test.go"
     owner: "TEAM_LINK_FOUNDATIONS"
+  - match: "statements_test.go"
+    owner: "TEAM_ASSETS"
