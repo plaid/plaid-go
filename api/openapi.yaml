@@ -7,7 +7,7 @@ info:
     details.
   termsOfService: https://plaid.com/legal/
   title: The Plaid API
-  version: 2020-09-14_1.496.2
+  version: 2020-09-14_1.503.5
 servers:
 - description: Production
   url: https://production.plaid.com
@@ -401,7 +401,7 @@ paths:
       description: |-
         The `/item/remove` endpoint allows you to invalidate an `access_token`, meaning you will not be able to create new Asset Reports with it. Removing an Item does not affect any Asset Reports or Audit Copies you have already created, which will remain accessible until you remove them specifically.
 
-        The `/asset_report/remove` endpoint allows you to remove an Asset Report. Removing an Asset Report invalidates its `asset_report_token`, meaning you will no longer be able to use it to access Report data or create new Audit Copies. Removing an Asset Report does not affect the underlying Items, but does invalidate any `audit_copy_tokens` associated with the Asset Report.
+        The `/asset_report/remove` endpoint allows you to remove access to an Asset Report. Removing an Asset Report invalidates its `asset_report_token`, meaning you will no longer be able to use it to access Report data or create new Audit Copies. Removing an Asset Report does not affect the underlying Items, but does invalidate any `audit_copy_tokens` associated with the Asset Report.
       externalDocs:
         url: /api/products/assets/#asset_reportremove
       operationId: assetReportRemove
@@ -732,6 +732,36 @@ paths:
       - plaid
       x-hidden-from-docs: true
     x-plaid-business-unit-context: BUSINESS_UNIT_CRA
+  /cra/base_report/create:
+    post:
+      description: This endpoint allows the customer to create a Base Report by passing
+        in a user token. The Base Report will be generated based on the most recently
+        linked item from the user token.
+      externalDocs:
+        url: /none/
+      operationId: baseReportCreate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BaseReportCreateRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    request_id: GVzMdiDd8DDAQK4
+              schema:
+                $ref: '#/components/schemas/BaseReportCreateResponse'
+          description: OK
+      summary: Create a Base Report
+      tags:
+      - plaid
+      x-hidden-from-docs: true
+    x-plaid-business-unit-context: BUSINESS_UNIT_CRA
   /credit/audit_copy_token/update:
     post:
       description: The `/credit/audit_copy_token/update` endpoint updates an existing  Audit
@@ -852,7 +882,7 @@ paths:
                           historical_average_monthly_gross_income: 390
                           historical_average_monthly_income: 300
                           forecasted_average_monthly_income: 300
-                          forecasted_average_monthly_income_prediction_interval:
+                          forecasted_average_monthly_income_prediction_intervals:
                           - lower_bound: 200
                             upper_bound: 400
                             probability: 0.8
@@ -977,6 +1007,33 @@ paths:
                 $ref: '#/components/schemas/CraBankIncomeGetResponse'
           description: OK
       summary: Retrieve information from the bank accounts used for income verification
+      tags:
+      - plaid
+    x-plaid-business-unit-context: BUSINESS_UNIT_CRA
+  /cra/bank_income/create:
+    post:
+      description: '`/cra/bank_income/create` creates a CRA report for income verification'
+      externalDocs:
+        url: /api/products/income/#crabank_incomecreate
+      operationId: craBankIncomeCreate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CraBankIncomeCreateRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    request_id: LhQf0THi8SH1yJm
+              schema:
+                $ref: '#/components/schemas/CraBankIncomeCreateResponse'
+          description: OK
+      summary: Create a CRA report for income verification
       tags:
       - plaid
     x-plaid-business-unit-context: BUSINESS_UNIT_CRA
@@ -1440,6 +1497,7 @@ paths:
                         postal_code: "41006"
                         country: US
                       email: leslie@knope.com
+                      phone: +14151234567
                       date_of_birth: 1975-01-18
                       ssn: "987654321"
                       ssn_last_4: "4321"
@@ -1558,7 +1616,7 @@ paths:
 
         Due to the potentially large number of transactions associated with an Item, results are paginated. Manipulate the `count` and `offset` parameters in conjunction with the `total_transactions` response body field to fetch all available transactions.
 
-        Data returned by `/transactions/get` will be the data available for the Item as of the most recent successful check for new transactions. Plaid typically checks for new data multiple times a day, but these checks may occur less frequently, such as once a day, depending on the institution. An Item's `status.transactions.last_successful_update` field will show the timestamp of the most recent successful update. To force Plaid to check for new transactions, you can use the `/transactions/refresh` endpoint.
+        Data returned by `/transactions/get` will be the data available for the Item as of the most recent successful check for new transactions. Plaid typically checks for new data multiple times a day, but these checks may occur less frequently, such as once a day, depending on the institution. To find out when the Item was last updated, use the [Item Debugger](https://plaid.com/docs/account/activity/#troubleshooting-with-item-debugger) or call `/item/get`; the `item.status.transactions.last_successful_update` field will show the timestamp of the most recent successful update. To force Plaid to check for new transactions, you can use the `/transactions/refresh` endpoint.
 
         Note that data may not be immediately available to `/transactions/get`. Plaid will begin to prepare transactions data upon Item link, if Link was initialized with `transactions`, or upon the first call to `/transactions/get`, if it wasn't. To be alerted when transaction data is ready to be fetched, listen for the [`INITIAL_UPDATE`](https://plaid.com/docs/api/products/transactions/#initial_update) and [`HISTORICAL_UPDATE`](https://plaid.com/docs/api/products/transactions/#historical_update) webhooks. If no transaction history is ready when `/transactions/get` is called, it will return a `PRODUCT_NOT_READY` error.
       externalDocs:
@@ -1743,11 +1801,16 @@ paths:
   /transactions/refresh:
     post:
       description: |-
-        `/transactions/refresh` is an optional endpoint for users of the Transactions product. It initiates an on-demand extraction to fetch the newest transactions for an Item. This on-demand extraction takes place in addition to the periodic extractions that automatically occur one or more times per day for any Transactions-enabled Item. If changes to transactions are discovered after calling `/transactions/refresh`, Plaid will fire a webhook: for `/transactions/sync` users, [`SYNC_UPDATES_AVAILABLE`](https://plaid.com/docs/api/products/transactions/#sync_updates_available) will be fired if there are any transactions updated, added, or removed. For users of both `/transactions/sync` and `/transactions/get`, [`TRANSACTIONS_REMOVED`](https://plaid.com/docs/api/products/transactions/#transactions_removed) will be fired if any removed transactions are detected, and [`DEFAULT_UPDATE`](https://plaid.com/docs/api/products/transactions/#default_update) will be fired if any new transactions are detected. New transactions can be fetched by calling `/transactions/get` or `/transactions/sync`. Note that the `/transactions/refresh` endpoint is not supported for Capital One (`ins_128026`) and will result in a `PRODUCT_NOT_SUPPORTED` error if called on an Item from that institution.
+        `/transactions/refresh` is an optional endpoint that initiates an on-demand extraction to fetch the newest transactions for an Item. The on-demand extraction takes place in addition to the periodic extractions that automatically occur one or more times per day for any Transactions-enabled Item. The Item must already have Transactions added as a product in order to call `/transactions/refresh`.
+
+        If changes to transactions are discovered after calling `/transactions/refresh`, Plaid will fire a webhook: for `/transactions/sync` users, [`SYNC_UPDATES_AVAILABLE`](https://plaid.com/docs/api/products/transactions/#sync_updates_available) will be fired if there are any transactions updated, added, or removed. For users of both `/transactions/sync` and `/transactions/get`, [`TRANSACTIONS_REMOVED`](https://plaid.com/docs/api/products/transactions/#transactions_removed) will be fired if any removed transactions are detected, and [`DEFAULT_UPDATE`](https://plaid.com/docs/api/products/transactions/#default_update) will be fired if any new transactions are detected. New transactions can be fetched by calling `/transactions/get` or `/transactions/sync`.
+
+        Note that the `/transactions/refresh` endpoint is not supported for Capital One (`ins_128026`) and will result in a `PRODUCTS_NOT_SUPPORTED` error if called on an Item from that institution.
+
 
         As this endpoint triggers a synchronous request for fresh data, latency may be higher than for other Plaid endpoints (typically less than 10 seconds, but occasionally up to 30 seconds or more); if you encounter errors, you may find it necessary to adjust your timeout period when making requests.
 
-        `/transactions/refresh` is offered as an add-on to Transactions and has a separate [fee model](/docs/account/billing/#per-request-flat-fee). To request access to this endpoint, submit a [product access request](https://dashboard.plaid.com/team/products) or contact your Plaid account manager.
+        `/transactions/refresh` is offered as an optional add-on to Transactions and has a separate [fee model](/docs/account/billing/#per-request-flat-fee). To request access to this endpoint, submit a [product access request](https://dashboard.plaid.com/team/products) or contact your Plaid account manager.
       externalDocs:
         url: /api/products/transactions/#transactionsrefresh
       operationId: transactionsRefresh
@@ -1936,7 +1999,7 @@ paths:
 
         When retrieving paginated updates, track both the `next_cursor` from the latest response and the original cursor from the first call in which `has_more` was `true`; if a call to `/transactions/sync` fails due to the [`TRANSACTIONS_SYNC_MUTATION_DURING_PAGINATION`](https://plaid.com/docs/errors/transactions/#transactions_sync_mutation_during_pagination) error, the entire pagination request loop must be restarted beginning with the cursor for the first page of the update, rather than retrying only the single request that failed.
 
-        Whenever new or updated transaction data becomes available, `/transactions/sync` will provide these updates. Plaid typically checks for new data multiple times a day, but these checks may occur less frequently, such as once a day, depending on the institution. An Item's `status.transactions.last_successful_update` field will show the timestamp of the most recent successful update. To force Plaid to check for new transactions, use the `/transactions/refresh` endpoint.
+        Whenever new or updated transaction data becomes available, `/transactions/sync` will provide these updates. Plaid typically checks for new data multiple times a day, but these checks may occur less frequently, such as once a day, depending on the institution. To find out when the Item was last updated, use the [Item Debugger](https://plaid.com/docs/account/activity/#troubleshooting-with-item-debugger) or call `/item/get`; the `item.status.transactions.last_successful_update` field will show the timestamp of the most recent successful update. To force Plaid to check for new transactions, use the `/transactions/refresh` endpoint.
 
         For newly created Items, data may not be immediately available to `/transactions/sync`. Plaid begins preparing transactions data when the Item is created, but the process can take anywhere from a few seconds to several minutes to complete, depending on the number of transactions available.
 
@@ -2567,6 +2630,8 @@ paths:
     post:
       description: |-
         The `/item/remove` endpoint allows you to remove an Item. Once removed, the `access_token`, as well as any processor tokens or bank account tokens associated with the Item, is no longer valid and cannot be used to access any data that was associated with the Item.
+
+        Removing an Item does not affect any Asset Reports or Audit Copies you have already created, which will remain accessible until you remove access to them specifically using the `/asset_report/remove` endpoint.
 
         Note that in the Development environment, issuing an `/item/remove`  request will not decrement your live credential count. To increase your credential account in Development, contact Support.
 
@@ -4876,6 +4941,50 @@ paths:
       tags:
       - plaid
     x-plaid-business-unit-context: BUSINESS_UNIT_PLAID
+  /beacon/account_risk/v1/evaluate:
+    post:
+      description: Use `/beacon/account_risk/v1/evaluate` to get risk insights for
+        a linked account.
+      externalDocs:
+        url: none
+      operationId: beaconAccountRiskEvaluate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeaconAccountRiskEvaluateRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    accounts:
+                    - account_id: mbVr0axYMECQ07NJ5gXnHRM9DeD2RJCxm9roR
+                      attributes:
+                        days_since_first_plaid_connection: 510
+                        plaid_connections_count_7d: 6
+                        plaid_connections_count_30d: 7
+                        total_plaid_connections_count: 15
+                      subtype: checking
+                      type: depository
+                    request_id: mdqfuVxeoza6mhu
+              schema:
+                $ref: '#/components/schemas/BeaconAccountRiskEvaluateResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidError'
+          description: Error response.
+      summary: Evaluate risk of a bank account
+      tags:
+      - plaid
+    x-plaid-business-unit-context: BUSINESS_UNIT_PLAID
+    x-hidden-from-docs: true
   /beacon/user/create:
     post:
       description: |-
@@ -4905,6 +5014,7 @@ paths:
                 example-1:
                   value:
                     id: becusr_42cF1MNo42r9Xj
+                    version: 1
                     created_at: 2020-07-24T03:26:02Z
                     updated_at: 2020-07-24T03:26:02Z
                     status: cleared
@@ -4931,6 +5041,7 @@ paths:
                     audit_trail:
                       source: dashboard
                       dashboard_user_id: 54350110fedcbaf01234ffee
+                      timestamp: 2020-07-24T03:26:02Z
                     request_id: saKrIBuEB9qJZng
               schema:
                 $ref: '#/components/schemas/BeaconUserCreateResponse'
@@ -4962,6 +5073,7 @@ paths:
                 example-1:
                   value:
                     id: becusr_42cF1MNo42r9Xj
+                    version: 1
                     created_at: 2020-07-24T03:26:02Z
                     updated_at: 2020-07-24T03:26:02Z
                     status: cleared
@@ -4988,6 +5100,7 @@ paths:
                     audit_trail:
                       source: dashboard
                       dashboard_user_id: 54350110fedcbaf01234ffee
+                      timestamp: 2020-07-24T03:26:02Z
                     request_id: saKrIBuEB9qJZng
               schema:
                 $ref: '#/components/schemas/BeaconUserGetResponse'
@@ -5028,6 +5141,7 @@ paths:
                 example-1:
                   value:
                     id: becusr_42cF1MNo42r9Xj
+                    version: 1
                     created_at: 2020-07-24T03:26:02Z
                     updated_at: 2020-07-24T03:26:02Z
                     status: cleared
@@ -5054,6 +5168,7 @@ paths:
                     audit_trail:
                       source: dashboard
                       dashboard_user_id: 54350110fedcbaf01234ffee
+                      timestamp: 2020-07-24T03:26:02Z
                     request_id: saKrIBuEB9qJZng
               schema:
                 $ref: '#/components/schemas/BeaconUserGetResponse'
@@ -5092,6 +5207,7 @@ paths:
                     audit_trail:
                       source: dashboard
                       dashboard_user_id: 54350110fedcbaf01234ffee
+                      timestamp: 2020-07-24T03:26:02Z
                     request_id: saKrIBuEB9qJZng
               schema:
                 $ref: '#/components/schemas/BeaconReportCreateResponse'
@@ -5138,6 +5254,7 @@ paths:
                       audit_trail:
                         source: dashboard
                         dashboard_user_id: 54350110fedcbaf01234ffee
+                        timestamp: 2020-07-24T03:26:02Z
                     next_cursor: eyJkaXJlY3Rpb24iOiJuZXh0Iiwib2Zmc2V0IjoiMTU5NDM
                     request_id: saKrIBuEB9qJZng
               schema:
@@ -5228,6 +5345,7 @@ paths:
                     audit_trail:
                       source: dashboard
                       dashboard_user_id: 54350110fedcbaf01234ffee
+                      timestamp: 2020-07-24T03:26:02Z
                     request_id: saKrIBuEB9qJZng
               schema:
                 $ref: '#/components/schemas/BeaconReportGetResponse'
@@ -5309,6 +5427,7 @@ paths:
                 example-1:
                   value:
                     id: becusr_42cF1MNo42r9Xj
+                    version: 1
                     created_at: 2020-07-24T03:26:02Z
                     updated_at: 2020-07-24T03:26:02Z
                     status: cleared
@@ -5335,6 +5454,7 @@ paths:
                     audit_trail:
                       source: dashboard
                       dashboard_user_id: 54350110fedcbaf01234ffee
+                      timestamp: 2020-07-24T03:26:02Z
                     request_id: saKrIBuEB9qJZng
               schema:
                 $ref: '#/components/schemas/BeaconUserUpdateResponse'
@@ -5440,6 +5560,64 @@ paths:
       - plaid
       x-hidden-from-docs: true
     x-plaid-business-unit-context: BUSINESS_UNIT_PLAID
+  /beacon/user/history/list:
+    post:
+      description: List all changes to the Beacon User in reverse-chronological order.
+      externalDocs:
+        url: /api/products/beacon/#beaconuserhistorylist
+      operationId: beaconUserHistoryList
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeaconUserHistoryListRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    beacon_users:
+                    - id: becusr_42cF1MNo42r9Xj
+                      version: 1
+                      created_at: 2020-07-24T03:26:02Z
+                      updated_at: 2020-07-24T03:26:02Z
+                      status: cleared
+                      program_id: becprg_11111111111111
+                      client_user_id: your-db-id-3b24110
+                      user:
+                        date_of_birth: 1990-05-29
+                        name:
+                          given_name: Leslie
+                          family_name: Knope
+                        address:
+                          street: 123 Main St.
+                          street2: Unit 42
+                          city: Pawnee
+                          region: IN
+                          postal_code: "46001"
+                          country: US
+                        email_address: user@example.com
+                        phone_number: +19876543212
+                        id_number:
+                          value: "123456789"
+                          type: us_ssn
+                        ip_address: 192.0.2.42
+                      audit_trail:
+                        source: dashboard
+                        dashboard_user_id: 54350110fedcbaf01234ffee
+                        timestamp: 2020-07-24T03:26:02Z
+                    next_cursor: eyJkaXJlY3Rpb24iOiJuZXh0Iiwib2Zmc2V0IjoiMTU5NDM
+                    request_id: saKrIBuEB9qJZng
+              schema:
+                $ref: '#/components/schemas/BeaconUserHistoryListResponse'
+          description: OK
+      summary: List a Beacon User's history
+      tags:
+      - plaid
+    x-plaid-business-unit-context: BUSINESS_UNIT_PLAID
   /processor/auth/get:
     post:
       description: |
@@ -5509,7 +5687,7 @@ paths:
 
         This endpoint retrieves cached information, rather than extracting fresh information from the institution. As a result, the account balance returned may not be up-to-date; for realtime balance information, use `/processor/balance/get` instead. Note that some information is nullable.
       externalDocs:
-        url: /api/processors/#processoraccountget
+        url: /api/processor-partners/#processoraccountget
       operationId: processorAccountGet
       requestBody:
         content:
@@ -5537,6 +5715,7 @@ paths:
                       official_name: Plaid Gold Checking
                       subtype: checking
                       type: depository
+                    institution_id: ins_109508
                     request_id: 1zlMf
               schema:
                 $ref: '#/components/schemas/ProcessorAccountGetResponse'
@@ -5558,9 +5737,9 @@ paths:
 
         Note that data may not be immediately available to `/processor/transactions/get`. Plaid will begin to prepare transactions data upon Item link, if Link was initialized with `transactions`, or upon the first call to `/processor/transactions/get`, if it wasn't. If no transaction history is ready when `/processor/transactions/get` is called, it will return a `PRODUCT_NOT_READY` error.
 
-        To receive Transactions webhooks for a processor token, set its webhook URL via the [`/processor/token/webhook/update`](https://plaid.com/docs/api/processors/#processortokenwebhookupdate) endpoint.
+        To receive Transactions webhooks for a processor token, set its webhook URL via the [`/processor/token/webhook/update`](https://plaid.com/docs/api/processor-partners/#processortokenwebhookupdate) endpoint.
       externalDocs:
-        url: /api/processors/#processortransactionsget
+        url: /api/processor-partners/#processortransactionsget
       operationId: processorTransactionsGet
       requestBody:
         content:
@@ -5743,9 +5922,9 @@ paths:
 
         Note that for newly created processor tokens, data may not be immediately available to `/processor/transactions/sync`. Plaid begins preparing transactions data when the corresponding Item is created, but the process can take anywhere from a few seconds to several minutes to complete, depending on the number of transactions available.
 
-        To receive Transactions webhooks for a processor token, set its webhook URL via the [`/processor/token/webhook/update`](https://plaid.com/docs/api/processors/#processortokenwebhookupdate) endpoint.
+        To receive Transactions webhooks for a processor token, set its webhook URL via the [`/processor/token/webhook/update`](https://plaid.com/docs/api/processor-partners/#processortokenwebhookupdate) endpoint.
       externalDocs:
-        url: /api/processors/#processortransactionssync
+        url: /api/processor-partners/#processortransactionssync
       operationId: processorTransactionsSync
       requestBody:
         content:
@@ -5901,13 +6080,13 @@ paths:
   /processor/transactions/refresh:
     post:
       description: |-
-        `/processor/transactions/refresh` is an optional endpoint for users of the Transactions product. It initiates an on-demand extraction to fetch the newest transactions for a processor token. This on-demand extraction takes place in addition to the periodic extractions that automatically occur one or more times per day for any Transactions-enabled processor token. If changes to transactions are discovered after calling `/processor/transactions/refresh`, Plaid will fire a webhook: for `/transactions/sync` users, [`SYNC_UPDATES_AVAILABLE`](https://plaid.com/docs/api/products/transactions/#sync_updates_available) will be fired if there are any transactions updated, added, or removed. For users of both `/processor/transactions/sync` and `/processor/transactions/get`, [`TRANSACTIONS_REMOVED`](https://plaid.com/docs/api/products/transactions/#transactions_removed) will be fired if any removed transactions are detected, and [`DEFAULT_UPDATE`](https://plaid.com/docs/api/products/transactions/#default_update) will be fired if any new transactions are detected. New transactions can be fetched by calling `/processor/transactions/get` or `/processor/transactions/sync`. Note that the `/processor/transactions/refresh` endpoint is not supported for Capital One (`ins_128026`) and will result in a `PRODUCT_NOT_SUPPORTED` error if called on a processor token from that institution.
+        `/processor/transactions/refresh` is an optional endpoint for users of the Transactions product. It initiates an on-demand extraction to fetch the newest transactions for a processor token. This on-demand extraction takes place in addition to the periodic extractions that automatically occur one or more times per day for any Transactions-enabled processor token. If changes to transactions are discovered after calling `/processor/transactions/refresh`, Plaid will fire a webhook: for `/transactions/sync` users, [`SYNC_UPDATES_AVAILABLE`](https://plaid.com/docs/api/products/transactions/#sync_updates_available) will be fired if there are any transactions updated, added, or removed. For users of both `/processor/transactions/sync` and `/processor/transactions/get`, [`TRANSACTIONS_REMOVED`](https://plaid.com/docs/api/products/transactions/#transactions_removed) will be fired if any removed transactions are detected, and [`DEFAULT_UPDATE`](https://plaid.com/docs/api/products/transactions/#default_update) will be fired if any new transactions are detected. New transactions can be fetched by calling `/processor/transactions/get` or `/processor/transactions/sync`. Note that the `/processor/transactions/refresh` endpoint is not supported for Capital One (`ins_128026`) and will result in a `PRODUCTS_NOT_SUPPORTED` error if called on a processor token from that institution.
 
         As this endpoint triggers a synchronous request for fresh data, latency may be higher than for other Plaid endpoints (typically less than 10 seconds, but occasionally up to 30 seconds or more); if you encounter errors, you may find it necessary to adjust your timeout period when making requests.
 
         `/processor/transactions/refresh` is offered as an add-on to Transactions and has a separate [fee model](/docs/account/billing/#per-request-flat-fee). To request access to this endpoint, submit a [product access request](https://dashboard.plaid.com/team/products) or contact your Plaid account manager.
       externalDocs:
-        url: /api/processors/#processortransactionsrefresh
+        url: /api/processor-partners/#processortransactionsrefresh
       operationId: processorTransactionsRefresh
       requestBody:
         content:
@@ -5947,9 +6126,9 @@ paths:
 
         After the initial call, you can call `/processor/transactions/recurring/get` endpoint at any point in the future to retrieve the latest summary of recurring streams. Listen to the [`RECURRING_TRANSACTIONS_UPDATE`](https://plaid.com/docs/api/products/transactions/#recurring_transactions_update) webhook to be notified when new updates are available.
 
-        To receive Transactions webhooks for a processor token, set its webhook URL via the [`/processor/token/webhook/update`](https://plaid.com/docs/api/processors/#processortokenwebhookupdate) endpoint.
+        To receive Transactions webhooks for a processor token, set its webhook URL via the [`/processor/token/webhook/update`](https://plaid.com/docs/api/processor-partners/#processortokenwebhookupdate) endpoint.
       externalDocs:
-        url: /api/processors/#processortransactionsrecurringget
+        url: /api/processor-partners/#processortransactionsrecurringget
       operationId: processorTransactionsRecurringGet
       requestBody:
         content:
@@ -6086,7 +6265,7 @@ paths:
 
         Note: This request may take some time to complete if Signal is being added to an existing Item. This is because Plaid must communicate directly with the institution when retrieving the data for the first time. To reduce this latency, you can call `/signal/prepare` on the Item before you need to request Signal data.
       externalDocs:
-        url: /api/processors/#processorsignalevaluate
+        url: /api/processor-partners/#processorsignalevaluate
       operationId: processorSignalEvaluate
       requestBody:
         content:
@@ -6136,7 +6315,7 @@ paths:
 
         If you are using the [Plaid Transfer product](https://www.plaid.com/docs/transfer) to create transfers, it is not necessary to use this endpoint, as Plaid already knows whether the transfer was initiated.
       externalDocs:
-        url: /api/processors/#processorsignaldecisionreport
+        url: /api/processor-partners/#processorsignaldecisionreport
       operationId: processorSignalDecisionReport
       requestBody:
         content:
@@ -6172,7 +6351,7 @@ paths:
 
         If you are using the [Plaid Transfer product](https://www.plaid.com/docs/transfer) to create transfers, it is not necessary to use this endpoint, as Plaid already knows whether the transfer was returned.
       externalDocs:
-        url: /api/processors/#processorsignalreturnreport
+        url: /api/processor-partners/#processorsignalreturnreport
       operationId: processorSignalReturnReport
       requestBody:
         content:
@@ -6208,7 +6387,7 @@ paths:
 
         If this endpoint is called with a processor token that is already initialized with Signal, it will return a 200 response and will not modify the processor token.
       externalDocs:
-        url: /api/processors/#processorsignalprepare
+        url: /api/processor-partners/#processorsignalprepare
       operationId: processorSignalPrepare
       requestBody:
         content:
@@ -6242,7 +6421,7 @@ paths:
       description: Use the `/processor/bank_transfer/create` endpoint to initiate
         a new bank transfer as a processor
       externalDocs:
-        url: /api/processors/#bank_transfercreate
+        url: /api/processor-partners/#bank_transfercreate
       operationId: processorBankTransferCreate
       requestBody:
         content:
@@ -6303,7 +6482,7 @@ paths:
 
         Note: This request may take some time to complete if `liabilities` was not specified as an initial product when creating the processor token. This is because Plaid must communicate directly with the institution to retrieve the additional data.
       externalDocs:
-        url: /api/processors/#processorliabilitiesget
+        url: /api/processor-partners/#processorliabilitiesget
       operationId: processorLiabilitiesGet
       requestBody:
         content:
@@ -6374,7 +6553,7 @@ paths:
         account holder information on file with the financial institution, including
         names, emails, phone numbers, and addresses.
       externalDocs:
-        url: /api/processors/#processoridentityget
+        url: /api/processor-partners/#processoridentityget
       operationId: processorIdentityGet
       requestBody:
         content:
@@ -6457,7 +6636,7 @@ paths:
 
         This request may take some time to complete if Identity was not specified as an initial product when creating the Item. This is because Plaid must communicate directly with the institution to retrieve the data.
       externalDocs:
-        url: /api/processors/#processoridentitymatch
+        url: /api/processor-partners/#processoridentitymatch
       operationId: processorIdentityMatch
       requestBody:
         content:
@@ -6512,7 +6691,7 @@ paths:
         object, only `/processor/balance/get` forces the available and current balance
         fields to be refreshed rather than cached. '
       externalDocs:
-        url: /api/processors/#processorbalanceget
+        url: /api/processor-partners/#processorbalanceget
       operationId: processorBalanceGet
       requestBody:
         content:
@@ -8474,7 +8653,7 @@ paths:
         URL associated with a processor token. This request triggers a `WEBHOOK_UPDATE_ACKNOWLEDGED`
         webhook to the newly specified webhook URL.
       externalDocs:
-        url: /api/processors/#processortokenwebhookupdate
+        url: /api/processor-partners/#processortokenwebhookupdate
       operationId: processorTokenWebhookUpdate
       requestBody:
         content:
@@ -8803,7 +8982,7 @@ paths:
       description: The `/transfer/get` endpoint fetches information about the transfer
         corresponding to the given `transfer_id`.
       externalDocs:
-        url: /api/products/transfer/#transferget
+        url: /api/products/transfer/reading-transfers/#transferget
       operationId: transferGet
       parameters: []
       requestBody:
@@ -8881,7 +9060,7 @@ paths:
       description: The `/transfer/recurring/get` fetches information about the recurring
         transfer corresponding to the given `recurring_transfer_id`.
       externalDocs:
-        url: /api/products/transfer/#transferrecurringget
+        url: /api/products/transfer/recurring-transfers/#transferrecurringget
       operationId: transferRecurringGet
       requestBody:
         content:
@@ -9024,7 +9203,7 @@ paths:
 
           - To decline a transfer with the rationale code `RISK`, the available balance on the account must be exactly $0. See [Create Sandbox test data](https://plaid.com/docs/sandbox/user-custom/) for details on how to customize data in Sandbox.
       externalDocs:
-        url: /api/products/transfer/#transferauthorizationcreate
+        url: /api/products/transfer/initiating-transfers/#transferauthorizationcreate
       operationId: transferAuthorizationCreate
       requestBody:
         content:
@@ -9087,7 +9266,7 @@ paths:
       description: Use the `/transfer/balance/get` endpoint to view a balance held
         with Plaid.
       externalDocs:
-        url: /api/products/transfer/#transferbalanceget
+        url: /api/products/transfer/balance/#transferbalanceget
       operationId: transferBalanceGet
       requestBody:
         content:
@@ -9128,7 +9307,7 @@ paths:
         institution (ending in 0000 or 1111), which will return `true`. Any other
         account will return `false`.
       externalDocs:
-        url: /api/products/transfer/#transfercapabilitiesget
+        url: /api/products/transfer/account-linking/#transfercapabilitiesget
       operationId: transferCapabilitiesGet
       requestBody:
         content:
@@ -9165,7 +9344,7 @@ paths:
       description: Use the `/transfer/configuration/get` endpoint to view your transfer
         product configurations.
       externalDocs:
-        url: /api/products/transfer/#transferconfigurationget
+        url: /api/products/transfer/metrics/#transferconfigurationget
       operationId: transferConfigurationGet
       requestBody:
         content:
@@ -9208,7 +9387,7 @@ paths:
       description: Use the `/transfer/ledger/get` endpoint to view a balance on the
         ledger held with Plaid.
       externalDocs:
-        url: /api/products/transfer/#transferledgerget
+        url: /api/products/transfer/ledger/#transferledgerget
       operationId: transferLedgerGet
       requestBody:
         content:
@@ -9245,7 +9424,7 @@ paths:
       description: Use the `/transfer/ledger/distribute` endpoint to move available
         balance between the ledgers of the platform and one of its originators.
       externalDocs:
-        url: /api/products/transfer/#transferledgerdistribute
+        url: /api/products/transfer/ledger/#transferledgerdistribute
       operationId: transferLedgerDistribute
       requestBody:
         content:
@@ -9280,7 +9459,7 @@ paths:
       description: Use the `/transfer/ledger/deposit` endpoint to deposit funds into
         Plaid Ledger.
       externalDocs:
-        url: /api/products/transfer/#transferledgerdeposit
+        url: /api/products/transfer/ledger/#transferledgerdeposit
       operationId: transferLedgerDeposit
       requestBody:
         content:
@@ -9325,7 +9504,7 @@ paths:
       description: Use the `/transfer/ledger/withdraw` endpoint to withdraw funds
         from a Plaid Ledger balance.
       externalDocs:
-        url: /api/products/transfer/#transferledgerwithdraw
+        url: /api/products/transfer/ledger/#transferledgerwithdraw
       operationId: transferLedgerWithdraw
       requestBody:
         content:
@@ -9370,7 +9549,7 @@ paths:
       description: Use the `/transfer/originator/funding_account/update` endpoint
         to update the funding account associated with the originator.
       externalDocs:
-        url: /api/products/transfer/#transferoriginatorfunding_accountupdate
+        url: /api/products/transfer/platform-payments/#transferoriginatorfunding_accountupdate
       operationId: transferOriginatorFundingAccountUpdate
       requestBody:
         content:
@@ -9404,7 +9583,7 @@ paths:
       description: Use the `/transfer/metrics/get` endpoint to view your transfer
         product usage metrics.
       externalDocs:
-        url: /api/products/transfer/#transfermetricsget
+        url: /api/products/transfer/metrics/#transfermetricsget
       operationId: transferMetricsGet
       requestBody:
         content:
@@ -9443,7 +9622,7 @@ paths:
     post:
       description: Use the `/transfer/create` endpoint to initiate a new transfer.
       externalDocs:
-        url: /api/products/transfer/#transfercreate
+        url: /api/products/transfer/initiating-transfers/#transfercreate
       operationId: transferCreate
       requestBody:
         content:
@@ -9518,7 +9697,7 @@ paths:
         recurring transfer. This capability is not currently supported for Transfer
         UI or Platform Payments (beta) customers.
       externalDocs:
-        url: /api/products/transfer/#transferrecurringcreate
+        url: /api/products/transfer/recurring-transfers/#transferrecurringcreate
       operationId: transferRecurringCreate
       requestBody:
         content:
@@ -9643,7 +9822,7 @@ paths:
       description: |
         Use the `/transfer/list` endpoint to see a list of all your transfers and their statuses. Results are paginated; use the `count` and `offset` query parameters to retrieve the desired transfers.
       externalDocs:
-        url: /api/products/transfer/#transferlist
+        url: /api/products/transfer/reading-transfers/#transferlist
       operationId: transferList
       requestBody:
         content:
@@ -9719,7 +9898,7 @@ paths:
       description: |
         Use the `/transfer/recurring/list` endpoint to see a list of all your recurring transfers and their statuses. Results are paginated; use the `count` and `offset` query parameters to retrieve the desired recurring transfers.
       externalDocs:
-        url: /api/products/transfer/#transferrecurringlist
+        url: /api/products/transfer/recurring-transfers/#transferrecurringlist
       operationId: transferRecurringList
       requestBody:
         content:
@@ -9847,7 +10026,7 @@ paths:
         is eligible for cancellation if the `cancellable` property returned by `/transfer/get`
         is `true`.
       externalDocs:
-        url: /api/products/transfer/#transfercancel
+        url: /api/products/transfer/initiating-transfers/#transfercancel
       operationId: transferCancel
       requestBody:
         content:
@@ -9881,7 +10060,7 @@ paths:
       description: Use the `/transfer/recurring/cancel` endpoint to cancel a recurring
         transfer.  Scheduled transfer that hasn't been submitted to bank will be cancelled.
       externalDocs:
-        url: /api/products/transfer/#transferrecurringcancel
+        url: /api/products/transfer/recurring-transfers/#transferrecurringcancel
       operationId: transferRecurringCancel
       requestBody:
         content:
@@ -9950,7 +10129,7 @@ paths:
       description: Use the `/transfer/event/list` endpoint to get a list of transfer
         events based on specified filter criteria.
       externalDocs:
-        url: /api/products/transfer/#transfereventlist
+        url: /api/products/transfer/reading-transfers/#transfereventlist
       operationId: transferEventList
       requestBody:
         content:
@@ -9980,6 +10159,7 @@ paths:
                       sweep_amount: null
                       sweep_id: null
                       timestamp: 2019-12-09T17:27:15Z
+                    has_more: true
                     request_id: mdqfuVxeoza6mhu
               schema:
                 $ref: '#/components/schemas/TransferEventListResponse'
@@ -10049,7 +10229,7 @@ paths:
         transfer events that happened after a specific `event_id`. Use the `/transfer/event/sync`
         endpoint to guarantee you have seen all transfer events.'
       externalDocs:
-        url: /api/products/transfer/#transfereventsync
+        url: /api/products/transfer/reading-transfers/#transfereventsync
       operationId: transferEventSync
       requestBody:
         content:
@@ -10079,6 +10259,7 @@ paths:
                       sweep_amount: null
                       sweep_id: null
                       timestamp: 2019-12-09T17:27:15Z
+                    has_more: true
                     request_id: mdqfuVxeoza6mhu
               schema:
                 $ref: '#/components/schemas/TransferEventSyncResponse'
@@ -10147,7 +10328,7 @@ paths:
       description: The `/transfer/sweep/get` endpoint fetches a sweep corresponding
         to the given `sweep_id`.
       externalDocs:
-        url: /api/products/transfer/#transfersweepget
+        url: /api/products/transfer/reading-transfers/#transfersweepget
       operationId: transferSweepGet
       parameters: []
       requestBody:
@@ -10233,7 +10414,7 @@ paths:
       description: The `/transfer/sweep/list` endpoint fetches sweeps matching the
         given filters.
       externalDocs:
-        url: /api/products/transfer/#transfersweeplist
+        url: /api/products/transfer/reading-transfers/#transfersweeplist
       operationId: transferSweepList
       parameters: []
       requestBody:
@@ -10408,7 +10589,7 @@ paths:
         endpoints, create the Item through Link instead.  Access to `/transfer/migrate_account`
         is not enabled by default; to obtain access, contact your Plaid Account Manager.
       externalDocs:
-        url: /api/products/transfer/#transfermigrate_account
+        url: /api/products/transfer/account-linking/#transfermigrate_account
       operationId: transferMigrateAccount
       requestBody:
         content:
@@ -10444,7 +10625,7 @@ paths:
       description: Use the `/transfer/intent/create` endpoint to generate a transfer
         intent object and invoke the Transfer UI.
       externalDocs:
-        url: /api/products/transfer/#transferintentcreate
+        url: /api/products/transfer/account-linking/#transferintentcreate
       operationId: transferIntentCreate
       requestBody:
         content:
@@ -10503,7 +10684,7 @@ paths:
       description: Use the `/transfer/intent/get` endpoint to retrieve more information
         about a transfer intent.
       externalDocs:
-        url: /api/products/transfer/#transferintentget
+        url: /api/products/transfer/account-linking/#transferintentget
       operationId: transferIntentGet
       requestBody:
         content:
@@ -10661,7 +10842,7 @@ paths:
       description: Use the `/transfer/originator/create` endpoint to create a new
         originator and return an `originator_client_id`.
       externalDocs:
-        url: /api/products/transfer/#transferoriginatorcreate
+        url: /api/products/transfer/platform-payments/#transferoriginatorcreate
       operationId: transferOriginatorCreate
       parameters: []
       requestBody:
@@ -10700,7 +10881,7 @@ paths:
         onboarding UI URL. Redirect the originator to this URL to provide their due
         diligence information and agree to Plaid’s terms for ACH money movement.
       externalDocs:
-        url: /api/products/transfer/#transferquestionnairecreate
+        url: /api/products/transfer/platform-payments/#transferquestionnairecreate
       operationId: transferQuestionnaireCreate
       parameters: []
       requestBody:
@@ -10737,7 +10918,7 @@ paths:
       description: Use the `/transfer/diligence/submit` endpoint to submit transfer
         diligence on behalf of the originator (i.e., the end customer).
       externalDocs:
-        url: /api/products/transfer/#transferdiligencesubmit
+        url: /api/products/transfer/platform-payments/#transferdiligencesubmit
       operationId: transferDiligenceSubmit
       parameters: []
       requestBody:
@@ -10774,7 +10955,7 @@ paths:
         Third-party sender customers can use `/transfer/diligence/document/upload` endpoint to upload a document on behalf of its end customer (i.e. originator) to Plaid. You’ll need to send a request of type multipart/form-data.
         You must provide the `client_id` in the `PLAID-CLIENT-ID` header and `secret` in the `PLAID-SECRET` header.
       externalDocs:
-        url: /api/products/transfer/#transferdiligencedocumentupload
+        url: /api/products/transfer/platform-payments/#transferdiligencedocumentupload
       operationId: transferDiligenceDocumentUpload
       parameters: []
       requestBody:
@@ -10811,7 +10992,7 @@ paths:
         an originator's onboarding process. This information is also available via
         the Transfer page on the Plaid dashboard.
       externalDocs:
-        url: /api/products/transfer/#transferoriginatorget
+        url: /api/products/transfer/platform-payments/#transferoriginatorget
       operationId: transferOriginatorGet
       parameters: []
       requestBody:
@@ -10852,7 +11033,7 @@ paths:
         all of your originators' onboarding. This information is also available via
         the Plaid dashboard.
       externalDocs:
-        url: /api/products/transfer/#transferoriginatorlist
+        url: /api/products/transfer/platform-payments/#transferoriginatorlist
       operationId: transferOriginatorList
       parameters: []
       requestBody:
@@ -10895,7 +11076,7 @@ paths:
 
         Processing of the refund will not occur until at least 4 business days following the transfer's settlement date, plus any hold/settlement delays. This 3-day window helps better protect your business from regular ACH returns. Consumer initiated returns (unauthorized returns) could still happen for about 60 days from the settlement date. If the original transfer is canceled, returned or failed, all pending refunds will automatically be canceled. Processed refunds cannot be revoked.
       externalDocs:
-        url: /api/products/transfer/#transferrefundcreate
+        url: /api/products/transfer/refunds/#transferrefundcreate
       operationId: transferRefundCreate
       parameters: []
       requestBody:
@@ -10938,7 +11119,7 @@ paths:
       description: The `/transfer/refund/get` endpoint fetches information about the
         refund corresponding to the given `refund_id`.
       externalDocs:
-        url: /api/products/transfer/#transferrefundget
+        url: /api/products/transfer/refunds/#transferrefundget
       operationId: transferRefundGet
       parameters: []
       requestBody:
@@ -10983,7 +11164,7 @@ paths:
         refund is eligible for cancellation if it has not yet been submitted to the
         payment network.
       externalDocs:
-        url: /api/products/transfer/#transferrefundcancel
+        url: /api/products/transfer/refunds/#transferrefundcancel
       operationId: transferRefundCancel
       requestBody:
         content:
@@ -11837,7 +12018,7 @@ paths:
                         state_and_local_wages:
                         - employer_state_id_number: 11111111111AAA
                           local_income_tax: "200"
-                          local_wages_and_tips: "200"
+                          local_wages_tips: "200"
                           locality_name: local
                           state: UT
                           state_income_tax: "200"
@@ -15091,6 +15272,7 @@ components:
             last_name: last_name
             first_name: first_name
           ssn_last_4: ssn_last_4
+          phone_number: phone_number
           email: email
           ssn: ssn
         items:
@@ -15478,9 +15660,7 @@ components:
         include_original_description:
           default: false
           description: Include the raw unparsed transaction description from the financial
-            institution. This field is disabled by default. If you need this information
-            in addition to the parsed data provided, contact your Plaid Account Manager,
-            or submit a [Support request](https://dashboard.plaid.com/support/new/product-and-development/product-troubleshooting/product-functionality).
+            institution.
           nullable: true
           type: boolean
         include_personal_finance_category_beta:
@@ -15906,7 +16086,7 @@ components:
           $ref: '#/components/schemas/TransactionsRecurringGetRequestOptions'
         account_ids:
           description: |-
-            A list of `account_ids` to retrieve for the Item
+            An optional list of `account_ids` to retrieve for the Item. Retrieves all active accounts on item if no `account_id`s are provided.
 
             Note: An error will be returned if a provided `account_id` is not associated with the Item.
           items:
@@ -15914,7 +16094,6 @@ components:
           type: array
       required:
       - access_token
-      - account_ids
       type: object
     TransactionsRecurringGetRequestOptions:
       description: An optional object to be used with the request. If specified, `options`
@@ -16315,9 +16494,7 @@ components:
         include_original_description:
           default: false
           description: Include the raw unparsed transaction description from the financial
-            institution. This field is disabled by default. If you need this information
-            in addition to the parsed data provided, contact your Plaid Account Manager
-            or submit a [Support request](https://dashboard.plaid.com/support/new/product-and-development/product-troubleshooting/product-functionality).
+            institution.
           nullable: true
           type: boolean
         include_personal_finance_category:
@@ -16352,16 +16529,66 @@ components:
         next_cursor: next_cursor
         removed:
         - transaction_id: transaction_id
+          account_id: account_id
         - transaction_id: transaction_id
+          account_id: account_id
         added:
         - null
         - null
         modified:
         - null
         - null
+        accounts:
+        - official_name: official_name
+          persistent_account_id: persistent_account_id
+          balances:
+            unofficial_currency_code: unofficial_currency_code
+            current: 6.027456183070403
+            available: 0.8008281904610115
+            limit: 1.4658129805029452
+            iso_currency_code: iso_currency_code
+            last_updated_datetime: 2000-01-23T04:56:07.000+00:00
+          verification_insights:
+            previous_returns:
+              has_previous_administrative_return: true
+            network_status:
+              has_numbers_match: true
+              is_numbers_match_verified: true
+          account_id: account_id
+          name: name
+          verification_status: automatically_verified
+          mask: mask
+        - official_name: official_name
+          persistent_account_id: persistent_account_id
+          balances:
+            unofficial_currency_code: unofficial_currency_code
+            current: 6.027456183070403
+            available: 0.8008281904610115
+            limit: 1.4658129805029452
+            iso_currency_code: iso_currency_code
+            last_updated_datetime: 2000-01-23T04:56:07.000+00:00
+          verification_insights:
+            previous_returns:
+              has_previous_administrative_return: true
+            network_status:
+              has_numbers_match: true
+              is_numbers_match_verified: true
+          account_id: account_id
+          name: name
+          verification_status: automatically_verified
+          mask: mask
         has_more: true
         request_id: request_id
       properties:
+        transactions_update_status:
+          $ref: '#/components/schemas/TransactionsUpdateStatus'
+        accounts:
+          description: An array of accounts at a financial institution associated
+            with the transactions in this response.
+          items:
+            $ref: '#/components/schemas/AccountBase'
+          type: array
+          x-hidden-from-docs: true
         added:
           description: Transactions that have been added to the Item since `cursor`
             ordered by ascending last modified time.
@@ -17859,6 +18086,7 @@ components:
           - liabilities
           - payment_initiation
           - standing_orders
+          - statements
           - transactions
           - transfer
         options:
@@ -18584,9 +18812,13 @@ components:
           name: name
           verification_status: automatically_verified
           mask: mask
+        institution_id: institution_id
       properties:
         account:
           $ref: '#/components/schemas/AccountBase'
+        institution_id:
+          description: The Plaid Institution ID associated with the Account.
+          type: string
         request_id:
           description: A unique identifier for the request, which can be used for
             troubleshooting. This identifier, like all Plaid identifiers, is case
@@ -18595,6 +18827,7 @@ components:
           type: string
       required:
       - account
+      - institution_id
       - request_id
       type: object
     ProcessorTransactionsGetRequestOptions:
@@ -18623,9 +18856,7 @@ components:
         include_original_description:
           default: false
           description: Include the raw unparsed transaction description from the financial
-            institution. This field is disabled by default. If you need this information
-            in addition to the parsed data provided, contact your Plaid Account Manager,
-            or submit a [Support request](https://dashboard.plaid.com/support/new/product-and-development/product-troubleshooting/product-functionality).
+            institution.
           nullable: true
           type: boolean
         include_personal_finance_category_beta:
@@ -18814,7 +19045,9 @@ components:
         next_cursor: next_cursor
         removed:
         - transaction_id: transaction_id
+          account_id: account_id
         - transaction_id: transaction_id
+          account_id: account_id
         added:
         - null
         - null
@@ -20751,6 +20984,7 @@ components:
           last_name: last_name
           first_name: first_name
         ssn_last_4: ssn_last_4
+        phone_number: phone_number
         email: email
         ssn: ssn
       nullable: true
@@ -20759,6 +20993,10 @@ components:
           $ref: '#/components/schemas/ProfileIdentityName'
         address:
           $ref: '#/components/schemas/ProfileIdentityAddress'
+        phone_number:
+          description: The user's phone number in [E.164](https://en.wikipedia.org/wiki/E.164)
+            format
+          type: string
         email:
           description: The user's email address.
           nullable: true
@@ -20817,6 +21055,7 @@ components:
           description: |-
             The full street address
             Example: `"564 Main Street, APT 15"`
+          nullable: true
           type: string
         street2:
           description: The second line street address
@@ -22111,8 +22350,10 @@ components:
           quantity: 5.962133916683182
           institution_value: 6.027456183070403
           iso_currency_code: iso_currency_code
+          vested_value: 2.3021358869347655
           institution_price_datetime: 2000-01-23T04:56:07.000+00:00
           institution_price_as_of: 2000-01-23
+          vested_quantity: 5.637376656633329
           security_id: security_id
         - cost_basis: 1.4658129805029452
           unofficial_currency_code: unofficial_currency_code
@@ -22121,8 +22362,10 @@ components:
           quantity: 5.962133916683182
           institution_value: 6.027456183070403
           iso_currency_code: iso_currency_code
+          vested_value: 2.3021358869347655
           institution_price_datetime: 2000-01-23T04:56:07.000+00:00
           institution_price_as_of: 2000-01-23
+          vested_quantity: 5.637376656633329
           security_id: security_id
         request_id: request_id
         securities:
@@ -22136,12 +22379,12 @@ components:
             contract_type: contract_type
             underlying_security_ticker: underlying_security_ticker
             expiration_date: 2000-01-23
-            strike_price: 2.3021358869347655
+            strike_price: 9.301444243932576
           update_datetime: 2000-01-23T04:56:07.000+00:00
           sedol: sedol
           type: type
           institution_id: institution_id
-          close_price: 5.637376656633329
+          close_price: 7.061401241503109
           proxy_security_id: proxy_security_id
           name: name
           iso_currency_code: iso_currency_code
@@ -22158,12 +22401,12 @@ components:
             contract_type: contract_type
             underlying_security_ticker: underlying_security_ticker
             expiration_date: 2000-01-23
-            strike_price: 2.3021358869347655
+            strike_price: 9.301444243932576
           update_datetime: 2000-01-23T04:56:07.000+00:00
           sedol: sedol
           type: type
           institution_id: institution_id
-          close_price: 5.637376656633329
+          close_price: 7.061401241503109
           proxy_security_id: proxy_security_id
           name: name
           iso_currency_code: iso_currency_code
@@ -22363,8 +22606,10 @@ components:
           quantity: 5.962133916683182
           institution_value: 6.027456183070403
           iso_currency_code: iso_currency_code
+          vested_value: 2.3021358869347655
           institution_price_datetime: 2000-01-23T04:56:07.000+00:00
           institution_price_as_of: 2000-01-23
+          vested_quantity: 5.637376656633329
           security_id: security_id
         - cost_basis: 1.4658129805029452
           unofficial_currency_code: unofficial_currency_code
@@ -22373,8 +22618,10 @@ components:
           quantity: 5.962133916683182
           institution_value: 6.027456183070403
           iso_currency_code: iso_currency_code
+          vested_value: 2.3021358869347655
           institution_price_datetime: 2000-01-23T04:56:07.000+00:00
           institution_price_as_of: 2000-01-23
+          vested_quantity: 5.637376656633329
           security_id: security_id
         request_id: request_id
         securities:
@@ -22388,12 +22635,12 @@ components:
             contract_type: contract_type
             underlying_security_ticker: underlying_security_ticker
             expiration_date: 2000-01-23
-            strike_price: 2.3021358869347655
+            strike_price: 9.301444243932576
           update_datetime: 2000-01-23T04:56:07.000+00:00
           sedol: sedol
           type: type
           institution_id: institution_id
-          close_price: 5.637376656633329
+          close_price: 7.061401241503109
           proxy_security_id: proxy_security_id
           name: name
           iso_currency_code: iso_currency_code
@@ -22410,12 +22657,12 @@ components:
             contract_type: contract_type
             underlying_security_ticker: underlying_security_ticker
             expiration_date: 2000-01-23
-            strike_price: 2.3021358869347655
+            strike_price: 9.301444243932576
           update_datetime: 2000-01-23T04:56:07.000+00:00
           sedol: sedol
           type: type
           institution_id: institution_id
-          close_price: 5.637376656633329
+          close_price: 7.061401241503109
           proxy_security_id: proxy_security_id
           name: name
           iso_currency_code: iso_currency_code
@@ -22671,12 +22918,12 @@ components:
             contract_type: contract_type
             underlying_security_ticker: underlying_security_ticker
             expiration_date: 2000-01-23
-            strike_price: 2.3021358869347655
+            strike_price: 9.301444243932576
           update_datetime: 2000-01-23T04:56:07.000+00:00
           sedol: sedol
           type: type
           institution_id: institution_id
-          close_price: 5.637376656633329
+          close_price: 7.061401241503109
           proxy_security_id: proxy_security_id
           name: name
           iso_currency_code: iso_currency_code
@@ -22693,12 +22940,12 @@ components:
             contract_type: contract_type
             underlying_security_ticker: underlying_security_ticker
             expiration_date: 2000-01-23
-            strike_price: 2.3021358869347655
+            strike_price: 9.301444243932576
           update_datetime: 2000-01-23T04:56:07.000+00:00
           sedol: sedol
           type: type
           institution_id: institution_id
-          close_price: 5.637376656633329
+          close_price: 7.061401241503109
           proxy_security_id: proxy_security_id
           name: name
           iso_currency_code: iso_currency_code
@@ -22827,7 +23074,6 @@ components:
           - galileo
           - modern_treasury
           - ocrolus
-          - prime_trust
           - vesta
           - drivewealth
           - vopay
@@ -23332,6 +23578,7 @@ components:
           same_day_microdeposits_enabled: true
           reroute_to_credentials: "OFF"
           database_insights_enabled: true
+          sms_microdeposits_verification_enabled: true
           database_match_enabled: true
           instant_microdeposits_enabled: true
         additional_consented_products:
@@ -23359,6 +23606,7 @@ components:
         - null
         institution_id: institution_id
         base_report:
+          client_report_id: client_report_id
           days_requested: 411
         optional_products:
         - null
@@ -23616,7 +23864,6 @@ components:
           nullable: true
           type: array
           x-override-enum-values-shown:
-          - assets
           - auth
           - identity
           - investments
@@ -24029,11 +24276,71 @@ components:
       - GROSS
       - NET
       type: string
+    LinkProfileEligibilityCheckRequest:
+      description: LinkProfileEligibilityCheckRequest defines the request schema for
+        `/link/profile/eligibility/check`
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        link_session_id:
+          description: The unique ID for the user's Link session
+          type: string
+        user:
+          $ref: '#/components/schemas/LinkProfileEligibilityCheckUser'
+      required:
+      - link_session_id
+      - user
+      type: object
+      x-hidden-from-docs: true
+    LinkProfileEligibilityCheckUser:
+      additionalProperties: true
+      description: |
+        An object specifying information about the end user who will be sharing their profile in this Link session
+      properties:
+        phone_number:
+          description: The user's phone number in [E.164](https://en.wikipedia.org/wiki/E.164)
+            format
+          type: string
+      required:
+      - phone_number
+      type: object
+      x-hidden-from-docs: true
+    LinkProfileEligibilityCheckResponse:
+      additionalProperties: true
+      description: LinkProfileEligibilityCheckResponse defines the response schema
+        for `/link/profile/eligibility/check`
+      properties:
+        profile_matches:
+          description: Indicates whether Plaid has a profile matching the customer's
+            eligibility requirements for this user
+          type: boolean
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - profile_matches
+      - request_id
+      type: object
+      x-hidden-from-docs: true
     LinkTokenCreateRequestAuth:
       description: Specifies options for initializing Link for use with the Auth product.
         This field can be used to enable or disable extended Auth flows for the resulting
         Link session. Omitting any field will result in a default that can be configured
-        by your account manager.
+        by your account manager. The default behavior described in the documentation
+        is the default behavior that will apply if you have not requested your account
+        manager to apply a different default.
       example:
         flow_type: FLEXIBLE_AUTH
         instant_match_enabled: true
@@ -24042,6 +24349,7 @@ components:
         same_day_microdeposits_enabled: true
         reroute_to_credentials: "OFF"
         database_insights_enabled: true
+        sms_microdeposits_verification_enabled: true
         database_match_enabled: true
         instant_microdeposits_enabled: true
       properties:
@@ -24054,7 +24362,7 @@ components:
           type: boolean
         automated_microdeposits_enabled:
           description: Specifies whether the Link session is enabled for the Automated
-            Micro-deposits flow.
+            Micro-deposits flow. Default behavior is `false`.
           type: boolean
         instant_match_enabled:
           description: Specifies whether the Link session is enabled for the Instant
@@ -24063,11 +24371,11 @@ components:
           type: boolean
         same_day_microdeposits_enabled:
           description: Specifies whether the Link session is enabled for the Same
-            Day Micro-deposits flow.
+            Day Micro-deposits flow.  Default behavior is `false`.
           type: boolean
         instant_microdeposits_enabled:
           description: Specifies whether the Link session is enabled for the Instant
-            Micro-deposits flow.
+            Micro-deposits flow.  Default behavior is `true`.
           type: boolean
         reroute_to_credentials:
           description: Specifies what type of [Reroute to Credentials](https://plaid.com/docs/auth/coverage/same-day/#reroute-to-credentials)
@@ -24087,13 +24395,17 @@ components:
           description: Specifies whether the Link session is enabled for the Database
             Insights flow.
           type: boolean
-          x-hidden_from_docs: true
+          x-hidden-from-docs: true
         flow_type:
           deprecated: true
           description: This field has been deprecated in favor of `auth_type_select_enabled`.
           enum:
           - FLEXIBLE_AUTH
           type: string
+        sms_microdeposits_verification_enabled:
+          description: Specifies whether the Link session is enabled for SMS microdeposits
+            verification. If omitted, behavior defaults to as if this was set to `true`.
+          type: boolean
       type: object
     LinkTokenCreateRequestIdentityVerification:
       description: Specifies option for initializing Link for use with the Identity
@@ -24816,8 +25128,8 @@ components:
           $ref: '#/components/schemas/LinkSessionSuccessMetadataTransferStatus'
       type: object
     LinkSessionSuccessMetadataInstitution:
-      description: An institution object. If the Item was created via Same-Day micro-deposit
-        verification, will be `null`.
+      description: An institution object. If the Item was created via Same-Day or
+        Instant micro-deposit verification, will be `null`.
       example:
         name: name
         institution_id: institution_id
@@ -24993,8 +25305,8 @@ components:
           type: string
       type: object
     LinkSessionExitMetadataInstitution:
-      description: An institution object. If the Item was created via Same-Day micro-deposit
-        verification, will be `null`.
+      description: An institution object. If the Item was created via Same-Day or
+        Instant micro-deposit verification, will be `null`.
       example:
         name: name
         institution_id: institution_id
@@ -25369,9 +25681,11 @@ components:
             used to trace multiple instances of the same account across different
             Items for depository accounts. This is currently only supported for Chase
             Items. Because Chase accounts have a different account number each time
-            they are linked, this field may be instead of the account number to uniquely
-            identify a Chase account across multiple Items for payments use cases,
-            helping to reduce duplicate Items or attempted fraud.
+            they are linked, this field may be used instead of the account number
+            to uniquely identify a Chase account across multiple Items for payments
+            use cases, helping to reduce duplicate Items or attempted fraud. In Sandbox,
+            this field may be populated for any account; in Production and Development,
+            it will only be populated for Chase accounts.
           type: string
       required:
       - account_id
@@ -26113,14 +26427,35 @@ components:
         If provided, the end user will be able to send payments only from the specified
         bank account.
       nullable: true
+    TransactionsUpdateStatus:
+      description: |-
+        A description of the update status for transaction pulls of an item.
+
+        `TRANSACTIONS_UPDATE_STATUS_UNKNOWN`: Unable to fetch transactions update status for item.
+        `NOT_READY`: The item is pending transaction pull.
+        `INITIAL_UPDATE_COMPLETE`: Initial pull for the item is complete, pending Historical pull.
+        `HISTORICAL_UPDATE_COMPLETE`: Both Initial and Historical pull for item is complete.
+      enum:
+      - TRANSACTIONS_UPDATE_STATUS_UNKNOWN
+      - NOT_READY
+      - INITIAL_UPDATE_COMPLETE
+      - HISTORICAL_UPDATE_COMPLETE
+      title: TransactionsUpdateStatus
+      type: string
+      x-hidden-from-docs: true
     RemovedTransaction:
       description: A representation of a removed transaction
       example:
         transaction_id: transaction_id
+        account_id: account_id
       properties:
         transaction_id:
           description: The ID of the removed transaction.
           type: string
+        account_id:
+          description: The ID of the account of the removed transaction.
+          type: string
+          x-hidden-from-docs: true
       title: RemovedTransaction
       type: object
       x-examples: {}
@@ -26278,9 +26613,8 @@ components:
         original_description:
           description: The string returned by the financial institution to describe
             the transaction. For transactions returned by `/transactions/sync` or
-            `/transactions/get`, this field is in beta and will be omitted unless
-            the client is both enrolled in the closed beta program and has set `options.include_original_description`
-            to `true`.
+            `/transactions/get`, this field will be omitted unless the client has
+            set `options.include_original_description` to `true`.
           nullable: true
           type: string
         payment_meta:
@@ -26766,6 +27100,7 @@ components:
             other Auth methods such as Instant Match or Automated Micro-deposit Verification.
             To identify institutions that support those methods, use the `auth_metadata`
             object. For more details, see [Full Auth coverage](https://plaid.com/docs/auth/coverage/).
+            The `income_verification` product here indicates support for Bank Income.
           items:
             $ref: '#/components/schemas/Products'
           type: array
@@ -28868,7 +29203,8 @@ components:
         next_payment_due_date: 2000-01-23
       properties:
         account_id:
-          description: The ID of the account that this liability belongs to.
+          description: The ID of the account that this liability belongs to. Each
+            account can only contain one liability.
           nullable: true
           type: string
         account_number:
@@ -30316,14 +30652,14 @@ components:
             A verified CUSIP Global Services license is required to receive this data.
             This field will be null by default for new customers, and null for existing
             customers starting March 12, 2024. If you would like access to this field,
-            please start the verification process [here](https://docs.google.com/forms/d/e/1FAIpQLSd9asHEYEfmf8fxJTHZTAfAzW4dugsnSu-HS2J51f1mxwd6Sw/viewform).
+            please [request ISIN/CUSIP access here](https://docs.google.com/forms/d/e/1FAIpQLSd9asHEYEfmf8fxJTHZTAfAzW4dugsnSu-HS2J51f1mxwd6Sw/viewform).
           type: string
         cusip:
           description: 9-character CUSIP, an identifier assigned to North American
             securities. A verified CUSIP Global Services license is required to receive
             this data. This field will be null by default for new customers, and null
             for existing customers starting March 12, 2024. If you would like access
-            to this field, please start the verification process [here](https://docs.google.com/forms/d/e/1FAIpQLSd9asHEYEfmf8fxJTHZTAfAzW4dugsnSu-HS2J51f1mxwd6Sw/viewform).
+            to this field, please [request ISIN/CUSIP access here](https://docs.google.com/forms/d/e/1FAIpQLSd9asHEYEfmf8fxJTHZTAfAzW4dugsnSu-HS2J51f1mxwd6Sw/viewform).
           type: string
         sedol:
           description: 7-character SEDOL, an identifier assigned to securities in
@@ -30362,17 +30698,6 @@ components:
           description: The total quantity of the asset held, as reported by the financial
             institution.
           format: double
-          type: number
-        vested_quantity:
-          description: The total quantity of vested assets held, as reported by the
-            financial institution. Vested assets are only associated with [equities](https://plaid.com/docs/api/products/investments/#investments-holdings-get-response-securities-type).
-          format: double
-          nullable: true
-          type: number
-        vested_value:
-          description: The value of the vested holdings as reported by the institution.
-          format: double
-          nullable: true
           type: number
         currency:
           description: Either a valid `iso_currency_code` or `unofficial_currency_code`
@@ -32805,8 +33130,10 @@ components:
         quantity: 5.962133916683182
         institution_value: 6.027456183070403
         iso_currency_code: iso_currency_code
+        vested_value: 2.3021358869347655
         institution_price_datetime: 2000-01-23T04:56:07.000+00:00
         institution_price_as_of: 2000-01-23
+        vested_quantity: 5.637376656633329
         security_id: security_id
       properties:
         account_id:
@@ -32868,6 +33195,17 @@ components:
             See the [currency code schema](https://plaid.com/docs/api/accounts#currency-code-schema) for a full listing of supported `iso_currency_code`s.
           nullable: true
           type: string
+        vested_quantity:
+          description: The total quantity of vested assets held, as reported by the
+            financial institution. Vested assets are only associated with [equities](https://plaid.com/docs/api/products/investments/#investments-holdings-get-response-securities-type).
+          format: double
+          nullable: true
+          type: number
+        vested_value:
+          description: The value of the vested holdings as reported by the institution.
+          format: double
+          nullable: true
+          type: number
       required:
       - account_id
       - cost_basis
@@ -32893,12 +33231,12 @@ components:
           contract_type: contract_type
           underlying_security_ticker: underlying_security_ticker
           expiration_date: 2000-01-23
-          strike_price: 2.3021358869347655
+          strike_price: 9.301444243932576
         update_datetime: 2000-01-23T04:56:07.000+00:00
         sedol: sedol
         type: type
         institution_id: institution_id
-        close_price: 5.637376656633329
+        close_price: 7.061401241503109
         proxy_security_id: proxy_security_id
         name: name
         iso_currency_code: iso_currency_code
@@ -33134,7 +33472,7 @@ components:
         contract_type: contract_type
         underlying_security_ticker: underlying_security_ticker
         expiration_date: 2000-01-23
-        strike_price: 2.3021358869347655
+        strike_price: 9.301444243932576
       nullable: true
       properties:
         contract_type:
@@ -34570,8 +34908,8 @@ components:
             The trace identifier for the transfer based on its network. This will only be set after the transfer has posted.
 
             For `ach` or `same-day-ach` transfers, this is the ACH trace number.
-            For `wire` transfers, this will be in the format of `<IMAD>/<OMAD>`.
-            The field will remain null for transfers on other rails.
+            For `rtp` transfers, this is the Transaction Identification number.
+            For `wire` transfers, this is the IMAD (Input Message Accountability Data) number.
           nullable: true
           title: TransferNetworkTraceID
           type: string
@@ -34672,7 +35010,7 @@ components:
         ach_class:
           $ref: '#/components/schemas/ACHClass'
         network:
-          $ref: '#/components/schemas/TransferNetwork'
+          $ref: '#/components/schemas/TransferACHNetwork'
         origination_account_id:
           deprecated: true
           description: Plaid’s unique identifier for the origination account that
@@ -34905,6 +35243,9 @@ components:
       description: |-
         Specifies the use case of the transfer. Required for transfers on an ACH network.
 
+        Codes supported for credits: `ccd`, `ppd`
+        Codes supported for debits: `ccd`, `tel`, `web`
+
         `"ccd"` - Corporate Credit or Debit - fund transfer between two corporate bank accounts
 
         `"ppd"` - Prearranged Payment or Deposit - the transfer is part of a pre-existing relationship with a consumer, e.g. bill payment
@@ -34968,8 +35309,8 @@ components:
         The trace identifier for the transfer based on its network. This will only be set after the transfer has posted.
 
         For `ach` or `same-day-ach` transfers, this is the ACH trace number.
-        For `wire` transfers, this will be in the format of `<IMAD>/<OMAD>`.
-        The field will remain null for transfers on other rails.
+        For `rtp` transfers, this is the Transaction Identification number.
+        For `wire` transfers, this is the IMAD (Input Message Accountability Data) number.
       nullable: true
       title: TransferNetworkTraceID
       type: string
@@ -36300,7 +36641,7 @@ components:
         type:
           $ref: '#/components/schemas/TransferType'
         network:
-          $ref: '#/components/schemas/TransferNetwork'
+          $ref: '#/components/schemas/TransferACHNetwork'
         ach_class:
           $ref: '#/components/schemas/ACHClass'
         amount:
@@ -38026,12 +38367,17 @@ components:
           transfer_amount: transfer_amount
           origination_account_id: origination_account_id
           timestamp: 2000-01-23T04:56:07.000+00:00
+        has_more: true
         request_id: request_id
       properties:
         transfer_events:
           items:
             $ref: '#/components/schemas/TransferEvent'
           type: array
+        has_more:
+          description: Whether there are more events to be pulled from the endpoint
+            that have not already been returned
+          type: boolean
         request_id:
           description: A unique identifier for the request, which can be used for
             troubleshooting. This identifier, like all Plaid identifiers, is case
@@ -38039,6 +38385,7 @@ components:
           title: RequestID
           type: string
       required:
+      - has_more
       - request_id
       - transfer_events
       title: TransferEventListResponse
@@ -38230,12 +38577,17 @@ components:
           transfer_amount: transfer_amount
           origination_account_id: origination_account_id
           timestamp: 2000-01-23T04:56:07.000+00:00
+        has_more: true
         request_id: request_id
       properties:
         transfer_events:
           items:
             $ref: '#/components/schemas/TransferEvent'
           type: array
+        has_more:
+          description: Whether there are more events to be pulled from the endpoint
+            that have not already been returned
+          type: boolean
         request_id:
           description: A unique identifier for the request, which can be used for
             troubleshooting. This identifier, like all Plaid identifiers, is case
@@ -38243,6 +38595,7 @@ components:
           title: RequestID
           type: string
       required:
+      - has_more
       - request_id
       - transfer_events
       title: TransferEventSyncResponse
@@ -38665,8 +39018,8 @@ components:
             The trace identifier for the transfer based on its network. This will only be set after the transfer has posted.
 
             For `ach` or `same-day-ach` transfers, this is the ACH trace number.
-            For `wire` transfers, this will be in the format of `<IMAD>/<OMAD>`.
-            The field will remain null for transfers on other rails.
+            For `rtp` transfers, this is the Transaction Identification number.
+            For `wire` transfers, this is the IMAD (Input Message Accountability Data) number.
           nullable: true
           title: TransferNetworkTraceID
           type: string
@@ -40397,8 +40750,11 @@ components:
       title: TransferIntentCreateResponse
       type: object
     TransferIntentGetRequest:
-      additionalProperties: true
       description: Defines the request schema for `/transfer/intent/get`
+      example:
+        secret: secret
+        client_id: client_id
+        transfer_intent_id: transfer_intent_id
       properties:
         client_id:
           description: Your Plaid API `client_id`. The `client_id` is required and
@@ -40752,8 +41108,8 @@ components:
             The trace identifier for the transfer based on its network. This will only be set after the transfer has posted.
 
             For `ach` or `same-day-ach` transfers, this is the ACH trace number.
-            For `wire` transfers, this will be in the format of `<IMAD>/<OMAD>`.
-            The field will remain null for transfers on other rails.
+            For `rtp` transfers, this is the Transaction Identification number.
+            For `wire` transfers, this is the IMAD (Input Message Accountability Data) number.
           nullable: true
           title: TransferNetworkTraceID
           type: string
@@ -42573,6 +42929,7 @@ components:
         product. This field is required if `assets` is included in the `products`
         array and the client is CRA-enabled.
       example:
+        client_report_id: client_report_id
         days_requested: 411
       properties:
         days_requested:
@@ -42581,6 +42938,11 @@ components:
           maximum: 730
           minimum: 1
           type: integer
+        client_report_id:
+          description: Client-generated identifier, which can be used by lenders to
+            track loan applications.
+          nullable: true
+          type: string
       required:
       - days_requested
       title: LinkTokenCreateRequestBaseReport
@@ -53678,7 +54040,9 @@ components:
           - NONE
         download_url:
           description: |-
-            Signed URL to retrieve the underlying file. For Payroll Income, the file type will always be PDF, and the file may not be available, in which case the field will be `null`. If you would like Plaid to generate a PDF if the original is not available, contact your Account Manager. For Document Income, this field will not be `null`, and the file type will be the original file type uploaded by the user. For more details on available file types, see the [Document Income](https://www.plaid.com/docs/income/payroll-income) documentation.
+            Signed URL to retrieve the underlying file. For Payroll Income, the file type will always be PDF, and the file may not be available, in which case the field will be `null`. If you would like Plaid to generate a PDF if the original is not available, contact your Account Manager. [Example generated pay stub](https://www.plaid.com/documents/plaid-generated-mock-paystub.pdf).
+
+            For Document Income, this field will not be `null`, and the file type will be the original file type uploaded by the user. For more details on available file types, see the [Document Income](https://www.plaid.com/docs/income/payroll-income) documentation.
 
             This download URL can only be used once and expires after two minutes. To generate a new download URL, call `/credit/payroll_income/get` again.
           nullable: true
@@ -63216,7 +63580,6 @@ components:
           $ref: '#/components/schemas/WebhookEnvironmentValues'
       required:
       - environment
-      - result
       - user_id
       - webhook_code
       - webhook_type
@@ -63227,7 +63590,6 @@ components:
           webhook_type: CRA_INCOME
           webhook_code: BANK_INCOME_COMPLETE
           user_id: wz666MBjYWTp2PDzzggYhM6oWWmBb
-          result: SUCCESS
           environment: production
     CraBankIncomeCompleteResult:
       description: |-
@@ -63240,6 +63602,35 @@ components:
       - SUCCESS
       - FAILURE
       type: string
+    CraBankIncomeErrorWebhook:
+      additionalProperties: true
+      description: Fired when a bank income report has failed to generate
+      properties:
+        webhook_type:
+          description: '`CRA_INCOME`'
+          type: string
+        webhook_code:
+          description: '`ERROR`'
+          type: string
+        user_id:
+          description: The `user_id` corresponding to the user the webhook has fired
+            for.
+          type: string
+        environment:
+          $ref: '#/components/schemas/WebhookEnvironmentValues'
+      required:
+      - environment
+      - user_id
+      - webhook_code
+      - webhook_type
+      title: CraBankIncomeErrorWebhook
+      type: object
+      x-examples:
+        example-1:
+          webhook_type: CRA_INCOME
+          webhook_code: ERROR
+          user_id: wz666MBjYWTp2PDzzggYhM6oWWmBb
+          environment: production
     BankIncomeCompleteWebhook:
       additionalProperties: true
       description: Fired when a bank income report has finished generating or failed
@@ -63288,8 +63679,8 @@ components:
       type: string
     CraPartnerInsightsCompleteWebhook:
       additionalProperties: true
-      description: Fired when a partner insights report has finished generating or
-        failed to generate.
+      description: Fired when a partner insights report has finished generating and
+        results are available
       properties:
         webhook_type:
           description: '`CRA_INSIGHTS`'
@@ -63301,13 +63692,10 @@ components:
           description: The `user_id` corresponding to the user the webhook has fired
             for.
           type: string
-        result:
-          $ref: '#/components/schemas/CraPartnerInsightsCompleteResult'
         environment:
           $ref: '#/components/schemas/WebhookEnvironmentValues'
       required:
       - environment
-      - result
       - user_id
       - webhook_code
       - webhook_type
@@ -63318,22 +63706,36 @@ components:
           webhook_type: CRA_INSIGHTS
           webhook_code: PARTNER_INSIGHTS_COMPLETE
           user_id: wz666MBjYWTp2PDzzggYhM6oWWmBb
-          result: SUCCESS
           environment: production
-    CraPartnerInsightsCompleteResult:
-      description: |-
-        The result of the partner insights report generation
-
-        `SUCCESS`: All insights in the partner insights report were successfully generated and can be retrieved via `/cra/partner_insights/get`.
-
-        `FAILURE`: The partner insights report failed to be generated.
-
-        `PARTIAL_SUCCESS`: Some, but not all, insights in the partner insights report were successfully generated and can be retrieved via `/cra/partner_insights/get`.
-      enum:
-      - SUCCESS
-      - FAILURE
-      - PARTIAL_SUCCESS
-      type: string
+    CraPartnerInsightsErrorWebhook:
+      additionalProperties: true
+      description: Fired when a partner insights report has failed to generate
+      properties:
+        webhook_type:
+          description: '`CRA_INSIGHTS`'
+          type: string
+        webhook_code:
+          description: '`PARTNER_INSIGHTS_ERROR`'
+          type: string
+        user_id:
+          description: The `user_id` corresponding to the user the webhook has fired
+            for.
+          type: string
+        environment:
+          $ref: '#/components/schemas/WebhookEnvironmentValues'
+      required:
+      - environment
+      - user_id
+      - webhook_code
+      - webhook_type
+      title: CraPartnerInsightsErrorWebhook
+      type: object
+      x-examples:
+        example-1:
+          webhook_type: CRA_INSIGHTS
+          webhook_code: PARTNER_INSIGHTS_ERROR
+          user_id: wz666MBjYWTp2PDzzggYhM6oWWmBb
+          environment: production
     IncomeVerificationRefreshReconnectNeededWebhook:
       additionalProperties: true
       description: Fired when the attempt to refresh Payroll Income data for a user
@@ -65139,6 +65541,66 @@ components:
       - removed
       - request_id
       type: object
+    BaseReportCreateRequest:
+      description: BaseReportCreateRequest defines the request schema for `/cra/base_report/create`
+      example:
+        webhook: webhook
+        secret: secret
+        user_token: user_token
+        client_id: client_id
+        days_requested: 58
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        user_token:
+          description: The user token associated with the User data is being requested
+            for.
+          title: UserToken
+          type: string
+        days_requested:
+          description: The duration of transaction history you requested
+          maximum: 731
+          minimum: 0
+          type: integer
+        webhook:
+          description: URL to which Plaid will send Assets webhooks, for example when
+            the requested Asset Report is ready.
+          nullable: true
+          type: string
+        consumer_report_permissible_purpose:
+          $ref: '#/components/schemas/ConsumerReportPermissiblePurpose'
+      required:
+      - consumer_report_permissible_purpose
+      - days_requested
+      - user_token
+      - webhook
+      type: object
+      x-hidden-from-docs: true
+    BaseReportCreateResponse:
+      additionalProperties: true
+      description: BaseReportCreateResponse defines the response schema for `cra/base_report/create`
+      example:
+        request_id: request_id
+      properties:
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      type: object
+      x-hidden-from-docs: true
     BaseReportGetRequest:
       description: BaseReportGetRequest defines the request schema for `/cra/base_report/get`
       example:
@@ -65176,6 +65638,7 @@ components:
         report:
           date_generated: 2000-01-23T04:56:07.000+00:00
           report_id: report_id
+          client_report_id: client_report_id
           items:
           - accounts:
             - official_name: official_name
@@ -68238,6 +68701,7 @@ components:
       example:
         date_generated: 2000-01-23T04:56:07.000+00:00
         report_id: report_id
+        client_report_id: client_report_id
         items:
         - accounts:
           - official_name: official_name
@@ -68975,6 +69439,11 @@ components:
         days_requested:
           description: The number of days of transaction history requested.
           type: number
+        client_report_id:
+          description: Client-generated identifier, which can be used by lenders to
+            track loan applications.
+          nullable: true
+          type: string
         items:
           description: Data returned by Plaid about each of the Items included in
             the Base Report.
@@ -69620,7 +70089,6 @@ components:
       required:
       - balances
       - days_available
-      - historical_balances
       - mask
       - name
       - official_name
@@ -70149,6 +70617,401 @@ components:
           type: boolean
       title: BalancePlusAttributes
       type: object
+    BeaconAccountRiskEvaluateRequest:
+      description: BeaconAccountRiskEvaluateRequest defines the request schema for
+        `/v1/beacon/account_risk/risk/evaluate`
+      example:
+        access_token: access_token
+        client_evaluation_id: client_evaluation_id
+        client_user_id: client_user_id
+        options:
+          account_ids:
+          - account_ids
+          - account_ids
+        secret: secret
+        device:
+          ip_address: ip_address
+          user_agent: user_agent
+        client_id: client_id
+        evaluate_time: evaluate_time
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        access_token:
+          description: The access token associated with the Item data is being requested
+            for.
+          title: AccessToken
+          type: string
+        options:
+          $ref: '#/components/schemas/BeaconAccountRiskEvaluateRequestOptions'
+        client_user_id:
+          description: A unique ID that identifies the end user in your system. This
+            ID is used to correlate requests by a user with multiple evaluations and/or
+            multiple linked accounts. Personally identifiable information, such as
+            an email address or phone number, should not be used in the client_user_id.
+          maxLength: 36
+          minLength: 1
+          type: string
+        client_evaluation_id:
+          description: Unique identifier of what you are looking to evaluate (account
+            add, information change, etc.) to allow us to tie the activity to the
+            decisions and possible fraud outcome sent via our feedback endpoints.
+            You can use your internal request ID or similar.
+          type: string
+        evaluation_reason:
+          $ref: '#/components/schemas/BeaconAccountRiskEvaluateEvaluationReason'
+        device:
+          $ref: '#/components/schemas/SignalDevice'
+        evaluate_time:
+          description: The time the event for evaluation has occurred. Populate this
+            field for backfilling data. If you don’t populate this field, we’ll use
+            the timestamp at the time of receipt. Use ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ).
+          type: string
+      title: BeaconAccountRiskEvaluateRequest
+      type: object
+      x-hidden-from-docs: true
+    BeaconAccountRiskEvaluateRequestOptions:
+      description: An optional object to filter `/beacon/account_risk/v1/evaluate`
+        results to a subset of the accounts on the linked Item.
+      example:
+        account_ids:
+        - account_ids
+        - account_ids
+      properties:
+        account_ids:
+          description: An array of `account_ids` for the specific accounts to evaluate.
+          items:
+            type: string
+          type: array
+      type: object
+    BeaconAccountRiskEvaluateEvaluationReason:
+      description: "Description of the reason you want to evaluate risk.\n`ONBOARDING`:\
+        \ user links a first bank account as part of the onboarding flow of your platform.\n\
+        `NEW_ACCOUNT`: user links another bank account or replaces the currently linked\
+        \ bank account on your platform.\n`INFORMATION_CHANGE`: user changes their\
+        \ information on your platform, e.g., updating their phone number.\n`DORMANT_USER`:\
+        \  you decide to re-evaluate a user that becomes active after a period of\
+        \ inactivity.  \n`OTHER`: any other reasons not listed here\nPossible values:\
+        \  `ONBOARDING`, `NEW_ACCOUNT`, `INFORMATION_CHANGE`, `DORMANT_USER`, `OTHER`\n"
+      enum:
+      - ONBOARDING
+      - NEW_ACCOUNT
+      - INFORMATION_CHANGE
+      - DORMANT_USER
+      - OTHER
+      type: string
+      x-hidden-from-docs: true
+    BeaconAccountRiskEvaluateResponse:
+      additionalProperties: true
+      description: BeaconAccountRiskEvaluateResponse defines the response schema for
+        `/beacon/account_risk/v1/evaluate`
+      example:
+        accounts:
+        - account_id: account_id
+          attributes:
+            days_since_first_plaid_connection: 0
+            is_account_closed: true
+            distinct_ip_addresses_count_90d: 1
+            distinct_user_agents_count_30d: 1
+            distinct_ip_addresses_count_30d: 1
+            distinct_user_agents_count_90d: 4
+            distinct_user_agents_count_7d: 7
+            phone_change_count_90d: 9
+            plaid_connections_count_30d: 5
+            is_account_frozen_or_restricted: true
+            failed_plaid_non_oauth_authentication_attempts_count_30d: 2
+            failed_plaid_non_oauth_authentication_attempts_count_7d: 9
+            phone_change_count_28d: 9
+            failed_plaid_non_oauth_authentication_attempts_count_3d: 2
+            days_since_account_creation: 6
+            plaid_non_oauth_authentication_attempts_count_30d: 4
+            total_plaid_connections_count: 1
+            plaid_non_oauth_authentication_attempts_count_7d: 3
+            email_change_count_90d: 8
+            plaid_connections_count_7d: 5
+            plaid_non_oauth_authentication_attempts_count_3d: 7
+            distinct_ip_addresses_count_7d: 1
+            distinct_user_agents_count_3d: 6
+            address_change_count_90d: 6
+            distinct_ip_addresses_count_3d: 7
+            email_change_count_28d: 9
+            address_change_count_28d: 5
+        - account_id: account_id
+          attributes:
+            days_since_first_plaid_connection: 0
+            is_account_closed: true
+            distinct_ip_addresses_count_90d: 1
+            distinct_user_agents_count_30d: 1
+            distinct_ip_addresses_count_30d: 1
+            distinct_user_agents_count_90d: 4
+            distinct_user_agents_count_7d: 7
+            phone_change_count_90d: 9
+            plaid_connections_count_30d: 5
+            is_account_frozen_or_restricted: true
+            failed_plaid_non_oauth_authentication_attempts_count_30d: 2
+            failed_plaid_non_oauth_authentication_attempts_count_7d: 9
+            phone_change_count_28d: 9
+            failed_plaid_non_oauth_authentication_attempts_count_3d: 2
+            days_since_account_creation: 6
+            plaid_non_oauth_authentication_attempts_count_30d: 4
+            total_plaid_connections_count: 1
+            plaid_non_oauth_authentication_attempts_count_7d: 3
+            email_change_count_90d: 8
+            plaid_connections_count_7d: 5
+            plaid_non_oauth_authentication_attempts_count_3d: 7
+            distinct_ip_addresses_count_7d: 1
+            distinct_user_agents_count_3d: 6
+            address_change_count_90d: 6
+            distinct_ip_addresses_count_3d: 7
+            email_change_count_28d: 9
+            address_change_count_28d: 5
+        request_id: request_id
+      properties:
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+        accounts:
+          description: The accounts for which a risk evaluation has been requested.
+          items:
+            $ref: '#/components/schemas/BeaconAccountRiskEvaluateAccount'
+          type: array
+      required:
+      - accounts
+      - request_id
+      title: BeaconAccountRiskEvaluateResponse
+      type: object
+      x-hidden-from-docs: true
+    BeaconAccountRiskEvaluateAccount:
+      description: An account in the `/beacon/account_risk/v1/evaluate` response.
+      example:
+        account_id: account_id
+        attributes:
+          days_since_first_plaid_connection: 0
+          is_account_closed: true
+          distinct_ip_addresses_count_90d: 1
+          distinct_user_agents_count_30d: 1
+          distinct_ip_addresses_count_30d: 1
+          distinct_user_agents_count_90d: 4
+          distinct_user_agents_count_7d: 7
+          phone_change_count_90d: 9
+          plaid_connections_count_30d: 5
+          is_account_frozen_or_restricted: true
+          failed_plaid_non_oauth_authentication_attempts_count_30d: 2
+          failed_plaid_non_oauth_authentication_attempts_count_7d: 9
+          phone_change_count_28d: 9
+          failed_plaid_non_oauth_authentication_attempts_count_3d: 2
+          days_since_account_creation: 6
+          plaid_non_oauth_authentication_attempts_count_30d: 4
+          total_plaid_connections_count: 1
+          plaid_non_oauth_authentication_attempts_count_7d: 3
+          email_change_count_90d: 8
+          plaid_connections_count_7d: 5
+          plaid_non_oauth_authentication_attempts_count_3d: 7
+          distinct_ip_addresses_count_7d: 1
+          distinct_user_agents_count_3d: 6
+          address_change_count_90d: 6
+          distinct_ip_addresses_count_3d: 7
+          email_change_count_28d: 9
+          address_change_count_28d: 5
+      properties:
+        account_id:
+          description: The account ID.
+          type: string
+        type:
+          $ref: '#/components/schemas/AccountType'
+        subtype:
+          $ref: '#/components/schemas/AccountSubtype'
+        attributes:
+          $ref: '#/components/schemas/BeaconAccountRiskEvaluateAccountAttributes'
+      title: BeaconAccountRiskEvaluateAccount
+      type: object
+    BeaconAccountRiskEvaluateAccountAttributes:
+      description: |-
+        The attributes object contains data that can be used to assess account risk. Examples of data include:
+        `days_since_first_plaid_connection`: The number of days since the first time the Item was connected to an application via Plaid
+        `plaid_connections_count_7d`: The number of times the Item has been connected to applications via Plaid over the past 7 days
+        `plaid_connections_count_30d`: The number of times the Item has been connected to applications via Plaid over the past 30 days
+        `total_plaid_connections_count`: The number of times the Item has been connected to applications via Plaid
+        For the full list and detailed documentation of core attributes available, or to request that core attributes not be returned, contact Sales or your Plaid account manager
+      example:
+        days_since_first_plaid_connection: 0
+        is_account_closed: true
+        distinct_ip_addresses_count_90d: 1
+        distinct_user_agents_count_30d: 1
+        distinct_ip_addresses_count_30d: 1
+        distinct_user_agents_count_90d: 4
+        distinct_user_agents_count_7d: 7
+        phone_change_count_90d: 9
+        plaid_connections_count_30d: 5
+        is_account_frozen_or_restricted: true
+        failed_plaid_non_oauth_authentication_attempts_count_30d: 2
+        failed_plaid_non_oauth_authentication_attempts_count_7d: 9
+        phone_change_count_28d: 9
+        failed_plaid_non_oauth_authentication_attempts_count_3d: 2
+        days_since_account_creation: 6
+        plaid_non_oauth_authentication_attempts_count_30d: 4
+        total_plaid_connections_count: 1
+        plaid_non_oauth_authentication_attempts_count_7d: 3
+        email_change_count_90d: 8
+        plaid_connections_count_7d: 5
+        plaid_non_oauth_authentication_attempts_count_3d: 7
+        distinct_ip_addresses_count_7d: 1
+        distinct_user_agents_count_3d: 6
+        address_change_count_90d: 6
+        distinct_ip_addresses_count_3d: 7
+        email_change_count_28d: 9
+        address_change_count_28d: 5
+      properties:
+        days_since_first_plaid_connection:
+          description: The number of days since the first time the Item was connected
+            to an application via Plaid
+          nullable: true
+          type: integer
+        days_since_account_creation:
+          description: The age of the account as reported by the FI, when available.
+          nullable: true
+          type: integer
+        is_account_closed:
+          description: Indicates if the account has been closed by the financial institution
+            or the consumer, or is at risk of being closed
+          nullable: true
+          type: boolean
+        is_account_frozen_or_restricted:
+          description: Indicates whether the account has withdrawals and transfers
+            disabled or if access to the account is restricted. This could be due
+            to a freeze by the credit issuer, legal restrictions (e.g., sanctions),
+            or regulatory requirements limiting monthly withdrawals, among other reasons
+          nullable: true
+          type: boolean
+        total_plaid_connections_count:
+          description: The total number of times the item has been connected to applications
+            via Plaid
+          nullable: true
+          type: integer
+        plaid_connections_count_7d:
+          description: The number of times the Item has been connected to applications
+            via Plaid over the past 7 days
+          nullable: true
+          type: integer
+        plaid_connections_count_30d:
+          description: The number of times the Item has been connected to applications
+            via Plaid over the past 30 days
+          nullable: true
+          type: integer
+        failed_plaid_non_oauth_authentication_attempts_count_3d:
+          description: The number of failed non-OAuth authentication attempts via
+            Plaid for this bank account over the past 3 days
+          nullable: true
+          type: integer
+        plaid_non_oauth_authentication_attempts_count_3d:
+          description: The number of non-OAuth authentication attempts via Plaid for
+            this bank account over the past 3 days
+          nullable: true
+          type: integer
+        failed_plaid_non_oauth_authentication_attempts_count_7d:
+          description: The number of failed non-OAuth authentication attempts via
+            Plaid for this bank account over the past 7 days
+          nullable: true
+          type: integer
+        plaid_non_oauth_authentication_attempts_count_7d:
+          description: The number of non-OAuth authentication attempts via Plaid for
+            this bank account over the past 7 days
+          nullable: true
+          type: integer
+        failed_plaid_non_oauth_authentication_attempts_count_30d:
+          description: The number of failed non-OAuth authentication attempts via
+            Plaid for this bank account over the past 30 days
+          nullable: true
+          type: integer
+        plaid_non_oauth_authentication_attempts_count_30d:
+          description: The number of non-OAuth authentication attempts via Plaid for
+            this bank account over the past 30 days
+          nullable: true
+          type: integer
+        distinct_ip_addresses_count_3d:
+          description: The number of distinct IP addresses linked to the same bank
+            account during Plaid authentication in the last 3 days
+          nullable: true
+          type: integer
+        distinct_ip_addresses_count_7d:
+          description: The number of distinct IP addresses linked to the same bank
+            account during Plaid authentication in the last 7 days
+          nullable: true
+          type: integer
+        distinct_ip_addresses_count_30d:
+          description: The number of distinct IP addresses linked to the same bank
+            account during Plaid authentication in the last 30 days
+          nullable: true
+          type: integer
+        distinct_ip_addresses_count_90d:
+          description: The number of distinct IP addresses linked to the same bank
+            account during Plaid authentication in the last 90 days
+          nullable: true
+          type: integer
+        distinct_user_agents_count_3d:
+          description: The number of distinct user agents linked to the same bank
+            account during Plaid authentication in the last 3 days
+          nullable: true
+          type: integer
+        distinct_user_agents_count_7d:
+          description: The number of distinct user agents linked to the same bank
+            account during Plaid authentication in the last 7 days
+          nullable: true
+          type: integer
+        distinct_user_agents_count_30d:
+          description: The number of distinct user agents linked to the same bank
+            account during Plaid authentication in the last 30 days
+          nullable: true
+          type: integer
+        distinct_user_agents_count_90d:
+          description: The number of distinct user agents linked to the same bank
+            account during Plaid authentication in the last 90 days
+          nullable: true
+          type: integer
+        address_change_count_28d:
+          description: The number of times the account's addresses on file have changed
+            over the past 28 days
+          nullable: true
+          type: integer
+        email_change_count_28d:
+          description: The number of times the account's email addresses on file have
+            changed over the past 28 days
+          nullable: true
+          type: integer
+        phone_change_count_28d:
+          description: The number of times the account's phone numbers on file have
+            changed over the past 28 days
+          nullable: true
+          type: integer
+        address_change_count_90d:
+          description: The number of times the account's addresses on file have changed
+            over the past 90 days
+          nullable: true
+          type: integer
+        email_change_count_90d:
+          description: The number of times the account's email addresses on file have
+            changed over the past 90 days
+          nullable: true
+          type: integer
+        phone_change_count_90d:
+          description: The number of times the account's phone numbers on file have
+            changed over the past 90 days
+          nullable: true
+          type: integer
+      title: BeaconAccountRiskEvaluateAccountAttributes
+      type: object
     AddressPurposeLabel:
       description: |-
         Field describing whether the associated address is being used for commercial or residential purposes.
@@ -70166,6 +71029,7 @@ components:
         what caused the change as well as when it occurred.
       example:
         dashboard_user_id: 54350110fedcbaf01234ffee
+        timestamp: 2020-07-24T03:26:02Z
       properties:
         source:
           $ref: '#/components/schemas/BeaconAuditTrailSource'
@@ -70175,9 +71039,16 @@ components:
           nullable: true
           title: DashboardUserID
           type: string
+        timestamp:
+          description: An ISO8601 formatted timestamp.
+          example: 2020-07-24T03:26:02Z
+          format: date-time
+          title: Timestamp
+          type: string
       required:
       - dashboard_user_id
       - source
+      - timestamp
       title: BeaconAuditTrail
       type: object
     BeaconAuditTrailSource:
@@ -70348,6 +71219,7 @@ components:
       example:
         audit_trail:
           dashboard_user_id: 54350110fedcbaf01234ffee
+          timestamp: 2020-07-24T03:26:02Z
         beacon_user_id: becusr_42cF1MNo42r9Xj
         created_at: 2020-07-24T03:26:02Z
         fraud_amount:
@@ -70446,6 +71318,7 @@ components:
       example:
         audit_trail:
           dashboard_user_id: 54350110fedcbaf01234ffee
+          timestamp: 2020-07-24T03:26:02Z
         beacon_user_id: becusr_42cF1MNo42r9Xj
         created_at: 2020-07-24T03:26:02Z
         fraud_amount:
@@ -70536,6 +71409,7 @@ components:
       example:
         audit_trail:
           dashboard_user_id: 54350110fedcbaf01234ffee
+          timestamp: 2020-07-24T03:26:02Z
         beacon_user_id: becusr_42cF1MNo42r9Xj
         created_at: 2020-07-24T03:26:02Z
         fraud_amount:
@@ -70639,6 +71513,7 @@ components:
         beacon_reports:
         - audit_trail:
             dashboard_user_id: 54350110fedcbaf01234ffee
+            timestamp: 2020-07-24T03:26:02Z
           beacon_user_id: becusr_42cF1MNo42r9Xj
           created_at: 2020-07-24T03:26:02Z
           fraud_amount:
@@ -70647,6 +71522,7 @@ components:
           fraud_date: 1990-05-29T00:00:00.000+0000
         - audit_trail:
             dashboard_user_id: 54350110fedcbaf01234ffee
+            timestamp: 2020-07-24T03:26:02Z
           beacon_user_id: becusr_42cF1MNo42r9Xj
           created_at: 2020-07-24T03:26:02Z
           fraud_amount:
@@ -70971,6 +71847,96 @@ components:
       - unknown
       title: BeaconReportType
       type: string
+    BeaconUser:
+      additionalProperties: true
+      description: A Beacon User represents an end user that has been scanned against
+        the Beacon Network.
+      example:
+        updated_at: 2020-07-24T03:26:02Z
+        audit_trail:
+          dashboard_user_id: 54350110fedcbaf01234ffee
+          timestamp: 2020-07-24T03:26:02Z
+        client_user_id: your-db-id-3b24110
+        program_id: becprg_11111111111111
+        created_at: 2020-07-24T03:26:02Z
+        id: becusr_42cF1MNo42r9Xj
+        version: 1
+        user:
+          id_number:
+            type: us_ssn
+            value: "123456789"
+          address:
+            country: US
+            city: Pawnee
+            street: 123 Main St.
+            street2: Unit 42
+            region: IN
+            postal_code: "46001"
+          email_address: user@example.com
+          date_of_birth: 1990-05-29T00:00:00.000+0000
+          name:
+            given_name: Leslie
+            family_name: Knope
+          phone_number: +19876543212
+          ip_address: 192.0.2.42
+        status: cleared
+      properties:
+        id:
+          description: ID of the associated Beacon User.
+          example: becusr_42cF1MNo42r9Xj
+          title: BeaconUserID
+          type: string
+        version:
+          description: The `version` field begins with 1 and increments each time
+            the user is updated.
+          example: 1
+          type: integer
+        created_at:
+          description: An ISO8601 formatted timestamp.
+          example: 2020-07-24T03:26:02Z
+          format: date-time
+          title: Timestamp
+          type: string
+        updated_at:
+          description: An ISO8601 formatted timestamp. This field indicates the last
+            time the resource was modified.
+          example: 2020-07-24T03:26:02Z
+          format: date-time
+          title: Timestamp
+          type: string
+        status:
+          $ref: '#/components/schemas/BeaconUserStatus'
+        program_id:
+          description: ID of the associated Beacon Program.
+          example: becprg_11111111111111
+          title: BeaconProgramID
+          type: string
+        client_user_id:
+          description: A unique ID that identifies the end user in your system. This
+            ID can also be used to associate user-specific data from other Plaid products.
+            Financial Account Matching requires this field and the `/link/token/create`
+            `client_user_id` to be consistent. Personally identifiable information,
+            such as an email address or phone number, should not be used in the `client_user_id`.
+          example: your-db-id-3b24110
+          minLength: 1
+          title: ClientUserID
+          type: string
+        user:
+          $ref: '#/components/schemas/BeaconUserData'
+        audit_trail:
+          $ref: '#/components/schemas/BeaconAuditTrail'
+      required:
+      - audit_trail
+      - client_user_id
+      - created_at
+      - id
+      - program_id
+      - status
+      - updated_at
+      - user
+      - version
+      title: BeaconUser
+      type: object
     BeaconUserAddress:
       additionalProperties: true
       description: |-
@@ -71042,9 +72008,9 @@ components:
         Request input for creating a Beacon User.
 
         The primary use for this endpoint is to add a new end user to Beacon for fraud and duplicate scanning.
-        This endpoint can also be used to import historical fraud cases into the Beacon Network without being charged
-        for creating a Beacon User. To import historical fraud cases, embed the fraud report in the optional `report`
-        section of the request payload.
+
+        Some fields are optional, but it is recommended to provide as much information as possible to improve
+        the accuracy of the fraud and duplicate scanning.
       example:
         client_user_id: your-db-id-3b24110
         program_id: becprg_11111111111111
@@ -71110,10 +72076,12 @@ components:
         updated_at: 2020-07-24T03:26:02Z
         audit_trail:
           dashboard_user_id: 54350110fedcbaf01234ffee
+          timestamp: 2020-07-24T03:26:02Z
         client_user_id: your-db-id-3b24110
         program_id: becprg_11111111111111
         created_at: 2020-07-24T03:26:02Z
         id: becusr_42cF1MNo42r9Xj
+        version: 1
         user:
           id_number:
             type: us_ssn
@@ -71140,6 +72108,11 @@ components:
           example: becusr_42cF1MNo42r9Xj
           title: BeaconUserID
           type: string
+        version:
+          description: The `version` field begins with 1 and increments each time
+            the user is updated.
+          example: 1
+          type: integer
         created_at:
           description: An ISO8601 formatted timestamp.
           example: 2020-07-24T03:26:02Z
@@ -71190,6 +72163,7 @@ components:
       - status
       - updated_at
       - user
+      - version
       type: object
     BeaconUserData:
       additionalProperties: true
@@ -71289,10 +72263,12 @@ components:
         updated_at: 2020-07-24T03:26:02Z
         audit_trail:
           dashboard_user_id: 54350110fedcbaf01234ffee
+          timestamp: 2020-07-24T03:26:02Z
         client_user_id: your-db-id-3b24110
         program_id: becprg_11111111111111
         created_at: 2020-07-24T03:26:02Z
         id: becusr_42cF1MNo42r9Xj
+        version: 1
         user:
           id_number:
             type: us_ssn
@@ -71319,6 +72295,11 @@ components:
           example: becusr_42cF1MNo42r9Xj
           title: BeaconUserID
           type: string
+        version:
+          description: The `version` field begins with 1 and increments each time
+            the user is updated.
+          example: 1
+          type: integer
         created_at:
           description: An ISO8601 formatted timestamp.
           example: 2020-07-24T03:26:02Z
@@ -71369,6 +72350,123 @@ components:
       - status
       - updated_at
       - user
+      - version
+      type: object
+    BeaconUserHistoryListRequest:
+      description: Request input for listing the history of a Beacon User
+      example:
+        cursor: eyJkaXJlY3Rpb24iOiJuZXh0Iiwib2Zmc2V0IjoiMTU5NDM
+        beacon_user_id: becusr_42cF1MNo42r9Xj
+        secret: secret
+        client_id: client_id
+      properties:
+        beacon_user_id:
+          description: ID of the associated Beacon User.
+          example: becusr_42cF1MNo42r9Xj
+          title: BeaconUserID
+          type: string
+        cursor:
+          description: An identifier that determines which page of results you receive.
+          example: eyJkaXJlY3Rpb24iOiJuZXh0Iiwib2Zmc2V0IjoiMTU5NDM
+          nullable: true
+          type: string
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+      required:
+      - beacon_user_id
+      type: object
+    BeaconUserHistoryListResponse:
+      additionalProperties: true
+      description: The response schema for `/beacon/user/history/list`
+      example:
+        next_cursor: eyJkaXJlY3Rpb24iOiJuZXh0Iiwib2Zmc2V0IjoiMTU5NDM
+        beacon_users:
+        - updated_at: 2020-07-24T03:26:02Z
+          audit_trail:
+            dashboard_user_id: 54350110fedcbaf01234ffee
+            timestamp: 2020-07-24T03:26:02Z
+          client_user_id: your-db-id-3b24110
+          program_id: becprg_11111111111111
+          created_at: 2020-07-24T03:26:02Z
+          id: becusr_42cF1MNo42r9Xj
+          version: 1
+          user:
+            id_number:
+              type: us_ssn
+              value: "123456789"
+            address:
+              country: US
+              city: Pawnee
+              street: 123 Main St.
+              street2: Unit 42
+              region: IN
+              postal_code: "46001"
+            email_address: user@example.com
+            date_of_birth: 1990-05-29T00:00:00.000+0000
+            name:
+              given_name: Leslie
+              family_name: Knope
+            phone_number: +19876543212
+            ip_address: 192.0.2.42
+          status: cleared
+        - updated_at: 2020-07-24T03:26:02Z
+          audit_trail:
+            dashboard_user_id: 54350110fedcbaf01234ffee
+            timestamp: 2020-07-24T03:26:02Z
+          client_user_id: your-db-id-3b24110
+          program_id: becprg_11111111111111
+          created_at: 2020-07-24T03:26:02Z
+          id: becusr_42cF1MNo42r9Xj
+          version: 1
+          user:
+            id_number:
+              type: us_ssn
+              value: "123456789"
+            address:
+              country: US
+              city: Pawnee
+              street: 123 Main St.
+              street2: Unit 42
+              region: IN
+              postal_code: "46001"
+            email_address: user@example.com
+            date_of_birth: 1990-05-29T00:00:00.000+0000
+            name:
+              given_name: Leslie
+              family_name: Knope
+            phone_number: +19876543212
+            ip_address: 192.0.2.42
+          status: cleared
+        request_id: request_id
+      properties:
+        beacon_users:
+          items:
+            $ref: '#/components/schemas/BeaconUser'
+          type: array
+        next_cursor:
+          description: An identifier that determines which page of results you receive.
+          example: eyJkaXJlY3Rpb24iOiJuZXh0Iiwib2Zmc2V0IjoiMTU5NDM
+          nullable: true
+          type: string
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - beacon_users
+      - next_cursor
+      - request_id
       type: object
     BeaconUserID:
       description: ID of the associated Beacon User.
@@ -71462,6 +72560,7 @@ components:
         street2: Unit 42
         region: IN
         postal_code: "46001"
+      nullable: true
       properties:
         street:
           description: The primary street portion of an address. If an address is
@@ -71620,7 +72719,6 @@ components:
           title: IPAddress
           type: string
       required:
-      - address
       - date_of_birth
       - name
       title: BeaconUserRequestData
@@ -71804,10 +72902,12 @@ components:
         updated_at: 2020-07-24T03:26:02Z
         audit_trail:
           dashboard_user_id: 54350110fedcbaf01234ffee
+          timestamp: 2020-07-24T03:26:02Z
         client_user_id: your-db-id-3b24110
         program_id: becprg_11111111111111
         created_at: 2020-07-24T03:26:02Z
         id: becusr_42cF1MNo42r9Xj
+        version: 1
         user:
           id_number:
             type: us_ssn
@@ -71834,6 +72934,11 @@ components:
           example: becusr_42cF1MNo42r9Xj
           title: BeaconUserID
           type: string
+        version:
+          description: The `version` field begins with 1 and increments each time
+            the user is updated.
+          example: 1
+          type: integer
         created_at:
           description: An ISO8601 formatted timestamp.
           example: 2020-07-24T03:26:02Z
@@ -71884,6 +72989,7 @@ components:
       - status
       - updated_at
       - user
+      - version
       type: object
     City:
       description: City from the end user's address
@@ -76705,7 +77811,9 @@ components:
     RiskCheckIdentityAbuseSignals:
       additionalProperties: true
       description: Result summary object capturing abuse signals related to `identity
-        abuse`, e.g. stolen and synthetic identity fraud.
+        abuse`, e.g. stolen and synthetic identity fraud. These attributes are only
+        available for US identities and some signals may not be available depending
+        on what information was collected.
       example:
         synthetic_identity:
           score: 0
@@ -76722,42 +77830,100 @@ components:
       - synthetic_identity
       type: object
     RiskCheckLinkedService:
-      description: An enum indicating the type of a linked service.
+      description: An enum indicating the type of a linked service. Note that `adult_sites`
+        refers' to explicit video content, and includes a number of related services.
       enum:
+      - aboutme
+      - adobe
+      - adult_sites
+      - airbnb
+      - altbalaji
+      - amazon
       - apple
+      - archiveorg
+      - atlassian
+      - bitmoji
+      - bodybuilding
+      - booking
+      - bukalapak
+      - codecademy
+      - deliveroo
+      - diigo
+      - discord
+      - disneyplus
+      - duolingo
       - ebay
+      - envato
+      - eventbrite
+      - evernote
       - facebook
+      - firefox
       - flickr
+      - flipkart
       - foursquare
+      - freelancer
+      - gaana
+      - giphy
       - github
       - google
       - gravatar
+      - hubspot
+      - imgur
       - instagram
+      - jdid
+      - kakao
+      - kommo
+      - komoot
       - lastfm
+      - lazada
+      - line
       - linkedin
+      - mailru
       - microsoft
       - myspace
+      - netflix
+      - nike
+      - ok
+      - patreon
       - pinterest
+      - plurk
+      - quora
+      - qzone
+      - rambler
+      - rappi
+      - replit
+      - samsung
+      - seoclerks
+      - shopclues
       - skype
+      - snapchat
+      - snapdeal
+      - soundcloud
       - spotify
+      - starz
+      - strava
+      - taringa
       - telegram
+      - tiki
+      - tokopedia
+      - treehouse
       - tumblr
       - twitter
+      - venmo
       - viber
       - vimeo
+      - vivino
+      - vkontakte
+      - wattpad
       - weibo
       - whatsapp
+      - wordpress
+      - xing
       - yahoo
-      - airbnb
-      - amazon
-      - booking
-      - discord
-      - kakao
-      - ok
-      - qzone
-      - line
-      - snapchat
+      - yandex
       - zalo
+      - zoho
+      example: apple
       type: string
     RiskCheckPhone:
       additionalProperties: true
@@ -80420,16 +81586,16 @@ components:
             - end_date: 2000-01-23
               unofficial_currency_code: unofficial_currency_code
               historical_average_monthly_gross_income: 5.962133916683182
-              forecasted_average_monthly_income_prediction_interval:
-              - lower_bound: 7.061401241503109
-                probability: 3.616076749251911
-                upper_bound: 9.301444243932576
-              - lower_bound: 7.061401241503109
-                probability: 3.616076749251911
-                upper_bound: 9.301444243932576
               income_description: income_description
               transaction_count: 1
               forecasted_average_monthly_income: 2.3021358869347655
+              forecasted_average_monthly_income_prediction_intervals:
+              - lower_bound: 7.061401241503109
+                probability: 3.616076749251911
+                upper_bound: 9.301444243932576
+              - lower_bound: 7.061401241503109
+                probability: 3.616076749251911
+                upper_bound: 9.301444243932576
               historical_summary:
               - end_date: 2000-01-23
                 total_amounts:
@@ -80494,16 +81660,16 @@ components:
             - end_date: 2000-01-23
               unofficial_currency_code: unofficial_currency_code
               historical_average_monthly_gross_income: 5.962133916683182
-              forecasted_average_monthly_income_prediction_interval:
-              - lower_bound: 7.061401241503109
-                probability: 3.616076749251911
-                upper_bound: 9.301444243932576
-              - lower_bound: 7.061401241503109
-                probability: 3.616076749251911
-                upper_bound: 9.301444243932576
               income_description: income_description
               transaction_count: 1
               forecasted_average_monthly_income: 2.3021358869347655
+              forecasted_average_monthly_income_prediction_intervals:
+              - lower_bound: 7.061401241503109
+                probability: 3.616076749251911
+                upper_bound: 9.301444243932576
+              - lower_bound: 7.061401241503109
+                probability: 3.616076749251911
+                upper_bound: 9.301444243932576
               historical_summary:
               - end_date: 2000-01-23
                 total_amounts:
@@ -80713,16 +81879,16 @@ components:
             - end_date: 2000-01-23
               unofficial_currency_code: unofficial_currency_code
               historical_average_monthly_gross_income: 5.962133916683182
-              forecasted_average_monthly_income_prediction_interval:
-              - lower_bound: 7.061401241503109
-                probability: 3.616076749251911
-                upper_bound: 9.301444243932576
-              - lower_bound: 7.061401241503109
-                probability: 3.616076749251911
-                upper_bound: 9.301444243932576
               income_description: income_description
               transaction_count: 1
               forecasted_average_monthly_income: 2.3021358869347655
+              forecasted_average_monthly_income_prediction_intervals:
+              - lower_bound: 7.061401241503109
+                probability: 3.616076749251911
+                upper_bound: 9.301444243932576
+              - lower_bound: 7.061401241503109
+                probability: 3.616076749251911
+                upper_bound: 9.301444243932576
               historical_summary:
               - end_date: 2000-01-23
                 total_amounts:
@@ -80787,16 +81953,16 @@ components:
             - end_date: 2000-01-23
               unofficial_currency_code: unofficial_currency_code
               historical_average_monthly_gross_income: 5.962133916683182
-              forecasted_average_monthly_income_prediction_interval:
-              - lower_bound: 7.061401241503109
-                probability: 3.616076749251911
-                upper_bound: 9.301444243932576
-              - lower_bound: 7.061401241503109
-                probability: 3.616076749251911
-                upper_bound: 9.301444243932576
               income_description: income_description
               transaction_count: 1
               forecasted_average_monthly_income: 2.3021358869347655
+              forecasted_average_monthly_income_prediction_intervals:
+              - lower_bound: 7.061401241503109
+                probability: 3.616076749251911
+                upper_bound: 9.301444243932576
+              - lower_bound: 7.061401241503109
+                probability: 3.616076749251911
+                upper_bound: 9.301444243932576
               historical_summary:
               - end_date: 2000-01-23
                 total_amounts:
@@ -81106,16 +82272,16 @@ components:
             - end_date: 2000-01-23
               unofficial_currency_code: unofficial_currency_code
               historical_average_monthly_gross_income: 5.962133916683182
-              forecasted_average_monthly_income_prediction_interval:
-              - lower_bound: 7.061401241503109
-                probability: 3.616076749251911
-                upper_bound: 9.301444243932576
-              - lower_bound: 7.061401241503109
-                probability: 3.616076749251911
-                upper_bound: 9.301444243932576
               income_description: income_description
               transaction_count: 1
               forecasted_average_monthly_income: 2.3021358869347655
+              forecasted_average_monthly_income_prediction_intervals:
+              - lower_bound: 7.061401241503109
+                probability: 3.616076749251911
+                upper_bound: 9.301444243932576
+              - lower_bound: 7.061401241503109
+                probability: 3.616076749251911
+                upper_bound: 9.301444243932576
               historical_summary:
               - end_date: 2000-01-23
                 total_amounts:
@@ -81180,16 +82346,16 @@ components:
             - end_date: 2000-01-23
               unofficial_currency_code: unofficial_currency_code
               historical_average_monthly_gross_income: 5.962133916683182
-              forecasted_average_monthly_income_prediction_interval:
-              - lower_bound: 7.061401241503109
-                probability: 3.616076749251911
-                upper_bound: 9.301444243932576
-              - lower_bound: 7.061401241503109
-                probability: 3.616076749251911
-                upper_bound: 9.301444243932576
               income_description: income_description
               transaction_count: 1
               forecasted_average_monthly_income: 2.3021358869347655
+              forecasted_average_monthly_income_prediction_intervals:
+              - lower_bound: 7.061401241503109
+                probability: 3.616076749251911
+                upper_bound: 9.301444243932576
+              - lower_bound: 7.061401241503109
+                probability: 3.616076749251911
+                upper_bound: 9.301444243932576
               historical_summary:
               - end_date: 2000-01-23
                 total_amounts:
@@ -81399,16 +82565,16 @@ components:
             - end_date: 2000-01-23
               unofficial_currency_code: unofficial_currency_code
               historical_average_monthly_gross_income: 5.962133916683182
-              forecasted_average_monthly_income_prediction_interval:
-              - lower_bound: 7.061401241503109
-                probability: 3.616076749251911
-                upper_bound: 9.301444243932576
-              - lower_bound: 7.061401241503109
-                probability: 3.616076749251911
-                upper_bound: 9.301444243932576
               income_description: income_description
               transaction_count: 1
               forecasted_average_monthly_income: 2.3021358869347655
+              forecasted_average_monthly_income_prediction_intervals:
+              - lower_bound: 7.061401241503109
+                probability: 3.616076749251911
+                upper_bound: 9.301444243932576
+              - lower_bound: 7.061401241503109
+                probability: 3.616076749251911
+                upper_bound: 9.301444243932576
               historical_summary:
               - end_date: 2000-01-23
                 total_amounts:
@@ -81473,16 +82639,16 @@ components:
             - end_date: 2000-01-23
               unofficial_currency_code: unofficial_currency_code
               historical_average_monthly_gross_income: 5.962133916683182
-              forecasted_average_monthly_income_prediction_interval:
-              - lower_bound: 7.061401241503109
-                probability: 3.616076749251911
-                upper_bound: 9.301444243932576
-              - lower_bound: 7.061401241503109
-                probability: 3.616076749251911
-                upper_bound: 9.301444243932576
               income_description: income_description
               transaction_count: 1
               forecasted_average_monthly_income: 2.3021358869347655
+              forecasted_average_monthly_income_prediction_intervals:
+              - lower_bound: 7.061401241503109
+                probability: 3.616076749251911
+                upper_bound: 9.301444243932576
+              - lower_bound: 7.061401241503109
+                probability: 3.616076749251911
+                upper_bound: 9.301444243932576
               historical_summary:
               - end_date: 2000-01-23
                 total_amounts:
@@ -81811,16 +82977,16 @@ components:
           - end_date: 2000-01-23
             unofficial_currency_code: unofficial_currency_code
             historical_average_monthly_gross_income: 5.962133916683182
-            forecasted_average_monthly_income_prediction_interval:
-            - lower_bound: 7.061401241503109
-              probability: 3.616076749251911
-              upper_bound: 9.301444243932576
-            - lower_bound: 7.061401241503109
-              probability: 3.616076749251911
-              upper_bound: 9.301444243932576
             income_description: income_description
             transaction_count: 1
             forecasted_average_monthly_income: 2.3021358869347655
+            forecasted_average_monthly_income_prediction_intervals:
+            - lower_bound: 7.061401241503109
+              probability: 3.616076749251911
+              upper_bound: 9.301444243932576
+            - lower_bound: 7.061401241503109
+              probability: 3.616076749251911
+              upper_bound: 9.301444243932576
             historical_summary:
             - end_date: 2000-01-23
               total_amounts:
@@ -81885,16 +83051,16 @@ components:
           - end_date: 2000-01-23
             unofficial_currency_code: unofficial_currency_code
             historical_average_monthly_gross_income: 5.962133916683182
-            forecasted_average_monthly_income_prediction_interval:
-            - lower_bound: 7.061401241503109
-              probability: 3.616076749251911
-              upper_bound: 9.301444243932576
-            - lower_bound: 7.061401241503109
-              probability: 3.616076749251911
-              upper_bound: 9.301444243932576
             income_description: income_description
             transaction_count: 1
             forecasted_average_monthly_income: 2.3021358869347655
+            forecasted_average_monthly_income_prediction_intervals:
+            - lower_bound: 7.061401241503109
+              probability: 3.616076749251911
+              upper_bound: 9.301444243932576
+            - lower_bound: 7.061401241503109
+              probability: 3.616076749251911
+              upper_bound: 9.301444243932576
             historical_summary:
             - end_date: 2000-01-23
               total_amounts:
@@ -82104,16 +83270,16 @@ components:
           - end_date: 2000-01-23
             unofficial_currency_code: unofficial_currency_code
             historical_average_monthly_gross_income: 5.962133916683182
-            forecasted_average_monthly_income_prediction_interval:
-            - lower_bound: 7.061401241503109
-              probability: 3.616076749251911
-              upper_bound: 9.301444243932576
-            - lower_bound: 7.061401241503109
-              probability: 3.616076749251911
-              upper_bound: 9.301444243932576
             income_description: income_description
             transaction_count: 1
             forecasted_average_monthly_income: 2.3021358869347655
+            forecasted_average_monthly_income_prediction_intervals:
+            - lower_bound: 7.061401241503109
+              probability: 3.616076749251911
+              upper_bound: 9.301444243932576
+            - lower_bound: 7.061401241503109
+              probability: 3.616076749251911
+              upper_bound: 9.301444243932576
             historical_summary:
             - end_date: 2000-01-23
               total_amounts:
@@ -82178,16 +83344,16 @@ components:
           - end_date: 2000-01-23
             unofficial_currency_code: unofficial_currency_code
             historical_average_monthly_gross_income: 5.962133916683182
-            forecasted_average_monthly_income_prediction_interval:
-            - lower_bound: 7.061401241503109
-              probability: 3.616076749251911
-              upper_bound: 9.301444243932576
-            - lower_bound: 7.061401241503109
-              probability: 3.616076749251911
-              upper_bound: 9.301444243932576
             income_description: income_description
             transaction_count: 1
             forecasted_average_monthly_income: 2.3021358869347655
+            forecasted_average_monthly_income_prediction_intervals:
+            - lower_bound: 7.061401241503109
+              probability: 3.616076749251911
+              upper_bound: 9.301444243932576
+            - lower_bound: 7.061401241503109
+              probability: 3.616076749251911
+              upper_bound: 9.301444243932576
             historical_summary:
             - end_date: 2000-01-23
               total_amounts:
@@ -82517,16 +83683,16 @@ components:
         - end_date: 2000-01-23
           unofficial_currency_code: unofficial_currency_code
           historical_average_monthly_gross_income: 5.962133916683182
-          forecasted_average_monthly_income_prediction_interval:
-          - lower_bound: 7.061401241503109
-            probability: 3.616076749251911
-            upper_bound: 9.301444243932576
-          - lower_bound: 7.061401241503109
-            probability: 3.616076749251911
-            upper_bound: 9.301444243932576
           income_description: income_description
           transaction_count: 1
           forecasted_average_monthly_income: 2.3021358869347655
+          forecasted_average_monthly_income_prediction_intervals:
+          - lower_bound: 7.061401241503109
+            probability: 3.616076749251911
+            upper_bound: 9.301444243932576
+          - lower_bound: 7.061401241503109
+            probability: 3.616076749251911
+            upper_bound: 9.301444243932576
           historical_summary:
           - end_date: 2000-01-23
             total_amounts:
@@ -82591,16 +83757,16 @@ components:
         - end_date: 2000-01-23
           unofficial_currency_code: unofficial_currency_code
           historical_average_monthly_gross_income: 5.962133916683182
-          forecasted_average_monthly_income_prediction_interval:
-          - lower_bound: 7.061401241503109
-            probability: 3.616076749251911
-            upper_bound: 9.301444243932576
-          - lower_bound: 7.061401241503109
-            probability: 3.616076749251911
-            upper_bound: 9.301444243932576
           income_description: income_description
           transaction_count: 1
           forecasted_average_monthly_income: 2.3021358869347655
+          forecasted_average_monthly_income_prediction_intervals:
+          - lower_bound: 7.061401241503109
+            probability: 3.616076749251911
+            upper_bound: 9.301444243932576
+          - lower_bound: 7.061401241503109
+            probability: 3.616076749251911
+            upper_bound: 9.301444243932576
           historical_summary:
           - end_date: 2000-01-23
             total_amounts:
@@ -82804,16 +83970,16 @@ components:
         end_date: 2000-01-23
         unofficial_currency_code: unofficial_currency_code
         historical_average_monthly_gross_income: 5.962133916683182
-        forecasted_average_monthly_income_prediction_interval:
-        - lower_bound: 7.061401241503109
-          probability: 3.616076749251911
-          upper_bound: 9.301444243932576
-        - lower_bound: 7.061401241503109
-          probability: 3.616076749251911
-          upper_bound: 9.301444243932576
         income_description: income_description
         transaction_count: 1
         forecasted_average_monthly_income: 2.3021358869347655
+        forecasted_average_monthly_income_prediction_intervals:
+        - lower_bound: 7.061401241503109
+          probability: 3.616076749251911
+          upper_bound: 9.301444243932576
+        - lower_bound: 7.061401241503109
+          probability: 3.616076749251911
+          upper_bound: 9.301444243932576
         historical_summary:
         - end_date: 2000-01-23
           total_amounts:
@@ -82939,7 +84105,7 @@ components:
             source(s).
           nullable: true
           type: number
-        forecasted_average_monthly_income_prediction_interval:
+        forecasted_average_monthly_income_prediction_intervals:
           description: The prediction interval(s) for the forecasted average monthly
             income.
           items:
@@ -82952,7 +84118,7 @@ components:
             $ref: '#/components/schemas/CraBankIncomeHistoricalSummary'
           type: array
       required:
-      - forecasted_average_monthly_income_prediction_interval
+      - forecasted_average_monthly_income_prediction_intervals
       type: object
     CraPredictionInterval:
       additionalProperties: true
@@ -83243,7 +84409,19 @@ components:
             Unofficial currency codes are used for currencies that do not have official ISO currency codes, such as cryptocurrencies and the currencies of certain countries.
           nullable: true
           type: string
+        bonus_type:
+          $ref: '#/components/schemas/CraBankIncomeBonusType'
       type: object
+    CraBankIncomeBonusType:
+      description: |-
+        The type of bonus that this transaction represents, if it is a bonus
+        `BONUS_INCLUDED`: Bonus is included in this transaction along with the normal pay
+        `BONUS_ONLY`: This transaction is a standalone bonus
+      enum:
+      - BONUS_INCLUDED
+      - BONUS_ONLY
+      nullable: true
+      type: string
     CraBankIncomeWarning:
       description: The warning associated with the data that was unavailable for the
         Bank Income Report.
@@ -83305,6 +84483,58 @@ components:
       - error_code
       - error_message
       - error_type
+      type: object
+    CraBankIncomeCreateRequest:
+      description: CraBankIncomeCreateRequest defines the request schema for `/cra/bank_income/create`.
+      example:
+        webhook: webhook
+        secret: secret
+        user_token: user_token
+        client_id: client_id
+        days_requested: 59
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        user_token:
+          description: The user token associated with the User data is being requested
+            for.
+          title: UserToken
+          type: string
+        webhook:
+          description: |
+            The destination URL to which webhooks will be sent
+          type: string
+        days_requested:
+          description: The number of days of data to request for the Bank Income product
+          maximum: 731
+          minimum: 1
+          type: integer
+        consumer_report_permissible_purpose:
+          $ref: '#/components/schemas/ConsumerReportPermissiblePurpose'
+      title: CraBankIncomeCreateRequest
+      type: object
+    CraBankIncomeCreateResponse:
+      additionalProperties: true
+      description: CraBankIncomeCreateRequest defines the response schema for `/cra/bank_income/create`.
+      example:
+        request_id: request_id
+      properties:
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      title: CraBankIncomeCreateResponse
       type: object
     CraPartnerInsightsGetRequest:
       description: CraPartnerInsightsGetRequest defines the request schema for `/cra/partner_insights/get`.
@@ -83648,7 +84878,7 @@ components:
                 min_age: 5
                 min_age_credit: 2
               version: 6
-            detect:
+            first_detect:
               reason_codes:
               - reason_codes
               - reason_codes
@@ -83978,7 +85208,7 @@ components:
                 min_age: 5
                 min_age_credit: 2
               version: 6
-            detect:
+            first_detect:
               reason_codes:
               - reason_codes
               - reason_codes
@@ -84328,7 +85558,7 @@ components:
               min_age: 5
               min_age_credit: 2
             version: 6
-          detect:
+          first_detect:
             reason_codes:
             - reason_codes
             - reason_codes
@@ -84660,7 +85890,7 @@ components:
             min_age: 5
             min_age_credit: 2
           version: 6
-        detect:
+        first_detect:
           reason_codes:
           - reason_codes
           - reason_codes
@@ -84683,8 +85913,8 @@ components:
           $ref: '#/components/schemas/PrismInsights'
         cash_score:
           $ref: '#/components/schemas/PrismCashScore'
-        detect:
-          $ref: '#/components/schemas/PrismDetect'
+        first_detect:
+          $ref: '#/components/schemas/PrismFirstDetect'
         status:
           description: Details on whether the Prism attributes succeeded or failed
             to be generated.
@@ -84705,15 +85935,15 @@ components:
           type: integer
         result:
           description: The Insights Result object is a map of cash flow attributes,
-            in string to float format.
+            where the key is a string, and the value is a float or string.
           title: PrismInsightsResult
           type: object
       required:
       - version
       type: object
     PrismInsightsResult:
-      description: The Insights Result object is a map of cash flow attributes, in
-        string to float format.
+      description: The Insights Result object is a map of cash flow attributes, where
+        the key is a string, and the value is a float or string.
       title: PrismInsightsResult
       type: object
     PrismCashScore:
@@ -84824,9 +86054,9 @@ components:
       - num_trxn_credit
       - num_trxn_debit
       type: object
-    PrismDetect:
+    PrismFirstDetect:
       additionalProperties: true
-      description: The data from the Detect product returned by Prism.
+      description: The data from the Firstdetect product returned by Prism.
       example:
         reason_codes:
         - reason_codes
@@ -84847,7 +86077,7 @@ components:
       nullable: true
       properties:
         version:
-          description: The version of Prism's detect model used.
+          description: The version of Prism's Firstdetect model used.
           type: integer
         score:
           description: The score returned by Prism. Ranges from 1-999, with higher
@@ -84855,7 +86085,7 @@ components:
           type: integer
         reason_codes:
           description: The reasons for an individual having risk according to the
-            detect cash score.
+            Firstdetect score.
           items:
             type: string
           type: array
@@ -91331,6 +92561,8 @@ components:
           type: array
         merchant_entity_id:
           description: A unique, stable, Plaid-generated ID that maps to the merchant.
+            In the case of a merchant with multiple retail locations, this field will
+            map to the broader merchant, not a specific location or store.
           nullable: true
           type: string
       required:

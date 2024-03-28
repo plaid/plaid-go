@@ -4,8 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/plaid/plaid-go/v21/plaid"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/plaid/plaid-go/v23/plaid"
 )
 
 func TestPayStubsGet(t *testing.T) {
@@ -15,7 +16,7 @@ func TestPayStubsGet(t *testing.T) {
 		t,
 		ctx,
 		testClient,
-		"ins_129618",
+		"ins_135842",
 		[]plaid.Products{plaid.PRODUCTS_INCOME_VERIFICATION},
 	)
 
