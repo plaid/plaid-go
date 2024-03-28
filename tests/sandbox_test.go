@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/plaid/plaid-go/v21/plaid"
+	"github.com/plaid/plaid-go/v22/plaid"
 	assert "github.com/stretchr/testify/require"
 )
 
