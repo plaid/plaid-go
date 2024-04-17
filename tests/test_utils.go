@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/plaid/plaid-go/v23/plaid"
+	"github.com/plaid/plaid-go/v24/plaid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -51,6 +51,31 @@ func createSandboxItem(t *testing.T, ctx context.Context, client *plaid.APIClien
 			products,
 		),
 	).Execute()
+
+	assert.NotNil(t, sandboxPublicTokenResp)
+	assert.NoError(t, err)
+
+	// exchange the public_token for an access_token
+	exchangePublicTokenResp, _, err := client.PlaidApi.ItemPublicTokenExchange(ctx).ItemPublicTokenExchangeRequest(
+		*plaid.NewItemPublicTokenExchangeRequest(sandboxPublicTokenResp.GetPublicToken()),
+	).Execute()
+
+	assert.NotNil(t, exchangePublicTokenResp)
+	assert.NoError(t, err)
+
+	return exchangePublicTokenResp.GetAccessToken()
+}
+
+func createSandboxItemWithOptions(t *testing.T, ctx context.Context, client *plaid.APIClient, institutionID string, products []plaid.Products, options *plaid.SandboxPublicTokenCreateRequestOptions) string {
+
+	req := *plaid.NewSandboxPublicTokenCreateRequest(
+		institutionID,
+		products,
+	)
+	req.Options = options
+
+	// generate a sandbox public_token
+	sandboxPublicTokenResp, _, err := client.PlaidApi.SandboxPublicTokenCreate(ctx).SandboxPublicTokenCreateRequest(req).Execute()
 
 	assert.NotNil(t, sandboxPublicTokenResp)
 	assert.NoError(t, err)

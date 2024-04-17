@@ -2,7 +2,7 @@ package tests
 
 import (
 	"context"
-	"github.com/plaid/plaid-go/v23/plaid"
+	"github.com/plaid/plaid-go/v24/plaid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
