@@ -11,19 +11,26 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/plaid/plaid-go/v23/plaid"
+	"github.com/plaid/plaid-go/v24/plaid"
 )
 
 func TestStatementsFullFlow(t *testing.T) {
 	testClient := NewTestClient()
 	ctx := context.Background()
 
-	accessToken := createSandboxItem(
+	opts := &plaid.SandboxPublicTokenCreateRequestOptions{}
+	opts.Statements.Set(&plaid.SandboxPublicTokenCreateRequestOptionsStatements{
+		StartDate: "2023-11-01",
+		EndDate:   "2023-12-01",
+	})
+
+	accessToken := createSandboxItemWithOptions(
 		t,
 		ctx,
 		testClient,
 		FIRST_PLATYPUS_BANK,
 		[]plaid.Products{plaid.PRODUCTS_STATEMENTS},
+		opts,
 	)
 
 	// List statements
@@ -48,7 +55,7 @@ func TestStatementsFullFlow(t *testing.T) {
 	}
 
 	// Refresh Statements
-	startDate, endDate := "2023-11-01", "2024-01-01"
+	startDate, endDate := "2024-01-01", "2024-02-01"
 	refreshRequest := plaid.NewStatementsRefreshRequest(accessToken, startDate, endDate)
 	refreshResponse, _, err := testClient.PlaidApi.StatementsRefresh(ctx).StatementsRefreshRequest(
 		*refreshRequest,
