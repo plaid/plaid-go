@@ -40,11 +40,18 @@ This library is generated from an OpenAPI schema (OAS). See full changelog [here
 ### 2020-09-14_1.505.0
 - Add `profile` product
 
+### 2020-09-14_1.504.2
+- [Breaking] Update `network` field type in `/transfer/recurring/create` request from `TransferACHNetwork` to `TransferRecurringNetwork` as recurring now supports rtp.
+- [Breaking] Update `network` field type in `RecurringTransfer` and `RecurringTransferNullable` from `TransferACHNetwork` to `TransferRecurringNetwork` as recurring now supports rtp.
+
 ### 2020-09-14_1.504.1
 - Documentation updates for `/transactions/sync` and Database Match / Database Insights (beta).
 
 ### 2020-09-14_1.504.0
 - Add new fields to `/transactions/sync` and `/processor/transactions/sync` endpoints
+
+### 2020-09-14_1.503.6
+- [Breaking change for Go client library] Make `start_date` and `end_date` required in the `statements` object for the `/link/token/create` endpoint
 
 # 23.0.0
 - Updating to OAS 2020-09-14_1.503.5
