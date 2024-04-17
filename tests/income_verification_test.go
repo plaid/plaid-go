@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/plaid/plaid-go/v23/plaid"
+	"github.com/plaid/plaid-go/v24/plaid"
 )
 
 func TestPayStubsGet(t *testing.T) {

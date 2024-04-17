@@ -7,7 +7,7 @@ info:
     details.
   termsOfService: https://plaid.com/legal/
   title: The Plaid API
-  version: 2020-09-14_1.503.5
+  version: 2020-09-14_1.508.0
 servers:
 - description: Production
   url: https://production.plaid.com
@@ -956,6 +956,18 @@ paths:
                         - amount: 300
                           iso_currency_code: USD
                           unofficial_currency_code: null
+                        historical_annual_gross_income:
+                        - amount: 4680
+                          iso_currency_code: USD
+                          unofficial_currency_code: null
+                        historical_annual_income:
+                        - amount: 3600
+                          iso_currency_code: USD
+                          unofficial_currency_code: null
+                        forecasted_annual_income:
+                        - amount: 3600
+                          iso_currency_code: USD
+                          unofficial_currency_code: null
                         historical_summary:
                         - start_date: 2021-11-02
                           end_date: 2021-11-30
@@ -1164,7 +1176,7 @@ paths:
   /statements/list:
     post:
       description: The `/statements/list` endpoint retrieves a list of all statements
-        associated with the provided item.
+        associated with an item.
       externalDocs:
         url: /api/products/statements#statementslist
       operationId: statementsList
@@ -1199,7 +1211,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/StatementsListResponse'
           description: OK
-      summary: Retrieve a list of all statements associated with the provided item.
+      summary: Retrieve a list of all statements associated with an item.
       tags:
       - plaid
     x-plaid-business-unit-context: BUSINESS_UNIT_PLAID
@@ -2004,8 +2016,6 @@ paths:
         For newly created Items, data may not be immediately available to `/transactions/sync`. Plaid begins preparing transactions data when the Item is created, but the process can take anywhere from a few seconds to several minutes to complete, depending on the number of transactions available.
 
         To be alerted when new data is available, listen for the [`SYNC_UPDATES_AVAILABLE`](https://plaid.com/docs/api/products/transactions/#sync_updates_available) webhook.
-
-        `/transactions/sync` does not directly return balance data. To get the balance for an account, call `/accounts/get`, which is a free-to-use endpoint that will return the cached balance as of the last successful transactions update.
       externalDocs:
         url: /api/products/transactions/#transactionssync
       operationId: transactionsSync
@@ -2023,6 +2033,19 @@ paths:
               examples:
                 example-1:
                   value:
+                    accounts:
+                    - account_id: BxBXxLj1m4HMXBm9WZZmCWVbPjX16EHwv99vp
+                      balances:
+                        available: 110.94
+                        current: 110.94
+                        iso_currency_code: USD
+                        limit: null
+                        unofficial_currency_code: null
+                      mask: "0000"
+                      name: Plaid Checking
+                      official_name: Plaid Gold Standard 0% Interest Checking
+                      subtype: checking
+                      type: depository
                     added:
                     - account_id: BxBXxLj1m4HMXBm9WZZmCWVbPjX16EHwv99vp
                       account_owner: null
@@ -2143,10 +2166,12 @@ paths:
                       transaction_code: null
                       transaction_type: digital
                     removed:
-                    - transaction_id: CmdQTNgems8BT1B7ibkoUXVPyAeehT3Tmzk0l
+                    - account_id: BxBXxLj1m4HMXBm9WZZmCWVbPjX16EHwv99vp
+                      transaction_id: CmdQTNgems8BT1B7ibkoUXVPyAeehT3Tmzk0l
                     next_cursor: tVUUL15lYQN5rBnfDIc1I8xudpGdIlw9nsgeXWvhOfkECvUeR663i3Dt1uf/94S8ASkitgLcIiOSqNwzzp+bh89kirazha5vuZHBb2ZA5NtCDkkV
                     has_more: false
                     request_id: Wvhy9PZHQLV8njG
+                    transactions_update_status: HISTORICAL_UPDATE_COMPLETE
               schema:
                 $ref: '#/components/schemas/TransactionsSyncResponse'
           description: OK
@@ -3204,6 +3229,152 @@ paths:
       tags:
       - plaid
     x-plaid-business-unit-context: BUSINESS_UNIT_PLAID
+  /identity/documents/uploads/get:
+    post:
+      description: Use `/identity/documents/uploads/get` to retrieve document uploaded
+        identity.
+      externalDocs:
+        url: none
+      operationId: identityDocumentsUploadsGet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IdentityDocumentsUploadsGetRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    accounts:
+                    - account_id: BxBXxLj1m4HMXBm9WZZmCWVbPjX16EHwv99vp
+                      balances:
+                        available: 100
+                        current: 110
+                        iso_currency_code: USD
+                        limit: null
+                        unofficial_currency_code: null
+                      mask: "0000"
+                      name: Plaid Checking
+                      official_name: Plaid Gold Standard 0% Interest Checking
+                      owners:
+                      - addresses:
+                        - data:
+                            city: Malakoff
+                            country: US
+                            postal_code: "14236"
+                            region: NY
+                            street: 2992 Cameron Road
+                          primary: true
+                        - data:
+                            city: San Matias
+                            country: US
+                            postal_code: 93405-2255
+                            region: CA
+                            street: 2493 Leisure Lane
+                          primary: false
+                        emails:
+                        - data: accountholder0@example.com
+                          primary: true
+                          type: primary
+                        - data: accountholder1@example.com
+                          primary: false
+                          type: secondary
+                        - data: extraordinarily.long.email.username.123456@reallylonghostname.com
+                          primary: false
+                          type: other
+                        names:
+                        - Alberta Bobbeth Charleson
+                        phone_numbers:
+                        - data: "1112223333"
+                          primary: false
+                          type: home
+                        - data: "1112224444"
+                          primary: false
+                          type: work
+                        - data: "1112225555"
+                          primary: false
+                          type: mobile
+                      subtype: checking
+                      type: depository
+                    - account_id: 3gE5gnRzNyfXpBK5wEEKcymJ5albGVUqg77gr
+                      balances:
+                        available: 200
+                        current: 210
+                        iso_currency_code: USD
+                        limit: null
+                        unofficial_currency_code: null
+                      mask: "1111"
+                      name: Plaid Saving
+                      official_name: Plaid Silver Standard 0.1% Interest Saving
+                      owners:
+                      - addresses:
+                        - data:
+                            city: Malakoff
+                            country: US
+                            postal_code: "14236"
+                            region: NY
+                            street: 2992 Cameron Road
+                          primary: true
+                        - data:
+                            city: San Matias
+                            country: US
+                            postal_code: 93405-2255
+                            region: CA
+                            street: 2493 Leisure Lane
+                          primary: false
+                        emails:
+                        - data: accountholder0@example.com
+                          primary: true
+                          type: primary
+                        - data: accountholder1@example.com
+                          primary: false
+                          type: secondary
+                        - data: extraordinarily.long.email.username.123456@reallylonghostname.com
+                          primary: false
+                          type: other
+                        names:
+                        - Alberta Bobbeth Charleson
+                        phone_numbers:
+                        - data: "1112223333"
+                          primary: false
+                          type: home
+                        - data: "1112224444"
+                          primary: false
+                          type: work
+                        - data: "1112225555"
+                          primary: false
+                          type: mobile
+                      subtype: savings
+                      type: depository
+                    item:
+                      available_products:
+                      - balance
+                      - investments
+                      billed_products:
+                      - assets
+                      - auth
+                      - identity
+                      - liabilities
+                      - transactions
+                      consent_expiration_time: null
+                      error: null
+                      institution_id: ins_3
+                      item_id: eVBnVMp7zdTJLkRNr33Rs6zr7KNJqBFL9DrE6
+                      update_type: background
+                      webhook: https://www.genericwebhookurl.com/webhook
+                    request_id: 3nARps6TOYtbACO
+              schema:
+                $ref: '#/components/schemas/IdentityDocumentsUploadsGetResponse'
+          description: OK
+      summary: Returns uploaded document identity
+      tags:
+      - plaid
+    x-plaid-business-unit-context: BUSINESS_UNIT_PLAID
+    x-hidden-from-docs: true
   /identity/match:
     post:
       description: |-
@@ -5940,6 +6111,19 @@ paths:
               examples:
                 example-1:
                   value:
+                    account:
+                      account_id: BxBXxLj1m4HMXBm9WZZmCWVbPjX16EHwv99vp
+                      balances:
+                        available: 110.94
+                        current: 110.94
+                        iso_currency_code: USD
+                        limit: null
+                        unofficial_currency_code: null
+                      mask: "0000"
+                      name: Plaid Checking
+                      official_name: Plaid Gold Standard 0% Interest Checking
+                      subtype: checking
+                      type: depository
                     added:
                     - account_id: BxBXxLj1m4HMXBm9WZZmCWVbPjX16EHwv99vp
                       account_owner: null
@@ -6064,6 +6248,7 @@ paths:
                     next_cursor: tVUUL15lYQN5rBnfDIc1I8xudpGdIlw9nsgeXWvhOfkECvUeR663i3Dt1uf/94S8ASkitgLcIiOSqNwzzp+bh89kirazha5vuZHBb2ZA5NtCDkkV
                     has_more: false
                     request_id: 45QSn
+                    transactions_update_status: HISTORICAL_UPDATE_COMPLETE
               schema:
                 $ref: '#/components/schemas/ProcessorTransactionsSyncResponse'
           description: OK
@@ -8824,6 +9009,38 @@ paths:
       tags:
       - plaid
     x-plaid-business-unit-context: BUSINESS_UNIT_PLAID
+  /link/profile/eligibility/check:
+    post:
+      description: |-
+        The `/link/profile/eligibility/check` endpoint can be used to check whether a user with the
+        supplied phone number has a saved profile that satisfies customer-defined eligibility
+        requirements.
+      externalDocs:
+        url: /api/link/#profileeligibilitycheck
+      operationId: linkProfileEligibilityCheck
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LinkProfileEligibilityCheckRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    profile_matches: true
+                    request_id: XQVgFigpGHXkb0b
+              schema:
+                $ref: '#/components/schemas/LinkProfileEligibilityCheckResponse'
+          description: OK
+      summary: Check profile eligibility
+      tags:
+      - plaid
+    x-hidden-from-docs: true
+    x-plaid-business-unit-context: BUSINESS_UNIT_PLAID
   /link/token/create:
     post:
       description: |-
@@ -9263,8 +9480,9 @@ paths:
     x-plaid-business-unit-context: BUSINESS_UNIT_PLAID
   /transfer/balance/get:
     post:
-      description: Use the `/transfer/balance/get` endpoint to view a balance held
-        with Plaid.
+      deprecated: true
+      description: (Deprecated) Use the `/transfer/balance/get` endpoint to view a
+        balance held with Plaid.
       externalDocs:
         url: /api/products/transfer/balance/#transferbalanceget
       operationId: transferBalanceGet
@@ -9294,7 +9512,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PlaidError'
           description: Error response
-      summary: Retrieve a balance held with Plaid
+      summary: (Deprecated) Retrieve a balance held with Plaid
       tags:
       - plaid
     x-plaid-business-unit-context: BUSINESS_UNIT_PLAID
@@ -16588,7 +16806,6 @@ components:
           items:
             $ref: '#/components/schemas/AccountBase'
           type: array
-          x-hidden-from-docs: true
         added:
           description: Transactions that have been added to the Item since `cursor`
             ordered by ascending last modified time.
@@ -16628,12 +16845,14 @@ components:
           title: RequestID
           type: string
       required:
+      - accounts
       - added
       - has_more
       - modified
       - next_cursor
       - removed
       - request_id
+      - transactions_update_status
       type: object
     InstitutionsGetRequest:
       description: InstitutionsGetRequest defines the request schema for `/institutions/get`
@@ -18041,6 +18260,9 @@ components:
             - null
           webhook: webhook
           override_username: user_good
+          statements:
+            end_date: 2000-01-23
+            start_date: 2000-01-23
           transactions:
             end_date: 2000-01-23
             start_date: 2000-01-23
@@ -18113,6 +18335,9 @@ components:
           - null
         webhook: webhook
         override_username: user_good
+        statements:
+          end_date: 2000-01-23
+          start_date: 2000-01-23
         transactions:
           end_date: 2000-01-23
           start_date: 2000-01-23
@@ -18135,6 +18360,8 @@ components:
           type: string
         transactions:
           $ref: '#/components/schemas/SandboxPublicTokenCreateRequestOptionsTransactions'
+        statements:
+          $ref: '#/components/schemas/SandboxPublicTokenCreateRequestOptionsStatements'
         income_verification:
           $ref: '#/components/schemas/SandboxPublicTokenCreateRequestOptionsIncomeVerification'
       type: object
@@ -18164,6 +18391,28 @@ components:
           type: integer
           x-hidden-from-docs: true
       title: SandboxPublicTokenCreateRequestOptionsTransactions
+      type: object
+    SandboxPublicTokenCreateRequestOptionsStatements:
+      description: An optional set of parameters corresponding to statements options.
+      example:
+        end_date: 2000-01-23
+        start_date: 2000-01-23
+      nullable: true
+      properties:
+        start_date:
+          description: The earliest date for which to fetch statements history. Dates
+            should be formatted as YYYY-MM-DD.
+          format: date
+          type: string
+        end_date:
+          description: The most recent date for which to fetch statements history.
+            Dates should be formatted as YYYY-MM-DD.
+          format: date
+          type: string
+      required:
+      - end_date
+      - start_date
+      title: SandboxPublicTokenCreateRequestOptionsStatements
       type: object
     SandboxPublicTokenCreateRequestOptionsIncomeVerification:
       description: A set of parameters for income verification options. This field
@@ -19056,7 +19305,31 @@ components:
         - null
         has_more: true
         request_id: request_id
+        account:
+          official_name: official_name
+          persistent_account_id: persistent_account_id
+          balances:
+            unofficial_currency_code: unofficial_currency_code
+            current: 6.027456183070403
+            available: 0.8008281904610115
+            limit: 1.4658129805029452
+            iso_currency_code: iso_currency_code
+            last_updated_datetime: 2000-01-23T04:56:07.000+00:00
+          verification_insights:
+            previous_returns:
+              has_previous_administrative_return: true
+            network_status:
+              has_numbers_match: true
+              is_numbers_match_verified: true
+          account_id: account_id
+          name: name
+          verification_status: automatically_verified
+          mask: mask
       properties:
+        transactions_update_status:
+          $ref: '#/components/schemas/TransactionsUpdateStatus'
+        account:
+          $ref: '#/components/schemas/AccountBase'
         added:
           description: Transactions that have been added to the Item since `cursor`
             ordered by ascending last modified time.
@@ -19096,12 +19369,14 @@ components:
           title: RequestID
           type: string
       required:
+      - account
       - added
       - has_more
       - modified
       - next_cursor
       - removed
       - request_id
+      - transactions_update_status
       type: object
     ProcessorTransactionsRefreshRequest:
       description: ProcessorTransactionsRefreshRequest defines the request schema
@@ -23573,7 +23848,7 @@ components:
         auth:
           flow_type: FLEXIBLE_AUTH
           instant_match_enabled: true
-          auth_type_select_enabled: false
+          auth_type_select_enabled: true
           automated_microdeposits_enabled: true
           same_day_microdeposits_enabled: true
           reroute_to_credentials: "OFF"
@@ -23906,15 +24181,15 @@ components:
         redirect_uri:
           description: A URI indicating the destination where a user should be forwarded
             after completing the Link flow; used to support OAuth authentication flows
-            when launching Link in the browser or via a webview. The `redirect_uri`
+            when launching Link in the browser or another app. The `redirect_uri`
             should not contain any query parameters. When used in Production or Development,
             must be an https URI. To specify any subdomain, use `*` as a wildcard
             character, e.g. `https://*.example.com/oauth.html`. Note that any redirect
             URI must also be added to the Allowed redirect URIs list in the [developer
             dashboard](https://dashboard.plaid.com/team/api). If initializing on Android,
             `android_package_name` must be specified instead and `redirect_uri` should
-            be left blank. If using Hosted Link (beta) the `redirect_uri` must be
-            set to `https://hosted.plaid.com/oauth/redirect`.
+            be left blank. If using Hosted Link, the `redirect_uri` must be set to
+            `https://hosted.plaid.com/oauth/redirect`.
           type: string
         android_package_name:
           description: The name of your app's Android package. Required if using the
@@ -24084,8 +24359,8 @@ components:
       type: object
     LinkTokenCreateHostedLink:
       additionalProperties: true
-      description: Configuration parameters for Hosted Link (beta). Only available
-        for participants in the Hosted Link beta program.
+      description: Configuration parameters for Hosted Link. To request access to
+        Hosted Link, contact your account manager.
       example:
         url_lifetime_seconds: 7
         completion_redirect_uri: completion_redirect_uri
@@ -24097,7 +24372,6 @@ components:
           description: |
             URI that Hosted Link will redirect to upon completion of the Link flow. This will only occur in Hosted Link sessions, not in other implementation methods.
           type: string
-          x-hidden-from-docs: true
         url_lifetime_seconds:
           description: |
             How many seconds the link will be valid for. Must be positive. Cannot be longer than 21 days. The default lifetime is 4 hours.
@@ -24105,14 +24379,14 @@ components:
         is_mobile_app:
           default: false
           description: |
-            This indicates whether the client is opening hosted Link in a mobile app in an out of process web view (OOPWV).
+            This indicates whether the client is opening hosted Link in a mobile app in an out of process web view (OOPWV) (i.e., an `AsWebAuthenticationSession` / `SFSafariViewController` or Android Custom Tab).
           type: boolean
       type: object
     HostedLinkDeliveryMethod:
       description: |
-        How Plaid should deliver the Plaid Link session to the customer.
+        How Plaid should deliver the Plaid Link session to the customer. Only available to customers enabled for Link Delivery (beta). To request Link Delivery access, contact your account manager.
         'sms' will deliver via SMS. Must pass `user.phone_number`.
-        'email' will deliver via email. Must pass `user.email_address`. In the Sandbox environment, this field will be ignored; use the Production or Development environment to test Hosted Link session delivery instead.
+        'email' will deliver via email. Must pass `user.email_address`. In the Sandbox environment, this field will be ignored; use the Production or Development environment to test Link Delivery instead.
       enum:
       - sms
       - email
@@ -24121,7 +24395,6 @@ components:
       description: |
         URI that Hosted Link will redirect to upon completion of the Link flow. This will only occur in Hosted Link sessions, not in other implementation methods.
       type: string
-      x-hidden-from-docs: true
     HostedLinkURLLifetimeSeconds:
       description: |
         How many seconds the link will be valid for. Must be positive. Cannot be longer than 21 days. The default lifetime is 4 hours.
@@ -24129,7 +24402,7 @@ components:
     HostedLinkIsMobileApp:
       default: false
       description: |
-        This indicates whether the client is opening hosted Link in a mobile app in an out of process web view (OOPWV).
+        This indicates whether the client is opening hosted Link in a mobile app in an out of process web view (OOPWV) (i.e., an `AsWebAuthenticationSession` / `SFSafariViewController` or Android Custom Tab).
       type: boolean
     LinkTokenCreateIdentity:
       description: Identity object used to specify document upload
@@ -24226,23 +24499,25 @@ components:
       type: object
     LinkTokenCreateRequestStatements:
       description: Specifies options for initializing Link for use with the Statements
-        product.
+        product. This field is required for the statements product.
       example:
         end_date: 2000-01-23
         start_date: 2000-01-23
       properties:
         start_date:
           description: The start date for statements, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
-            “YYYY-MM-DD” format, e.g. "2020-10-30". If no value is provided, this
-            will default to 3 months prior to the current date.
+            “YYYY-MM-DD” format, e.g. "2020-10-30".
           format: date
           type: string
         end_date:
           description: The end date for statements, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
-            “YYYY-MM-DD” format, e.g. "2020-10-30". If no value is provided, this
-            will default to the current date. You can request up to two years of data.
+            “YYYY-MM-DD” format, e.g. "2020-10-30". You can request up to two years
+            of data.
           format: date
           type: string
+      required:
+      - end_date
+      - start_date
       type: object
     UserStatedIncomeSourceCategory:
       description: The income category for a specified income source
@@ -24279,6 +24554,12 @@ components:
     LinkProfileEligibilityCheckRequest:
       description: LinkProfileEligibilityCheckRequest defines the request schema for
         `/link/profile/eligibility/check`
+      example:
+        link_session_id: link_session_id
+        secret: secret
+        user:
+          phone_number: phone_number
+        client_id: client_id
       properties:
         client_id:
           description: Your Plaid API `client_id`. The `client_id` is required and
@@ -24305,6 +24586,8 @@ components:
       additionalProperties: true
       description: |
         An object specifying information about the end user who will be sharing their profile in this Link session
+      example:
+        phone_number: phone_number
       properties:
         phone_number:
           description: The user's phone number in [E.164](https://en.wikipedia.org/wiki/E.164)
@@ -24318,6 +24601,9 @@ components:
       additionalProperties: true
       description: LinkProfileEligibilityCheckResponse defines the response schema
         for `/link/profile/eligibility/check`
+      example:
+        profile_matches: true
+        request_id: request_id
       properties:
         profile_matches:
           description: Indicates whether Plaid has a profile matching the customer's
@@ -24344,7 +24630,7 @@ components:
       example:
         flow_type: FLEXIBLE_AUTH
         instant_match_enabled: true
-        auth_type_select_enabled: false
+        auth_type_select_enabled: true
         automated_microdeposits_enabled: true
         same_day_microdeposits_enabled: true
         reroute_to_credentials: "OFF"
@@ -24354,11 +24640,11 @@ components:
         instant_microdeposits_enabled: true
       properties:
         auth_type_select_enabled:
-          default: false
           description: Specifies whether Auth Type Select is enabled for the Link
-            session, allowing the end user to choose between linking instantly or
-            manually prior to selecting their financial institution. Note that this
-            can only be true if `same_day_microdeposits_enabled` is set to true.
+            session, allowing the end user to choose between linking via a credentials-based
+            flow (i.e. Instant Auth, Instant Match, Automated Micro-deposits) or a
+            manual flow that does not require login (all other Auth flows) prior to
+            selecting their financial institution. Default behavior is `false`.
           type: boolean
         automated_microdeposits_enabled:
           description: Specifies whether the Link session is enabled for the Automated
@@ -24366,8 +24652,8 @@ components:
           type: boolean
         instant_match_enabled:
           description: Specifies whether the Link session is enabled for the Instant
-            Match flow. As of November 2022, Instant Match will be enabled by default.
-            Instant Match can be disabled by setting this field to `false`.
+            Match flow. Instant Match is enabled by default. Instant Match can be
+            disabled by setting this field to `false`.
           type: boolean
         same_day_microdeposits_enabled:
           description: Specifies whether the Link session is enabled for the Same
@@ -24375,12 +24661,14 @@ components:
           type: boolean
         instant_microdeposits_enabled:
           description: Specifies whether the Link session is enabled for the Instant
-            Micro-deposits flow.  Default behavior is `true`.
+            Micro-deposits flow.  Default behavior for Plaid teams created after November
+            2023 is `false`; default behavior for Plaid teams created before that
+            date is `true`.
           type: boolean
         reroute_to_credentials:
           description: Specifies what type of [Reroute to Credentials](https://plaid.com/docs/auth/coverage/same-day/#reroute-to-credentials)
             pane should be used in the Link session for the Same Day Micro-deposits
-            flow. As of October 15 2023, the default setting is `OPTIONAL`.
+            flow. Default behavior is `OPTIONAL`.
           enum:
           - "OFF"
           - OPTIONAL
@@ -24388,23 +24676,23 @@ components:
           type: string
         database_match_enabled:
           description: Specifies whether the Link session is enabled for the Database
-            Match flow.
+            Match flow. Default behavior is `false`.
           type: boolean
-          x-hidden-from-docs: true
         database_insights_enabled:
           description: Specifies whether the Link session is enabled for the Database
-            Insights flow.
+            Insights flow. Database Insights is currently in closed beta; for access,
+            contact your Account Manager. Default behavior is `false`.
           type: boolean
-          x-hidden-from-docs: true
         flow_type:
           deprecated: true
           description: This field has been deprecated in favor of `auth_type_select_enabled`.
           enum:
           - FLEXIBLE_AUTH
           type: string
+          x-plaid-hidden-from-docs: true
         sms_microdeposits_verification_enabled:
-          description: Specifies whether the Link session is enabled for SMS microdeposits
-            verification. If omitted, behavior defaults to as if this was set to `true`.
+          description: Specifies whether the Link session is enabled for SMS micro-deposits
+            verification. Default behavior is `true`.
           type: boolean
       type: object
     LinkTokenCreateRequestIdentityVerification:
@@ -24516,6 +24804,7 @@ components:
           format: date-time
           nullable: true
           type: string
+          x-hidden-from-docs: true
         email_address:
           description: The user's email address. This field is optional, but required
             to enable the [pre-authenticated returning user flow](https://plaid.com/docs/link/returning-user/#pre-authenticated-rux).
@@ -24532,11 +24821,13 @@ components:
           format: date-time
           nullable: true
           type: string
+          x-hidden-from-docs: true
         ssn:
           deprecated: true
           description: Deprecated and not currently used, use the `id_number` field
             instead.
           type: string
+          x-hidden-from-docs: true
         date_of_birth:
           description: To be provided in the format "yyyy-mm-dd". Can be used to prefill
             Link fields when used with Identity Verification.
@@ -24913,9 +25204,9 @@ components:
           type: string
         link_sessions:
           description: Information about Link sessions created using this `link_token`.
-            This field will only be present if your client is enabled for Hosted Link
-            (beta). Session data will be provided for up to six hours after the session
-            has ended.
+            This field will only be present if your client is enabled for Hosted Link.
+            Session data will be provided for up to six hours after the session has
+            ended.
           items:
             $ref: '#/components/schemas/LinkTokenGetSessionsResponse'
           type: array
@@ -24936,9 +25227,8 @@ components:
       type: object
     LinkTokenGetSessionsResponse:
       additionalProperties: true
-      description: An object containing information about a link session. This field
-        will only be present if your client is enabled for Hosted Link (beta). Session
-        data will be provided for up to six hours after the session has ended.
+      description: An object containing information about a link session.Session data
+        will be provided for up to six hours after the session has ended.
       example:
         finished_at: 2000-01-23T04:56:07.000+00:00
         on_success:
@@ -25191,13 +25481,13 @@ components:
 
             `verification_failed`: The Item failed manual micro-deposit verification because the user exhausted all 3 verification attempts. Users may retry by submitting their information again through Link.
 
-            `database_matched`: The Item has successfully been verified using Plaid's data sources. Note: Database Match is currently a beta feature, please contact your account manager for more information.
+            `database_matched`: The Item has successfully been verified using Plaid's data sources.
 
-            `database_insights_pass`: The Item's ACH numbers have been verified using Plaid's data sources and have strong signal for being valid. Note: Database Insights is currently a beta feature, please contact your account manager for more information.
+            `database_insights_pass`: The Item's account and routing number pair has been verified against a known account using Plaid's data sources and has strong signal for being valid. Note: Database Insights is currently a beta feature, please contact your account manager for more information.
 
-            `database_insights_pass_with_caution`: The Item's ACH numbers have been verified using Plaid's data sources and have some signal for being valid. Note: Database Insights is currently a beta feature, please contact your account manager for more information.
+            `database_insights_pass_with_caution`: The Item's account and routing number pair was unable to be verified against a known account using Plaid's data sources. However, the routing number has strong signal for being valid, and the account number format is consistent with other known account numbers used with the given routing number. Note: Database Insights is currently a beta feature, please contact your account manager for more information.
 
-            `database_insights_fail`: The Item's ACH numbers have been verified using Plaid's data sources and have signal for being invalid and/or have no signal for being valid. Note: Database Insights is currently a beta feature, please contact your account manager for more information.
+            `database_insights_fail`: The Item's account and routing number pair has been checked using Plaid's data sources and has signal for being invalid and/or has no signal for being valid. Note: Database Insights is currently a beta feature, please contact your account manager for more information.
 
             `null`: micro-deposit-based verification is not being used for the Item.
           nullable: true
@@ -25435,7 +25725,7 @@ components:
         hosted_link_url:
           description: A URL of a Plaid-hosted Link flow that will use the Link token
             returned by this request. Only present if the client is enabled for Hosted
-            Link (beta).
+            Link.
           type: string
       required:
       - expiration
@@ -25444,13 +25734,15 @@ components:
       type: object
     PlaidError:
       additionalProperties: true
-      description: We use standard HTTP response codes for success and failure notifications,
-        and our errors are further classified by `error_type`. In general, 200 HTTP
-        codes correspond to success, 40X codes are for developer- or user-related
-        failures, and 50X codes are for Plaid-related issues. An Item with a non-`null`
-        error object will only be part of an API response when calling `/item/get`
-        to view Item status. Otherwise, error fields will be `null` if no error has
-        occurred; if an error has occurred, an error code will be returned instead.
+      description: 'Errors are identified by `error_code` and categorized by `error_type`.
+        Use these in preference to HTTP status codes to identify and handle specific
+        errors. HTTP status codes are set and provide the broadest categorization
+        of errors: 4xx codes are for developer- or user-related errors, and 5xx codes
+        are for Plaid-related errors, and the status will be 2xx in non-error cases.
+        An Item with a non-`null` error object will only be part of an API response
+        when calling `/item/get` to view Item status. Otherwise, error fields will
+        be `null` if no error has occurred; if an error has occurred, an error code
+        will be returned instead.'
       example:
         error_message: error_message
         suggested_action: suggested_action
@@ -25887,7 +26179,6 @@ components:
       - network_status
       title: VerificationInsights
       type: object
-      x-hidden-from-docs: true
     AccountVerificationInsightsAccountNumberFormat:
       description: |-
         Indicator of account number format validity for institution.
@@ -25903,7 +26194,6 @@ components:
       - unknown
       title: VerificationInsightsAccountNumberFormat
       type: string
-      x-hidden-from-docs: true
     AccountVerificationInsightsNetworkStatus:
       additionalProperties: true
       description: Status information about the account and routing number in the
@@ -25925,7 +26215,6 @@ components:
       - is_numbers_match_verified
       title: VerificationInsightsNetworkStatus
       type: object
-      x-hidden-from-docs: true
     AccountVerificationInsightsPreviousReturns:
       additionalProperties: true
       description: Information about known ACH returns for the account and routing
@@ -25941,7 +26230,6 @@ components:
       - has_previous_administrative_return
       title: VerificationInsightsNetworkStatus
       type: object
-      x-hidden-from-docs: true
     LinkEventName:
       description: A string representing the event that has just occurred in the Link
         flow.
@@ -26429,12 +26717,12 @@ components:
       nullable: true
     TransactionsUpdateStatus:
       description: |-
-        A description of the update status for transaction pulls of an item.
+        A description of the update status for transaction pulls of an Item.
 
-        `TRANSACTIONS_UPDATE_STATUS_UNKNOWN`: Unable to fetch transactions update status for item.
-        `NOT_READY`: The item is pending transaction pull.
-        `INITIAL_UPDATE_COMPLETE`: Initial pull for the item is complete, pending Historical pull.
-        `HISTORICAL_UPDATE_COMPLETE`: Both Initial and Historical pull for item is complete.
+        `TRANSACTIONS_UPDATE_STATUS_UNKNOWN`: Unable to fetch transactions update status for Item.
+        `NOT_READY`: The Item is pending transaction pull.
+        `INITIAL_UPDATE_COMPLETE`: Initial pull for the Item is complete, historical pull is pending.
+        `HISTORICAL_UPDATE_COMPLETE`: Both initial and historical pull for Item are complete.
       enum:
       - TRANSACTIONS_UPDATE_STATUS_UNKNOWN
       - NOT_READY
@@ -26442,7 +26730,6 @@ components:
       - HISTORICAL_UPDATE_COMPLETE
       title: TransactionsUpdateStatus
       type: string
-      x-hidden-from-docs: true
     RemovedTransaction:
       description: A representation of a removed transaction
       example:
@@ -26455,7 +26742,6 @@ components:
         account_id:
           description: The ID of the account of the removed transaction.
           type: string
-          x-hidden-from-docs: true
       title: RemovedTransaction
       type: object
       x-examples: {}
@@ -29268,8 +29554,8 @@ components:
         minimum_payment_amount:
           description: |-
             The minimum payment due for the next billing cycle. There are some exceptions:
-            Some institutions require a minimum payment across all loans associated with an account number. Our API presents that same minimum payment amount on each loan. The institutions that do this are: Great Lakes ( `ins_116861`), Firstmark (`ins_116295`), Commonbond Firstmark Services (`ins_116950`), Nelnet (`ins_116528`), EdFinancial Services (`ins_116304`), Granite State (`ins_116308`), and Oklahoma Student Loan Authority (`ins_116945`).
-            Firstmark (`ins_116295` ) and Navient (`ins_116248`) will display as $0 if there is an autopay program in effect.
+            Some institutions require a minimum payment across all loans associated with an account number. Our API presents that same minimum payment amount on each loan. The institutions that do this are: Great Lakes ( `ins_116861`), Firstmark (`ins_116295`), Commonbond Firstmark Services (`ins_116950`), EdFinancial Services (`ins_116304`), Granite State (`ins_116308`), and Oklahoma Student Loan Authority (`ins_116945`).
+            Firstmark (`ins_116295` ), EdFinancial Services (`ins_116304`),  and Navient (`ins_116248`) will display as $0 if there is an autopay program in effect.
           format: double
           nullable: true
           type: number
@@ -30290,6 +30576,7 @@ components:
       - statements
       - processor_payments
       - processor_identity
+      - profile
       title: Products
       type: string
     ProductStatus:
@@ -30967,7 +31254,147 @@ components:
           items:
             $ref: '#/components/schemas/PaystubOverride'
           type: array
+        w2s:
+          description: A list of w2s associated with the account.
+          items:
+            $ref: '#/components/schemas/W2Override'
+          type: array
       title: IncomeOverride
+      type: object
+    W2Override:
+      additionalProperties: true
+      description: W2 is an object that represents income data taken from a W2 tax
+        document.
+      properties:
+        employer:
+          $ref: '#/components/schemas/PaystubOverrideEmployer'
+        employee:
+          $ref: '#/components/schemas/PaystubOverrideEmployee'
+        tax_year:
+          description: The tax year of the W2 document.
+          nullable: true
+          type: string
+        employer_id_number:
+          description: An employee identification number or EIN.
+          nullable: true
+          type: string
+        wages_tips_other_comp:
+          description: Wages from tips and other compensation.
+          nullable: true
+          type: string
+        federal_income_tax_withheld:
+          description: Federal income tax withheld for the tax year.
+          nullable: true
+          type: string
+        social_security_wages:
+          description: Wages from social security.
+          nullable: true
+          type: string
+        social_security_tax_withheld:
+          description: Social security tax withheld for the tax year.
+          nullable: true
+          type: string
+        medicare_wages_and_tips:
+          description: Wages and tips from medicare.
+          nullable: true
+          type: string
+        medicare_tax_withheld:
+          description: Medicare tax withheld for the tax year.
+          nullable: true
+          type: string
+        social_security_tips:
+          description: Tips from social security.
+          nullable: true
+          type: string
+        allocated_tips:
+          description: Allocated tips.
+          nullable: true
+          type: string
+        box_9:
+          description: Contents from box 9 on the W2.
+          nullable: true
+          type: string
+        dependent_care_benefits:
+          description: Dependent care benefits.
+          nullable: true
+          type: string
+        nonqualified_plans:
+          description: Nonqualified plans.
+          nullable: true
+          type: string
+        box_12:
+          items:
+            $ref: '#/components/schemas/W2Box12Override'
+          type: array
+        statutory_employee:
+          description: Statutory employee.
+          nullable: true
+          type: string
+        retirement_plan:
+          description: Retirement plan.
+          nullable: true
+          type: string
+        third_party_sick_pay:
+          description: Third party sick pay.
+          nullable: true
+          type: string
+        other:
+          description: Other.
+          nullable: true
+          type: string
+        state_and_local_wages:
+          items:
+            $ref: '#/components/schemas/W2StateAndLocalWagesOverride'
+          type: array
+      title: W2Override
+      type: object
+    W2Box12Override:
+      additionalProperties: true
+      description: Data on the W2 Box 12
+      properties:
+        code:
+          description: W2 Box 12 code.
+          nullable: true
+          type: string
+        amount:
+          description: W2 Box 12 amount.
+          nullable: true
+          type: string
+      title: W2Box12Override
+      type: object
+    W2StateAndLocalWagesOverride:
+      additionalProperties: true
+      description: W2 state and local wages
+      properties:
+        state:
+          description: State associated with the wage.
+          nullable: true
+          type: string
+        employer_state_id_number:
+          description: State identification number of the employer.
+          nullable: true
+          type: string
+        state_wages_tips:
+          description: Wages and tips from the specified state.
+          nullable: true
+          type: string
+        state_income_tax:
+          description: Income tax from the specified state.
+          nullable: true
+          type: string
+        local_wages_tips:
+          description: Wages and tips from the locality.
+          nullable: true
+          type: string
+        local_income_tax:
+          description: Income tax from the locality.
+          nullable: true
+          type: string
+        locality_name:
+          description: Name of the locality.
+          nullable: true
+          type: string
+      title: W2StateAndLocalWagesOverride
       type: object
     PaystubOverride:
       description: An object representing data from a paystub.
@@ -30977,18 +31404,191 @@ components:
         employee:
           $ref: '#/components/schemas/PaystubOverrideEmployee'
         income_breakdown:
+          deprecated: true
           items:
             $ref: '#/components/schemas/IncomeBreakdown'
           type: array
+          x-hidden-from-docs: true
+        net_pay:
+          $ref: '#/components/schemas/PaystubOverrideNetPay'
+        deductions:
+          $ref: '#/components/schemas/PaystubOverrideDeductions'
+        earnings:
+          $ref: '#/components/schemas/PaystubOverrideEarnings'
         pay_period_details:
           $ref: '#/components/schemas/PaystubOverridePayPeriodDetails'
       title: PaystubOverride
+      type: object
+    PaystubOverrideEarnings:
+      additionalProperties: true
+      description: An object representing both a breakdown of earnings on a paystub
+        and the total earnings.
+      properties:
+        breakdown:
+          items:
+            $ref: '#/components/schemas/PaystubOverrideEarningsBreakdown'
+          type: array
+        total:
+          $ref: '#/components/schemas/PaystubOverrideEarningsTotal'
+      title: PaystubOverrideEarnings
+      type: object
+    PaystubOverrideEarningsBreakdown:
+      additionalProperties: true
+      description: An object representing the earnings line items for the pay period.
+      properties:
+        canonical_description:
+          $ref: '#/components/schemas/EarningsBreakdownCanonicalDescription'
+        current_amount:
+          description: Raw amount of the earning line item.
+          format: double
+          nullable: true
+          type: number
+        description:
+          description: Description of the earning line item.
+          nullable: true
+          type: string
+        hours:
+          description: Number of hours applicable for this earning.
+          nullable: true
+          type: number
+        currency:
+          description: The ISO-4217 currency code of the line item.
+          nullable: true
+          type: string
+        rate:
+          description: Hourly rate applicable for this earning.
+          format: double
+          nullable: true
+          type: number
+        ytd_amount:
+          description: The year-to-date amount of the deduction.
+          format: double
+          nullable: true
+          type: number
+      title: PaystubOverrideEarningsBreakdown
+      type: object
+    PaystubOverrideEarningsTotal:
+      additionalProperties: true
+      description: An object representing both the current pay period and year to
+        date amount for an earning category.
+      properties:
+        hours:
+          description: Total number of hours worked for this pay period
+          nullable: true
+          type: number
+        currency:
+          description: The ISO-4217 currency code of the line item
+          nullable: true
+          type: string
+      title: PaystubOverrideEarningsTotal
+      type: object
+    PaystubOverrideDeductions:
+      additionalProperties: true
+      description: An object with the deduction information found on a paystub.
+      properties:
+        breakdown:
+          items:
+            $ref: '#/components/schemas/PaystubOverrideDeductionsBreakdown'
+          type: array
+        total:
+          $ref: '#/components/schemas/PaystubOverrideDeductionsTotal'
+      title: PaystubOverrideDeductions
+      type: object
+    PaystubOverrideDeductionsBreakdown:
+      additionalProperties: true
+      description: An object representing the deduction line items for the pay period
+      properties:
+        current_amount:
+          description: Raw amount of the deduction
+          format: double
+          nullable: true
+          type: number
+        description:
+          description: Description of the deduction line item
+          nullable: true
+          type: string
+        currency:
+          description: The ISO-4217 currency code of the line item.
+          nullable: true
+          type: string
+        ytd_amount:
+          description: The year-to-date amount of the deduction
+          format: double
+          nullable: true
+          type: number
+      title: PaystubOverrideDeductionsBreakdown
+      type: object
+    PaystubOverrideDeductionsTotal:
+      additionalProperties: true
+      description: An object representing the total deductions for the pay period
+      properties:
+        current_amount:
+          description: Raw amount of the deduction
+          format: double
+          nullable: true
+          type: number
+        currency:
+          description: The ISO-4217 currency code of the line item.
+          nullable: true
+          type: string
+        ytd_amount:
+          description: The year-to-date total amount of the deductions
+          format: double
+          nullable: true
+          type: number
+      title: PaystubOverrideDeductionsTotal
+      type: object
+    PaystubOverrideNetPay:
+      additionalProperties: true
+      description: An object representing information about the net pay amount on
+        the paystub.
+      properties:
+        description:
+          description: Description of the net pay
+          nullable: true
+          type: string
+        currency:
+          description: The ISO-4217 currency code of the net pay.
+          nullable: true
+          type: string
+        ytd_amount:
+          description: The year-to-date amount of the net pay
+          format: double
+          nullable: true
+          type: number
+      title: PaystubOverrideNetPay
       type: object
     PaystubOverrideEmployer:
       description: The employer on the paystub.
       properties:
         name:
           description: The name of the employer.
+          nullable: true
+          type: string
+        address:
+          $ref: '#/components/schemas/PaystubOverrideEmployerAddress'
+      type: object
+    PaystubOverrideEmployerAddress:
+      description: The address of the employer.
+      properties:
+        city:
+          description: The full city name.
+          type: string
+        region:
+          description: |-
+            The region or state
+            Example: `"NC"`
+          type: string
+        street:
+          description: |-
+            The full street address
+            Example: `"564 Main Street, APT 15"`
+          type: string
+        postal_code:
+          description: 5 digit postal code.
+          type: string
+        country:
+          description: The country of the address.
           type: string
       type: object
     PaystubOverrideEmployee:
@@ -30999,6 +31599,29 @@ components:
           type: string
         address:
           $ref: '#/components/schemas/PaystubOverrideEmployeeAddress'
+        marital_status:
+          description: Marital status of the employee - either `single` or `married`.
+          nullable: true
+          type: string
+          x-override-enum-values-shown:
+          - single
+          - married
+        taxpayer_id:
+          $ref: '#/components/schemas/PaystubOverrideTaxpayerID'
+      type: object
+    PaystubOverrideTaxpayerID:
+      additionalProperties: true
+      description: Taxpayer ID of the individual receiving the paystub.
+      properties:
+        id_type:
+          description: Type of ID, e.g. 'SSN'
+          nullable: true
+          type: string
+        id_mask:
+          description: ID mask; i.e. last 4 digits of the taxpayer ID
+          nullable: true
+          type: string
+      title: PaystubOverrideTaxpayerID
       type: object
     PaystubOverrideEmployeeAddress:
       description: The address of the employee.
@@ -32293,8 +32916,9 @@ components:
         depository:
           description: 'An account type holding cash, in which funds are deposited.
             Supported products for `depository` accounts are: Auth (`checking` and
-            `savings` types only), Balance, Transactions, Identity, Payment Initiation,
-            Assets, and Investments (`cash management` type only).'
+            `savings` types only), Transfer, Balance, Signal, Income, Transactions,
+            Identity, Payment Initiation, Assets, and Investments (`cash management`
+            type only).'
           properties:
             checking:
               description: Checking account
@@ -32339,7 +32963,7 @@ components:
           type: string
         credit:
           description: 'A credit card type account. Supported products for `credit`
-            accounts are: Balance, Transactions, Identity, and Liabilities.'
+            accounts are: Balance, Transactions, Identity, Assets, and Liabilities.'
           properties:
             credit card:
               description: Bank-issued credit card
@@ -32354,7 +32978,7 @@ components:
           type: string
         loan:
           description: 'A loan type account. Supported products for `loan` accounts
-            are: Balance, Liabilities, and Transactions.'
+            are: Balance, Liabilities, Assets, and Transactions.'
           properties:
             auto:
               description: Auto loan
@@ -32410,8 +33034,8 @@ components:
           type: string
         investment:
           description: 'An investment account. Supported products for `investment`
-            accounts are: Balance and Investments. In API versions 2018-05-22 and
-            earlier, this type is called `brokerage`.'
+            accounts are: Balance, Assets, and Investments. In API versions 2018-05-22
+            and earlier, this type is called `brokerage`.'
           properties:
             "529":
               description: |
@@ -32647,8 +33271,8 @@ components:
     DepositoryAccount:
       description: 'An account type holding cash, in which funds are deposited. Supported
         products for `depository` accounts are: Auth (`checking` and `savings` types
-        only), Balance, Transactions, Identity, Payment Initiation, Assets, and Investments
-        (`cash management` type only).'
+        only), Transfer, Balance, Signal, Income, Transactions, Identity, Payment
+        Initiation, Assets, and Investments (`cash management` type only).'
       properties:
         checking:
           description: Checking account
@@ -32692,7 +33316,7 @@ components:
       type: string
     CreditAccount:
       description: 'A credit card type account. Supported products for `credit` accounts
-        are: Balance, Transactions, Identity, and Liabilities.'
+        are: Balance, Transactions, Identity, Assets, and Liabilities.'
       properties:
         credit card:
           description: Bank-issued credit card
@@ -32707,7 +33331,7 @@ components:
       type: string
     LoanAccount:
       description: 'A loan type account. Supported products for `loan` accounts are:
-        Balance, Liabilities, and Transactions.'
+        Balance, Liabilities, Assets, and Transactions.'
       properties:
         auto:
           description: Auto loan
@@ -32763,8 +33387,8 @@ components:
       type: string
     InvestmentAccountSubtypeStandalone:
       description: 'An investment account. Supported products for `investment` accounts
-        are: Balance and Investments. In API versions 2018-05-22 and earlier, this
-        type is called `brokerage`.'
+        are: Balance, Assets, and Investments. In API versions 2018-05-22 and earlier,
+        this type is called `brokerage`.'
       properties:
         "529":
           description: |
@@ -35010,7 +35634,7 @@ components:
         ach_class:
           $ref: '#/components/schemas/ACHClass'
         network:
-          $ref: '#/components/schemas/TransferACHNetwork'
+          $ref: '#/components/schemas/TransferRecurringNetwork'
         origination_account_id:
           deprecated: true
           description: Plaid’s unique identifier for the origination account that
@@ -35907,7 +36531,8 @@ components:
           description: |-
             A date in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format (YYYY-MM-DD). The recurring transfer will begin on the first `interval_execution_day` on or after the `start_date`.
 
-            If the first `interval_execution_day` on or after the start date is also the same day that `/transfer/recurring/create` was called, the bank *may* make the first payment on that day, but it is not guaranteed to do so.
+            For `rtp` recurring transfers, `start_date` must be in the future.
+            Otherwise, if the first `interval_execution_day` on or after the start date is also the same day that `/transfer/recurring/create` was called, the bank *may* make the first payment on that day, but it is not guaranteed to do so.
           format: date
           type: string
         end_date:
@@ -36011,6 +36636,7 @@ components:
         `pending`: A new transfer was created; it is in the pending state.
         `posted`: The transfer has been successfully submitted to the payment network.
         `settled`: Credits are available to be withdrawn or debits have been deducted from the Plaid linked account.
+        `funds_available`: Funds from the transfer have been released from hold and applied to the ledger's available balance. (Only applicable to ACH debits.)
         `cancelled`: The transfer was cancelled by the client.
         `failed`: The transfer failed, no funds were moved.
         `returned`: A posted transfer was returned.
@@ -36018,6 +36644,7 @@ components:
       - pending
       - posted
       - settled
+      - funds_available
       - cancelled
       - failed
       - returned
@@ -36121,6 +36748,14 @@ components:
       - ach
       - same-day-ach
       title: TransferACHNetwork
+      type: string
+    TransferRecurringNetwork:
+      description: Networks eligible for recurring transfers.
+      enum:
+      - ach
+      - same-day-ach
+      - rtp
+      title: TransferRecurrinngNetwork
       type: string
     BankTransferNetwork:
       description: The network or rails used for the transfer. Valid options are `ach`,
@@ -36641,7 +37276,7 @@ components:
         type:
           $ref: '#/components/schemas/TransferType'
         network:
-          $ref: '#/components/schemas/TransferACHNetwork'
+          $ref: '#/components/schemas/TransferRecurringNetwork'
         ach_class:
           $ref: '#/components/schemas/ACHClass'
         amount:
@@ -37009,7 +37644,7 @@ components:
 
         A decision regarding the proposed transfer.
 
-        `approved` – The proposed transfer has received the end user's consent and has been approved for processing by Plaid. The `decision_rationale` field is set if Plaid was unable to fetch the account information. You may proceed with the transfer, but further review is recommended (i.e., use Link in update to re-authenticate your user when `decision_rationale.code` is `ITEM_LOGIN_REQUIRED`). Refer to the `code` field in the `decision_rationale` object for details.
+        `approved` – The proposed transfer has received the end user's consent and has been approved for processing by Plaid. The `decision_rationale` field is set if Plaid was unable to fetch the account information. You may proceed with the transfer, but further review is recommended (i.e., use Link in update mode to re-authenticate your user when `decision_rationale.code` is `ITEM_LOGIN_REQUIRED`). Refer to the `code` field in the `decision_rationale` object for details.
 
         `declined` – Plaid reviewed the proposed transfer and declined processing. Refer to the `code` field in the `decision_rationale` object for details.
       enum:
@@ -38078,6 +38713,8 @@ components:
 
         `settled`: Credits are available to be withdrawn or debits have been deducted from the Plaid linked account.
 
+        `funds_available`: Funds from the transfer have been released from hold and applied to the ledger's available balance. (Only applicable to ACH debits.)
+
         `returned`: A posted transfer was returned.
 
         `swept`: The transfer was swept to / from the sweep account.
@@ -38117,6 +38754,7 @@ components:
       - failed
       - posted
       - settled
+      - funds_available
       - returned
       - swept
       - swept_settled
@@ -40779,7 +41417,7 @@ components:
 
         A decision regarding the proposed transfer.
 
-        `APPROVED` – The proposed transfer has received the end user's consent and has been approved for processing by Plaid. The `decision_rationale` field is set if Plaid was unable to fetch the account information. You may proceed with the transfer, but further review is recommended (i.e., use Link in update to re-authenticate your user when `decision_rationale.code` is `ITEM_LOGIN_REQUIRED`). Refer to the `code` field in the `decision_rationale` object for details.
+        `APPROVED` – The proposed transfer has received the end user's consent and has been approved for processing by Plaid. The `decision_rationale` field is set if Plaid was unable to fetch the account information. You may proceed with the transfer, but further review is recommended (i.e., use Link in update mode to re-authenticate your user when `decision_rationale.code` is `ITEM_LOGIN_REQUIRED`). Refer to the `code` field in the `decision_rationale` object for details.
 
         `DECLINED` – Plaid reviewed the proposed transfer and declined processing. Refer to the `code` field in the `decision_rationale` object for details.
       enum:
@@ -61604,6 +62242,7 @@ components:
       nullable: true
       title: RecurringFrequency
       type: string
+      x-hidden-from-docs: true
     TransactionsUserInsightsGetRequest:
       description: TransactionsUserInsightsGetRequest defines the request schema for
         `/beta/transactions/user_insights/v1/get`.
@@ -62676,8 +63315,8 @@ components:
         redirect_uris:
           description: A list of URIs indicating the destination(s) where a user can
             be forwarded after completing the Link flow; used to support OAuth authentication
-            flows when launching Link in the browser or via a webview. URIs should
-            not contain any query parameters. When used in Production or Development,
+            flows when launching Link in the browser or another app. URIs should not
+            contain any query parameters. When used in Production or Development,
             URIs must use https. To specify any subdomain, use `*` as a wildcard character,
             e.g. `https://*.example.com/oauth.html`. To modify redirect URIs for an
             end customer after creating them, go to the end customer's [API page](https://dashboard.plaid.com/team/api)
@@ -65776,14 +66415,17 @@ components:
               - date: 2000-01-23
                 unofficial_currency_code: unofficial_currency_code
                 amount: 1.4658129805029452
+                pending: true
+                original_description: original_description
+                merchant_name: merchant_name
+                account_owner: account_owner
+                date_transacted: date_transacted
                 check_number: check_number
                 credit_category:
                   detailed: detailed
                   primary: primary
-                pending: true
+                category_id: ""
                 iso_currency_code: iso_currency_code
-                original_description: original_description
-                merchant_name: merchant_name
                 location:
                   country: country
                   address: address
@@ -65793,19 +66435,23 @@ components:
                   region: region
                   postal_code: postal_code
                   lat: 9.301444243932576
-                account_owner: account_owner
-                date_transacted: date_transacted
+                category:
+                - category
+                - category
               - date: 2000-01-23
                 unofficial_currency_code: unofficial_currency_code
                 amount: 1.4658129805029452
+                pending: true
+                original_description: original_description
+                merchant_name: merchant_name
+                account_owner: account_owner
+                date_transacted: date_transacted
                 check_number: check_number
                 credit_category:
                   detailed: detailed
                   primary: primary
-                pending: true
+                category_id: ""
                 iso_currency_code: iso_currency_code
-                original_description: original_description
-                merchant_name: merchant_name
                 location:
                   country: country
                   address: address
@@ -65815,8 +66461,9 @@ components:
                   region: region
                   postal_code: postal_code
                   lat: 9.301444243932576
-                account_owner: account_owner
-                date_transacted: date_transacted
+                category:
+                - category
+                - category
               mask: mask
               days_available: 6.027456183070403
             - official_name: official_name
@@ -65954,14 +66601,17 @@ components:
               - date: 2000-01-23
                 unofficial_currency_code: unofficial_currency_code
                 amount: 1.4658129805029452
+                pending: true
+                original_description: original_description
+                merchant_name: merchant_name
+                account_owner: account_owner
+                date_transacted: date_transacted
                 check_number: check_number
                 credit_category:
                   detailed: detailed
                   primary: primary
-                pending: true
+                category_id: ""
                 iso_currency_code: iso_currency_code
-                original_description: original_description
-                merchant_name: merchant_name
                 location:
                   country: country
                   address: address
@@ -65971,19 +66621,23 @@ components:
                   region: region
                   postal_code: postal_code
                   lat: 9.301444243932576
-                account_owner: account_owner
-                date_transacted: date_transacted
+                category:
+                - category
+                - category
               - date: 2000-01-23
                 unofficial_currency_code: unofficial_currency_code
                 amount: 1.4658129805029452
+                pending: true
+                original_description: original_description
+                merchant_name: merchant_name
+                account_owner: account_owner
+                date_transacted: date_transacted
                 check_number: check_number
                 credit_category:
                   detailed: detailed
                   primary: primary
-                pending: true
+                category_id: ""
                 iso_currency_code: iso_currency_code
-                original_description: original_description
-                merchant_name: merchant_name
                 location:
                   country: country
                   address: address
@@ -65993,8 +66647,9 @@ components:
                   region: region
                   postal_code: postal_code
                   lat: 9.301444243932576
-                account_owner: account_owner
-                date_transacted: date_transacted
+                category:
+                - category
+                - category
               mask: mask
               days_available: 6.027456183070403
             institution_name: institution_name
@@ -66136,14 +66791,17 @@ components:
               - date: 2000-01-23
                 unofficial_currency_code: unofficial_currency_code
                 amount: 1.4658129805029452
+                pending: true
+                original_description: original_description
+                merchant_name: merchant_name
+                account_owner: account_owner
+                date_transacted: date_transacted
                 check_number: check_number
                 credit_category:
                   detailed: detailed
                   primary: primary
-                pending: true
+                category_id: ""
                 iso_currency_code: iso_currency_code
-                original_description: original_description
-                merchant_name: merchant_name
                 location:
                   country: country
                   address: address
@@ -66153,19 +66811,23 @@ components:
                   region: region
                   postal_code: postal_code
                   lat: 9.301444243932576
-                account_owner: account_owner
-                date_transacted: date_transacted
+                category:
+                - category
+                - category
               - date: 2000-01-23
                 unofficial_currency_code: unofficial_currency_code
                 amount: 1.4658129805029452
+                pending: true
+                original_description: original_description
+                merchant_name: merchant_name
+                account_owner: account_owner
+                date_transacted: date_transacted
                 check_number: check_number
                 credit_category:
                   detailed: detailed
                   primary: primary
-                pending: true
+                category_id: ""
                 iso_currency_code: iso_currency_code
-                original_description: original_description
-                merchant_name: merchant_name
                 location:
                   country: country
                   address: address
@@ -66175,8 +66837,9 @@ components:
                   region: region
                   postal_code: postal_code
                   lat: 9.301444243932576
-                account_owner: account_owner
-                date_transacted: date_transacted
+                category:
+                - category
+                - category
               mask: mask
               days_available: 6.027456183070403
             - official_name: official_name
@@ -66314,14 +66977,17 @@ components:
               - date: 2000-01-23
                 unofficial_currency_code: unofficial_currency_code
                 amount: 1.4658129805029452
+                pending: true
+                original_description: original_description
+                merchant_name: merchant_name
+                account_owner: account_owner
+                date_transacted: date_transacted
                 check_number: check_number
                 credit_category:
                   detailed: detailed
                   primary: primary
-                pending: true
+                category_id: ""
                 iso_currency_code: iso_currency_code
-                original_description: original_description
-                merchant_name: merchant_name
                 location:
                   country: country
                   address: address
@@ -66331,19 +66997,23 @@ components:
                   region: region
                   postal_code: postal_code
                   lat: 9.301444243932576
-                account_owner: account_owner
-                date_transacted: date_transacted
+                category:
+                - category
+                - category
               - date: 2000-01-23
                 unofficial_currency_code: unofficial_currency_code
                 amount: 1.4658129805029452
+                pending: true
+                original_description: original_description
+                merchant_name: merchant_name
+                account_owner: account_owner
+                date_transacted: date_transacted
                 check_number: check_number
                 credit_category:
                   detailed: detailed
                   primary: primary
-                pending: true
+                category_id: ""
                 iso_currency_code: iso_currency_code
-                original_description: original_description
-                merchant_name: merchant_name
                 location:
                   country: country
                   address: address
@@ -66353,8 +67023,9 @@ components:
                   region: region
                   postal_code: postal_code
                   lat: 9.301444243932576
-                account_owner: account_owner
-                date_transacted: date_transacted
+                category:
+                - category
+                - category
               mask: mask
               days_available: 6.027456183070403
             institution_name: institution_name
@@ -68839,14 +69510,17 @@ components:
             - date: 2000-01-23
               unofficial_currency_code: unofficial_currency_code
               amount: 1.4658129805029452
+              pending: true
+              original_description: original_description
+              merchant_name: merchant_name
+              account_owner: account_owner
+              date_transacted: date_transacted
               check_number: check_number
               credit_category:
                 detailed: detailed
                 primary: primary
-              pending: true
+              category_id: ""
               iso_currency_code: iso_currency_code
-              original_description: original_description
-              merchant_name: merchant_name
               location:
                 country: country
                 address: address
@@ -68856,19 +69530,23 @@ components:
                 region: region
                 postal_code: postal_code
                 lat: 9.301444243932576
-              account_owner: account_owner
-              date_transacted: date_transacted
+              category:
+              - category
+              - category
             - date: 2000-01-23
               unofficial_currency_code: unofficial_currency_code
               amount: 1.4658129805029452
+              pending: true
+              original_description: original_description
+              merchant_name: merchant_name
+              account_owner: account_owner
+              date_transacted: date_transacted
               check_number: check_number
               credit_category:
                 detailed: detailed
                 primary: primary
-              pending: true
+              category_id: ""
               iso_currency_code: iso_currency_code
-              original_description: original_description
-              merchant_name: merchant_name
               location:
                 country: country
                 address: address
@@ -68878,8 +69556,9 @@ components:
                 region: region
                 postal_code: postal_code
                 lat: 9.301444243932576
-              account_owner: account_owner
-              date_transacted: date_transacted
+              category:
+              - category
+              - category
             mask: mask
             days_available: 6.027456183070403
           - official_name: official_name
@@ -69017,14 +69696,17 @@ components:
             - date: 2000-01-23
               unofficial_currency_code: unofficial_currency_code
               amount: 1.4658129805029452
+              pending: true
+              original_description: original_description
+              merchant_name: merchant_name
+              account_owner: account_owner
+              date_transacted: date_transacted
               check_number: check_number
               credit_category:
                 detailed: detailed
                 primary: primary
-              pending: true
+              category_id: ""
               iso_currency_code: iso_currency_code
-              original_description: original_description
-              merchant_name: merchant_name
               location:
                 country: country
                 address: address
@@ -69034,19 +69716,23 @@ components:
                 region: region
                 postal_code: postal_code
                 lat: 9.301444243932576
-              account_owner: account_owner
-              date_transacted: date_transacted
+              category:
+              - category
+              - category
             - date: 2000-01-23
               unofficial_currency_code: unofficial_currency_code
               amount: 1.4658129805029452
+              pending: true
+              original_description: original_description
+              merchant_name: merchant_name
+              account_owner: account_owner
+              date_transacted: date_transacted
               check_number: check_number
               credit_category:
                 detailed: detailed
                 primary: primary
-              pending: true
+              category_id: ""
               iso_currency_code: iso_currency_code
-              original_description: original_description
-              merchant_name: merchant_name
               location:
                 country: country
                 address: address
@@ -69056,8 +69742,9 @@ components:
                 region: region
                 postal_code: postal_code
                 lat: 9.301444243932576
-              account_owner: account_owner
-              date_transacted: date_transacted
+              category:
+              - category
+              - category
             mask: mask
             days_available: 6.027456183070403
           institution_name: institution_name
@@ -69199,14 +69886,17 @@ components:
             - date: 2000-01-23
               unofficial_currency_code: unofficial_currency_code
               amount: 1.4658129805029452
+              pending: true
+              original_description: original_description
+              merchant_name: merchant_name
+              account_owner: account_owner
+              date_transacted: date_transacted
               check_number: check_number
               credit_category:
                 detailed: detailed
                 primary: primary
-              pending: true
+              category_id: ""
               iso_currency_code: iso_currency_code
-              original_description: original_description
-              merchant_name: merchant_name
               location:
                 country: country
                 address: address
@@ -69216,19 +69906,23 @@ components:
                 region: region
                 postal_code: postal_code
                 lat: 9.301444243932576
-              account_owner: account_owner
-              date_transacted: date_transacted
+              category:
+              - category
+              - category
             - date: 2000-01-23
               unofficial_currency_code: unofficial_currency_code
               amount: 1.4658129805029452
+              pending: true
+              original_description: original_description
+              merchant_name: merchant_name
+              account_owner: account_owner
+              date_transacted: date_transacted
               check_number: check_number
               credit_category:
                 detailed: detailed
                 primary: primary
-              pending: true
+              category_id: ""
               iso_currency_code: iso_currency_code
-              original_description: original_description
-              merchant_name: merchant_name
               location:
                 country: country
                 address: address
@@ -69238,8 +69932,9 @@ components:
                 region: region
                 postal_code: postal_code
                 lat: 9.301444243932576
-              account_owner: account_owner
-              date_transacted: date_transacted
+              category:
+              - category
+              - category
             mask: mask
             days_available: 6.027456183070403
           - official_name: official_name
@@ -69377,14 +70072,17 @@ components:
             - date: 2000-01-23
               unofficial_currency_code: unofficial_currency_code
               amount: 1.4658129805029452
+              pending: true
+              original_description: original_description
+              merchant_name: merchant_name
+              account_owner: account_owner
+              date_transacted: date_transacted
               check_number: check_number
               credit_category:
                 detailed: detailed
                 primary: primary
-              pending: true
+              category_id: ""
               iso_currency_code: iso_currency_code
-              original_description: original_description
-              merchant_name: merchant_name
               location:
                 country: country
                 address: address
@@ -69394,19 +70092,23 @@ components:
                 region: region
                 postal_code: postal_code
                 lat: 9.301444243932576
-              account_owner: account_owner
-              date_transacted: date_transacted
+              category:
+              - category
+              - category
             - date: 2000-01-23
               unofficial_currency_code: unofficial_currency_code
               amount: 1.4658129805029452
+              pending: true
+              original_description: original_description
+              merchant_name: merchant_name
+              account_owner: account_owner
+              date_transacted: date_transacted
               check_number: check_number
               credit_category:
                 detailed: detailed
                 primary: primary
-              pending: true
+              category_id: ""
               iso_currency_code: iso_currency_code
-              original_description: original_description
-              merchant_name: merchant_name
               location:
                 country: country
                 address: address
@@ -69416,8 +70118,9 @@ components:
                 region: region
                 postal_code: postal_code
                 lat: 9.301444243932576
-              account_owner: account_owner
-              date_transacted: date_transacted
+              category:
+              - category
+              - category
             mask: mask
             days_available: 6.027456183070403
           institution_name: institution_name
@@ -69598,14 +70301,17 @@ components:
           - date: 2000-01-23
             unofficial_currency_code: unofficial_currency_code
             amount: 1.4658129805029452
+            pending: true
+            original_description: original_description
+            merchant_name: merchant_name
+            account_owner: account_owner
+            date_transacted: date_transacted
             check_number: check_number
             credit_category:
               detailed: detailed
               primary: primary
-            pending: true
+            category_id: ""
             iso_currency_code: iso_currency_code
-            original_description: original_description
-            merchant_name: merchant_name
             location:
               country: country
               address: address
@@ -69615,19 +70321,23 @@ components:
               region: region
               postal_code: postal_code
               lat: 9.301444243932576
-            account_owner: account_owner
-            date_transacted: date_transacted
+            category:
+            - category
+            - category
           - date: 2000-01-23
             unofficial_currency_code: unofficial_currency_code
             amount: 1.4658129805029452
+            pending: true
+            original_description: original_description
+            merchant_name: merchant_name
+            account_owner: account_owner
+            date_transacted: date_transacted
             check_number: check_number
             credit_category:
               detailed: detailed
               primary: primary
-            pending: true
+            category_id: ""
             iso_currency_code: iso_currency_code
-            original_description: original_description
-            merchant_name: merchant_name
             location:
               country: country
               address: address
@@ -69637,8 +70347,9 @@ components:
               region: region
               postal_code: postal_code
               lat: 9.301444243932576
-            account_owner: account_owner
-            date_transacted: date_transacted
+            category:
+            - category
+            - category
           mask: mask
           days_available: 6.027456183070403
         - official_name: official_name
@@ -69776,14 +70487,17 @@ components:
           - date: 2000-01-23
             unofficial_currency_code: unofficial_currency_code
             amount: 1.4658129805029452
+            pending: true
+            original_description: original_description
+            merchant_name: merchant_name
+            account_owner: account_owner
+            date_transacted: date_transacted
             check_number: check_number
             credit_category:
               detailed: detailed
               primary: primary
-            pending: true
+            category_id: ""
             iso_currency_code: iso_currency_code
-            original_description: original_description
-            merchant_name: merchant_name
             location:
               country: country
               address: address
@@ -69793,19 +70507,23 @@ components:
               region: region
               postal_code: postal_code
               lat: 9.301444243932576
-            account_owner: account_owner
-            date_transacted: date_transacted
+            category:
+            - category
+            - category
           - date: 2000-01-23
             unofficial_currency_code: unofficial_currency_code
             amount: 1.4658129805029452
+            pending: true
+            original_description: original_description
+            merchant_name: merchant_name
+            account_owner: account_owner
+            date_transacted: date_transacted
             check_number: check_number
             credit_category:
               detailed: detailed
               primary: primary
-            pending: true
+            category_id: ""
             iso_currency_code: iso_currency_code
-            original_description: original_description
-            merchant_name: merchant_name
             location:
               country: country
               address: address
@@ -69815,8 +70533,9 @@ components:
               region: region
               postal_code: postal_code
               lat: 9.301444243932576
-            account_owner: account_owner
-            date_transacted: date_transacted
+            category:
+            - category
+            - category
           mask: mask
           days_available: 6.027456183070403
         institution_name: institution_name
@@ -69987,14 +70706,17 @@ components:
         - date: 2000-01-23
           unofficial_currency_code: unofficial_currency_code
           amount: 1.4658129805029452
+          pending: true
+          original_description: original_description
+          merchant_name: merchant_name
+          account_owner: account_owner
+          date_transacted: date_transacted
           check_number: check_number
           credit_category:
             detailed: detailed
             primary: primary
-          pending: true
+          category_id: ""
           iso_currency_code: iso_currency_code
-          original_description: original_description
-          merchant_name: merchant_name
           location:
             country: country
             address: address
@@ -70004,19 +70726,23 @@ components:
             region: region
             postal_code: postal_code
             lat: 9.301444243932576
-          account_owner: account_owner
-          date_transacted: date_transacted
+          category:
+          - category
+          - category
         - date: 2000-01-23
           unofficial_currency_code: unofficial_currency_code
           amount: 1.4658129805029452
+          pending: true
+          original_description: original_description
+          merchant_name: merchant_name
+          account_owner: account_owner
+          date_transacted: date_transacted
           check_number: check_number
           credit_category:
             detailed: detailed
             primary: primary
-          pending: true
+          category_id: ""
           iso_currency_code: iso_currency_code
-          original_description: original_description
-          merchant_name: merchant_name
           location:
             country: country
             address: address
@@ -70026,8 +70752,9 @@ components:
             region: region
             postal_code: postal_code
             lat: 9.301444243932576
-          account_owner: account_owner
-          date_transacted: date_transacted
+          category:
+          - category
+          - category
         mask: mask
         days_available: 6.027456183070403
       properties:
@@ -70122,14 +70849,17 @@ components:
         date: 2000-01-23
         unofficial_currency_code: unofficial_currency_code
         amount: 1.4658129805029452
+        pending: true
+        original_description: original_description
+        merchant_name: merchant_name
+        account_owner: account_owner
+        date_transacted: date_transacted
         check_number: check_number
         credit_category:
           detailed: detailed
           primary: primary
-        pending: true
+        category_id: ""
         iso_currency_code: iso_currency_code
-        original_description: original_description
-        merchant_name: merchant_name
         location:
           country: country
           address: address
@@ -70139,8 +70869,9 @@ components:
           region: region
           postal_code: postal_code
           lat: 9.301444243932576
-        account_owner: account_owner
-        date_transacted: date_transacted
+        category:
+        - category
+        - category
       properties:
         amount:
           description: The settled value of the transaction, denominated in the transaction's
@@ -70205,6 +70936,20 @@ components:
             populated and only relevant when dealing with sub-accounts.
           nullable: true
           type: string
+        transaction_type:
+          $ref: '#/components/schemas/BaseReportTransactionType'
+        category:
+          description: A hierarchical array of the categories to which this transaction
+            belongs. For a full list of categories, see [`/categories/get`](https://plaid.com/docs/api/products/transactions/#categoriesget).
+          items:
+            type: string
+          nullable: true
+          type: array
+          x-hidden-from-docs: true
+        category_id:
+          description: The ID of the category to which this transaction belongs. For
+            a full list of categories, see [`/categories/get`](https://plaid.com/docs/api/products/transactions/#categoriesget).
+          x-hidden-from-docs: true
       required:
       - amount
       - date
@@ -70214,6 +70959,24 @@ components:
       - unofficial_currency_code
       title: BaseReportTransaction
       type: object
+      x-hidden-from-docs: true
+    BaseReportTransactionType:
+      description: |
+        `digital:` transactions that took place online.
+
+        `place:` transactions that were made at a physical location.
+
+        `special:` transactions that relate to banks, e.g. fees or deposits.
+
+        `unresolved:` transactions that do not fit into the other types.
+      enum:
+      - digital
+      - place
+      - special
+      - unresolved
+      nullable: true
+      title: BaseReportTransactionType
+      type: string
       x-hidden-from-docs: true
     BaseReportAccountInsights:
       additionalProperties: true
@@ -70721,59 +71484,59 @@ components:
             days_since_first_plaid_connection: 0
             is_account_closed: true
             distinct_ip_addresses_count_90d: 1
-            distinct_user_agents_count_30d: 1
+            distinct_user_agents_count_30d: 7
             distinct_ip_addresses_count_30d: 1
-            distinct_user_agents_count_90d: 4
-            distinct_user_agents_count_7d: 7
-            phone_change_count_90d: 9
+            distinct_user_agents_count_90d: 1
+            distinct_user_agents_count_7d: 6
+            phone_change_count_90d: 8
             plaid_connections_count_30d: 5
             is_account_frozen_or_restricted: true
-            failed_plaid_non_oauth_authentication_attempts_count_30d: 2
-            failed_plaid_non_oauth_authentication_attempts_count_7d: 9
+            failed_plaid_non_oauth_authentication_attempts_count_30d: 3
+            failed_plaid_non_oauth_authentication_attempts_count_7d: 7
             phone_change_count_28d: 9
-            failed_plaid_non_oauth_authentication_attempts_count_3d: 2
-            days_since_account_creation: 6
-            plaid_non_oauth_authentication_attempts_count_30d: 4
-            total_plaid_connections_count: 1
-            plaid_non_oauth_authentication_attempts_count_7d: 3
-            email_change_count_90d: 8
-            plaid_connections_count_7d: 5
-            plaid_non_oauth_authentication_attempts_count_3d: 7
-            distinct_ip_addresses_count_7d: 1
-            distinct_user_agents_count_3d: 6
-            address_change_count_90d: 6
-            distinct_ip_addresses_count_3d: 7
-            email_change_count_28d: 9
-            address_change_count_28d: 5
+            failed_plaid_non_oauth_authentication_attempts_count_3d: 5
+            plaid_non_oauth_authentication_attempts_count_30d: 2
+            total_plaid_connections_count: 6
+            plaid_non_oauth_authentication_attempts_count_7d: 9
+            email_change_count_90d: 6
+            plaid_connections_count_7d: 1
+            plaid_non_oauth_authentication_attempts_count_3d: 2
+            distinct_ip_addresses_count_7d: 7
+            distinct_user_agents_count_3d: 1
+            address_change_count_90d: 9
+            days_since_account_opening: 9
+            distinct_ip_addresses_count_3d: 4
+            email_change_count_28d: 5
+            address_change_count_28d: 4
         - account_id: account_id
           attributes:
             days_since_first_plaid_connection: 0
             is_account_closed: true
             distinct_ip_addresses_count_90d: 1
-            distinct_user_agents_count_30d: 1
+            distinct_user_agents_count_30d: 7
             distinct_ip_addresses_count_30d: 1
-            distinct_user_agents_count_90d: 4
-            distinct_user_agents_count_7d: 7
-            phone_change_count_90d: 9
+            distinct_user_agents_count_90d: 1
+            distinct_user_agents_count_7d: 6
+            phone_change_count_90d: 8
             plaid_connections_count_30d: 5
             is_account_frozen_or_restricted: true
-            failed_plaid_non_oauth_authentication_attempts_count_30d: 2
-            failed_plaid_non_oauth_authentication_attempts_count_7d: 9
+            failed_plaid_non_oauth_authentication_attempts_count_30d: 3
+            failed_plaid_non_oauth_authentication_attempts_count_7d: 7
             phone_change_count_28d: 9
-            failed_plaid_non_oauth_authentication_attempts_count_3d: 2
-            days_since_account_creation: 6
-            plaid_non_oauth_authentication_attempts_count_30d: 4
-            total_plaid_connections_count: 1
-            plaid_non_oauth_authentication_attempts_count_7d: 3
-            email_change_count_90d: 8
-            plaid_connections_count_7d: 5
-            plaid_non_oauth_authentication_attempts_count_3d: 7
-            distinct_ip_addresses_count_7d: 1
-            distinct_user_agents_count_3d: 6
-            address_change_count_90d: 6
-            distinct_ip_addresses_count_3d: 7
-            email_change_count_28d: 9
-            address_change_count_28d: 5
+            failed_plaid_non_oauth_authentication_attempts_count_3d: 5
+            plaid_non_oauth_authentication_attempts_count_30d: 2
+            total_plaid_connections_count: 6
+            plaid_non_oauth_authentication_attempts_count_7d: 9
+            email_change_count_90d: 6
+            plaid_connections_count_7d: 1
+            plaid_non_oauth_authentication_attempts_count_3d: 2
+            distinct_ip_addresses_count_7d: 7
+            distinct_user_agents_count_3d: 1
+            address_change_count_90d: 9
+            days_since_account_opening: 9
+            distinct_ip_addresses_count_3d: 4
+            email_change_count_28d: 5
+            address_change_count_28d: 4
         request_id: request_id
       properties:
         request_id:
@@ -70801,30 +71564,30 @@ components:
           days_since_first_plaid_connection: 0
           is_account_closed: true
           distinct_ip_addresses_count_90d: 1
-          distinct_user_agents_count_30d: 1
+          distinct_user_agents_count_30d: 7
           distinct_ip_addresses_count_30d: 1
-          distinct_user_agents_count_90d: 4
-          distinct_user_agents_count_7d: 7
-          phone_change_count_90d: 9
+          distinct_user_agents_count_90d: 1
+          distinct_user_agents_count_7d: 6
+          phone_change_count_90d: 8
           plaid_connections_count_30d: 5
           is_account_frozen_or_restricted: true
-          failed_plaid_non_oauth_authentication_attempts_count_30d: 2
-          failed_plaid_non_oauth_authentication_attempts_count_7d: 9
+          failed_plaid_non_oauth_authentication_attempts_count_30d: 3
+          failed_plaid_non_oauth_authentication_attempts_count_7d: 7
           phone_change_count_28d: 9
-          failed_plaid_non_oauth_authentication_attempts_count_3d: 2
-          days_since_account_creation: 6
-          plaid_non_oauth_authentication_attempts_count_30d: 4
-          total_plaid_connections_count: 1
-          plaid_non_oauth_authentication_attempts_count_7d: 3
-          email_change_count_90d: 8
-          plaid_connections_count_7d: 5
-          plaid_non_oauth_authentication_attempts_count_3d: 7
-          distinct_ip_addresses_count_7d: 1
-          distinct_user_agents_count_3d: 6
-          address_change_count_90d: 6
-          distinct_ip_addresses_count_3d: 7
-          email_change_count_28d: 9
-          address_change_count_28d: 5
+          failed_plaid_non_oauth_authentication_attempts_count_3d: 5
+          plaid_non_oauth_authentication_attempts_count_30d: 2
+          total_plaid_connections_count: 6
+          plaid_non_oauth_authentication_attempts_count_7d: 9
+          email_change_count_90d: 6
+          plaid_connections_count_7d: 1
+          plaid_non_oauth_authentication_attempts_count_3d: 2
+          distinct_ip_addresses_count_7d: 7
+          distinct_user_agents_count_3d: 1
+          address_change_count_90d: 9
+          days_since_account_opening: 9
+          distinct_ip_addresses_count_3d: 4
+          email_change_count_28d: 5
+          address_change_count_28d: 4
       properties:
         account_id:
           description: The account ID.
@@ -70849,38 +71612,34 @@ components:
         days_since_first_plaid_connection: 0
         is_account_closed: true
         distinct_ip_addresses_count_90d: 1
-        distinct_user_agents_count_30d: 1
+        distinct_user_agents_count_30d: 7
         distinct_ip_addresses_count_30d: 1
-        distinct_user_agents_count_90d: 4
-        distinct_user_agents_count_7d: 7
-        phone_change_count_90d: 9
+        distinct_user_agents_count_90d: 1
+        distinct_user_agents_count_7d: 6
+        phone_change_count_90d: 8
         plaid_connections_count_30d: 5
         is_account_frozen_or_restricted: true
-        failed_plaid_non_oauth_authentication_attempts_count_30d: 2
-        failed_plaid_non_oauth_authentication_attempts_count_7d: 9
+        failed_plaid_non_oauth_authentication_attempts_count_30d: 3
+        failed_plaid_non_oauth_authentication_attempts_count_7d: 7
         phone_change_count_28d: 9
-        failed_plaid_non_oauth_authentication_attempts_count_3d: 2
-        days_since_account_creation: 6
-        plaid_non_oauth_authentication_attempts_count_30d: 4
-        total_plaid_connections_count: 1
-        plaid_non_oauth_authentication_attempts_count_7d: 3
-        email_change_count_90d: 8
-        plaid_connections_count_7d: 5
-        plaid_non_oauth_authentication_attempts_count_3d: 7
-        distinct_ip_addresses_count_7d: 1
-        distinct_user_agents_count_3d: 6
-        address_change_count_90d: 6
-        distinct_ip_addresses_count_3d: 7
-        email_change_count_28d: 9
-        address_change_count_28d: 5
+        failed_plaid_non_oauth_authentication_attempts_count_3d: 5
+        plaid_non_oauth_authentication_attempts_count_30d: 2
+        total_plaid_connections_count: 6
+        plaid_non_oauth_authentication_attempts_count_7d: 9
+        email_change_count_90d: 6
+        plaid_connections_count_7d: 1
+        plaid_non_oauth_authentication_attempts_count_3d: 2
+        distinct_ip_addresses_count_7d: 7
+        distinct_user_agents_count_3d: 1
+        address_change_count_90d: 9
+        days_since_account_opening: 9
+        distinct_ip_addresses_count_3d: 4
+        email_change_count_28d: 5
+        address_change_count_28d: 4
       properties:
         days_since_first_plaid_connection:
           description: The number of days since the first time the Item was connected
             to an application via Plaid
-          nullable: true
-          type: integer
-        days_since_account_creation:
-          description: The age of the account as reported by the FI, when available.
           nullable: true
           type: integer
         is_account_closed:
@@ -71008,6 +71767,11 @@ components:
         phone_change_count_90d:
           description: The number of times the account's phone numbers on file have
             changed over the past 90 days
+          nullable: true
+          type: integer
+        days_since_account_opening:
+          description: The number of days since the bank account was opened, as reported
+            by the financial institution
           nullable: true
           type: integer
       title: BeaconAccountRiskEvaluateAccountAttributes
@@ -71957,18 +72721,22 @@ components:
       properties:
         street:
           description: The primary street portion of an address. If an address is
-            provided, this field will always be filled.
+            provided, this field will always be filled. A string with at least one
+            non-whitespace alphabetical character, with a max length of 80 characters.
           example: 123 Main St.
           title: Street
           type: string
         street2:
           description: Extra street information, like an apartment or suite number.
+            If provided, a string with at least one non-whitespace character, with
+            a max length of 20 characters.
           example: Unit 42
           nullable: true
           title: Street2
           type: string
         city:
-          description: City from the end user's address
+          description: City from the end user's address. A string with at least one
+            non-whitespace alphabetical character, with a max length of 100 characters."
           example: Pawnee
           title: CityName
           type: string
@@ -72483,7 +73251,8 @@ components:
       properties:
         value:
           description: Value of identity document value typed in by user. Alpha-numeric,
-            with all formatting characters stripped.
+            with all formatting characters stripped. For specific format requirements
+            by ID type, see [Hybrid Input Validation](https://plaid.com/docs/identity-verification/hybrid-input-validation/).
           example: "123456789"
           title: IDNumberValue
           type: string
@@ -72564,18 +73333,22 @@ components:
       properties:
         street:
           description: The primary street portion of an address. If an address is
-            provided, this field will always be filled.
+            provided, this field will always be filled. A string with at least one
+            non-whitespace alphabetical character, with a max length of 80 characters.
           example: 123 Main St.
           title: Street
           type: string
         street2:
           description: Extra street information, like an apartment or suite number.
+            If provided, a string with at least one non-whitespace character, with
+            a max length of 20 characters.
           example: Unit 42
           nullable: true
           title: Street2
           type: string
         city:
-          description: City from the end user's address
+          description: City from the end user's address. A string with at least one
+            non-whitespace alphabetical character, with a max length of 100 characters."
           example: Pawnee
           title: CityName
           type: string
@@ -72622,18 +73395,22 @@ components:
       properties:
         street:
           description: The primary street portion of an address. If an address is
-            provided, this field will always be filled.
+            provided, this field will always be filled. A string with at least one
+            non-whitespace alphabetical character, with a max length of 80 characters.
           example: 123 Main St.
           title: Street
           type: string
         street2:
           description: Extra street information, like an apartment or suite number.
+            If provided, a string with at least one non-whitespace character, with
+            a max length of 20 characters.
           example: Unit 42
           nullable: true
           title: Street2
           type: string
         city:
-          description: City from the end user's address
+          description: City from the end user's address. A string with at least one
+            non-whitespace alphabetical character, with a max length of 100 characters."
           example: Pawnee
           title: CityName
           type: string
@@ -72992,12 +73769,14 @@ components:
       - version
       type: object
     City:
-      description: City from the end user's address
+      description: City from the end user's address. A string with at least one non-whitespace
+        alphabetical character, with a max length of 100 characters."
       example: Pawnee
       title: CityName
       type: string
     CityNullable:
-      description: City from the end user's address
+      description: City from the end user's address. A string with at least one non-whitespace
+        alphabetical character, with a max length of 100 characters."
       example: Pawnee
       nullable: true
       title: CityName
@@ -74503,7 +75282,8 @@ components:
       type: string
     IDNumberValue:
       description: Value of identity document value typed in by user. Alpha-numeric,
-        with all formatting characters stripped.
+        with all formatting characters stripped. For specific format requirements
+        by ID type, see [Hybrid Input Validation](https://plaid.com/docs/identity-verification/hybrid-input-validation/).
       example: "123456789"
       title: IDNumberValue
       type: string
@@ -74815,18 +75595,22 @@ components:
       properties:
         street:
           description: The primary street portion of an address. If an address is
-            provided, this field will always be filled.
+            provided, this field will always be filled. A string with at least one
+            non-whitespace alphabetical character, with a max length of 80 characters.
           example: 123 Main St.
           title: Street
           type: string
         street2:
           description: Extra street information, like an apartment or suite number.
+            If provided, a string with at least one non-whitespace character, with
+            a max length of 20 characters.
           example: Unit 42
           nullable: true
           title: Street2
           type: string
         city:
-          description: City from the end user's address
+          description: City from the end user's address. A string with at least one
+            non-whitespace alphabetical character, with a max length of 100 characters."
           example: Pawnee
           nullable: true
           title: CityName
@@ -76822,19 +77606,23 @@ components:
       properties:
         street:
           description: The primary street portion of an address. If an address is
-            provided, this field will always be filled.
+            provided, this field will always be filled. A string with at least one
+            non-whitespace alphabetical character, with a max length of 80 characters.
           example: 123 Main St.
           nullable: true
           title: Street
           type: string
         street2:
           description: Extra street information, like an apartment or suite number.
+            If provided, a string with at least one non-whitespace character, with
+            a max length of 20 characters.
           example: Unit 42
           nullable: true
           title: Street2
           type: string
         city:
-          description: City from the end user's address
+          description: City from the end user's address. A string with at least one
+            non-whitespace alphabetical character, with a max length of 100 characters."
           example: Pawnee
           nullable: true
           title: CityName
@@ -78314,19 +79102,23 @@ components:
       type: string
     Street:
       description: The primary street portion of an address. If an address is provided,
-        this field will always be filled.
+        this field will always be filled. A string with at least one non-whitespace
+        alphabetical character, with a max length of 80 characters.
       example: 123 Main St.
       title: Street
       type: string
     Street2:
-      description: Extra street information, like an apartment or suite number.
+      description: Extra street information, like an apartment or suite number. If
+        provided, a string with at least one non-whitespace character, with a max
+        length of 20 characters.
       example: Unit 42
       nullable: true
       title: Street2
       type: string
     StreetNullable:
       description: The primary street portion of an address. If an address is provided,
-        this field will always be filled.
+        this field will always be filled. A string with at least one non-whitespace
+        alphabetical character, with a max length of 80 characters.
       example: 123 Main St.
       nullable: true
       title: Street
@@ -78485,19 +79277,23 @@ components:
       properties:
         street:
           description: The primary street portion of an address. If an address is
-            provided, this field will always be filled.
+            provided, this field will always be filled. A string with at least one
+            non-whitespace alphabetical character, with a max length of 80 characters.
           example: 123 Main St.
           nullable: true
           title: Street
           type: string
         street2:
           description: Extra street information, like an apartment or suite number.
+            If provided, a string with at least one non-whitespace character, with
+            a max length of 20 characters.
           example: Unit 42
           nullable: true
           title: Street2
           type: string
         city:
-          description: City from the end user's address
+          description: City from the end user's address. A string with at least one
+            non-whitespace alphabetical character, with a max length of 100 characters."
           example: Pawnee
           nullable: true
           title: CityName
@@ -78539,7 +79335,8 @@ components:
       properties:
         value:
           description: Value of identity document value typed in by user. Alpha-numeric,
-            with all formatting characters stripped.
+            with all formatting characters stripped. For specific format requirements
+            by ID type, see [Hybrid Input Validation](https://plaid.com/docs/identity-verification/hybrid-input-validation/).
           example: "123456789"
           title: IDNumberValue
           type: string
@@ -82029,7 +82826,6 @@ components:
           generated_time: 2000-01-23T04:56:07.000+00:00
           bank_income_summary:
             end_date: 2000-01-23
-            income_categories_count: 7
             historical_average_monthly_gross_income:
             - unofficial_currency_code: unofficial_currency_code
               amount: 9.301444243932576
@@ -82038,13 +82834,6 @@ components:
               amount: 9.301444243932576
               iso_currency_code: iso_currency_code
             income_transactions_count: 1
-            total_amounts:
-            - unofficial_currency_code: unofficial_currency_code
-              amount: 9.301444243932576
-              iso_currency_code: iso_currency_code
-            - unofficial_currency_code: unofficial_currency_code
-              amount: 9.301444243932576
-              iso_currency_code: iso_currency_code
             forecasted_average_monthly_income:
             - unofficial_currency_code: unofficial_currency_code
               amount: 9.301444243932576
@@ -82105,6 +82894,36 @@ components:
                 iso_currency_code: iso_currency_code
                 original_description: original_description
               start_date: 2000-01-23
+            income_sources_count: 4
+            historical_annual_gross_income:
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 9.301444243932576
+              iso_currency_code: iso_currency_code
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 9.301444243932576
+              iso_currency_code: iso_currency_code
+            income_categories_count: 7
+            forecasted_annual_income:
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 9.301444243932576
+              iso_currency_code: iso_currency_code
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 9.301444243932576
+              iso_currency_code: iso_currency_code
+            total_amounts:
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 9.301444243932576
+              iso_currency_code: iso_currency_code
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 9.301444243932576
+              iso_currency_code: iso_currency_code
+            historical_annual_income:
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 9.301444243932576
+              iso_currency_code: iso_currency_code
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 9.301444243932576
+              iso_currency_code: iso_currency_code
             historical_average_monthly_income:
             - unofficial_currency_code: unofficial_currency_code
               amount: 9.301444243932576
@@ -82113,7 +82932,6 @@ components:
               amount: 9.301444243932576
               iso_currency_code: iso_currency_code
             start_date: 2000-01-23
-            income_sources_count: 4
           days_requested: 0
         - bank_income_id: bank_income_id
           warnings:
@@ -82715,7 +83533,6 @@ components:
           generated_time: 2000-01-23T04:56:07.000+00:00
           bank_income_summary:
             end_date: 2000-01-23
-            income_categories_count: 7
             historical_average_monthly_gross_income:
             - unofficial_currency_code: unofficial_currency_code
               amount: 9.301444243932576
@@ -82724,13 +83541,6 @@ components:
               amount: 9.301444243932576
               iso_currency_code: iso_currency_code
             income_transactions_count: 1
-            total_amounts:
-            - unofficial_currency_code: unofficial_currency_code
-              amount: 9.301444243932576
-              iso_currency_code: iso_currency_code
-            - unofficial_currency_code: unofficial_currency_code
-              amount: 9.301444243932576
-              iso_currency_code: iso_currency_code
             forecasted_average_monthly_income:
             - unofficial_currency_code: unofficial_currency_code
               amount: 9.301444243932576
@@ -82791,6 +83601,36 @@ components:
                 iso_currency_code: iso_currency_code
                 original_description: original_description
               start_date: 2000-01-23
+            income_sources_count: 4
+            historical_annual_gross_income:
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 9.301444243932576
+              iso_currency_code: iso_currency_code
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 9.301444243932576
+              iso_currency_code: iso_currency_code
+            income_categories_count: 7
+            forecasted_annual_income:
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 9.301444243932576
+              iso_currency_code: iso_currency_code
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 9.301444243932576
+              iso_currency_code: iso_currency_code
+            total_amounts:
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 9.301444243932576
+              iso_currency_code: iso_currency_code
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 9.301444243932576
+              iso_currency_code: iso_currency_code
+            historical_annual_income:
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 9.301444243932576
+              iso_currency_code: iso_currency_code
+            - unofficial_currency_code: unofficial_currency_code
+              amount: 9.301444243932576
+              iso_currency_code: iso_currency_code
             historical_average_monthly_income:
             - unofficial_currency_code: unofficial_currency_code
               amount: 9.301444243932576
@@ -82799,7 +83639,6 @@ components:
               amount: 9.301444243932576
               iso_currency_code: iso_currency_code
             start_date: 2000-01-23
-            income_sources_count: 4
           days_requested: 0
         request_id: request_id
       properties:
@@ -83420,7 +84259,6 @@ components:
         generated_time: 2000-01-23T04:56:07.000+00:00
         bank_income_summary:
           end_date: 2000-01-23
-          income_categories_count: 7
           historical_average_monthly_gross_income:
           - unofficial_currency_code: unofficial_currency_code
             amount: 9.301444243932576
@@ -83429,13 +84267,6 @@ components:
             amount: 9.301444243932576
             iso_currency_code: iso_currency_code
           income_transactions_count: 1
-          total_amounts:
-          - unofficial_currency_code: unofficial_currency_code
-            amount: 9.301444243932576
-            iso_currency_code: iso_currency_code
-          - unofficial_currency_code: unofficial_currency_code
-            amount: 9.301444243932576
-            iso_currency_code: iso_currency_code
           forecasted_average_monthly_income:
           - unofficial_currency_code: unofficial_currency_code
             amount: 9.301444243932576
@@ -83496,6 +84327,36 @@ components:
               iso_currency_code: iso_currency_code
               original_description: original_description
             start_date: 2000-01-23
+          income_sources_count: 4
+          historical_annual_gross_income:
+          - unofficial_currency_code: unofficial_currency_code
+            amount: 9.301444243932576
+            iso_currency_code: iso_currency_code
+          - unofficial_currency_code: unofficial_currency_code
+            amount: 9.301444243932576
+            iso_currency_code: iso_currency_code
+          income_categories_count: 7
+          forecasted_annual_income:
+          - unofficial_currency_code: unofficial_currency_code
+            amount: 9.301444243932576
+            iso_currency_code: iso_currency_code
+          - unofficial_currency_code: unofficial_currency_code
+            amount: 9.301444243932576
+            iso_currency_code: iso_currency_code
+          total_amounts:
+          - unofficial_currency_code: unofficial_currency_code
+            amount: 9.301444243932576
+            iso_currency_code: iso_currency_code
+          - unofficial_currency_code: unofficial_currency_code
+            amount: 9.301444243932576
+            iso_currency_code: iso_currency_code
+          historical_annual_income:
+          - unofficial_currency_code: unofficial_currency_code
+            amount: 9.301444243932576
+            iso_currency_code: iso_currency_code
+          - unofficial_currency_code: unofficial_currency_code
+            amount: 9.301444243932576
+            iso_currency_code: iso_currency_code
           historical_average_monthly_income:
           - unofficial_currency_code: unofficial_currency_code
             amount: 9.301444243932576
@@ -83504,7 +84365,6 @@ components:
             amount: 9.301444243932576
             iso_currency_code: iso_currency_code
           start_date: 2000-01-23
-          income_sources_count: 4
         days_requested: 0
       properties:
         bank_income_id:
@@ -84162,7 +85022,6 @@ components:
         history of 730 days).
       example:
         end_date: 2000-01-23
-        income_categories_count: 7
         historical_average_monthly_gross_income:
         - unofficial_currency_code: unofficial_currency_code
           amount: 9.301444243932576
@@ -84171,13 +85030,6 @@ components:
           amount: 9.301444243932576
           iso_currency_code: iso_currency_code
         income_transactions_count: 1
-        total_amounts:
-        - unofficial_currency_code: unofficial_currency_code
-          amount: 9.301444243932576
-          iso_currency_code: iso_currency_code
-        - unofficial_currency_code: unofficial_currency_code
-          amount: 9.301444243932576
-          iso_currency_code: iso_currency_code
         forecasted_average_monthly_income:
         - unofficial_currency_code: unofficial_currency_code
           amount: 9.301444243932576
@@ -84238,6 +85090,36 @@ components:
             iso_currency_code: iso_currency_code
             original_description: original_description
           start_date: 2000-01-23
+        income_sources_count: 4
+        historical_annual_gross_income:
+        - unofficial_currency_code: unofficial_currency_code
+          amount: 9.301444243932576
+          iso_currency_code: iso_currency_code
+        - unofficial_currency_code: unofficial_currency_code
+          amount: 9.301444243932576
+          iso_currency_code: iso_currency_code
+        income_categories_count: 7
+        forecasted_annual_income:
+        - unofficial_currency_code: unofficial_currency_code
+          amount: 9.301444243932576
+          iso_currency_code: iso_currency_code
+        - unofficial_currency_code: unofficial_currency_code
+          amount: 9.301444243932576
+          iso_currency_code: iso_currency_code
+        total_amounts:
+        - unofficial_currency_code: unofficial_currency_code
+          amount: 9.301444243932576
+          iso_currency_code: iso_currency_code
+        - unofficial_currency_code: unofficial_currency_code
+          amount: 9.301444243932576
+          iso_currency_code: iso_currency_code
+        historical_annual_income:
+        - unofficial_currency_code: unofficial_currency_code
+          amount: 9.301444243932576
+          iso_currency_code: iso_currency_code
+        - unofficial_currency_code: unofficial_currency_code
+          amount: 9.301444243932576
+          iso_currency_code: iso_currency_code
         historical_average_monthly_income:
         - unofficial_currency_code: unofficial_currency_code
           amount: 9.301444243932576
@@ -84246,7 +85128,6 @@ components:
           amount: 9.301444243932576
           iso_currency_code: iso_currency_code
         start_date: 2000-01-23
-        income_sources_count: 4
       properties:
         total_amounts:
           description: |-
@@ -84294,6 +85175,26 @@ components:
           items:
             $ref: '#/components/schemas/CreditAmountWithCurrency'
           type: array
+        historical_annual_gross_income:
+          description: An estimate of the annual gross income based on the historical
+            net amount and income category for the income source(s).
+          items:
+            $ref: '#/components/schemas/CreditAmountWithCurrency'
+          type: array
+          x-hidden-from-docs: true
+        historical_annual_income:
+          description: The annual income amount estimated based on the historical
+            data for the income source(s).
+          items:
+            $ref: '#/components/schemas/CreditAmountWithCurrency'
+          type: array
+          x-hidden-from-docs: true
+        forecasted_annual_income:
+          description: The predicted average annual income amount for the income source(s).
+          items:
+            $ref: '#/components/schemas/CreditAmountWithCurrency'
+          type: array
+          x-hidden-from-docs: true
         historical_summary:
           items:
             $ref: '#/components/schemas/CraBankIncomeHistoricalSummary'
@@ -89581,6 +90482,199 @@ components:
       - MiddleName
       title: CreditFreddieMacIndividualName
       type: object
+    IdentityDocumentsUploadsGetRequest:
+      description: IdentityDocumentsUploadsGetRequest defines the request schema for
+        `/identity/documents/uploads/get`
+      example:
+        access_token: access_token
+        options:
+          account_ids:
+          - account_ids
+          - account_ids
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        access_token:
+          description: The access token associated with the Item data is being requested
+            for.
+          title: AccessToken
+          type: string
+        options:
+          $ref: '#/components/schemas/IdentityDocumentsUploadsGetRequestOptions'
+      required:
+      - access_token
+      title: IdentityDocumentsUploadsGetRequest
+      x-hidden-from-docs: true
+    IdentityDocumentsUploadsGetRequestOptions:
+      description: An optional object to filter `/identity/documents/uploads/get`
+        results.
+      example:
+        account_ids:
+        - account_ids
+        - account_ids
+      properties:
+        account_ids:
+          description: |-
+            A list of `account_ids` to retrieve for the Item.
+            Note: An error will be returned if a provided `account_id` is not associated with the Item.
+          items:
+            type: string
+          type: array
+      type: object
+    IdentityDocumentsUploadsGetResponse:
+      additionalProperties: true
+      description: IdentityDocumentsUploadsGetResponse defines the response schema
+        for `/identity/documents/uploads/get`
+      example:
+        item:
+          update_type: background
+          webhook: webhook
+          item_id: item_id
+          billed_products:
+          - null
+          - null
+          consent_expiration_time: 2000-01-23T04:56:07.000+00:00
+          error:
+            error_message: error_message
+            suggested_action: suggested_action
+            causes:
+            - ""
+            - ""
+            display_message: display_message
+            error_code: error_code
+            documentation_url: documentation_url
+            request_id: request_id
+            status: 0
+          consented_products:
+          - null
+          - null
+          available_products:
+          - null
+          - null
+          institution_id: institution_id
+          products:
+          - null
+          - null
+        accounts:
+        - null
+        - null
+        request_id: request_id
+      properties:
+        accounts:
+          description: The accounts for which Identity data has been requested
+          items:
+            $ref: '#/components/schemas/AccountIdentityDocumentUpload'
+          type: array
+        item:
+          $ref: '#/components/schemas/Item'
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - accounts
+      - item
+      - request_id
+      type: object
+    AccountIdentityDocumentUpload:
+      allOf:
+      - $ref: '#/components/schemas/AccountBase'
+      - $ref: '#/components/schemas/AccountIdentityDocumentUpload_allOf'
+      description: Identity information about an account
+      title: AccountIdentityDocumentUpload
+    IdentityDocumentUpload:
+      description: Document object with metadata of the uploaded document
+      properties:
+        document_id:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/IdentityDocumentUploadMetadata'
+        risk_insights:
+          $ref: '#/components/schemas/IdentityDocumentUploadRiskInsights'
+      title: IdentityDocumentUpload
+      type: object
+      x-hidden-from-docs: true
+    IdentityDocumentUploadMetadata:
+      additionalProperties: true
+      description: In closed beta. Object representing metadata pertaining to the
+        document.
+      properties:
+        document_type:
+          description: String enumeration of the submitted document type.
+          nullable: true
+          type: string
+        is_account_number_match:
+          description: Boolean field indicating if the uploaded document's account
+            number matches the account number we have on file
+          nullable: true
+          type: boolean
+        page_count:
+          nullable: true
+          type: integer
+        last_updated:
+          format: date-time
+          type: string
+        uploaded_at:
+          format: date-time
+          type: string
+      title: IdentityDocumentUploadMetadata
+      type: object
+      x-hidden-from-docs: true
+    IdentityDocumentUploadRiskInsights:
+      additionalProperties: true
+      description: In closed beta. Object representing fraud risk data of the document
+      properties:
+        risk_summary:
+          $ref: '#/components/schemas/IdentityDocumentUploadRiskSummary'
+        risk_signals:
+          description: an array of risk signals
+          items:
+            $ref: '#/components/schemas/IdentityDocumentUploadRiskSignal'
+          title: RiskSignals
+          type: array
+      title: IdentityDocumentUploadRiskInsights
+      type: object
+    IdentityDocumentUploadRiskSummary:
+      additionalProperties: true
+      description: Risk summary of an uploaded document
+      properties:
+        risk_score:
+          description: Integer value representing the risk score of the document
+          nullable: true
+          type: integer
+      title: IdentityDocumentUploadRiskSummary
+      type: object
+    IdentityDocumentUploadRiskSignal:
+      additionalProperties: true
+      description: Risk signals tied to the document
+      properties:
+        type:
+          nullable: true
+          type: string
+        has_fraud_risk:
+          nullable: true
+          type: boolean
+        signal_description:
+          nullable: true
+          type: string
+        page_number:
+          nullable: true
+          type: integer
+      title: IdentityDocumentUploadRiskSignal
+      type: object
     ItemGetRequest:
       description: ItemGetRequest defines the request schema for `/item/get`
       example:
@@ -90712,6 +91806,7 @@ components:
           p50_eod_balance_31d_to_60d: 7.933506881737151
           distinct_ip_addresses_count_7d: 0
           p50_eod_balance_61d_to_90d: 5.507386964179881
+          days_since_account_opening: 8
           distinct_ip_addresses_count_3d: 3
           p50_eod_balance_30d: 0.8774076871421566
           credit_transactions_count_90d: 0
@@ -91115,6 +92210,7 @@ components:
           p50_eod_balance_31d_to_60d: 7.933506881737151
           distinct_ip_addresses_count_7d: 0
           p50_eod_balance_61d_to_90d: 5.507386964179881
+          days_since_account_opening: 8
           distinct_ip_addresses_count_3d: 3
           p50_eod_balance_30d: 0.8774076871421566
           credit_transactions_count_90d: 0
@@ -91764,6 +92860,7 @@ components:
         p50_eod_balance_31d_to_60d: 7.933506881737151
         distinct_ip_addresses_count_7d: 0
         p50_eod_balance_61d_to_90d: 5.507386964179881
+        days_since_account_opening: 8
         distinct_ip_addresses_count_3d: 3
         p50_eod_balance_30d: 0.8774076871421566
         credit_transactions_count_90d: 0
@@ -92209,6 +93306,11 @@ components:
             the same bank account during Plaid authentication in the last 90 days
           nullable: true
           type: integer
+        days_since_account_opening:
+          description: The number of days since the bank account was opened, as reported
+            by the financial institution
+          nullable: true
+          type: integer
       title: SignalEvaluateCoreAttributes
       type: object
     StatementsListRequest:
@@ -92646,6 +93748,33 @@ components:
           format: double
           nullable: true
           type: number
+      type: object
+    AccountIdentityDocumentUpload_allOf:
+      properties:
+        owners:
+          description: Data returned by the financial institution about the account
+            owner or owners. Only returned by Identity or Assets endpoints. For business
+            accounts, the name reported may be either the name of the individual or
+            the name of the business, depending on the institution; detecting whether
+            the linked account is a business account is not currently supported. Multiple
+            owners on a single account will be represented in the same `owner` object,
+            not in multiple owner objects within the array. In API versions 2018-05-22
+            and earlier, the `owners` object is not returned, and instead identity
+            information is returned in the top level `identity` object. For more details,
+            see [Plaid API versioning](https://plaid.com/docs/api/versioning/#version-2019-05-29)
+          items:
+            $ref: '#/components/schemas/Owner'
+          type: array
+        documents:
+          description: An array of document with which the Identity data is derived
+            from.
+          items:
+            $ref: '#/components/schemas/IdentityDocumentUpload'
+          nullable: true
+          type: array
+          x-hidden-from-docs: true
+      required:
+      - owners
       type: object
   securitySchemes:
     clientId:
