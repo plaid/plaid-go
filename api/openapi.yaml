@@ -7,7 +7,7 @@ info:
     details.
   termsOfService: https://plaid.com/legal/
   title: The Plaid API
-  version: 2020-09-14_1.508.0
+  version: 2020-09-14_1.517.0
 servers:
 - description: Production
   url: https://production.plaid.com
@@ -1173,6 +1173,143 @@ paths:
       tags:
       - plaid
     x-plaid-business-unit-context: BUSINESS_UNIT_CRA
+  /cra/loans/applications/register:
+    post:
+      description: '`/cra/loans/applications/register` registers loan applications
+        and decisions.'
+      externalDocs:
+        url: /none/
+      operationId: craLoansApplicationsRegister
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CraLoansApplicationsRegisterRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    request_id: LhQf0THi8SH1yJm
+              schema:
+                $ref: '#/components/schemas/CraLoansApplicationsRegisterResponse'
+          description: OK
+      summary: Register loan applications and decisions.
+      tags:
+      - plaid
+    x-plaid-business-unit-context: BUSINESS_UNIT_CRA
+  /cra/loans/register:
+    post:
+      description: '`/cra/loans/register` registers a list of loans to their applicants.'
+      externalDocs:
+        url: /none/
+      operationId: craLoansRegister
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CRALoansRegisterRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    request_id: LhQf0THi8SH1yJm
+              schema:
+                $ref: '#/components/schemas/CraLoansRegisterResponse'
+          description: OK
+      summary: Register a list of loans to their applicants.
+      tags:
+      - plaid
+    x-plaid-business-unit-context: BUSINESS_UNIT_CRA
+  /cra/loans/update:
+    post:
+      description: '`/cra/loans/update` updates loan information such as the status
+        and payment history.'
+      externalDocs:
+        url: /none/
+      operationId: craLoansUpdate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CraLoansUpdateRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    request_id: LhQf0THi8SH1yJm
+              schema:
+                $ref: '#/components/schemas/CraLoansUpdateResponse'
+          description: OK
+      summary: Updates loan data.
+      tags:
+      - plaid
+    x-plaid-business-unit-context: BUSINESS_UNIT_CRA
+  /cra/loans/unregister:
+    post:
+      description: '`/cra/loans/unregister` indicates the loans have reached a final
+        status and no further updates are expected.'
+      externalDocs:
+        url: /none/
+      operationId: craLoansUnregister
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CraLoansUnregisterRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    request_id: LhQf0THi8SH1yJm
+              schema:
+                $ref: '#/components/schemas/CraLoanUnregisterResponse'
+          description: OK
+      summary: Unregister a list of loans.
+      tags:
+      - plaid
+    x-plaid-business-unit-context: BUSINESS_UNIT_CRA
+  /consumer_report/pdf/get:
+    post:
+      description: |-
+        Retrieves all existing CRB Bank Income and Base reports for the consumer in PDF format.
+
+        Response is PDF binary data. The `request_id` is returned in the `Plaid-Request-ID` header.
+      externalDocs:
+        url: /none/
+      operationId: consumerReportPdfGet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsumerReportPDFGetRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/pdf:
+              schema:
+                $ref: '#/components/schemas/ConsumerReportPDFGetResponse'
+          description: OK
+      summary: Retrieve a PDF Reports
+      tags:
+      - plaid
+    x-plaid-business-unit-context: BUSINESS_UNIT_CRA
   /statements/list:
     post:
       description: The `/statements/list` endpoint retrieves a list of all statements
@@ -1818,7 +1955,6 @@ paths:
         If changes to transactions are discovered after calling `/transactions/refresh`, Plaid will fire a webhook: for `/transactions/sync` users, [`SYNC_UPDATES_AVAILABLE`](https://plaid.com/docs/api/products/transactions/#sync_updates_available) will be fired if there are any transactions updated, added, or removed. For users of both `/transactions/sync` and `/transactions/get`, [`TRANSACTIONS_REMOVED`](https://plaid.com/docs/api/products/transactions/#transactions_removed) will be fired if any removed transactions are detected, and [`DEFAULT_UPDATE`](https://plaid.com/docs/api/products/transactions/#default_update) will be fired if any new transactions are detected. New transactions can be fetched by calling `/transactions/get` or `/transactions/sync`.
 
         Note that the `/transactions/refresh` endpoint is not supported for Capital One (`ins_128026`) and will result in a `PRODUCTS_NOT_SUPPORTED` error if called on an Item from that institution.
-
 
         As this endpoint triggers a synchronous request for fresh data, latency may be higher than for other Plaid endpoints (typically less than 10 seconds, but occasionally up to 30 seconds or more); if you encounter errors, you may find it necessary to adjust your timeout period when making requests.
 
@@ -2937,6 +3073,8 @@ paths:
         `NEW_ACCOUNTS_AVAILABLE`: Webhook to be fired for a given Sandbox Item created with Account Select v2.
 
         `AUTH_DATA_UPDATE`: Webhook to be fired for a given Sandbox Item created with Auth as an enabled product.
+
+        `SMS_MICRODEPOSITS_VERIFICATION`: Fired when a given same day micro-deposit item is verified via SMS verification.
 
         `LOGIN_REPAIRED`: Fired when an Item recovers from the `ITEM_LOGIN_REQUIRED` without the user going through update mode in your app.
 
@@ -5796,7 +5934,7 @@ paths:
 
         Versioning note: API versions 2019-05-29 and earlier use a different schema for the `numbers` object returned by this endpoint. For details, see [Plaid API versioning](https://plaid.com/docs/api/versioning/#version-2020-09-14).
       externalDocs:
-        url: /api/processors/#processorauthget
+        url: /api/processor-partners/#processorauthget
       operationId: processorAuthGet
       requestBody:
         content:
@@ -6245,6 +6383,7 @@ paths:
                       transaction_type: digital
                     removed:
                     - transaction_id: CmdQTNgems8BT1B7ibkoUXVPyAeehT3Tmzk0l
+                      account_id: BxBXxLj1m4HMXBm9WZZmCWVbPjX16EHwv99vp
                     next_cursor: tVUUL15lYQN5rBnfDIc1I8xudpGdIlw9nsgeXWvhOfkECvUeR663i3Dt1uf/94S8ASkitgLcIiOSqNwzzp+bh89kirazha5vuZHBb2ZA5NtCDkkV
                     has_more: false
                     request_id: 45QSn
@@ -7258,17 +7397,16 @@ paths:
     x-plaid-business-unit-context: BUSINESS_UNIT_PLAID
   /payment_initiation/payment/reverse:
     post:
-      description: |
-        Reverse a settled payment from a Plaid virtual account.
-
-        The original payment must be in a settled state to be refunded.
-        To refund partially, specify the amount as part of the request.
-        If the amount is not specified, the refund amount will be equal to all
-        of the remaining payment amount that has not been refunded yet.
-
-        The refund will go back to the source account that initiated the payment.
-        The original payment must have been initiated to a Plaid virtual account
-        so that this account can be used to initiate the refund.
+      description: "Reverse a settled payment from a Plaid virtual account.\n\nThe\
+        \ original payment must be in a settled state to be refunded.\nTo refund partially,\
+        \ specify the amount as part of the request.\nIf the amount is not specified,\
+        \ the refund amount will be equal to all\nof the remaining payment amount\
+        \ that has not been refunded yet.\n\nThe refund will go back to the source\
+        \ account that initiated the payment.\nThe original payment must have been\
+        \ initiated to a Plaid virtual account\nso that this account can be used to\
+        \ initiate the refund.\n\nProviding counterparty information such as date\
+        \ of birth and address increases \nthe likelihood of refund being successful\
+        \ without human intervention.\n"
       externalDocs:
         url: /api/products/payment-initiation/#payment_initiationpaymentreverse
       operationId: paymentInitiationPaymentReverse
@@ -9475,6 +9613,41 @@ paths:
                 $ref: '#/components/schemas/PlaidError'
           description: Error response
       summary: Create a transfer authorization
+      tags:
+      - plaid
+    x-plaid-business-unit-context: BUSINESS_UNIT_PLAID
+  /transfer/authorization/cancel:
+    post:
+      description: Use the `/transfer/authorization/cancel` endpoint to cancel a transfer
+        authorization. A transfer authorization is eligible for cancellation if it
+        has not yet been used to create a transfer.
+      externalDocs:
+        url: /api/products/transfer/initiating-transfers/#transferauthorizationcancel
+      operationId: transferAuthorizationCancel
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferAuthorizationCancelRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    request_id: saKrIBuEB9qJZno
+              schema:
+                $ref: '#/components/schemas/TransferAuthorizationCancelResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidError'
+          description: Error response
+      summary: Cancel a transfer authorization
       tags:
       - plaid
     x-plaid-business-unit-context: BUSINESS_UNIT_PLAID
@@ -13667,7 +13840,6 @@ paths:
                 $ref: '#/components/schemas/CreditRelayCreateResponse'
           description: OK
       summary: Create a relay token to share an Asset Report with a partner client
-        (beta)
       tags:
       - plaid
     x-plaid-business-unit-context: BUSINESS_UNIT_PLAID
@@ -13908,7 +14080,7 @@ paths:
                 $ref: '#/components/schemas/AssetReportGetResponse'
           description: OK
       summary: Retrieve the reports associated with a relay token that was shared
-        with you (beta)
+        with you
       tags:
       - plaid
     x-plaid-business-unit-context: BUSINESS_UNIT_PLAID
@@ -13972,7 +14144,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/CreditRelayRefreshResponse'
           description: OK
-      summary: Refresh a report of a relay token (beta)
+      summary: Refresh a report of a relay token
       tags:
       - plaid
     x-plaid-business-unit-context: BUSINESS_UNIT_PLAID
@@ -14005,7 +14177,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/CreditRelayRemoveResponse'
           description: OK
-      summary: Remove relay token (beta)
+      summary: Remove relay token
       tags:
       - plaid
     x-plaid-business-unit-context: BUSINESS_UNIT_PLAID
@@ -15363,7 +15535,7 @@ paths:
               examples:
                 example-1:
                   value:
-                    link_delivery_url: http://hosted.plaid.com/99ace160-3cf7-4e51-a083-403633425815
+                    link_delivery_url: http://secure.plaid.com/99ace160-3cf7-4e51-a083-403633425815
                     link_delivery_session_id: 99ace160-3cf7-4e51-a083-403633425815
                     request_id: 4ciYmmesdqSiUAB
               schema:
@@ -16951,8 +17123,9 @@ components:
           description: Specify an array of routing numbers to filter institutions.
             The response will only return institutions that match all of the routing
             numbers in the array. Routing number records used for this matching are
-            not comprehensive; failure to match a given routing number to an institution
-            does not mean that the institution is unsupported by Plaid.
+            generally comprehensive; however, failure to match a given routing number
+            to an institution does not necessarily mean that the institution is unsupported
+            by Plaid.
           items:
             type: string
           nullable: true
@@ -17003,6 +17176,7 @@ components:
               - null
             supports_sepa_instant: true
             supports_international_payments: true
+            supports_payment_consents: true
           institution_id: institution_id
           products:
           - null
@@ -17125,6 +17299,7 @@ components:
               - null
             supports_sepa_instant: true
             supports_international_payments: true
+            supports_payment_consents: true
           institution_id: institution_id
           products:
           - null
@@ -17403,6 +17578,7 @@ components:
               - null
             supports_sepa_instant: true
             supports_international_payments: true
+            supports_payment_consents: true
           institution_id: institution_id
           products:
           - null
@@ -17525,6 +17701,7 @@ components:
               - null
             supports_sepa_instant: true
             supports_international_payments: true
+            supports_payment_consents: true
           institution_id: institution_id
           products:
           - null
@@ -17743,6 +17920,7 @@ components:
               - null
             supports_sepa_instant: true
             supports_international_payments: true
+            supports_payment_consents: true
           institution_id: institution_id
           products:
           - null
@@ -18499,6 +18677,7 @@ components:
           - DEFAULT_UPDATE
           - NEW_ACCOUNTS_AVAILABLE
           - AUTH_DATA_UPDATE
+          - SMS_MICRODEPOSITS_VERIFICATION
           - AUTHORIZATION_GRANTED
           - RECURRING_TRANSACTIONS_UPDATE
           - SYNC_UPDATES_AVAILABLE
@@ -18626,7 +18805,7 @@ components:
       type: object
       x-hidden-from-docs: true
     AccountsBalanceGetRequestOptions:
-      description: An optional object to filter `/accounts/balance/get` results.
+      description: Optional parameters to `/accounts/balance/get`.
       example:
         account_ids:
         - account_ids
@@ -18645,7 +18824,7 @@ components:
           description: |-
             Timestamp in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format (`YYYY-MM-DDTHH:mm:ssZ`) indicating the oldest acceptable balance when making a request to `/accounts/balance/get`.
 
-            This field is only necessary when the institution is `ins_128026` (Capital One), *and* the account type is a non-depository account (such as a credit card) in which case a value must be provided or an `INVALID_REQUEST` error with the code of `INVALID_FIELD` will be returned. For all other institutions, as well as for depository accounts at Capital One (including all checking and savings accounts) this field is ignored.
+            This field is only necessary when the institution is `ins_128026` (Capital One), *and* one or more account types being requested is a non-depository account (such as a credit card) as Capital One does not provide real-time balance for non-depository accounts. In this case, a value must be provided or an `INVALID_REQUEST` error with the code of `INVALID_FIELD` will be returned. For all other institutions, as well as for depository accounts at Capital One (including all checking and savings accounts) this field is ignored and real-time balance information will be fetched.
 
             If this field is not ignored, and no acceptable balance is available, an `INVALID_RESULT` error with the code `LAST_UPDATED_DATETIME_OUT_OF_RANGE` will be returned.
           format: date-time
@@ -18656,7 +18835,7 @@ components:
       description: |-
         Timestamp in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format (`YYYY-MM-DDTHH:mm:ssZ`) indicating the oldest acceptable balance when making a request to `/accounts/balance/get`.
 
-        This field is only necessary when the institution is `ins_128026` (Capital One), *and* the account type is a non-depository account (such as a credit card) in which case a value must be provided or an `INVALID_REQUEST` error with the code of `INVALID_FIELD` will be returned. For all other institutions, as well as for depository accounts at Capital One (including all checking and savings accounts) this field is ignored.
+        This field is only necessary when the institution is `ins_128026` (Capital One), *and* one or more account types being requested is a non-depository account (such as a credit card) as Capital One does not provide real-time balance for non-depository accounts. In this case, a value must be provided or an `INVALID_REQUEST` error with the code of `INVALID_FIELD` will be returned. For all other institutions, as well as for depository accounts at Capital One (including all checking and savings accounts) this field is ignored and real-time balance information will be fetched.
 
         If this field is not ignored, and no acceptable balance is available, an `INVALID_RESULT` error with the code `LAST_UPDATED_DATETIME_OUT_OF_RANGE` will be returned.
       format: date-time
@@ -20121,7 +20300,7 @@ components:
       - processor_token
       type: object
     ProcessorBalanceGetRequestOptions:
-      description: An optional object to filter `/processor/balance/get` results.
+      description: Optional parameters to `/processor/balance/get`.
       example:
         min_last_updated_datetime: 2000-01-23T04:56:07.000+00:00
       properties:
@@ -20129,7 +20308,7 @@ components:
           description: |-
             Timestamp in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format (`YYYY-MM-DDTHH:mm:ssZ`) indicating the oldest acceptable balance when making a request to `/accounts/balance/get`.
 
-            This field is only necessary when the institution is `ins_128026` (Capital One), *and* the account type is a non-depository account (such as a credit card) in which case a value must be provided or an `INVALID_REQUEST` error with the code of `INVALID_FIELD` will be returned. For all other institutions, as well as for depository accounts at Capital One (including all checking and savings accounts) this field is ignored.
+            This field is only necessary when the institution is `ins_128026` (Capital One), *and* one or more account types being requested is a non-depository account (such as a credit card) as Capital One does not provide real-time balance for non-depository accounts. In this case, a value must be provided or an `INVALID_REQUEST` error with the code of `INVALID_FIELD` will be returned. For all other institutions, as well as for depository accounts at Capital One (including all checking and savings accounts) this field is ignored and real-time balance information will be fetched.
 
             If this field is not ignored, and no acceptable balance is available, an `INVALID_RESULT` error with the code `LAST_UPDATED_DATETIME_OUT_OF_RANGE` will be returned.
           format: date-time
@@ -20881,6 +21060,14 @@ components:
         for `/payment_initiation/payment/reverse`
       example:
         reference: reference
+        counterparty_address:
+          country: country
+          city: city
+          street:
+          - street
+          - street
+          postal_code: postal_code
+        counterparty_date_of_birth: 2000-01-23
         payment_id: payment_id
         idempotency_key: idempotency_key
         secret: secret
@@ -20918,6 +21105,14 @@ components:
           type: string
         amount:
           $ref: '#/components/schemas/PaymentAmountToRefund'
+        counterparty_date_of_birth:
+          description: The counterparty's birthdate, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
+            (YYYY-MM-DD) format.
+          format: date
+          nullable: true
+          type: string
+        counterparty_address:
+          $ref: '#/components/schemas/PaymentInitiationAddress'
       required:
       - idempotency_key
       - payment_id
@@ -23891,6 +24086,7 @@ components:
           - account_ids
           - account_ids
           is_document_upload: true
+        enable_multi_item_link: true
         country_codes:
         - null
         - null
@@ -23948,6 +24144,7 @@ components:
           - null
         transactions:
           days_requested: 679
+        financekit_supported: true
         access_token: access_token
         android_package_name: android_package_name
         identity_verification:
@@ -24189,7 +24386,7 @@ components:
             dashboard](https://dashboard.plaid.com/team/api). If initializing on Android,
             `android_package_name` must be specified instead and `redirect_uri` should
             be left blank. If using Hosted Link, the `redirect_uri` must be set to
-            `https://hosted.plaid.com/oauth/redirect`.
+            `https://secure.plaid.com/oauth/redirect`.
           type: string
         android_package_name:
           description: The name of your app's Android package. Required if using the
@@ -24253,6 +24450,16 @@ components:
           x-hidden-from-docs: true
         identity:
           $ref: '#/components/schemas/LinkTokenCreateIdentity'
+        financekit_supported:
+          description: If `true`, indicates that client supports linking FinanceKit
+            / AppleCard items. Defaults to `false`.
+          type: boolean
+          x-hidden-from-docs: true
+        enable_multi_item_link:
+          description: If `true`, enable linking multiple items in the same Link session.
+            Defaults to `false`.
+          type: boolean
+          x-hidden-from-docs: true
       required:
       - client_name
       - country_codes
@@ -24789,9 +24996,9 @@ components:
               Users will not be asked for their name when this field is provided.
         phone_number:
           description: The user's phone number in [E.164](https://en.wikipedia.org/wiki/E.164)
-            format. This field is optional, but required to enable the [returning
-            user experience](https://plaid.com/docs/link/returning-user). Can also
-            be used to prefill Link fields when used with Identity Verification.
+            format. If supplied, will be used when applicable to prefill phone number
+            fields in Link for the [returning user flow](https://www.plaid.com/docs/link/returning/user)
+            and the [Identity Verification flow](https://www.plaid.com/docs/identity-verification).
           type: string
         phone_number_verified_time:
           deprecated: true
@@ -24806,9 +25013,8 @@ components:
           type: string
           x-hidden-from-docs: true
         email_address:
-          description: The user's email address. This field is optional, but required
-            to enable the [pre-authenticated returning user flow](https://plaid.com/docs/link/returning-user/#pre-authenticated-rux).
-            Can also be used to prefill Link fields when used with Identity Verification.
+          description: The user's email address. Can be used to prefill Link fields
+            when used with [Identity Verification](https://www.plaid.com/docs/identity-verification).
           type: string
         email_address_verified_time:
           deprecated: true
@@ -25010,6 +25216,7 @@ components:
           institution_data:
             routing_number: routing_number
           redirect_uri: redirect_uri
+          user_token: user_token
           initial_products:
           - null
           - null
@@ -25018,7 +25225,26 @@ components:
         created_at: 2000-01-23T04:56:07.000+00:00
         expiration: 2000-01-23T04:56:07.000+00:00
         link_sessions:
-        - finished_at: 2000-01-23T04:56:07.000+00:00
+        - exit:
+            metadata:
+              institution:
+                name: name
+                institution_id: institution_id
+              link_session_id: link_session_id
+              request_id: request_id
+              status: status
+            error:
+              error_message: error_message
+              suggested_action: suggested_action
+              causes:
+              - ""
+              - ""
+              display_message: display_message
+              error_code: error_code
+              documentation_url: documentation_url
+              request_id: request_id
+              status: 0
+          finished_at: 2000-01-23T04:56:07.000+00:00
           on_success:
             public_token: public_token
             metadata:
@@ -25062,6 +25288,71 @@ components:
               documentation_url: documentation_url
               request_id: request_id
               status: 0
+          results:
+            bank_income_results:
+            - institution:
+                name: name
+                institution_id: institution_id
+              item_id: item_id
+            - institution:
+                name: name
+                institution_id: institution_id
+              item_id: item_id
+            document_income_results:
+              num_bank_statements_uploaded: 5
+              num_1099s_uploaded: 2
+              num_paystubs_uploaded: 1
+              num_w2s_uploaded: 5
+            item_add_results:
+            - institution:
+                name: name
+                institution_id: institution_id
+              public_token: public_token
+              accounts:
+              - class_type: class_type
+                subtype: subtype
+                name: name
+                id: id
+                type: type
+                verification_status: verification_status
+                mask: mask
+              - class_type: class_type
+                subtype: subtype
+                name: name
+                id: id
+                type: type
+                verification_status: verification_status
+                mask: mask
+            - institution:
+                name: name
+                institution_id: institution_id
+              public_token: public_token
+              accounts:
+              - class_type: class_type
+                subtype: subtype
+                name: name
+                id: id
+                type: type
+                verification_status: verification_status
+                mask: mask
+              - class_type: class_type
+                subtype: subtype
+                name: name
+                id: id
+                type: type
+                verification_status: verification_status
+                mask: mask
+            payroll_income_results:
+            - institution:
+                name: name
+                institution_id: institution_id
+              num_w2s_retrieved: 6
+              num_paystubs_retrieved: 0
+            - institution:
+                name: name
+                institution_id: institution_id
+              num_w2s_retrieved: 6
+              num_paystubs_retrieved: 0
           events:
           - event_id: event_id
             event_name: event_name
@@ -25101,7 +25392,26 @@ components:
               request_id: request_id
               view_name: view_name
             timestamp: timestamp
-        - finished_at: 2000-01-23T04:56:07.000+00:00
+        - exit:
+            metadata:
+              institution:
+                name: name
+                institution_id: institution_id
+              link_session_id: link_session_id
+              request_id: request_id
+              status: status
+            error:
+              error_message: error_message
+              suggested_action: suggested_action
+              causes:
+              - ""
+              - ""
+              display_message: display_message
+              error_code: error_code
+              documentation_url: documentation_url
+              request_id: request_id
+              status: 0
+          finished_at: 2000-01-23T04:56:07.000+00:00
           on_success:
             public_token: public_token
             metadata:
@@ -25145,6 +25455,71 @@ components:
               documentation_url: documentation_url
               request_id: request_id
               status: 0
+          results:
+            bank_income_results:
+            - institution:
+                name: name
+                institution_id: institution_id
+              item_id: item_id
+            - institution:
+                name: name
+                institution_id: institution_id
+              item_id: item_id
+            document_income_results:
+              num_bank_statements_uploaded: 5
+              num_1099s_uploaded: 2
+              num_paystubs_uploaded: 1
+              num_w2s_uploaded: 5
+            item_add_results:
+            - institution:
+                name: name
+                institution_id: institution_id
+              public_token: public_token
+              accounts:
+              - class_type: class_type
+                subtype: subtype
+                name: name
+                id: id
+                type: type
+                verification_status: verification_status
+                mask: mask
+              - class_type: class_type
+                subtype: subtype
+                name: name
+                id: id
+                type: type
+                verification_status: verification_status
+                mask: mask
+            - institution:
+                name: name
+                institution_id: institution_id
+              public_token: public_token
+              accounts:
+              - class_type: class_type
+                subtype: subtype
+                name: name
+                id: id
+                type: type
+                verification_status: verification_status
+                mask: mask
+              - class_type: class_type
+                subtype: subtype
+                name: name
+                id: id
+                type: type
+                verification_status: verification_status
+                mask: mask
+            payroll_income_results:
+            - institution:
+                name: name
+                institution_id: institution_id
+              num_w2s_retrieved: 6
+              num_paystubs_retrieved: 0
+            - institution:
+                name: name
+                institution_id: institution_id
+              num_w2s_retrieved: 6
+              num_paystubs_retrieved: 0
           events:
           - event_id: event_id
             event_name: event_name
@@ -25204,9 +25579,9 @@ components:
           type: string
         link_sessions:
           description: Information about Link sessions created using this `link_token`.
-            This field will only be present if your client is enabled for Hosted Link.
-            Session data will be provided for up to six hours after the session has
-            ended.
+            This field will only be present if your client is enabled for Backend
+            Handoff. Session data will be provided for up to six hours after the session
+            has ended.
           items:
             $ref: '#/components/schemas/LinkTokenGetSessionsResponse'
           type: array
@@ -25227,9 +25602,28 @@ components:
       type: object
     LinkTokenGetSessionsResponse:
       additionalProperties: true
-      description: An object containing information about a link session.Session data
-        will be provided for up to six hours after the session has ended.
+      description: An object containing information about a link session. Session
+        data will be provided for up to six hours after the session has ended.
       example:
+        exit:
+          metadata:
+            institution:
+              name: name
+              institution_id: institution_id
+            link_session_id: link_session_id
+            request_id: request_id
+            status: status
+          error:
+            error_message: error_message
+            suggested_action: suggested_action
+            causes:
+            - ""
+            - ""
+            display_message: display_message
+            error_code: error_code
+            documentation_url: documentation_url
+            request_id: request_id
+            status: 0
         finished_at: 2000-01-23T04:56:07.000+00:00
         on_success:
           public_token: public_token
@@ -25274,6 +25668,71 @@ components:
             documentation_url: documentation_url
             request_id: request_id
             status: 0
+        results:
+          bank_income_results:
+          - institution:
+              name: name
+              institution_id: institution_id
+            item_id: item_id
+          - institution:
+              name: name
+              institution_id: institution_id
+            item_id: item_id
+          document_income_results:
+            num_bank_statements_uploaded: 5
+            num_1099s_uploaded: 2
+            num_paystubs_uploaded: 1
+            num_w2s_uploaded: 5
+          item_add_results:
+          - institution:
+              name: name
+              institution_id: institution_id
+            public_token: public_token
+            accounts:
+            - class_type: class_type
+              subtype: subtype
+              name: name
+              id: id
+              type: type
+              verification_status: verification_status
+              mask: mask
+            - class_type: class_type
+              subtype: subtype
+              name: name
+              id: id
+              type: type
+              verification_status: verification_status
+              mask: mask
+          - institution:
+              name: name
+              institution_id: institution_id
+            public_token: public_token
+            accounts:
+            - class_type: class_type
+              subtype: subtype
+              name: name
+              id: id
+              type: type
+              verification_status: verification_status
+              mask: mask
+            - class_type: class_type
+              subtype: subtype
+              name: name
+              id: id
+              type: type
+              verification_status: verification_status
+              mask: mask
+          payroll_income_results:
+          - institution:
+              name: name
+              institution_id: institution_id
+            num_w2s_retrieved: 6
+            num_paystubs_retrieved: 0
+          - institution:
+              name: name
+              institution_id: institution_id
+            num_w2s_retrieved: 6
+            num_paystubs_retrieved: 0
         events:
         - event_id: event_id
           event_name: event_name
@@ -25331,16 +25790,216 @@ components:
         on_success:
           $ref: '#/components/schemas/LinkSessionSuccess'
         on_exit:
+          $ref: '#/components/schemas/LinkSessionExitDeprecated'
+        exit:
           $ref: '#/components/schemas/LinkSessionExit'
         events:
           description: List of customer-related Link events
           items:
             $ref: '#/components/schemas/LinkEvent'
           type: array
+        results:
+          $ref: '#/components/schemas/LinkSessionResults'
       required:
       - link_session_id
       type: object
+    LinkSessionResults:
+      additionalProperties: true
+      description: The set of results for a Link session.
+      example:
+        bank_income_results:
+        - institution:
+            name: name
+            institution_id: institution_id
+          item_id: item_id
+        - institution:
+            name: name
+            institution_id: institution_id
+          item_id: item_id
+        document_income_results:
+          num_bank_statements_uploaded: 5
+          num_1099s_uploaded: 2
+          num_paystubs_uploaded: 1
+          num_w2s_uploaded: 5
+        item_add_results:
+        - institution:
+            name: name
+            institution_id: institution_id
+          public_token: public_token
+          accounts:
+          - class_type: class_type
+            subtype: subtype
+            name: name
+            id: id
+            type: type
+            verification_status: verification_status
+            mask: mask
+          - class_type: class_type
+            subtype: subtype
+            name: name
+            id: id
+            type: type
+            verification_status: verification_status
+            mask: mask
+        - institution:
+            name: name
+            institution_id: institution_id
+          public_token: public_token
+          accounts:
+          - class_type: class_type
+            subtype: subtype
+            name: name
+            id: id
+            type: type
+            verification_status: verification_status
+            mask: mask
+          - class_type: class_type
+            subtype: subtype
+            name: name
+            id: id
+            type: type
+            verification_status: verification_status
+            mask: mask
+        payroll_income_results:
+        - institution:
+            name: name
+            institution_id: institution_id
+          num_w2s_retrieved: 6
+          num_paystubs_retrieved: 0
+        - institution:
+            name: name
+            institution_id: institution_id
+          num_w2s_retrieved: 6
+          num_paystubs_retrieved: 0
+      nullable: true
+      properties:
+        item_add_results:
+          description: The set of Item adds for the Link session.
+          items:
+            $ref: '#/components/schemas/LinkSessionItemAddResult'
+          type: array
+        bank_income_results:
+          description: The set of bank income verifications for the Link session.
+          items:
+            $ref: '#/components/schemas/LinkSessionBankIncomeResult'
+          type: array
+        payroll_income_results:
+          description: The set of payroll income verifications for the Link session.
+          items:
+            $ref: '#/components/schemas/LinkSessionPayrollIncomeResult'
+          type: array
+        document_income_results:
+          $ref: '#/components/schemas/CreditSessionDocumentIncomeResult'
+      type: object
+    LinkSessionItemAddResult:
+      additionalProperties: true
+      description: The details of an Item add in Link.
+      example:
+        institution:
+          name: name
+          institution_id: institution_id
+        public_token: public_token
+        accounts:
+        - class_type: class_type
+          subtype: subtype
+          name: name
+          id: id
+          type: type
+          verification_status: verification_status
+          mask: mask
+        - class_type: class_type
+          subtype: subtype
+          name: name
+          id: id
+          type: type
+          verification_status: verification_status
+          mask: mask
+      properties:
+        public_token:
+          description: Returned once a user has successfully linked their Item.
+          type: string
+        accounts:
+          description: A list of accounts attached to the connected Item. If Account
+            Select is enabled via the developer dashboard, `accounts` will only include
+            selected accounts.
+          items:
+            $ref: '#/components/schemas/LinkSessionSuccessMetadataAccount'
+          type: array
+        institution:
+          $ref: '#/components/schemas/LinkSessionSuccessMetadataInstitution'
+      required:
+      - accounts
+      - institution
+      - public_token
+      type: object
+    LinkSessionBankIncomeResult:
+      additionalProperties: true
+      description: The details of a bank income verification in Link.
+      example:
+        institution:
+          name: name
+          institution_id: institution_id
+        item_id: item_id
+      properties:
+        status:
+          $ref: '#/components/schemas/CreditSessionBankIncomeStatus'
+        item_id:
+          description: The Plaid Item ID. The `item_id` is always unique; linking
+            the same account at the same institution twice will result in two Items
+            with different `item_id` values. Like all Plaid identifiers, the `item_id`
+            is case-sensitive.
+          type: string
+        institution:
+          $ref: '#/components/schemas/LinkSessionSuccessMetadataInstitution'
+      required:
+      - institution
+      - item_id
+      - status
+      type: object
+    LinkSessionBankEmploymentResult:
+      additionalProperties: true
+      description: The details of a bank employment verification in Link.
+      properties:
+        status:
+          $ref: '#/components/schemas/CreditSessionBankEmploymentStatus'
+        item_id:
+          description: The Plaid Item ID. The `item_id` is always unique; linking
+            the same account at the same institution twice will result in two Items
+            with different `item_id` values. Like all Plaid identifiers, the `item_id`
+            is case-sensitive.
+          type: string
+        institution:
+          $ref: '#/components/schemas/LinkSessionSuccessMetadataInstitution'
+      required:
+      - institution
+      - item_id
+      - status
+      type: object
+    LinkSessionPayrollIncomeResult:
+      additionalProperties: true
+      description: The details of a digital payroll income verification in Link.
+      example:
+        institution:
+          name: name
+          institution_id: institution_id
+        num_w2s_retrieved: 6
+        num_paystubs_retrieved: 0
+      properties:
+        num_paystubs_retrieved:
+          description: The number of paystubs retrieved from a payroll provider.
+          type: integer
+        num_w2s_retrieved:
+          description: The number of W-2s retrieved from a payroll provider.
+          type: integer
+        institution:
+          $ref: '#/components/schemas/LinkSessionSuccessMetadataInstitution'
+      required:
+      - institution
+      - num_paystubs_retrieved
+      - num_w2s_retrieved
+      type: object
     LinkSessionSuccess:
+      deprecated: true
       description: An object representing an [onSuccess](https://plaid.com/docs/link/web/#onsuccess)
         callback from Link.
       example:
@@ -25467,7 +26126,7 @@ components:
           type: string
         verification_status:
           description: |
-            Indicates an Item's micro-deposit-based verification status. Possible values are:
+            Indicates an Item's micro-deposit-based verification or database verification status. Possible values are:
 
             `pending_automatic_verification`: The Item is pending automatic verification
 
@@ -25483,13 +26142,9 @@ components:
 
             `database_matched`: The Item has successfully been verified using Plaid's data sources.
 
-            `database_insights_pass`: The Item's account and routing number pair has been verified against a known account using Plaid's data sources and has strong signal for being valid. Note: Database Insights is currently a beta feature, please contact your account manager for more information.
+            `database_insights_pending`: The Database Insights result is pending and will be available upon Auth request. Note: Database Insights is currently a beta feature, please contact your account manager for more information.
 
-            `database_insights_pass_with_caution`: The Item's account and routing number pair was unable to be verified against a known account using Plaid's data sources. However, the routing number has strong signal for being valid, and the account number format is consistent with other known account numbers used with the given routing number. Note: Database Insights is currently a beta feature, please contact your account manager for more information.
-
-            `database_insights_fail`: The Item's account and routing number pair has been checked using Plaid's data sources and has signal for being invalid and/or has no signal for being valid. Note: Database Insights is currently a beta feature, please contact your account manager for more information.
-
-            `null`: micro-deposit-based verification is not being used for the Item.
+            `null`: Neither micro-deposit-based verification nor database verification are being used for the Item.
           nullable: true
           type: string
         class_type:
@@ -25511,6 +26166,40 @@ components:
       type: string
     LinkSessionExit:
       additionalProperties: true
+      description: An object representing an [onExit](https://plaid.com/docs/link/web/#onexit)
+        callback from Link.
+      example:
+        metadata:
+          institution:
+            name: name
+            institution_id: institution_id
+          link_session_id: link_session_id
+          request_id: request_id
+          status: status
+        error:
+          error_message: error_message
+          suggested_action: suggested_action
+          causes:
+          - ""
+          - ""
+          display_message: display_message
+          error_code: error_code
+          documentation_url: documentation_url
+          request_id: request_id
+          status: 0
+      nullable: true
+      properties:
+        error:
+          $ref: '#/components/schemas/PlaidError'
+        metadata:
+          $ref: '#/components/schemas/LinkSessionExitMetadata'
+      required:
+      - error
+      - metadata
+      type: object
+    LinkSessionExitDeprecated:
+      additionalProperties: true
+      deprecated: true
       description: An object representing an [onExit](https://plaid.com/docs/link/web/#onexit)
         callback from Link.
       example:
@@ -25639,6 +26328,7 @@ components:
         institution_data:
           routing_number: routing_number
         redirect_uri: redirect_uri
+        user_token: user_token
         initial_products:
         - null
         - null
@@ -25686,6 +26376,11 @@ components:
         client_name:
           description: The `client_name` specified in the `/link/token/create` call.
           nullable: true
+          type: string
+        user_token:
+          description: The user token associated with the User data is being requested
+            for.
+          title: UserToken
           type: string
       required:
       - client_name
@@ -25940,20 +26635,18 @@ components:
             \ The Item failed manual micro-deposit verification because the user exhausted\
             \ all 3 verification attempts. Users may retry by submitting their information\
             \ again through Link.\n\n`database_matched`: The Item has successfully\
-            \ been verified using Plaid's data sources. Note: Database Match is currently\
-            \ a beta feature, please contact your account manager for more information.\n\
-            \n`database_insights_pass`: The Item's ACH numbers have been verified\
-            \ using Plaid's data sources and have strong signal for being valid. Note:\
-            \ Database Insights is currently a beta feature, please contact your account\
-            \ manager for more information.\n\n`database_insights_pass_with_caution`:\
+            \ been verified using Plaid's data sources.\n\n`database_insights_pass`:\
             \ The Item's ACH numbers have been verified using Plaid's data sources\
-            \ and have some signal for being valid. Note: Database Insights is currently\
+            \ and have strong signal for being valid. Note: Database Insights is currently\
             \ a beta feature, please contact your account manager for more information.\n\
-            \n`database_insights_fail`:  The Item's ACH numbers have been verified\
-            \ using Plaid's data sources and have signal for being invalid and/or\
-            \ have no signal for being valid. Note: Database Insights is currently\
-            \ a beta feature, please contact your account manager for more information.\t\
-            \n\t"
+            \n`database_insights_pass_with_caution`: The Item's ACH numbers have been\
+            \ verified using Plaid's data sources and have some signal for being valid.\
+            \ Note: Database Insights is currently a beta feature, please contact\
+            \ your account manager for more information.\n\n`database_insights_fail`:\
+            \  The Item's ACH numbers have been verified using Plaid's data sources\
+            \ and have signal for being invalid and/or have no signal for being valid.\
+            \ Note: Database Insights is currently a beta feature, please contact\
+            \ your account manager for more information.\t\n\t"
           enum:
           - automatically_verified
           - pending_automatic_verification
@@ -26297,7 +26990,8 @@ components:
       type: object
       x-hidden-from-docs: true
     LinkDeliveryVerificationStatus:
-      description: Indicates an Item's micro-deposit-based verification status.
+      description: Indicates an Item's micro-deposit-based verification or database
+        verification status.
       enum:
       - automatically_verified
       - pending_automatic_verification
@@ -26306,9 +27000,7 @@ components:
       - verification_expired
       - verification_failed
       - database_matched
-      - database_insights_pass
-      - database_insights_pass_with_caution
-      - database_insights_fail
+      - database_insights_pending
       title: LinkDeliveryVerificationStatus
       type: string
     LinkDeliveryAccount:
@@ -26731,6 +27423,7 @@ components:
       title: TransactionsUpdateStatus
       type: string
     RemovedTransaction:
+      additionalProperties: true
       description: A representation of a removed transaction
       example:
         transaction_id: transaction_id
@@ -26742,6 +27435,9 @@ components:
         account_id:
           description: The ID of the account of the removed transaction.
           type: string
+      required:
+      - account_id
+      - transaction_id
       title: RemovedTransaction
       type: object
       x-examples: {}
@@ -27262,6 +27958,7 @@ components:
             - null
           supports_sepa_instant: true
           supports_international_payments: true
+          supports_payment_consents: true
         institution_id: institution_id
         products:
         - null
@@ -27410,9 +28107,9 @@ components:
           nullable: true
           type: string
         routing_numbers:
-          description: A partial list of routing numbers associated with the institution.
+          description: A list of routing numbers known to be associated with the institution.
             This list is provided for the purpose of looking up institutions by routing
-            number. It is not comprehensive and should never be used as a complete
+            number. It is generally comprehensive but is not guaranteed to be a complete
             list of routing numbers for an institution.
           items:
             type: string
@@ -30192,6 +30889,7 @@ components:
           - null
         supports_sepa_instant: true
         supports_international_payments: true
+        supports_payment_consents: true
       nullable: true
       properties:
         supports_international_payments:
@@ -30215,10 +30913,14 @@ components:
           type: boolean
         standing_order_metadata:
           $ref: '#/components/schemas/PaymentInitiationStandingOrderMetadata'
+        supports_payment_consents:
+          description: Indicates whether the institution supports payment consents.
+          type: boolean
       required:
       - maximum_payment_amount
       - standing_order_metadata
       - supports_international_payments
+      - supports_payment_consents
       - supports_refund_details
       - supports_sepa_instant
       title: PaymentInitiationMetadata
@@ -36282,7 +36984,7 @@ components:
 
         Any non-`null` value for an `approved` transfer indicates that the the authorization check could not be run and that you should perform your own risk assessment on the transfer. The code will indicate why the check could not be run. Possible values for an `approved` transfer are:
 
-        `MANUALLY_VERIFIED_ITEM` – Item created via same-day micro deposits, limited information available.
+        `MANUALLY_VERIFIED_ITEM` – Item created via a manual entry flow (i.e. Same Day Micro-deposit, Instant Micro-deposit, Database Insights, or Database Match), limited information available.
 
         `ITEM_LOGIN_REQUIRED` – Unable to collect the account information due to Item staleness. Can be resolved by using Link in [update mode](https://www.plaid.com/docs/link/update-mode).
 
@@ -36965,6 +37667,32 @@ components:
       - user
       title: TransferAuthorizationCreateRequest
       type: object
+    TransferAuthorizationCancelRequest:
+      description: Defines the request schema for `/transfer/authorization/cancel`
+      example:
+        authorization_id: authorization_id
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        authorization_id:
+          description: Plaid’s unique identifier for a transfer authorization.
+          title: TransferAuthorizationID
+          type: string
+      required:
+      - authorization_id
+      title: TransferAuthorizationCancelRequest
+      type: object
     TransferCapabilitiesGetRequest:
       description: Defines the request schema for `/transfer/capabilities/get`
       example:
@@ -37489,6 +38217,22 @@ components:
       - authorization
       - request_id
       title: TransferAuthorizationCreateResponse
+      type: object
+    TransferAuthorizationCancelResponse:
+      additionalProperties: true
+      description: Defines the response schema for `/transfer/authorization/cancel`
+      example:
+        request_id: request_id
+      properties:
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      title: TransferAuthorizationCancelResponse
       type: object
     TransferCapabilitiesGetResponse:
       additionalProperties: true
@@ -59071,6 +59815,7 @@ components:
     CreditRelayGetRequest:
       description: CreditRelayGetRequest defines the request schema for `/credit/relay/get`
       example:
+        include_insights: false
         secret: secret
         relay_token: relay_token
         client_id: client_id
@@ -59092,6 +59837,11 @@ components:
           type: string
         report_type:
           $ref: '#/components/schemas/ReportType'
+        include_insights:
+          default: false
+          description: '`true` if you would like to retrieve the Asset Report with
+            Insights, `false` otherwise. This field defaults to `false` if omitted.'
+          type: boolean
       required:
       - relay_token
       - report_type
@@ -64648,6 +65398,46 @@ components:
       title: LinkEventsWebhook
       type: object
       x-hidden-from-docs: true
+    ItemAddResultWebhook:
+      additionalProperties: true
+      description: Fired when a user successfully adds a Plaid item during a Link
+        session. Contains the public token for the item.
+      properties:
+        webhook_type:
+          description: '`LINK`'
+          type: string
+        webhook_code:
+          description: '`ITEM_ADD_RESULT`'
+          type: string
+        link_session_id:
+          description: The identifier for the Link session.
+          type: string
+        link_token:
+          description: The link token used to create the Link session.
+          type: string
+        public_token:
+          description: The public token corresponding to the item that was added.
+          type: string
+        environment:
+          $ref: '#/components/schemas/WebhookEnvironmentValues'
+      required:
+      - environment
+      - link_session_id
+      - link_token
+      - public_token
+      - webhook_code
+      - webhook_type
+      title: ItemAddResultWebhook
+      type: object
+      x-hidden-from-docs: true
+      x-examples:
+        example-1:
+          webhook_type: LINK
+          webhook_code: ITEM_ADD_RESULT
+          link_session_id: 356dbb28-7f98-44d1-8e6d-0cec580f3171
+          link_token: link-sandbox-af1a0311-da53-4636-b754-dd15cc058176
+          public_token: public-sandbox-b0e2c4ee-a763-4df5-bfe9-46a46bce993d
+          environment: sandbox
     LinkSessionFinishedWebhook:
       additionalProperties: true
       description: Contains the state of a completed Link session, along with the
@@ -64672,6 +65462,12 @@ components:
         public_token:
           description: The public token generated by the Link session.
           type: string
+        public_tokens:
+          description: The public tokens generated by the Link session.
+          items:
+            type: string
+          type: array
+          x-hidden-from-docs: true
         environment:
           $ref: '#/components/schemas/WebhookEnvironmentValues'
       required:
@@ -71506,6 +72302,7 @@ components:
             address_change_count_90d: 9
             days_since_account_opening: 9
             distinct_ip_addresses_count_3d: 4
+            days_since_first_observed_transaction: 6
             email_change_count_28d: 5
             address_change_count_28d: 4
         - account_id: account_id
@@ -71535,6 +72332,7 @@ components:
             address_change_count_90d: 9
             days_since_account_opening: 9
             distinct_ip_addresses_count_3d: 4
+            days_since_first_observed_transaction: 6
             email_change_count_28d: 5
             address_change_count_28d: 4
         request_id: request_id
@@ -71586,6 +72384,7 @@ components:
           address_change_count_90d: 9
           days_since_account_opening: 9
           distinct_ip_addresses_count_3d: 4
+          days_since_first_observed_transaction: 6
           email_change_count_28d: 5
           address_change_count_28d: 4
       properties:
@@ -71634,6 +72433,7 @@ components:
         address_change_count_90d: 9
         days_since_account_opening: 9
         distinct_ip_addresses_count_3d: 4
+        days_since_first_observed_transaction: 6
         email_change_count_28d: 5
         address_change_count_28d: 4
       properties:
@@ -71772,6 +72572,12 @@ components:
         days_since_account_opening:
           description: The number of days since the bank account was opened, as reported
             by the financial institution
+          nullable: true
+          type: integer
+        days_since_first_observed_transaction:
+          description: The number of days since the oldest transaction available to
+            Plaid for this account. This measure, combined with Plaid connection history,
+            can be used to infer the age of the account
           nullable: true
           type: integer
       title: BeaconAccountRiskEvaluateAccountAttributes
@@ -83656,6 +84462,36 @@ components:
       - request_id
       title: CraBankIncomeGetResponse
       type: object
+    ConsumerReportPDFGetRequest:
+      description: ConsumerReportPDFGetRequest defines the request schema for `/consumer_report/pdf/get`
+      example:
+        secret: secret
+        user_token: user_token
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        user_token:
+          description: The user token associated with the User data is being requested
+            for.
+          title: UserToken
+          type: string
+      required:
+      - user_token
+      type: object
+    ConsumerReportPDFGetResponse:
+      description: ConsumerReportPDFGetResponse defines the response schema for `/consumer_report/pdf/get`
+      format: binary
+      type: string
     CraBankIncome:
       description: The report of the Bank Income data for an end user.
       example:
@@ -86995,6 +87831,549 @@ components:
       required:
       - score
       - version
+      type: object
+    CraLoansApplicationsRegisterRequest:
+      description: CraLoansApplicationsRegisterRequest defines the request schema
+        for `/cra/loans/applications/register`.
+      example:
+        secret: secret
+        client_id: client_id
+        applications:
+        - decision_date: 2000-01-23
+          application_date: 2000-01-23
+          user_token: user_token
+          application_id: application_id
+        - decision_date: 2000-01-23
+          application_date: 2000-01-23
+          user_token: user_token
+          application_id: application_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        applications:
+          description: A list of loan applications to register.
+          items:
+            $ref: '#/components/schemas/CraLoanApplication'
+          type: array
+      required:
+      - applications
+      type: object
+    CraLoansApplicationsRegisterResponse:
+      additionalProperties: true
+      description: CraLoansApplicationsRegisterResponse defines the response schema
+        for `/cra/loans/applications/register`.
+      example:
+        request_id: request_id
+      properties:
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      title: CraLoansApplicationsRegisterResponse
+      type: object
+    CraLoanApplication:
+      additionalProperties: true
+      description: Contains loan application data.
+      example:
+        decision_date: 2000-01-23
+        application_date: 2000-01-23
+        user_token: user_token
+        application_id: application_id
+      properties:
+        user_token:
+          description: The user token for the user associated with the loan.
+          type: string
+        application_id:
+          description: "A unique identifier for the loan application. \nPersonally\
+            \ identifiable information, such as an email address or phone number,\
+            \ should not be used in the `application_id`."
+          type: string
+        type:
+          $ref: '#/components/schemas/CraLoanType'
+        decision:
+          $ref: '#/components/schemas/CraLoanApplicationDecision'
+        application_date:
+          description: The date the user applied for the loan. The date should be
+            in ISO 8601 format (YYYY-MM-DD).
+          format: date
+          type: string
+        decision_date:
+          description: The date when the loan application's decision was made. The
+            date should be in ISO 8601 format (YYYY-MM-DD).
+          format: date
+          type: string
+      required:
+      - application_id
+      - decision
+      - type
+      - user_token
+      type: object
+    CraLoanApplicationDecision:
+      description: The decision of the loan application.
+      enum:
+      - APPROVED
+      - DECLINED
+      - OTHER
+      type: string
+    CRALoansRegisterRequest:
+      description: CraLoansRegisterRequest defines the request schema for `/cra/loans/register`
+      example:
+        loans:
+        - application:
+            application_date: 2000-01-23
+            application_id: application_id
+          loan_amount: 0.8008281904610115
+          user_token: user_token
+          opened_date: 2000-01-23
+          loan_id: loan_id
+          opened_with_status:
+            date: 2000-01-23
+        - application:
+            application_date: 2000-01-23
+            application_id: application_id
+          loan_amount: 0.8008281904610115
+          user_token: user_token
+          opened_date: 2000-01-23
+          loan_id: loan_id
+          opened_with_status:
+            date: 2000-01-23
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        loans:
+          description: A list of loans to register.
+          items:
+            $ref: '#/components/schemas/CraLoanRegister'
+          type: array
+      required:
+      - loans
+      type: object
+    CraLoansRegisterResponse:
+      additionalProperties: true
+      description: CraLoansRegisterResponse defines the response schema for `/cra/loans/register`.
+      example:
+        request_id: request_id
+      properties:
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      title: CraLoansRegisterResponse
+      type: object
+    CraLoanRegister:
+      additionalProperties: true
+      description: Contains loan data to register.
+      example:
+        application:
+          application_date: 2000-01-23
+          application_id: application_id
+        loan_amount: 0.8008281904610115
+        user_token: user_token
+        opened_date: 2000-01-23
+        loan_id: loan_id
+        opened_with_status:
+          date: 2000-01-23
+      properties:
+        user_token:
+          description: The user token for the user associated with the loan.
+          type: string
+        loan_id:
+          description: "A unique identifier for the loan. \nPersonally identifiable\
+            \ information, such as an email address or phone number, should not be\
+            \ used in the `loan_id`."
+          type: string
+        type:
+          $ref: '#/components/schemas/CraLoanType'
+        payment_schedule:
+          $ref: '#/components/schemas/CraLoanPaymentSchedule'
+        opened_date:
+          description: The date the loan account was opened. The date should be in
+            ISO 8601 format (YYYY-MM-DD).
+          format: date
+          type: string
+        opened_with_status:
+          $ref: '#/components/schemas/CraLoanOpenedStatus'
+        loan_amount:
+          description: The total amount of the approved loan.
+          type: number
+        application:
+          $ref: '#/components/schemas/CraLoanRegisterApplication'
+      required:
+      - loan_id
+      - opened_date
+      - opened_with_status
+      - payment_schedule
+      - type
+      - user_token
+      type: object
+    CraLoanRegisterApplication:
+      additionalProperties: true
+      description: Contains loan application data to register.
+      example:
+        application_date: 2000-01-23
+        application_id: application_id
+      properties:
+        application_id:
+          description: "A unique identifier for the loan application. \nPersonally\
+            \ identifiable information, such as an email address or phone number,\
+            \ should not be used in the `application_id`."
+          type: string
+        application_date:
+          description: The date the user applied for the loan. The date should be
+            in ISO 8601 format (YYYY-MM-DD).
+          format: date
+          type: string
+      type: object
+    CraLoansUpdateRequest:
+      description: CraLoansUpdateRequest defines the request schema for `/cra/loans/update`
+      example:
+        loans:
+        - status_history:
+          - date: 2000-01-23
+          - date: 2000-01-23
+          loan_id: loan_id
+          payment_history:
+          - period: 0
+            due_date: 2000-01-23
+            days_past_due: 6
+            balance_remaining: 5.962133916683182
+            amount_past_due: 1.4658129805029452
+          - period: 0
+            due_date: 2000-01-23
+            days_past_due: 6
+            balance_remaining: 5.962133916683182
+            amount_past_due: 1.4658129805029452
+        - status_history:
+          - date: 2000-01-23
+          - date: 2000-01-23
+          loan_id: loan_id
+          payment_history:
+          - period: 0
+            due_date: 2000-01-23
+            days_past_due: 6
+            balance_remaining: 5.962133916683182
+            amount_past_due: 1.4658129805029452
+          - period: 0
+            due_date: 2000-01-23
+            days_past_due: 6
+            balance_remaining: 5.962133916683182
+            amount_past_due: 1.4658129805029452
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        loans:
+          description: A list of loans to update.
+          items:
+            $ref: '#/components/schemas/CraLoanUpdate'
+          type: array
+      required:
+      - loans
+      type: object
+    CraLoansUpdateResponse:
+      additionalProperties: true
+      description: CraLoansUpdateResponse defines the response schema for `/cra/loans/update`.
+      example:
+        request_id: request_id
+      properties:
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      title: CraLoansUpdateResponse
+      type: object
+    CraLoanUpdate:
+      additionalProperties: true
+      description: Contains loan data to update.
+      example:
+        status_history:
+        - date: 2000-01-23
+        - date: 2000-01-23
+        loan_id: loan_id
+        payment_history:
+        - period: 0
+          due_date: 2000-01-23
+          days_past_due: 6
+          balance_remaining: 5.962133916683182
+          amount_past_due: 1.4658129805029452
+        - period: 0
+          due_date: 2000-01-23
+          days_past_due: 6
+          balance_remaining: 5.962133916683182
+          amount_past_due: 1.4658129805029452
+      properties:
+        loan_id:
+          description: "A unique identifier for the loan. \nPersonally identifiable\
+            \ information, such as an email address or phone number, should not be\
+            \ used in the `loan_id`."
+          type: string
+        status_history:
+          description: A list of status update history of the loan.
+          items:
+            $ref: '#/components/schemas/CraLoanStatusHistoryUpdate'
+          type: array
+        payment_history:
+          description: The updates to the payment history for the loan.
+          items:
+            $ref: '#/components/schemas/CraLoanPaymentHistory'
+          type: array
+      type: object
+    CraLoanStatusHistoryUpdate:
+      additionalProperties: true
+      description: Contains the status and date of an update to the loan.
+      example:
+        date: 2000-01-23
+      properties:
+        status:
+          $ref: '#/components/schemas/CraLoanStatus'
+        date:
+          description: The effective date for the status of the loan. The date should
+            be in ISO 8601 format (YYYY-MM-DD).
+          format: date
+          type: string
+      required:
+      - date
+      - status
+      type: object
+    CraLoanPaymentHistory:
+      additionalProperties: true
+      description: Contains the payment information for a loan payment period.
+      example:
+        period: 0
+        due_date: 2000-01-23
+        days_past_due: 6
+        balance_remaining: 5.962133916683182
+        amount_past_due: 1.4658129805029452
+      properties:
+        period:
+          description: |-
+            The index to identify the loan's payment period, starting from 1.
+            For example:
+              1 means the period between the loan's opening date and the 1st payment due date.
+              2 means the period between the loan's 1st payment due date and 2nd payment due date.
+          type: integer
+        due_date:
+          description: The payment due date or end date of the payment period. The
+            date should be in ISO 8601 format (YYYY-MM-DD).
+          format: date
+          type: string
+        days_past_due:
+          description: |-
+            The number of days the loan was delinquent at the end of the pay period.
+            If specified, should be greater of equal to 0.
+          type: integer
+        amount_past_due:
+          description: The amount past due or the charge-off amount of the loan at
+            the end of the payment period.
+          type: number
+        balance_remaining:
+          description: The balance remaining on the loan at the end of the payment
+            period.
+          type: number
+      required:
+      - days_past_due
+      - due_date
+      - period
+      type: object
+    CraLoansUnregisterRequest:
+      description: CraLoansUnregisterRequest defines the request schema for `/cra/loans/unregister`
+      example:
+        loans:
+        - closed_with_status:
+            date: 2000-01-23
+          loan_id: loan_id
+        - closed_with_status:
+            date: 2000-01-23
+          loan_id: loan_id
+        secret: secret
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        loans:
+          description: A list of loans to unregister.
+          items:
+            $ref: '#/components/schemas/CraLoanUnregister'
+          type: array
+      required:
+      - loans
+      type: object
+    CraLoanUnregisterResponse:
+      additionalProperties: true
+      description: CraLoanUnregisterResponse defines the response schema for `/cra/loans/unregister`.
+      example:
+        request_id: request_id
+      properties:
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      title: CraLoanUnregisterResponse
+      type: object
+    CraLoanUnregister:
+      additionalProperties: true
+      description: Contains loan data for the loan being unregistered.
+      example:
+        closed_with_status:
+          date: 2000-01-23
+        loan_id: loan_id
+      properties:
+        loan_id:
+          description: "A unique identifier for the loan. \nPersonally identifiable\
+            \ information, such as an email address or phone number, should not be\
+            \ used in the `loan_id`."
+          type: string
+        closed_with_status:
+          $ref: '#/components/schemas/CraLoanClosedStatus'
+      required:
+      - closed_with_status
+      - loan_id
+      type: object
+    CraLoanType:
+      description: The type of loan the user applied for.
+      enum:
+      - PERSONAL
+      - CREDIT_CARD
+      - BUSINESS
+      - MORTGAGE
+      - AUTO
+      - PAYDAY
+      - STUDENT
+      - HOME_EQUITY
+      - OTHER
+      type: string
+    CraLoanPaymentSchedule:
+      description: |-
+        The frequency of a loan's payment schedule.
+        `BIWEEKLY` represents one payment every two weeks.
+      enum:
+      - DAILY
+      - WEEKLY
+      - BIWEEKLY
+      - MONTHLY
+      - QUARTERLY
+      - ANNUALLY
+      - OTHER
+      type: string
+    CraLoanStatus:
+      description: The status of the loan.
+      enum:
+      - APPROVED
+      - DECLINED
+      - BOOKED
+      - CURRENT
+      - DELINQUENT
+      - DEFAULT
+      - CHARGED_OFF
+      - TRANSFERRED
+      - PAID_OFF
+      - OTHER
+      type: string
+    CraLoanStatusEffectiveDate:
+      description: The effective date for the status of the loan. The date should
+        be in ISO 8601 format (YYYY-MM-DD).
+      format: date
+      type: string
+    CraLoanUserToken:
+      description: The user token for the user associated with the loan.
+      type: string
+    CraLoanApplicationID:
+      description: "A unique identifier for the loan application. \nPersonally identifiable\
+        \ information, such as an email address or phone number, should not be used\
+        \ in the `application_id`."
+      type: string
+    CraLoanID:
+      description: "A unique identifier for the loan. \nPersonally identifiable information,\
+        \ such as an email address or phone number, should not be used in the `loan_id`."
+      type: string
+    CraLoanOpenedStatus:
+      additionalProperties: true
+      description: Contains the status and date information of the loan when registering.
+      example:
+        date: 2000-01-23
+      properties:
+        status:
+          $ref: '#/components/schemas/CraLoanStatus'
+        date:
+          description: The effective date for the status of the loan. The date should
+            be in ISO 8601 format (YYYY-MM-DD).
+          format: date
+          type: string
+      required:
+      - date
+      - status
+      type: object
+    CraLoanClosedStatus:
+      additionalProperties: true
+      description: Contains the status and date information of the loan when unregistering.
+      example:
+        date: 2000-01-23
+      properties:
+        status:
+          $ref: '#/components/schemas/CraLoanStatus'
+        date:
+          description: The effective date for the status of the loan. The date should
+            be in ISO 8601 format (YYYY-MM-DD).
+          format: date
+          type: string
+      required:
+      - date
+      - status
       type: object
     AssetReportFreddieGetRequest:
       additionalProperties: true
@@ -91697,15 +93076,15 @@ components:
         device:
           $ref: '#/components/schemas/SignalDevice'
         risk_profile_key:
-          description: The name of the risk profile to use for this transaction. A
-            risk profile can be configured using via the Plaid Dashboard. If not provided,
-            no risk profile will be used. This feature is currently in closed beta;
-            to request access, contact your account manager.
-          maxLength: 32
+          description: The key of the risk profile to use for this transaction. You
+            can configure a risk profile using the Signal dashboard located within
+            the Plaid Dashboard. If not provided, no risk profile will be used. This
+            feature is currently in closed beta; to request access, contact your account
+            manager.
+          maxLength: 64
           minLength: 1
           nullable: true
           type: string
-          x-hidden-from-docs: true
       required:
       - access_token
       - account_id
@@ -92720,14 +94099,15 @@ components:
       nullable: true
       properties:
         key:
-          description: The name of the risk profile used for this transaction.
+          description: The key of the risk profile used for this transaction.
           type: string
         outcome:
-          description: The name of the evaluated outcome for this transaction.
+          description: The evaluated outcome for this transaction. You can configure
+            a list of outcomes, such as "accept", "review", and "decline" using the
+            Signal dashboard located within the Plaid Dashboard.
           type: string
       title: SignalEvaluateRiskProfile
       type: object
-      x-hidden-from-docs: true
     SignalDecisionOutcome:
       description: |
         The payment decision from the risk assessment.
