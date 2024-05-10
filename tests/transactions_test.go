@@ -6,8 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/plaid/plaid-go/v24/plaid"
+	"github.com/plaid/plaid-go/v25/plaid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestTransactionsGet(t *testing.T) {
@@ -26,7 +27,7 @@ func TestTransactionsGet(t *testing.T) {
 
 	transactionsResp, err := pollForTransactionsGet(t, ctx, testClient, request)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, transactionsResp.Accounts)
 	assert.NotNil(t, transactionsResp.Transactions)
 }
@@ -52,7 +53,7 @@ func TestTransactionsGetWithOptions(t *testing.T) {
 
 	transactionsResp, err := pollForTransactionsGet(t, ctx, testClient, request)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, transactionsResp.Accounts)
 	assert.NotNil(t, transactionsResp.Transactions)
 
