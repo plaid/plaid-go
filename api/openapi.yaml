@@ -7,12 +7,10 @@ info:
     details.
   termsOfService: https://plaid.com/legal/
   title: The Plaid API
-  version: 2020-09-14_1.525.1
+  version: 2020-09-14_1.534.3
 servers:
 - description: Production
   url: https://production.plaid.com
-- description: Development
-  url: https://development.plaid.com
 - description: Sandbox
   url: https://sandbox.plaid.com
 security:
@@ -1677,7 +1675,7 @@ paths:
         report (if it exists) followed by the most recent Base Report (if it exists)
         in PDF format'
       externalDocs:
-        url: /none/
+        url: /check/api/#cracheck_reportpdfget
       operationId: craCheckReportPdfGet
       requestBody:
         content:
@@ -1855,6 +1853,53 @@ paths:
                 $ref: '#/components/schemas/PlaidError'
           description: Error response
       summary: Retrieve cash flow insights from partners
+      tags:
+      - plaid
+    x-plaid-business-unit-context: BUSINESS_UNIT_CRA
+  /cra/check_report/network_insights/get:
+    post:
+      description: |-
+        This endpoint allows you to retrieve the Network Attributes product for your user. You should call this endpoint after you've received the `CHECK_REPORT_READY` webhook, either after the Link session for the user or after calling `/cra/check_report/create`. If the most recent consumer report for the user doesn’t have sufficient data to generate the report, or the consumer report has expired, you will receive an error indicating that you should create a new consumer report by calling `/cra/check_report/create`.
+
+        If you did not initialize Link with the `cra_network_attributes` product or have generated a report using `/cra/check_report/create`, we will generate the attributes when you call this endpoint.
+      externalDocs:
+        url: /check/api/#cracheck_reportnetwork_attributesget
+      operationId: craCheckReportNetworkAttributesGet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CraCheckReportNetworkAttributesGetRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    request_id: LhQf0THi8SH1yJm
+                    report:
+                      report_id: abc123
+                      generated_time: 2022-01-31T22:47:53Z
+                      network_attributes:
+                        plaid_conn_user_lifetime__lending_count: 5
+                        plaid_conn_user_lifetime__personal_lending_flag: true
+                        plaid_conn_user_lifetime__cash_advance_primary_count: 0
+                      items:
+                      - institution_id: ins_0
+                        institution_name: Plaid Bank
+                        item_id: ABC123
+              schema:
+                $ref: '#/components/schemas/CraCheckReportNetworkAttributesGetResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidError'
+          description: Error response
+      summary: Retrieve network attributes for the user
       tags:
       - plaid
     x-plaid-business-unit-context: BUSINESS_UNIT_CRA
@@ -2301,11 +2346,11 @@ paths:
     x-plaid-business-unit-context: BUSINESS_UNIT_PLAID
   /user_account/session/get:
     post:
-      description: Returns user permissioned account data including identity and item
+      description: Returns user permissioned account data including identity and Item
         access tokens.
       externalDocs:
-        url: /api/user_account/#sessionget
-      operationId: sessionGet
+        url: /api/products/layer/#user_accountsessionget
+      operationId: userAccountSessionGet
       requestBody:
         content:
           application/json:
@@ -3829,7 +3874,7 @@ paths:
 
         `ERROR`: Assets webhook to be fired when asset report generation has failed. If the Item does not support Assets, a `SANDBOX_PRODUCT_NOT_ENABLED` error will result.
 
-        Note that this endpoint is provided for developer ease-of-use and is not required for testing webhooks; webhooks will also fire in Sandbox under the same conditions that they would in Production or Development (except for webhooks of type `TRANSFER`).
+        Note that this endpoint is provided for developer ease-of-use and is not required for testing webhooks; webhooks will also fire in Sandbox under the same conditions that they would in Production (except for webhooks of type `TRANSFER`).
       externalDocs:
         url: /api/sandbox/#sandboxitemfire_webhook
       operationId: sandboxItemFireWebhook
@@ -6556,9 +6601,9 @@ paths:
   /beacon/user/update:
     post:
       description: |-
-        Update the identity data for a Beacon User in your Beacon Program.
+        Update the identity data for a Beacon User in your Beacon Program or add new accounts to the Beacon User.
 
-        Similar to `/beacon/user/create`, several checks are performed immediately when you submit a change to `/beacon/user/update`:
+        Similar to `/beacon/user/create`, several checks are performed immediately when you submit an identity data change to `/beacon/user/update`:
 
           - The user's updated PII is searched against all other users within the Beacon Program you specified. If a match is found that violates your program's "Duplicate Information Filtering" settings, the user will be returned with a status of `pending_review`.
 
@@ -6776,6 +6821,73 @@ paths:
                 $ref: '#/components/schemas/BeaconUserHistoryListResponse'
           description: OK
       summary: List a Beacon User's history
+      tags:
+      - plaid
+    x-plaid-business-unit-context: BUSINESS_UNIT_PLAID
+  /beacon/user/account_insights/get:
+    post:
+      description: Get Account Insights for all Accounts linked to this Beacon User.
+        The insights for each account are computed based on the information that was
+        last retrieved from the financial institution.
+      externalDocs:
+        url: /api/products/beacon/#beaconuseraccount_insightsget
+      operationId: beaconUserAccountInsightsGet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeaconUserAccountInsightsGetRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    beacon_user_id: becusr_42cF1MNo42r9Xj
+                    created_at: 2020-07-24T03:26:02Z
+                    updated_at: 2020-07-24T03:26:02Z
+                    bank_account_insights:
+                      item_id: 515cd85321d3649aecddc015
+                      accounts:
+                      - account_id: blgvvBlXw3cq5GMPwqB6s6q4dLKB9WcVqGDGo
+                        type: depository
+                        subtype: checking
+                        attributes:
+                          days_since_first_plaid_connection: 1
+                          is_account_closed: false
+                          is_account_frozen_or_restricted: false
+                          total_plaid_connections_count: 1
+                          plaid_connections_count_7d: 1
+                          plaid_connections_count_30d: 1
+                          failed_plaid_non_oauth_authentication_attempts_count_3d: 1
+                          plaid_non_oauth_authentication_attempts_count_3d: 1
+                          failed_plaid_non_oauth_authentication_attempts_count_7d: 1
+                          plaid_non_oauth_authentication_attempts_count_7d: 1
+                          failed_plaid_non_oauth_authentication_attempts_count_30d: 1
+                          plaid_non_oauth_authentication_attempts_count_30d: 1
+                          distinct_ip_addresses_count_3d: 1
+                          distinct_ip_addresses_count_7d: 1
+                          distinct_ip_addresses_count_30d: 1
+                          distinct_ip_addresses_count_90d: 1
+                          distinct_user_agents_count_3d: 1
+                          distinct_user_agents_count_7d: 1
+                          distinct_user_agents_count_30d: 1
+                          distinct_user_agents_count_90d: 1
+                          address_change_count_28d: 1
+                          email_change_count_28d: 2
+                          phone_change_count_28d: 1
+                          address_change_count_90d: 3
+                          email_change_count_90d: 4
+                          phone_change_count_90d: 2
+                          days_since_account_opening: 365
+                          days_since_first_observed_transaction: 180
+                    request_id: saKrIBuEB9qJZng
+              schema:
+                $ref: '#/components/schemas/BeaconUserAccountInsightsGetResponse'
+          description: OK
+      summary: Get Account Insights for a Beacon User
       tags:
       - plaid
     x-plaid-business-unit-context: BUSINESS_UNIT_PLAID
@@ -7960,7 +8072,7 @@ paths:
 
         You can use the `/item/access_token/invalidate` endpoint to rotate the `access_token` associated with an Item. The endpoint returns a new `access_token` and immediately invalidates the previous `access_token`.
       externalDocs:
-        url: /api/tokens/#itemaccess_tokeninvalidate
+        url: /api/items/#itemaccess_tokeninvalidate
       operationId: itemAccessTokenInvalidate
       requestBody:
         content:
@@ -8363,12 +8475,31 @@ paths:
     x-plaid-business-unit-context: BUSINESS_UNIT_PLAID
   /payment_initiation/payment/create:
     post:
-      description: |-
-        After creating a payment recipient, you can use the `/payment_initiation/payment/create` endpoint to create a payment to that recipient.  Payments can be one-time or standing order (recurring) and can be denominated in either EUR, GBP or other chosen [currency](https://plaid.com/docs/api/products/payment-initiation/#payment_initiation-payment-create-request-amount-currency).  If making domestic GBP-denominated payments, your recipient must have been created with BACS numbers. In general, EUR-denominated payments will be sent via SEPA Credit Transfer, GBP-denominated payments will be sent via the Faster Payments network and for non-Eurozone markets typically via the local payment scheme, but the payment network used will be determined by the institution. Payments sent via Faster Payments will typically arrive immediately, while payments sent via SEPA Credit Transfer or other local payment schemes will typically arrive in one business day.
-
-        Standing orders (recurring payments) must be denominated in GBP and can only be sent to recipients in the UK. Once created, standing order payments cannot be modified or canceled via the API. An end user can cancel or modify a standing order directly on their banking application or website, or by contacting the bank. Standing orders will follow the payment rules of the underlying rails (Faster Payments in UK). Payments can be sent Monday to Friday, excluding bank holidays. If the pre-arranged date falls on a weekend or bank holiday, the payment is made on the next working day. It is not possible to guarantee the exact time the payment will reach the recipient’s account, although at least 90% of standing order payments are sent by 6am.
-
-        In the Development environment, payments must be below 5 GBP or other chosen [currency](https://plaid.com/docs/api/products/payment-initiation/#payment_initiation-payment-create-request-amount-currency). For details on any payment limits in Production, contact your Plaid Account Manager.
+      description: "After creating a payment recipient, you can use the `/payment_initiation/payment/create`\
+        \ endpoint to create a payment to that recipient.  Payments can be one-time\
+        \ or standing order (recurring) and can be denominated in either EUR, GBP\
+        \ or other chosen [currency](https://plaid.com/docs/api/products/payment-initiation/#payment_initiation-payment-create-request-amount-currency).\
+        \  If making domestic GBP-denominated payments, your recipient must have been\
+        \ created with BACS numbers. In general, EUR-denominated payments will be\
+        \ sent via SEPA Credit Transfer, GBP-denominated payments will be sent via\
+        \ the Faster Payments network and for non-Eurozone markets typically via the\
+        \ local payment scheme, but the payment network used will be determined by\
+        \ the institution. Payments sent via Faster Payments will typically arrive\
+        \ immediately, while payments sent via SEPA Credit Transfer or other local\
+        \ payment schemes will typically arrive in one business day.\n\nStanding orders\
+        \ (recurring payments) must be denominated in GBP and can only be sent to\
+        \ recipients in the UK. Once created, standing order payments cannot be modified\
+        \ or canceled via the API. An end user can cancel or modify a standing order\
+        \ directly on their banking application or website, or by contacting the bank.\
+        \ Standing orders will follow the payment rules of the underlying rails (Faster\
+        \ Payments in UK). Payments can be sent Monday to Friday, excluding bank holidays.\
+        \ If the pre-arranged date falls on a weekend or bank holiday, the payment\
+        \ is made on the next working day. It is not possible to guarantee the exact\
+        \ time the payment will reach the recipient’s account, although at least 90%\
+        \ of standing order payments are sent by 6am.\n\nIn Limited Production, payments\
+        \ must be below 5 GBP or other chosen [currency](https://plaid.com/docs/api/products/payment-initiation/#payment_initiation-payment-create-request-amount-currency),\
+        \ and standing orders, variable recurring payments, and Virtual Accounts are\
+        \ not supported. "
       externalDocs:
         url: /api/products/payment-initiation/#payment_initiationpaymentcreate
       operationId: paymentInitiationPaymentCreate
@@ -8630,6 +8761,38 @@ paths:
       tags:
       - plaid
     x-plaid-business-unit-context: BUSINESS_UNIT_PLAID
+  /sandbox/user/reset_login:
+    post:
+      description: |-
+        `/sandbox/user/reset_login/` functions the same as `/sandbox/item/reset_login`, but will modify Items related to a User. This endpoint forces each Item into an `ITEM_LOGIN_REQUIRED` state in order to simulate an Item whose login is no longer valid. This makes it easy to test Link's [update mode](https://plaid.com/docs/link/update-mode) flow in the Sandbox environment.  After calling `/sandbox/user/reset_login`, You can then use Plaid Link update mode to restore Items associated with the User to a good state. An `ITEM_LOGIN_REQUIRED` webhook will also be fired after a call to this endpoint, if one is associated with the Item.
+
+
+        In the Sandbox, Items will transition to an `ITEM_LOGIN_REQUIRED` error state automatically after 30 days, even if this endpoint is not called.
+      externalDocs:
+        url: /api/sandbox/#sandboxuserreset_login
+      operationId: sandboxUserResetLogin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SandboxUserResetLoginRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    reset_login: true
+                    request_id: n7XQnv8ozwyFPBC
+              schema:
+                $ref: '#/components/schemas/SandboxUserResetLoginResponse'
+          description: OK
+      summary: Force item(s) for a Sandbox User into an error state
+      tags:
+      - plaid
+    x-plaid-business-unit-context: BUSINESS_UNIT_CRA
   /item/public_token/exchange:
     post:
       description: |-
@@ -8637,7 +8800,7 @@ paths:
 
         The response also includes an `item_id` that should be stored with the `access_token`. The `item_id` is used to identify an Item in a webhook. The `item_id` can also be retrieved by making an `/item/get` request.
       externalDocs:
-        url: /api/tokens/#itempublic_tokenexchange
+        url: /api/items/#itempublic_tokenexchange
       operationId: itemPublicTokenExchange
       requestBody:
         content:
@@ -8762,6 +8925,91 @@ paths:
       - plaid
     x-plaid-business-unit-context: BUSINESS_UNIT_UNDETERMINED
     x-hidden-from-docs: true
+  /user/remove:
+    post:
+      description: "This endpoint is used to remove a user and any relevant data related\
+        \ to the user based on the provided user token. \nAny subsequent calls to\
+        \ retrieve information using the same user token will result in an error stating\
+        \ the user does not exist."
+      externalDocs:
+        url: /api/products/income/#userremove
+      operationId: userRemove
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRemoveRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    request_id: Aim3b
+              schema:
+                $ref: '#/components/schemas/UserRemoveResponse'
+          description: OK
+      summary: Remove user
+      tags:
+      - plaid
+    x-plaid-business-unit-context: BUSINESS_UNIT_UNDETERMINED
+  /user/items/get:
+    post:
+      description: Returns Items associated with a User along with their corresponding
+        statuses.
+      externalDocs:
+        url: /api/products/income/#useritemsget
+      operationId: userItemsGet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserItemsGetRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    items:
+                    - available_products:
+                      - balance
+                      - auth
+                      billed_products:
+                      - identity
+                      - transactions
+                      error: null
+                      institution_id: ins_109508
+                      item_id: Ed6bjNrDLJfGvZWwnkQlfxwoNz54B5C97ejBr
+                      update_type: background
+                      webhook: https://plaid.com/example/hook
+                      consent_expiration_time: null
+                    - available_products:
+                      - balance
+                      - identity
+                      - payment_initiation
+                      - transactions
+                      billed_products:
+                      - assets
+                      - auth
+                      error: null
+                      institution_id: ins_109508
+                      item_id: DWVAAPWq4RHGlEaNyGKRTAnPLaEmo8Cvq7na6
+                      update_type: background
+                      webhook: https://plaid.com/example/hook
+                      consent_expiration_time: null
+                    request_id: m8MDnv9okwxFNBV
+              schema:
+                $ref: '#/components/schemas/UserItemsGetResponse'
+          description: OK
+      summary: Get Items associated with a User
+      tags:
+      - plaid
+    x-plaid-business-unit-context: BUSINESS_UNIT_UNDETERMINED
   /credit/sessions/get:
     post:
       description: |-
@@ -10034,9 +10282,9 @@ paths:
   /link/token/create:
     post:
       description: |-
-        The `/link/token/create` endpoint creates a `link_token`, which is required as a parameter when initializing Link. Once Link has been initialized, it returns a `public_token`, which can then be exchanged for an `access_token` via `/item/public_token/exchange` as part of the main Link flow.
+        The `/link/token/create` endpoint creates a `link_token`, which is required as a parameter when initializing Link. Once Link has been initialized, it returns a `public_token`. For most Plaid products, the `public_token` is saved and exchanged for an `access_token` via `/item/public_token/exchange` as part of the main Link flow. For more details, see the [Link flow overview](https://plaid.com/docs/link/#link-flow-overview).
 
-        A `link_token` generated by `/link/token/create` is also used to initialize other Link flows, such as the update mode flow for tokens with expired credentials, or the Payment Initiation (Europe) flow.
+        A `link_token` generated by `/link/token/create` is also used to initialize other Link flows, such as the [update mode](https://plaid.com/docs/link/update-mode) flow for tokens with expired credentials, or the Identity Verification flow.
       externalDocs:
         url: /api/tokens/#linktokencreate
       operationId: linkTokenCreate
@@ -16173,7 +16421,6 @@ paths:
                       status: ACTIVE
                       secrets:
                         sandbox: b60b5201d006ca5a7081d27c824d77
-                        development: 95e56a510204f293d3bebd4b9cf5c7
                         production: 79g03eoofwl8240v776r2h667442119
                     request_id: 4zlKapIkTm8p5KM
               schema:
@@ -16236,7 +16483,7 @@ paths:
   /partner/customer/enable:
     post:
       description: The `/partner/customer/enable` endpoint is used by reseller partners
-        to enable an end customer in the Production environment.
+        to enable an end customer in the full Production environment.
       externalDocs:
         url: /api/partner/#partnercustomerenable
       operationId: partnerCustomerEnable
@@ -16279,7 +16526,7 @@ paths:
       description: The `/partner/customer/remove` endpoint is used by reseller partners
         to remove an end customer. Removing an end customer will remove it from view
         in the Plaid Dashboard and deactivate its API keys. This endpoint can only
-        be used to remove an end customer that has not yet been enabled in Production.
+        be used to remove an end customer that has not yet been enabled in full Production.
       externalDocs:
         url: /api/partner/#partnercustomerremove
       operationId: partnerCustomerRemove
@@ -16351,14 +16598,12 @@ paths:
                       institution_id: ins_56
                       environments:
                         production: PROCESSING
-                        development: PROCESSING
                       production_enablement_date: null
                       classic_disablement_date: 2022-06-30
                     - name: Capital One
                       institution_id: ins_128026
                       environments:
                         production: ENABLED
-                        development: ENABLED
                       production_enablement_date: 2022-12-19
                       classic_disablement_date: null
                     request_id: 4zlKapIkTm8p5KM
@@ -16562,7 +16807,6 @@ components:
     WebhookEnvironmentValues:
       description: The Plaid environment the webhook was sent from
       enum:
-      - development
       - sandbox
       - production
       nullable: false
@@ -18026,7 +18270,10 @@ components:
         - null
       properties:
         products:
-          description: 'Filter the Institutions based on which products they support. '
+          description: Filter the Institutions based on which products they support.
+            Will only return institutions that support all listed products. When filtering
+            based on `auth`, an institution must support Instant Auth to match the
+            criterion.
           items:
             $ref: '#/components/schemas/Products'
           minItems: 1
@@ -22148,6 +22395,58 @@ components:
       - request_id
       - reset_login
       type: object
+    SandboxUserResetLoginRequest:
+      description: SandboxUserResetLoginRequest defines the request schema for `/sandbox/user/reset_login`
+      example:
+        item_ids:
+        - null
+        - null
+        secret: secret
+        user_token: user_token
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        user_token:
+          description: The user token associated with the User data is being requested
+            for.
+          title: UserToken
+          type: string
+        item_ids:
+          description: An array of `item_id`s associated with the User to be reset.  If
+            empty or `null`, this field will default to resetting all Items associated
+            with the User.
+          items:
+            $ref: '#/components/schemas/ItemId'
+          nullable: true
+          type: array
+      required:
+      - user_token
+      type: object
+    SandboxUserResetLoginResponse:
+      additionalProperties: true
+      description: SandboxUserResetLoginResponse defines the response schema for `/sandbox/user/reset_login`
+      example:
+        request_id: request_id
+      properties:
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      type: object
     SandboxPaymentProfileResetLoginRequest:
       description: SandboxPaymentProfileResetLoginRequest defines the request schema
         for `/sandbox/payment_profile/reset_login`
@@ -22389,10 +22688,154 @@ components:
       - request_id
       type: object
       x-hidden-from-docs: true
+    UserRemoveRequest:
+      description: UserRemoveRequest defines the request schema for `/user/remove`
+      example:
+        secret: secret
+        user_token: user_token
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        user_token:
+          description: The user token associated with the User data is being requested
+            for.
+          title: UserToken
+          type: string
+      required:
+      - user_token
+      type: object
+    UserRemoveResponse:
+      additionalProperties: true
+      description: UserRemoveResponse defines the response schema for `/user/remove`
+      example:
+        request_id: request_id
+      properties:
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - request_id
+      type: object
+    UserItemsGetRequest:
+      description: UserItemsGetRequest defines the request schema for `/user/items/get`
+      example:
+        secret: secret
+        user_token: user_token
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        user_token:
+          description: The user token associated with the User data is being requested
+            for.
+          title: UserToken
+          type: string
+      required:
+      - user_token
+      type: object
+    UserItemsGetResponse:
+      additionalProperties: true
+      description: UserItemsGetResponse defines the response schema for `/user/items/get`
+      example:
+        items:
+        - update_type: background
+          webhook: webhook
+          item_id: item_id
+          billed_products:
+          - null
+          - null
+          consent_expiration_time: 2000-01-23T04:56:07.000+00:00
+          error:
+            error_message: error_message
+            suggested_action: suggested_action
+            causes:
+            - ""
+            - ""
+            display_message: display_message
+            error_code: error_code
+            documentation_url: documentation_url
+            request_id: request_id
+            status: 0
+          consented_products:
+          - null
+          - null
+          available_products:
+          - null
+          - null
+          institution_id: institution_id
+          products:
+          - null
+          - null
+        - update_type: background
+          webhook: webhook
+          item_id: item_id
+          billed_products:
+          - null
+          - null
+          consent_expiration_time: 2000-01-23T04:56:07.000+00:00
+          error:
+            error_message: error_message
+            suggested_action: suggested_action
+            causes:
+            - ""
+            - ""
+            display_message: display_message
+            error_code: error_code
+            documentation_url: documentation_url
+            request_id: request_id
+            status: 0
+          consented_products:
+          - null
+          - null
+          available_products:
+          - null
+          - null
+          institution_id: institution_id
+          products:
+          - null
+          - null
+        request_id: request_id
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/Item'
+          type: array
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - items
+      - request_id
+      type: object
     UserAccountIdentity:
       additionalProperties: true
-      description: UserAccountIdentity defines the identity data permissioned by the
-        end user during the authorization flow.
+      description: The identity data permissioned by the end user during the authorization
+        flow.
       example:
         address:
           country: country
@@ -22438,8 +22881,7 @@ components:
       type: object
     UserAccountIdentityName:
       additionalProperties: true
-      description: UserAccountIdentityName defines the user's first name and last
-        name.
+      description: The user's first name and last name.
       example:
         last_name: last_name
         first_name: first_name
@@ -22452,7 +22894,7 @@ components:
       type: object
     UserAccountIdentityAddress:
       additionalProperties: true
-      description: UserAccountIdentityAddress defines the user's address.
+      description: The user's address.
       example:
         country: country
         city: city
@@ -22494,8 +22936,7 @@ components:
       type: object
     UserAccountItem:
       additionalProperties: true
-      description: UserAccountItem defines an Item created during a Layer authorization
-        session.
+      description: An Item created during a Layer authorization session.
       example:
         access_token: access_token
         item_id: item_id
@@ -23599,7 +24040,7 @@ components:
           description: |-
             A random key provided by the client, per unique consent payment. Maximum of 128 characters.
 
-            The API supports idempotency for safely retrying requests without accidentally performing the same operation twice. If a request to execute a consent payment fails due to a network connection error, you can retry the request with the same idempotency key to guarantee that only a single payment is created. If the request was successfully processed, it will prevent any payment that uses the same idempotency key, and was received within 24 hours of the first request, from being processed.
+            The API supports idempotency for safely retrying requests without accidentally performing the same operation twice. If a request to execute a consent payment fails due to a network connection error, you can retry the request with the same idempotency key to guarantee that only a single payment is created. If the request was successfully processed, it will prevent any payment that uses the same idempotency key, and was received within 48 hours of the first request, from being processed.
           maxLength: 128
           minLength: 1
           title: ConsentPaymentIdempotencyKey
@@ -24655,6 +25096,7 @@ components:
           - sardine
           - alloy
           - finix
+          - nuvei
           - layer
           - boom
           - paynote
@@ -25156,6 +25598,9 @@ components:
         - null
         - null
         identity:
+          parsing_configs:
+          - null
+          - null
           account_ids:
           - account_ids
           - account_ids
@@ -25237,6 +25682,7 @@ components:
           masked_number_match_enabled: false
           manual_entry_enabled: false
         transfer:
+          authorization_id: authorization_id
           payment_profile_token: payment_profile_token
           intent_id: intent_id
         account_filters:
@@ -25327,11 +25773,11 @@ components:
 
             If using Identity Verification, `country_codes` should be set to the country where your company is based, not the country where your user is located. For all other products, `country_codes` represents the location of your user's financial institution.
 
-            If Link is launched with multiple country codes, only products that you are enabled for in all countries will be used by Link. Note that while all countries are enabled by default in Sandbox and Development, in Production only US and Canada are enabled by default. Access to European institutions requires additional compliance steps. To request access to European institutions in the Production environment, [file a product access Support ticket](https://dashboard.plaid.com/support/new/product-and-development/product-troubleshooting/request-product-access) via the Plaid dashboard. If you initialize with a European country code, your users will see the European consent panel during the Link flow.
+            If Link is launched with multiple country codes, only products that you are enabled for in all countries will be used by Link. Note that while all countries are enabled by default in Sandbox, in Production only US and Canada are enabled by default. To request access to European institutions, [file a product access Support ticket](https://dashboard.plaid.com/support/new/product-and-development/product-troubleshooting/request-product-access) via the Plaid dashboard.
 
             If using a Link customization, make sure the country codes in the customization match those specified in `country_codes`, or the customization may not be applied.
 
-            If using the Auth features Instant Match, Same-day Micro-deposits, or Automated Micro-deposits, `country_codes` must be set to `['US']`.
+            If using the Auth features Instant Match, Instant Micro-deposits, Same-day Micro-deposits, Automated Micro-deposits, or Database Insights, `country_codes` must be set to `['US']`.
           items:
             $ref: '#/components/schemas/CountryCode'
           minItems: 1
@@ -25356,6 +25802,8 @@ components:
           x-override-enum-values-shown:
           - assets
           - auth
+          - balance_plus
+          - beacon
           - employment
           - identity
           - income_verification
@@ -25422,6 +25870,7 @@ components:
           type: array
           x-override-enum-values-shown:
           - auth
+          - balance_plus
           - identity
           - investments
           - liabilities
@@ -25464,14 +25913,13 @@ components:
           description: A URI indicating the destination where a user should be forwarded
             after completing the Link flow; used to support OAuth authentication flows
             when launching Link in the browser or another app. The `redirect_uri`
-            should not contain any query parameters. When used in Production or Development,
-            must be an https URI. To specify any subdomain, use `*` as a wildcard
-            character, e.g. `https://*.example.com/oauth.html`. Note that any redirect
-            URI must also be added to the Allowed redirect URIs list in the [developer
-            dashboard](https://dashboard.plaid.com/team/api). If initializing on Android,
-            `android_package_name` must be specified instead and `redirect_uri` should
-            be left blank. If using Hosted Link, the `redirect_uri` must be set to
-            `https://secure.plaid.com/oauth/redirect`.
+            should not contain any query parameters. When used in Production, must
+            be an https URI. To specify any subdomain, use `*` as a wildcard character,
+            e.g. `https://*.example.com/oauth.html`. Note that any redirect URI must
+            also be added to the Allowed redirect URIs list in the [developer dashboard](https://dashboard.plaid.com/team/api).
+            If initializing on Android, `android_package_name` must be specified instead
+            and `redirect_uri` should be left blank. If using Hosted Link, the `redirect_uri`
+            must be set to `https://secure.plaid.com/oauth/redirect`.
           type: string
         android_package_name:
           description: The name of your app's Android package. Required if using the
@@ -25680,7 +26128,7 @@ components:
       description: |
         How Plaid should deliver the Plaid Link session to the customer. Only available to customers enabled for Link Delivery (beta). To request Link Delivery access, contact your account manager.
         'sms' will deliver via SMS. Must pass `user.phone_number`.
-        'email' will deliver via email. Must pass `user.email_address`. In the Sandbox environment, this field will be ignored; use the Production or Development environment to test Link Delivery instead.
+        'email' will deliver via email. Must pass `user.email_address`. In the Sandbox environment, this field will be ignored; use the Production environment to test Link Delivery instead.
       enum:
       - sms
       - email
@@ -25701,6 +26149,9 @@ components:
     LinkTokenCreateIdentity:
       description: Identity object used to specify document upload
       example:
+        parsing_configs:
+        - null
+        - null
         account_ids:
         - account_ids
         - account_ids
@@ -25714,6 +26165,13 @@ components:
           description: An array of `account_ids`
           items:
             type: string
+          type: array
+        parsing_configs:
+          description: An array of parsing configurations. Valid parsing configurations
+            are `ocr` and `risk_signals`. If parsing configurations are omitted, defaults
+            to `ocr`
+          items:
+            $ref: '#/components/schemas/IncomeVerificationDocParsingConfig'
           type: array
       type: object
     LinkTokenCreateRequestPaymentInitiation:
@@ -25753,11 +26211,18 @@ components:
       description: Specifies options for initializing Link for use with the Transfer
         product.
       example:
+        authorization_id: authorization_id
         payment_profile_token: payment_profile_token
         intent_id: intent_id
       properties:
         intent_id:
           description: The `id` returned by the `/transfer/intent/create` endpoint.
+          type: string
+        authorization_id:
+          description: The `id` returned by the `/transfer/authorization/create` endpoint.
+            Used to indicate Link session to complete required user action in order
+            to make a decision for the authorization. If set, `access_token` can be
+            omitted.
           type: string
         payment_profile_token:
           description: The `payment_profile_token` returned by the `/payment_profile/create`
@@ -26153,11 +26618,11 @@ components:
         account_selection_enabled:
           default: false
           description: If `true`, enables [update mode with Account Select](https://plaid.com/docs/link/update-mode/#using-update-mode-to-request-new-accounts)
-            for institutions that do not use OAuth, or that use OAuth but do not have
-            their own account selection flow. For institutions that have an OAuth
-            account selection flow (i.e. most OAuth-enabled institutions), update
-            mode with Account Select will always be enabled, regardless of the value
-            of this field.
+            for institutions in the US and Canada that do not use OAuth, or that use
+            OAuth but do not have their own account selection flow. For institutions
+            in the US that have an OAuth account selection flow (i.e. most OAuth-enabled
+            institutions), update mode with Account Select will always be enabled,
+            regardless of the value of this field.
           type: boolean
         user:
           default: false
@@ -27762,8 +28227,8 @@ components:
             they are linked, this field may be used instead of the account number
             to uniquely identify a Chase account across multiple Items for payments
             use cases, helping to reduce duplicate Items or attempted fraud. In Sandbox,
-            this field may be populated for any account; in Production and Development,
-            it will only be populated for Chase accounts.
+            this field may be populated for any account; in Production, it will only
+            be populated for Chase accounts.
           type: string
         holder_category:
           $ref: '#/components/schemas/AccountHolderCategory'
@@ -30989,7 +31454,6 @@ components:
         names:
         - names
         - names
-        document_id: document_id
       properties:
         names:
           description: |-
@@ -31020,12 +31484,6 @@ components:
           items:
             $ref: '#/components/schemas/Address'
           type: array
-        document_id:
-          description: document_id is the id of the document that this identity belongs
-            to
-          nullable: true
-          type: string
-          x-hidden-from-docs: true
       required:
       - addresses
       - emails
@@ -32303,7 +32761,7 @@ components:
       description: |-
         A random key provided by the client, per unique consent payment. Maximum of 128 characters.
 
-        The API supports idempotency for safely retrying requests without accidentally performing the same operation twice. If a request to execute a consent payment fails due to a network connection error, you can retry the request with the same idempotency key to guarantee that only a single payment is created. If the request was successfully processed, it will prevent any payment that uses the same idempotency key, and was received within 24 hours of the first request, from being processed.
+        The API supports idempotency for safely retrying requests without accidentally performing the same operation twice. If a request to execute a consent payment fails due to a network connection error, you can retry the request with the same idempotency key to guarantee that only a single payment is created. If the request was successfully processed, it will prevent any payment that uses the same idempotency key, and was received within 48 hours of the first request, from being processed.
       maxLength: 128
       minLength: 1
       title: ConsentPaymentIdempotencyKey
@@ -32381,6 +32839,8 @@ components:
       - assets
       - auth
       - balance
+      - balance_plus
+      - beacon
       - identity
       - identity_match
       - investments
@@ -36615,7 +37075,7 @@ components:
     UserPermissionRevokedWebhook:
       additionalProperties: true
       description: |-
-        The `USER_PERMISSION_REVOKED` webhook may be fired when an end user has used either the [my.plaid.com portal](https://my.plaid.com) or the financial institution’s OAuth consent portal to revoke the permission that they previously granted to access an Item. This webhook is not guaranteed to always be fired upon consent revocation, since some institutions’ consent portals do not trigger this webhook. Once access to an Item has been revoked, it cannot be restored. If the user subsequently returns to your application, a new Item must be created for the user.
+        The `USER_PERMISSION_REVOKED` webhook may be fired when an end user has used either the [my.plaid.com portal](https://my.plaid.com) or the financial institution’s OAuth consent portal to revoke the permission that they previously granted to access an Item. This webhook is not guaranteed to always be fired upon consent revocation, since some institutions’ consent portals do not trigger this webhook. Once access to an Item has been revoked, it cannot be restored. If the user subsequently returns to your application, a new Item must be created for the user. Upon receiving this webhook, it is recommended to call `/item/remove` to delete the underlying Item and to delete any stored data from Plaid associated with the Item.
 
         Note that when using ACH flows with Chase Items specifically, the account number provided by Plaid will no longer work for creating transfers once user permission has been revoked. If you receive this webhook for a Chase Item, you should not create any new ACH transfers for that Item, as they will be returned.
       properties:
@@ -39643,9 +40103,12 @@ components:
         `approved` – The proposed transfer has received the end user's consent and has been approved for processing by Plaid. The `decision_rationale` field is set if Plaid was unable to fetch the account information. You may proceed with the transfer, but further review is recommended (i.e., use Link in update mode to re-authenticate your user when `decision_rationale.code` is `ITEM_LOGIN_REQUIRED`). Refer to the `code` field in the `decision_rationale` object for details.
 
         `declined` – Plaid reviewed the proposed transfer and declined processing. Refer to the `code` field in the `decision_rationale` object for details.
+
+        `user_action_required` – An action is required before Plaid can assess the transfer risk and make a decision. The most common scenario is to update authentication for an Item. To complete the required action, initialize Link by setting `transfer.authorization_id` in the request of `/link/token/create`.
       enum:
       - approved
       - declined
+      - user_action_required
       type: string
     TransferAuthorization:
       additionalProperties: true
@@ -44565,16 +45028,6 @@ components:
       - $ref: '#/components/schemas/AccountIdentity_allOf'
       description: Identity information about an account
       title: AccountIdentity
-    IdentityDocument:
-      description: Document object with metadata of the document uploaded
-      properties:
-        metadata:
-          $ref: '#/components/schemas/IdentityDocumentMetadata'
-        document_id:
-          type: string
-      title: IdentityDocument
-      type: object
-      x-hidden-from-docs: true
     AccountIdentityMatchScore:
       allOf:
       - $ref: '#/components/schemas/AccountBase'
@@ -48732,7 +49185,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -48765,7 +49217,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             - official_name: official_name
               account_id: account_id
@@ -48803,7 +49254,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -48836,7 +49286,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             institution_name: institution_name
             institution_id: institution_id
@@ -48892,7 +49341,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -48925,7 +49373,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             - official_name: official_name
               account_id: account_id
@@ -48963,7 +49410,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -48996,7 +49442,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             institution_name: institution_name
             institution_id: institution_id
@@ -49067,7 +49512,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -49100,7 +49544,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             - official_name: official_name
               account_id: account_id
@@ -49138,7 +49581,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -49171,7 +49613,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             institution_name: institution_name
             institution_id: institution_id
@@ -49227,7 +49668,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -49260,7 +49700,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             - official_name: official_name
               account_id: account_id
@@ -49298,7 +49737,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -49331,7 +49769,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             institution_name: institution_name
             institution_id: institution_id
@@ -49424,7 +49861,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             - emails:
               - data: data
                 type: primary
@@ -49457,7 +49893,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             mask: mask
           - official_name: official_name
             account_id: account_id
@@ -49495,7 +49930,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             - emails:
               - data: data
                 type: primary
@@ -49528,7 +49962,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             mask: mask
           institution_name: institution_name
           institution_id: institution_id
@@ -49584,7 +50017,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             - emails:
               - data: data
                 type: primary
@@ -49617,7 +50049,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             mask: mask
           - official_name: official_name
             account_id: account_id
@@ -49655,7 +50086,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             - emails:
               - data: data
                 type: primary
@@ -49688,7 +50118,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             mask: mask
           institution_name: institution_name
           institution_id: institution_id
@@ -49782,7 +50211,6 @@ components:
             names:
             - names
             - names
-            document_id: document_id
           - emails:
             - data: data
               type: primary
@@ -49815,7 +50243,6 @@ components:
             names:
             - names
             - names
-            document_id: document_id
           mask: mask
         - official_name: official_name
           account_id: account_id
@@ -49853,7 +50280,6 @@ components:
             names:
             - names
             - names
-            document_id: document_id
           - emails:
             - data: data
               type: primary
@@ -49886,7 +50312,6 @@ components:
             names:
             - names
             - names
-            document_id: document_id
           mask: mask
         institution_name: institution_name
         institution_id: institution_id
@@ -50094,7 +50519,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -50127,7 +50551,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             - official_name: official_name
               account_id: account_id
@@ -50165,7 +50588,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -50198,7 +50620,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             last_updated_time: 2000-01-23T04:56:07.000+00:00
             item_id: item_id
@@ -50382,7 +50803,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -50415,7 +50835,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             - official_name: official_name
               account_id: account_id
@@ -50453,7 +50872,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -50486,7 +50904,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             last_updated_time: 2000-01-23T04:56:07.000+00:00
             item_id: item_id
@@ -50764,7 +51181,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -50797,7 +51213,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             - official_name: official_name
               account_id: account_id
@@ -50835,7 +51250,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -50868,7 +51282,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             last_updated_time: 2000-01-23T04:56:07.000+00:00
             item_id: item_id
@@ -51052,7 +51465,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -51085,7 +51497,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             - official_name: official_name
               account_id: account_id
@@ -51123,7 +51534,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -51156,7 +51566,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             last_updated_time: 2000-01-23T04:56:07.000+00:00
             item_id: item_id
@@ -51486,7 +51895,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             - emails:
               - data: data
                 type: primary
@@ -51519,7 +51927,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             mask: mask
           - official_name: official_name
             account_id: account_id
@@ -51557,7 +51964,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             - emails:
               - data: data
                 type: primary
@@ -51590,7 +51996,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             mask: mask
           last_updated_time: 2000-01-23T04:56:07.000+00:00
           item_id: item_id
@@ -51774,7 +52179,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             - emails:
               - data: data
                 type: primary
@@ -51807,7 +52211,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             mask: mask
           - official_name: official_name
             account_id: account_id
@@ -51845,7 +52248,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             - emails:
               - data: data
                 type: primary
@@ -51878,7 +52280,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             mask: mask
           last_updated_time: 2000-01-23T04:56:07.000+00:00
           item_id: item_id
@@ -52174,7 +52575,6 @@ components:
             names:
             - names
             - names
-            document_id: document_id
           - emails:
             - data: data
               type: primary
@@ -52207,7 +52607,6 @@ components:
             names:
             - names
             - names
-            document_id: document_id
           mask: mask
         - official_name: official_name
           account_id: account_id
@@ -52245,7 +52644,6 @@ components:
             names:
             - names
             - names
-            document_id: document_id
           - emails:
             - data: data
               type: primary
@@ -52278,7 +52676,6 @@ components:
             names:
             - names
             - names
-            document_id: document_id
           mask: mask
         last_updated_time: 2000-01-23T04:56:07.000+00:00
         item_id: item_id
@@ -52492,7 +52889,6 @@ components:
           names:
           - names
           - names
-          document_id: document_id
         - emails:
           - data: data
             type: primary
@@ -52525,7 +52921,6 @@ components:
           names:
           - names
           - names
-          document_id: document_id
         mask: mask
       properties:
         account_id:
@@ -62610,7 +63005,10 @@ components:
       description: Fired when Plaid detects a new account for Items created or updated
         with [Account Select v2](https://plaid.com/docs/link/customization/#account-select).
         Upon receiving this webhook, you can prompt your users to share new accounts
-        with you through [Account Select v2 update mode](https://plaid.com/docs/link/update-mode/#using-update-mode-to-request-new-accounts).
+        with you through [Account Select v2 update mode](https://plaid.com/docs/link/update-mode/#using-update-mode-to-request-new-accounts)
+        (US/CA only). For end user accounts in the EU and UK, upon receiving this
+        webhook, you can prompt your user to re-link their account and then delete
+        the old Item via `/item/remove`.
       properties:
         webhook_type:
           description: '`ITEM`'
@@ -65473,11 +65871,11 @@ components:
           description: A list of URIs indicating the destination(s) where a user can
             be forwarded after completing the Link flow; used to support OAuth authentication
             flows when launching Link in the browser or another app. URIs should not
-            contain any query parameters. When used in Production or Development,
-            URIs must use https. To specify any subdomain, use `*` as a wildcard character,
-            e.g. `https://*.example.com/oauth.html`. To modify redirect URIs for an
-            end customer after creating them, go to the end customer's [API page](https://dashboard.plaid.com/team/api)
-            in the Dashboard.
+            contain any query parameters. When used in Production, URIs must use https.
+            To specify any subdomain, use `*` as a wildcard character, e.g. `https://*.example.com/oauth.html`.
+            To modify redirect URIs for an end customer after creating them, go to
+            the end customer's [API page](https://dashboard.plaid.com/team/api) in
+            the Dashboard.
           items:
             type: string
           type: array
@@ -65766,19 +66164,19 @@ components:
       - $ref: '#/components/schemas/PartnerEndCustomer'
       - $ref: '#/components/schemas/PartnerEndCustomerWithSecrets_allOf'
       description: The details for the newly created end customer, including secrets
-        for non-Production environments.
+        for Sandbox and Limited Production.
       type: object
     PartnerEndCustomerStatus:
       description: |-
         The status of the given end customer.
 
-        `UNDER_REVIEW`: The end customer has been created and enabled in the non-Production environments. The end customer must be manually reviewed by the Plaid team before it can be enabled in production, at which point its status will automatically transition to `PENDING_ENABLEMENT` or `DENIED`.
+        `UNDER_REVIEW`: The end customer has been created and enabled in Sandbox and Limited Production. The end customer must be manually reviewed by the Plaid team before it can be enabled in full production, at which point its status will automatically transition to `PENDING_ENABLEMENT` or `DENIED`.
 
-        `PENDING_ENABLEMENT`: The end customer is ready to be enabled in the Production environment. Call the `/partner/customer/enable` endpoint to enable the end customer in Production.
+        `PENDING_ENABLEMENT`: The end customer is ready to be fully enabled in the Production environment. Call the `/partner/customer/enable` endpoint to enable the end customer in full Production.
 
-        `ACTIVE`: The end customer has been enabled in all environments.
+        `ACTIVE`: The end customer has been fully enabled in all environments.
 
-        `DENIED`: The end customer has been created and enabled in the non-Production environments, but it did not pass review by the Plaid team and therefore cannot be enabled in the Production environment. Talk to your Account Manager for more information.
+        `DENIED`: The end customer has been created and enabled in Sandbox and Limited Production, but it did not pass review by the Plaid team and therefore cannot be enabled for full Production access. Talk to your Account Manager for more information.
       enum:
       - UNDER_REVIEW
       - PENDING_ENABLEMENT
@@ -65787,8 +66185,7 @@ components:
       type: string
     PartnerEndCustomerSecrets:
       additionalProperties: true
-      description: The secrets for the newly created end customer in non-Production
-        environments.
+      description: The secrets for the newly created end customer.
       properties:
         sandbox:
           description: The end customer's secret key for the Sandbox environment.
@@ -65796,8 +66193,9 @@ components:
         development:
           deprecated: true
           description: The end customer's secret key for the Development environment.
-            The Development environment will be decommissioned on June 20, 2024.
+            The Development environment has been removed.
           type: string
+          x-hidden-from-docs: true
         production:
           description: The end customer's secret key for the Production environment.
             The end customer will be provided with a limited number of credits to
@@ -66197,7 +66595,7 @@ components:
     UserAccountRevokedWebhook:
       additionalProperties: true
       description: |-
-        The `USER_ACCOUNT_REVOKED` webhook is fired when an end user has revoked access to their account on the Data Provider's portal. This webhook is currently sent only for Chase Items, but may be sent in the future for other financial institutions that allow account-level permissions revocation through their portals.
+        The `USER_ACCOUNT_REVOKED` webhook is fired when an end user has revoked access to their account on the Data Provider's portal. This webhook is currently sent only for Chase Items, but may be sent in the future for other financial institutions that allow account-level permissions revocation through their portals. Upon receiving this webhook, it is recommended to delete any Plaid-derived data you have stored that is associated with the revoked account.
 
         If you are using Auth and receive this webhook for a Chase Item, this webhook indicates that the TAN associated with the revoked account is no longer valid and cannot be used to create new transfers. You should not create new ACH transfers for the account that was revoked until access has been re-granted.
 
@@ -66494,6 +66892,13 @@ components:
           description: The `user_id` corresponding to the user the webhook has fired
             for.
           type: string
+        item_ids:
+          description: A list of `item_ids` that is included in the Check Report.
+          items:
+            $ref: '#/components/schemas/ItemId'
+          nullable: true
+          type: array
+          x-hidden-from-docs: true
         environment:
           $ref: '#/components/schemas/WebhookEnvironmentValues'
       required:
@@ -66707,8 +67112,8 @@ components:
       type: string
     LinkEventMetadata:
       additionalProperties: true
-      description: Metadata about an event that occured while the user was going through
-        Link
+      description: Metadata about an event that occurred while the user was going
+        through Link
       example:
         error_message: error_message
         mfa_type: mfa_type
@@ -67616,7 +68021,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -67649,7 +68053,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               verification_status: automatically_verified
               transactions:
               - date: 2000-01-23
@@ -67802,7 +68205,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -67835,7 +68237,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               verification_status: automatically_verified
               transactions:
               - date: 2000-01-23
@@ -67993,7 +68394,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -68026,7 +68426,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               verification_status: automatically_verified
               transactions:
               - date: 2000-01-23
@@ -68179,7 +68578,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -68212,7 +68610,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               verification_status: automatically_verified
               transactions:
               - date: 2000-01-23
@@ -68628,7 +69025,6 @@ components:
       - user_token
       title: CraCheckReportPDFGetRequest
       type: object
-      x-hidden-from-docs: true
     CraPDFAddOns:
       description: |-
         A list of add-ons that can be included in the PDF.
@@ -68642,10 +69038,12 @@ components:
       description: CraCheckReportPDFGetResponse defines the response schema for `/cra/check_report/pdf/get`
       format: binary
       type: string
-      x-hidden-from-docs: true
     CraCheckReportBaseReportGetRequest:
       description: BaseReportGetRequest defines the request schema for `/cra/check_report/base_report/get`
       example:
+        item_ids:
+        - null
+        - null
         secret: secret
         user_token: user_token
         client_id: client_id
@@ -68666,6 +69064,14 @@ components:
             for.
           title: UserToken
           type: string
+        item_ids:
+          description: The item IDs to include in the Base Report. If not provided,
+            all items associated with the user will be included.
+          items:
+            $ref: '#/components/schemas/ItemId'
+          nullable: true
+          type: array
+          x-hidden-from-docs: true
       required:
       - user_token
       title: CraCheckReportBaseReportGetRequest
@@ -68719,7 +69125,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -68752,7 +69157,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               transactions:
               - date: 2000-01-23
                 transaction_id: transaction_id
@@ -68910,7 +69314,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -68943,7 +69346,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               transactions:
               - date: 2000-01-23
                 transaction_id: transaction_id
@@ -69106,7 +69508,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -69139,7 +69540,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               transactions:
               - date: 2000-01-23
                 transaction_id: transaction_id
@@ -69297,7 +69697,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -69330,7 +69729,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               transactions:
               - date: 2000-01-23
                 transaction_id: transaction_id
@@ -69555,7 +69953,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -69588,7 +69985,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               transactions:
               - date: 2000-01-23
                 transaction_id: transaction_id
@@ -69746,7 +70142,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -69779,7 +70174,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               transactions:
               - date: 2000-01-23
                 transaction_id: transaction_id
@@ -69942,7 +70336,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -69975,7 +70368,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               transactions:
               - date: 2000-01-23
                 transaction_id: transaction_id
@@ -70133,7 +70525,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -70166,7 +70557,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               transactions:
               - date: 2000-01-23
                 transaction_id: transaction_id
@@ -70652,7 +71042,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             - emails:
               - data: data
                 type: primary
@@ -70685,7 +71074,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             verification_status: automatically_verified
             transactions:
             - date: 2000-01-23
@@ -70838,7 +71226,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             - emails:
               - data: data
                 type: primary
@@ -70871,7 +71258,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             verification_status: automatically_verified
             transactions:
             - date: 2000-01-23
@@ -71029,7 +71415,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             - emails:
               - data: data
                 type: primary
@@ -71062,7 +71447,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             verification_status: automatically_verified
             transactions:
             - date: 2000-01-23
@@ -71215,7 +71599,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             - emails:
               - data: data
                 type: primary
@@ -71248,7 +71631,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             verification_status: automatically_verified
             transactions:
             - date: 2000-01-23
@@ -71447,7 +71829,6 @@ components:
             names:
             - names
             - names
-            document_id: document_id
           - emails:
             - data: data
               type: primary
@@ -71480,7 +71861,6 @@ components:
             names:
             - names
             - names
-            document_id: document_id
           verification_status: automatically_verified
           transactions:
           - date: 2000-01-23
@@ -71633,7 +72013,6 @@ components:
             names:
             - names
             - names
-            document_id: document_id
           - emails:
             - data: data
               type: primary
@@ -71666,7 +72045,6 @@ components:
             names:
             - names
             - names
-            document_id: document_id
           verification_status: automatically_verified
           transactions:
           - date: 2000-01-23
@@ -71857,7 +72235,6 @@ components:
           names:
           - names
           - names
-          document_id: document_id
         - emails:
           - data: data
             type: primary
@@ -71890,7 +72267,6 @@ components:
           names:
           - names
           - names
-          document_id: document_id
         verification_status: automatically_verified
         transactions:
         - date: 2000-01-23
@@ -72680,7 +73056,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             - emails:
               - data: data
                 type: primary
@@ -72713,7 +73088,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             transactions:
             - date: 2000-01-23
               transaction_id: transaction_id
@@ -72871,7 +73245,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             - emails:
               - data: data
                 type: primary
@@ -72904,7 +73277,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             transactions:
             - date: 2000-01-23
               transaction_id: transaction_id
@@ -73067,7 +73439,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             - emails:
               - data: data
                 type: primary
@@ -73100,7 +73471,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             transactions:
             - date: 2000-01-23
               transaction_id: transaction_id
@@ -73258,7 +73628,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             - emails:
               - data: data
                 type: primary
@@ -73291,7 +73660,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             transactions:
             - date: 2000-01-23
               transaction_id: transaction_id
@@ -73491,7 +73859,6 @@ components:
             names:
             - names
             - names
-            document_id: document_id
           - emails:
             - data: data
               type: primary
@@ -73524,7 +73891,6 @@ components:
             names:
             - names
             - names
-            document_id: document_id
           transactions:
           - date: 2000-01-23
             transaction_id: transaction_id
@@ -73682,7 +74048,6 @@ components:
             names:
             - names
             - names
-            document_id: document_id
           - emails:
             - data: data
               type: primary
@@ -73715,7 +74080,6 @@ components:
             names:
             - names
             - names
-            document_id: document_id
           transactions:
           - date: 2000-01-23
             transaction_id: transaction_id
@@ -73911,7 +74275,6 @@ components:
           names:
           - names
           - names
-          document_id: document_id
         - emails:
           - data: data
             type: primary
@@ -73944,7 +74307,6 @@ components:
           names:
           - names
           - names
-          document_id: document_id
         transactions:
         - date: 2000-01-23
           transaction_id: transaction_id
@@ -74366,11 +74728,13 @@ components:
           description: Date of the earliest transaction in the base report for the
             account.
           format: date
+          nullable: true
           type: string
         most_recent_transaction_date:
           description: Date of the most recent transaction in the base report for
             the account.
           format: date
+          nullable: true
           type: string
         days_available:
           description: Number of days days available in the base report for the account.
@@ -75164,15 +75528,46 @@ components:
         `plaid_connections_count_30d`: The number of times the Item has been connected to applications via Plaid over the past 30 days
         `total_plaid_connections_count`: The number of times the Item has been connected to applications via Plaid
         For the full list and detailed documentation of core attributes available, or to request that core attributes not be returned, contact Sales or your Plaid account manager
+      example:
+        days_since_first_plaid_connection: 1
+        is_account_closed: false
+        distinct_ip_addresses_count_90d: 1
+        distinct_user_agents_count_30d: 1
+        distinct_ip_addresses_count_30d: 1
+        distinct_user_agents_count_90d: 1
+        distinct_user_agents_count_7d: 1
+        phone_change_count_90d: 2
+        plaid_connections_count_30d: 1
+        is_account_frozen_or_restricted: false
+        failed_plaid_non_oauth_authentication_attempts_count_30d: 1
+        failed_plaid_non_oauth_authentication_attempts_count_7d: 1
+        phone_change_count_28d: 1
+        failed_plaid_non_oauth_authentication_attempts_count_3d: 1
+        plaid_non_oauth_authentication_attempts_count_30d: 1
+        total_plaid_connections_count: 1
+        plaid_non_oauth_authentication_attempts_count_7d: 1
+        email_change_count_90d: 4
+        plaid_connections_count_7d: 1
+        plaid_non_oauth_authentication_attempts_count_3d: 1
+        distinct_ip_addresses_count_7d: 1
+        distinct_user_agents_count_3d: 1
+        address_change_count_90d: 3
+        days_since_account_opening: 365
+        distinct_ip_addresses_count_3d: 1
+        days_since_first_observed_transaction: 180
+        email_change_count_28d: 2
+        address_change_count_28d: 1
       properties:
         days_since_first_plaid_connection:
           description: The number of days since the first time the Item was connected
             to an application via Plaid
+          example: 1
           nullable: true
           type: integer
         is_account_closed:
           description: Indicates if the account has been closed by the financial institution
             or the consumer, or is at risk of being closed
+          example: false
           nullable: true
           type: boolean
         is_account_frozen_or_restricted:
@@ -75180,134 +75575,189 @@ components:
             disabled or if access to the account is restricted. This could be due
             to a freeze by the credit issuer, legal restrictions (e.g., sanctions),
             or regulatory requirements limiting monthly withdrawals, among other reasons
+          example: false
           nullable: true
           type: boolean
         total_plaid_connections_count:
           description: The total number of times the item has been connected to applications
             via Plaid
+          example: 1
           nullable: true
           type: integer
         plaid_connections_count_7d:
           description: The number of times the Item has been connected to applications
             via Plaid over the past 7 days
+          example: 1
           nullable: true
           type: integer
         plaid_connections_count_30d:
           description: The number of times the Item has been connected to applications
             via Plaid over the past 30 days
+          example: 1
           nullable: true
           type: integer
         failed_plaid_non_oauth_authentication_attempts_count_3d:
           description: The number of failed non-OAuth authentication attempts via
             Plaid for this bank account over the past 3 days
+          example: 1
           nullable: true
           type: integer
         plaid_non_oauth_authentication_attempts_count_3d:
           description: The number of non-OAuth authentication attempts via Plaid for
             this bank account over the past 3 days
+          example: 1
           nullable: true
           type: integer
         failed_plaid_non_oauth_authentication_attempts_count_7d:
           description: The number of failed non-OAuth authentication attempts via
             Plaid for this bank account over the past 7 days
+          example: 1
           nullable: true
           type: integer
         plaid_non_oauth_authentication_attempts_count_7d:
           description: The number of non-OAuth authentication attempts via Plaid for
             this bank account over the past 7 days
+          example: 1
           nullable: true
           type: integer
         failed_plaid_non_oauth_authentication_attempts_count_30d:
           description: The number of failed non-OAuth authentication attempts via
             Plaid for this bank account over the past 30 days
+          example: 1
           nullable: true
           type: integer
         plaid_non_oauth_authentication_attempts_count_30d:
           description: The number of non-OAuth authentication attempts via Plaid for
             this bank account over the past 30 days
+          example: 1
           nullable: true
           type: integer
         distinct_ip_addresses_count_3d:
           description: The number of distinct IP addresses linked to the same bank
             account during Plaid authentication in the last 3 days
+          example: 1
           nullable: true
           type: integer
         distinct_ip_addresses_count_7d:
           description: The number of distinct IP addresses linked to the same bank
             account during Plaid authentication in the last 7 days
+          example: 1
           nullable: true
           type: integer
         distinct_ip_addresses_count_30d:
           description: The number of distinct IP addresses linked to the same bank
             account during Plaid authentication in the last 30 days
+          example: 1
           nullable: true
           type: integer
         distinct_ip_addresses_count_90d:
           description: The number of distinct IP addresses linked to the same bank
             account during Plaid authentication in the last 90 days
+          example: 1
           nullable: true
           type: integer
         distinct_user_agents_count_3d:
           description: The number of distinct user agents linked to the same bank
             account during Plaid authentication in the last 3 days
+          example: 1
           nullable: true
           type: integer
         distinct_user_agents_count_7d:
           description: The number of distinct user agents linked to the same bank
             account during Plaid authentication in the last 7 days
+          example: 1
           nullable: true
           type: integer
         distinct_user_agents_count_30d:
           description: The number of distinct user agents linked to the same bank
             account during Plaid authentication in the last 30 days
+          example: 1
           nullable: true
           type: integer
         distinct_user_agents_count_90d:
           description: The number of distinct user agents linked to the same bank
             account during Plaid authentication in the last 90 days
+          example: 1
           nullable: true
           type: integer
         address_change_count_28d:
           description: The number of times the account's addresses on file have changed
             over the past 28 days
+          example: 1
           nullable: true
           type: integer
         email_change_count_28d:
           description: The number of times the account's email addresses on file have
             changed over the past 28 days
+          example: 2
           nullable: true
           type: integer
         phone_change_count_28d:
           description: The number of times the account's phone numbers on file have
             changed over the past 28 days
+          example: 1
           nullable: true
           type: integer
         address_change_count_90d:
           description: The number of times the account's addresses on file have changed
             over the past 90 days
+          example: 3
           nullable: true
           type: integer
         email_change_count_90d:
           description: The number of times the account's email addresses on file have
             changed over the past 90 days
+          example: 4
           nullable: true
           type: integer
         phone_change_count_90d:
           description: The number of times the account's phone numbers on file have
             changed over the past 90 days
+          example: 2
           nullable: true
           type: integer
         days_since_account_opening:
           description: The number of days since the bank account was opened, as reported
             by the financial institution
+          example: 365
           nullable: true
           type: integer
         days_since_first_observed_transaction:
           description: The number of days since the oldest transaction available to
             Plaid for this account. This measure, combined with Plaid connection history,
             can be used to infer the age of the account
+          example: 180
           nullable: true
           type: integer
+      required:
+      - address_change_count_28d
+      - address_change_count_90d
+      - days_since_account_opening
+      - days_since_first_observed_transaction
+      - days_since_first_plaid_connection
+      - distinct_ip_addresses_count_30d
+      - distinct_ip_addresses_count_3d
+      - distinct_ip_addresses_count_7d
+      - distinct_ip_addresses_count_90d
+      - distinct_user_agents_count_30d
+      - distinct_user_agents_count_3d
+      - distinct_user_agents_count_7d
+      - distinct_user_agents_count_90d
+      - email_change_count_28d
+      - email_change_count_90d
+      - failed_plaid_non_oauth_authentication_attempts_count_30d
+      - failed_plaid_non_oauth_authentication_attempts_count_3d
+      - failed_plaid_non_oauth_authentication_attempts_count_7d
+      - is_account_closed
+      - is_account_frozen_or_restricted
+      - phone_change_count_28d
+      - phone_change_count_90d
+      - plaid_connections_count_30d
+      - plaid_connections_count_7d
+      - plaid_non_oauth_authentication_attempts_count_30d
+      - plaid_non_oauth_authentication_attempts_count_3d
+      - plaid_non_oauth_authentication_attempts_count_7d
+      - total_plaid_connections_count
       title: BeaconAccountRiskAttributes
       type: object
     BeaconAuditTrail:
@@ -75356,6 +75806,140 @@ components:
       - system
       - bulk_import
       type: string
+    BeaconBankAccountInsights:
+      additionalProperties: true
+      description: Bank Account Insights encapsulate the risk insights for a single
+        Bank Account linked to an Item that is assocaited with a Beacon User.
+      example:
+        account_id: blgvvBlXw3cq5GMPwqB6s6q4dLKB9WcVqGDGo
+        attributes:
+          days_since_first_plaid_connection: 1
+          is_account_closed: false
+          distinct_ip_addresses_count_90d: 1
+          distinct_user_agents_count_30d: 1
+          distinct_ip_addresses_count_30d: 1
+          distinct_user_agents_count_90d: 1
+          distinct_user_agents_count_7d: 1
+          phone_change_count_90d: 2
+          plaid_connections_count_30d: 1
+          is_account_frozen_or_restricted: false
+          failed_plaid_non_oauth_authentication_attempts_count_30d: 1
+          failed_plaid_non_oauth_authentication_attempts_count_7d: 1
+          phone_change_count_28d: 1
+          failed_plaid_non_oauth_authentication_attempts_count_3d: 1
+          plaid_non_oauth_authentication_attempts_count_30d: 1
+          total_plaid_connections_count: 1
+          plaid_non_oauth_authentication_attempts_count_7d: 1
+          email_change_count_90d: 4
+          plaid_connections_count_7d: 1
+          plaid_non_oauth_authentication_attempts_count_3d: 1
+          distinct_ip_addresses_count_7d: 1
+          distinct_user_agents_count_3d: 1
+          address_change_count_90d: 3
+          days_since_account_opening: 365
+          distinct_ip_addresses_count_3d: 1
+          days_since_first_observed_transaction: 180
+          email_change_count_28d: 2
+          address_change_count_28d: 1
+      properties:
+        account_id:
+          description: The Plaid `account_id`
+          example: blgvvBlXw3cq5GMPwqB6s6q4dLKB9WcVqGDGo
+          type: string
+        type:
+          $ref: '#/components/schemas/AccountType'
+        subtype:
+          $ref: '#/components/schemas/AccountSubtype'
+        attributes:
+          $ref: '#/components/schemas/BeaconAccountRiskAttributes'
+      required:
+      - account_id
+      - attributes
+      - subtype
+      - type
+      title: BeaconBankAccountInsights
+      type: object
+    BeaconBankAccounts:
+      additionalProperties: true
+      description: A collection of Bank Accounts linked to an Item that is associated
+        with this Beacon User.
+      example:
+        item_id: 515cd85321d3649aecddc015
+        accounts:
+        - account_id: blgvvBlXw3cq5GMPwqB6s6q4dLKB9WcVqGDGo
+          attributes:
+            days_since_first_plaid_connection: 1
+            is_account_closed: false
+            distinct_ip_addresses_count_90d: 1
+            distinct_user_agents_count_30d: 1
+            distinct_ip_addresses_count_30d: 1
+            distinct_user_agents_count_90d: 1
+            distinct_user_agents_count_7d: 1
+            phone_change_count_90d: 2
+            plaid_connections_count_30d: 1
+            is_account_frozen_or_restricted: false
+            failed_plaid_non_oauth_authentication_attempts_count_30d: 1
+            failed_plaid_non_oauth_authentication_attempts_count_7d: 1
+            phone_change_count_28d: 1
+            failed_plaid_non_oauth_authentication_attempts_count_3d: 1
+            plaid_non_oauth_authentication_attempts_count_30d: 1
+            total_plaid_connections_count: 1
+            plaid_non_oauth_authentication_attempts_count_7d: 1
+            email_change_count_90d: 4
+            plaid_connections_count_7d: 1
+            plaid_non_oauth_authentication_attempts_count_3d: 1
+            distinct_ip_addresses_count_7d: 1
+            distinct_user_agents_count_3d: 1
+            address_change_count_90d: 3
+            days_since_account_opening: 365
+            distinct_ip_addresses_count_3d: 1
+            days_since_first_observed_transaction: 180
+            email_change_count_28d: 2
+            address_change_count_28d: 1
+        - account_id: blgvvBlXw3cq5GMPwqB6s6q4dLKB9WcVqGDGo
+          attributes:
+            days_since_first_plaid_connection: 1
+            is_account_closed: false
+            distinct_ip_addresses_count_90d: 1
+            distinct_user_agents_count_30d: 1
+            distinct_ip_addresses_count_30d: 1
+            distinct_user_agents_count_90d: 1
+            distinct_user_agents_count_7d: 1
+            phone_change_count_90d: 2
+            plaid_connections_count_30d: 1
+            is_account_frozen_or_restricted: false
+            failed_plaid_non_oauth_authentication_attempts_count_30d: 1
+            failed_plaid_non_oauth_authentication_attempts_count_7d: 1
+            phone_change_count_28d: 1
+            failed_plaid_non_oauth_authentication_attempts_count_3d: 1
+            plaid_non_oauth_authentication_attempts_count_30d: 1
+            total_plaid_connections_count: 1
+            plaid_non_oauth_authentication_attempts_count_7d: 1
+            email_change_count_90d: 4
+            plaid_connections_count_7d: 1
+            plaid_non_oauth_authentication_attempts_count_3d: 1
+            distinct_ip_addresses_count_7d: 1
+            distinct_user_agents_count_3d: 1
+            address_change_count_90d: 3
+            days_since_account_opening: 365
+            distinct_ip_addresses_count_3d: 1
+            days_since_first_observed_transaction: 180
+            email_change_count_28d: 2
+            address_change_count_28d: 1
+      properties:
+        item_id:
+          description: The Plaid Item ID the Bank Accounts belong to.
+          example: 515cd85321d3649aecddc015
+          type: string
+        accounts:
+          items:
+            $ref: '#/components/schemas/BeaconBankAccountInsights'
+          type: array
+      required:
+      - accounts
+      - item_id
+      title: BeaconBankAccounts
+      type: object
     BeaconDuplicateGetRequest:
       description: Request input for getting a Beacon Duplicate
       example:
@@ -76236,6 +76820,145 @@ components:
       - version
       title: BeaconUser
       type: object
+    BeaconUserAccountInsightsGetRequest:
+      description: Request input for fetching the risk insights for a Beacon User's
+        Bank Accounts
+      example:
+        access_token: access_token
+        beacon_user_id: becusr_42cF1MNo42r9Xj
+        secret: secret
+        client_id: client_id
+      properties:
+        beacon_user_id:
+          description: ID of the associated Beacon User.
+          example: becusr_42cF1MNo42r9Xj
+          title: BeaconUserID
+          type: string
+        access_token:
+          description: The access token associated with the Item data is being requested
+            for.
+          title: AccessToken
+          type: string
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+      required:
+      - access_token
+      - beacon_user_id
+      type: object
+    BeaconUserAccountInsightsGetResponse:
+      additionalProperties: true
+      description: The response schema for `/beacon/user/account/insights/get`
+      example:
+        updated_at: 2020-07-24T03:26:02Z
+        beacon_user_id: becusr_42cF1MNo42r9Xj
+        created_at: 2020-07-24T03:26:02Z
+        bank_account_insights:
+          item_id: 515cd85321d3649aecddc015
+          accounts:
+          - account_id: blgvvBlXw3cq5GMPwqB6s6q4dLKB9WcVqGDGo
+            attributes:
+              days_since_first_plaid_connection: 1
+              is_account_closed: false
+              distinct_ip_addresses_count_90d: 1
+              distinct_user_agents_count_30d: 1
+              distinct_ip_addresses_count_30d: 1
+              distinct_user_agents_count_90d: 1
+              distinct_user_agents_count_7d: 1
+              phone_change_count_90d: 2
+              plaid_connections_count_30d: 1
+              is_account_frozen_or_restricted: false
+              failed_plaid_non_oauth_authentication_attempts_count_30d: 1
+              failed_plaid_non_oauth_authentication_attempts_count_7d: 1
+              phone_change_count_28d: 1
+              failed_plaid_non_oauth_authentication_attempts_count_3d: 1
+              plaid_non_oauth_authentication_attempts_count_30d: 1
+              total_plaid_connections_count: 1
+              plaid_non_oauth_authentication_attempts_count_7d: 1
+              email_change_count_90d: 4
+              plaid_connections_count_7d: 1
+              plaid_non_oauth_authentication_attempts_count_3d: 1
+              distinct_ip_addresses_count_7d: 1
+              distinct_user_agents_count_3d: 1
+              address_change_count_90d: 3
+              days_since_account_opening: 365
+              distinct_ip_addresses_count_3d: 1
+              days_since_first_observed_transaction: 180
+              email_change_count_28d: 2
+              address_change_count_28d: 1
+          - account_id: blgvvBlXw3cq5GMPwqB6s6q4dLKB9WcVqGDGo
+            attributes:
+              days_since_first_plaid_connection: 1
+              is_account_closed: false
+              distinct_ip_addresses_count_90d: 1
+              distinct_user_agents_count_30d: 1
+              distinct_ip_addresses_count_30d: 1
+              distinct_user_agents_count_90d: 1
+              distinct_user_agents_count_7d: 1
+              phone_change_count_90d: 2
+              plaid_connections_count_30d: 1
+              is_account_frozen_or_restricted: false
+              failed_plaid_non_oauth_authentication_attempts_count_30d: 1
+              failed_plaid_non_oauth_authentication_attempts_count_7d: 1
+              phone_change_count_28d: 1
+              failed_plaid_non_oauth_authentication_attempts_count_3d: 1
+              plaid_non_oauth_authentication_attempts_count_30d: 1
+              total_plaid_connections_count: 1
+              plaid_non_oauth_authentication_attempts_count_7d: 1
+              email_change_count_90d: 4
+              plaid_connections_count_7d: 1
+              plaid_non_oauth_authentication_attempts_count_3d: 1
+              distinct_ip_addresses_count_7d: 1
+              distinct_user_agents_count_3d: 1
+              address_change_count_90d: 3
+              days_since_account_opening: 365
+              distinct_ip_addresses_count_3d: 1
+              days_since_first_observed_transaction: 180
+              email_change_count_28d: 2
+              address_change_count_28d: 1
+        request_id: request_id
+      properties:
+        beacon_user_id:
+          description: ID of the associated Beacon User.
+          example: becusr_42cF1MNo42r9Xj
+          title: BeaconUserID
+          type: string
+        created_at:
+          description: An ISO8601 formatted timestamp.
+          example: 2020-07-24T03:26:02Z
+          format: date-time
+          title: Timestamp
+          type: string
+        updated_at:
+          description: An ISO8601 formatted timestamp. This field indicates the last
+            time the resource was modified.
+          example: 2020-07-24T03:26:02Z
+          format: date-time
+          title: Timestamp
+          type: string
+        bank_account_insights:
+          $ref: '#/components/schemas/BeaconBankAccounts'
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - bank_account_insights
+      - beacon_user_id
+      - created_at
+      - request_id
+      - updated_at
+      type: object
     BeaconUserAddress:
       additionalProperties: true
       description: |-
@@ -76357,6 +77080,9 @@ components:
         user:
           $ref: '#/components/schemas/BeaconUserRequestData'
         access_tokens:
+          description: "Send this array of access tokens to link accounts to the Beacon\
+            \ User and have them evaluated for Account Insights. \nA maximum of 50\
+            \ accounts total can be added to a single Beacon User."
           items:
             $ref: '#/components/schemas/AccessToken'
           nullable: true
@@ -77172,6 +77898,10 @@ components:
         user:
           $ref: '#/components/schemas/BeaconUserUpdateRequestData'
         access_tokens:
+          description: |-
+            Send this array of access tokens to add accounts to this user for evaluation.
+            This will add accounts to this Beacon User. If left null only existing accounts will be returned in response.
+            A maximum of 50 accounts total can be added to a Beacon User.
           items:
             $ref: '#/components/schemas/AccessToken'
           nullable: true
@@ -77189,12 +77919,12 @@ components:
           type: string
       required:
       - beacon_user_id
-      - user
       type: object
     BeaconUserUpdateRequestData:
       additionalProperties: true
       description: A subset of a Beacon User's data which is used to patch the existing
-        identity data associated with a Beacon User. At least one field must be provided,.
+        identity data associated with a Beacon User. At least one field must be provided.
+        If left unset or null, user data will not be patched.
       example:
         id_number:
           type: us_ssn
@@ -77213,6 +77943,7 @@ components:
           family_name: Knope
         phone_number: +19876543212
         ip_address: 192.0.2.42
+      nullable: true
       properties:
         date_of_birth:
           description: A date in the format YYYY-MM-DD (RFC 3339 Section 5.6).
@@ -85788,7 +86519,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -85821,7 +86551,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             - official_name: official_name
               account_id: account_id
@@ -85859,7 +86588,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -85892,7 +86620,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             last_updated_time: 2000-01-23T04:56:07.000+00:00
             item_id: item_id
@@ -86094,7 +86821,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -86127,7 +86853,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             - official_name: official_name
               account_id: account_id
@@ -86165,7 +86890,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -86198,7 +86922,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             last_updated_time: 2000-01-23T04:56:07.000+00:00
             item_id: item_id
@@ -86569,7 +87292,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -86602,7 +87324,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             - official_name: official_name
               account_id: account_id
@@ -86640,7 +87361,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -86673,7 +87393,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             last_updated_time: 2000-01-23T04:56:07.000+00:00
             item_id: item_id
@@ -86875,7 +87594,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -86908,7 +87626,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             - official_name: official_name
               account_id: account_id
@@ -86946,7 +87663,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -86979,7 +87695,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             last_updated_time: 2000-01-23T04:56:07.000+00:00
             item_id: item_id
@@ -87306,7 +88021,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -87339,7 +88053,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             - official_name: official_name
               account_id: account_id
@@ -87377,7 +88090,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -87410,7 +88122,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             last_updated_time: 2000-01-23T04:56:07.000+00:00
             item_id: item_id
@@ -87612,7 +88323,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -87645,7 +88355,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             - official_name: official_name
               account_id: account_id
@@ -87683,7 +88392,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -87716,7 +88424,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             last_updated_time: 2000-01-23T04:56:07.000+00:00
             item_id: item_id
@@ -88093,7 +88800,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             - emails:
               - data: data
                 type: primary
@@ -88126,7 +88832,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             mask: mask
           - official_name: official_name
             account_id: account_id
@@ -88164,7 +88869,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             - emails:
               - data: data
                 type: primary
@@ -88197,7 +88901,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             mask: mask
           last_updated_time: 2000-01-23T04:56:07.000+00:00
           item_id: item_id
@@ -88399,7 +89102,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             - emails:
               - data: data
                 type: primary
@@ -88432,7 +89134,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             mask: mask
           - official_name: official_name
             account_id: account_id
@@ -88470,7 +89171,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             - emails:
               - data: data
                 type: primary
@@ -88503,7 +89203,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             mask: mask
           last_updated_time: 2000-01-23T04:56:07.000+00:00
           item_id: item_id
@@ -88861,7 +89560,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             - emails:
               - data: data
                 type: primary
@@ -88894,7 +89592,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             mask: mask
           - official_name: official_name
             account_id: account_id
@@ -88932,7 +89629,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             - emails:
               - data: data
                 type: primary
@@ -88965,7 +89661,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             mask: mask
           last_updated_time: 2000-01-23T04:56:07.000+00:00
           item_id: item_id
@@ -89167,7 +89862,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             - emails:
               - data: data
                 type: primary
@@ -89200,7 +89894,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             mask: mask
           - official_name: official_name
             account_id: account_id
@@ -89238,7 +89931,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             - emails:
               - data: data
                 type: primary
@@ -89271,7 +89963,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             mask: mask
           last_updated_time: 2000-01-23T04:56:07.000+00:00
           item_id: item_id
@@ -89618,7 +90309,6 @@ components:
             names:
             - names
             - names
-            document_id: document_id
           - emails:
             - data: data
               type: primary
@@ -89651,7 +90341,6 @@ components:
             names:
             - names
             - names
-            document_id: document_id
           mask: mask
         - official_name: official_name
           account_id: account_id
@@ -89689,7 +90378,6 @@ components:
             names:
             - names
             - names
-            document_id: document_id
           - emails:
             - data: data
               type: primary
@@ -89722,7 +90410,6 @@ components:
             names:
             - names
             - names
-            document_id: document_id
           mask: mask
         last_updated_time: 2000-01-23T04:56:07.000+00:00
         item_id: item_id
@@ -89959,7 +90646,6 @@ components:
           names:
           - names
           - names
-          document_id: document_id
         - emails:
           - data: data
             type: primary
@@ -89992,7 +90678,6 @@ components:
           names:
           - names
           - names
-          document_id: document_id
         mask: mask
       properties:
         account_id:
@@ -90677,6 +91362,9 @@ components:
         user_token: user_token
         client_id: client_id
         days_requested: 59
+        products:
+        - null
+        - null
       properties:
         client_id:
           description: Your Plaid API `client_id`. The `client_id` is required and
@@ -90703,15 +91391,30 @@ components:
           maximum: 731
           minimum: 1
           type: integer
+        products:
+          description: Products that will be retrieved in this report. This configuration
+            will determine what data types to fetch from the user's financial institution.
+            If omitted, the data types needed to support all products will be fetched.
+          items:
+            $ref: '#/components/schemas/CraCheckReportProduct'
+          type: array
+          x-hidden-from-docs: true
         consumer_report_permissible_purpose:
           $ref: '#/components/schemas/ConsumerReportPermissiblePurpose'
       required:
       - consumer_report_permissible_purpose
-      - days_requested
       - user_token
       - webhook
       title: CraCheckReportCreateRequest
       type: object
+    CraCheckReportProduct:
+      description: A product supported by Plaid Check.
+      enum:
+      - cra_base_report
+      - cra_income_insights
+      - cra_partner_insights
+      - cra_network_insights
+      type: string
     CraCheckReportCreateResponse:
       additionalProperties: true
       description: CraCheckReportCreateResponse defines the response schema for `/cra/check_report/create`.
@@ -90798,7 +91501,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -90831,7 +91533,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             - official_name: official_name
               account_id: account_id
@@ -90869,7 +91570,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -90902,7 +91602,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             institution_name: institution_name
             institution_id: institution_id
@@ -90944,7 +91643,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -90977,7 +91675,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             - official_name: official_name
               account_id: account_id
@@ -91015,7 +91712,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -91048,7 +91744,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             institution_name: institution_name
             institution_id: institution_id
@@ -91132,7 +91827,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -91165,7 +91859,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             - official_name: official_name
               account_id: account_id
@@ -91203,7 +91896,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -91236,7 +91928,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             institution_name: institution_name
             institution_id: institution_id
@@ -91278,7 +91969,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -91311,7 +92001,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             - official_name: official_name
               account_id: account_id
@@ -91349,7 +92038,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -91382,7 +92070,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             institution_name: institution_name
             institution_id: institution_id
@@ -91536,7 +92223,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -91569,7 +92255,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             - official_name: official_name
               account_id: account_id
@@ -91607,7 +92292,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -91640,7 +92324,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             institution_name: institution_name
             institution_id: institution_id
@@ -91682,7 +92365,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -91715,7 +92397,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             - official_name: official_name
               account_id: account_id
@@ -91753,7 +92434,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               - emails:
                 - data: data
                   type: primary
@@ -91786,7 +92466,6 @@ components:
                 names:
                 - names
                 - names
-                document_id: document_id
               mask: mask
             institution_name: institution_name
             institution_id: institution_id
@@ -91888,7 +92567,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             - emails:
               - data: data
                 type: primary
@@ -91921,7 +92599,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             mask: mask
           - official_name: official_name
             account_id: account_id
@@ -91959,7 +92636,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             - emails:
               - data: data
                 type: primary
@@ -91992,7 +92668,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             mask: mask
           institution_name: institution_name
           institution_id: institution_id
@@ -92034,7 +92709,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             - emails:
               - data: data
                 type: primary
@@ -92067,7 +92741,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             mask: mask
           - official_name: official_name
             account_id: account_id
@@ -92105,7 +92778,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             - emails:
               - data: data
                 type: primary
@@ -92138,7 +92810,6 @@ components:
               names:
               - names
               - names
-              document_id: document_id
             mask: mask
           institution_name: institution_name
           institution_id: institution_id
@@ -92241,7 +92912,6 @@ components:
             names:
             - names
             - names
-            document_id: document_id
           - emails:
             - data: data
               type: primary
@@ -92274,7 +92944,6 @@ components:
             names:
             - names
             - names
-            document_id: document_id
           mask: mask
         - official_name: official_name
           account_id: account_id
@@ -92312,7 +92981,6 @@ components:
             names:
             - names
             - names
-            document_id: document_id
           - emails:
             - data: data
               type: primary
@@ -92345,7 +93013,6 @@ components:
             names:
             - names
             - names
-            document_id: document_id
           mask: mask
         institution_name: institution_name
         institution_id: institution_id
@@ -92406,7 +93073,6 @@ components:
           names:
           - names
           - names
-          document_id: document_id
         - emails:
           - data: data
             type: primary
@@ -92439,7 +93105,6 @@ components:
           names:
           - names
           - names
-          document_id: document_id
         mask: mask
       properties:
         account_id:
@@ -92711,6 +93376,130 @@ components:
       required:
       - score
       - version
+      type: object
+    CraCheckReportNetworkAttributesGetRequest:
+      description: CraCheckReportNetworkAttributesGetRequest defines the request schema
+        for `/cra/check_report/network_attributes/get`.
+      example:
+        secret: secret
+        user_token: user_token
+        client_id: client_id
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        user_token:
+          description: The user token associated with the User data is being requested
+            for.
+          title: UserToken
+          type: string
+      required:
+      - user_token
+      title: CraCheckReportNetworkAttributesGetRequest
+      type: object
+    CraCheckReportNetworkAttributesGetResponse:
+      additionalProperties: true
+      description: CraCheckReportNetworkAttributesGetResponse defines the response
+        schema for `/cra/check_report/network_attributes/get`.
+      example:
+        report:
+          network_attributes: '{}'
+          report_id: report_id
+          items:
+          - item_id: item_id
+            institution_name: institution_name
+            institution_id: institution_id
+          - item_id: item_id
+            institution_name: institution_name
+            institution_id: institution_id
+          generated_time: 2000-01-23T04:56:07.000+00:00
+        request_id: request_id
+      properties:
+        report:
+          $ref: '#/components/schemas/CraNetworkAttributesReport'
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - report
+      - request_id
+      title: CraCheckReportNetworkAttributesGetResponse
+      type: object
+    CraNetworkAttributesReport:
+      additionalProperties: true
+      description: Contains data for the CRA Network Attributes Report.
+      example:
+        network_attributes: '{}'
+        report_id: report_id
+        items:
+        - item_id: item_id
+          institution_name: institution_name
+          institution_id: institution_id
+        - item_id: item_id
+          institution_name: institution_name
+          institution_id: institution_id
+        generated_time: 2000-01-23T04:56:07.000+00:00
+      properties:
+        report_id:
+          description: The unique identifier associated with the Network Attributes
+            report object.
+          type: string
+        generated_time:
+          description: The time when the Network Attributes Report was generated.
+          format: date-time
+          type: string
+        network_attributes:
+          description: A map of network attributes, where the key is a string, and
+            the value is a float, int, or boolean.
+          title: NetworkAttributes
+          type: object
+        items:
+          description: The Items the end user connected in Link.
+          items:
+            $ref: '#/components/schemas/CraNetworkAttributesItem'
+          type: array
+      required:
+      - generated_time
+      - items
+      - network_attributes
+      - report_id
+      type: object
+    NetworkAttributesSchema:
+      description: A map of network attributes, where the key is a string, and the
+        value is a float, int, or boolean.
+      title: NetworkAttributes
+      type: object
+    CraNetworkAttributesItem:
+      description: Contains data about the connected Item.
+      example:
+        item_id: item_id
+        institution_name: institution_name
+        institution_id: institution_id
+      properties:
+        institution_id:
+          description: The ID for the institution the user linked.
+          type: string
+        institution_name:
+          description: The name of the institution the user linked.
+          type: string
+        item_id:
+          description: The identifier for the Item.
+          type: string
+      required:
+      - institution_id
+      - institution_name
+      - item_id
       type: object
     CraLoansApplicationsRegisterRequest:
       description: CraLoansApplicationsRegisterRequest defines the request schema
@@ -99999,13 +100788,6 @@ components:
           items:
             $ref: '#/components/schemas/Owner'
           type: array
-        documents:
-          description: Array of documents that identity data is dervied from. This
-            array will be empty if none of the account identity is from a document.
-          items:
-            $ref: '#/components/schemas/IdentityDocument'
-          type: array
-          x-hidden-from-docs: true
       required:
       - owners
       type: object
