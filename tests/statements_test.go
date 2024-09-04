@@ -11,7 +11,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/plaid/plaid-go/v27/plaid"
+	"github.com/plaid/plaid-go/v28/plaid"
 )
 
 func TestStatementsFullFlow(t *testing.T) {
