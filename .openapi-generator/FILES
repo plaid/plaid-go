@@ -240,6 +240,13 @@ model_client_provided_raw_transaction.go
 model_client_provided_transaction.go
 model_client_provided_transaction_location.go
 model_connected_application.go
+model_consent_event.go
+model_consent_event_code.go
+model_consent_event_initiator.go
+model_consent_event_type.go
+model_consent_events_get_request.go
+model_consent_events_get_response.go
+model_consented_account.go
 model_consumer_dispute.go
 model_consumer_dispute_category.go
 model_consumer_report_pdf_get_request.go
@@ -462,6 +469,7 @@ model_dashboard_user_get_response.go
 model_dashboard_user_list_request.go
 model_dashboard_user_list_response.go
 model_dashboard_user_status.go
+model_data_sources.go
 model_date_range.go
 model_deductions.go
 model_deductions_breakdown.go
@@ -484,6 +492,7 @@ model_depository_account_subtype.go
 model_depository_filter.go
 model_detailed_originator.go
 model_detected_account.go
+model_device_id.go
 model_distribution_breakdown.go
 model_doc_type.go
 model_document_analysis.go
@@ -696,6 +705,7 @@ model_investment_holdings_get_request_options.go
 model_investment_transaction.go
 model_investment_transaction_subtype.go
 model_investment_transaction_type.go
+model_investments_auth_data_sources.go
 model_investments_auth_get_numbers.go
 model_investments_auth_get_request.go
 model_investments_auth_get_request_options.go
@@ -712,7 +722,15 @@ model_investments_transactions_get_request_options.go
 model_investments_transactions_get_response.go
 model_investments_transactions_override.go
 model_iso_currency_code.go
+model_issue.go
 model_issue_resolved_webhook.go
+model_issues_get_request.go
+model_issues_get_response.go
+model_issues_search_request.go
+model_issues_search_response.go
+model_issues_status.go
+model_issues_subscribe_request.go
+model_issues_subscribe_response.go
 model_issuing_country.go
 model_item.go
 model_item_access_token_invalidate_request.go
@@ -727,6 +745,7 @@ model_item_application_scopes_update_request.go
 model_item_application_scopes_update_response.go
 model_item_application_unlink_request.go
 model_item_application_unlink_response.go
+model_item_consented_data_scope.go
 model_item_error_webhook.go
 model_item_get_request.go
 model_item_get_response.go
@@ -1246,6 +1265,9 @@ model_security.go
 model_security_override.go
 model_selfie_analysis.go
 model_selfie_analysis_document_comparison.go
+model_selfie_analysis_facial_analysis.go
+model_selfie_analysis_facial_analysis_outcome.go
+model_selfie_analysis_liveness_check.go
 model_selfie_capture.go
 model_selfie_check.go
 model_selfie_check_selfie.go
@@ -1454,6 +1476,9 @@ model_transfer_originator_list_request.go
 model_transfer_originator_list_response.go
 model_transfer_platform_originator_create_request.go
 model_transfer_platform_originator_create_response.go
+model_transfer_platform_requirement_submission.go
+model_transfer_platform_requirement_submit_request.go
+model_transfer_platform_requirement_submit_response.go
 model_transfer_platform_tos_acceptance_metadata.go
 model_transfer_questionnaire_create_request.go
 model_transfer_questionnaire_create_response.go
@@ -1499,6 +1524,7 @@ model_transfer_user_in_request.go
 model_transfer_user_in_request_deprecated.go
 model_transfer_user_in_response.go
 model_transfer_wire_details.go
+model_trusted_device_data.go
 model_update_entity_screening_request_search_terms.go
 model_update_individual_screening_request_search_terms.go
 model_user_account_identity.go
