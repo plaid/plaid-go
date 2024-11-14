@@ -153,6 +153,7 @@ model_base_report.go
 model_base_report_account.go
 model_base_report_account_balances.go
 model_base_report_account_insights.go
+model_base_report_account_metadata.go
 model_base_report_attributes.go
 model_base_report_average_flow_insights.go
 model_base_report_average_monthly_balances.go
@@ -259,6 +260,7 @@ model_counterparty_type.go
 model_country_code.go
 model_cra_bank_income.go
 model_cra_bank_income_account.go
+model_cra_bank_income_account_metadata.go
 model_cra_bank_income_bonus_type.go
 model_cra_bank_income_cause.go
 model_cra_bank_income_complete_result.go
@@ -334,6 +336,7 @@ model_cra_partner_insights_get_request.go
 model_cra_partner_insights_get_response.go
 model_cra_partner_insights_item.go
 model_cra_partner_insights_item_account.go
+model_cra_partner_insights_item_account_metadata.go
 model_cra_partner_insights_prism.go
 model_cra_pdf_add_ons.go
 model_cra_prediction_interval.go
@@ -747,6 +750,7 @@ model_item_application_scopes_update_response.go
 model_item_application_unlink_request.go
 model_item_application_unlink_response.go
 model_item_consented_data_scope.go
+model_item_create_authentication.go
 model_item_error_webhook.go
 model_item_get_request.go
 model_item_get_response.go
@@ -769,6 +773,8 @@ model_item_status_nullable.go
 model_item_status_transactions.go
 model_item_webhook_update_request.go
 model_item_webhook_update_response.go
+model_item_with_consent_fields.go
+model_item_with_consent_fields_all_of.go
 model_jwk_public_key.go
 model_jwt_header.go
 model_kyc_check_address_summary.go
@@ -991,6 +997,8 @@ model_payment_initiation_consent_create_request.go
 model_payment_initiation_consent_create_response.go
 model_payment_initiation_consent_get_request.go
 model_payment_initiation_consent_get_response.go
+model_payment_initiation_consent_payer_details.go
+model_payment_initiation_consent_payer_numbers.go
 model_payment_initiation_consent_payment_execute_request.go
 model_payment_initiation_consent_payment_execute_response.go
 model_payment_initiation_consent_processing_mode.go
@@ -998,6 +1006,7 @@ model_payment_initiation_consent_revoke_request.go
 model_payment_initiation_consent_revoke_response.go
 model_payment_initiation_consent_scope.go
 model_payment_initiation_consent_status.go
+model_payment_initiation_consent_type.go
 model_payment_initiation_metadata.go
 model_payment_initiation_optional_restriction_bacs.go
 model_payment_initiation_payment.go
@@ -1304,6 +1313,8 @@ model_signal_user.go
 model_signal_warning.go
 model_simulated_transfer_sweep.go
 model_single_document_risk_signal.go
+model_sms_verification.go
+model_sms_verification_status.go
 model_source.go
 model_standalone_account_type.go
 model_standalone_currency_code_list.go
@@ -1334,7 +1345,15 @@ model_taxpayer_identifier_type.go
 model_taxpayer_identifiers.go
 model_total.go
 model_total_canonical_description.go
+model_total_inflow_amount.go
+model_total_inflow_amount30d.go
+model_total_inflow_amount60d.go
+model_total_inflow_amount90d.go
 model_total_monthly_income_insights.go
+model_total_outflow_amount.go
+model_total_outflow_amount30d.go
+model_total_outflow_amount60d.go
+model_total_outflow_amount90d.go
 model_transaction.go
 model_transaction_all_of.go
 model_transaction_base.go
@@ -1486,6 +1505,7 @@ model_transfer_platform_person_create_request.go
 model_transfer_platform_person_create_response.go
 model_transfer_platform_person_id_number.go
 model_transfer_platform_person_name.go
+model_transfer_platform_requirement.go
 model_transfer_platform_requirement_submission.go
 model_transfer_platform_requirement_submit_request.go
 model_transfer_platform_requirement_submit_response.go
@@ -1571,6 +1591,8 @@ model_verification_of_asset.go
 model_verification_of_asset_response.go
 model_verification_refresh_status.go
 model_verification_status.go
+model_verify_sms_details.go
+model_verify_sms_details_status.go
 model_w2.go
 model_w2_box12.go
 model_w2_box12_override.go
