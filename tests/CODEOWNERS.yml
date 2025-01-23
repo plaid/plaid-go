@@ -15,7 +15,7 @@ file_owners:
   - match: "deposit_switch_test.go"
     owner: "TEAM_FINANCIAL_IDENTITY"
   - match: "enrich_test.go"
-    owner: "TEAM_TES"
+    owner: "TEAM_TRANSACTIONS"
   - match: "enums_test.go"
     owner: "TEAM_DASHBOARD_PLATFORM"
   - match: "holdings_test.go"
