@@ -231,6 +231,8 @@ model_beacon_user_status_updated_webhook.go
 model_beacon_user_update_request.go
 model_beacon_user_update_request_data.go
 model_beacon_user_update_response.go
+model_business_account.go
+model_business_account_all_of.go
 model_business_finance_category.go
 model_cash_flow_updates_expected_deposit_missed_webhook.go
 model_cash_flow_updates_insights_webhook.go
@@ -960,6 +962,16 @@ model_numbers_international.go
 model_numbers_international_iban.go
 model_numbers_international_nullable.go
 model_numbers_retirement401k.go
+model_o_auth_error_code.go
+model_o_auth_error_response.go
+model_o_auth_grant_type.go
+model_o_auth_introspect_request.go
+model_o_auth_introspect_response.go
+model_o_auth_revoke_request.go
+model_o_auth_revoke_response.go
+model_o_auth_subject_token_type.go
+model_o_auth_token_request.go
+model_o_auth_token_response.go
 model_omittable_transfer_type.go
 model_option_contract.go
 model_originating_fund_source.go
