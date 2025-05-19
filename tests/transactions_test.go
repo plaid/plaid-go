@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/plaid/plaid-go/v34/plaid"
+	"github.com/plaid/plaid-go/v35/plaid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
