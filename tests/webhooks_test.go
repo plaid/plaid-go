@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/plaid/plaid-go/v36/plaid"
+	"github.com/plaid/plaid-go/v37/plaid"
 	"github.com/stretchr/testify/assert"
 )
 
