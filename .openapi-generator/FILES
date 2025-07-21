@@ -230,6 +230,7 @@ model_beacon_user_update_response.go
 model_business_account.go
 model_business_account_all_of.go
 model_business_finance_category.go
+model_cash_flow_updates_event_webhook_codes.go
 model_cash_flow_updates_expected_deposit_missed_webhook.go
 model_cash_flow_updates_insights_webhook.go
 model_cash_flow_updates_large_deposit_webhook.go
@@ -291,6 +292,9 @@ model_consumer_report_permissible_purpose.go
 model_consumer_report_user_identity.go
 model_counterparty.go
 model_counterparty_insights.go
+model_counterparty_numbers.go
+model_counterparty_numbers_bacs.go
+model_counterparty_numbers_international.go
 model_counterparty_type.go
 model_country_code.go
 model_cra_bank_income_account.go
@@ -333,10 +337,14 @@ model_cra_check_report_partner_insights_get_request.go
 model_cra_check_report_partner_insights_get_response.go
 model_cra_check_report_pdf_get_request.go
 model_cra_check_report_ready_webhook.go
+model_cra_check_report_verification_get_employment_refresh_options.go
 model_cra_check_report_verification_get_report_type.go
 model_cra_check_report_verification_get_request.go
 model_cra_check_report_verification_get_response.go
-model_cra_check_report_verification_get_voe_options.go
+model_cra_employment_refresh_report.go
+model_cra_employment_refresh_report_account.go
+model_cra_employment_refresh_report_item.go
+model_cra_employment_refresh_report_transaction.go
 model_cra_income_insights.go
 model_cra_loan_application.go
 model_cra_loan_application_decision.go
@@ -388,10 +396,6 @@ model_cra_voa_report_account_historical_balance.go
 model_cra_voa_report_attributes.go
 model_cra_voa_report_item.go
 model_cra_voa_report_transactions_insights.go
-model_cra_voe_report.go
-model_cra_voe_report_account.go
-model_cra_voe_report_item.go
-model_cra_voe_report_transaction.go
 model_credit1099.go
 model_credit1099_filer.go
 model_credit1099_payer.go
@@ -954,7 +958,6 @@ model_monitoring_income_source.go
 model_monitoring_insights.go
 model_monitoring_insights_item_status.go
 model_monitoring_insights_status.go
-model_monitoring_insights_webhook.go
 model_monitoring_item_status_code.go
 model_monitoring_loan_insights.go
 model_mortgage_interest_rate.go
@@ -1267,6 +1270,7 @@ model_recurring_transactions_update_webhook.go
 model_recurring_transfer.go
 model_recurring_transfer_nullable.go
 model_recurring_transfer_skipped_webhook.go
+model_refresh_result.go
 model_removed_transaction.go
 model_report_type.go
 model_reporting_information.go
@@ -1696,6 +1700,8 @@ model_user_create_request.go
 model_user_create_response.go
 model_user_custom_password.go
 model_user_data_overview.go
+model_user_financial_data_refresh_request.go
+model_user_financial_data_refresh_response.go
 model_user_id_number.go
 model_user_items_get_request.go
 model_user_items_get_response.go
@@ -1709,6 +1715,8 @@ model_user_third_party_token_create_request.go
 model_user_third_party_token_create_response.go
 model_user_third_party_token_remove_request.go
 model_user_third_party_token_remove_response.go
+model_user_transactions_refresh_request.go
+model_user_transactions_refresh_response.go
 model_user_update_request.go
 model_user_update_response.go
 model_validation_source.go
