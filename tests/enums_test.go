@@ -3,7 +3,7 @@ package tests
 import (
 	"testing"
 
-	"github.com/plaid/plaid-go/v37/plaid"
+	"github.com/plaid/plaid-go/v38/plaid"
 	"github.com/stretchr/testify/assert"
 )
 

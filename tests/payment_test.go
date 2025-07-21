@@ -3,9 +3,8 @@ package tests
 import (
 	"context"
 	"testing"
-	"time"
 
-	"github.com/plaid/plaid-go/v37/plaid"
+	"github.com/plaid/plaid-go/v38/plaid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -145,12 +144,10 @@ func commonPaymentTestFlows(t *testing.T, ctx context.Context, testClient *plaid
 	paymentInitiation.SetPaymentId(paymentID)
 
 	if useLinkToken {
-		user := plaid.NewLinkTokenCreateRequestUser(time.Now().String())
 		request := plaid.NewLinkTokenCreateRequest(
 			"Plaid Test",
 			"en",
 			[]plaid.CountryCode{plaid.COUNTRYCODE_US},
-			*user,
 		)
 		request.SetProducts([]plaid.Products{plaid.PRODUCTS_PAYMENT_INITIATION})
 		request.SetPaymentInitiation(*paymentInitiation)

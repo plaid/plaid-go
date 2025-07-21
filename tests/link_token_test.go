@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-	"time"
 
-	"github.com/plaid/plaid-go/v37/plaid"
+	"github.com/plaid/plaid-go/v38/plaid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,7 +14,7 @@ func TestLinkTokenCreateRequired(t *testing.T) {
 	testClient := NewTestClient()
 	ctx := context.Background()
 
-	request := plaid.NewLinkTokenCreateRequest("Plaid Test", "en", []plaid.CountryCode{plaid.COUNTRYCODE_US}, *plaid.NewLinkTokenCreateRequestUser(time.Now().String()))
+	request := plaid.NewLinkTokenCreateRequest("Plaid Test", "en", []plaid.CountryCode{plaid.COUNTRYCODE_US})
 	request.SetProducts([]plaid.Products{plaid.PRODUCTS_AUTH})
 	resp, _, err := testClient.PlaidApi.LinkTokenCreate(ctx).LinkTokenCreateRequest(*request).Execute()
 	assert.NoError(t, err)
@@ -27,23 +26,11 @@ func TestLinkTokenCreateRequired(t *testing.T) {
 func TestLinkTokenCreateOptional(t *testing.T) {
 	testClient := NewTestClient()
 	ctx := context.Background()
-	now := time.Now()
-	nullableNow := *plaid.NewNullableTime(&now)
 
-	user := plaid.LinkTokenCreateRequestUser{
-		ClientUserId:             time.Now().String(),
-		LegalName:                plaid.PtrString("Legal Name"),
-		PhoneNumber:              plaid.PtrString("2025550165"),
-		PhoneNumberVerifiedTime:  nullableNow,
-		EmailAddress:             plaid.PtrString("test@email.com"),
-		EmailAddressVerifiedTime: nullableNow,
-		Ssn:                      plaid.PtrString("123-22-1234"),
-	}
 	request := plaid.NewLinkTokenCreateRequest(
 		"Plaid Test",
 		"en",
 		[]plaid.CountryCode{plaid.COUNTRYCODE_US},
-		user,
 	)
 	request.SetProducts([]plaid.Products{plaid.PRODUCTS_AUTH})
 	request.SetLinkCustomizationName("default")
@@ -64,24 +51,11 @@ func TestLinkTokenCreateOptional(t *testing.T) {
 func TestLinkTokenCreateThenGet(t *testing.T) {
 	testClient := NewTestClient()
 	ctx := context.Background()
-	now := time.Now()
-	nullableNow := *plaid.NewNullableTime(&now)
-
-	user := plaid.LinkTokenCreateRequestUser{
-		ClientUserId:             time.Now().String(),
-		LegalName:                plaid.PtrString("Legal Name"),
-		PhoneNumber:              plaid.PtrString("2025550165"),
-		PhoneNumberVerifiedTime:  nullableNow,
-		EmailAddress:             plaid.PtrString("test@email.com"),
-		EmailAddressVerifiedTime: nullableNow,
-		Ssn:                      plaid.PtrString("123-22-1234"),
-	}
 
 	request := plaid.NewLinkTokenCreateRequest(
 		"Plaid Test",
 		"en",
 		[]plaid.CountryCode{plaid.COUNTRYCODE_US},
-		user,
 	)
 	request.SetProducts([]plaid.Products{plaid.PRODUCTS_AUTH})
 	request.SetLinkCustomizationName("default")
@@ -114,13 +88,11 @@ func TestLinkTokenCreateThenGet(t *testing.T) {
 func TestLinkTokenCreateThenGet_ExtendedAuth(t *testing.T) {
 	testClient := NewTestClient()
 	ctx := context.Background()
-	now := time.Now()
 
 	request := plaid.NewLinkTokenCreateRequest(
 		"Plaid Test",
 		"en",
 		[]plaid.CountryCode{plaid.COUNTRYCODE_US},
-		plaid.LinkTokenCreateRequestUser{ClientUserId: now.String()},
 	)
 	request.SetProducts([]plaid.Products{plaid.PRODUCTS_AUTH})
 	enabled := true
