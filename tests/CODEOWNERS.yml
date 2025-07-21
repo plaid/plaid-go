@@ -25,7 +25,7 @@ file_owners:
   - match: "identity_verification_test.go"
     owner: "TEAM_IDENTITY"
   - match: "income_verification_test.go"
-    owner: "TEAM_INCOME_VERIFICATION"
+    owner: "TEAM_CREDIT_DECISIONING"
   - match: "institutions_test.go"
     owner: "TEAM_LINK_FOUNDATIONS"
   - match: "investment_transactions_test.go"
