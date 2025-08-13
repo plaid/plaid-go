@@ -2,6 +2,9 @@ api/openapi.yaml
 api_plaid.go
 client.go
 configuration.go
+model_aamva_analysis.go
+model_aamva_detailed_match_result.go
+model_aamva_match_result.go
 model_account_access.go
 model_account_assets.go
 model_account_balance.go
@@ -50,6 +53,9 @@ model_asset.go
 model_asset_detail.go
 model_asset_holder.go
 model_asset_holder_name.go
+model_asset_holding.go
+model_asset_holdings.go
+model_asset_investment_transaction_type.go
 model_asset_owner.go
 model_asset_owners.go
 model_asset_report.go
@@ -105,6 +111,10 @@ model_auth_get_response.go
 model_auth_metadata.go
 model_auth_supported_methods.go
 model_auth_update_types.go
+model_auth_verify_numbers_ach.go
+model_auth_verify_request.go
+model_auth_verify_request_numbers.go
+model_auth_verify_response.go
 model_automatically_verified_webhook.go
 model_bank_income_complete_result.go
 model_bank_income_complete_webhook.go
@@ -272,6 +282,7 @@ model_cause.go
 model_cause_all_of.go
 model_check_report_warning.go
 model_check_report_warning_code.go
+model_client_customization.go
 model_client_provided_enhanced_transaction.go
 model_client_provided_enriched_transaction.go
 model_client_provided_raw_transaction.go
@@ -844,6 +855,7 @@ model_kyc_check_phone_summary.go
 model_last_data_access_times.go
 model_latest_scored_event.go
 model_layer_authentication_passed_webhook.go
+model_ledger_event_source_type.go
 model_liabilities_default_update_webhook.go
 model_liabilities_get_request.go
 model_liabilities_get_request_options.go
@@ -1455,8 +1467,6 @@ model_taxpayer_id.go
 model_taxpayer_identifier.go
 model_taxpayer_identifier_type.go
 model_taxpayer_identifiers.go
-model_tch_notification.go
-model_tch_notification_response.go
 model_total.go
 model_total_canonical_description.go
 model_total_inflow_amount.go
@@ -1598,6 +1608,9 @@ model_transfer_ledger_deposit_request.go
 model_transfer_ledger_deposit_response.go
 model_transfer_ledger_distribute_request.go
 model_transfer_ledger_distribute_response.go
+model_transfer_ledger_event.go
+model_transfer_ledger_event_list_request.go
+model_transfer_ledger_event_list_response.go
 model_transfer_ledger_get_request.go
 model_transfer_ledger_get_response.go
 model_transfer_ledger_sweep_simulate_event_type.go
@@ -1705,6 +1718,8 @@ model_user_financial_data_refresh_response.go
 model_user_id_number.go
 model_user_items_get_request.go
 model_user_items_get_response.go
+model_user_items_list_request.go
+model_user_items_list_response.go
 model_user_permission_revoked_webhook.go
 model_user_remove_request.go
 model_user_remove_response.go
