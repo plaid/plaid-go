@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/plaid/plaid-go/v38/plaid"
+	"github.com/plaid/plaid-go/v39/plaid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -47,7 +47,8 @@ func TestIdentityVerification(t *testing.T) {
 	assert.Equal(t, retryResponse.Status, plaid.IdentityVerificationStatus("active"), "Response status should be active")
 
 	// POST /identity_verification/list
-	listRequest := plaid.NewIdentityVerificationListRequest(TEMPLATE_ID, CLIENT_USER_ID)
+	listRequest := plaid.NewIdentityVerificationListRequest(TEMPLATE_ID)
+	listRequest.SetClientUserId(CLIENT_USER_ID)
 	listResponse, _, err := testClient.PlaidApi.IdentityVerificationList(ctx).IdentityVerificationListRequest(
 		*listRequest,
 	).Execute()

@@ -25,10 +25,10 @@ Library versions follow Semantic Versioning ("SemVer") and are formatted as `v1.
 
 As of `v1.0.0`, we've moved to support `GOMODULES`.
 
-Edit your go.mod to include `github.com/plaid/plaid-go/v38 {VERSION}`
+Edit your go.mod to include `github.com/plaid/plaid-go/v39 {VERSION}`
 
 ```console
-$ go get github.com/plaid/plaid-go/v38@{VERSION}
+$ go get github.com/plaid/plaid-go/v39@{VERSION}
 ```
 
 All users are strongly recommended to use a recent version of the library, as older versions do not contain support for new endpoints and fields. For more details, see the [Migration Guide](#migration-guide).
@@ -195,7 +195,7 @@ import (
     "context"
     "os"
 
-    "github.com/plaid/plaid-go/v38/plaid"
+    "github.com/plaid/plaid-go/v39/plaid"
 )
 
 configuration := plaid.NewConfiguration()
