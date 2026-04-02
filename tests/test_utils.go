@@ -2,10 +2,12 @@ package tests
 
 import (
 	"context"
+	"net/http"
 	"os"
 	"testing"
+	"time"
 
-	"github.com/plaid/plaid-go/v41/plaid"
+	"github.com/plaid/plaid-go/v42/plaid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -40,6 +42,19 @@ func PlaidEnv() string {
 		return plaidEnv
 	} else {
 		return "sandbox"
+	}
+}
+
+// retryOnRateLimit retries an API call once after a 10s wait if it receives a
+// 429 response. The caller passes a closure that executes the API call and
+// returns the *http.Response; the closure should assign typed results to
+// variables in the enclosing scope.
+func retryOnRateLimit(t *testing.T, fn func() *http.Response) {
+	httpResp := fn()
+	if httpResp != nil && httpResp.StatusCode == 429 {
+		t.Log("Rate limited (429), retrying after 10s...")
+		time.Sleep(10 * time.Second)
+		fn()
 	}
 }
 

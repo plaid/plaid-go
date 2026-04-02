@@ -2,9 +2,10 @@ package tests
 
 import (
 	"context"
+	"net/http"
 	"testing"
 
-	"github.com/plaid/plaid-go/v41/plaid"
+	"github.com/plaid/plaid-go/v42/plaid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -66,7 +67,13 @@ func TestInstitutionsGet(t *testing.T) {
 		t.Run(tc.desc, func(t *testing.T) {
 			request := plaid.NewInstitutionsGetRequest(tc.count, tc.offset, tc.countryCodes)
 			request.SetOptions(tc.options)
-			instsResp, _, err := testClient.PlaidApi.InstitutionsGet(ctx).InstitutionsGetRequest(*request).Execute()
+			var instsResp plaid.InstitutionsGetResponse
+			var err error
+			retryOnRateLimit(t, func() *http.Response {
+				var httpResp *http.Response
+				instsResp, httpResp, err = testClient.PlaidApi.InstitutionsGet(ctx).InstitutionsGetRequest(*request).Execute()
+				return httpResp
+			})
 			if len(tc.countryCodes) == 0 {
 				assert.Error(t, err)
 			} else {
