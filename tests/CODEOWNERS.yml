@@ -12,8 +12,6 @@ file_owners:
     owner: "TEAM_TRANSFERS_AND_PAYMENTS"
   - match: "categories_test.go"
     owner: "TEAM_TRANSACTIONS"
-  - match: "deposit_switch_test.go"
-    owner: "TEAM_FINANCIAL_IDENTITY"
   - match: "enrich_test.go"
     owner: "TEAM_TRANSACTIONS"
   - match: "enums_test.go"
