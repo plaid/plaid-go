@@ -1,4 +1,4 @@
-module github.com/plaid/plaid-go/v43
+module github.com/plaid/plaid-go/v44
 
 go 1.13
 
