@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/plaid/plaid-go/v43/plaid"
+	"github.com/plaid/plaid-go/v44/plaid"
 	"github.com/stretchr/testify/assert"
 )
 

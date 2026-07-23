@@ -11,7 +11,7 @@ For more information about the Plaid API, including reference documentation, see
 * [Installation](#installation)
 * [Getting Started](#getting-started)
   + [Calling Endpoints](#calling-endpoints)
-  + [Dates](#errors)
+  + [Dates](#dates)
   + [Errors](#errors)
 * [Examples](#examples)
 * [Migration Guide](#migration-guide)
@@ -25,10 +25,10 @@ Library versions follow Semantic Versioning ("SemVer") and are formatted as `v1.
 
 As of `v1.0.0`, we've moved to support `GOMODULES`.
 
-Edit your go.mod to include `github.com/plaid/plaid-go/v43 {VERSION}`
+Edit your go.mod to include `github.com/plaid/plaid-go/v44 {VERSION}`
 
 ```console
-$ go get github.com/plaid/plaid-go/v43@{VERSION}
+$ go get github.com/plaid/plaid-go/v44@{VERSION}
 ```
 
 All users are strongly recommended to use a recent version of the library, as older versions do not contain support for new endpoints and fields. For more details, see the [Migration Guide](#migration-guide).
@@ -100,7 +100,7 @@ If you need to set up specific plaid errors to test your code, there is a helper
 ```go
 	plaidError := plaid.NewPlaidError(plaid.PLAIDERRORTYPE_ITEM_ERROR, "PRODUCT_NOT_READY", "", plaid.NullableString{})
 	genericOpenAPIError := plaid.MakeGenericOpenAPIError([]byte{}, "400 Bad Request", *plaidError)
-````
+```
 
 ## Examples
 
@@ -116,8 +116,8 @@ request := plaid.NewLinkTokenCreateRequest(
   "Plaid Test",
   "en",
   []plaid.CountryCode{plaid.COUNTRYCODE_US},
-  user,
 )
+request.SetUser(user)
 request.SetProducts([]plaid.Products{plaid.PRODUCTS_AUTH})
 request.SetLinkCustomizationName("default")
 request.SetWebhook("https://webhook-uri.com")
@@ -195,7 +195,7 @@ import (
     "context"
     "os"
 
-    "github.com/plaid/plaid-go/v43/plaid"
+    "github.com/plaid/plaid-go/v44/plaid"
 )
 
 configuration := plaid.NewConfiguration()
@@ -335,53 +335,49 @@ balancesGetResp, _, err = testClient.PlaidApi.AccountsBalanceGet(ctx).AccountsBa
 ).Execute()
 ```
 
+Using `/link/token/create` as an example, the required parameters and optional parameters (such as `webhook`, `link_customization_name`, and `redirect_uri`) are now set differently.
+
 #### Using optional parameters example (old way)
 
-```
-const iso8601TimeFormat = "2006-01-02"
-startDate := time.Now().Add(-365 * 24 * time.Hour).Format(iso8601TimeFormat)
-endDate := time.Now().Format(iso8601TimeFormat)
-transactionsResp, err := client.GetTransactions(accessToken, startDate, endDate)
-
-// Or, using optional parameters:
-startDate := time.Now().Add(-365 * 24 * time.Hour).Format(iso8601TimeFormat)
-endDate := time.Now().Format(iso8601TimeFormat)
-options := GetTransactionsOptions{
-  StartDate:  startDate,
-  EndDate:    endDate,
-  AccountIDs: []string{},
-  Count:      2,
-  Offset:     1,
-}
-transactionsResp, err := client.GetTransactionsWithOptions(accessToken, options)
+```go
+// Required and optional parameters are all struct fields
+linkTokenResp, err := client.CreateLinkToken(plaid.LinkTokenConfigs{
+  User: &plaid.LinkTokenUser{
+    ClientUserID: "user-id-from-your-db",
+  },
+  ClientName:   "Plaid Test",
+  Products:     []string{"auth"},
+  CountryCodes: []string{"US"},
+  Language:     "en",
+  // Optional parameters
+  Webhook:               "https://webhook-uri.com",
+  LinkCustomizationName: "default",
+  RedirectUri:           "https://domainname.com/oauth-page.html",
+})
+linkToken := linkTokenResp.LinkToken
 ```
 
 #### Using optional parameters example (new way)
 
-```
-const iso8601TimeFormat = "2006-01-02"
-startDate := time.Now().Add(-365 * 24 * time.Hour).Format(iso8601TimeFormat)
-endDate := time.Now().Format(iso8601TimeFormat)
-options := plaid.TransactionsGetRequestOptions{
-    IncludePersonalFinanceCategory := true,
+```go
+user := plaid.LinkTokenCreateRequestUser{
+  ClientUserId: "user-id-from-your-db",
 }
-request.SetOptions(options)
-
-request := plaid.NewTransactionsGetRequest(
-  accessToken,
-  startDate,
-  endDate,
+request := plaid.NewLinkTokenCreateRequest(
+  "Plaid Test",
+  "en",
+  []plaid.CountryCode{plaid.COUNTRYCODE_US},
 )
+request.SetUser(user)
+request.SetProducts([]plaid.Products{plaid.PRODUCTS_AUTH})
 
-options := plaid.TransactionsGetRequestOptions{
-  Count:  plaid.PtrInt32(100),
-  Offset: plaid.PtrInt32(0),
-  IncludePersonalFinanceCategory: true,
-}
+// Optional parameters are set with their corresponding setters
+request.SetWebhook("https://webhook-uri.com")
+request.SetLinkCustomizationName("default")
+request.SetRedirectUri("https://domainname.com/oauth-page.html")
 
-request.SetOptions(options)
-
-transactionsResp, _, err := testClient.PlaidApi.TransactionsGet(ctx).TransactionsGetRequest(*request).Execute()
+resp, _, err := testClient.PlaidApi.LinkTokenCreate(ctx).LinkTokenCreateRequest(*request).Execute()
+linkToken := resp.GetLinkToken()
 ```
 
 ## Contributing
