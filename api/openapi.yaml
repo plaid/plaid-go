@@ -7,7 +7,7 @@ info:
     details.
   termsOfService: https://plaid.com/legal/
   title: The Plaid API
-  version: 2020-09-14_1.706.1
+  version: 2020-09-14_1.708.0
 servers:
 - description: Production
   url: https://production.plaid.com
@@ -32290,6 +32290,7 @@ components:
     CreditSessionsGetRequest:
       description: CreditSessionsGetRequest defines the request schema for `/credit/sessions/get`
       example:
+        user_id: ""
         secret: secret
         user_token: user_token
         client_id: client_id
@@ -32312,6 +32313,10 @@ components:
             the `user_id` instead. For more details, see [New User APIs](https://plaid.com/docs/api/users/user-apis).
           title: UserToken
           type: string
+        user_id:
+          allOf:
+          - $ref: '#/components/schemas/NewUserID'
+          x-hidden-from-docs: true
       required:
       - user_token
       type: object
@@ -34759,6 +34764,7 @@ components:
           - natural
           - kanmon
           - kick
+          - increase
           type: string
       required:
       - access_token
@@ -50592,11 +50598,15 @@ components:
 
         The following codes indicate that the authorization decision was `declined`:
 
-        `NSF` - Transaction likely to result in a return due to insufficient funds.
+        `NSF` - Transaction has an elevated probability of resulting in a return due to insufficient funds.
 
         `RISK` - Transaction is high-risk.
 
         `TRANSFER_LIMIT_REACHED` - One or several transfer limits are reached, e.g. monthly transfer limit. Check the accompanying `description` field to understand which limit has been reached.
+
+        `ADMIN` - Transaction has an elevated probability of resulting in an administrative return (for example a closed, invalid, or unauthorized account).
+
+        `FRAUD` - Transaction has an elevated probability of being fraudulent.
       enum:
       - NSF
       - RISK
@@ -50606,6 +50616,8 @@ components:
       - PAYMENT_PROFILE_LOGIN_REQUIRED
       - ERROR
       - MIGRATED_ACCOUNT_ITEM
+      - ADMIN
+      - FRAUD
       - null
       type: string
     TransferAuthorizationDecisionRationale:
@@ -67024,6 +67036,7 @@ components:
       description: CreditBankStatementsUploadsGetRequest defines the request schema
         for `/credit/bank_statements/uploads/get`
       example:
+        user_id: ""
         options:
           item_ids:
           - item_ids
@@ -67050,6 +67063,10 @@ components:
             the `user_id` instead. For more details, see [New User APIs](https://plaid.com/docs/api/users/user-apis).
           title: UserToken
           type: string
+        user_id:
+          allOf:
+          - $ref: '#/components/schemas/NewUserID'
+          x-hidden-from-docs: true
         options:
           $ref: '#/components/schemas/CreditBankStatementsUploadsGetRequestOptions'
       required:
@@ -125663,7 +125680,7 @@ components:
           type: string
         attributes:
           description: A map of cash flow attributes, where the key is a string, and
-            the value is a float, int, or boolean. The specific list of attributes
+            the value is a string, float, int, or boolean. The specific list of attributes
             will depend on the cash flow attributes version used. For a full list
             of attributes, contact your account manager.
           title: CashflowAttributes
@@ -125674,17 +125691,17 @@ components:
       type: object
     CashflowAttributesSchema:
       description: A map of cash flow attributes, where the key is a string, and the
-        value is a float, int, or boolean. The specific list of attributes will depend
-        on the cash flow attributes version used. For a full list of attributes, contact
-        your account manager.
+        value is a string, float, int, or boolean. The specific list of attributes
+        will depend on the cash flow attributes version used. For a full list of attributes,
+        contact your account manager.
       title: CashflowAttributes
       type: object
     CraCreditProfileCashflowAttributesSchema:
-      additionalProperties: true
+      additionalProperties: {}
       description: A map of cash flow attributes, where the key is a string, and the
-        value is a float, int, or boolean. The specific list of attributes will depend
-        on the cash flow attributes version used. For a full list of attributes, contact
-        your account manager.
+        value is a string, float, int, or boolean. The specific list of attributes
+        will depend on the cash flow attributes version used. For a full list of attributes,
+        contact your account manager.
       nullable: true
       title: CraCreditProfileCashflowAttributes
       type: object
@@ -125955,7 +125972,7 @@ components:
       title: NetworkInsights
       type: object
     CraCreditProfileNetworkInsightsSchema:
-      additionalProperties: true
+      additionalProperties: {}
       description: A map of network attributes, where the key is a string, and the
         value is a float, int, or boolean. For a full list of attributes, contact
         your account manager.
@@ -131993,7 +132010,7 @@ components:
         report:
           date_retrieved: 2000-01-23T04:56:07.000+00:00
           network_insights_attributes:
-            key: '{}'
+            key: ""
           metadata:
             item_count: 6
             primary_account_count: 5
@@ -132022,7 +132039,7 @@ components:
             error_reason: error_reason
             variant: variant
           cashflow_insights_attributes:
-            key: '{}'
+            key: ""
           client_report_id: client_report_id
         request_id: request_id
       properties:
@@ -132060,7 +132077,7 @@ components:
       example:
         date_retrieved: 2000-01-23T04:56:07.000+00:00
         network_insights_attributes:
-          key: '{}'
+          key: ""
         metadata:
           item_count: 6
           primary_account_count: 5
@@ -132089,7 +132106,7 @@ components:
           error_reason: error_reason
           variant: variant
         cashflow_insights_attributes:
-          key: '{}'
+          key: ""
         client_report_id: client_report_id
       properties:
         date_retrieved:
@@ -132108,16 +132125,16 @@ components:
             $ref: '#/components/schemas/CraCreditProfileLendScore'
           type: array
         cashflow_insights_attributes:
-          additionalProperties: true
+          additionalProperties: {}
           description: A map of cash flow attributes, where the key is a string, and
-            the value is a float, int, or boolean. The specific list of attributes
+            the value is a string, float, int, or boolean. The specific list of attributes
             will depend on the cash flow attributes version used. For a full list
             of attributes, contact your account manager.
           nullable: true
           title: CraCreditProfileCashflowAttributes
           type: object
         network_insights_attributes:
-          additionalProperties: true
+          additionalProperties: {}
           description: A map of network attributes, where the key is a string, and
             the value is a float, int, or boolean. For a full list of attributes,
             contact your account manager.
@@ -132292,9 +132309,9 @@ components:
         products:
         - product: ""
           metadata:
-            key: '{}'
+            key: ""
           attributes:
-            key: '{}'
+            key: ""
           version: version
           errors:
           - error_code_reason: error_code_reason
@@ -132333,9 +132350,9 @@ components:
             status: 0
         - product: ""
           metadata:
-            key: '{}'
+            key: ""
           attributes:
-            key: '{}'
+            key: ""
           version: version
           errors:
           - error_code_reason: error_code_reason
@@ -132431,9 +132448,9 @@ components:
       example:
         product: ""
         metadata:
-          key: '{}'
+          key: ""
         attributes:
-          key: '{}'
+          key: ""
         version: version
         errors:
         - error_code_reason: error_code_reason
@@ -132488,7 +132505,7 @@ components:
           type: string
           x-hidden-from-docs: true
         metadata:
-          additionalProperties: true
+          additionalProperties: {}
           description: A map of product report metadata, where the key is a string
             and the value varies by product. For a full list of metadata fields per
             product, see the data dictionary. May be `null` if metadata was not available.
@@ -132497,10 +132514,10 @@ components:
           type: object
           x-hidden-from-docs: true
         attributes:
-          additionalProperties: true
+          additionalProperties: {}
           description: A map of product attributes, where the key is a string and
-            the value is a float, int, or boolean. The specific list of attributes
-            depends on the product and version. For a full list, see the data dictionary.
+            the value can be any JSON value. The specific list of attributes depends
+            on the product and version. For a full list, see the data dictionary.
             May be `null` if attributes were not available.
           nullable: true
           title: CraReportGetProductAttributes
@@ -132522,7 +132539,7 @@ components:
       type: object
       x-hidden-from-docs: true
     CraReportGetProductMetadata:
-      additionalProperties: true
+      additionalProperties: {}
       description: A map of product report metadata, where the key is a string and
         the value varies by product. For a full list of metadata fields per product,
         see the data dictionary. May be `null` if metadata was not available.
@@ -132531,11 +132548,11 @@ components:
       type: object
       x-hidden-from-docs: true
     CraReportGetProductAttributes:
-      additionalProperties: true
+      additionalProperties: {}
       description: A map of product attributes, where the key is a string and the
-        value is a float, int, or boolean. The specific list of attributes depends
-        on the product and version. For a full list, see the data dictionary. May
-        be `null` if attributes were not available.
+        value can be any JSON value. The specific list of attributes depends on the
+        product and version. For a full list, see the data dictionary. May be `null`
+        if attributes were not available.
       nullable: true
       title: CraReportGetProductAttributes
       type: object
@@ -132553,9 +132570,9 @@ components:
           products:
           - product: ""
             metadata:
-              key: '{}'
+              key: ""
             attributes:
-              key: '{}'
+              key: ""
             version: version
             errors:
             - error_code_reason: error_code_reason
@@ -132594,9 +132611,9 @@ components:
               status: 0
           - product: ""
             metadata:
-              key: '{}'
+              key: ""
             attributes:
-              key: '{}'
+              key: ""
             version: version
             errors:
             - error_code_reason: error_code_reason
