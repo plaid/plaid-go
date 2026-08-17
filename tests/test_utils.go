@@ -107,11 +107,13 @@ func createSandboxItemWithOptions(t *testing.T, ctx context.Context, client *pla
 }
 
 func importSandboxItem(t *testing.T, ctx context.Context, client *plaid.APIClient, userID string, authToken string, products []plaid.Products) string {
+	userAuth := plaid.NewItemImportRequestUserAuth(userID)
+	userAuth.SetAuthToken(authToken)
+	request := plaid.NewItemImportRequest(*userAuth)
+	request.SetProducts(products)
+
 	accessTokenResp, _, err := client.PlaidApi.ItemImport(ctx).ItemImportRequest(
-		*plaid.NewItemImportRequest(
-			products,
-			*plaid.NewItemImportRequestUserAuth(userID, authToken),
-		),
+		*request,
 	).Execute()
 
 	assert.NoError(t, err)

@@ -89,9 +89,10 @@ func TestItemImportWithoutOptions(t *testing.T) {
 	testClient := NewTestClient()
 	ctx := context.Background()
 
-	request := plaid.NewItemImportRequest(
-		[]plaid.Products{plaid.PRODUCTS_IDENTITY, plaid.PRODUCTS_AUTH},
-		*plaid.NewItemImportRequestUserAuth("user_good", "pass_good"))
+	userAuth := plaid.NewItemImportRequestUserAuth("user_good")
+	userAuth.SetAuthToken("pass_good")
+	request := plaid.NewItemImportRequest(*userAuth)
+	request.SetProducts([]plaid.Products{plaid.PRODUCTS_IDENTITY, plaid.PRODUCTS_AUTH})
 	resp, _, err := testClient.PlaidApi.ItemImport(ctx).ItemImportRequest(*request).Execute()
 	assert.NoError(t, err)
 	assert.True(t, strings.HasPrefix(resp.GetAccessToken(), fmt.Sprintf("access-%s", PlaidEnv())))
@@ -101,9 +102,10 @@ func TestItemImportWithOptions(t *testing.T) {
 	testClient := NewTestClient()
 	ctx := context.Background()
 
-	request := plaid.NewItemImportRequest(
-		[]plaid.Products{plaid.PRODUCTS_IDENTITY, plaid.PRODUCTS_AUTH},
-		*plaid.NewItemImportRequestUserAuth("user_good", "pass_good"))
+	userAuth := plaid.NewItemImportRequestUserAuth("user_good")
+	userAuth.SetAuthToken("pass_good")
+	request := plaid.NewItemImportRequest(*userAuth)
+	request.SetProducts([]plaid.Products{plaid.PRODUCTS_IDENTITY, plaid.PRODUCTS_AUTH})
 	webhook := "https://plaid.com/webhook-test"
 	request.SetOptions(plaid.ItemImportRequestOptions{
 		Webhook: &webhook,
