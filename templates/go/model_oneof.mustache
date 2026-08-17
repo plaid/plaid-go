@@ -1,0 +1,185 @@
+// {{classname}} - {{#description}}{{{description}}}{{/description}}{{^description}}struct for {{{classname}}}{{/description}}
+type {{classname}} struct {
+	{{#oneOf}}
+	{{{.}}} *{{{.}}}
+	{{/oneOf}}
+}
+
+{{#oneOf}}
+// {{{.}}}As{{classname}} is a convenience function that returns {{{.}}} wrapped in {{classname}}
+func {{{.}}}As{{classname}}(v *{{{.}}}) {{classname}} {
+	return {{classname}}{ {{{.}}}: v}
+}
+
+{{/oneOf}}
+{{#vendorExtensions.x-plaid-sdk-one-of-interface}}
+// UnmarshalJSON dispatches on the wire discriminator.
+func (dst *{{classname}}) UnmarshalJSON(data []byte) error {
+	{{#oneOf}}
+	dst.{{{.}}} = nil
+	{{/oneOf}}
+
+	var object map[string]interface{}
+	if err := json.Unmarshal(data, &object); err != nil || object == nil {
+		if err != nil {
+			return fmt.Errorf("failed to decode {{classname}} discriminator object: %w", err)
+		}
+		return fmt.Errorf("failed to decode {{classname}} discriminator object: expected object")
+	}
+
+	discriminatorValue, ok := object["{{#discriminator}}{{{propertyBaseName}}}{{/discriminator}}"].(string)
+	if !ok || discriminatorValue == "" {
+		return fmt.Errorf("missing or invalid discriminator {{#discriminator}}{{{propertyBaseName}}}{{/discriminator}} for {{classname}}")
+	}
+
+	switch discriminatorValue {
+	{{#discriminator}}
+	{{#mappedModels}}
+	case "{{mappingName}}":
+		var value {{modelName}}
+		if err := json.Unmarshal(data, &value); err != nil {
+			return fmt.Errorf("failed to unmarshal {{classname}} as {{modelName}}: %w", err)
+		}
+		dst.{{modelName}} = &value
+		return nil
+	{{/mappedModels}}
+	{{/discriminator}}
+	default:
+		return fmt.Errorf("unsupported discriminator value %q for {{classname}}", discriminatorValue)
+	}
+}
+
+// MarshalJSON validates and serializes the selected branch.
+func (src {{classname}}) MarshalJSON() ([]byte, error) {
+	selected := 0
+	{{#oneOf}}
+	if src.{{{.}}} != nil {
+		selected++
+	}
+	{{/oneOf}}
+	if selected != 1 {
+		return nil, fmt.Errorf("{{classname}} must contain exactly one branch; got %d", selected)
+	}
+
+	{{#discriminator}}
+	{{#mappedModels}}
+	if src.{{modelName}} != nil {
+		data, err := json.Marshal(src.{{modelName}})
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal {{classname}} as {{modelName}}: %w", err)
+		}
+		var object map[string]interface{}
+		if err := json.Unmarshal(data, &object); err != nil || object == nil {
+			if err != nil {
+				return nil, fmt.Errorf("failed to validate {{classname}} discriminator: %w", err)
+			}
+			return nil, fmt.Errorf("failed to validate {{classname}} discriminator: expected object")
+		}
+		discriminatorValue, ok := object["{{#discriminator}}{{{propertyBaseName}}}{{/discriminator}}"].(string)
+		if !ok || discriminatorValue != "{{mappingName}}" {
+			return nil, fmt.Errorf("{{modelName}} discriminator must be %q", "{{mappingName}}")
+		}
+		return data, nil
+	}
+
+	{{/mappedModels}}
+	{{/discriminator}}
+	return nil, fmt.Errorf("{{classname}} selected branch is not explicitly mapped")
+}
+{{/vendorExtensions.x-plaid-sdk-one-of-interface}}
+{{^vendorExtensions.x-plaid-sdk-one-of-interface}}
+// Unmarshal JSON data into one of the pointers in the struct
+func (dst *{{classname}}) UnmarshalJSON(data []byte) error {
+	var err error
+	{{#isNullable}}
+	// allow an empty payload or object for nullable unions
+	if string(data) == "" || string(data) == "{}" {
+		return nil
+	}
+
+	{{/isNullable}}
+	{{#useOneOfDiscriminatorLookup}}
+	{{#discriminator}}
+	{{#mappedModels}}
+	{{#-first}}
+	// use discriminator value to speed up the lookup
+	var jsonDict map[string]interface{}
+	err = json.Unmarshal(data, &jsonDict)
+	if err != nil {
+		return fmt.Errorf("Failed to unmarshal JSON into map for the discrimintor lookup.")
+	}
+
+	{{/-first}}
+	// check if the discriminator value is '{{{mappingName}}}'
+	if jsonDict["{{{propertyBaseName}}}"] == "{{{mappingName}}}" {
+		// try to unmarshal JSON data into {{{modelName}}}
+		err = json.Unmarshal(data, &dst.{{{modelName}}})
+		if err == nil {
+			return nil // data stored in dst.{{{modelName}}}, return on the first match
+		} else {
+			dst.{{{modelName}}} = nil
+			return fmt.Errorf("Failed to unmarshal {{classname}} as {{{modelName}}}: %s", err.Error())
+		}
+	}
+
+	{{/mappedModels}}
+	{{/discriminator}}
+	return nil
+	{{/useOneOfDiscriminatorLookup}}
+	{{^useOneOfDiscriminatorLookup}}
+	match := 0
+	{{#oneOf}}
+	// try to unmarshal data into {{{.}}}
+	err = json.Unmarshal(data, &dst.{{{.}}})
+	if err == nil {
+		json{{{.}}}, _ := json.Marshal(dst.{{{.}}})
+		if string(json{{{.}}}) == "{}" { // empty struct
+			dst.{{{.}}} = nil
+		} else {
+			match++
+		}
+	} else {
+		dst.{{{.}}} = nil
+	}
+
+	{{/oneOf}}
+	if match > 1 { // more than 1 match
+		// reset to nil
+		{{#oneOf}}
+		dst.{{{.}}} = nil
+		{{/oneOf}}
+
+		return fmt.Errorf("Data matches more than one schema in oneOf({{classname}})")
+	} else if match == 1 {
+		return nil // exactly one match
+	} else { // no match
+		return fmt.Errorf("Data failed to match schemas in oneOf({{classname}})")
+	}
+	{{/useOneOfDiscriminatorLookup}}
+}
+
+// Marshal data from the first non-nil pointers in the struct to JSON
+func (src {{classname}}) MarshalJSON() ([]byte, error) {
+{{#oneOf}}
+	if src.{{{.}}} != nil {
+		return json.Marshal(&src.{{{.}}})
+	}
+
+{{/oneOf}}
+	return nil, nil // no data in oneOf schemas
+}
+{{/vendorExtensions.x-plaid-sdk-one-of-interface}}
+
+// Get the actual instance
+func (obj *{{classname}}) GetActualInstance() (interface{}) {
+{{#oneOf}}
+	if obj.{{{.}}} != nil {
+		return obj.{{{.}}}
+	}
+
+{{/oneOf}}
+	// all schemas are nil
+	return nil
+}
+
+{{>nullable_model}}
