@@ -7,7 +7,7 @@ info:
     details.
   termsOfService: https://plaid.com/legal/
   title: The Plaid API
-  version: 2020-09-14_1.729.1
+  version: 2020-09-14_1.740.1
 servers:
 - description: Production
   url: https://production.plaid.com
@@ -600,10 +600,12 @@ paths:
       - plaid
   /cra/monitoring_insights/subscribe:
     post:
+      deprecated: true
       description: This endpoint allows you to subscribe to insights for a user's
         linked CRA Item, which are updated between one and four times per day (best-effort).
-        In the current Cash Flow Updates beta experience, only one Item per user may
-        be subscribed for monitoring updates.
+        Only one Item per user may be subscribed. This endpoint is part of the legacy
+        Cash Flow Updates product and is available only to integrations already using
+        it; other integrations should use `/cra/servicing/subscription/create` instead.
       externalDocs:
         url: /api/products/check/#cramonitoring_insightssubscribe
       operationId: craMonitoringInsightsSubscribe
@@ -631,13 +633,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/PlaidError'
           description: Error response
-      summary: Subscribe to Monitoring Insights
+      summary: (Legacy) Subscribe to Cash Flow Updates
       tags:
       - plaid
   /cra/monitoring_insights/unsubscribe:
     post:
-      description: This endpoint allows you to unsubscribe from previously subscribed
-        Monitoring Insights.
+      deprecated: true
+      description: This endpoint allows you to remove a subscription created by `/cra/monitoring_insights/subscribe`.
+        This endpoint is part of the legacy Cash Flow Updates product and is available
+        only to integrations already using it; other integrations should use `/cra/servicing/subscription/delete`
+        instead.
       externalDocs:
         url: /api/products/check/#cramonitoring_insightsunsubscribe
       operationId: craMonitoringInsightsUnsubscribe
@@ -664,13 +669,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/PlaidError'
           description: Error response
-      summary: Unsubscribe from Monitoring Insights
+      summary: (Legacy) Unsubscribe from Cash Flow Updates
       tags:
       - plaid
   /cra/monitoring_insights/get:
     post:
+      deprecated: true
       description: This endpoint allows you to retrieve a Cash Flow Updates report
-        by passing in the `user_id` referred to in the webhook you received.
+        by passing in the `user_id` referred to in the webhook you received. This
+        endpoint is part of the legacy Cash Flow Updates product and is available
+        only to integrations already using it. CRA Servicing has no direct equivalent;
+        other integrations should handle the `CRA_REPORT_UPDATED` webhook and pass
+        its `report_id` to the relevant product `/get` endpoint, such as `/cra/check_report/base_report/get`.
       externalDocs:
         url: /api/products/check/#cramonitoring_insightsget
       operationId: craMonitoringInsightsGet
@@ -1586,7 +1596,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PlaidError'
           description: Error response
-      summary: Retrieve a Monitoring Insights Report
+      summary: (Legacy) Retrieve a Cash Flow Updates report
       tags:
       - plaid
   /credit/audit_copy_token/update:
@@ -3583,7 +3593,7 @@ paths:
       description: '`/cra/servicing/subscription/create` subscribes a user to CRA
         report-update webhooks for a given scope.'
       externalDocs:
-        url: /none/
+        url: /api/products/check/#craservicingsubscriptioncreate
       operationId: craServicingSubscriptionCreate
       requestBody:
         content:
@@ -3617,7 +3627,7 @@ paths:
       description: '`/cra/servicing/subscription/delete` removes the CRA servicing
         subscription identified by `subscription_id`.'
       externalDocs:
-        url: /none/
+        url: /api/products/check/#craservicingsubscriptiondelete
       operationId: craServicingSubscriptionDelete
       requestBody:
         content:
@@ -3651,7 +3661,7 @@ paths:
       description: '`/cra/servicing/subscription/get` returns the CRA servicing subscription
         identified by `subscription_id`.'
       externalDocs:
-        url: /none/
+        url: /api/products/check/#craservicingsubscriptionget
       operationId: craServicingSubscriptionGet
       requestBody:
         content:
@@ -3695,7 +3705,7 @@ paths:
       description: '`/cra/servicing/subscription/list` returns all CRA servicing subscriptions
         for a user, across scopes.'
       externalDocs:
-        url: /none/
+        url: /api/products/check/#craservicingsubscriptionlist
       operationId: craServicingSubscriptionList
       requestBody:
         content:
@@ -3738,7 +3748,7 @@ paths:
         servicing subscription. Fields left blank are unchanged; provided fields overwrite
         the current value. Use `reset_fields` to clear fields.'
       externalDocs:
-        url: /none/
+        url: /api/products/check/#craservicingsubscriptionupdate
       operationId: craServicingSubscriptionUpdate
       requestBody:
         content:
@@ -3788,6 +3798,7 @@ paths:
                   value:
                     request_id: eYupqX1mZkEuQRx
                     user_id: usr_abc123
+                    client_user_id: your-db-id-3b24110
                     warnings: []
                     report:
                       retrieved_time: 2024-01-15T10:30:00Z
@@ -4928,6 +4939,7 @@ paths:
                       merchant_name: Walmart
                       merchant_entity_id: O5W5j4dN9OR3E6ypQmjdkWZZRoXEzVMz2ByWM
                       merchant_category_code: "5411"
+                      running_balance: 110.94
                       logo_url: https://plaid-merchant-logos.plaid.com/walmart_1100.png
                       website: walmart.com
                       payment_meta:
@@ -5947,6 +5959,7 @@ paths:
                       merchant_name: Walmart
                       merchant_entity_id: O5W5j4dN9OR3E6ypQmjdkWZZRoXEzVMz2ByWM
                       merchant_category_code: "5411"
+                      running_balance: 110.94
                       logo_url: https://plaid-merchant-logos.plaid.com/walmart_1100.png
                       website: walmart.com
                       payment_meta:
@@ -10224,12 +10237,9 @@ paths:
   /protect/report/create:
     post:
       description: |-
-        Use this endpoint to create a Protect report to document fraud incidents, investigation outcomes, or other risk events.
-        This endpoint allows you to report various types of incidents including account takeovers, identity fraud, unauthorized transactions, and other security events.
-        The reported data helps improve fraud detection models and provides valuable feedback to enhance the overall security of the Plaid network.
-        Reports can be created for confirmed incidents that have been fully investigated, or for suspected incidents that require further review.
-        You can associate reports with specific users, sessions, or transactions to provide comprehensive context about the incident.
-        Each report must include `user_id`, or an `incident_event` with at least one supported identifier: `link_session_id`, `idv_session_id`, `protect_event_id`, `signal_client_transaction_id`, or `access_token`. Context fields such as `internal_reference`, `time`, `amount`, and `bank_account` do not satisfy this identifier requirement.
+        Use this endpoint to create a Protect report to document fraud incidents, investigation outcomes, or other risk events. This endpoint allows you to report various types of incidents including account takeovers, identity fraud, unauthorized transactions, and other security events. The reported data helps improve fraud detection models and provides valuable feedback to enhance the overall security of the Plaid network.
+
+        Reports can be created for confirmed incidents that have been fully investigated, or for suspected incidents that require further review. You can associate reports with specific users, sessions, or transactions to provide comprehensive context about the incident. Each report must include `user_id`, or an `incident_event` with at least one supported identifier: `link_session_id`, `idv_session_id`, `protect_event_id`, `signal_client_transaction_id`, or `access_token`. Context fields such as `internal_reference`, `time`, `amount`, and `bank_account` do not satisfy this identifier requirement.
       externalDocs:
         url: /api/products/protect/#protectreportcreate
       operationId: protectReportCreate
@@ -10312,7 +10322,7 @@ paths:
   /protect/compute:
     post:
       description: |-
-        Compute a Protect Trust Index score for a user. The model selected determines what is scored and what additional fields the response contains. For example, `ti-link-session-2.0` scores a completed Link session for fraud risk; `cash-advance-onboarding-1.0` scores repayment risk for a first-time cash advance and additionally populates per-amount-bucket subscores. Cash-advance models require that the user have a Plaid Item with Transactions enabled, or an Assets Report, before scoring.
+        Compute a Protect Trust Index score for a user. The model selected determines what is scored and what additional fields the response contains. For example, `ti-link-session-3-<client>` scores a completed Link session for fraud risk; `cash-advance-onboarding-<client>-1.0` scores repayment risk for a first-time cash advance and `cash-advance-ongoing-<client>-1.0` scores subsequent advances, both additionally populating per-amount-bucket subscores. Cash-advance models require that the user have a Plaid Item with Transactions enabled, or an Assets Report, before scoring.
 
         The endpoint returns HTTP 400 with `error_type` = `INVALID_REQUEST` and `error_code` = `FAILED_PRECONDITION` when a required precondition is not met: for link-session models, when the Link session has not completed; for cash-advance models, when the user has not successfully linked any Item.
       externalDocs:
@@ -10332,7 +10342,7 @@ paths:
                 example-1:
                   value:
                     score: 86
-                    model: ti-link-session-2.0
+                    model: ti-link-session-3-<client>
                     attributes:
                       link_session.linked_bank_accounts.user_pi_matches_owners: true
                       link_session.linked_bank_accounts.connected_apps.days_since_first_connection: 582
@@ -11328,6 +11338,7 @@ paths:
                       merchant_name: Walmart
                       merchant_entity_id: O5W5j4dN9OR3E6ypQmjdkWZZRoXEzVMz2ByWM
                       merchant_category_code: "5411"
+                      running_balance: 110.94
                       logo_url: https://plaid-merchant-logos.plaid.com/walmart_1100.png
                       website: walmart.com
                       payment_meta:
@@ -11444,6 +11455,7 @@ paths:
                       merchant_name: Walmart
                       merchant_entity_id: O5W5j4dN9OR3E6ypQmjdkWZZRoXEzVMz2ByWM
                       merchant_category_code: "5411"
+                      running_balance: 110.94
                       logo_url: https://plaid-merchant-logos.plaid.com/walmart_1100.png
                       website: walmart.com
                       payment_meta:
@@ -12304,7 +12316,7 @@ paths:
 
         Filtering is optional. When multiple filter fields are set (`webhook_types`,
         `webhook_codes`, `item_ids`, `delivery_statuses`), they are combined with AND across fields
-        and OR within each array (for example, `webhook_types: ["TRANSACTIONS", "ITEM"]` matches
+        and OR within each array (for example, `webhook_types: ["ITEM", "AUTH"]` matches
         either type).
 
         Recommended pagination workflow:
@@ -12312,12 +12324,25 @@ paths:
         1. First call: omit `cursor`, and optionally set `start_time` within the last 7 days (or
            omit `start_time` to begin at the oldest retained event).
         2. Subsequent calls: pass `next_cursor` as `cursor`. Do not send `start_time` with
-           `cursor` — the two fields are mutually exclusive.
+           `cursor` — the two fields are mutually exclusive. Sending both returns `INVALID_FIELD`.
         3. Persist `next_cursor` even when `has_more` is `false`, then reuse it on the next poll so
            you only receive events newer than what you have already seen.
         4. If a stored cursor is older than the 7-day retention window, the API returns
            `WEBHOOK_EVENTS_CURSOR_EXPIRED`; restart with a `start_time` within the last 7 days.
            Events older than the retention window are no longer available.
+
+        Errors:
+
+        `WEBHOOK_EVENTS_START_TIME_OUT_OF_RANGE` (400) is returned when `start_time` is earlier
+        than the 7-day retention window. Retry with a `start_time` within the last 7 days, or omit
+        it.
+
+        `WEBHOOK_EVENTS_CURSOR_EXPIRED` (400) is returned when the cursor's position is older than
+        the 7-day retention window and can no longer be resolved. Restart pagination with a
+        `start_time` within the last 7 days.
+
+        `INVALID_FIELD` (400) is returned when `cursor` is not a properly formatted string, when
+        both `cursor` and `start_time` are provided, or when the request is otherwise invalid.
       externalDocs:
         url: none
       operationId: betaWebhookEventsList
@@ -12330,6 +12355,21 @@ paths:
                   client_id: 7f57eb3d2a9j6480121fx361
                   secret: 79g03eoofwl8240v776r2h667442119
                   count: 100
+              filtered:
+                value:
+                  client_id: 7f57eb3d2a9j6480121fx361
+                  secret: 79g03eoofwl8240v776r2h667442119
+                  webhook_types:
+                  - ITEM
+                  - AUTH
+                  delivery_statuses:
+                  - FAILED
+                  count: 100
+              cursor-continuation:
+                value:
+                  client_id: 7f57eb3d2a9j6480121fx361
+                  secret: 79g03eoofwl8240v776r2h667442119
+                  cursor: eyJzZW50X3RpbWUiOiIyMDI2LTA3LTIxVDE0OjMyOjAwWiIsIndlYmhvb2tfbWVzc2FnZV9pZCI6IndobXNnXzR0UTlwTnpMMnZCeFlLIn0
             schema:
               $ref: '#/components/schemas/BetaWebhookEventsListRequest'
         required: true
@@ -12342,13 +12382,13 @@ paths:
                   value:
                     webhook_events:
                     - webhook_message_id: whmsg_4tQ9pNzL2vBxYK
-                      webhook_type: TRANSACTIONS
-                      webhook_code: DEFAULT_UPDATE
+                      webhook_type: ITEM
+                      webhook_code: PENDING_EXPIRATION
                       item_id: abc123
                       sent_time: 2026-07-21T14:32:00Z
                       payload:
-                        webhook_type: TRANSACTIONS
-                        webhook_code: DEFAULT_UPDATE
+                        webhook_type: ITEM
+                        webhook_code: PENDING_EXPIRATION
                       destination_url: https://client.example.com/webhook
                       delivery_status: DELIVERED
                       last_http_status_code: 200
@@ -12357,18 +12397,50 @@ paths:
                     has_more: true
                     next_cursor: eyJzZW50X3RpbWUiOiIyMDI2LTA3LTIxVDE0OjMyOjAwWiIsIndlYmhvb2tfbWVzc2FnZV9pZCI6IndobXNnXzR0UTlwTnpMMnZCeFlLIn0
                     request_id: 4zlKapIkTm8p5KM
+                pending-last-page:
+                  value:
+                    webhook_events:
+                    - webhook_message_id: whmsg_8kLm2QwR9nCvYD
+                      webhook_type: ITEM
+                      webhook_code: ERROR
+                      item_id: abc123
+                      sent_time: 2026-08-18T09:15:00Z
+                      payload:
+                        webhook_type: ITEM
+                        webhook_code: ERROR
+                      destination_url: https://client.example.com/webhook
+                      delivery_status: PENDING
+                      last_http_status_code: null
+                      attempt_count: 0
+                      last_attempt_time: null
+                    has_more: false
+                    next_cursor: eyJzZW50X3RpbWUiOiIyMDI2LTA4LTE4VDA5OjE1OjAwWiIsIndlYmhvb2tfbWVzc2FnZV9pZCI6IndobXNnXzhrTG0yUXdSOW5DdllEIiwic2Vlbl90aHJvdWdoX3RpbWUiOiIyMDI2LTA4LTE4VDA5OjE1OjAwWiJ9
+                    request_id: 4zlKapIkTm8p5KM
               schema:
                 $ref: '#/components/schemas/BetaWebhookEventsListResponse'
           description: OK
         default:
           content:
             application/json:
+              examples:
+                cursor_expired:
+                  value:
+                    error_type: INVALID_INPUT
+                    error_code: WEBHOOK_EVENTS_CURSOR_EXPIRED
+                    error_message: cursor is older than the 7-day webhook events retention
+                      window and can no longer be resolved. Restart pagination with
+                      a start_time within the last 7 days. Events sent before that
+                      window are no longer retained.
+                    display_message: null
+                    status: 400
+                    request_id: 4zlKapIkTm8p5KM
               schema:
                 $ref: '#/components/schemas/PlaidError'
           description: Error response
       summary: List webhook events
       tags:
       - plaid
+      x-hidden-from-docs: true
   /webhook_verification_key/get:
     post:
       description: |-
@@ -12417,7 +12489,7 @@ paths:
   /liabilities/get:
     post:
       description: |-
-        The `/liabilities/get` endpoint returns various details about an Item with loan or credit accounts. Liabilities data is available primarily for US financial institutions, with some limited coverage of Canadian institutions. Supported account types are account type `credit` with account subtype `charge card`, `credit card`, or `paypal`; and account type `loan` with account subtype `auto`, `commercial`, `commercial line of credit`, `consumer`, `home equity`, `home equity loan`, `installment`, `line of credit`, `loan`, `mortgage`, or `student`. To limit accounts listed in Link to types and subtypes supported by Liabilities, you can use the `account_filters` parameter when [creating a Link token](https://plaid.com/docs/api/link/#linktokencreate).
+        The `/liabilities/get` endpoint returns various details about an Item with loan or credit accounts. Liabilities data is available primarily for US financial institutions, with some limited coverage of Canadian institutions. Currently supported account types are account type `credit` with account subtype `credit card` or `paypal`, and account type `loan` with account subtype `student` or `mortgage`. To limit accounts listed in Link to types and subtypes supported by Liabilities, you can use the `account_filters` parameter when [creating a Link token](https://plaid.com/docs/api/link/#linktokencreate).
 
         The types of information returned by Liabilities can include balances and due dates, loan terms, and account details such as original loan amount and guarantor. Data is refreshed approximately once per day; the latest data can be retrieved by calling `/liabilities/get`.
       externalDocs:
@@ -12621,49 +12693,6 @@ paths:
                           street: 123 Relaxation Road
                         ytd_interest_paid: 280.55
                         ytd_principal_paid: 271.65
-                      loan:
-                      - account_id: c0cTGbrDXN3xiGLGUNI9LGwxrOGjakxtWTgQV
-                        account_number: "8943210074"
-                        interest_rate:
-                          percentage: 6.49
-                          type: fixed
-                        principal_balance: 18250
-                        origination_principal_amount: 32000
-                        origination_date: 2023-09-01
-                        loan_term_months: 72
-                        maturity_date: 2029-09-01
-                        payment_count: 72
-                        payment_frequency: monthly
-                        next_payment_amount: 525.4
-                        next_payment_due_date: 2026-07-01
-                        last_payment_amount: 525.4
-                        last_payment_date: 2026-06-01
-                        payoff_amount: 18190.25
-                        ytd_interest_paid: 612.18
-                        compounding_period: monthly
-                      line_of_credit:
-                      - account_id: ufQuuYHpSjhuk9TKIQTnDWlFVDIR5nWSynuQD
-                        interest_rate:
-                          percentage: 8.25
-                          type: variable
-                        credit_limit: 100000
-                        available_credit: 76000
-                        principal_balance: 24000
-                        minimum_payment_amount: 180
-                        next_payment_amount: 180
-                        next_payment_due_date: 2026-07-05
-                        last_payment_amount: 180
-                        last_payment_date: 2026-06-05
-                        last_statement_balance: 24000
-                        last_statement_issue_date: 2026-06-01
-                        past_due_amount: 0
-                        finance_charges: 162.5
-                        draw_period_end_date: 2032-03-10
-                        aprs:
-                        - apr_percentage: 8.25
-                          apr_type: purchase_apr
-                          balance_subject_to_apr: null
-                          interest_charge_amount: null
                     request_id: dTnnm60WgKGLnKL
               schema:
                 $ref: '#/components/schemas/LiabilitiesGetResponse'
@@ -13634,10 +13663,10 @@ paths:
   /user/products/terminate:
     post:
       description: Terminates user-based recurring subscription bundles or products
-        (Financial Management, Plaid Protect, and CRA Cash Flow Updates) associated
-        with a `user_id`. After you call this endpoint, the user will no longer be
-        billed for these products. For CRA Monitoring, the subscription is canceled
-        but historical data remains available for future report requests.
+        (Financial Management, Plaid Protect, and CRA Servicing) associated with a
+        `user_id`. After you call this endpoint, the user will no longer be billed
+        for these products. For CRA Servicing, the subscription is canceled but historical
+        data remains available for future report requests.
       externalDocs:
         url: /api/users/#userproductsterminate
       operationId: userProductsTerminate
@@ -13780,7 +13809,7 @@ paths:
     post:
       description: |-
         Removes specific Items associated with a user. It is equivalent to calling `/item/remove` on each Item individually, but supports use cases (such as Plaid Check) where access tokens are not available. All specified Items must belong to the user or the entire operation fails. Similar to `/item/remove`, this deletes Item product data and terminates billing on the Item's products. Once removed, Items cannot be reconnected without going through Link again.
-        This endpoint is not intended to remove all data for a user, as it will only remove Items and no other data for the user. If the user has any user-based recurring subscription products (Financial Management, Plaid Protect, or CRA Cash Flow Updates) and is deleting their account with your product, also call `/user/products/terminate` to end those subscriptions; per-Item billing is already terminated by this endpoint. For a user initiated data deletion request, see the [Consumer Service Center](https://plaid.com/check/consumer-service-center/) to revoke access to data.
+        This endpoint is not intended to remove all data for a user, as it will only remove Items and no other data for the user. If the user has any user-based recurring subscription products (Financial Management, Plaid Protect, or CRA Servicing) and is deleting their account with your product, also call `/user/products/terminate` to end those subscriptions; per-Item billing is already terminated by this endpoint. For a user initiated data deletion request, see the [Consumer Service Center](https://plaid.com/check/consumer-service-center/) to revoke access to data.
       externalDocs:
         url: /api/users/#useritemsremove
       operationId: userItemsRemove
@@ -17867,7 +17896,7 @@ paths:
       description: |-
         Use the `/transfer/refund/create` endpoint to create a refund for a transfer. A transfer can be refunded if the transfer was initiated in the past 180 days.
 
-        Refunds come out of the available balance of the ledger used for the original debit transfer. If there are not enough funds in the available balance to cover the refund amount, the refund will be rejected. You can create a refund at any time. Plaid does not impose any hold time on refunds.
+        Refunds come out of the available balance of the ledger used for the original debit transfer. If there are not enough funds in the available balance to cover the refund amount, the refund will be rejected. Plaid does not impose a hold time before a refund can be created; you do not need to wait for the original transfer to settle.
 
         A refund can still be issued even if the Item's `access_token` is no longer valid (e.g. if the user revoked OAuth consent or the Item was deleted via `/item/remove`), as long as the account and routing number pair used to make the original transaction is still valid. A refund cannot be issued if the Item has an [invalidated TAN](https://plaid.com/docs/auth/#tokenized-account-numbers), which can occur at Chase or PNC.
       externalDocs:
@@ -20995,7 +21024,9 @@ paths:
   /sandbox/cra/cashflow_updates/update:
     post:
       description: Use the `/sandbox/cra/cashflow_updates/update` endpoint to manually
-        trigger an update for Cash Flow Updates (Monitoring) in the Sandbox environment.
+        trigger an update for the legacy Cash Flow Updates product in the Sandbox
+        environment. To simulate a report generation for a CRA Servicing subscription,
+        use `/sandbox/cra/servicing/simulate`.
       externalDocs:
         url: /api/sandbox/#sandboxcracashflow_updatesupdate
       operationId: sandboxCraCashflowUpdatesUpdate
@@ -21033,7 +21064,7 @@ paths:
         This endpoint also fires a `CRA_REPORT_UPDATED` webhook, mirroring the notification
         a live subscription would emit.
       externalDocs:
-        url: /none/
+        url: /api/sandbox/#sandboxcraservicingsimulate
       operationId: sandboxCraServicingSimulate
       requestBody:
         content:
@@ -24223,7 +24254,9 @@ components:
           type: string
         start_date:
           description: The earliest date for which data should be returned. Dates
-            should be formatted as YYYY-MM-DD.
+            should be formatted as YYYY-MM-DD. Plaid returns all transaction history
+            stored for the Item (up to 2 years prior to the initial linking of the
+            Item).
           format: date
           type: string
         end_date:
@@ -28320,23 +28353,29 @@ components:
       nullable: true
       properties:
         start_date:
-          description: The earliest date for which to fetch transaction history. Dates
-            should be formatted as YYYY-MM-DD.
+          deprecated: true
+          description: Use `days_requested` instead. This field has no effect on the
+            amount of transaction history available on the Item.
           format: date
           type: string
+          x-hidden-from-docs: true
         end_date:
-          description: The most recent date for which to fetch transaction history.
-            Dates should be formatted as YYYY-MM-DD.
+          deprecated: true
+          description: Use `days_requested` instead. This field has no effect on the
+            amount of transaction history available on the Item.
           format: date
           type: string
+          x-hidden-from-docs: true
         days_requested:
           default: 90
           description: The maximum number of days of transaction history to request
-            for the Transactions product.
+            for the Transactions product, matching [`transactions.days_requested`](https://plaid.com/docs/api/link/#link-token-create-request-transactions-days-requested)
+            on `/link/token/create`. If no value is specified, this defaults to 90
+            days. Once Transactions has been added to an Item, this value cannot be
+            updated.
           maximum: 730
           minimum: 1
           type: integer
-          x-hidden-from-docs: true
       title: SandboxPublicTokenCreateRequestOptionsTransactions
       type: object
     SandboxPublicTokenCreateRequestOptionsStatements:
@@ -29974,7 +30013,9 @@ components:
           type: string
         start_date:
           description: The earliest date for which data should be returned. Dates
-            should be formatted as YYYY-MM-DD.
+            should be formatted as YYYY-MM-DD. Plaid returns all transaction history
+            stored for the Item (up to 2 years prior to the initial linking of the
+            Item).
           format: date
           type: string
         end_date:
@@ -31070,16 +31111,14 @@ components:
       example:
         cursor: cursor
         webhook_types:
-        - webhook_types
-        - webhook_types
+        - ITEM
+        - AUTH
         start_time: 2000-01-23T04:56:07.000+00:00
         webhook_codes:
-        - webhook_codes
-        - webhook_codes
+        - ERROR
         count: 8
         item_ids:
-        - item_ids
-        - item_ids
+        - abc123
         secret: secret
         delivery_statuses:
         - null
@@ -31100,14 +31139,16 @@ components:
         cursor:
           description: |-
             Opaque cursor from a prior `/beta/webhook_events/list` response `next_cursor`. Use this
-            on subsequent requests to continue forward. Mutually exclusive with `start_time`.
+            on subsequent requests to continue forward. Mutually exclusive with `start_time`: sending
+            both returns `INVALID_FIELD`. Callers should send only one.
           maxLength: 512
           type: string
         start_time:
           description: |-
             ISO-8601 timestamp. Returns webhook events with `sent_time` greater than or equal to
-            this value. Must fall within the last 7 days (the retention window). Mutually exclusive
-            with `cursor`. Omit to begin from the oldest retained event.
+            this value. Must not be earlier than the 7-day retention window. Mutually exclusive with
+            `cursor`: sending both returns `INVALID_FIELD`. Omit to begin from the oldest retained
+            event. Callers should send only one of `cursor` or `start_time`.
           format: date-time
           nullable: true
           type: string
@@ -31119,20 +31160,32 @@ components:
           nullable: true
           type: integer
         webhook_types:
-          description: Filter by webhook type. Multiple values are OR'd. Combined
-            with other filters using AND.
+          description: |-
+            Filter by webhook type. Multiple values are OR'd. Combined with other filters using AND.
+            Values are case-sensitive and match the webhook types Plaid sends (`SCREAMING_SNAKE`, for
+            example `ITEM` or `AUTH`).
+          example:
+          - ITEM
+          - AUTH
           items:
             type: string
           type: array
         webhook_codes:
-          description: Filter by webhook code. Multiple values are OR'd. Combined
-            with other filters using AND.
+          description: |-
+            Filter by webhook code. Multiple values are OR'd. Combined with other filters using AND.
+            Values are case-sensitive and match the webhook codes Plaid sends (`SCREAMING_SNAKE`, for
+            example `ERROR`).
+          example:
+          - ERROR
           items:
             type: string
           type: array
         item_ids:
-          description: Filter to specific Items. Multiple values are OR'd. Combined
-            with other filters using AND.
+          description: |-
+            Filter to specific Items. Multiple values are OR'd. Combined with other filters using AND.
+            Values are case-sensitive and match the Item IDs Plaid sends.
+          example:
+          - abc123
           items:
             type: string
           type: array
@@ -31278,8 +31331,11 @@ components:
     WebhookEventDeliveryStatus:
       description: |-
         Latest delivery state for this webhook.
+
         `PENDING`: Plaid has not yet received a successful response and may still retry.
+
         `DELIVERED`: the destination returned a 2xx response.
+
         `FAILED`: all delivery attempts were exhausted without a 2xx response.
       enum:
       - PENDING
@@ -35768,7 +35824,9 @@ components:
           type: string
         start_date:
           description: The earliest date for which data should be returned. Dates
-            should be formatted as YYYY-MM-DD.
+            should be formatted as YYYY-MM-DD. Plaid returns all investment transaction
+            history stored for the Item (up to 2 years prior to the initial linking
+            of the Item).
           format: date
           type: string
         end_date:
@@ -35958,7 +36016,9 @@ components:
           type: string
         start_date:
           description: The earliest date for which to fetch transaction history. Dates
-            should be formatted as YYYY-MM-DD.
+            should be formatted as YYYY-MM-DD. Plaid returns all investment transaction
+            history stored for the Item (up to 2 years prior to the initial linking
+            of the Item).
           format: date
           type: string
         end_date:
@@ -36322,7 +36382,7 @@ components:
           - nuvei
           - layer
           - boom
-          - paynote
+          - seamlessach
           - stake
           - wedbush
           - esusu
@@ -36358,6 +36418,7 @@ components:
           - cybrid
           - bizcap
           - webull
+          - kikoff_enterprise
           type: string
       required:
       - access_token
@@ -36954,7 +37015,7 @@ components:
           type: string
         country_codes:
           description: |-
-            Specify an array of Plaid-supported country codes using the ISO-3166-1 alpha-2 country code standard. Institutions from all listed countries will be shown. For a complete mapping of supported products by country, see https://support.plaid.com/hc/en-us/articles/27895826947735-What-Plaid-products-are-supported-in-each-country-and-region. For access to additional countries beyond what you have been approved for, [contact sales](https://plaid.com/contact/), your account manager, or support.
+            Specify an array of Plaid-supported country codes using the ISO-3166-1 alpha-2 country code standard. Institutions from all listed countries will be shown. For a complete mapping of supported products by country, see [What Plaid products are supported in each country and region?](https://support.plaid.com/hc/en-us/articles/27895826947735-What-Plaid-products-are-supported-in-each-country-and-region). For access to additional countries beyond what you have been approved for, [contact sales](https://plaid.com/contact/), your account manager, or support.
 
             If using Identity Verification, `country_codes` should be set to the country where your company is based, not the country where your user is located. For all other products, `country_codes` represents the location of your user's financial institution.
 
@@ -37481,8 +37542,10 @@ components:
     HostedLinkDeliveryMethod:
       description: |
         How Plaid should deliver the Plaid Link session to the customer. Only available to customers enabled for Link Delivery (beta). To request Link Delivery access, contact your account manager.
-        'sms' will deliver via SMS. Must pass `user.phone_number`.
-        'email' will deliver via email. Must pass `user.email_address`. In the Sandbox environment, this field will be ignored; use the Production environment to test Link Delivery instead.
+
+        `sms` will deliver via SMS. Must pass `user.phone_number`.
+
+        `email` will deliver via email. Must pass `user.email_address`. In the Sandbox environment, this field will be ignored; use the Production environment to test Link Delivery instead.
       enum:
       - sms
       - email
@@ -39993,6 +40056,7 @@ components:
             The specific reason for the error code. Currently, reasons are only supported for OAuth-based item errors; `null` will be returned otherwise. Safe for programmatic use.
 
             Possible values:
+
             `OAUTH_INVALID_TOKEN`: The user's OAuth connection to this institution has been invalidated.
 
             `OAUTH_CONSENT_EXPIRED`: The user's access consent for this OAuth connection to this institution has expired.
@@ -41116,8 +41180,11 @@ components:
         A description of the update status for transaction pulls of an Item. This field contains the same information provided by transactions webhooks, and may be helpful for webhook troubleshooting or when recovering from missed webhooks.
 
         `TRANSACTIONS_UPDATE_STATUS_UNKNOWN`: Unable to fetch transactions update status for Item.
+
         `NOT_READY`: The Item is pending transaction pull.
+
         `INITIAL_UPDATE_COMPLETE`: Initial pull for the Item is complete, historical pull is pending.
+
         `HISTORICAL_UPDATE_COMPLETE`: Both initial and historical pull for Item are complete.
       enum:
       - TRANSACTIONS_UPDATE_STATUS_UNKNOWN
@@ -42127,7 +42194,9 @@ components:
         A description of the source of data for a given product/data type.
 
         `INSTITUTION`: The institution supports this product, and the data was provided by the institution.
+
         `INSTITUTION_MASK`: The user manually provided the full account number, which was matched to the account mask provided by the institution. Only applicable to the `numbers` data type.
+
         `USER`: The institution does not support this product, and the data was manually provided by the user.
       enum:
       - INSTITUTION
@@ -42833,9 +42902,13 @@ components:
             A description of how confident we are that the provided counterparty is involved in the transaction.
 
             `VERY_HIGH`: We recognize this counterparty and we are more than 98% confident that it is involved in this transaction.
+
             `HIGH`: We recognize this counterparty and we are more than 90% confident that it is involved in this transaction.
+
             `MEDIUM`: We are moderately confident that this counterparty was involved in this transaction, but some details may differ from our records.
+
             `LOW`: We didn't find a matching counterparty in our records, so we are returning a cleansed name parsed out of the request description.
+
             `UNKNOWN`: We don't know the confidence level for this counterparty.
           nullable: true
           type: string
@@ -42896,9 +42969,13 @@ components:
             A description of how confident we are that the provided counterparty is involved in the transaction.
 
             `VERY_HIGH`: We recognize this counterparty and we are more than 98% confident that it is involved in this transaction.
+
             `HIGH`: We recognize this counterparty and we are more than 90% confident that it is involved in this transaction.
+
             `MEDIUM`: We are moderately confident that this counterparty was involved in this transaction, but some details may differ from our records.
+
             `LOW`: We didn't find a matching counterparty in our records, so we are returning a cleansed name parsed out of the request description.
+
             `UNKNOWN`: We don't know the confidence level for this counterparty.
           nullable: true
           type: string
@@ -42916,10 +42993,15 @@ components:
         The counterparty type.
 
         `merchant`: a provider of goods or services for purchase
+
         `financial_institution`: a financial entity (bank, credit union, BNPL, fintech)
+
         `payment_app`: a transfer or P2P app (e.g. Zelle)
+
         `marketplace`: a marketplace (e.g. DoorDash, Google Play Store)
+
         `payment_terminal`: a point-of-sale payment terminal (e.g. Square, Toast)
+
         `income_source`: the payer in an income transaction (e.g., an employer, client, or government agency)
       enum:
       - merchant
@@ -43020,9 +43102,13 @@ components:
             A description of how confident we are that the provided categories accurately describe the transaction intent.
 
             `VERY_HIGH`: We are more than 98% confident that this category reflects the intent of the transaction.
+
             `HIGH`: We are more than 90% confident that this category reflects the intent of the transaction.
+
             `MEDIUM`: We are moderately confident that this category reflects the intent of the transaction.
+
             `LOW`: This category may reflect the intent, but there may be other categories that are more accurate.
+
             `UNKNOWN`: We don't know the confidence level for this category.
           nullable: true
           type: string
@@ -43056,9 +43142,13 @@ components:
             A description of how confident we are that the provided categories accurately describe the transaction intent.
 
             `VERY_HIGH`: We are more than 98% confident that this category reflects the intent of the transaction.
+
             `HIGH`: We are more than 90% confident that this category reflects the intent of the transaction.
+
             `MEDIUM`: We are moderately confident that this category reflects the intent of the transaction.
+
             `LOW`: This category may reflect the intent, but there may be other categories that are more accurate.
+
             `UNKNOWN`: We don't know the confidence level for this category.
           nullable: true
           type: string
@@ -44696,12 +44786,14 @@ components:
             $ref: '#/components/schemas/LoanLiability'
           nullable: true
           type: array
+          x-hidden-from-docs: true
         line_of_credit:
           description: The line of credit accounts returned.
           items:
             $ref: '#/components/schemas/LineOfCreditLiability'
           nullable: true
           type: array
+          x-hidden-from-docs: true
       required:
       - credit
       - mortgage
@@ -44826,6 +44918,7 @@ components:
       - ytd_interest_paid
       title: LoanLiability
       type: object
+      x-hidden-from-docs: true
     LineOfCreditLiability:
       additionalProperties: true
       description: Contains details about a line of credit account.
@@ -44951,6 +45044,7 @@ components:
       - principal_balance
       title: LineOfCreditLiability
       type: object
+      x-hidden-from-docs: true
     LoanInterestRate:
       additionalProperties: true
       description: Information about the interest rate on a loan or line of credit.
@@ -44970,6 +45064,7 @@ components:
       - type
       title: LoanInterestRate
       type: object
+      x-hidden-from-docs: true
     LoanInterestRateType:
       description: The type of interest rate.
       enum:
@@ -44978,6 +45073,7 @@ components:
       nullable: true
       title: LoanInterestRateType
       type: string
+      x-hidden-from-docs: true
     LoanPaymentFrequency:
       description: The frequency at which payments are scheduled.
       enum:
@@ -44991,6 +45087,7 @@ components:
       nullable: true
       title: LoanPaymentFrequency
       type: string
+      x-hidden-from-docs: true
     LoanCompoundingPeriod:
       description: The frequency at which interest is compounded.
       enum:
@@ -45004,6 +45101,7 @@ components:
       nullable: true
       title: LoanCompoundingPeriod
       type: string
+      x-hidden-from-docs: true
     StudentLoan:
       additionalProperties: true
       description: Contains details about a student loan account
@@ -46306,7 +46404,9 @@ components:
             This field is deprecated in favor of the `breakdown` object, which provides more granular institution health data.
 
             `HEALTHY`: the majority of requests are successful
+
             `DEGRADED`: only some requests are successful
+
             `DOWN`: all requests are failing
           enum:
           - HEALTHY
@@ -46785,10 +46885,15 @@ components:
         type:
           description: |-
             The type of the investment transaction. Possible values are:
+
             `buy`: Buying an investment
+
             `sell`: Selling an investment
+
             `cash`: Activity that modifies a cash position
+
             `fee`: A fee on the account
+
             `transfer`: Activity that modifies a position, but not through buy/sell activity e.g. options exercise, portfolio transfer
           type: string
         currency:
@@ -48562,7 +48667,9 @@ components:
     PendingDisconnectWebhookReason:
       description: |-
         Reason why the Item is about to be disconnected.
+
         `INSTITUTION_MIGRATION`: The institution is moving to API or to a different integration. For example, this can occur when an institution moves from a non-OAuth integration to an OAuth integration.
+
         `INSTITUTION_TOKEN_EXPIRATION`: The consent on an Item associated with a US or CA institution is about to expire.
       enum:
       - INSTITUTION_MIGRATION
@@ -49043,6 +49150,7 @@ components:
             charge card:
               description: Bank-issued charge card
               type: string
+              x-hidden-from-docs: true
             credit card:
               description: Bank-issued credit card
               type: string
@@ -49069,6 +49177,7 @@ components:
             commercial line of credit:
               description: Commercial line of credit
               type: string
+              x-hidden-from-docs: true
             construction:
               description: Construction loan
               type: string
@@ -49081,9 +49190,11 @@ components:
             home equity loan:
               description: Home equity loan
               type: string
+              x-hidden-from-docs: true
             installment:
               description: Installment loan
               type: string
+              x-hidden-from-docs: true
             line of credit:
               description: Pre-approved line of credit
               type: string
@@ -49456,6 +49567,7 @@ components:
         charge card:
           description: Bank-issued charge card
           type: string
+          x-hidden-from-docs: true
         credit card:
           description: Bank-issued credit card
           type: string
@@ -49482,6 +49594,7 @@ components:
         commercial line of credit:
           description: Commercial line of credit
           type: string
+          x-hidden-from-docs: true
         construction:
           description: Construction loan
           type: string
@@ -49494,9 +49607,11 @@ components:
         home equity loan:
           description: Home equity loan
           type: string
+          x-hidden-from-docs: true
         installment:
           description: Installment loan
           type: string
+          x-hidden-from-docs: true
         line of credit:
           description: Pre-approved line of credit
           type: string
@@ -50400,11 +50515,17 @@ components:
     InvestmentTransactionType:
       description: |-
         Value is one of the following:
+
         `buy`: Buying an investment
+
         `sell`: Selling an investment
+
         `cancel`: A cancellation of a pending transaction
+
         `cash`: Activity that modifies a cash position
+
         `fee`: A fee on the account
+
         `transfer`: Activity which modifies a position, but not through buy/sell activity e.g. options exercise, portfolio transfer
 
         For descriptions of possible transaction types and subtypes, see the [Investment transaction types schema](https://plaid.com/docs/api/accounts/#investment-transaction-types-schema).
@@ -53148,11 +53269,17 @@ components:
         The status of the transfer.
 
         `pending`: A new transfer was created; it is in the pending state.
+
         `posted`: The transfer has been successfully submitted to the payment network.
+
         `settled`: The transfer was successfully completed by the payment network. Note that funds from received debits are not available to be moved out of the Ledger until the transfer reaches `funds_available` status. For credit transactions, `settled` means the funds have been delivered to the receiving bank account. This is the terminal state of a successful credit transfer.
+
         `funds_available`: Funds from the transfer have been released from hold and applied to the ledger's available balance. (Only applicable to ACH debits.) This is the terminal state of a successful debit transfer.
+
         `cancelled`: The transfer was cancelled by the client. This is the terminal state of a cancelled transfer.
+
         `failed`: The transfer failed, no funds were moved. This is the terminal state of a failed transfer.
+
         `returned`: A posted transfer was returned. This is the terminal state of a returned transfer.
       enum:
       - pending
@@ -53169,7 +53296,9 @@ components:
         The status of the recurring transfer.
 
         `active`: The recurring transfer is currently active.
+
         `cancelled`: The recurring transfer was cancelled by the client or Plaid.
+
         `expired`: The recurring transfer has completed all originations according to its recurring schedule.
       enum:
       - active
@@ -53182,9 +53311,13 @@ components:
         The status of the sweep for the transfer.
 
         `unswept`: The transfer hasn't been swept yet.
+
         `swept`: The transfer was swept to the sweep account.
+
         `swept_settled`: Credits are available to be withdrawn or debits have been deducted from the customer's business checking account.
+
         `return_swept`: The transfer was returned, funds were pulled back or pushed back to the sweep account.
+
         `null`: The transfer will never be swept (e.g. if the transfer is cancelled or returned before being swept)
       enum:
       - null
@@ -53200,10 +53333,15 @@ components:
         The status of the refund.
 
         `pending`: A new refund was created; it is in the pending state.
+
         `posted`: The refund has been successfully submitted to the payment network.
+
         `settled`: Credits have been refunded to the Plaid linked account.
+
         `cancelled`: The refund was cancelled by the client.
+
         `failed`: The refund has failed.
+
         `returned`: The refund was returned.
       enum:
       - pending
@@ -53489,7 +53627,6 @@ components:
             or set to `false`, the authorization is evaluated without guarantee coverage.
           nullable: true
           type: boolean
-          x-hidden-from-docs: true
         beacon_session_id:
           deprecated: true
           description: The unique identifier returned by Plaid's [beacon](https://plaid.com/docs/transfer/guarantee/#using-a-beacon)
@@ -55587,7 +55724,10 @@ components:
       type: string
     BankTransferEventListDirection:
       description: |-
-        Indicates the direction of the transfer: `outbound`: for API-initiated transfers
+        Indicates the direction of the transfer:
+
+        `outbound`: for API-initiated transfers
+
         `inbound`: for payments received by the FBO account.
       enum:
       - inbound
@@ -56005,7 +56145,9 @@ components:
         Source of the ledger event.
 
         `"TRANSFER"` - The source of the ledger event is a transfer
+
         `"SWEEP"` - The source of the ledger event is a sweep
+
         `"REFUND"` - The source of the ledger event is a refund
       enum:
       - TRANSFER
@@ -56553,10 +56695,15 @@ components:
         The status of a sweep transfer
 
         `"pending"` - The sweep is currently pending
+
         `"posted"` - The sweep has been posted
+
         `"settled"` - The sweep has settled. This is the terminal state of a successful credit sweep.
+
         `"returned"` - The sweep has been returned. This is the terminal state of a returned sweep. Returns of a sweep are extremely rare, since sweeps are money movement between your own bank account and your own Ledger.
+
         `"funds_available"` - Funds from the sweep have been released from hold and applied to the ledger's available balance. (Only applicable to deposits.) This is the terminal state of a successful deposit sweep.
+
         `"failed"` - The sweep has failed. This is the terminal state of a failed sweep.
       enum:
       - pending
@@ -56574,8 +56721,11 @@ components:
         The trigger of the sweep
 
         `"manual"` - The sweep is created manually by the customer
+
         `"incoming"` - The sweep is created by incoming funds flow (e.g. Incoming Wire)
+
         `"balance_threshold"` - The sweep is created by balance threshold setting
+
         `"automatic_aggregate"` - The sweep is created by the Plaid automatic aggregation process. These funds did not pass through the Plaid Ledger balance.
       enum:
       - manual
@@ -58653,7 +58803,9 @@ components:
         The status of the transfer intent.
 
         `PENDING`: The transfer intent is pending.
+
         `SUCCEEDED`: The transfer intent was successfully created.
+
         `FAILED`: The transfer intent was unable to be created.
       enum:
       - PENDING
@@ -60520,12 +60672,11 @@ components:
           nullable: true
           type: boolean
         is_business_name_detected:
-          description: Is `true` if the name on either of the names that was matched
-            for the score contained strings indicative of a business name, such as
-            "CORP", "LLC", "INC", or "LTD". A `true` result generally indicates that
-            an account's name is a business name. However, a `false` result does not
-            mean the account name is not a business name, as some businesses do not
-            use these strings in the names used for their financial institution accounts.
+          description: Is `true` if Plaid determined that one of the names being compared
+            is a business name and scored the pair using its business name matching
+            algorithm. Detection is based on business keywords (such as `LLC`, `INC`,
+            `LTD`, `DBA`, `COMPANY`, or `BUSINESS`) appearing in either name, or on
+            either name matching a known business name.
           nullable: true
           type: boolean
       required:
@@ -62174,7 +62325,9 @@ components:
         The verification refresh status. One of the following:
 
         `"USER_PRESENCE_REQUIRED"` User presence is required to refresh an income verification.
+
         `"SUCCESSFUL"` The income verification refresh was successful.
+
         `"NOT_FOUND"` No new data was found after the income verification refresh.
       title: CreditPayrollIncomeRefreshStatus
       type: string
@@ -68729,20 +68882,35 @@ components:
     CreditBankIncomeCategory:
       description: |-
         The income category.
+
         `BANK_INTEREST`: Interest earned from a bank account.
+
         `BENEFIT_OTHER`: Government benefits other than retirement, unemployment, child support, or disability. Currently used only in the UK, to represent benefits such as Cost of Living Payments.
+
         `CASH`: Deprecated and used only for existing legacy implementations. Has been replaced by `CASH_DEPOSIT` and `TRANSFER_FROM_APPLICATION`.
+
         `CASH_DEPOSIT`: A cash or check deposit.
+
         `CHILD_SUPPORT`: Child support payments received.
+
         `GIG_ECONOMY`: Income earned as a gig economy worker, e.g. driving for Uber, Lyft, Postmates, DoorDash, etc.
+
         `LONG_TERM_DISABILITY`: Disability payments, including Social Security disability benefits.
+
         `OTHER`: Income that could not be categorized as any other income category.
+
         `MILITARY`: Veterans benefits. Income earned as salary for serving in the military (e.g. through DFAS) will be classified as `SALARY` rather than `MILITARY`.
+
         `RENTAL`: Income earned from a rental property. Income may be identified as rental when the payment is received through a rental platform, e.g. Airbnb; rent paid directly by the tenant to the property owner (e.g. via cash, check, or ACH) will typically not be classified as rental income.
+
         `RETIREMENT`: Payments from private retirement systems, pensions, and government retirement programs, including Social Security retirement benefits.
+
         `SALARY`: Payment from an employer to an earner or other form of permanent employment.
+
         `TAX_REFUND`: A tax refund.
+
         `TRANSFER_FROM_APPLICATION`: Deposits from a money transfer app, such as Venmo, Cash App, or Zelle.
+
         `UNEMPLOYMENT`: Unemployment benefits. In the UK, includes certain low-income benefits such as the Universal Credit.
       enum:
       - SALARY
@@ -77399,7 +77567,9 @@ components:
             The verification refresh status. One of the following:
 
             `"USER_PRESENCE_REQUIRED"` User presence is required to refresh an income verification.
+
             `"SUCCESSFUL"` The income verification refresh was successful.
+
             `"NOT_FOUND"` No new data was found after the income verification refresh.
           title: CreditPayrollIncomeRefreshStatus
           type: string
@@ -77634,10 +77804,15 @@ components:
         employee_type:
           description: |-
             The type of employment for the individual.
+
             `"FULL_TIME"`: A full-time employee.
+
             `"PART_TIME"`: A part-time employee.
+
             `"CONTRACTOR"`: An employee typically hired externally through a contracting group.
+
             `"TEMPORARY"`: A temporary employee.
+
             `"OTHER"`: The employee type is not one of the above defined types.
           nullable: true
           title: CreditEmploymentEmployeeType
@@ -77670,10 +77845,15 @@ components:
     CreditEmploymentEmployeeType:
       description: |-
         The type of employment for the individual.
+
         `"FULL_TIME"`: A full-time employee.
+
         `"PART_TIME"`: A part-time employee.
+
         `"CONTRACTOR"`: An employee typically hired externally through a contracting group.
+
         `"TEMPORARY"`: A temporary employee.
+
         `"OTHER"`: The employee type is not one of the above defined types.
       nullable: true
       title: CreditEmploymentEmployeeType
@@ -77759,10 +77939,15 @@ components:
     CreditBankIncomeWarningCode:
       description: |-
         The warning code identifies a specific kind of warning.
+
         `IDENTITY_UNAVAILABLE`: Unable to extract identity for the Item
+
         `TRANSACTIONS_UNAVAILABLE`: Unable to extract transactions for the Item
+
         `ITEM_UNAPPROVED`: User exited flow before giving permission to share data for the Item
+
         `REPORT_DELETED`: Report deleted due to customer or consumer request
+
         `DATA_UNAVAILABLE`: No relevant data was found for the Item
       enum:
       - IDENTITY_UNAVAILABLE
@@ -78787,8 +78972,11 @@ components:
     AccountSelectionCardinality:
       description: |-
         The application requires that accounts be limited to a specific cardinality.
+
         `MULTI_SELECT`: indicates that the user should be allowed to pick multiple accounts.
+
         `SINGLE_SELECT`: indicates that the user should be allowed to pick only a single account.
+
         `ALL`: indicates that the user must share all of their accounts and should not be given the opportunity to de-select
       enum:
       - SINGLE_SELECT
@@ -79498,6 +79686,7 @@ components:
         `/sandbox/cra/servicing/simulate`
       example:
         subscription_id: subscription_id
+        user_id: user_id
         options:
           transactions_end_date: 2000-01-23
         secret: secret
@@ -79519,6 +79708,10 @@ components:
             calling this endpoint, Plaid will simulate a report creation for all products
             referenced by this subscription ID.
           type: string
+        user_id:
+          description: The user to simulate an update for, in place of a `subscription_id`.
+          type: string
+          x-hidden-from-docs: true
         options:
           $ref: '#/components/schemas/SandboxCraServicingSimulateRequestOptions'
       required:
@@ -79545,13 +79738,20 @@ components:
       type: object
     SandboxCraServicingSimulateErrorWebhookCode:
       description: If set, skip report generation and instead fire a `CRA_REPORT_UPDATED`
-        error webhook carrying this code.
+        error webhook carrying this code. The accepted values depend on the `scope`
+        of the subscription being simulated, since a simulation can only fire a webhook
+        that scope would send in Production. A `CLIENT_USER` subscription accepts
+        `USER_NOT_FOUND` and `PRODUCT_GENERATION_FAILED`; a `PLAID_NETWORK` subscription
+        accepts `UNMATCH`, `DATA_UNAVAILABLE`, `NO_ELIGIBLE_ITEMS_ON_PROFILE`, and
+        `PRODUCT_GENERATION_ERROR`. Supplying a code that does not match the subscription's
+        scope returns an `INVALID_FIELD` error.
       enum:
       - USER_NOT_FOUND
       - PRODUCT_GENERATION_FAILED
       - UNMATCH
       - DATA_UNAVAILABLE
       - NO_ELIGIBLE_ITEMS_ON_PROFILE
+      - PRODUCT_GENERATION_ERROR
       nullable: true
       type: string
     SandboxCraServicingSimulateResponse:
@@ -80042,6 +80242,8 @@ components:
           numbers:
             international:
               iban: iban
+          is_verified: true
+          holder_category: ""
         secret: secret
         client_id: client_id
       properties:
@@ -80120,6 +80322,8 @@ components:
         numbers:
           international:
             iban: iban
+        is_verified: true
+        holder_category: ""
       properties:
         name:
           description: The name of the counterparty
@@ -80135,11 +80339,38 @@ components:
           format: date
           nullable: true
           type: string
+        holder_category:
+          allOf:
+          - $ref: '#/components/schemas/WalletTransactionCounterpartyHolderCategory'
+          x-hidden-from-docs: true
+        is_verified:
+          description: |-
+            Set to `true` if you have already verified that this counterparty owns the account, either through your own checks or through Plaid Auth or Identity. Plaid then skips its payee verification check.
+
+            Whether Plaid runs a check is determined by Plaid configuration, so this field can only suppress a check and never request one. Only applies to GBP payouts.
+
+            Accepted on `/wallet/transaction/execute` and not returned on read endpoints.
+          type: boolean
+          x-hidden-from-docs: true
       required:
       - name
       - numbers
       title: WalletTransactionCounterparty
       type: object
+    WalletTransactionCounterpartyHolderCategory:
+      description: |-
+        Whether the counterparty is a personal or a business account holder. Payee verification schemes match a different set of identifiers for a natural person and a legal entity.
+
+        `personal`: the counterparty is an individual.
+
+        `business`: the counterparty is a company.
+
+        If this is omitted, a payee verification check on a GBP payout returns `CHECK_NOT_POSSIBLE`. Accepted on `/wallet/transaction/execute` and not returned on read endpoints.
+      enum:
+      - personal
+      - business
+      title: WalletTransactionCounterpartyHolderCategory
+      type: string
     WalletTransactionCounterpartyNumbers:
       additionalProperties: true
       description: The counterparty's bank account numbers. Exactly one of IBAN or
@@ -80309,12 +80540,19 @@ components:
     WalletTransactionFailureReason:
       description: |-
         The error code of a failed transaction. Error codes include:
+
         `EXTERNAL_SYSTEM`: The transaction was declined by an external system.
+
         `EXPIRED`: The transaction request has expired.
+
         `CANCELLED`: The transaction request was rescinded.
+
         `INVALID`: The transaction did not meet certain criteria, such as an inactive account or no valid counterparty, etc.
+
         `ACCOUNT_INVALID`: The transaction could not be processed because the wallet account is invalid or inactive.
+
         `AUTHENTICATION_FAILED`: The transaction could not be processed because authentication with the wallet provider failed.
+
         `UNKNOWN`: The transaction was unsuccessful, but the exact cause is unknown.
       enum:
       - EXTERNAL_SYSTEM
@@ -80328,7 +80566,7 @@ components:
       type: string
     WalletTransactionPayeeVerificationStatus:
       description: |-
-        Result of payee verification check for EUR payouts. Payee verification checks whether the payee name provided matches the account holder name at the destination institution.
+        Result of payee verification check for EUR and GBP payouts. Payee verification checks whether the payee name provided matches the account holder name at the destination institution.
 
         `FULL_MATCH`: The payee name fully matches the account holder.
 
@@ -80340,7 +80578,7 @@ components:
 
         `CHECK_NOT_POSSIBLE`: Payee verification could not be performed.
 
-        This field is only populated for applicable EUR payout transactions and will be `null` for other transaction types.
+        This field is only populated for applicable EUR and GBP payout transactions and will be `null` for other transaction types.
       enum:
       - FULL_MATCH
       - PARTIAL_MATCH
@@ -80541,6 +80779,8 @@ components:
             numbers:
               international:
                 iban: iban
+            is_verified: true
+            holder_category: ""
           last_status_update: 2000-01-23T04:56:07.000+00:00
           related_transactions:
           - id: id
@@ -80586,6 +80826,8 @@ components:
             numbers:
               international:
                 iban: iban
+            is_verified: true
+            holder_category: ""
           last_status_update: 2000-01-23T04:56:07.000+00:00
           related_transactions:
           - id: id
@@ -80658,6 +80900,8 @@ components:
           numbers:
             international:
               iban: iban
+          is_verified: true
+          holder_category: ""
         last_status_update: 2000-01-23T04:56:07.000+00:00
         related_transactions:
         - id: id
@@ -85746,9 +85990,13 @@ components:
         insights:
           description: |-
             Array containing the insights detected within the generated report, if any. Possible values include:
+
               `LARGE_DEPOSIT_DETECTED`: signaling a deposit over $5,000
+
               `LOW_BALANCE_DETECTED`: signaling a balance below $100
+
               `NEW_LOAN_PAYMENT_DETECTED`: signaling a new loan payment
+
               `NSF_OVERDRAFT_DETECTED`: signaling an NSF overdraft
           items:
             $ref: '#/components/schemas/CashFlowInsight'
@@ -86336,6 +86584,98 @@ components:
               update them to continue.
             item_id: eVBnVMp7zdTJLkRNr33Rs6zr7KNJqBFL9DrE6
           failed_products: []
+          environment: production
+    CraReportUpdatedWebhook:
+      additionalProperties: true
+      description: Fired when a subscribed CRA report has been updated. Retrieve the
+        updated products by calling the relevant product `/get` endpoint. A single
+        webhook covers all CRA report-update subscriptions; the `successful_products`/`failed_products`
+        fields indicate which products were updated, and the `scope` field indicates
+        the data the report was computed over.
+      properties:
+        webhook_type:
+          description: '`CRA_REPORT`'
+          type: string
+        webhook_code:
+          description: '`CRA_REPORT_UPDATED`'
+          type: string
+        user_id:
+          description: The `user_id` associated with the user whose data is being
+            requested. This is received by calling `/user/create`.
+          type: string
+        report_id:
+          description: The identifier of the CRA report that was updated. Pass this
+            value to the relevant product `/get` endpoint to retrieve the updated
+            report.
+          nullable: true
+          type: string
+        scope:
+          $ref: '#/components/schemas/CraReportScope'
+        successful_products:
+          description: Specifies a list of products that have successfully been updated
+            for the report. Call the product `/get` endpoint to retrieve them.
+          items:
+            $ref: '#/components/schemas/CreditProduct'
+          type: array
+        failed_products:
+          description: Specifies a list of products that have failed to update for
+            the report. Additional detail on what caused the failure can be found
+            by calling the product `/get` endpoint.
+          items:
+            $ref: '#/components/schemas/CreditProduct'
+          type: array
+        generated_time:
+          description: The timestamp when the products were generated, in ISO 8601
+            format. Null if there are no successful products.
+          format: date-time
+          nullable: true
+          type: string
+        error_code:
+          description: The reason all products failed to update. Populated only when
+            every requested product failed; null if any product succeeded. For example,
+            `NO_ELIGIBLE_ITEMS`.
+          nullable: true
+          type: string
+        environment:
+          $ref: '#/components/schemas/WebhookEnvironmentValues'
+      required:
+      - environment
+      - failed_products
+      - scope
+      - successful_products
+      - user_id
+      - webhook_code
+      - webhook_type
+      title: CraReportUpdatedWebhook
+      type: object
+      x-examples:
+        example-1:
+          webhook_type: CRA_REPORT
+          webhook_code: CRA_REPORT_UPDATED
+          user_id: usr_8c3ZbDBYjaqUXZ
+          report_id: cra-report-production-6f8b1e0c-4d2a-4c7e-9a3b-2f1d8e5a7c90
+          scope: CLIENT_USER
+          successful_products:
+          - product: cra_base_report
+            version: V1
+          - product: cra_income_insights
+            version: V1
+          failed_products: []
+          generated_time: 2026-01-12T20:23:59Z
+          environment: production
+        example-2:
+          webhook_type: CRA_REPORT
+          webhook_code: CRA_REPORT_UPDATED
+          user_id: usr_8c3ZbDBYjaqUXZ
+          report_id: cra-report-production-6f8b1e0c-4d2a-4c7e-9a3b-2f1d8e5a7c90
+          scope: PLAID_NETWORK
+          successful_products: []
+          failed_products:
+          - product: cra_base_report
+            version: V1
+          - product: cra_income_insights
+            version: V1
+          error_code: NO_ELIGIBLE_ITEMS
           environment: production
     CraPartnerInsightsCompleteWebhook:
       additionalProperties: true
@@ -92877,6 +93217,7 @@ components:
         A list of add-ons that can be included in the PDF.
 
         `cra_income_insights`: Include Income Insights report in the PDF.
+
         `cra_partner_insights`: Include Partner Insights report in the PDF.
       enum:
       - cra_income_insights
@@ -92953,6 +93294,8 @@ components:
         consumer_report_permissible_purpose:
           allOf:
           - $ref: '#/components/schemas/CraCheckReportPermissiblePurpose'
+          description: The permissible purpose under which the consumer report is
+            being retrieved.
           x-hidden-from-docs: true
       title: CraCheckReportBaseReportGetRequest
       type: object
@@ -94119,8 +94462,11 @@ components:
     BaseReportWarningCode:
       description: |-
         The warning code identifies a specific kind of warning.
+
         `IDENTITY_UNAVAILABLE`: Account-owner information is not available.
+
         `TRANSACTIONS_UNAVAILABLE`: Transactions information associated with Credit and Depository accounts are unavailable.
+
         `USER_FRAUD_ALERT`: The User has placed a fraud alert on their Plaid Check consumer report due to suspected fraud. Note: when a fraud alert is in place, the recipient of the consumer report has an obligation to verify the consumer's identity.
       enum:
       - IDENTITY_UNAVAILABLE
@@ -94409,6 +94755,7 @@ components:
         Add-ons that should be included in the Asset Report.
 
         `investments`: The Investments add-on
+
         `fast_assets`: The Fast Assets add-on
       enum:
       - investments
@@ -99796,8 +100143,11 @@ components:
         How an asset is owned.
 
         `association`: Ownership by a corporation, partnership, or unincorporated association, including for-profit and not-for-profit organizations.
+
         `individual`: Ownership by an individual.
+
         `joint`: Joint ownership by multiple parties.
+
         `trust`: Ownership by a revocable or irrevocable trust.
       enum:
       - null
@@ -104095,8 +104445,8 @@ components:
           description: Transaction history associated with the account. Transaction
             history returned by endpoints such as `/transactions/get` or `/investments/transactions/get`
             will be returned in the top-level `transactions` field instead. Some transactions
-            may have their details masked in accordance to the FCRA. These will appear
-            with a `credit_category` of `MASKED_TRANSACTION_CATEGORY`.
+            may have their details masked in accordance with the FCRA. These will
+            appear with a `credit_category` of `MASKED_TRANSACTION_CATEGORY`.
           items:
             $ref: '#/components/schemas/BaseReportTransaction'
           type: array
@@ -105520,11 +105870,17 @@ components:
     BeaconAccountRiskEvaluateEvaluationReason:
       description: |
         Description of the reason you want to evaluate risk.
+
         `ONBOARDING`: user links a first bank account as part of the onboarding flow of your platform.
+
         `NEW_ACCOUNT`: user links another bank account or replaces the currently linked bank account on your platform.
+
         `INFORMATION_CHANGE`: user changes their information on your platform, e.g., updating their phone number.
+
         `DORMANT_USER`:  you decide to re-evaluate a user that becomes active after a period of inactivity.
+
         `OTHER`: any other reasons not listed here
+
         Possible values:  `ONBOARDING`, `NEW_ACCOUNT`, `INFORMATION_CHANGE`, `DORMANT_USER`, `OTHER`
       enum:
       - ONBOARDING
@@ -105667,10 +106023,15 @@ components:
     BeaconAccountRiskEvaluateAccountAttributes:
       description: |-
         The attributes object contains data that can be used to assess account risk. Examples of data include:
+
         `days_since_first_plaid_connection`: The number of days since the first time the Item was connected to an application via Plaid
+
         `plaid_connections_count_7d`: The number of times the Item has been connected to applications via Plaid over the past 7 days
+
         `plaid_connections_count_30d`: The number of times the Item has been connected to applications via Plaid over the past 30 days
+
         `total_plaid_connections_count`: The number of times the Item has been connected to applications via Plaid
+
         For the full list and detailed documentation of core attributes available, or to request that core attributes not be returned, contact sales or your Plaid account manager
       example:
         days_since_first_plaid_connection: 0
@@ -105956,10 +106317,15 @@ components:
       additionalProperties: true
       description: |-
         The attributes object contains data that can be used to assess account risk. Examples of data include:
+
         `days_since_first_plaid_connection`: The number of days since the first time the Item was connected to an application via Plaid
+
         `plaid_connections_count_7d`: The number of times the Item has been connected to applications via Plaid over the past 7 days
+
         `plaid_connections_count_30d`: The number of times the Item has been connected to applications via Plaid over the past 30 days
+
         `total_plaid_connections_count`: The number of times the Item has been connected to applications via Plaid
+
         For the full list and detailed documentation of core attributes available, or to request that core attributes not be returned, contact sales or your Plaid account manager
       example:
         days_since_first_plaid_connection: 1
@@ -110845,21 +111211,37 @@ components:
     EntityWatchlistCode:
       description: |-
         Shorthand identifier for a specific screening list for entities.
+
          `AU_CON`: Australia Department of Foreign Affairs and Trade Consolidated List
+
          `CA_CON`: Government of Canada Consolidated List of Sanctions
+
          `EU_CON`: European External Action Service Consolidated List
+
          `IZ_SOE`: State Owned Enterprise List
+
          `IZ_UNC`: United Nations Consolidated Sanctions
+
          `IZ_WBK`: World Bank Listing of Ineligible Firms and Individuals
+
          `US_CAP`: US OFAC Correspondent Account or Payable-Through Account Sanctions
+
          `US_FSE`: US OFAC Foreign Sanctions Evaders
+
          `US_MBS`: US Non-SDN Menu-Based Sanctions
+
          `US_SDN`: US OFAC Specially Designated Nationals List
+
          `US_SSI`: US OFAC Sectoral Sanctions Identifications
+
          `US_CMC`: US OFAC Non-SDN Chinese Military-Industrial Complex List
+
          `US_UVL`: Bureau of Industry and Security Unverified List
+
          `US_SAM`: US System for Award Management Exclusion List
+
          `US_TEL`: US Terrorist Exclusion List
+
          `UK_HMC`: Foreign, Commonwealth & Development Office UK Sanctions List
       enum:
       - CA_CON
@@ -115260,30 +115642,55 @@ components:
     IndividualWatchlistCode:
       description: |-
         Shorthand identifier for a specific screening list for individuals.
+
          `AU_CON`: Australia Department of Foreign Affairs and Trade Consolidated List
+
          `CA_CON`: Government of Canada Consolidated List of Sanctions
+
          `EU_CON`: European External Action Service Consolidated List
+
          `IZ_CIA`: CIA List of Chiefs of State and Cabinet Members
+
          `IZ_IPL`: Interpol Red Notices for Wanted Persons List
+
          `IZ_PEP`: Politically Exposed Persons List
+
          `IZ_UNC`: United Nations Consolidated Sanctions
+
          `IZ_WBK`: World Bank Listing of Ineligible Firms and Individuals
+
          `UK_HMC`: Foreign, Commonwealth & Development Office UK Sanctions List
+
          `US_DPL`: Bureau of Industry and Security Denied Persons List
+
          `US_DTC`: US Department of State AECA Debarred
+
          `US_FBI`: US Department of Justice FBI Wanted List
+
          `US_FSE`: US OFAC Foreign Sanctions Evaders
+
          `US_ISN`: US Department of State Nonproliferation Sanctions
+
          `US_MBS`: US Non-SDN Menu-Based Sanctions
+
          `US_PLC`: US OFAC Palestinian Legislative Council
+
          `US_SAM`: US System for Award Management Exclusion List
+
          `US_SDN`: US OFAC Specially Designated Nationals List
+
          `US_SSI`: US OFAC Sectoral Sanctions Identifications
+
          `SG_SOF`: Government of Singapore Terrorists and Terrorist Entities
+
          `TR_TWL`: Government of Turkey Terrorist Wanted List
+
          `TR_DFD`: Government of Turkey Domestic Freezing Decisions
+
          `TR_FOR`: Government of Turkey Foreign Freezing Requests
+
          `TR_WMD`: Government of Turkey Weapons of Mass Destruction
+
          `TR_CMB`: Government of Turkey Capital Markets Board
       enum:
       - AU_CON
@@ -120649,6 +121056,8 @@ components:
         consumer_report_permissible_purpose:
           allOf:
           - $ref: '#/components/schemas/CraCheckReportPermissiblePurpose'
+          description: The permissible purpose under which the consumer report is
+            being retrieved.
           x-hidden-from-docs: true
       title: CraCheckReportIncomeInsightsGetRequest
       type: object
@@ -121891,8 +122300,11 @@ components:
     CheckReportWarningCode:
       description: |-
         The warning code identifies a specific kind of warning.
+
         `IDENTITY_UNAVAILABLE`:  Account-owner information is not available.
+
         `TRANSACTIONS_UNAVAILABLE`: Transactions information associated with Credit and Depository accounts are unavailable.
+
         `USER_FRAUD_ALERT`: The user has placed a fraud alert on their Plaid Check consumer report due to suspected fraud. Please note that when a fraud alert is in place, the recipient of the consumer report has an obligation to verify the consumer's identity.
       enum:
       - IDENTITY_UNAVAILABLE
@@ -124373,7 +124785,9 @@ components:
     CraBankIncomeBonusType:
       description: |-
         The type of bonus that this transaction represents, if it is a bonus.
+
         `BONUS_INCLUDED`: Bonus is included in this transaction along with the normal pay
+
         `BONUS_ONLY`: This transaction is a standalone bonus
       enum:
       - BONUS_INCLUDED
@@ -124385,8 +124799,11 @@ components:
     CraBankIncomeStatus:
       description: |-
         The status of the income sources.
+
         `ACTIVE`: The income source is active.
+
         `INACTIVE`: The income source is inactive.
+
         `UNKNOWN`: The income source status is unknown.
       enum:
       - ACTIVE
@@ -124866,9 +125283,13 @@ components:
     CraBankIncomeWarningCode:
       description: |-
         The warning code identifies a specific kind of warning.
+
         `IDENTITY_UNAVAILABLE`: Unable to extract identity for the Item
+
         `TRANSACTIONS_UNAVAILABLE`: Unable to extract transactions for the Item
+
         `REPORT_DELETED`: Report deleted due to customer or consumer request
+
         `DATA_UNAVAILABLE`: No relevant data was found for the Item
       enum:
       - IDENTITY_UNAVAILABLE
@@ -134810,11 +135231,17 @@ components:
     CraVerificationIncomePayFrequency:
       description: |-
         The income pay frequency.
+
         `WEEKLY`: Weekly pay frequency.
+
         `BIWEEKLY`: Biweekly pay frequency.
+
         `SEMI_MONTHLY`: Semi-monthly pay frequency.
+
         `MONTHLY`: Monthly pay frequency.
+
         `DAILY`: Daily pay frequency.
+
         `UNKNOWN`: Pay frequency is unknown.
       enum:
       - WEEKLY
@@ -134848,8 +135275,11 @@ components:
     CraVerificationIncomeStatus:
       description: |-
         The status of the income source.
+
         `ACTIVE`: The income source is active.
+
         `INACTIVE`: The income source is inactive.
+
         `UNKNOWN`: The income source status is unknown.
       enum:
       - ACTIVE
@@ -136151,7 +136581,24 @@ components:
       - CLIENT_USER
       title: CraReportScope
       type: string
-      x-hidden-from-docs: true
+    CreditProduct:
+      description: A product included in a CRA report, along with the version that
+        was generated.
+      properties:
+        product:
+          allOf:
+          - $ref: '#/components/schemas/Products'
+          x-override-enum-values-shown:
+          - cra_base_report
+          - cra_income_insights
+        version:
+          description: The version of the product that was generated.
+          type: string
+      required:
+      - product
+      - version
+      title: CreditProduct
+      type: object
     CraSubscriptionID:
       description: A CRA servicing subscription identifier, in the format `cra-sub-<environment>-<uuid>`.
       title: CraSubscriptionID
@@ -136968,6 +137415,7 @@ components:
       description: CraReportGetResponse defines the response schema for `/cra/report/get`.
       example:
         user_id: user_id
+        client_user_id: client_user_id
         warnings:
         - warning_type: warning_type
         - warning_type: warning_type
@@ -136992,6 +137440,12 @@ components:
             to identify a user instead of the `user_token`. For more details, see
             [New User APIs](https://plaid.com/docs/api/users/user-apis).
           title: NewUserID
+          type: string
+        client_user_id:
+          description: The unique ID representing the end user that you supplied as
+            `client_user_id` when creating the user via `/user/create`. `null` if
+            the user has no `client_user_id` on record.
+          nullable: true
           type: string
         warnings:
           description: User or report-level errors that affected the overall report
@@ -142250,10 +142704,15 @@ components:
         The reason for removing the Item
 
         `FRAUD_FIRST_PARTY`: The end user who owns the connected bank account committed fraud
+
         `FRAUD_FALSE_IDENTITY`: The end user created the connection using false identity information or stolen credentials
+
         `FRAUD_ABUSE`: The end user is abusing the client's service or platform through their connected account
+
         `FRAUD_OTHER`: Other fraud-related reasons involving the end user not covered by the specific fraud categories
+
         `CONNECTION_IS_NON_FUNCTIONAL`: The connection to the end user's financial institution is broken and cannot be restored
+
         `OTHER`: Any other reason for removing the connection not covered by the above categories
       enum:
       - FRAUD_FIRST_PARTY
@@ -142988,17 +143447,29 @@ components:
         The reason for terminating products.
 
         `FRAUD_FIRST_PARTY`: The end user who owns the connected bank account committed fraud using their real identity
+
         `FRAUD_FALSE_IDENTITY`: The connection was created using a false or stolen identity
+
         `FRAUD_ABUSE`: The end user is abusing the client's service or platform (for example, automation or excessive retries) through their connected account
+
         `FRAUD_OTHER`: Fraud-related, but not covered by the specific fraud categories above; `reason_note` should clarify
+
         `FRAUD_TRANSACTION`: Fraud occurred at the transaction level, such as an unauthorized transaction, card testing, chargeback, ACH return, or dispute
+
         `CONSUMER_LOAN_PAID_OFF`: The end user paid off their loan and no longer needs the product
+
         `CONSUMER_ACCOUNT_CLOSED`: The end user closed their account with the client and no longer needs the product
+
         `CONSUMER_CHARGE_OFF`: The end user's account has been charged off
+
         `CONSUMER_PAYMENT_METHOD_SWITCHED`: The end user switched to a different payment method and no longer needs the product
+
         `USER_OFFBOARDING`: The user is offboarding from the client's service or platform
+
         `DUPLICATE_ITEM`: This Item is a duplicate of another active Item for the same user
+
         `BILLING_TERMINATION`: The client's billing or subscription relationship with the end user has ended
+
         `OTHER`: None of the above; `reason_note` should clarify
       enum:
       - FRAUD_FIRST_PARTY
@@ -143041,8 +143512,11 @@ components:
         A space-separated list of scopes associated with this token, in the format described in [https://datatracker.ietf.org/doc/html/rfc6749#section-3.3](https://datatracker.ietf.org/doc/html/rfc6749#section-3.3). Currently accepted values are:
 
         `user:read` allows reading user data.
+
         `user:write` allows writing user data.
+
         `exchange` allows exchanging a token using the `urn:plaid:params:oauth:user-token` subject token type.
+
         `mcp:dashboard` allows access to the MCP dashboard server.
       example: user:read user:write exchange
       title: OAuth Scope
@@ -143083,8 +143557,11 @@ components:
         The type of OAuth grant being requested:
 
         `client_credentials` allows exchanging a client id and client secret for a refresh and access token.
+
         `refresh_token` allows refreshing an access token using a refresh token. When using this grant type, only the `refresh_token` field is required (along with the `client_id` and `client_secret`).
+
         `urn:ietf:params:oauth:grant-type:token-exchange` allows exchanging a subject token for an OAuth token. When using this grant type, the `audience`, `subject_token` and `subject_token_type` fields are required.
+
         These grants are defined in their respective RFCs. `refresh_token` and `client_credentials` are defined in RFC 6749 and `urn:ietf:params:oauth:grant-type:token-exchange` is defined in RFC 8693.
       enum:
       - refresh_token
@@ -143094,8 +143571,11 @@ components:
     OAuthSubjectTokenType:
       description: |-
         The type of the subject token.
+
         `urn:plaid:params:tokens:user` allows exchanging a Plaid-issued user token for an OAuth token. When using this token type, `audience` must be the same as the `client_id`. `subject_token` must be a Plaid-issued user token issued from the `/user/create` endpoint.
+
         `urn:plaid:params:oauth:user-token` allows exchanging a refresh token for an OAuth token to another `client_id`. The other `client_id` is provided in `audience`. `subject_token` must be an OAuth refresh token issued from the `/oauth/token` endpoint.
+
         `urn:plaid:params:credit:multi-user` allows exchanging a Plaid-issued user token for an OAuth token. When using this token type, `audience` may be a client id or a supported CRA partner URN. `audience` supports a comma-delimited list of clients. When multiple clients are specified in the `audience` a multi-party token is created which can be used by all parties in the audience in conjunction with their `client_id` and `client_secret`.
       enum:
       - urn:plaid:params:tokens:user
@@ -143139,8 +143619,11 @@ components:
             A space-separated list of scopes associated with this token, in the format described in [https://datatracker.ietf.org/doc/html/rfc6749#section-3.3](https://datatracker.ietf.org/doc/html/rfc6749#section-3.3). Currently accepted values are:
 
             `user:read` allows reading user data.
+
             `user:write` allows writing user data.
+
             `exchange` allows exchanging a token using the `urn:plaid:params:oauth:user-token` subject token type.
+
             `mcp:dashboard` allows access to the MCP dashboard server.
           example: user:read user:write exchange
           title: OAuth Scope
@@ -143274,8 +143757,11 @@ components:
             A space-separated list of scopes associated with this token, in the format described in [https://datatracker.ietf.org/doc/html/rfc6749#section-3.3](https://datatracker.ietf.org/doc/html/rfc6749#section-3.3). Currently accepted values are:
 
             `user:read` allows reading user data.
+
             `user:write` allows writing user data.
+
             `exchange` allows exchanging a token using the `urn:plaid:params:oauth:user-token` subject token type.
+
             `mcp:dashboard` allows access to the MCP dashboard server.
           example: user:read user:write exchange
           title: OAuth Scope
@@ -144156,9 +144642,13 @@ components:
         default_payment_method:
           description: |-
             The default ACH payment method to complete the transaction. When using a Balance-only ruleset, this field is ignored.
+
             `SAME_DAY_ACH`: Same Day ACH by Nacha. The debit transaction is processed and settled on the same day.
+
             `STANDARD_ACH`: Standard ACH by Nacha.
+
             `MULTIPLE_PAYMENT_METHODS`: If there is no default debit rail or there are multiple payment methods.
+
             Possible values:  `SAME_DAY_ACH`, `STANDARD_ACH`, `MULTIPLE_PAYMENT_METHODS`
           nullable: true
           type: string
@@ -144706,9 +145196,13 @@ components:
         default_payment_method:
           description: |-
             The default ACH payment method to complete the transaction.
+
             `SAME_DAY_ACH`: Same Day ACH by Nacha. The debit transaction is processed and settled on the same day.
+
             `STANDARD_ACH`: Standard ACH by Nacha.
+
             `MULTIPLE_PAYMENT_METHODS`: If there is no default debit rail or there are multiple payment methods.
+
             Possible values:  `SAME_DAY_ACH`, `STANDARD_ACH`, `MULTIPLE_PAYMENT_METHODS`
           nullable: true
           type: string
@@ -145474,7 +145968,9 @@ components:
         The result of the rule that was triggered for this transaction.
 
         `ACCEPT`: Accept the transaction for processing.
+
         `REROUTE`: Reroute the transaction to a different payment method, as this transaction is too risky.
+
         `REVIEW`: Review the transaction before proceeding.
       enum:
       - ACCEPT
@@ -145530,10 +146026,15 @@ components:
         If using a Balance-only ruleset, only `available_balance` and `current_balance` will be returned as core attributes. If using a Signal Transaction Scores ruleset, over 80 core attributes will be returned. Examples of attributes include:
 
         `available_balance` and `current_balance`: The balance in the ACH transaction funding account
+
         `days_since_first_plaid_connection`: The number of days since the first time the Item was connected to an application via Plaid
+
         `plaid_connections_count_7d`: The number of times the Item has been connected to applications via Plaid over the past 7 days
+
         `plaid_connections_count_30d`: The number of times the Item has been connected to applications via Plaid over the past 30 days
+
         `total_plaid_connections_count`: The number of times the Item has been connected to applications via Plaid
+
         `is_savings_or_money_market_account`: Indicates whether the ACH transaction funding account is a savings/money market account
 
         For the full list and detailed documentation of core attributes available, or to request that core attributes not be returned, contact sales or your Plaid account manager.
@@ -146368,8 +146869,8 @@ components:
           link:
             require_extracted_data: true
             link_session_id: link_session_id
-          sdk:
-            sdk_session_id: sdk_session_id
+          device:
+            device_session_id: device_session_id
         model: model
         secret: secret
         user:
@@ -146390,12 +146891,13 @@ components:
           type: string
         model:
           description: 'The name of the Trust Index model to use for scoring, with
-            a major.minor version suffix. Examples: `ti-link-session-2.0` (link-session
-            fraud), `ti-identity-2.0` (identity fraud), `cash-advance-onboarding-1.0`
-            (first cash advance), and `cash-advance-ongoing-1.0` (subsequent cash
-            advances). The model specified may require certain fields within `model_inputs`;
-            for example, `ti-link-session-2.0` requires the `link` field. Cash-advance
-            models do not use `model_inputs`.'
+            a major.minor version suffix. Examples: `ti-link-session-3` (link-session
+            fraud), `ti-identity-3` (identity fraud), `cash-advance-onboarding-<client>-1.0`
+            (first cash advance), and `cash-advance-ongoing-<client>-1.0` (subsequent
+            cash advances). Cash-advance models are client-scoped; use the model name
+            issued for your client. The model specified may require certain fields
+            within `model_inputs`; for example, `ti-link-session-2` requires the `link`
+            field. Cash-advance models do not use `model_inputs`.'
           maxLength: 128
           type: string
         user:
@@ -146414,14 +146916,14 @@ components:
         link:
           require_extracted_data: true
           link_session_id: link_session_id
-        sdk:
-          sdk_session_id: sdk_session_id
+        device:
+          device_session_id: device_session_id
       nullable: true
       properties:
         link:
           $ref: '#/components/schemas/ProtectLinkModelInputs'
-        sdk:
-          $ref: '#/components/schemas/ProtectSDKModelInputs'
+        device:
+          $ref: '#/components/schemas/ProtectDeviceModelInputs'
       type: object
     ProtectLinkModelInputs:
       description: Inputs for link session Trust Index models.
@@ -146444,22 +146946,23 @@ components:
             `error_code` = `FAILED_PRECONDITION` if extraction is still in progress;
             once data is ready a score will be returned normally.
           type: boolean
+          x-hidden-from-docs: true
       required:
       - link_session_id
       type: object
-    ProtectSDKModelInputs:
-      description: Inputs for Protect SDK Trust Index models.
+    ProtectDeviceModelInputs:
+      description: Inputs for device Trust Index models.
       example:
-        sdk_session_id: sdk_session_id
+        device_session_id: device_session_id
       nullable: true
       properties:
-        sdk_session_id:
-          description: A unique identifier for the Protect SDK session, used to compute
-            a Trust Index score and fraud attributes.
+        device_session_id:
+          description: A unique identifier for the device session started via the
+            Protect SDK, used to compute a Trust Index score and fraud attributes.
           maxLength: 128
           type: string
       required:
-      - sdk_session_id
+      - device_session_id
       type: object
     ProtectComputeResponse:
       additionalProperties: true
@@ -146564,8 +147067,11 @@ components:
       title: ProtectAPIToken
       type: string
     ProtectClientSessionStartData:
-      description: The initial data collected by the Protect SDK when a Protect client
-        session is started.
+      deprecated: true
+      description: Deprecated. This field remains accepted for backward compatibility
+        with existing SDK integrations. New integrations should omit it when starting
+        a session and submit device data through `/protect/client/session/update`
+        instead.
       title: ProtectClientSessionStartData
       type: string
     ProtectReportCreateRequest:
@@ -146657,10 +147163,10 @@ components:
       description: Request object for `/protect/cash_advance/decision/create`.
       example:
         cash_advance:
-          is_taken: true
           amount_approved: ""
           due_date: 2000-01-23
           amount_due: ""
+        is_taken: true
         decision_time: 2000-01-23T04:56:07.000+00:00
         secret: secret
         user:
@@ -146668,6 +147174,7 @@ components:
           client_user_id: client_user_id
         client_advance_id: client_advance_id
         client_id: client_id
+        previous_advance_count: 0
       properties:
         client_id:
           description: Your Plaid API `client_id`. The `client_id` is required and
@@ -146683,10 +147190,18 @@ components:
         user:
           $ref: '#/components/schemas/ProtectUser'
         client_advance_id:
-          description: Your unique identifier for a cash-advance. Provide when available.
-            This should be the same id provided when recording a repayment.
+          description: Your unique identifier for a cash-advance. Required when `is_taken`
+            is `true`. This should be the same identifier provided when recording
+            a repayment.
           nullable: true
           type: string
+        advance_type:
+          $ref: '#/components/schemas/CashAdvanceType'
+        previous_advance_count:
+          description: The number of cash-advances a user has previously taken.
+          minimum: 0
+          nullable: true
+          type: integer
         decision_time:
           description: The time the decision was made, in ISO 8601 / RFC 3339 format
             (`YYYY-MM-DDTHH:mm:ssZ`).
@@ -146694,19 +147209,23 @@ components:
           type: string
         decision:
           $ref: '#/components/schemas/CashAdvanceDecisionOutcome'
+        is_taken:
+          description: Whether the end user took the cash-advance. Required when `decision`
+            is APPROVED. When `true`, `client_advance_id` and `cash_advance` are required.
+          nullable: true
+          type: boolean
         cash_advance:
-          $ref: '#/components/schemas/CashAdvanceDetails'
+          $ref: '#/components/schemas/CashAdvanceInfo'
       required:
       - decision
       - decision_time
       - user
       type: object
-    CashAdvanceDetails:
+    CashAdvanceInfo:
       additionalProperties: true
-      description: The details of a cash-advance associated with an approved cash-advance
-        decision. Required when a cash-advance has been approved.
+      description: The details of a cash-advance associated with the decision. Required
+        when `is_taken` is `true`.
       example:
-        is_taken: true
         amount_approved: ""
         due_date: 2000-01-23
         amount_due: ""
@@ -146726,13 +147245,8 @@ components:
             Required if `is_taken` is `true`.
           format: date
           type: string
-        is_taken:
-          description: Whether the end user took the approved cash-advance. `True`
-            if taken, `False` if not.
-          type: boolean
       required:
       - amount_approved
-      - is_taken
       type: object
     Amount:
       additionalProperties: true
@@ -146799,8 +147313,8 @@ components:
         status:
           $ref: '#/components/schemas/CashAdvanceRepaymentStatus'
         repayment_time:
-          description: The time the repayment occurred, in ISO 8601 / RFC 3339 format
-            (`YYYY-MM-DDTHH:mm:ssZ`).
+          description: The time the repayment occurred. Required when `status` is
+            `REPAID` or `PARTIAL_PAYMENT`. In ISO 8601 / RFC 3339 format (`YYYY-MM-DDTHH:mm:ssZ`).
           format: date-time
           nullable: true
           type: string
@@ -146823,7 +147337,8 @@ components:
         amount_paid:
           allOf:
           - $ref: '#/components/schemas/Amount'
-          description: The amount a user paid.
+          description: The amount a user paid. Required if there was a payment made.
+          nullable: true
         amount_due:
           allOf:
           - $ref: '#/components/schemas/Amount'
@@ -146835,7 +147350,6 @@ components:
           type: string
       required:
       - amount_due
-      - amount_paid
       - due_date
       type: object
     ProtectCashAdvanceRepaymentCreateResponse:
@@ -147104,19 +147618,19 @@ components:
     ProtectEventSendRequest:
       description: Request object for /protect/event/send
       example:
+        device_session_id: device_session_id
         request_trust_index: true
         secret: secret
         event:
+          device_session_id: device_session_id
           user_sign_in:
             key: '{}'
           app_visit:
             key: '{}'
-          protect_session_id: protect_session_id
           user_sign_up:
             key: '{}'
           timestamp: 2000-01-23T04:56:07.000+00:00
         client_id: client_id
-        protect_session_id: protect_session_id
         timestamp: 2000-01-23T04:56:07.000+00:00
       properties:
         client_id:
@@ -147138,8 +147652,8 @@ components:
           type: string
         event:
           $ref: '#/components/schemas/ProtectEvent'
-        protect_session_id:
-          description: Protect Session ID should be provided for any event correlated
+        device_session_id:
+          description: Device Session ID should be provided for any event correlated
             with a frontend user session started via the Protect SDK.
           type: string
         request_trust_index:
@@ -147304,11 +147818,11 @@ components:
       additionalProperties: true
       description: Event data for Protect events.
       example:
+        device_session_id: device_session_id
         user_sign_in:
           key: '{}'
         app_visit:
           key: '{}'
-        protect_session_id: protect_session_id
         user_sign_up:
           key: '{}'
         timestamp: 2000-01-23T04:56:07.000+00:00
@@ -147319,8 +147833,8 @@ components:
             format, e.g. `"2017-09-14T14:42:19.350Z"`
           format: date-time
           type: string
-        protect_session_id:
-          description: If present, contains the current Protect Session ID from the
+        device_session_id:
+          description: If present, contains the current Device Session ID from the
             Protect SDK.
           type: string
         app_visit:
@@ -147504,10 +148018,23 @@ components:
         The outcome of a cash-advance decision.
 
         `APPROVED` - The cash-advance was approved.
+
         `DECLINED` - The cash-advance was declined.
       enum:
       - APPROVED
       - DECLINED
+      type: string
+    CashAdvanceType:
+      description: |-
+        Required when `is_taken` is `true`.
+        Indicates if this would be a user's first or repeat cash-advance.
+
+        `FIRST` - A user's first cash-advance.
+
+        `REPEAT` - A user has previously taken out a cash-advance.
+      enum:
+      - FIRST
+      - REPEAT
       type: string
     CashAdvanceRepaymentStatus:
       description: |-
@@ -147515,12 +148042,12 @@ components:
 
         `REPAID` - The cash-advance has been fully repaid.
 
-        `DELIVERED` - The cash-advance has been disbursed to the user and is still outstanding, but its due date has not yet passed.
+        `PARTIAL_PAYMENT` - A payment has been made on the cash-advance, but there is still an outstanding balance.
 
         `UNPAID` - The cash-advance is past its due date and has not been repaid; the user is delinquent.
       enum:
       - REPAID
-      - DELIVERED
+      - PARTIAL_PAYMENT
       - UNPAID
       type: string
     ProtectReportConfidence:
@@ -147774,11 +148301,21 @@ components:
           nullable: true
           type: string
         merchant_category_code:
-          description: The merchant category code for the transaction, typically a
-            four-digit [ISO 18245](https://www.iso.org/standard/33365.html) string.
-            Not populated for every transaction.
+          description: 'The merchant category code for the transaction, typically
+            a four-digit [ISO 18245](https://www.iso.org/standard/33365.html) string.
+            This field is in beta: it is populated primarily for card transactions,
+            coverage varies by institution, and values are subject to change.'
           nullable: true
           type: string
+        running_balance:
+          description: The balance of the account after this transaction was applied,
+            as reported by the financial institution. Returned on posted transactions
+            only, and not populated for every institution or every transaction. May
+            not reconcile with the balances returned by `/accounts/balance/get`.
+          format: double
+          nullable: true
+          type: number
+          x-hidden-from-docs: true
         client_customization:
           $ref: '#/components/schemas/ClientCustomization'
       required:
