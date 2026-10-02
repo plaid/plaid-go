@@ -9,6 +9,8 @@ This library is generated from an OpenAPI schema (OAS). See full changelog [here
  - [BREAKING] Remove the unlaunched `charge card` and `installment` account subtype enum values, and the never-populated `fund fee`, `loan payment`, and `rebalance` investment transaction subtype enum values. Remove references to those enum members when upgrading.
  - [BREAKING] `CHECK_REPORT_FAILED` and `USER_CHECK_REPORT_FAILED` webhook models now require `error`, `repairable_items`, and `failed_products`; update any manually constructed instances accordingly. Empty item/product lists are returned as `[]`.
  - [BREAKING] The Go module path changes from `github.com/plaid/plaid-go/v47` to `github.com/plaid/plaid-go/v48`. Update imports and run `go get github.com/plaid/plaid-go/v48`.
+ - [BREAKING for Go] `Street` on `AddressData`, `AddressDataNullable`, `AddressDataNotRequired`, and `AddressDataNullableNoRequiredFields` is now `NullableString` (OAS 2020-09-14_1.745.2). Update direct field assignments and the street argument to `NewAddressData` and `NewAddressDataNullable` to use the nullable wrapper. `GetStreet()` still returns `string`; use `GetStreetOk()` to handle null values.
+ - [BREAKING for Go] `NewInstitution` requires `connectionAvailability`, `NewCraReportUpdatedWebhook` requires `clientUserId`, `NewUserAccountSessionGetResponse` requires `linkSessionId`, and `NewPaymentInitiationMetadata` requires `supportsCommercialPaymentConsents` (OAS 2020-09-14_1.749.0, 1.748.0, 1.757.0, 1.744.0). Supply the new argument when calling these constructors; existing keyed struct literals remain compatible.
 
 ## OpenAPI Schema Changes
 ### 2020-09-14_1.762.0
