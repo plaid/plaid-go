@@ -7,7 +7,7 @@ info:
     details.
   termsOfService: https://plaid.com/legal/
   title: The Plaid API
-  version: 2020-09-14_1.740.1
+  version: 2020-09-14_1.762.0
 servers:
 - description: Production
   url: https://production.plaid.com
@@ -607,7 +607,7 @@ paths:
         Cash Flow Updates product and is available only to integrations already using
         it; other integrations should use `/cra/servicing/subscription/create` instead.
       externalDocs:
-        url: /api/products/check/#cramonitoring_insightssubscribe
+        url: /api/products/check-legacy/#cramonitoring_insightssubscribe
       operationId: craMonitoringInsightsSubscribe
       requestBody:
         content:
@@ -644,7 +644,7 @@ paths:
         only to integrations already using it; other integrations should use `/cra/servicing/subscription/delete`
         instead.
       externalDocs:
-        url: /api/products/check/#cramonitoring_insightsunsubscribe
+        url: /api/products/check-legacy/#cramonitoring_insightsunsubscribe
       operationId: craMonitoringInsightsUnsubscribe
       requestBody:
         content:
@@ -682,7 +682,7 @@ paths:
         other integrations should handle the `CRA_REPORT_UPDATED` webhook and pass
         its `report_id` to the relevant product `/get` endpoint, such as `/cra/check_report/base_report/get`.
       externalDocs:
-        url: /api/products/check/#cramonitoring_insightsget
+        url: /api/products/check-legacy/#cramonitoring_insightsget
       operationId: craMonitoringInsightsGet
       requestBody:
         content:
@@ -1772,7 +1772,7 @@ paths:
 
         NOTE: The following schema was updated in April 2026 to reflect the response when the provided version is "II2". Please see [this document](https://docs.google.com/document/d/1kQkQ7FOgFaC4n-sUGUk74hoXZNY_L_nJeCuMe7Keip4/edit?tab=t.0#heading=h.rudamzinus2i) for guidance on migrating to II2 if you are currently using the II1 version, and [this section](https://docs.google.com/document/d/1kQkQ7FOgFaC4n-sUGUk74hoXZNY_L_nJeCuMe7Keip4/edit?tab=t.0#bookmark=id.tdcc2wpk0h60) for an example II1 response along with its [documentation](https://docs.google.com/document/d/1kQkQ7FOgFaC4n-sUGUk74hoXZNY_L_nJeCuMe7Keip4/edit?tab=t.36c85n2ircqk#heading=h.79dwr5c1iszl).
       externalDocs:
-        url: /api/products/check/#cracheck_reportincome_insightsget
+        url: /api/products/check-legacy/#cracheck_reportincome_insightsget
       operationId: craCheckReportIncomeInsightsGet
       requestBody:
         content:
@@ -1922,7 +1922,7 @@ paths:
         or the consumer report has expired, you will receive an error indicating that
         you should create a new consumer report by calling `/cra/check_report/create`.
       externalDocs:
-        url: /api/products/check/#cracheck_reportbase_reportget
+        url: /api/products/check-legacy/#cracheck_reportbase_reportget
       operationId: craCheckReportBaseReportGet
       requestBody:
         content:
@@ -2898,12 +2898,11 @@ paths:
   /cra/check_report/pdf/get:
     post:
       description: '`/cra/check_report/pdf/get` retrieves the most recent Consumer
-        Report in PDF format. By default, the most recent Base Report (if it exists)
-        for the user will be returned. To request that the most recent Partner Insights
-        or Income Insights report be included in the PDF as well, use the `add-ons`
-        field.'
+        Report in PDF format. The most recent Base Report for the user is always included.
+        Use the `add_ons` field to also include the most recent Income Insights, Partner
+        Insights or LendScore report in the PDF.'
       externalDocs:
-        url: /api/products/check/#cracheck_reportpdfget
+        url: /api/products/check-legacy/#cracheck_reportpdfget
       operationId: craCheckReportPdfGet
       requestBody:
         content:
@@ -2937,7 +2936,7 @@ paths:
 
         Each call to `/cra/check_report/create` creates a new, independent report. `/get` endpoints will retrieve the most recently created report for the requested user.
       externalDocs:
-        url: /api/products/check/#cracheck_reportcreate
+        url: /api/products/check-legacy/#cracheck_reportcreate
       operationId: craCheckReportCreate
       requestBody:
         content:
@@ -2975,7 +2974,7 @@ paths:
         the consumer report has expired, you will receive an error indicating that
         you should create a new consumer report by calling `/cra/check_report/create`.
       externalDocs:
-        url: /api/products/check/#cracheck_reportpartner_insightsget
+        url: /api/products/check-legacy/#cracheck_reportpartner_insightsget
       operationId: craCheckReportPartnerInsightsGet
       requestBody:
         content:
@@ -3072,7 +3071,7 @@ paths:
         the consumer report has expired, you will receive an error indicating that
         you should create a new consumer report by calling `/cra/check_report/create`.
       externalDocs:
-        url: /api/products/check/#cracheck_reportcashflow_insightsget
+        url: /api/products/check-legacy/#cracheck_reportcashflow_insightsget
       operationId: craCheckReportCashflowInsightsGet
       requestBody:
         content:
@@ -3121,7 +3120,7 @@ paths:
         the consumer report has expired, you will receive an error indicating that
         you should create a new consumer report by calling `/cra/check_report/create`.
       externalDocs:
-        url: /api/products/check/#cracheck_reportlend_scoreget
+        url: /api/products/check-legacy/#cracheck_reportlend_scoreget
       operationId: craCheckReportLendScoreGet
       requestBody:
         content:
@@ -3173,7 +3172,7 @@ paths:
         the consumer report has expired, you will receive an error indicating that
         you should create a new consumer report by calling `/cra/check_report/create`.
       externalDocs:
-        url: /api/products/check/#cracheck_reportnetwork_insightsget
+        url: /api/products/check-legacy/#cracheck_reportnetwork_insightsget
       operationId: craCheckReportNetworkInsightsGet
       requestBody:
         content:
@@ -3227,7 +3226,7 @@ paths:
 
         If the most recent consumer report for the user doesn't have sufficient data to generate the report, or the consumer report has expired, you will receive an error indicating that you should create a new consumer report by calling `/cra/check_report/create`.
       externalDocs:
-        url: /api/products/check/#cracheck_reportverificationget
+        url: /api/products/check-legacy/#cracheck_reportverificationget
       operationId: craCheckReportVerificationGet
       requestBody:
         content:
@@ -3420,6 +3419,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/PlaidError'
           description: Error response
+      security:
+      - clientId: []
+        secret: []
+        plaidVersion: []
+      - oauth2:
+        - cra:read
       summary: Retrieve various home lending reports for a user
       tags:
       - plaid
@@ -3430,7 +3435,7 @@ paths:
 
         The response to `/cra/check_report/verification/pdf/get` is the PDF binary data. The `request_id`  is returned in the `Plaid-Request-ID` header.
       externalDocs:
-        url: /api/products/check/#cracheck_reportverificationpdfget
+        url: /api/products/check-legacy/#cracheck_reportverificationpdfget
       operationId: craCheckReportVerificationPdfGet
       requestBody:
         content:
@@ -3454,6 +3459,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/PlaidError'
           description: Error response
+      security:
+      - clientId: []
+        secret: []
+        plaidVersion: []
+      - oauth2:
+        - cra:read
       summary: Retrieve a Consumer Report as a Verification PDF
       tags:
       - plaid
@@ -3593,7 +3604,7 @@ paths:
       description: '`/cra/servicing/subscription/create` subscribes a user to CRA
         report-update webhooks for a given scope.'
       externalDocs:
-        url: /api/products/check/#craservicingsubscriptioncreate
+        url: /api/products/check-legacy/#craservicingsubscriptioncreate
       operationId: craServicingSubscriptionCreate
       requestBody:
         content:
@@ -3627,7 +3638,7 @@ paths:
       description: '`/cra/servicing/subscription/delete` removes the CRA servicing
         subscription identified by `subscription_id`.'
       externalDocs:
-        url: /api/products/check/#craservicingsubscriptiondelete
+        url: /api/products/check-legacy/#craservicingsubscriptiondelete
       operationId: craServicingSubscriptionDelete
       requestBody:
         content:
@@ -3661,7 +3672,7 @@ paths:
       description: '`/cra/servicing/subscription/get` returns the CRA servicing subscription
         identified by `subscription_id`.'
       externalDocs:
-        url: /api/products/check/#craservicingsubscriptionget
+        url: /api/products/check-legacy/#craservicingsubscriptionget
       operationId: craServicingSubscriptionGet
       requestBody:
         content:
@@ -3705,7 +3716,7 @@ paths:
       description: '`/cra/servicing/subscription/list` returns all CRA servicing subscriptions
         for a user, across scopes.'
       externalDocs:
-        url: /api/products/check/#craservicingsubscriptionlist
+        url: /api/products/check-legacy/#craservicingsubscriptionlist
       operationId: craServicingSubscriptionList
       requestBody:
         content:
@@ -3748,7 +3759,7 @@ paths:
         servicing subscription. Fields left blank are unchanged; provided fields overwrite
         the current value. Use `reset_fields` to clear fields.'
       externalDocs:
-        url: /api/products/check/#craservicingsubscriptionupdate
+        url: /api/products/check-legacy/#craservicingsubscriptionupdate
       operationId: craServicingSubscriptionUpdate
       requestBody:
         content:
@@ -3777,11 +3788,47 @@ paths:
       summary: Update a CRA servicing subscription
       tags:
       - plaid
+  /cra/report/create:
+    post:
+      description: |-
+        `/cra/report/create` generates a CRA Report for a user from the Items associated with that user.
+
+        Each requested product is generated asynchronously. Use the returned `report_id` to retrieve the report once its products are ready.
+      externalDocs:
+        url: /api/products/check/#crareportcreate
+      operationId: craReportCreate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CraReportCreateRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    request_id: eYupqX1mZkEuQRx
+                    report_id: cra-report-production-6f8b1e0c-4d2a-4c7e-9a3b-2f1d8e5a7c90
+              schema:
+                $ref: '#/components/schemas/CraReportCreateResponse'
+          description: OK
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaidError'
+          description: Error response
+      summary: Create a CRA Report for provided user
+      tags:
+      - plaid
   /cra/report/get:
     post:
       description: '`/cra/report/get` retrieves a CRA Report for a user.'
       externalDocs:
-        url: /none/
+        url: /api/products/check/#crareportget
       operationId: craReportGet
       requestBody:
         content:
@@ -3806,7 +3853,7 @@ paths:
                       decision_stage: DECISIONING
                       consumer_report_permissible_purpose: WRITTEN_INSTRUCTION_PREQUALIFICATION
                       products:
-                      - product: cra_qualify
+                      - product: cra_income_insights
                         version: V1
                         metadata:
                           generated_time: 2024-01-15T10:30:00Z
@@ -3814,9 +3861,16 @@ paths:
                           account_count: 5
                           institution_ids:
                           - ins_56
+                          primary_account_count: 1
+                          depository_account_type_count: 3
+                          credit_account_type_count: 2
+                          other_account_type_count: 0
+                          multiple_owner_account_count: 0
+                          oldest_transaction_date: 2023-01-15
+                          most_recent_transaction_date: 2024-01-14
                         attributes:
-                          plaid_conn_user_active_auto_loan_count_90d: 0
-                          accounts_count: 3
+                          income_streams: []
+                          user_summary: null
                         errors: []
               schema:
                 $ref: '#/components/schemas/CraReportGetResponse'
@@ -3827,10 +3881,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/PlaidError'
           description: Error response
+      security:
+      - clientId: []
+        secret: []
+        plaidVersion: []
+      - oauth2:
+        - cra:read
       summary: Retrieve a CRA Report for provided user
       tags:
       - plaid
-    x-hidden-from-docs: true
   /cra/credit_profile/report/get:
     post:
       description: '`/cra/credit_profile/report/get` retrieves a credit profile report
@@ -4478,6 +4537,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/PlaidError'
           description: Error response.
+      security:
+      - clientId: []
+        secret: []
+        plaidVersion: []
+      - oauth2:
+        - item:read
       summary: Retrieve an Item
       tags:
       - plaid
@@ -4558,6 +4623,8 @@ paths:
                     items:
                     - item_id: Ed6bjNrDLJfGvZWwnkQlfxwoNz54B5C97ejBr
                       access_token: access-sandbox-435beced-94e8-4df3-a181-1dde1cfa19f0
+                    idv_session_status: success
+                    link_session_id: 00010203-0405-0607-0809-0a0b0c0d0e0f
                     request_id: m8MDnv9okwxFNBV
               schema:
                 $ref: '#/components/schemas/UserAccountSessionGetResponse'
@@ -4702,6 +4769,7 @@ paths:
                   value:
                     accounts:
                     - account_id: vzeNDwK7KQIm4yEog683uElbp9GRLEFXGK98D
+                      apy: 0
                       balances:
                         available: 100
                         current: 110
@@ -4760,6 +4828,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/PlaidError'
           description: Default error
+      security:
+      - clientId: []
+        secret: []
+        plaidVersion: []
+      - oauth2:
+        - auth:read
       summary: Retrieve auth data
       tags:
       - plaid
@@ -4839,6 +4913,7 @@ paths:
                   value:
                     accounts:
                     - account_id: BxBXxLj1m4HMXBm9WZZmCWVbPjX16EHwv99vp
+                      apy: 0
                       balances:
                         available: 110.94
                         current: 110.94
@@ -5040,9 +5115,9 @@ paths:
       description: |-
         Use the `/sandbox/transactions/create` endpoint to create new transactions for an existing Item. This endpoint can be used to add up to 10 transactions to any Item at a time.
 
-        This endpoint can only be used with Items that were created in the Sandbox environment using the `user_transactions_dynamic` test user. You can use this to add transactions to test the `/transactions/get` and `/transactions/sync` endpoints.
+        This endpoint can be used with any Item created in the Sandbox environment. Added transactions persist across subsequent calls to `/transactions/get` and `/transactions/sync`.
 
-        Custom transactions are only applied to the depository account. Support for per-account targeting may be added in the future.
+        Each transaction is added to the account named by its `account_id`. When `account_id` is omitted, the transaction is added to the Item's checking account, or, for a custom Sandbox user, to the first depository account listed in its `override_accounts`, or its first account if it has no depository account.
       externalDocs:
         url: /api/sandbox/#sandboxtransactionscreate
       operationId: sandboxTransactionsCreate
@@ -5079,12 +5154,17 @@ paths:
                   value:
                     error_type: INVALID_REQUEST
                     error_code: INVALID_FIELD
-                    error_message: Transaction and posted dates must be within the
-                      last 14 days. The posted date cannot be before the transaction
-                      date.
-                    display_message: Transaction and posted dates must be within the
-                      last 14 days. The posted date cannot be before the transaction
-                      date.
+                    error_message: date_posted must be within the last 730 days
+                    display_message: null
+                    status: 400
+                    request_id: m8MDnv9okwxFNBV
+                invalid_account_id:
+                  value:
+                    error_type: INVALID_INPUT
+                    error_code: INVALID_ACCOUNT_ID
+                    error_message: could not find matching account. Verify that you
+                      are using a valid account_id
+                    display_message: null
                     status: 400
                     request_id: m8MDnv9okwxFNBV
               schema:
@@ -5165,6 +5245,7 @@ paths:
                   value:
                     accounts:
                     - account_id: BxBXxLj1m4HMXBm9WZZmCWVbPjX16EHwv99vp
+                      apy: 0
                       balances:
                         available: 110.94
                         current: 110.94
@@ -5387,6 +5468,7 @@ paths:
                   value:
                     accounts:
                     - account_id: BxBXxLj1m4HMXBm9WZZmCWVbPjX16EHwv99vp
+                      apy: 0
                       balances:
                         available: 110.94
                         current: 110.94
@@ -5624,6 +5706,7 @@ paths:
                       auth_method: INSTANT_AUTH
                     accounts:
                     - account_id: BxBXxLj1m4HMXBm9WZZmCWVbPjX16EHwv99vp
+                      apy: 0
                       balances:
                         available: 110.94
                         current: 110.94
@@ -5917,6 +6000,7 @@ paths:
                   value:
                     accounts:
                     - account_id: BxBXxLj1m4HMXBm9WZZmCWVbPjX16EHwv99vp
+                      apy: 0
                       balances:
                         available: 110.94
                         current: 110.94
@@ -6057,6 +6141,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/PlaidError'
           description: Error response
+      security:
+      - clientId: []
+        secret: []
+        plaidVersion: []
+      - oauth2:
+        - transactions:read
       summary: Get incremental transaction updates on an Item
       tags:
       - plaid
@@ -6332,6 +6422,7 @@ paths:
                       - "0955"
                       - "1367"
                       oauth: false
+                      connection_availability: SUPPORTED
                     request_id: tbFyCEqkU774ZGG
                     total: 11384
               schema:
@@ -6349,7 +6440,7 @@ paths:
   /institutions/search:
     post:
       description: |
-        Returns a JSON response containing details for institutions that match the query parameters, up to a maximum of ten institutions per query.
+        Returns a JSON response containing details for institutions that match the query parameters, up to a maximum of ten institutions per query. Institutions that Plaid does not support for new connections are not included in search results, but can still be retrieved by ID with `/institutions/get_by_id`.
 
         Versioning note: API versions 2019-05-29 and earlier allow use of the `public_key` parameter instead of the `client_id` and `secret` parameters to authenticate to this endpoint. The `public_key` parameter has since been deprecated; all customers are encouraged to use `client_id` and `secret` instead.
       externalDocs:
@@ -6374,6 +6465,7 @@ paths:
                       institution_id: ins_109513
                       name: Theoretical Bank
                       oauth: true
+                      connection_availability: SUPPORTED
                       products:
                       - assets
                       - auth
@@ -6408,7 +6500,9 @@ paths:
   /institutions/get_by_id:
     post:
       description: |
-        Returns a JSON response containing details on a specified financial institution currently supported by Plaid.
+        Returns a JSON response containing details on a specified financial institution.
+
+        Institutions that Plaid does not support for new connections are still returned by this endpoint, so that an `institution_id` stored on an existing Item can still be looked up. These institutions are not returned by `/institutions/get` or `/institutions/search`, and attempting to create a new Item for one of them returns an `INSTITUTION_NO_LONGER_SUPPORTED` error. Use `connection_availability` to tell the two cases apart.
 
         Versioning note: API versions 2019-05-29 and earlier allow use of the `public_key` parameter instead of the `client_id` and `secret` to authenticate to this endpoint. The `public_key` has been deprecated; all customers are encouraged to use `client_id` and `secret` instead.
       externalDocs:
@@ -6446,6 +6540,7 @@ paths:
                       - "0955"
                       - "1367"
                       oauth: false
+                      connection_availability: SUPPORTED
                       status:
                         item_logins:
                           status: HEALTHY
@@ -6636,6 +6731,7 @@ paths:
                   value:
                     accounts:
                     - account_id: blgvvBlXw3cq5GMPwqB6s6q4dLKB9WcVqGDGo
+                      apy: 0
                       balances:
                         available: 100
                         current: 110
@@ -6649,6 +6745,7 @@ paths:
                       subtype: checking
                       type: depository
                     - account_id: 6PdjjRP6LmugpBy5NgQvUqpRXMWxzktg3rwrk
+                      apy: null
                       balances:
                         available: null
                         current: 23631.9805
@@ -6661,6 +6758,7 @@ paths:
                       subtype: 401k
                       type: investment
                     - account_id: XMBvvyMGQ1UoLbKByoMqH3nXMj84ALSdE5B58
+                      apy: null
                       balances:
                         available: null
                         current: 65262
@@ -6966,6 +7064,7 @@ paths:
                   value:
                     accounts:
                     - account_id: BxBXxLj1m4HMXBm9WZZmCWVbPjX16EHwv99vp
+                      apy: 0
                       balances:
                         available: 100
                         current: 110
@@ -6979,6 +7078,7 @@ paths:
                       subtype: checking
                       type: depository
                     - account_id: dVzbVMLjrxTnLjX4G66XUp5GLklm4oiZy88yK
+                      apy: null
                       balances:
                         available: null
                         current: 410
@@ -6991,6 +7091,7 @@ paths:
                       subtype: credit card
                       type: credit
                     - account_id: Pp1Vpkl9w8sajvK6oEEKtr7vZxBnGpf7LxxLE
+                      apy: null
                       balances:
                         available: null
                         current: 65262
@@ -7030,6 +7131,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/PlaidError'
           description: Error response
+      security:
+      - clientId: []
+        secret: []
+        plaidVersion: []
+      - oauth2:
+        - accounts:read
       summary: Retrieve real-time balance data
       tags:
       - plaid
@@ -7057,6 +7164,7 @@ paths:
                   value:
                     accounts:
                     - account_id: BxBXxLj1m4HMXBm9WZZmCWVbPjX16EHwv99vp
+                      apy: 0
                       balances:
                         available: 100
                         current: 110
@@ -7107,6 +7215,7 @@ paths:
                       subtype: checking
                       type: depository
                     - account_id: 3gE5gnRzNyfXpBK5wEEKcymJ5albGVUqg77gr
+                      apy: 0.1
                       balances:
                         available: 200
                         current: 210
@@ -7184,6 +7293,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/PlaidError'
           description: Error response
+      security:
+      - clientId: []
+        secret: []
+        plaidVersion: []
+      - oauth2:
+        - identity:read
       summary: Retrieve identity data
       tags:
       - plaid
@@ -7209,6 +7324,7 @@ paths:
                   value:
                     accounts:
                     - account_id: ZXEbW7Rkr9iv1qj8abebU1KDMlkexgSgrLAod
+                      apy: null
                       balances:
                         available: null
                         current: null
@@ -7304,6 +7420,7 @@ paths:
                   value:
                     accounts:
                     - account_id: BxBXxLj1m4HMXBm9WZZmCWVbPjX16EHwv99vp
+                      apy: 0
                       balances:
                         available: null
                         current: null
@@ -7328,6 +7445,7 @@ paths:
                       subtype: checking
                       type: depository
                     - account_id: 3gE5gnRzNyfXpBK5wEEKcymJ5albGVUqg77gr
+                      apy: 0.1
                       balances:
                         available: null
                         current: null
@@ -10208,6 +10326,7 @@ paths:
                     latest_scored_event:
                       event_id: ptevt_cYNnF8xYE1v1om
                       timestamp: 2020-07-24T03:26:02Z
+                      event_type: PROTECT_COMPUTE
                       trust_index:
                         score: 86
                         model: trust_index.2.0.0
@@ -10317,6 +10436,38 @@ paths:
                 $ref: '#/components/schemas/ProtectCashAdvanceRepaymentCreateResponse'
           description: OK
       summary: Record a cash advance repayment
+      tags:
+      - plaid
+  /protect/cash_advance/feedback/upload:
+    post:
+      description: Upload a CSV file of cash advance decision or repayment feedback.
+        Each row is equivalent to one call to `/protect/cash_advance/decision/create`
+        or `/protect/cash_advance/repayment/create`. Send the request as `multipart/form-data`
+        with `client_id` and `secret` in the `PLAID-CLIENT-ID` and `PLAID-SECRET`
+        headers. The file is accepted for asynchronous processing; the response contains
+        a `request_id` and an `upload_id` that identifies the upload.
+      externalDocs:
+        url: /api/products/protect/#protectcashadvancefeedbackupload
+      operationId: protectCashAdvanceFeedbackUpload
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProtectCashAdvanceFeedbackUploadRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                example-1:
+                  value:
+                    request_id: saKrIBuEB9qJZng
+                    upload_id: caifb_7Kx9mQ2vXpLw9R
+              schema:
+                $ref: '#/components/schemas/ProtectCashAdvanceFeedbackUploadResponse'
+          description: OK
+      summary: Upload a file of cash advance feedback
       tags:
       - plaid
   /protect/compute:
@@ -10432,6 +10583,7 @@ paths:
                   value:
                     event_id: ptevt_cYNnF8xYE1v1om
                     timestamp: 2020-07-24T03:26:02Z
+                    event_type: PROTECT_COMPUTE
                     trust_index:
                       score: 86
                       model: trust_index.2.0.0
@@ -10705,6 +10857,7 @@ paths:
                   value:
                     account:
                       account_id: vzeNDwK7KQIm4yEog683uElbp9GRLEFXGK98D
+                      apy: 0
                       balances:
                         available: 100
                         current: 110
@@ -10772,6 +10925,7 @@ paths:
                   value:
                     account:
                       account_id: QKKzevvp33HxPWpoqn6rI13BxW4awNSjnw4xv
+                      apy: 0
                       balances:
                         available: 100
                         current: 110
@@ -10819,6 +10973,7 @@ paths:
                   value:
                     account:
                       account_id: JqMLm4rJwpF6gMPJwBqdh9ZjjPvvpDcb7kDK1
+                      apy: null
                       balances:
                         available: null
                         current: 110.01
@@ -10949,6 +11104,7 @@ paths:
                   value:
                     account:
                       account_id: xlP8npRxwgCj48LQbjxWipkeL3gbyXf64knoy
+                      apy: null
                       balances:
                         available: null
                         current: 415.57
@@ -11099,6 +11255,7 @@ paths:
                   value:
                     account:
                       account_id: rz99ex9ZQotvnjXdgQLEsR81e3ArPgulVWjGj
+                      apy: null
                       balances:
                         available: null
                         current: 23631.9805
@@ -11238,6 +11395,7 @@ paths:
                   value:
                     account:
                       account_id: BxBXxLj1m4HMXBm9WZZmCWVbPjX16EHwv99vp
+                      apy: 0
                       balances:
                         available: 110.94
                         current: 110.94
@@ -11413,6 +11571,7 @@ paths:
                   value:
                     account:
                       account_id: BxBXxLj1m4HMXBm9WZZmCWVbPjX16EHwv99vp
+                      apy: 0
                       balances:
                         available: 110.94
                         current: 110.94
@@ -11967,6 +12126,7 @@ paths:
                   value:
                     account:
                       account_id: dVzbVMLjrxTnLjX4G66XUp5GLklm4oiZy88yK
+                      apy: null
                       balances:
                         available: null
                         current: 410
@@ -12005,6 +12165,7 @@ paths:
                         last_statement_balance: 1708.77
                         minimum_payment_amount: 20
                         next_payment_due_date: 2020-05-28
+                        cash_advance_limit: 500
                       mortgage: []
                       student: []
                     request_id: dTnnm60WgKGLnKL
@@ -12043,6 +12204,7 @@ paths:
                   value:
                     account:
                       account_id: XMGPJy4q1gsQoKd5z9R3tK8kJ9EWL8SdkgKMq
+                      apy: 0
                       balances:
                         available: 100
                         current: 110
@@ -12129,6 +12291,7 @@ paths:
                   value:
                     account:
                       account_id: BxBXxLj1m4HMXBm9WZZmCWVbPjX16EHwv99vp
+                      apy: 0
                       balances:
                         available: null
                         current: null
@@ -12195,6 +12358,7 @@ paths:
                   value:
                     account:
                       account_id: QKKzevvp33HxPWpoqn6rI13BxW4awNSjnw4xv
+                      apy: 0
                       balances:
                         available: 100
                         current: 110
@@ -12309,42 +12473,38 @@ paths:
   /beta/webhook_events/list:
     post:
       description: |-
-        The `/beta/webhook_events/list` endpoint returns webhook events Plaid sent to the calling
-        client within the last 7 days. Results are ordered by `sent_time` ascending and cursor
-        paginated so clients can recover missed webhook deliveries and deduplicate on
-        `webhook_message_id`.
+        `/beta/webhook_events/list` returns webhook events for your account from the last 7
+        days, regardless of delivery outcome. Results are ordered by `sent_time`, oldest
+        first, and paginated with a cursor so you can recover deliveries your endpoint
+        missed. Each event includes a `webhook_message_id` that stays the same if that
+        event shows up again on a later poll, so you can skip events you have already
+        handled.
 
-        Filtering is optional. When multiple filter fields are set (`webhook_types`,
-        `webhook_codes`, `item_ids`, `delivery_statuses`), they are combined with AND across fields
-        and OR within each array (for example, `webhook_types: ["ITEM", "AUTH"]` matches
-        either type).
+        `TRANSACTIONS` webhooks are not returned. Use
+        [`/transactions/sync`](https://plaid.com/docs/api/products/transactions/#transactionssync)
+        to recover transaction updates.
 
-        Recommended pagination workflow:
+        Filtering is optional. For `webhook_types`, `webhook_codes`, `item_ids`, and
+        `delivery_statuses`, values within a field match with OR; different fields combine
+        with AND. For example, `webhook_types: ["ITEM", "AUTH"]` matches events of either
+        type.
 
-        1. First call: omit `cursor`, and optionally set `start_time` within the last 7 days (or
-           omit `start_time` to begin at the oldest retained event).
-        2. Subsequent calls: pass `next_cursor` as `cursor`. Do not send `start_time` with
-           `cursor` — the two fields are mutually exclusive. Sending both returns `INVALID_FIELD`.
-        3. Persist `next_cursor` even when `has_more` is `false`, then reuse it on the next poll so
-           you only receive events newer than what you have already seen.
-        4. If a stored cursor is older than the 7-day retention window, the API returns
-           `WEBHOOK_EVENTS_CURSOR_EXPIRED`; restart with a `start_time` within the last 7 days.
-           Events older than the retention window are no longer available.
+        To page through events:
 
-        Errors:
+        - On the first request, omit `cursor`. You can set `start_time` to a time within the last 7 days, or omit `start_time` to start at the oldest retained event.
+        - On later requests, send the previous response's `next_cursor` as `cursor`. If you also send `start_time`, it is ignored; `cursor` takes precedence, even when `start_time` has changed.
+        - Save `next_cursor` even when `has_more` is `false`, and send that cursor on the next poll so you only receive events newer than the ones you have already seen.
 
-        `WEBHOOK_EVENTS_START_TIME_OUT_OF_RANGE` (400) is returned when `start_time` is earlier
-        than the 7-day retention window. Retry with a `start_time` within the last 7 days, or omit
-        it.
+        A request fails with 400 in these cases:
 
-        `WEBHOOK_EVENTS_CURSOR_EXPIRED` (400) is returned when the cursor's position is older than
-        the 7-day retention window and can no longer be resolved. Restart pagination with a
-        `start_time` within the last 7 days.
+        - `WEBHOOK_EVENTS_START_TIME_OUT_OF_RANGE` (`INVALID_INPUT`) is returned when `cursor` is omitted and `start_time` is earlier than the 7-day retention window. Retry with a `start_time` within the last 7 days, or omit `start_time`.
+        - `WEBHOOK_EVENTS_CURSOR_EXPIRED` (`INVALID_INPUT`) is returned when the cursor is older than the 7-day retention window and can no longer be resolved. Start again with a `start_time` within the last 7 days. Events older than that window are no longer available.
+        - `INVALID_FIELD` (`INVALID_REQUEST`) is returned when `cursor` is not a properly formatted string, or when the request is otherwise invalid.
 
-        `INVALID_FIELD` (400) is returned when `cursor` is not a properly formatted string, when
-        both `cursor` and `start_time` are provided, or when the request is otherwise invalid.
+        This endpoint is in beta and may change in backwards-incompatible ways before it
+        is generally available. Send feedback or bug reports to building@plaid.com.
       externalDocs:
-        url: none
+        url: /api/webhooks/webhook-events/#betawebhook_eventslist
       operationId: betaWebhookEventsList
       requestBody:
         content:
@@ -12434,13 +12594,30 @@ paths:
                     display_message: null
                     status: 400
                     request_id: 4zlKapIkTm8p5KM
+                start_time_out_of_range:
+                  value:
+                    error_type: INVALID_INPUT
+                    error_code: WEBHOOK_EVENTS_START_TIME_OUT_OF_RANGE
+                    error_message: start_time is earlier than the 7-day webhook events
+                      retention window. Retry with a start_time within the last 7
+                      days, or omit start_time to begin from the oldest retained event.
+                    display_message: null
+                    status: 400
+                    request_id: 4zlKapIkTm8p5KM
+                invalid_field:
+                  value:
+                    error_type: INVALID_REQUEST
+                    error_code: INVALID_FIELD
+                    error_message: cursor must be a properly formatted string
+                    display_message: null
+                    status: 400
+                    request_id: 4zlKapIkTm8p5KM
               schema:
                 $ref: '#/components/schemas/PlaidError'
           description: Error response
       summary: List webhook events
       tags:
       - plaid
-      x-hidden-from-docs: true
   /webhook_verification_key/get:
     post:
       description: |-
@@ -12510,6 +12687,7 @@ paths:
                   value:
                     accounts:
                     - account_id: BxBXxLj1m4HMXBm9WZZmCWVbPjX16EHwv99vp
+                      apy: 0
                       balances:
                         available: 100
                         current: 110
@@ -12522,6 +12700,7 @@ paths:
                       subtype: checking
                       type: depository
                     - account_id: dVzbVMLjrxTnLjX4G66XUp5GLklm4oiZy88yK
+                      apy: null
                       balances:
                         available: null
                         current: 410
@@ -12534,6 +12713,7 @@ paths:
                       subtype: credit card
                       type: credit
                     - account_id: Pp1Vpkl9w8sajvK6oEEKtr7vZxBnGpf7LxxLE
+                      apy: null
                       balances:
                         available: null
                         current: 65262
@@ -12546,6 +12726,7 @@ paths:
                       subtype: student
                       type: loan
                     - account_id: BxBXxLj1m4HMXBm9WZJyUg9XLd4rKEhw8Pb1J
+                      apy: null
                       balances:
                         available: null
                         current: 56302.06
@@ -12558,6 +12739,7 @@ paths:
                       subtype: mortgage
                       type: loan
                     - account_id: c0cTGbrDXN3xiGLGUNI9LGwxrOGjakxtWTgQV
+                      apy: null
                       balances:
                         available: null
                         current: 18250
@@ -12570,6 +12752,7 @@ paths:
                       subtype: auto
                       type: loan
                     - account_id: ufQuuYHpSjhuk9TKIQTnDWlFVDIR5nWSynuQD
+                      apy: null
                       balances:
                         available: 76000
                         current: 24000
@@ -12626,6 +12809,7 @@ paths:
                         last_statement_balance: 1708.77
                         minimum_payment_amount: 20
                         next_payment_due_date: 2020-05-28
+                        cash_advance_limit: 500
                       mortgage:
                       - account_id: BxBXxLj1m4HMXBm9WZJyUg9XLd4rKEhw8Pb1J
                         account_number: "3120194154"
@@ -13318,6 +13502,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/PlaidError'
           description: Error response
+      security:
+      - clientId: []
+        secret: []
+        plaidVersion: []
+      - oauth2:
+        - item:write
       summary: Exchange public token for an access token
       tags:
       - plaid
@@ -14089,6 +14279,7 @@ paths:
                   value:
                     accounts:
                     - account_id: 5Bvpj4QknlhVWk7GygpwfVKdd133GoCxB814g
+                      apy: 1.85
                       balances:
                         available: 43200
                         current: 43200
@@ -14103,6 +14294,7 @@ paths:
                       subtype: money market
                       type: depository
                     - account_id: JqMLm4rJwpF6gMPJwBqdh9ZjjPvvpDcb7kDK1
+                      apy: null
                       balances:
                         available: null
                         current: 110.01
@@ -14116,6 +14308,7 @@ paths:
                       subtype: ira
                       type: investment
                     - account_id: k67E4xKvMlhmleEa4pg9hlwGGNnnEeixPolGm
+                      apy: null
                       balances:
                         available: null
                         current: 24580.0605
@@ -14129,6 +14322,7 @@ paths:
                       subtype: 401k
                       type: investment
                     - account_id: ax0xgOBYRAIqOOjeLZr0iZBb8r6K88HZXpvmq
+                      apy: null
                       balances:
                         available: 48200.03
                         current: 48200.03
@@ -14537,6 +14731,7 @@ paths:
                   value:
                     accounts:
                     - account_id: 5e66Dl6jNatx3nXPGwZ7UkJed4z6KBcZA4Rbe
+                      apy: 0
                       balances:
                         available: 100
                         current: 110
@@ -14550,6 +14745,7 @@ paths:
                       subtype: checking
                       type: depository
                     - account_id: KqZZMoZmBWHJlz7yKaZjHZb78VNpaxfVa7e5z
+                      apy: null
                       balances:
                         available: null
                         current: 320.76
@@ -14563,6 +14759,7 @@ paths:
                       subtype: ira
                       type: investment
                     - account_id: rz99ex9ZQotvnjXdgQLEsR81e3ArPgulVWjGj
+                      apy: null
                       balances:
                         available: null
                         current: 23631.9805
@@ -14782,6 +14979,7 @@ paths:
                   value:
                     accounts:
                     - account_id: 31qEA6LPwGumkA4Z5mGbfyGwr4mL6nSZlQqpZ
+                      apy: 1.85
                       balances:
                         available: 43200
                         current: 43200
@@ -14796,6 +14994,7 @@ paths:
                       subtype: money market
                       type: depository
                     - account_id: xlP8npRxwgCj48LQbjxWipkeL3gbyXf64knoy
+                      apy: null
                       balances:
                         available: null
                         current: 415.57
@@ -15334,6 +15533,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/PlaidError'
           description: Error response
+      security:
+      - clientId: []
+        secret: []
+        plaidVersion: []
+      - oauth2:
+        - link:write
       summary: Create Link Token
       tags:
       - plaid
@@ -23111,81 +23316,6 @@ paths:
       tags:
       - plaid
     x-hidden-from-docs: true
-  /link_delivery/create:
-    post:
-      deprecated: true
-      description: Use the `/link_delivery/create` endpoint to create a Hosted Link
-        session.
-      externalDocs:
-        url: /none/
-      operationId: linkDeliveryCreate
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LinkDeliveryCreateRequest'
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              examples:
-                example-1:
-                  value:
-                    link_delivery_url: https://secure.plaid.com/99ace160-3cf7-4e51-a083-403633425815
-                    link_delivery_session_id: 99ace160-3cf7-4e51-a083-403633425815
-                    request_id: 4ciYmmesdqSiUAB
-              schema:
-                $ref: '#/components/schemas/LinkDeliveryCreateResponse'
-          description: OK
-        default:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PlaidError'
-          description: Error response
-      summary: Create Hosted Link session
-      tags:
-      - plaid
-  /link_delivery/get:
-    post:
-      deprecated: true
-      description: Use the `/link_delivery/get` endpoint to get the status of a Hosted
-        Link session.
-      externalDocs:
-        url: /none/
-      operationId: linkDeliveryGet
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LinkDeliveryGetRequest'
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              examples:
-                example-1:
-                  value:
-                    status: COMPLETED
-                    created_at: 2019-10-12T07:20:50.52Z
-                    public_tokens:
-                    - public-sandbox-b0e2c4ee-a763-4df5-bfe9-46a46bce993d
-                    completed_at: 2019-10-12T07:21:50.52Z
-                    request_id: 4ciYmmesdqSiUAB
-              schema:
-                $ref: '#/components/schemas/LinkDeliveryGetResponse'
-          description: OK
-        default:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PlaidError'
-          description: Error response
-      summary: Get Hosted Link session
-      tags:
-      - plaid
   /fdx/notifications:
     post:
       description: A generic webhook receiver endpoint for FDX Event Notifications
@@ -23722,9 +23852,7 @@ components:
           update_type: background
           webhook: webhook
           item_id: item_id
-          billed_products:
-          - null
-          - null
+          paired_item_id: paired_item_id
           consent_expiration_time: 2000-01-23T04:56:07.000+00:00
           error:
             error_code_reason: error_code_reason
@@ -23745,14 +23873,17 @@ components:
             request_id: request_id
             status: 2
           institution_name: institution_name
-          consented_products:
-          - null
-          - null
           available_products:
           - null
           - null
           institution_id: institution_id
           products:
+          - null
+          - null
+          billed_products:
+          - null
+          - null
+          consented_products:
           - null
           - null
         numbers:
@@ -24115,13 +24246,28 @@ components:
           phone_number: phone_number
           email: email
           ssn: ssn
+        link_session_id: link_session_id
         items:
         - access_token: access_token
           item_id: item_id
         - access_token: access_token
           item_id: item_id
         request_id: request_id
+        idv_session_status: ""
       properties:
+        idv_session_status:
+          allOf:
+          - $ref: '#/components/schemas/IdentityVerificationStatus'
+          description: Overall IDV status for the session. Omitted when IDV status
+            retrieval is disabled, no verification exists, or its status is unavailable.
+            Use the IDV endpoints for detailed results.
+          x-hidden-from-docs: true
+        link_session_id:
+          description: The Link session identifier associated with this session. Null
+            for sessions without a valid Link session identifier.
+          nullable: true
+          type: string
+          x-hidden-from-docs: true
         identity:
           $ref: '#/components/schemas/UserAccountIdentity'
         items:
@@ -24139,6 +24285,7 @@ components:
       required:
       - identity
       - items
+      - link_session_id
       - request_id
       type: object
     UserAccountSessionEventSendRequest:
@@ -24365,9 +24512,7 @@ components:
           update_type: background
           webhook: webhook
           item_id: item_id
-          billed_products:
-          - null
-          - null
+          paired_item_id: paired_item_id
           consent_expiration_time: 2000-01-23T04:56:07.000+00:00
           error:
             error_code_reason: error_code_reason
@@ -24388,14 +24533,17 @@ components:
             request_id: request_id
             status: 2
           institution_name: institution_name
-          consented_products:
-          - null
-          - null
           available_products:
           - null
           - null
           institution_id: institution_id
           products:
+          - null
+          - null
+          billed_products:
+          - null
+          - null
+          consented_products:
           - null
           - null
         total_transactions: 0
@@ -24535,11 +24683,13 @@ components:
         transactions:
         - amount: 0.8008281904610115
           date_posted: 2000-01-23
+          account_id: account_id
           iso_currency_code: iso_currency_code
           description: description
           date_transacted: 2000-01-23
         - amount: 0.8008281904610115
           date_posted: 2000-01-23
+          account_id: account_id
           iso_currency_code: iso_currency_code
           description: description
           date_transacted: 2000-01-23
@@ -24714,9 +24864,7 @@ components:
           update_type: background
           webhook: webhook
           item_id: item_id
-          billed_products:
-          - null
-          - null
+          paired_item_id: paired_item_id
           consent_expiration_time: 2000-01-23T04:56:07.000+00:00
           error:
             error_code_reason: error_code_reason
@@ -24737,14 +24885,17 @@ components:
             request_id: request_id
             status: 2
           institution_name: institution_name
-          consented_products:
-          - null
-          - null
           available_products:
           - null
           - null
           institution_id: institution_id
           products:
+          - null
+          - null
+          billed_products:
+          - null
+          - null
+          consented_products:
           - null
           - null
         next_cursor: next_cursor
@@ -25025,9 +25176,7 @@ components:
           update_type: background
           webhook: webhook
           item_id: item_id
-          billed_products:
-          - null
-          - null
+          paired_item_id: paired_item_id
           consent_expiration_time: 2000-01-23T04:56:07.000+00:00
           error:
             error_code_reason: error_code_reason
@@ -25048,14 +25197,17 @@ components:
             request_id: request_id
             status: 2
           institution_name: institution_name
-          consented_products:
-          - null
-          - null
           available_products:
           - null
           - null
           institution_id: institution_id
           products:
+          - null
+          - null
+          billed_products:
+          - null
+          - null
+          consented_products:
           - null
           - null
         next_cursor: next_cursor
@@ -25293,9 +25445,7 @@ components:
           update_type: background
           webhook: webhook
           item_id: item_id
-          billed_products:
-          - null
-          - null
+          paired_item_id: paired_item_id
           consent_expiration_time: 2000-01-23T04:56:07.000+00:00
           error:
             error_code_reason: error_code_reason
@@ -25316,14 +25466,17 @@ components:
             request_id: request_id
             status: 2
           institution_name: institution_name
-          consented_products:
-          - null
-          - null
           available_products:
           - null
           - null
           institution_id: institution_id
           products:
+          - null
+          - null
+          billed_products:
+          - null
+          - null
+          consented_products:
           - null
           - null
         last_generated_time: 2000-01-23T04:56:07.000+00:00
@@ -27044,6 +27197,7 @@ components:
               valid_standing_order_intervals:
               - null
               - null
+            supports_commercial_payment_consents: true
             supports_sepa_instant: true
             supports_international_payments: true
             supports_payment_consents: true
@@ -27167,6 +27321,7 @@ components:
               valid_standing_order_intervals:
               - null
               - null
+            supports_commercial_payment_consents: true
             supports_sepa_instant: true
             supports_international_payments: true
             supports_payment_consents: true
@@ -27447,6 +27602,7 @@ components:
               valid_standing_order_intervals:
               - null
               - null
+            supports_commercial_payment_consents: true
             supports_sepa_instant: true
             supports_international_payments: true
             supports_payment_consents: true
@@ -27570,6 +27726,7 @@ components:
               valid_standing_order_intervals:
               - null
               - null
+            supports_commercial_payment_consents: true
             supports_sepa_instant: true
             supports_international_payments: true
             supports_payment_consents: true
@@ -27789,6 +27946,7 @@ components:
               valid_standing_order_intervals:
               - null
               - null
+            supports_commercial_payment_consents: true
             supports_sepa_instant: true
             supports_international_payments: true
             supports_payment_consents: true
@@ -27967,9 +28125,7 @@ components:
           update_type: background
           webhook: webhook
           item_id: item_id
-          billed_products:
-          - null
-          - null
+          paired_item_id: paired_item_id
           consent_expiration_time: 2000-01-23T04:56:07.000+00:00
           error:
             error_code_reason: error_code_reason
@@ -27990,14 +28146,17 @@ components:
             request_id: request_id
             status: 2
           institution_name: institution_name
-          consented_products:
-          - null
-          - null
           available_products:
           - null
           - null
           institution_id: institution_id
           products:
+          - null
+          - null
+          billed_products:
+          - null
+          - null
+          consented_products:
           - null
           - null
         accounts:
@@ -28457,6 +28616,8 @@ components:
       description: SandboxItemFireWebhookRequest defines the request schema for `/sandbox/item/fire_webhook`
       example:
         access_token: access_token
+        options:
+          new_transactions: 0
         secret: secret
         webhook_code: DEFAULT_UPDATE
         client_id: client_id
@@ -28507,9 +28668,24 @@ components:
           - SYNC_UPDATES_AVAILABLE
           - PRODUCT_READY
           - ERROR
+        options:
+          $ref: '#/components/schemas/SandboxItemFireWebhookRequestOptions'
       required:
       - access_token
       - webhook_code
+      type: object
+    SandboxItemFireWebhookRequestOptions:
+      description: Values to set on the fired webhook's payload. Each field is named
+        after the webhook field it sets. If specified, must not be `null`.
+      example:
+        new_transactions: 0
+      properties:
+        new_transactions:
+          description: The value to send as `new_transactions` in a `TRANSACTIONS`
+            `DEFAULT_UPDATE` webhook. Defaults to 0. Only valid when `webhook_type`
+            is `TRANSACTIONS` and `webhook_code` is `DEFAULT_UPDATE`.
+          minimum: 0
+          type: integer
       type: object
     WebhookType:
       description: The webhook types that can be fired by this test endpoint.
@@ -28751,9 +28927,7 @@ components:
           update_type: background
           webhook: webhook
           item_id: item_id
-          billed_products:
-          - null
-          - null
+          paired_item_id: paired_item_id
           consent_expiration_time: 2000-01-23T04:56:07.000+00:00
           error:
             error_code_reason: error_code_reason
@@ -28774,14 +28948,17 @@ components:
             request_id: request_id
             status: 2
           institution_name: institution_name
-          consented_products:
-          - null
-          - null
           available_products:
           - null
           - null
           institution_id: institution_id
           products:
+          - null
+          - null
+          billed_products:
+          - null
+          - null
+          consented_products:
           - null
           - null
         accounts:
@@ -28898,9 +29075,7 @@ components:
           update_type: background
           webhook: webhook
           item_id: item_id
-          billed_products:
-          - null
-          - null
+          paired_item_id: paired_item_id
           consent_expiration_time: 2000-01-23T04:56:07.000+00:00
           error:
             error_code_reason: error_code_reason
@@ -28921,14 +29096,17 @@ components:
             request_id: request_id
             status: 2
           institution_name: institution_name
-          consented_products:
-          - null
-          - null
           available_products:
           - null
           - null
           institution_id: institution_id
           products:
+          - null
+          - null
+          billed_products:
+          - null
+          - null
+          consented_products:
           - null
           - null
         accounts:
@@ -30632,51 +30810,51 @@ components:
       example:
         liabilities:
           loan:
-          - origination_principal_amount: 6.965117697638846
+          - origination_principal_amount: 1.284659006116532
             account_number: account_number
-            payment_count: 2
+            payment_count: 6
             last_payment_date: 2000-01-23
-            payoff_amount: 5.944895607614016
+            payoff_amount: 6.704019297950036
             maturity_date: 2000-01-23
-            last_payment_amount: 6.878052220127876
+            last_payment_amount: 5.944895607614016
             account_id: account_id
-            loan_term_months: 1
+            loan_term_months: 2
             origination_date: 2000-01-23
             interest_rate:
-              percentage: 6.438423552598547
-            principal_balance: 3.5571952270680973
-            ytd_interest_paid: 6.704019297950036
+              percentage: 3.5571952270680973
+            principal_balance: 6.965117697638846
+            ytd_interest_paid: 3.353193347011243
             next_payment_due_date: 2000-01-23
-            next_payment_amount: 6.778324963048013
-          - origination_principal_amount: 6.965117697638846
+            next_payment_amount: 6.878052220127876
+          - origination_principal_amount: 1.284659006116532
             account_number: account_number
-            payment_count: 2
+            payment_count: 6
             last_payment_date: 2000-01-23
-            payoff_amount: 5.944895607614016
+            payoff_amount: 6.704019297950036
             maturity_date: 2000-01-23
-            last_payment_amount: 6.878052220127876
+            last_payment_amount: 5.944895607614016
             account_id: account_id
-            loan_term_months: 1
+            loan_term_months: 2
             origination_date: 2000-01-23
             interest_rate:
-              percentage: 6.438423552598547
-            principal_balance: 3.5571952270680973
-            ytd_interest_paid: 6.704019297950036
+              percentage: 3.5571952270680973
+            principal_balance: 6.965117697638846
+            ytd_interest_paid: 3.353193347011243
             next_payment_due_date: 2000-01-23
-            next_payment_amount: 6.778324963048013
+            next_payment_amount: 6.878052220127876
           mortgage:
-          - origination_principal_amount: 7.386281948385884
+          - origination_principal_amount: 1.2315135367772556
             account_number: account_number
-            next_monthly_payment: 4.145608029883936
+            next_monthly_payment: 7.386281948385884
             loan_type_description: loan_type_description
-            escrow_balance: 9.301444243932576
+            escrow_balance: 3.616076749251911
             has_pmi: true
             last_payment_date: 2000-01-23
-            past_due_amount: 1.2315135367772556
+            past_due_amount: 1.0246457001441578
             maturity_date: 2000-01-23
             has_prepayment_penalty: true
-            current_late_fee: 7.061401241503109
-            last_payment_amount: 2.027123023002322
+            current_late_fee: 9.301444243932576
+            last_payment_amount: 4.145608029883936
             property_address:
               country: country
               city: city
@@ -30687,23 +30865,23 @@ components:
             origination_date: 2000-01-23
             loan_term: loan_term
             interest_rate:
-              percentage: 3.616076749251911
+              percentage: 2.027123023002322
               type: type
-            ytd_interest_paid: 1.0246457001441578
-            ytd_principal_paid: 1.4894159098541704
+            ytd_interest_paid: 1.4894159098541704
+            ytd_principal_paid: 6.84685269835264
             next_payment_due_date: 2000-01-23
-          - origination_principal_amount: 7.386281948385884
+          - origination_principal_amount: 1.2315135367772556
             account_number: account_number
-            next_monthly_payment: 4.145608029883936
+            next_monthly_payment: 7.386281948385884
             loan_type_description: loan_type_description
-            escrow_balance: 9.301444243932576
+            escrow_balance: 3.616076749251911
             has_pmi: true
             last_payment_date: 2000-01-23
-            past_due_amount: 1.2315135367772556
+            past_due_amount: 1.0246457001441578
             maturity_date: 2000-01-23
             has_prepayment_penalty: true
-            current_late_fee: 7.061401241503109
-            last_payment_amount: 2.027123023002322
+            current_late_fee: 9.301444243932576
+            last_payment_amount: 4.145608029883936
             property_address:
               country: country
               city: city
@@ -30714,26 +30892,26 @@ components:
             origination_date: 2000-01-23
             loan_term: loan_term
             interest_rate:
-              percentage: 3.616076749251911
+              percentage: 2.027123023002322
               type: type
-            ytd_interest_paid: 1.0246457001441578
-            ytd_principal_paid: 1.4894159098541704
+            ytd_interest_paid: 1.4894159098541704
+            ytd_principal_paid: 6.84685269835264
             next_payment_due_date: 2000-01-23
           student:
-          - origination_principal_amount: 5.025004791520295
+          - origination_principal_amount: 9.965781217890562
             account_number: account_number
             payment_reference_number: payment_reference_number
             guarantor: guarantor
             last_statement_issue_date: 2000-01-23
-            last_statement_balance: 1.1730742509559433
+            last_statement_balance: 4.965218492984954
             expected_payoff_date: 2000-01-23
             pslf_status:
-              payments_remaining: 6
-              payments_made: 9
+              payments_remaining: 8
+              payments_made: 6
               estimated_eligibility_date: 2000-01-23
-            outstanding_interest_amount: 9.965781217890562
-            ytd_interest_paid: 8.762042012749001
-            ytd_principal_paid: 9.018348186070783
+            outstanding_interest_amount: 9.369310271410669
+            ytd_interest_paid: 9.018348186070783
+            ytd_principal_paid: 6.438423552598547
             loan_name: loan_name
             next_payment_due_date: 2000-01-23
             loan_status:
@@ -30744,10 +30922,10 @@ components:
               type: extended graduated
             last_payment_date: 2000-01-23
             is_overdue: true
-            last_payment_amount: 7.457744773683766
+            last_payment_amount: 1.1730742509559433
             sequence_number: sequence_number
             account_id: account_id
-            interest_rate_percentage: 6.84685269835264
+            interest_rate_percentage: 7.457744773683766
             disbursement_dates:
             - 2000-01-23
             - 2000-01-23
@@ -30758,21 +30936,21 @@ components:
               street: street
               region: region
               postal_code: postal_code
-            minimum_payment_amount: 4.965218492984954
-          - origination_principal_amount: 5.025004791520295
+            minimum_payment_amount: 5.025004791520295
+          - origination_principal_amount: 9.965781217890562
             account_number: account_number
             payment_reference_number: payment_reference_number
             guarantor: guarantor
             last_statement_issue_date: 2000-01-23
-            last_statement_balance: 1.1730742509559433
+            last_statement_balance: 4.965218492984954
             expected_payoff_date: 2000-01-23
             pslf_status:
-              payments_remaining: 6
-              payments_made: 9
+              payments_remaining: 8
+              payments_made: 6
               estimated_eligibility_date: 2000-01-23
-            outstanding_interest_amount: 9.965781217890562
-            ytd_interest_paid: 8.762042012749001
-            ytd_principal_paid: 9.018348186070783
+            outstanding_interest_amount: 9.369310271410669
+            ytd_interest_paid: 9.018348186070783
+            ytd_principal_paid: 6.438423552598547
             loan_name: loan_name
             next_payment_due_date: 2000-01-23
             loan_status:
@@ -30783,10 +30961,10 @@ components:
               type: extended graduated
             last_payment_date: 2000-01-23
             is_overdue: true
-            last_payment_amount: 7.457744773683766
+            last_payment_amount: 1.1730742509559433
             sequence_number: sequence_number
             account_id: account_id
-            interest_rate_percentage: 6.84685269835264
+            interest_rate_percentage: 7.457744773683766
             disbursement_dates:
             - 2000-01-23
             - 2000-01-23
@@ -30797,11 +30975,12 @@ components:
               street: street
               region: region
               postal_code: postal_code
-            minimum_payment_amount: 4.965218492984954
+            minimum_payment_amount: 5.025004791520295
           credit:
           - account_id: account_id
             last_payment_date: 2000-01-23
             is_overdue: true
+            cash_advance_limit: 7.061401241503109
             last_statement_issue_date: 2000-01-23
             minimum_payment_amount: 2.3021358869347655
             aprs:
@@ -30819,6 +30998,7 @@ components:
           - account_id: account_id
             last_payment_date: 2000-01-23
             is_overdue: true
+            cash_advance_limit: 7.061401241503109
             last_statement_issue_date: 2000-01-23
             minimum_payment_amount: 2.3021358869347655
             aprs:
@@ -30835,18 +31015,18 @@ components:
             last_statement_balance: 5.637376656633329
           line_of_credit:
           - last_payment_date: 2000-01-23
-            past_due_amount: 4.652396432933246
+            past_due_amount: 8.969578798196912
             last_statement_issue_date: 2000-01-23
-            last_payment_amount: 6.519180951018382
+            last_payment_amount: 0.10263654006109402
             draw_period_end_date: 2000-01-23
-            last_statement_balance: 0.10263654006109402
-            finance_charges: 8.969578798196912
+            last_statement_balance: 4.652396432933246
+            finance_charges: 7.740351818741173
             account_id: account_id
-            credit_limit: 3.353193347011243
+            credit_limit: 3.0937452626664474
             interest_rate:
-              percentage: 6.438423552598547
-            principal_balance: 7.143538047012306
-            minimum_payment_amount: 0.8851374739011653
+              percentage: 3.5571952270680973
+            principal_balance: 0.8851374739011653
+            minimum_payment_amount: 7.058770351582356
             aprs:
             - apr_percentage: 0.8008281904610115
               apr_type: balance_transfer_apr
@@ -30856,22 +31036,22 @@ components:
               apr_type: balance_transfer_apr
               interest_charge_amount: 1.4658129805029452
               balance_subject_to_apr: 6.027456183070403
-            available_credit: 3.0937452626664474
+            available_credit: 7.143538047012306
             next_payment_due_date: 2000-01-23
-            next_payment_amount: 7.058770351582356
+            next_payment_amount: 6.519180951018382
           - last_payment_date: 2000-01-23
-            past_due_amount: 4.652396432933246
+            past_due_amount: 8.969578798196912
             last_statement_issue_date: 2000-01-23
-            last_payment_amount: 6.519180951018382
+            last_payment_amount: 0.10263654006109402
             draw_period_end_date: 2000-01-23
-            last_statement_balance: 0.10263654006109402
-            finance_charges: 8.969578798196912
+            last_statement_balance: 4.652396432933246
+            finance_charges: 7.740351818741173
             account_id: account_id
-            credit_limit: 3.353193347011243
+            credit_limit: 3.0937452626664474
             interest_rate:
-              percentage: 6.438423552598547
-            principal_balance: 7.143538047012306
-            minimum_payment_amount: 0.8851374739011653
+              percentage: 3.5571952270680973
+            principal_balance: 0.8851374739011653
+            minimum_payment_amount: 7.058770351582356
             aprs:
             - apr_percentage: 0.8008281904610115
               apr_type: balance_transfer_apr
@@ -30881,9 +31061,9 @@ components:
               apr_type: balance_transfer_apr
               interest_charge_amount: 1.4658129805029452
               balance_subject_to_apr: 6.027456183070403
-            available_credit: 3.0937452626664474
+            available_credit: 7.143538047012306
             next_payment_due_date: 2000-01-23
-            next_payment_amount: 7.058770351582356
+            next_payment_amount: 6.519180951018382
         request_id: request_id
         account:
           official_name: official_name
@@ -31139,16 +31319,17 @@ components:
         cursor:
           description: |-
             Opaque cursor from a prior `/beta/webhook_events/list` response `next_cursor`. Use this
-            on subsequent requests to continue forward. Mutually exclusive with `start_time`: sending
-            both returns `INVALID_FIELD`. Callers should send only one.
+            on subsequent requests to continue forward. If `start_time` is also provided,
+            it is ignored; `cursor` takes precedence.
           maxLength: 512
           type: string
         start_time:
           description: |-
             ISO-8601 timestamp. Returns webhook events with `sent_time` greater than or equal to
-            this value. Must not be earlier than the 7-day retention window. Mutually exclusive with
-            `cursor`: sending both returns `INVALID_FIELD`. Omit to begin from the oldest retained
-            event. Callers should send only one of `cursor` or `start_time`.
+            this value. When `cursor` is provided, this value is ignored, even if it has changed
+            or falls outside the 7-day retention window. Otherwise, it must not be earlier than
+            the 7-day retention window. Omit both `cursor` and `start_time` to begin from the
+            oldest retained event.
           format: date-time
           nullable: true
           type: string
@@ -31229,7 +31410,7 @@ components:
           last_attempt_time: 2000-01-23T04:56:07.000+00:00
       properties:
         webhook_events:
-          description: Webhook events sent to the calling client.
+          description: Webhook events for your account.
           items:
             $ref: '#/components/schemas/WebhookEvent'
           type: array
@@ -31256,7 +31437,7 @@ components:
       type: object
     WebhookEvent:
       additionalProperties: true
-      description: A webhook event Plaid sent to the calling client.
+      description: A webhook event for your account.
       example:
         sent_time: 2000-01-23T04:56:07.000+00:00
         attempt_count: 6
@@ -31271,8 +31452,9 @@ components:
         last_attempt_time: 2000-01-23T04:56:07.000+00:00
       properties:
         webhook_message_id:
-          description: Stable, opaque, per-webhook ID for deduplication and support
-            reference.
+          description: Stable, opaque ID for this webhook event. The same value is
+            returned if the event appears again on a later poll. Quote it when contacting
+            support.
           type: string
         webhook_type:
           description: The webhook type.
@@ -31332,7 +31514,9 @@ components:
       description: |-
         Latest delivery state for this webhook.
 
-        `PENDING`: Plaid has not yet received a successful response and may still retry.
+        `PENDING`: Plaid has not recorded a successful response and may still retry.
+        Treat `PENDING` as unknown rather than undelivered: a delivery may have
+        succeeded without the outcome being recorded.
 
         `DELIVERED`: the destination returned a 2xx response.
 
@@ -31517,9 +31701,7 @@ components:
           update_type: background
           webhook: webhook
           item_id: item_id
-          billed_products:
-          - null
-          - null
+          paired_item_id: paired_item_id
           consent_expiration_time: 2000-01-23T04:56:07.000+00:00
           error:
             error_code_reason: error_code_reason
@@ -31540,9 +31722,6 @@ components:
             request_id: request_id
             status: 2
           institution_name: institution_name
-          consented_products:
-          - null
-          - null
           available_products:
           - null
           - null
@@ -31550,53 +31729,59 @@ components:
           products:
           - null
           - null
+          billed_products:
+          - null
+          - null
+          consented_products:
+          - null
+          - null
         liabilities:
           loan:
-          - origination_principal_amount: 6.965117697638846
+          - origination_principal_amount: 1.284659006116532
             account_number: account_number
-            payment_count: 2
+            payment_count: 6
             last_payment_date: 2000-01-23
-            payoff_amount: 5.944895607614016
+            payoff_amount: 6.704019297950036
             maturity_date: 2000-01-23
-            last_payment_amount: 6.878052220127876
+            last_payment_amount: 5.944895607614016
             account_id: account_id
-            loan_term_months: 1
+            loan_term_months: 2
             origination_date: 2000-01-23
             interest_rate:
-              percentage: 6.438423552598547
-            principal_balance: 3.5571952270680973
-            ytd_interest_paid: 6.704019297950036
+              percentage: 3.5571952270680973
+            principal_balance: 6.965117697638846
+            ytd_interest_paid: 3.353193347011243
             next_payment_due_date: 2000-01-23
-            next_payment_amount: 6.778324963048013
-          - origination_principal_amount: 6.965117697638846
+            next_payment_amount: 6.878052220127876
+          - origination_principal_amount: 1.284659006116532
             account_number: account_number
-            payment_count: 2
+            payment_count: 6
             last_payment_date: 2000-01-23
-            payoff_amount: 5.944895607614016
+            payoff_amount: 6.704019297950036
             maturity_date: 2000-01-23
-            last_payment_amount: 6.878052220127876
+            last_payment_amount: 5.944895607614016
             account_id: account_id
-            loan_term_months: 1
+            loan_term_months: 2
             origination_date: 2000-01-23
             interest_rate:
-              percentage: 6.438423552598547
-            principal_balance: 3.5571952270680973
-            ytd_interest_paid: 6.704019297950036
+              percentage: 3.5571952270680973
+            principal_balance: 6.965117697638846
+            ytd_interest_paid: 3.353193347011243
             next_payment_due_date: 2000-01-23
-            next_payment_amount: 6.778324963048013
+            next_payment_amount: 6.878052220127876
           mortgage:
-          - origination_principal_amount: 7.386281948385884
+          - origination_principal_amount: 1.2315135367772556
             account_number: account_number
-            next_monthly_payment: 4.145608029883936
+            next_monthly_payment: 7.386281948385884
             loan_type_description: loan_type_description
-            escrow_balance: 9.301444243932576
+            escrow_balance: 3.616076749251911
             has_pmi: true
             last_payment_date: 2000-01-23
-            past_due_amount: 1.2315135367772556
+            past_due_amount: 1.0246457001441578
             maturity_date: 2000-01-23
             has_prepayment_penalty: true
-            current_late_fee: 7.061401241503109
-            last_payment_amount: 2.027123023002322
+            current_late_fee: 9.301444243932576
+            last_payment_amount: 4.145608029883936
             property_address:
               country: country
               city: city
@@ -31607,23 +31792,23 @@ components:
             origination_date: 2000-01-23
             loan_term: loan_term
             interest_rate:
-              percentage: 3.616076749251911
+              percentage: 2.027123023002322
               type: type
-            ytd_interest_paid: 1.0246457001441578
-            ytd_principal_paid: 1.4894159098541704
+            ytd_interest_paid: 1.4894159098541704
+            ytd_principal_paid: 6.84685269835264
             next_payment_due_date: 2000-01-23
-          - origination_principal_amount: 7.386281948385884
+          - origination_principal_amount: 1.2315135367772556
             account_number: account_number
-            next_monthly_payment: 4.145608029883936
+            next_monthly_payment: 7.386281948385884
             loan_type_description: loan_type_description
-            escrow_balance: 9.301444243932576
+            escrow_balance: 3.616076749251911
             has_pmi: true
             last_payment_date: 2000-01-23
-            past_due_amount: 1.2315135367772556
+            past_due_amount: 1.0246457001441578
             maturity_date: 2000-01-23
             has_prepayment_penalty: true
-            current_late_fee: 7.061401241503109
-            last_payment_amount: 2.027123023002322
+            current_late_fee: 9.301444243932576
+            last_payment_amount: 4.145608029883936
             property_address:
               country: country
               city: city
@@ -31634,26 +31819,26 @@ components:
             origination_date: 2000-01-23
             loan_term: loan_term
             interest_rate:
-              percentage: 3.616076749251911
+              percentage: 2.027123023002322
               type: type
-            ytd_interest_paid: 1.0246457001441578
-            ytd_principal_paid: 1.4894159098541704
+            ytd_interest_paid: 1.4894159098541704
+            ytd_principal_paid: 6.84685269835264
             next_payment_due_date: 2000-01-23
           student:
-          - origination_principal_amount: 5.025004791520295
+          - origination_principal_amount: 9.965781217890562
             account_number: account_number
             payment_reference_number: payment_reference_number
             guarantor: guarantor
             last_statement_issue_date: 2000-01-23
-            last_statement_balance: 1.1730742509559433
+            last_statement_balance: 4.965218492984954
             expected_payoff_date: 2000-01-23
             pslf_status:
-              payments_remaining: 6
-              payments_made: 9
+              payments_remaining: 8
+              payments_made: 6
               estimated_eligibility_date: 2000-01-23
-            outstanding_interest_amount: 9.965781217890562
-            ytd_interest_paid: 8.762042012749001
-            ytd_principal_paid: 9.018348186070783
+            outstanding_interest_amount: 9.369310271410669
+            ytd_interest_paid: 9.018348186070783
+            ytd_principal_paid: 6.438423552598547
             loan_name: loan_name
             next_payment_due_date: 2000-01-23
             loan_status:
@@ -31664,10 +31849,10 @@ components:
               type: extended graduated
             last_payment_date: 2000-01-23
             is_overdue: true
-            last_payment_amount: 7.457744773683766
+            last_payment_amount: 1.1730742509559433
             sequence_number: sequence_number
             account_id: account_id
-            interest_rate_percentage: 6.84685269835264
+            interest_rate_percentage: 7.457744773683766
             disbursement_dates:
             - 2000-01-23
             - 2000-01-23
@@ -31678,21 +31863,21 @@ components:
               street: street
               region: region
               postal_code: postal_code
-            minimum_payment_amount: 4.965218492984954
-          - origination_principal_amount: 5.025004791520295
+            minimum_payment_amount: 5.025004791520295
+          - origination_principal_amount: 9.965781217890562
             account_number: account_number
             payment_reference_number: payment_reference_number
             guarantor: guarantor
             last_statement_issue_date: 2000-01-23
-            last_statement_balance: 1.1730742509559433
+            last_statement_balance: 4.965218492984954
             expected_payoff_date: 2000-01-23
             pslf_status:
-              payments_remaining: 6
-              payments_made: 9
+              payments_remaining: 8
+              payments_made: 6
               estimated_eligibility_date: 2000-01-23
-            outstanding_interest_amount: 9.965781217890562
-            ytd_interest_paid: 8.762042012749001
-            ytd_principal_paid: 9.018348186070783
+            outstanding_interest_amount: 9.369310271410669
+            ytd_interest_paid: 9.018348186070783
+            ytd_principal_paid: 6.438423552598547
             loan_name: loan_name
             next_payment_due_date: 2000-01-23
             loan_status:
@@ -31703,10 +31888,10 @@ components:
               type: extended graduated
             last_payment_date: 2000-01-23
             is_overdue: true
-            last_payment_amount: 7.457744773683766
+            last_payment_amount: 1.1730742509559433
             sequence_number: sequence_number
             account_id: account_id
-            interest_rate_percentage: 6.84685269835264
+            interest_rate_percentage: 7.457744773683766
             disbursement_dates:
             - 2000-01-23
             - 2000-01-23
@@ -31717,11 +31902,12 @@ components:
               street: street
               region: region
               postal_code: postal_code
-            minimum_payment_amount: 4.965218492984954
+            minimum_payment_amount: 5.025004791520295
           credit:
           - account_id: account_id
             last_payment_date: 2000-01-23
             is_overdue: true
+            cash_advance_limit: 7.061401241503109
             last_statement_issue_date: 2000-01-23
             minimum_payment_amount: 2.3021358869347655
             aprs:
@@ -31739,6 +31925,7 @@ components:
           - account_id: account_id
             last_payment_date: 2000-01-23
             is_overdue: true
+            cash_advance_limit: 7.061401241503109
             last_statement_issue_date: 2000-01-23
             minimum_payment_amount: 2.3021358869347655
             aprs:
@@ -31755,18 +31942,18 @@ components:
             last_statement_balance: 5.637376656633329
           line_of_credit:
           - last_payment_date: 2000-01-23
-            past_due_amount: 4.652396432933246
+            past_due_amount: 8.969578798196912
             last_statement_issue_date: 2000-01-23
-            last_payment_amount: 6.519180951018382
+            last_payment_amount: 0.10263654006109402
             draw_period_end_date: 2000-01-23
-            last_statement_balance: 0.10263654006109402
-            finance_charges: 8.969578798196912
+            last_statement_balance: 4.652396432933246
+            finance_charges: 7.740351818741173
             account_id: account_id
-            credit_limit: 3.353193347011243
+            credit_limit: 3.0937452626664474
             interest_rate:
-              percentage: 6.438423552598547
-            principal_balance: 7.143538047012306
-            minimum_payment_amount: 0.8851374739011653
+              percentage: 3.5571952270680973
+            principal_balance: 0.8851374739011653
+            minimum_payment_amount: 7.058770351582356
             aprs:
             - apr_percentage: 0.8008281904610115
               apr_type: balance_transfer_apr
@@ -31776,22 +31963,22 @@ components:
               apr_type: balance_transfer_apr
               interest_charge_amount: 1.4658129805029452
               balance_subject_to_apr: 6.027456183070403
-            available_credit: 3.0937452626664474
+            available_credit: 7.143538047012306
             next_payment_due_date: 2000-01-23
-            next_payment_amount: 7.058770351582356
+            next_payment_amount: 6.519180951018382
           - last_payment_date: 2000-01-23
-            past_due_amount: 4.652396432933246
+            past_due_amount: 8.969578798196912
             last_statement_issue_date: 2000-01-23
-            last_payment_amount: 6.519180951018382
+            last_payment_amount: 0.10263654006109402
             draw_period_end_date: 2000-01-23
-            last_statement_balance: 0.10263654006109402
-            finance_charges: 8.969578798196912
+            last_statement_balance: 4.652396432933246
+            finance_charges: 7.740351818741173
             account_id: account_id
-            credit_limit: 3.353193347011243
+            credit_limit: 3.0937452626664474
             interest_rate:
-              percentage: 6.438423552598547
-            principal_balance: 7.143538047012306
-            minimum_payment_amount: 0.8851374739011653
+              percentage: 3.5571952270680973
+            principal_balance: 0.8851374739011653
+            minimum_payment_amount: 7.058770351582356
             aprs:
             - apr_percentage: 0.8008281904610115
               apr_type: balance_transfer_apr
@@ -31801,9 +31988,9 @@ components:
               apr_type: balance_transfer_apr
               interest_charge_amount: 1.4658129805029452
               balance_subject_to_apr: 6.027456183070403
-            available_credit: 3.0937452626664474
+            available_credit: 7.143538047012306
             next_payment_due_date: 2000-01-23
-            next_payment_amount: 7.058770351582356
+            next_payment_amount: 6.519180951018382
         accounts:
         - official_name: official_name
           persistent_account_id: persistent_account_id
@@ -33265,9 +33452,7 @@ components:
         - update_type: background
           webhook: webhook
           item_id: item_id
-          billed_products:
-          - null
-          - null
+          paired_item_id: paired_item_id
           consent_expiration_time: 2000-01-23T04:56:07.000+00:00
           error:
             error_code_reason: error_code_reason
@@ -33288,22 +33473,23 @@ components:
             request_id: request_id
             status: 2
           institution_name: institution_name
-          consented_products:
-          - null
-          - null
           available_products:
           - null
           - null
           institution_id: institution_id
           products:
+          - null
+          - null
+          billed_products:
+          - null
+          - null
+          consented_products:
           - null
           - null
         - update_type: background
           webhook: webhook
           item_id: item_id
-          billed_products:
-          - null
-          - null
+          paired_item_id: paired_item_id
           consent_expiration_time: 2000-01-23T04:56:07.000+00:00
           error:
             error_code_reason: error_code_reason
@@ -33324,14 +33510,17 @@ components:
             request_id: request_id
             status: 2
           institution_name: institution_name
-          consented_products:
-          - null
-          - null
           available_products:
           - null
           - null
           institution_id: institution_id
           products:
+          - null
+          - null
+          billed_products:
+          - null
+          - null
+          consented_products:
           - null
           - null
         request_id: request_id
@@ -35219,9 +35408,7 @@ components:
           update_type: background
           webhook: webhook
           item_id: item_id
-          billed_products:
-          - null
-          - null
+          paired_item_id: paired_item_id
           consent_expiration_time: 2000-01-23T04:56:07.000+00:00
           error:
             error_code_reason: error_code_reason
@@ -35242,14 +35429,17 @@ components:
             request_id: request_id
             status: 2
           institution_name: institution_name
-          consented_products:
-          - null
-          - null
           available_products:
           - null
           - null
           institution_id: institution_id
           products:
+          - null
+          - null
+          billed_products:
+          - null
+          - null
+          consented_products:
           - null
           - null
         is_investments_fallback_item: true
@@ -35468,9 +35658,7 @@ components:
           update_type: background
           webhook: webhook
           item_id: item_id
-          billed_products:
-          - null
-          - null
+          paired_item_id: paired_item_id
           consent_expiration_time: 2000-01-23T04:56:07.000+00:00
           error:
             error_code_reason: error_code_reason
@@ -35491,14 +35679,17 @@ components:
             request_id: request_id
             status: 2
           institution_name: institution_name
-          consented_products:
-          - null
-          - null
           available_products:
           - null
           - null
           institution_id: institution_id
           products:
+          - null
+          - null
+          billed_products:
+          - null
+          - null
+          consented_products:
           - null
           - null
         numbers:
@@ -36085,9 +36276,7 @@ components:
           update_type: background
           webhook: webhook
           item_id: item_id
-          billed_products:
-          - null
-          - null
+          paired_item_id: paired_item_id
           consent_expiration_time: 2000-01-23T04:56:07.000+00:00
           error:
             error_code_reason: error_code_reason
@@ -36108,14 +36297,17 @@ components:
             request_id: request_id
             status: 2
           institution_name: institution_name
-          consented_products:
-          - null
-          - null
           available_products:
           - null
           - null
           institution_id: institution_id
           products:
+          - null
+          - null
+          billed_products:
+          - null
+          - null
+          consented_products:
           - null
           - null
         is_investments_fallback_item: true
@@ -36419,6 +36611,8 @@ components:
           - bizcap
           - webull
           - kikoff_enterprise
+          - adyen_ca
+          - bitgo
           type: string
       required:
       - access_token
@@ -36761,7 +36955,7 @@ components:
           start_date: 2000-01-23
         secret: secret
         cashflow_report:
-          days_requested: 303
+          days_requested: 90
         investments:
           allow_manual_entry: true
           allow_unverified_crypto_wallets: true
@@ -36859,7 +37053,7 @@ components:
         card_switch:
           card_bin: card_bin
         hosted_link:
-          url_lifetime_seconds: 3
+          url_lifetime_seconds: 4
           completion_redirect_uri: completion_redirect_uri
           is_mobile_app: false
         client_name: client_name
@@ -36905,7 +37099,7 @@ components:
           - null
           - null
         transactions:
-          days_requested: 148
+          days_requested: 539
         financekit_supported: true
         access_token: access_token
         android_package_name: android_package_name
@@ -36922,6 +37116,14 @@ components:
           authorization_id: authorization_id
           payment_profile_token: payment_profile_token
           intent_id: intent_id
+        cra_report_parameter:
+          client_report_id: client_report_id
+          include_investments: true
+          days_required: 37
+          days_requested: 264
+          products:
+          - null
+          - null
         user_id: user_id
         account_filters:
           loan:
@@ -36998,6 +37200,7 @@ components:
             - Estonian (`'et'`)
             - French (`'fr'`)
             - German (`'de'`)
+            - Haitian Creole (`'ht'`)
             - Hindi (`'hi'`)
             - Italian (`'it'`)
             - Latvian (`'lv'`)
@@ -37236,6 +37439,8 @@ components:
           $ref: '#/components/schemas/LinkTokenCreateRequestCreditPartnerInsights'
         cra_options:
           $ref: '#/components/schemas/LinkTokenCreateRequestCraOptions'
+        cra_report_parameter:
+          $ref: '#/components/schemas/LinkTokenCreateRequestCraReportParameter'
         consumer_report_permissible_purpose:
           $ref: '#/components/schemas/ConsumerReportPermissiblePurpose'
         auth:
@@ -37395,7 +37600,7 @@ components:
     LinkTokenTransactions:
       description: Configuration parameters for the Transactions product
       example:
-        days_requested: 148
+        days_requested: 539
       properties:
         days_requested:
           default: 90
@@ -37411,7 +37616,7 @@ components:
       description: Configuration parameters for the Cashflow Report product. Currently
         in closed beta.
       example:
-        days_requested: 303
+        days_requested: 90
       properties:
         days_requested:
           default: 365
@@ -37427,7 +37632,7 @@ components:
       description: Configuration parameters for Hosted Link. To enable the session
         for Hosted Link, send this object in the request. It can be empty.
       example:
-        url_lifetime_seconds: 3
+        url_lifetime_seconds: 4
         completion_redirect_uri: completion_redirect_uri
         is_mobile_app: false
       properties:
@@ -40478,7 +40683,6 @@ components:
       - cash isa
       - cash management
       - cd
-      - charge card
       - checking
       - commercial
       - commercial line of credit
@@ -40495,7 +40699,6 @@ components:
       - home equity
       - home equity loan
       - hsa
-      - installment
       - isa
       - ira
       - keogh
@@ -42222,6 +42425,7 @@ components:
             valid_standing_order_intervals:
             - null
             - null
+          supports_commercial_payment_consents: true
           supports_sepa_instant: true
           supports_international_payments: true
           supports_payment_consents: true
@@ -42395,6 +42599,8 @@ components:
             will be `true` if OAuth is supported for any Items associated with the
             institution, even if the institution also supports non-OAuth connections.
           type: boolean
+        connection_availability:
+          $ref: '#/components/schemas/InstitutionConnectionAvailability'
         status:
           $ref: '#/components/schemas/InstitutionStatus'
         payment_initiation_metadata:
@@ -42402,6 +42608,7 @@ components:
         auth_metadata:
           $ref: '#/components/schemas/AuthMetadata'
       required:
+      - connection_availability
       - country_codes
       - institution_id
       - name
@@ -42410,6 +42617,18 @@ components:
       - routing_numbers
       title: Institution
       type: object
+    InstitutionConnectionAvailability:
+      description: |
+        Whether Plaid supports creating new Items for the institution.
+
+        `SUPPORTED`: Plaid supports new connections to the institution. Whether a given connection succeeds can still depend on your integration and account: some institutions require completing [OAuth registration](https://plaid.com/docs/link/oauth/#complete-the-registration-requirements) before they can be used, the institution may not support every product requested in `/link/token/create`, and your Plaid account must be in good standing.
+
+        `NOT_SUPPORTED`: Plaid does not support new connections to the institution. Existing Items may continue to work. Attempting to create a new Item for the institution returns an `INSTITUTION_NO_LONGER_SUPPORTED` error. Institutions with this value are returned only by `/institutions/get_by_id`.
+      enum:
+      - SUPPORTED
+      - NOT_SUPPORTED
+      title: InstitutionConnectionAvailability
+      type: string
     InstitutionStatus:
       additionalProperties: true
       description: |
@@ -44342,6 +44561,7 @@ components:
           description: |-
             The full street address
             Example: `"564 Main Street, APT 15"`
+          nullable: true
           type: string
         postal_code:
           description: The postal code. In API versions 2018-05-22 and earlier, this
@@ -44378,6 +44598,7 @@ components:
           description: |-
             The full street address
             Example: `"564 Main Street, APT 15"`
+          nullable: true
           type: string
         postal_code:
           description: The postal code. In API versions 2018-05-22 and earlier, this
@@ -44509,51 +44730,51 @@ components:
       description: An object containing liability accounts
       example:
         loan:
-        - origination_principal_amount: 6.965117697638846
+        - origination_principal_amount: 1.284659006116532
           account_number: account_number
-          payment_count: 2
+          payment_count: 6
           last_payment_date: 2000-01-23
-          payoff_amount: 5.944895607614016
+          payoff_amount: 6.704019297950036
           maturity_date: 2000-01-23
-          last_payment_amount: 6.878052220127876
+          last_payment_amount: 5.944895607614016
           account_id: account_id
-          loan_term_months: 1
+          loan_term_months: 2
           origination_date: 2000-01-23
           interest_rate:
-            percentage: 6.438423552598547
-          principal_balance: 3.5571952270680973
-          ytd_interest_paid: 6.704019297950036
+            percentage: 3.5571952270680973
+          principal_balance: 6.965117697638846
+          ytd_interest_paid: 3.353193347011243
           next_payment_due_date: 2000-01-23
-          next_payment_amount: 6.778324963048013
-        - origination_principal_amount: 6.965117697638846
+          next_payment_amount: 6.878052220127876
+        - origination_principal_amount: 1.284659006116532
           account_number: account_number
-          payment_count: 2
+          payment_count: 6
           last_payment_date: 2000-01-23
-          payoff_amount: 5.944895607614016
+          payoff_amount: 6.704019297950036
           maturity_date: 2000-01-23
-          last_payment_amount: 6.878052220127876
+          last_payment_amount: 5.944895607614016
           account_id: account_id
-          loan_term_months: 1
+          loan_term_months: 2
           origination_date: 2000-01-23
           interest_rate:
-            percentage: 6.438423552598547
-          principal_balance: 3.5571952270680973
-          ytd_interest_paid: 6.704019297950036
+            percentage: 3.5571952270680973
+          principal_balance: 6.965117697638846
+          ytd_interest_paid: 3.353193347011243
           next_payment_due_date: 2000-01-23
-          next_payment_amount: 6.778324963048013
+          next_payment_amount: 6.878052220127876
         mortgage:
-        - origination_principal_amount: 7.386281948385884
+        - origination_principal_amount: 1.2315135367772556
           account_number: account_number
-          next_monthly_payment: 4.145608029883936
+          next_monthly_payment: 7.386281948385884
           loan_type_description: loan_type_description
-          escrow_balance: 9.301444243932576
+          escrow_balance: 3.616076749251911
           has_pmi: true
           last_payment_date: 2000-01-23
-          past_due_amount: 1.2315135367772556
+          past_due_amount: 1.0246457001441578
           maturity_date: 2000-01-23
           has_prepayment_penalty: true
-          current_late_fee: 7.061401241503109
-          last_payment_amount: 2.027123023002322
+          current_late_fee: 9.301444243932576
+          last_payment_amount: 4.145608029883936
           property_address:
             country: country
             city: city
@@ -44564,23 +44785,23 @@ components:
           origination_date: 2000-01-23
           loan_term: loan_term
           interest_rate:
-            percentage: 3.616076749251911
+            percentage: 2.027123023002322
             type: type
-          ytd_interest_paid: 1.0246457001441578
-          ytd_principal_paid: 1.4894159098541704
+          ytd_interest_paid: 1.4894159098541704
+          ytd_principal_paid: 6.84685269835264
           next_payment_due_date: 2000-01-23
-        - origination_principal_amount: 7.386281948385884
+        - origination_principal_amount: 1.2315135367772556
           account_number: account_number
-          next_monthly_payment: 4.145608029883936
+          next_monthly_payment: 7.386281948385884
           loan_type_description: loan_type_description
-          escrow_balance: 9.301444243932576
+          escrow_balance: 3.616076749251911
           has_pmi: true
           last_payment_date: 2000-01-23
-          past_due_amount: 1.2315135367772556
+          past_due_amount: 1.0246457001441578
           maturity_date: 2000-01-23
           has_prepayment_penalty: true
-          current_late_fee: 7.061401241503109
-          last_payment_amount: 2.027123023002322
+          current_late_fee: 9.301444243932576
+          last_payment_amount: 4.145608029883936
           property_address:
             country: country
             city: city
@@ -44591,26 +44812,26 @@ components:
           origination_date: 2000-01-23
           loan_term: loan_term
           interest_rate:
-            percentage: 3.616076749251911
+            percentage: 2.027123023002322
             type: type
-          ytd_interest_paid: 1.0246457001441578
-          ytd_principal_paid: 1.4894159098541704
+          ytd_interest_paid: 1.4894159098541704
+          ytd_principal_paid: 6.84685269835264
           next_payment_due_date: 2000-01-23
         student:
-        - origination_principal_amount: 5.025004791520295
+        - origination_principal_amount: 9.965781217890562
           account_number: account_number
           payment_reference_number: payment_reference_number
           guarantor: guarantor
           last_statement_issue_date: 2000-01-23
-          last_statement_balance: 1.1730742509559433
+          last_statement_balance: 4.965218492984954
           expected_payoff_date: 2000-01-23
           pslf_status:
-            payments_remaining: 6
-            payments_made: 9
+            payments_remaining: 8
+            payments_made: 6
             estimated_eligibility_date: 2000-01-23
-          outstanding_interest_amount: 9.965781217890562
-          ytd_interest_paid: 8.762042012749001
-          ytd_principal_paid: 9.018348186070783
+          outstanding_interest_amount: 9.369310271410669
+          ytd_interest_paid: 9.018348186070783
+          ytd_principal_paid: 6.438423552598547
           loan_name: loan_name
           next_payment_due_date: 2000-01-23
           loan_status:
@@ -44621,10 +44842,10 @@ components:
             type: extended graduated
           last_payment_date: 2000-01-23
           is_overdue: true
-          last_payment_amount: 7.457744773683766
+          last_payment_amount: 1.1730742509559433
           sequence_number: sequence_number
           account_id: account_id
-          interest_rate_percentage: 6.84685269835264
+          interest_rate_percentage: 7.457744773683766
           disbursement_dates:
           - 2000-01-23
           - 2000-01-23
@@ -44635,21 +44856,21 @@ components:
             street: street
             region: region
             postal_code: postal_code
-          minimum_payment_amount: 4.965218492984954
-        - origination_principal_amount: 5.025004791520295
+          minimum_payment_amount: 5.025004791520295
+        - origination_principal_amount: 9.965781217890562
           account_number: account_number
           payment_reference_number: payment_reference_number
           guarantor: guarantor
           last_statement_issue_date: 2000-01-23
-          last_statement_balance: 1.1730742509559433
+          last_statement_balance: 4.965218492984954
           expected_payoff_date: 2000-01-23
           pslf_status:
-            payments_remaining: 6
-            payments_made: 9
+            payments_remaining: 8
+            payments_made: 6
             estimated_eligibility_date: 2000-01-23
-          outstanding_interest_amount: 9.965781217890562
-          ytd_interest_paid: 8.762042012749001
-          ytd_principal_paid: 9.018348186070783
+          outstanding_interest_amount: 9.369310271410669
+          ytd_interest_paid: 9.018348186070783
+          ytd_principal_paid: 6.438423552598547
           loan_name: loan_name
           next_payment_due_date: 2000-01-23
           loan_status:
@@ -44660,10 +44881,10 @@ components:
             type: extended graduated
           last_payment_date: 2000-01-23
           is_overdue: true
-          last_payment_amount: 7.457744773683766
+          last_payment_amount: 1.1730742509559433
           sequence_number: sequence_number
           account_id: account_id
-          interest_rate_percentage: 6.84685269835264
+          interest_rate_percentage: 7.457744773683766
           disbursement_dates:
           - 2000-01-23
           - 2000-01-23
@@ -44674,11 +44895,12 @@ components:
             street: street
             region: region
             postal_code: postal_code
-          minimum_payment_amount: 4.965218492984954
+          minimum_payment_amount: 5.025004791520295
         credit:
         - account_id: account_id
           last_payment_date: 2000-01-23
           is_overdue: true
+          cash_advance_limit: 7.061401241503109
           last_statement_issue_date: 2000-01-23
           minimum_payment_amount: 2.3021358869347655
           aprs:
@@ -44696,6 +44918,7 @@ components:
         - account_id: account_id
           last_payment_date: 2000-01-23
           is_overdue: true
+          cash_advance_limit: 7.061401241503109
           last_statement_issue_date: 2000-01-23
           minimum_payment_amount: 2.3021358869347655
           aprs:
@@ -44712,18 +44935,18 @@ components:
           last_statement_balance: 5.637376656633329
         line_of_credit:
         - last_payment_date: 2000-01-23
-          past_due_amount: 4.652396432933246
+          past_due_amount: 8.969578798196912
           last_statement_issue_date: 2000-01-23
-          last_payment_amount: 6.519180951018382
+          last_payment_amount: 0.10263654006109402
           draw_period_end_date: 2000-01-23
-          last_statement_balance: 0.10263654006109402
-          finance_charges: 8.969578798196912
+          last_statement_balance: 4.652396432933246
+          finance_charges: 7.740351818741173
           account_id: account_id
-          credit_limit: 3.353193347011243
+          credit_limit: 3.0937452626664474
           interest_rate:
-            percentage: 6.438423552598547
-          principal_balance: 7.143538047012306
-          minimum_payment_amount: 0.8851374739011653
+            percentage: 3.5571952270680973
+          principal_balance: 0.8851374739011653
+          minimum_payment_amount: 7.058770351582356
           aprs:
           - apr_percentage: 0.8008281904610115
             apr_type: balance_transfer_apr
@@ -44733,22 +44956,22 @@ components:
             apr_type: balance_transfer_apr
             interest_charge_amount: 1.4658129805029452
             balance_subject_to_apr: 6.027456183070403
-          available_credit: 3.0937452626664474
+          available_credit: 7.143538047012306
           next_payment_due_date: 2000-01-23
-          next_payment_amount: 7.058770351582356
+          next_payment_amount: 6.519180951018382
         - last_payment_date: 2000-01-23
-          past_due_amount: 4.652396432933246
+          past_due_amount: 8.969578798196912
           last_statement_issue_date: 2000-01-23
-          last_payment_amount: 6.519180951018382
+          last_payment_amount: 0.10263654006109402
           draw_period_end_date: 2000-01-23
-          last_statement_balance: 0.10263654006109402
-          finance_charges: 8.969578798196912
+          last_statement_balance: 4.652396432933246
+          finance_charges: 7.740351818741173
           account_id: account_id
-          credit_limit: 3.353193347011243
+          credit_limit: 3.0937452626664474
           interest_rate:
-            percentage: 6.438423552598547
-          principal_balance: 7.143538047012306
-          minimum_payment_amount: 0.8851374739011653
+            percentage: 3.5571952270680973
+          principal_balance: 0.8851374739011653
+          minimum_payment_amount: 7.058770351582356
           aprs:
           - apr_percentage: 0.8008281904610115
             apr_type: balance_transfer_apr
@@ -44758,9 +44981,9 @@ components:
             apr_type: balance_transfer_apr
             interest_charge_amount: 1.4658129805029452
             balance_subject_to_apr: 6.027456183070403
-          available_credit: 3.0937452626664474
+          available_credit: 7.143538047012306
           next_payment_due_date: 2000-01-23
-          next_payment_amount: 7.058770351582356
+          next_payment_amount: 6.519180951018382
       properties:
         credit:
           description: The credit accounts returned.
@@ -44804,22 +45027,22 @@ components:
       additionalProperties: true
       description: Contains details about a closed-end loan account.
       example:
-        origination_principal_amount: 6.965117697638846
+        origination_principal_amount: 1.284659006116532
         account_number: account_number
-        payment_count: 2
+        payment_count: 6
         last_payment_date: 2000-01-23
-        payoff_amount: 5.944895607614016
+        payoff_amount: 6.704019297950036
         maturity_date: 2000-01-23
-        last_payment_amount: 6.878052220127876
+        last_payment_amount: 5.944895607614016
         account_id: account_id
-        loan_term_months: 1
+        loan_term_months: 2
         origination_date: 2000-01-23
         interest_rate:
-          percentage: 6.438423552598547
-        principal_balance: 3.5571952270680973
-        ytd_interest_paid: 6.704019297950036
+          percentage: 3.5571952270680973
+        principal_balance: 6.965117697638846
+        ytd_interest_paid: 3.353193347011243
         next_payment_due_date: 2000-01-23
-        next_payment_amount: 6.778324963048013
+        next_payment_amount: 6.878052220127876
       properties:
         account_id:
           description: The ID of the account that this liability belongs to.
@@ -44924,18 +45147,18 @@ components:
       description: Contains details about a line of credit account.
       example:
         last_payment_date: 2000-01-23
-        past_due_amount: 4.652396432933246
+        past_due_amount: 8.969578798196912
         last_statement_issue_date: 2000-01-23
-        last_payment_amount: 6.519180951018382
+        last_payment_amount: 0.10263654006109402
         draw_period_end_date: 2000-01-23
-        last_statement_balance: 0.10263654006109402
-        finance_charges: 8.969578798196912
+        last_statement_balance: 4.652396432933246
+        finance_charges: 7.740351818741173
         account_id: account_id
-        credit_limit: 3.353193347011243
+        credit_limit: 3.0937452626664474
         interest_rate:
-          percentage: 6.438423552598547
-        principal_balance: 7.143538047012306
-        minimum_payment_amount: 0.8851374739011653
+          percentage: 3.5571952270680973
+        principal_balance: 0.8851374739011653
+        minimum_payment_amount: 7.058770351582356
         aprs:
         - apr_percentage: 0.8008281904610115
           apr_type: balance_transfer_apr
@@ -44945,9 +45168,9 @@ components:
           apr_type: balance_transfer_apr
           interest_charge_amount: 1.4658129805029452
           balance_subject_to_apr: 6.027456183070403
-        available_credit: 3.0937452626664474
+        available_credit: 7.143538047012306
         next_payment_due_date: 2000-01-23
-        next_payment_amount: 7.058770351582356
+        next_payment_amount: 6.519180951018382
       properties:
         account_id:
           description: The ID of the account that this liability belongs to.
@@ -45049,7 +45272,7 @@ components:
       additionalProperties: true
       description: Information about the interest rate on a loan or line of credit.
       example:
-        percentage: 6.438423552598547
+        percentage: 3.5571952270680973
       nullable: true
       properties:
         percentage:
@@ -45106,20 +45329,20 @@ components:
       additionalProperties: true
       description: Contains details about a student loan account
       example:
-        origination_principal_amount: 5.025004791520295
+        origination_principal_amount: 9.965781217890562
         account_number: account_number
         payment_reference_number: payment_reference_number
         guarantor: guarantor
         last_statement_issue_date: 2000-01-23
-        last_statement_balance: 1.1730742509559433
+        last_statement_balance: 4.965218492984954
         expected_payoff_date: 2000-01-23
         pslf_status:
-          payments_remaining: 6
-          payments_made: 9
+          payments_remaining: 8
+          payments_made: 6
           estimated_eligibility_date: 2000-01-23
-        outstanding_interest_amount: 9.965781217890562
-        ytd_interest_paid: 8.762042012749001
-        ytd_principal_paid: 9.018348186070783
+        outstanding_interest_amount: 9.369310271410669
+        ytd_interest_paid: 9.018348186070783
+        ytd_principal_paid: 6.438423552598547
         loan_name: loan_name
         next_payment_due_date: 2000-01-23
         loan_status:
@@ -45130,10 +45353,10 @@ components:
           type: extended graduated
         last_payment_date: 2000-01-23
         is_overdue: true
-        last_payment_amount: 7.457744773683766
+        last_payment_amount: 1.1730742509559433
         sequence_number: sequence_number
         account_id: account_id
-        interest_rate_percentage: 6.84685269835264
+        interest_rate_percentage: 7.457744773683766
         disbursement_dates:
         - 2000-01-23
         - 2000-01-23
@@ -45144,7 +45367,7 @@ components:
           street: street
           region: region
           postal_code: postal_code
-        minimum_payment_amount: 4.965218492984954
+        minimum_payment_amount: 5.025004791520295
       properties:
         account_id:
           description: The ID of the account that this liability belongs to. Each
@@ -45313,6 +45536,7 @@ components:
         account_id: account_id
         last_payment_date: 2000-01-23
         is_overdue: true
+        cash_advance_limit: 7.061401241503109
         last_statement_issue_date: 2000-01-23
         minimum_payment_amount: 2.3021358869347655
         aprs:
@@ -45379,6 +45603,12 @@ components:
           format: date
           nullable: true
           type: string
+        cash_advance_limit:
+          description: The credit limit for cash advances on the account.
+          format: double
+          nullable: true
+          type: number
+          x-hidden-from-docs: true
       required:
       - account_id
       - aprs
@@ -45395,18 +45625,18 @@ components:
       additionalProperties: true
       description: Contains details about a mortgage account.
       example:
-        origination_principal_amount: 7.386281948385884
+        origination_principal_amount: 1.2315135367772556
         account_number: account_number
-        next_monthly_payment: 4.145608029883936
+        next_monthly_payment: 7.386281948385884
         loan_type_description: loan_type_description
-        escrow_balance: 9.301444243932576
+        escrow_balance: 3.616076749251911
         has_pmi: true
         last_payment_date: 2000-01-23
-        past_due_amount: 1.2315135367772556
+        past_due_amount: 1.0246457001441578
         maturity_date: 2000-01-23
         has_prepayment_penalty: true
-        current_late_fee: 7.061401241503109
-        last_payment_amount: 2.027123023002322
+        current_late_fee: 9.301444243932576
+        last_payment_amount: 4.145608029883936
         property_address:
           country: country
           city: city
@@ -45417,10 +45647,10 @@ components:
         origination_date: 2000-01-23
         loan_term: loan_term
         interest_rate:
-          percentage: 3.616076749251911
+          percentage: 2.027123023002322
           type: type
-        ytd_interest_paid: 1.0246457001441578
-        ytd_principal_paid: 1.4894159098541704
+        ytd_interest_paid: 1.4894159098541704
+        ytd_principal_paid: 6.84685269835264
         next_payment_due_date: 2000-01-23
       properties:
         account_id:
@@ -45546,7 +45776,7 @@ components:
       additionalProperties: true
       description: Object containing metadata about the interest rate for the mortgage.
       example:
-        percentage: 3.616076749251911
+        percentage: 2.027123023002322
         type: type
       properties:
         percentage:
@@ -45686,8 +45916,8 @@ components:
         (`ins_116527`). Since FedLoan no longer services student loans, this field
         is no longer returned. '
       example:
-        payments_remaining: 6
-        payments_made: 9
+        payments_remaining: 8
+        payments_made: 6
         estimated_eligibility_date: 2000-01-23
       properties:
         estimated_eligibility_date:
@@ -45859,6 +46089,7 @@ components:
           valid_standing_order_intervals:
           - null
           - null
+        supports_commercial_payment_consents: true
         supports_sepa_instant: true
         supports_international_payments: true
         supports_payment_consents: true
@@ -45888,9 +46119,14 @@ components:
         supports_payment_consents:
           description: Indicates whether the institution supports payment consents.
           type: boolean
+        supports_commercial_payment_consents:
+          description: Indicates whether the institution supports commercial variable
+            recurring payment (cVRP) consents.
+          type: boolean
       required:
       - maximum_payment_amount
       - standing_order_metadata
+      - supports_commercial_payment_consents
       - supports_international_payments
       - supports_payment_consents
       - supports_refund_details
@@ -46491,6 +46727,13 @@ components:
 
             Note that transactions data is generated relative to the Item's creation date. Different Items created on different dates with the same seed for transactions data will have different dates for the transactions. The number of days between each transaction and the Item creation will remain constant. For example, an Item created on December 15 might show a transaction on December 14. An Item created on December 20, using the same seed, would show that same transaction occurring on December 19.
           type: string
+        roll_dates_forward:
+          default: false
+          description: |-
+            When `true`, every date in this configuration is shifted at Item creation so that the most recent activity date falls on the day the Item is created, keeping the spacing between dates. Activity dates are transaction and investment transaction dates, pay period end dates and pay days, holding `institution_price_as_of` dates, and a loan's `last_payment_date` or `last_statement_issue_date`. Scheduled loan dates such as `origination_date`, `maturity_date`, and `next_payment_due_date` move by the same amount but are never the anchor. This lets a saved configuration keep producing recent data without being edited.
+
+            A `date_posted` later than its `date_transacted` stays later, so the most recent transaction can still be pending. Dates are UTC calendar dates. The shift happens once, when the Item is created; the Item keeps the shifted dates afterwards. Defaults to `false`.
+          type: boolean
         override_accounts:
           description: An array of account overrides to configure the accounts for
             the Item. By default, if no override is specified, transactions and account
@@ -46713,11 +46956,7 @@ components:
       properties:
         date_transacted:
           description: The date of the transaction, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
-            (YYYY-MM-DD) format. Transactions in Sandbox will move from pending to
-            posted once their transaction date has been reached. If a `date_transacted`
-            is not provided by the institution, a transaction date may be available
-            in the [`authorized_date`](https://plaid.com/docs/api/products/transactions/#transactions-get-response-transactions-authorized-date)
-            field.
+            (YYYY-MM-DD) format. This field does not affect pending status; see `date_posted`.
           format: date
           type: string
         date_posted:
@@ -46750,6 +46989,7 @@ components:
       example:
         amount: 0.8008281904610115
         date_posted: 2000-01-23
+        account_id: account_id
         iso_currency_code: iso_currency_code
         description: description
         date_transacted: 2000-01-23
@@ -46757,13 +46997,13 @@ components:
         date_transacted:
           description: The date of the transaction, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
             (YYYY-MM-DD) format. Transaction date must be the present date or a date
-            up to 14 days in the past. Future dates are not allowed.
+            up to 730 days in the past. Future dates are not allowed.
           format: date
           type: string
         date_posted:
           description: The date the transaction posted, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
             (YYYY-MM-DD) format. Posted date must be the present date or a date up
-            to 14 days in the past. Future dates are not allowed.
+            to 730 days in the past. Future dates are not allowed.
           format: date
           type: string
         amount:
@@ -46776,6 +47016,14 @@ components:
         iso_currency_code:
           description: The ISO-4217 format currency code for the transaction. Defaults
             to USD.
+          type: string
+        account_id:
+          description: The `account_id` of the account to add the transaction to,
+            as returned by `/accounts/get`. If omitted, the transaction is added to
+            the Item's checking account, or, for a custom Sandbox user, to the first
+            depository account listed in its `override_accounts`, or its first account
+            if it has no depository account. Student loan accounts don't accept custom
+            transactions and return an `INVALID_ACCOUNT_ID` error.
           type: string
       required:
       - amount
@@ -49147,10 +49395,6 @@ components:
         credit:
           description: A credit card type account.
           properties:
-            charge card:
-              description: Bank-issued charge card
-              type: string
-              x-hidden-from-docs: true
             credit card:
               description: Bank-issued credit card
               type: string
@@ -49177,7 +49421,6 @@ components:
             commercial line of credit:
               description: Commercial line of credit
               type: string
-              x-hidden-from-docs: true
             construction:
               description: Construction loan
               type: string
@@ -49190,11 +49433,6 @@ components:
             home equity loan:
               description: Home equity loan
               type: string
-              x-hidden-from-docs: true
-            installment:
-              description: Installment loan
-              type: string
-              x-hidden-from-docs: true
             line of credit:
               description: Pre-approved line of credit
               type: string
@@ -49218,9 +49456,11 @@ components:
           - auto
           - business
           - commercial
+          - commercial line of credit
           - construction
           - consumer
           - home equity
+          - home equity loan
           - line of credit
           - loan
           - mortgage
@@ -49564,10 +49804,6 @@ components:
     CreditAccount:
       description: A credit card type account.
       properties:
-        charge card:
-          description: Bank-issued charge card
-          type: string
-          x-hidden-from-docs: true
         credit card:
           description: Bank-issued credit card
           type: string
@@ -49594,7 +49830,6 @@ components:
         commercial line of credit:
           description: Commercial line of credit
           type: string
-          x-hidden-from-docs: true
         construction:
           description: Construction loan
           type: string
@@ -49607,11 +49842,6 @@ components:
         home equity loan:
           description: Home equity loan
           type: string
-          x-hidden-from-docs: true
-        installment:
-          description: Installment loan
-          type: string
-          x-hidden-from-docs: true
         line of credit:
           description: Pre-approved line of credit
           type: string
@@ -49635,9 +49865,11 @@ components:
       - auto
       - business
       - commercial
+      - commercial line of credit
       - construction
       - consumer
       - home equity
+      - home equity loan
       - line of credit
       - loan
       - mortgage
@@ -50553,12 +50785,10 @@ components:
       - dividend reinvestment
       - exercise
       - expire
-      - fund fee
       - interest
       - interest receivable
       - interest reinvestment
       - legal fee
-      - loan payment
       - long-term capital gain
       - long-term capital gain reinvestment
       - management fee
@@ -50570,7 +50800,6 @@ components:
       - pending credit
       - pending debit
       - qualified dividend
-      - rebalance
       - return of principal
       - request
       - sell
@@ -50590,6 +50819,51 @@ components:
       - unqualified gain
       - withdrawal
       type: string
+      x-override-enum-values-shown:
+      - account fee
+      - adjustment
+      - assignment
+      - buy
+      - buy to cover
+      - contribution
+      - deposit
+      - distribution
+      - dividend
+      - dividend reinvestment
+      - exercise
+      - expire
+      - interest
+      - interest receivable
+      - interest reinvestment
+      - legal fee
+      - long-term capital gain
+      - long-term capital gain reinvestment
+      - management fee
+      - margin expense
+      - merger
+      - miscellaneous fee
+      - non-qualified dividend
+      - non-resident tax
+      - pending credit
+      - pending debit
+      - qualified dividend
+      - return of principal
+      - request
+      - sell
+      - sell short
+      - send
+      - short-term capital gain
+      - short-term capital gain reinvestment
+      - spin off
+      - split
+      - tax
+      - tax withheld
+      - trade
+      - transfer
+      - transfer fee
+      - trust fee
+      - unqualified gain
+      - withdrawal
     OptionContract:
       additionalProperties: true
       description: |-
@@ -50889,9 +51163,6 @@ components:
             dividend:
               description: Inflow of cash from a dividend
               type: string
-            stock distribution:
-              description: Inflow of stock from a distribution
-              type: string
             interest:
               description: Inflow of cash from interest
               type: string
@@ -50993,9 +51264,6 @@ components:
               type: string
             short-term capital gain:
               description: Short-term capital gain received as cash
-              type: string
-            stock distribution:
-              description: Inflow of stock from a distribution
               type: string
             tax:
               description: Taxes paid on behalf of the investor
@@ -51109,9 +51377,6 @@ components:
         dividend:
           description: Inflow of cash from a dividend
           type: string
-        stock distribution:
-          description: Inflow of stock from a distribution
-          type: string
         interest:
           description: Inflow of cash from interest
           type: string
@@ -51213,9 +51478,6 @@ components:
           type: string
         short-term capital gain:
           description: Short-term capital gain received as cash
-          type: string
-        stock distribution:
-          description: Inflow of stock from a distribution
           type: string
         tax:
           description: Taxes paid on behalf of the investor
@@ -53208,6 +53470,30 @@ components:
       nullable: true
       title: TransferAuthorizationCustomAttributes
       type: object
+    TransferAuthorizationUserAttributes:
+      description: |
+        Typed attributes of the end user that Plaid models directly in transfer authorization decisioning. Use `custom_attributes` for any other risk-relevant context.
+      nullable: true
+      properties:
+        account_created_time:
+          description: The date and time the end user created their account on your
+            platform, in ISO 8601 format (`YYYY-MM-DDTHH:mm:ssZ`). This is the user's
+            account with you, not a Plaid `account_id`.
+          format: date-time
+          nullable: true
+          type: string
+        successful_payment_count:
+          description: The total number of payments the end user has successfully
+            completed on your platform since their account was created, across all
+            payment methods. Excludes the payment being authorized, and excludes payments
+            that were returned, charged back, or subsequently failed.
+          format: int64
+          minimum: 0
+          nullable: true
+          type: integer
+      title: TransferAuthorizationUserAttributes
+      type: object
+      x-hidden-from-docs: true
     TransferType:
       description: The type of transfer. This will be either `debit` or `credit`.  A
         `debit` indicates a transfer of money into the origination account; a `credit`
@@ -53429,7 +53715,8 @@ components:
     TransferFailure:
       additionalProperties: true
       description: The failure reason if the event type for a transfer is `"failed"`
-        or `"returned"`. Null value otherwise.
+        or `"returned"`, or the adjustment reason if the event type is `"adjustment"`.
+        Null value otherwise.
       example:
         failure_code: failure_code
         ach_return_code: ach_return_code
@@ -53451,8 +53738,8 @@ components:
           nullable: true
           type: string
         description:
-          description: A human-readable description of the reason for the failure
-            or reversal.
+          description: A human-readable description of the reason for the failure,
+            reversal, or adjustment.
           type: string
       title: TransferFailure
       type: object
@@ -53481,6 +53768,7 @@ components:
       description: Defines the request schema for `/transfer/authorization/create`
       example:
         credit_funds_source: ""
+        user_attributes: ""
         secret: secret
         client_id: client_id
         with_guarantee: true
@@ -53674,6 +53962,10 @@ components:
           nullable: true
           title: TransferAuthorizationCustomAttributes
           type: object
+        user_attributes:
+          allOf:
+          - $ref: '#/components/schemas/TransferAuthorizationUserAttributes'
+          x-hidden-from-docs: true
       required:
       - access_token
       - account_id
@@ -55838,6 +56130,8 @@ components:
 
         `returned`: A posted transfer was returned.
 
+        `adjustment`: An adjustment was made to the transfer due to rare activity, such as a dishonor. Refer to `event_amount` for the amount adjusted: a positive amount means funds are credited to the ledger, and a negative amount means funds are debited from the ledger. `failure_reason.description` describes the reason for the adjustment.
+
         `guarantee_reimbursed`: Plaid reimbursed the client for the loss on a returned guaranteed transfer. The `event_amount` is the reimbursed amount.
 
         `client_return_recovered`: The client reported recovering the loss on a returned transfer via `/transfer/return/recover`, and Plaid debited the recovered amount from the client's ledger. The `event_amount` is the recovered amount.
@@ -55886,6 +56180,7 @@ components:
       - funds_available
       - guaranteed
       - returned
+      - adjustment
       - guarantee_reimbursed
       - client_return_recovered
       - plaid_return_recovered
@@ -60947,7 +61242,6 @@ components:
       description: Valid account subtypes for credit accounts. For a list containing
         descriptions of each subtype, see [Account schemas](https://plaid.com/docs/api/accounts/#StandaloneAccountType-credit).
       enum:
-      - charge card
       - credit card
       - paypal
       - all
@@ -60964,7 +61258,6 @@ components:
       - consumer
       - home equity
       - home equity loan
-      - installment
       - loan
       - mortgage
       - overdraft
@@ -62070,6 +62363,55 @@ components:
         network_insights_version:
           $ref: '#/components/schemas/NetworkInsightsVersion'
       title: LinkTokenCreateRequestCraOptionsNetworkInsights
+      type: object
+    LinkTokenCreateRequestCraReportParameter:
+      description: Specifies the report parameters for Plaid Check products, mirroring
+        the parameters accepted on `/cra/report/create`.
+      example:
+        client_report_id: client_report_id
+        include_investments: true
+        days_required: 37
+        days_requested: 264
+        products:
+        - null
+        - null
+      properties:
+        scope:
+          $ref: '#/components/schemas/CraReportScope'
+        decision_stage:
+          $ref: '#/components/schemas/CraReportDecisionStage'
+        client_report_id:
+          description: Client-generated identifier, which can be used by lenders to
+            track loan applications.
+          nullable: true
+          type: string
+        days_requested:
+          description: The number of days of history to include in Plaid Check products.
+            Maximum is 731; minimum is 180. If a value lower than 180 is provided,
+            a minimum of 180 days of history will be requested.
+          maximum: 731
+          minimum: 0
+          nullable: true
+          type: integer
+        days_required:
+          description: The minimum number of days of data required for the report
+            to be successfully generated.
+          maximum: 184
+          minimum: 0
+          nullable: true
+          type: integer
+        include_investments:
+          description: Indicates that investment data should be extracted from the
+            linked account(s).
+          nullable: true
+          type: boolean
+        products:
+          description: The Plaid Check products, versions, and options to generate
+            for the report.
+          items:
+            $ref: '#/components/schemas/CraReportProduct'
+          type: array
+      title: LinkTokenCreateRequestCraReportParameter
       type: object
     LinkTokenCreateRequestCreditPartnerInsights:
       description: Specifies options for initializing Link for use with the Credit
@@ -85312,219 +85654,6 @@ components:
           title: RequestID
           type: string
       type: object
-    LinkDeliverySessionStatus:
-      description: |-
-        The status of the given Hosted Link session.
-
-        `CREATED`: The session is created but not yet accessed by the user
-
-        `OPENED`: The session is opened by the user but not yet completed
-
-        `EXITED`: The session has been exited by the user
-
-        `COMPLETED`: The session has been completed by the user
-
-        `EXPIRED`: The session has expired
-      enum:
-      - CREATED
-      - OPENED
-      - EXITED
-      - COMPLETED
-      - EXPIRED
-      type: string
-    LinkDeliveryDeliveryMethod:
-      description: |-
-        The delivery method to be used to deliver the Hosted Link session URL.
-
-        `SMS`: The URL will be delivered through SMS
-
-        `EMAIL`: The URL will be delivered through email
-      enum:
-      - SMS
-      - EMAIL
-      type: string
-    LinkDeliveryCommunicationMethod:
-      description: The communication method containing both the type and address to
-        send the URL.
-      example:
-        address: address
-      properties:
-        method:
-          $ref: '#/components/schemas/LinkDeliveryDeliveryMethod'
-        address:
-          description: The phone number / email address that Hosted Link sessions
-            are delivered to. Phone numbers must be in E.164 format.
-          type: string
-      type: object
-    LinkDeliveryRecipient:
-      description: Metadata related to the recipient. If the information required
-        to populate this field is not available, leave it blank.
-      example:
-        communication_methods:
-        - address: address
-        - address: address
-        first_name: first_name
-      properties:
-        communication_methods:
-          description: The list of communication methods to send the Hosted Link session
-            URL to. If delivery is not required, leave this field blank.
-          items:
-            $ref: '#/components/schemas/LinkDeliveryCommunicationMethod'
-          type: array
-        first_name:
-          description: First name of the recipient. Will be used in the body of the
-            email / text (if configured). If this information is not available, leave
-            this field blank.
-          type: string
-      type: object
-    LinkDeliveryOptions:
-      description: Optional metadata related to the Hosted Link session
-      example:
-        recipient:
-          communication_methods:
-          - address: address
-          - address: address
-          first_name: first_name
-      properties:
-        recipient:
-          $ref: '#/components/schemas/LinkDeliveryRecipient'
-      type: object
-    LinkDeliveryCreateRequest:
-      description: LinkDeliveryCreateRequest defines the request schema for `/link_delivery/create`
-      example:
-        link_token: link_token
-        options:
-          recipient:
-            communication_methods:
-            - address: address
-            - address: address
-            first_name: first_name
-        secret: secret
-        client_id: client_id
-      properties:
-        client_id:
-          description: Your Plaid API `client_id`. The `client_id` is required and
-            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
-            request body.
-          title: ClientID
-          type: string
-        secret:
-          description: Your Plaid API `secret`. The `secret` is required and may be
-            provided either in the `PLAID-SECRET` header or as part of a request body.
-          title: APISecret
-          type: string
-        link_token:
-          description: A `link_token` from a previous invocation of `/link/token/create`.
-          type: string
-        options:
-          $ref: '#/components/schemas/LinkDeliveryOptions'
-      required:
-      - link_token
-      type: object
-    LinkDeliveryCreateResponse:
-      additionalProperties: true
-      description: LinkDeliveryCreateResponse defines the response schema for `/link_delivery/create`
-      example:
-        link_delivery_session_id: link_delivery_session_id
-        link_delivery_url: link_delivery_url
-        request_id: request_id
-      properties:
-        link_delivery_url:
-          description: The URL to the Hosted Link session, which will be delivered
-            by the specified delivery method.
-          type: string
-        link_delivery_session_id:
-          description: The ID for the Hosted Link session. Same as the `link_token`
-            string excluding the "link-{env}-" prefix.
-          type: string
-        request_id:
-          description: A unique identifier for the request, which can be used for
-            troubleshooting. This identifier, like all Plaid identifiers, is case
-            sensitive.
-          title: RequestID
-          type: string
-      required:
-      - link_delivery_session_id
-      - link_delivery_url
-      - request_id
-      type: object
-    LinkDeliveryGetRequest:
-      description: LinkDeliveryGetRequest defines the request schema for `/link_delivery/get`
-      example:
-        link_delivery_session_id: link_delivery_session_id
-        secret: secret
-        client_id: client_id
-      properties:
-        client_id:
-          description: Your Plaid API `client_id`. The `client_id` is required and
-            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
-            request body.
-          title: ClientID
-          type: string
-        secret:
-          description: Your Plaid API `secret`. The `secret` is required and may be
-            provided either in the `PLAID-SECRET` header or as part of a request body.
-          title: APISecret
-          type: string
-        link_delivery_session_id:
-          description: The ID for the Hosted Link session from a previous invocation
-            of `/link_delivery/create`.
-          type: string
-      required:
-      - link_delivery_session_id
-      type: object
-    LinkDeliveryGetResponse:
-      additionalProperties: true
-      description: LinkDeliveryGetResponse defines the response schema for `/link_delivery/get`
-      example:
-        completed_at: 2000-01-23T04:56:07.000+00:00
-        item_ids:
-        - null
-        - null
-        created_at: 2000-01-23T04:56:07.000+00:00
-        request_id: request_id
-        access_tokens:
-        - null
-        - null
-      properties:
-        status:
-          $ref: '#/components/schemas/LinkDeliverySessionStatus'
-        created_at:
-          description: Timestamp in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
-            format (`YYYY-MM-DDTHH:mm:ssZ`) indicating the time the given Hosted Link
-            session was created at.
-          format: date-time
-          type: string
-        completed_at:
-          description: Timestamp in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
-            format (`YYYY-MM-DDTHH:mm:ssZ`) indicating the time the given Hosted Link
-            session was completed at.
-          format: date-time
-          nullable: true
-          type: string
-        request_id:
-          description: A unique identifier for the request, which can be used for
-            troubleshooting. This identifier, like all Plaid identifiers, is case
-            sensitive.
-          title: RequestID
-          type: string
-        access_tokens:
-          description: An array of access tokens associated with the Hosted Link session.
-          items:
-            $ref: '#/components/schemas/AccessToken'
-          nullable: true
-          type: array
-        item_ids:
-          description: An array of `item_id`s associated with the Hosted Link session.
-          items:
-            $ref: '#/components/schemas/ItemId'
-          nullable: true
-          type: array
-      required:
-      - created_at
-      - request_id
-      - status
-      type: object
     LinkUserDeliveryStatusWebhook:
       additionalProperties: true
       description: Webhook indicating that the status of the delivery of the Hosted
@@ -86324,7 +86453,6 @@ components:
           allOf:
           - $ref: '#/components/schemas/PlaidError'
           description: Details on why the Check Report failed and how to resolve it.
-          nullable: true
         repairable_items:
           description: A list of Items that the end user can repair via Link [update
             mode](https://plaid.com/docs/link/update-mode). Empty when no Item is
@@ -86361,6 +86489,9 @@ components:
           $ref: '#/components/schemas/WebhookEnvironmentValues'
       required:
       - environment
+      - error
+      - failed_products
+      - repairable_items
       - user_id
       - webhook_code
       - webhook_type
@@ -86520,7 +86651,6 @@ components:
           allOf:
           - $ref: '#/components/schemas/PlaidError'
           description: Details on why the Check Report failed and how to resolve it.
-          nullable: true
         repairable_items:
           description: A list of Items that the end user can repair via Link [update
             mode](https://plaid.com/docs/link/update-mode). Empty when no Item is
@@ -86557,6 +86687,9 @@ components:
           $ref: '#/components/schemas/WebhookEnvironmentValues'
       required:
       - environment
+      - error
+      - failed_products
+      - repairable_items
       - user_id
       - webhook_code
       - webhook_type
@@ -86603,6 +86736,11 @@ components:
           description: The `user_id` associated with the user whose data is being
             requested. This is received by calling `/user/create`.
           type: string
+        client_user_id:
+          description: The `client_user_id` you supplied for this user when calling
+            `/user/create`.
+          minLength: 1
+          type: string
         report_id:
           description: The identifier of the CRA report that was updated. Pass this
             value to the relevant product `/get` endpoint to retrieve the updated
@@ -86639,6 +86777,7 @@ components:
         environment:
           $ref: '#/components/schemas/WebhookEnvironmentValues'
       required:
+      - client_user_id
       - environment
       - failed_products
       - scope
@@ -86653,6 +86792,7 @@ components:
           webhook_type: CRA_REPORT
           webhook_code: CRA_REPORT_UPDATED
           user_id: usr_8c3ZbDBYjaqUXZ
+          client_user_id: uid_12345
           report_id: cra-report-production-6f8b1e0c-4d2a-4c7e-9a3b-2f1d8e5a7c90
           scope: CLIENT_USER
           successful_products:
@@ -86667,6 +86807,7 @@ components:
           webhook_type: CRA_REPORT
           webhook_code: CRA_REPORT_UPDATED
           user_id: usr_8c3ZbDBYjaqUXZ
+          client_user_id: uid_12345
           report_id: cra-report-production-6f8b1e0c-4d2a-4c7e-9a3b-2f1d8e5a7c90
           scope: PLAID_NETWORK
           successful_products: []
@@ -86676,6 +86817,114 @@ components:
           - product: cra_income_insights
             version: V1
           error_code: NO_ELIGIBLE_ITEMS
+          environment: production
+    CraReportReadyWebhook:
+      additionalProperties: true
+      description: Fired when generation finishes for a CRA report requested via `/cra/report/create`
+        or a Link session configured with `cra_report_parameter`, whether every requested
+        product was generated, only some were, or none were. `successful_products`
+        and `failed_products` indicate which products were generated, and `error_code`
+        is populated when every product failed. Call `/cra/report/get` for the generated
+        products and for error details on failed products.
+      properties:
+        webhook_type:
+          description: '`CRA_REPORT`'
+          type: string
+        webhook_code:
+          description: '`CRA_REPORT_READY`'
+          type: string
+        user_id:
+          description: The `user_id` associated with the user whose data is being
+            requested. This is received by calling `/user/create`.
+          type: string
+        client_user_id:
+          description: The `client_user_id` you supplied for this user when calling
+            `/user/create`. `null` if no `client_user_id` is associated with the user.
+          nullable: true
+          type: string
+        report_id:
+          allOf:
+          - $ref: '#/components/schemas/CraReportId'
+          - description: The identifier of the CRA report. Pass this value to `/cra/report/get`
+              to retrieve the report.
+          nullable: true
+        client_report_id:
+          description: The `client_report_id` you supplied when requesting the report,
+            if any.
+          nullable: true
+          type: string
+        scope:
+          $ref: '#/components/schemas/CraReportScope'
+        successful_products:
+          description: Specifies a list of products that have successfully been generated
+            for the report.
+          items:
+            $ref: '#/components/schemas/CreditProduct'
+          type: array
+        failed_products:
+          description: Specifies a list of products that have failed to generate for
+            the report. Additional detail on what caused the failure can be found
+            in the product's `errors` when calling `/cra/report/get`.
+          items:
+            $ref: '#/components/schemas/CreditProduct'
+          type: array
+        generated_time:
+          description: The timestamp when the products were generated, in ISO 8601
+            format. Null if there are no successful products.
+          format: date-time
+          nullable: true
+          type: string
+        error_code:
+          $ref: '#/components/schemas/CraReportErrorCode'
+        environment:
+          $ref: '#/components/schemas/WebhookEnvironmentValues'
+      required:
+      - client_report_id
+      - client_user_id
+      - environment
+      - error_code
+      - failed_products
+      - generated_time
+      - report_id
+      - scope
+      - successful_products
+      - user_id
+      - webhook_code
+      - webhook_type
+      title: CraReportReadyWebhook
+      type: object
+      x-examples:
+        example-1:
+          webhook_type: CRA_REPORT
+          webhook_code: CRA_REPORT_READY
+          user_id: usr_8c3ZbDBYjaqUXZ
+          client_user_id: uid_12345
+          report_id: cra-report-production-6f8b1e0c-4d2a-4c7e-9a3b-2f1d8e5a7c90
+          client_report_id: 908en3djkk342
+          scope: CLIENT_USER
+          successful_products:
+          - product: cra_base_report
+            version: V1
+          failed_products:
+          - product: cra_income_insights
+            version: V2
+          generated_time: 2026-01-12T20:23:59Z
+          environment: production
+        example-2:
+          webhook_type: CRA_REPORT
+          webhook_code: CRA_REPORT_READY
+          user_id: usr_8c3ZbDBYjaqUXZ
+          client_user_id: uid_12345
+          report_id: cra-report-production-6f8b1e0c-4d2a-4c7e-9a3b-2f1d8e5a7c90
+          client_report_id: 908en3djkk342
+          scope: CLIENT_USER
+          successful_products: []
+          failed_products:
+          - product: cra_base_report
+            version: V1
+          - product: cra_income_insights
+            version: V2
+          error_code: DATA_UNAVAILABLE
           environment: production
     CraPartnerInsightsCompleteWebhook:
       additionalProperties: true
@@ -93199,7 +93448,8 @@ components:
           type: string
           x-hidden-from-docs: true
         add_ons:
-          description: Use this field to include other reports in the PDF.
+          description: Use this field to include the most recent Income Insights,
+            Partner Insights, or LendScore report in the PDF.
           items:
             $ref: '#/components/schemas/CraPDFAddOns'
           type: array
@@ -93219,9 +93469,12 @@ components:
         `cra_income_insights`: Include Income Insights report in the PDF.
 
         `cra_partner_insights`: Include Partner Insights report in the PDF.
+
+        `cra_lend_score`: Include LendScore report in the PDF.
       enum:
       - cra_income_insights
       - cra_partner_insights
+      - cra_lend_score
       title: CraPDFAddOns
       type: string
     CraCheckReportPDFGetResponse:
@@ -112771,6 +113024,7 @@ components:
         gave_consent: true
         is_shareable: true
         template_id: idvtmp_4FrXJvfQU3zGUR
+        language: fr-CA
         secret: secret
         user:
           id_number:
@@ -112828,6 +113082,8 @@ components:
           example: idvtmp_4FrXJvfQU3zGUR
           title: IdentityVerificationTemplateID
           type: string
+        language:
+          $ref: '#/components/schemas/IdentityVerificationLanguage'
         gave_consent:
           default: false
           description: |-
@@ -113953,6 +114209,23 @@ components:
       description: ID of the associated Identity Verification attempt.
       example: idv_52xR9LKo77r1Np
       title: IdentityVerificationID
+      type: string
+    IdentityVerificationLanguage:
+      description: |-
+        The language shown when the user starts this identity verification. If omitted or null, the language is detected from the user's browser settings, with English as the fallback. The user can select a different language during the session. An idempotent request that returns an existing identity verification does not change its language.
+
+        Use a supported BCP 47 language tag, such as `fr-CA`. Unlike `/link/token/create`, this field requires a region-specific value rather than a two-letter language code such as `fr`.
+      enum:
+      - en-US
+      - es-ES
+      - es-US
+      - fr-CA
+      - ja-JP
+      - pt-BR
+      - pt-PT
+      - null
+      example: fr-CA
+      nullable: true
       type: string
     IdentityVerificationListRequest:
       description: Request input for listing Identity Verifications
@@ -136422,7 +136695,6 @@ components:
       - version
       title: CraIncomeInsightsProduct
       type: object
-      x-hidden-from-docs: true
     CraQualifyProduct:
       additionalProperties: true
       description: Names the Qualify product at a given version.
@@ -136460,7 +136732,78 @@ components:
       - version
       title: CraHomeLendingProduct
       type: object
-      x-hidden-from-docs: true
+    CraBaseReportProduct:
+      additionalProperties: true
+      description: Names the Base Report product at a given version.
+      properties:
+        product:
+          description: The Base Report product discriminator.
+          enum:
+          - cra_base_report
+          type: string
+        version:
+          description: A string that specifies a particular version of a CRA product.
+          title: CraProductVersion
+          type: string
+      required:
+      - product
+      - version
+      title: CraBaseReportProduct
+      type: object
+    CraLendScoreProduct:
+      additionalProperties: true
+      description: Names the LendScore product at a given version.
+      properties:
+        product:
+          description: The LendScore product discriminator.
+          enum:
+          - cra_lend_score
+          type: string
+        version:
+          description: A string that specifies a particular version of a CRA product.
+          title: CraProductVersion
+          type: string
+      required:
+      - product
+      - version
+      title: CraLendScoreProduct
+      type: object
+    CraCashflowInsightsProduct:
+      additionalProperties: true
+      description: Names the Cashflow Insights product at a given version.
+      properties:
+        product:
+          description: The Cashflow Insights product discriminator.
+          enum:
+          - cra_cashflow_insights
+          type: string
+        version:
+          description: A string that specifies a particular version of a CRA product.
+          title: CraProductVersion
+          type: string
+      required:
+      - product
+      - version
+      title: CraCashflowInsightsProduct
+      type: object
+    CraNetworkInsightsProduct:
+      additionalProperties: true
+      description: Names the Network Insights product at a given version.
+      properties:
+        product:
+          description: The Network Insights product discriminator.
+          enum:
+          - cra_network_insights
+          type: string
+        version:
+          description: A string that specifies a particular version of a CRA product.
+          title: CraProductVersion
+          type: string
+      required:
+      - product
+      - version
+      title: CraNetworkInsightsProduct
+      type: object
     CraReportGetRequestProduct:
       description: CraReportGetRequestProduct specifies one product and version requested
         from `/cra/report/get`, selected by the `product` discriminator.
@@ -136469,20 +136812,352 @@ components:
           cra_qualify: '#/components/schemas/CraQualifyProduct'
           cra_income_insights: '#/components/schemas/CraIncomeInsightsProduct'
           cra_home_lending: '#/components/schemas/CraHomeLendingProduct'
+          cra_base_report: '#/components/schemas/CraBaseReportProduct'
+          cra_lend_score: '#/components/schemas/CraLendScoreProduct'
+          cra_cashflow_insights: '#/components/schemas/CraCashflowInsightsProduct'
+          cra_network_insights: '#/components/schemas/CraNetworkInsightsProduct'
         propertyName: product
       oneOf:
       - $ref: '#/components/schemas/CraQualifyProduct'
       - $ref: '#/components/schemas/CraIncomeInsightsProduct'
       - $ref: '#/components/schemas/CraHomeLendingProduct'
+      - $ref: '#/components/schemas/CraBaseReportProduct'
+      - $ref: '#/components/schemas/CraLendScoreProduct'
+      - $ref: '#/components/schemas/CraCashflowInsightsProduct'
+      - $ref: '#/components/schemas/CraNetworkInsightsProduct'
       title: CraReportGetRequestProduct
-      x-hidden-from-docs: true
+      x-plaid-sdk-one-of-interface: true
+    CraReportCreateEmploymentRefreshOptions:
+      description: Configures the Employment Refresh report.
+      nullable: true
+      properties:
+        days_requested:
+          description: The number of days of data to request for the Employment Refresh
+            report. Maximum is 731.
+          maximum: 731
+          minimum: 0
+          type: integer
+      required:
+      - days_requested
+      title: CraReportCreateEmploymentRefreshOptions
+      type: object
+    CraReportCreateHomeLendingReportType:
+      description: A type of home lending report.
+      enum:
+      - VOA
+      - EMPLOYMENT_REFRESH
+      - INCOME
+      title: CraReportCreateHomeLendingReportType
+      type: string
+    CraReportCreateBaseReportOptions:
+      description: Configures how the Base Report product is generated.
+      nullable: true
+      properties:
+        require_identity:
+          description: Require the report to include identity information. If identity
+            information is not available, report generation fails.
+          nullable: true
+          type: boolean
+      title: CraReportCreateBaseReportOptions
+      type: object
+    CraReportCreateHomeLendingOptions:
+      description: Configures how the Home Lending product is generated.
+      nullable: true
+      properties:
+        reports_requested:
+          description: The home lending reports to generate.
+          items:
+            $ref: '#/components/schemas/CraReportCreateHomeLendingReportType'
+          type: array
+        employment_refresh_options:
+          $ref: '#/components/schemas/CraReportCreateEmploymentRefreshOptions'
+      required:
+      - reports_requested
+      title: CraReportCreateHomeLendingOptions
+      type: object
+    CraReportCreateIncomeInsightsOptions:
+      description: Configures how the Income Insights product is generated.
+      nullable: true
+      properties:
+        income_insights_filter:
+          $ref: '#/components/schemas/IncomeInsightsFilter'
+      title: CraReportCreateIncomeInsightsOptions
+      type: object
+    CraReportCreateBaseReportProductConfig:
+      additionalProperties: true
+      description: Requests the given version of the Base Report product, optionally
+        configuring how it is generated.
+      properties:
+        product:
+          description: Set to `cra_base_report` to request the Base Report product.
+          enum:
+          - cra_base_report
+          type: string
+        version:
+          description: A string that specifies a particular version of a CRA product.
+          title: CraProductVersion
+          type: string
+        options:
+          $ref: '#/components/schemas/CraReportCreateBaseReportOptions'
+      required:
+      - product
+      - version
+      title: CraReportCreateBaseReportProductConfig
+      type: object
+    CraReportCreateCashflowInsightsProductConfig:
+      additionalProperties: true
+      description: Requests the given version of the Cashflow Insights product. Cashflow
+        Insights accepts no additional configuration today.
+      properties:
+        product:
+          description: Set to `cra_cashflow_insights` to request the Cashflow Insights
+            product.
+          enum:
+          - cra_cashflow_insights
+          type: string
+        version:
+          description: A string that specifies a particular version of a CRA product.
+          title: CraProductVersion
+          type: string
+      required:
+      - product
+      - version
+      title: CraReportCreateCashflowInsightsProductConfig
+      type: object
+    CraReportCreateHomeLendingProductConfig:
+      additionalProperties: true
+      description: Requests the given version of the Home Lending product, optionally
+        configuring how it is generated.
+      properties:
+        product:
+          description: Set to `cra_home_lending` to request the Home Lending product.
+          enum:
+          - cra_home_lending
+          type: string
+        version:
+          description: A string that specifies a particular version of a CRA product.
+          title: CraProductVersion
+          type: string
+        options:
+          $ref: '#/components/schemas/CraReportCreateHomeLendingOptions'
+      required:
+      - product
+      - version
+      title: CraReportCreateHomeLendingProductConfig
+      type: object
+    CraReportCreateIncomeInsightsProductConfig:
+      additionalProperties: true
+      description: Requests the given version of the Income Insights product, optionally
+        configuring how it is generated.
+      properties:
+        product:
+          description: Set to `cra_income_insights` to request the Income Insights
+            product.
+          enum:
+          - cra_income_insights
+          type: string
+        version:
+          description: A string that specifies a particular version of a CRA product.
+          title: CraProductVersion
+          type: string
+        options:
+          $ref: '#/components/schemas/CraReportCreateIncomeInsightsOptions'
+      required:
+      - product
+      - version
+      title: CraReportCreateIncomeInsightsProductConfig
+      type: object
+    CraReportCreateLendScoreProductConfig:
+      additionalProperties: true
+      description: Requests the given version of the LendScore product. LendScore
+        accepts no additional configuration today.
+      properties:
+        product:
+          description: Set to `cra_lend_score` to request the LendScore product.
+          enum:
+          - cra_lend_score
+          type: string
+        version:
+          description: A string that specifies a particular version of a CRA product.
+          title: CraProductVersion
+          type: string
+      required:
+      - product
+      - version
+      title: CraReportCreateLendScoreProductConfig
+      type: object
+    CraReportCreateNetworkInsightsProductConfig:
+      additionalProperties: true
+      description: Requests the given version of the Network Insights product. Network
+        Insights accepts no additional configuration today.
+      properties:
+        product:
+          description: Set to `cra_network_insights` to request the Network Insights
+            product.
+          enum:
+          - cra_network_insights
+          type: string
+        version:
+          description: A string that specifies a particular version of a CRA product.
+          title: CraProductVersion
+          type: string
+      required:
+      - product
+      - version
+      title: CraReportCreateNetworkInsightsProductConfig
+      type: object
+    CraReportCreateQualifyProductConfig:
+      additionalProperties: true
+      description: Requests the given version of the Qualify product. Qualify accepts
+        no additional configuration today.
+      properties:
+        product:
+          description: Set to `cra_qualify` to request the Qualify product.
+          enum:
+          - cra_qualify
+          type: string
+        version:
+          description: A string that specifies a particular version of a CRA product.
+          title: CraProductVersion
+          type: string
+      required:
+      - product
+      - version
+      title: CraReportCreateQualifyProductConfig
+      type: object
+    CraReportProduct:
+      description: A Plaid Check product and version to generate for the report, with
+        the options that apply to that product, selected by the `product` field.
+      discriminator:
+        mapping:
+          cra_base_report: '#/components/schemas/CraReportCreateBaseReportProductConfig'
+          cra_cashflow_insights: '#/components/schemas/CraReportCreateCashflowInsightsProductConfig'
+          cra_home_lending: '#/components/schemas/CraReportCreateHomeLendingProductConfig'
+          cra_income_insights: '#/components/schemas/CraReportCreateIncomeInsightsProductConfig'
+          cra_lend_score: '#/components/schemas/CraReportCreateLendScoreProductConfig'
+          cra_network_insights: '#/components/schemas/CraReportCreateNetworkInsightsProductConfig'
+          cra_qualify: '#/components/schemas/CraReportCreateQualifyProductConfig'
+        propertyName: product
+      oneOf:
+      - $ref: '#/components/schemas/CraReportCreateBaseReportProductConfig'
+      - $ref: '#/components/schemas/CraReportCreateCashflowInsightsProductConfig'
+      - $ref: '#/components/schemas/CraReportCreateHomeLendingProductConfig'
+      - $ref: '#/components/schemas/CraReportCreateIncomeInsightsProductConfig'
+      - $ref: '#/components/schemas/CraReportCreateLendScoreProductConfig'
+      - $ref: '#/components/schemas/CraReportCreateNetworkInsightsProductConfig'
+      - $ref: '#/components/schemas/CraReportCreateQualifyProductConfig'
+      title: CraReportProduct
       x-plaid-sdk-one-of-interface: true
     CraReportId:
       description: A unique ID identifying a CRA report. Like all Plaid identifiers,
         this ID is case sensitive.
       title: CraReportId
       type: string
-      x-hidden-from-docs: true
+    CraReportCreateRequest:
+      description: CraReportCreateRequest defines the request schema for `/cra/report/create`.
+      example:
+        webhook: http://example.com/aeiou
+        user_id: user_id
+        client_report_id: client_report_id
+        include_investments: true
+        secret: secret
+        days_required: 110
+        client_id: client_id
+        products:
+        - null
+        - null
+        days_requested: 58
+      properties:
+        client_id:
+          description: Your Plaid API `client_id`. The `client_id` is required and
+            may be provided either in the `PLAID-CLIENT-ID` header or as part of a
+            request body.
+          title: ClientID
+          type: string
+        secret:
+          description: Your Plaid API `secret`. The `secret` is required and may be
+            provided either in the `PLAID-SECRET` header or as part of a request body.
+          title: APISecret
+          type: string
+        user_id:
+          description: A unique user identifier, created by `/user/create`. Integrations
+            that began using `/user/create` after December 10, 2025 use this field
+            to identify a user instead of the `user_token`. For more details, see
+            [New User APIs](https://plaid.com/docs/api/users/user-apis).
+          title: NewUserID
+          type: string
+        products:
+          description: The Plaid Check products, versions, and options to generate
+            for the report.
+          items:
+            $ref: '#/components/schemas/CraReportProduct'
+          minItems: 1
+          type: array
+        scope:
+          $ref: '#/components/schemas/CraReportScope'
+        decision_stage:
+          $ref: '#/components/schemas/CraReportDecisionStage'
+        consumer_report_permissible_purpose:
+          $ref: '#/components/schemas/ConsumerReportPermissiblePurpose'
+        client_report_id:
+          description: Client-generated identifier, which can be used by lenders to
+            track loan applications.
+          nullable: true
+          type: string
+        days_requested:
+          description: The number of days of history to include in Plaid Check products.
+            Maximum is 731; minimum is 180. If a value lower than 180 is provided,
+            a minimum of 180 days of history will be requested.
+          maximum: 731
+          nullable: true
+          type: integer
+        days_required:
+          description: The minimum number of days of data required for the report
+            to be successfully generated.
+          maximum: 184
+          minimum: 0
+          nullable: true
+          type: integer
+        include_investments:
+          description: Indicates that investment data should be extracted from the
+            linked account(s).
+          nullable: true
+          type: boolean
+        webhook:
+          description: The destination URL to which the report's webhooks will be
+            sent.
+          format: url
+          type: string
+      required:
+      - consumer_report_permissible_purpose
+      - decision_stage
+      - products
+      - user_id
+      title: CraReportCreateRequest
+      type: object
+    CraReportCreateResponse:
+      additionalProperties: true
+      description: CraReportCreateResponse defines the response schema for `/cra/report/create`.
+      example:
+        report_id: ""
+        request_id: request_id
+      properties:
+        report_id:
+          allOf:
+          - $ref: '#/components/schemas/CraReportId'
+          - description: The identifier of the report being generated. Use it to retrieve
+              the report once its products are ready.
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+      required:
+      - report_id
+      - request_id
+      title: CraReportCreateResponse
+      type: object
     CraReportGetRequest:
       description: CraReportGetRequest defines the request schema for `/cra/report/get`.
       example:
@@ -136513,7 +137188,7 @@ components:
           title: NewUserID
           type: string
         products:
-          description: The requested products and their versions, e.g. `[{"product":"cra_qualify","version":"V1"}]`.
+          description: The requested products and their versions, e.g. `[{"product":"cra_base_report","version":"V1"}]`.
           items:
             $ref: '#/components/schemas/CraReportGetRequestProduct'
           minItems: 1
@@ -136537,7 +137212,6 @@ components:
       - user_id
       title: CraReportGetRequest
       type: object
-      x-hidden-from-docs: true
     CraReportGetReport:
       additionalProperties: true
       description: The CRA report returned by `/cra/report/get`.
@@ -136571,7 +137245,20 @@ components:
       - scope
       title: CraReportGetReport
       type: object
-      x-hidden-from-docs: true
+    CraReportErrorCode:
+      description: |-
+        The reason every product in a CRA report failed to generate. `null` when at least one product succeeded.
+
+        `DATA_UNAVAILABLE`: Plaid could not retrieve enough data from the user's Items to generate any of the requested products. Sending the user through Link to add or repair Items may resolve this.
+
+        `INTERNAL_SERVER_ERROR`: Plaid encountered an unexpected error while generating the report.
+      enum:
+      - DATA_UNAVAILABLE
+      - INTERNAL_SERVER_ERROR
+      - null
+      nullable: true
+      title: CraReportErrorCode
+      type: string
     CraReportScope:
       description: Determines whose items are used. `PLAID_NETWORK` (default) uses
         the Plaid Network view of the user's profile. `CLIENT_USER` uses only the
@@ -136591,6 +137278,9 @@ components:
           x-override-enum-values-shown:
           - cra_base_report
           - cra_income_insights
+          - cra_cashflow_insights
+          - cra_lend_score
+          - cra_network_insights
         version:
           description: The version of the product that was generated.
           type: string
@@ -137024,15 +137714,13 @@ components:
       title: CraServicingSubscriptionUpdateResponse
       type: object
     CraReportDecisionStage:
-      description: The stage in the lending lifecycle for which the report is being
-        retrieved.
+      description: The stage in the lending lifecycle that the report is for.
       enum:
       - PREQUALIFICATION
       - DECISIONING
       - SERVICING
       title: CraReportDecisionStage
       type: string
-      x-hidden-from-docs: true
     CraProductVersion:
       description: A string that specifies a particular version of a CRA product.
       title: CraProductVersion
@@ -137050,7 +137738,6 @@ components:
       - $ref: '#/components/schemas/CraReportGetIncomeInsightsResponseProduct'
       - $ref: '#/components/schemas/CraReportGetHomeLendingResponseProduct'
       title: CraReportGetResponseProduct
-      x-hidden-from-docs: true
       x-plaid-sdk-one-of-interface: true
     CraReportGetQualifyResponseProduct:
       additionalProperties: true
@@ -137073,7 +137760,6 @@ components:
           nullable: true
           title: CraReportGetProductMetadata
           type: object
-          x-hidden-from-docs: true
         attributes:
           additionalProperties: {}
           description: A map of product attributes, where the key is a string and
@@ -137083,7 +137769,6 @@ components:
           nullable: true
           title: CraReportGetProductAttributes
           type: object
-          x-hidden-from-docs: true
         errors:
           description: Product-level errors. Non-empty when this product failed to
             generate; empty on success.
@@ -137130,7 +137815,6 @@ components:
       - version
       title: CraReportGetIncomeInsightsResponseProduct
       type: object
-      x-hidden-from-docs: true
     CraReportGetIncomeInsightsAttributes:
       additionalProperties: true
       description: Income Insights attribute data returned by `/cra/report/get`.
@@ -137148,7 +137832,6 @@ components:
       - user_summary
       title: CraReportGetIncomeInsightsAttributes
       type: object
-      x-hidden-from-docs: true
     CraReportGetIncomeInsightsStream:
       additionalProperties: true
       description: An income stream detected for the user.
@@ -137184,7 +137867,6 @@ components:
       - start_date
       title: CraReportGetIncomeInsightsStream
       type: object
-      x-hidden-from-docs: true
     CraReportGetProductBaseMetadata:
       additionalProperties: true
       description: Fields common to every /cra/report/get product's metadata.
@@ -137213,7 +137895,6 @@ components:
       - item_count
       title: CraReportGetProductBaseMetadata
       type: object
-      x-hidden-from-docs: true
     CraReportGetIncomeInsightsMetadata:
       additionalProperties: true
       allOf:
@@ -137223,7 +137904,6 @@ components:
       nullable: true
       title: CraReportGetIncomeInsightsMetadata
       type: object
-      x-hidden-from-docs: true
     CraReportGetHomeLendingResponseProduct:
       additionalProperties: true
       description: Home Lending data returned by `/cra/report/get`.
@@ -137255,7 +137935,6 @@ components:
       - version
       title: CraReportGetHomeLendingResponseProduct
       type: object
-      x-hidden-from-docs: true
     CraReportGetHomeLendingAttributes:
       additionalProperties: true
       description: Home Lending attribute data returned by `/cra/report/get`.
@@ -137296,7 +137975,6 @@ components:
       - payment_behavior_nsf_late_fees_flag_90d
       title: CraReportGetHomeLendingAttributes
       type: object
-      x-hidden-from-docs: true
     CraReportGetHomeLendingIncomeMetrics:
       additionalProperties: true
       description: Modeled current income for a given currency. Home Lending reports
@@ -137320,7 +137998,6 @@ components:
       - unofficial_currency_code
       title: CraReportGetHomeLendingIncomeMetrics
       type: object
-      x-hidden-from-docs: true
     CraReportGetHomeLendingIncomeByCategories:
       additionalProperties: true
       description: Modeled income for one currency, broken down by income category.
@@ -137347,7 +138024,6 @@ components:
       - unofficial_currency_code
       title: CraReportGetHomeLendingIncomeByCategories
       type: object
-      x-hidden-from-docs: true
     CraReportGetHomeLendingCategoryIncome:
       additionalProperties: true
       description: Modeled current income for a single income category.
@@ -137361,7 +138037,6 @@ components:
       - income_category
       title: CraReportGetHomeLendingCategoryIncome
       type: object
-      x-hidden-from-docs: true
     CraReportGetHomeLendingIncomeSources:
       additionalProperties: true
       description: Summary of the income sources backing the Home Lending report.
@@ -137381,7 +138056,6 @@ components:
       - income_stream_count
       title: CraReportGetHomeLendingIncomeSources
       type: object
-      x-hidden-from-docs: true
     CraReportGetHomeLendingMetadata:
       additionalProperties: true
       allOf:
@@ -137390,7 +138064,6 @@ components:
       nullable: true
       title: CraReportGetHomeLendingMetadata
       type: object
-      x-hidden-from-docs: true
     CraReportGetProductMetadata:
       additionalProperties: {}
       description: A map of product report metadata, where the key is a string and
@@ -137399,7 +138072,6 @@ components:
       nullable: true
       title: CraReportGetProductMetadata
       type: object
-      x-hidden-from-docs: true
     CraReportGetProductAttributes:
       additionalProperties: {}
       description: A map of product attributes, where the key is a string and the
@@ -137409,7 +138081,6 @@ components:
       nullable: true
       title: CraReportGetProductAttributes
       type: object
-      x-hidden-from-docs: true
     CraReportGetResponse:
       additionalProperties: true
       description: CraReportGetResponse defines the response schema for `/cra/report/get`.
@@ -137460,7 +138131,6 @@ components:
       - warnings
       title: CraReportGetResponse
       type: object
-      x-hidden-from-docs: true
     AssetReportFreddieGetRequest:
       additionalProperties: true
       description: AssetReportFreddieGetRequest defines the request schema for `/credit/asset_report/freddie_mac/get`
@@ -142428,9 +143098,7 @@ components:
           update_type: background
           webhook: webhook
           item_id: item_id
-          billed_products:
-          - null
-          - null
+          paired_item_id: paired_item_id
           consent_expiration_time: 2000-01-23T04:56:07.000+00:00
           error:
             error_code_reason: error_code_reason
@@ -142451,14 +143119,17 @@ components:
             request_id: request_id
             status: 2
           institution_name: institution_name
-          consented_products:
-          - null
-          - null
           available_products:
           - null
           - null
           institution_id: institution_id
           products:
+          - null
+          - null
+          billed_products:
+          - null
+          - null
+          consented_products:
           - null
           - null
         accounts:
@@ -142779,9 +143450,7 @@ components:
           update_type: background
           webhook: webhook
           item_id: item_id
-          billed_products:
-          - null
-          - null
+          paired_item_id: paired_item_id
           consent_expiration_time: 2000-01-23T04:56:07.000+00:00
           error:
             error_code_reason: error_code_reason
@@ -142802,14 +143471,17 @@ components:
             request_id: request_id
             status: 2
           institution_name: institution_name
-          consented_products:
-          - null
-          - null
           available_products:
           - null
           - null
           institution_id: institution_id
           products:
+          - null
+          - null
+          billed_products:
+          - null
+          - null
+          consented_products:
           - null
           - null
         request_id: request_id
@@ -143147,9 +143819,7 @@ components:
         update_type: background
         webhook: webhook
         item_id: item_id
-        billed_products:
-        - null
-        - null
+        paired_item_id: paired_item_id
         consent_expiration_time: 2000-01-23T04:56:07.000+00:00
         error:
           error_code_reason: error_code_reason
@@ -143170,14 +143840,17 @@ components:
           request_id: request_id
           status: 2
         institution_name: institution_name
-        consented_products:
-        - null
-        - null
         available_products:
         - null
         - null
         institution_id: institution_id
         products:
+        - null
+        - null
+        billed_products:
+        - null
+        - null
+        consented_products:
         - null
         - null
       properties:
@@ -143281,6 +143954,14 @@ components:
           - background
           - user_present_required
           type: string
+        paired_item_id:
+          description: The `item_id` of the Item that was created alongside this one
+            in a single Link session. Only present for Items created in a hybrid Link
+            flow that produces separate Plaid Inc and Plaid Check items; `null` for
+            every other Item.
+          nullable: true
+          type: string
+          x-hidden-from-docs: true
       required:
       - available_products
       - billed_products
@@ -147730,6 +148411,7 @@ components:
       description: Response object for /protect/event/get
       example:
         event_id: event_id
+        event_type: event_type
         trust_index:
           score: 0
           model: model
@@ -147750,6 +148432,9 @@ components:
           description: The timestamp of the event, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601)
             format, e.g. `"2017-09-14T14:42:19.350Z"`
           format: date-time
+          type: string
+        event_type:
+          description: The external event type, when one is available.
           type: string
         trust_index:
           $ref: '#/components/schemas/TrustIndex'
@@ -147798,7 +148483,7 @@ components:
           format: date-time
           type: string
         event_type:
-          description: The type of event.
+          description: The external event type, when one is available.
           type: string
         trust_index:
           $ref: '#/components/schemas/TrustIndex'
@@ -148170,6 +148855,51 @@ components:
             is present.
           nullable: true
           type: string
+      type: object
+    CashAdvanceFeedbackType:
+      description: The kind of feedback rows the file contains.
+      enum:
+      - DECISION
+      - REPAYMENT
+      title: CashAdvanceFeedbackType
+      type: string
+    ProtectCashAdvanceFeedbackUploadRequest:
+      description: Defines the request schema for `/protect/cash_advance/feedback/upload`
+      example:
+        file: ""
+      properties:
+        feedback_type:
+          $ref: '#/components/schemas/CashAdvanceFeedbackType'
+        file:
+          description: A CSV file of feedback rows. Maximum 20 MB.
+          format: binary
+          type: string
+      required:
+      - feedback_type
+      - file
+      title: ProtectCashAdvanceFeedbackUploadRequest
+      type: object
+    ProtectCashAdvanceFeedbackUploadResponse:
+      additionalProperties: true
+      description: Defines the response schema for `/protect/cash_advance/feedback/upload`
+      example:
+        upload_id: upload_id
+        request_id: request_id
+      properties:
+        request_id:
+          description: A unique identifier for the request, which can be used for
+            troubleshooting. This identifier, like all Plaid identifiers, is case
+            sensitive.
+          title: RequestID
+          type: string
+        upload_id:
+          description: 'A unique identifier for the upload. Retain it: it is the identifier
+            Plaid Support uses to look up this upload.'
+          type: string
+      required:
+      - request_id
+      - upload_id
+      title: ProtectCashAdvanceFeedbackUploadResponse
       type: object
     BusinessAccount_allOf:
       properties:
@@ -148548,5 +149278,12 @@ components:
           scopes:
             cra:read: Read CRA report data.
             user:write: Write user data.
+            item:read: Read Item data.
+            link:write: Create Link tokens.
+            item:write: Exchange a public token for an access token.
+            auth:read: Read Auth data.
+            accounts:read: Read account data.
+            identity:read: Read Identity data.
+            transactions:read: Read Transactions data.
           tokenUrl: https://api.plaid.com/oauth2/apiv2/token
       type: oauth2
