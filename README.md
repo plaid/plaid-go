@@ -1,5 +1,9 @@
 # plaid-go [![GoDoc](https://godoc.org/github.com/plaid/plaid-go?status.svg)](https://godoc.org/github.com/plaid/plaid-go/plaid)
 
+> **Help shape Plaid’s next-generation SDKs**
+>
+> We’re modernizing Plaid’s SDKs and looking for developers to try early releases and share feedback. [Register your interest](https://docs.google.com/forms/d/e/1FAIpQLScuhIBKCGcxrDQXLZA0nyTdJEW83J-VEr8E08KMKkT0EjmxBQ/viewform) and we’ll follow up when an early release is available for your language. No migration is required today.
+
 The official Go client library for the [Plaid API](https://plaid.com/docs). The library is now generated from our [OpenAPI schema](https://github.com/plaid/plaid-openapi). If you are currently on a manually-written version of this library from August 2021 or earlier, see the [migration guide](#migration-guide).
 
 The latest version of the library supports only the latest version of the Plaid API (currently 2020-09-14). 
@@ -25,10 +29,10 @@ Library versions follow Semantic Versioning ("SemVer") and are formatted as `v1.
 
 As of `v1.0.0`, we've moved to support `GOMODULES`.
 
-Edit your go.mod to include `github.com/plaid/plaid-go/v47 {VERSION}`
+Edit your go.mod to include `github.com/plaid/plaid-go/v48 {VERSION}`
 
 ```console
-$ go get github.com/plaid/plaid-go/v47@{VERSION}
+$ go get github.com/plaid/plaid-go/v48@{VERSION}
 ```
 
 All users are strongly recommended to use a recent version of the library, as older versions do not contain support for new endpoints and fields. For more details, see the [Migration Guide](#migration-guide).
@@ -195,7 +199,7 @@ import (
     "context"
     "os"
 
-    "github.com/plaid/plaid-go/v47/plaid"
+    "github.com/plaid/plaid-go/v48/plaid"
 )
 
 configuration := plaid.NewConfiguration()
