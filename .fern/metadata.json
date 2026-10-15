@@ -1,0 +1,28 @@
+{
+  "cliVersion": "5.134.0",
+  "generatorName": "fernapi/fern-go-sdk",
+  "generatorVersion": "1.70.3",
+  "generatorConfig": {
+    "enableRequestBodyPagination": true,
+    "enableNestedRequestBodyPagination": true,
+    "offsetSemantics": "item-index",
+    "union": "v1",
+    "packageName": "plaid",
+    "importPath": "github.com/plaid/plaid-go/v49",
+    "module": {
+      "path": "github.com/plaid/plaid-go/v49"
+    },
+    "inlinePathParameters": true,
+    "inlineFileProperties": true,
+    "user-agent": "Plaid Go {version}",
+    "omitFernHeaders": false,
+    "maxRetries": 0,
+    "includeLegacyClientOptions": false
+  },
+  "originGitCommit": "0226a44f45d6e4958886b8195a6950678acfbe89",
+  "originGitCommitIsDirty": false,
+  "invokedBy": "ci",
+  "requestedVersion": "v49.0.0",
+  "ciProvider": "github",
+  "sdkVersion": "v49.0.0"
+}

@@ -1,0 +1,34 @@
+# Specify files that shouldn't be modified by Fern
+internal/caller.go
+internal/destination.go
+internal/destination_test.go
+credential_destination_test.go
+core/custom_endpoint.go
+option/custom_endpoint.go
+.fern/replay.lock
+.fern/replay.yml
+retry_default_test.go
+wire_test_security_test.go
+.gitattributes
+PREVIEW.md
+legacy/
+.github/workflows/ci.yml
+
+# Both SDKs share these module files. Preserve legacy dependencies when Fern
+# regenerates; maintain dependencies for both SDKs with go mod tidy.
+go.mod
+go.sum
+README.md
+CHANGELOG.md
+.circleci/config.yml
+LICENSE
+changelog.md
+MIGRATION.md
+CONTRIBUTING.md
+
+.github/
+
+scripts/release/
+
+# Handwritten multipart contract test; keep generated client files regeneratable.
+transfer_diligence_upload_test.go

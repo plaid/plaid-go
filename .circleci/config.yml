@@ -2,13 +2,20 @@ version: 2.1
 
 jobs:
   build:
-    machine:
-      image: ubuntu-2204:edge
+    docker:
+      # cimg/go:1.21.13; exercise the SDK's minimum supported Go version.
+      - image: cimg/go@sha256:312861424d0144f66feb4a454932107a8cec01bf246127deb3371ed3b43d135d
+    environment:
+      GOTOOLCHAIN: local
+      GOWORK: "off"
+      GOFLAGS: -mod=readonly
     steps:
       - checkout
       - run:
-          name: Build Docker image for running go tests
-          command: docker build -t plaid-go .
-      - run:
-          name: Run go tests in Docker
-          command: docker run --rm -e CLIENT_ID=$CLIENT_ID -e SECRET=$SECRET plaid-go
+          name: Build both SDK packages
+          command: go build ./...
+
+workflows:
+  build:
+    jobs:
+      - build
