@@ -1,17 +1,16 @@
 # plaid-go [![GoDoc](https://godoc.org/github.com/plaid/plaid-go?status.svg)](https://godoc.org/github.com/plaid/plaid-go/plaid)
 
-> **Help shape Plaid’s next-generation SDKs**
->
-> We’re modernizing Plaid’s SDKs and looking for developers to try early releases and share feedback. [Register your interest](https://docs.google.com/forms/d/e/1FAIpQLScuhIBKCGcxrDQXLZA0nyTdJEW83J-VEr8E08KMKkT0EjmxBQ/viewform) and we’ll follow up when an early release is available for your language. No migration is required today.
+The official Go client library for the [Plaid API](https://plaid.com/docs), generated from our [OpenAPI schema](https://github.com/plaid/plaid-openapi).
 
-The official Go client library for the [Plaid API](https://plaid.com/docs). The library is now generated from our [OpenAPI schema](https://github.com/plaid/plaid-openapi). If you are currently on a manually-written version of this library from August 2021 or earlier, see the [migration guide](#migration-guide).
+Version 49 introduces a new SDK with endpoints grouped by product, simpler method calls, typed errors, and iterators for many paginated endpoints. The previous calling style remains available through the `legacy` package, so you can migrate one endpoint at a time. The updated API schema may also require changes to legacy models. See the [Go SDK Migration Guide](MIGRATION.md) for upgrade instructions.
 
-The latest version of the library supports only the latest version of the Plaid API (currently 2020-09-14). 
+If you are upgrading from a manually written version of this library from August 2021 or earlier, see the [older migration guide](#pre-august-2021-to-the-previous-sdk).
 
-For more information about the Plaid API, including reference documentation, see the [Plaid API docs](https://www.plaid.com/docs/api).
+The library supports Plaid API version `2020-09-14`. For API reference documentation, see the [Plaid API docs](https://plaid.com/docs/api).
 
 ## Table of Contents
 
+* [Requirements](#requirements)
 * [Installation](#installation)
 * [Getting Started](#getting-started)
   + [Calling Endpoints](#calling-endpoints)
@@ -22,6 +21,9 @@ For more information about the Plaid API, including reference documentation, see
 * [Contributing](#contributing)
 * [License](#license)
 
+## Requirements
+
+Go 1.21 or later.
 
 ## Installation
 
@@ -29,10 +31,10 @@ Library versions follow Semantic Versioning ("SemVer") and are formatted as `v1.
 
 As of `v1.0.0`, we've moved to support `GOMODULES`.
 
-Edit your go.mod to include `github.com/plaid/plaid-go/v48 {VERSION}`
+Edit your go.mod to include `github.com/plaid/plaid-go/v49 {VERSION}`
 
 ```console
-$ go get github.com/plaid/plaid-go/v48@{VERSION}
+$ go get github.com/plaid/plaid-go/v49@{VERSION}
 ```
 
 All users are strongly recommended to use a recent version of the library, as older versions do not contain support for new endpoints and fields. For more details, see the [Migration Guide](#migration-guide).
@@ -128,7 +130,7 @@ request.SetWebhook("https://webhook-uri.com")
 request.SetRedirectUri("https://domainname.com/oauth-page.html")
 request.SetAccountFilters(plaid.LinkTokenAccountFilters{
   Depository: &plaid.DepositoryFilter{
-    AccountSubtypes: []plaid.AccountSubtype{plaid.ACCOUNTSUBTYPE_CHECKING, plaid.ACCOUNTSUBTYPE_SAVINGS},
+    AccountSubtypes: []plaid.DepositoryAccountSubtype{plaid.DEPOSITORYACCOUNTSUBTYPE_CHECKING, plaid.DEPOSITORYACCOUNTSUBTYPE_SAVINGS},
   },
 })
 resp, _, err := testClient.PlaidApi.LinkTokenCreate(ctx).LinkTokenCreateRequest(*request).Execute()
@@ -150,9 +152,7 @@ accessToken := exchangePublicTokenResp.GetAccessToken()
 #### Retrieve transactions (preferred method)
 
 ```go
-request := plaid.NewTransactionsSyncRequest(
-  accessToken
-)
+request := plaid.NewTransactionsSyncRequest(accessToken)
 
 transactionsResp, _, err := testClient.PlaidApi.TransactionsSync(ctx).TransactionsSyncRequest(*request).Execute()
 ```
@@ -199,7 +199,7 @@ import (
     "context"
     "os"
 
-    "github.com/plaid/plaid-go/v48/plaid"
+    "github.com/plaid/plaid-go/v49/plaid"
 )
 
 configuration := plaid.NewConfiguration()
@@ -212,7 +212,7 @@ ctx := context.Background()
 
 // If not testing in Sandbox, remove these four lines and instead use a publicToken obtained from Link
 sandboxInstitution := "ins_109508"
-testProducts := []string{"auth"}
+testProducts := []plaid.Products{plaid.PRODUCTS_AUTH}
 sandboxPublicTokenResp, _, err := client.PlaidApi.SandboxPublicTokenCreate(ctx).SandboxPublicTokenCreateRequest(
   *plaid.NewSandboxPublicTokenCreateRequest(
     sandboxInstitution,
@@ -241,13 +241,17 @@ processorTokenCreateResp, _, err := client.PlaidApi.ProcessorTokenCreate(ctx).Pr
 
 ## Migration guide
 
-### Post-August 2021 to latest
+### Version 48 to version 49
 
-Migrating from a version released on or after August 2021 to a recent version should involve very minor integration changes. Many customers will not need to make changes to their integrations at all. To see a list of all potentially-breaking changes since your current version, see the [client library changelog](https://github.com/plaid/plaid-go/blob/master/CHANGELOG.md) and search for "Breaking changes in this version". Breaking changes are annotated at the top of each major version header.
+Version 49 introduces a new SDK and includes the previous SDK in a `legacy` package so you can migrate one endpoint at a time. Follow the [Go SDK Migration Guide](MIGRATION.md) for the walkthrough and code examples.
 
-### Pre-August 2021 to latest
+### Post-August 2021 through version 48
 
-The client library was rewritten in August 2021 to be generated from OpenAPI. To update, you will need to update your integration as follows:
+Migrating between versions released on or after August 2021, up to and including version 48, should involve very minor integration changes. Many customers will not need to make changes to their integrations at all. To see a list of all potentially-breaking changes since your current version, see the [client library changelog](https://github.com/plaid/plaid-go/blob/master/CHANGELOG.md) and search for "Breaking changes in this version". Breaking changes are annotated at the top of each major version header.
+
+### Pre-August 2021 to the previous SDK
+
+The client library was rewritten in August 2021 to be generated from OpenAPI. The following changes describe migrating to that SDK, used through version 48. To then migrate to version 49, follow the [Go SDK Migration Guide](MIGRATION.md).
 
 #### Client initialization
 From:
@@ -267,7 +271,7 @@ client, err := plaid.NewClient(plaid.ClientOptions{
 To:
 ```go
 import (
-  "github.com/plaid/plaid-go/plaid"
+  "github.com/plaid/plaid-go/v49/plaid"
 )
 
 configuration := plaid.NewConfiguration()
