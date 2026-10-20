@@ -1,0 +1,130 @@
+name: Integrate generated Go SDK
+
+on:
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+  status:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Check the generated PR without merging
+        type: boolean
+        default: true
+        required: true
+
+permissions: {}
+concurrency:
+  group: plaid-go-integration
+  cancel-in-progress: false
+
+env:
+  SDK_AUTOMERGE_ENABLED: ${{ vars.SDK_AUTOMERGE_ENABLED }}
+  SDK_INTEGRATION_DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run == true }}
+  SDK_PR_APP_BOT_ID: ${{ vars.SDK_PR_APP_BOT_ID }}
+  SDK_INTEGRATION_APP_BOT_ID: ${{ vars.SDK_INTEGRATION_APP_BOT_ID }}
+  SDK_CIRCLECI_STATUS_ACTOR_ID: ${{ vars.SDK_CIRCLECI_STATUS_ACTOR_ID }}
+  SDK_RELEASE_CONTROL_COMMIT: ${{ vars.SDK_RELEASE_CONTROL_COMMIT }}
+
+jobs:
+  check:
+    if: >-
+      (vars.SDK_AUTOMERGE_ENABLED == 'true' ||
+      (github.event_name == 'workflow_dispatch' && inputs.dry_run == true)) &&
+      github.repository == 'plaid/plaid-go' &&
+      github.event.repository.private == false && github.ref == 'refs/heads/master' &&
+      github.ref_protected &&
+      github.workflow_ref == 'plaid/plaid-go/.github/workflows/integrate.yml@refs/heads/master' &&
+      (github.event_name != 'status' || github.event.state == 'success')
+    runs-on: ubuntu-24.04
+    environment: sdk-integration
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+      number: ${{ steps.check.outputs.number }}
+      base: ${{ steps.check.outputs.base }}
+      head: ${{ steps.check.outputs.head }}
+    steps:
+      - name: Require immutable reviewed controls
+        run: '[[ "$SDK_RELEASE_CONTROL_COMMIT" =~ ^[0-9a-f]{40}$ ]]'
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ vars.SDK_RELEASE_CONTROL_COMMIT }}
+          path: control
+          persist-credentials: false
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        id: read-app
+        with:
+          client-id: ${{ vars.SDK_INTEGRATION_APP_CLIENT_ID }}
+          private-key: ${{ secrets.SDK_INTEGRATION_APP_PRIVATE_KEY }}
+          owner: plaid
+          repositories: plaid-go
+          permission-contents: read
+          permission-pull-requests: read
+          permission-administration: read
+      - name: Verify generated content, generation signature, CI and branch controls
+        id: check
+        env:
+          GH_TOKEN: ${{ steps.read-app.outputs.token }}
+        run: >-
+          python3 control/scripts/release/integrate.py --control control
+          --control-commit "$SDK_RELEASE_CONTROL_COMMIT"
+
+  merge:
+    needs: check
+    if: >-
+      needs.check.outputs.ready == 'true' && vars.SDK_AUTOMERGE_ENABLED == 'true' &&
+      !(github.event_name == 'workflow_dispatch' && inputs.dry_run == true)
+    runs-on: ubuntu-24.04
+    environment: sdk-integration
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      VERIFIED_PR: ${{ needs.check.outputs.number }}
+      VERIFIED_BASE: ${{ needs.check.outputs.base }}
+      VERIFIED_HEAD: ${{ needs.check.outputs.head }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ vars.SDK_RELEASE_CONTROL_COMMIT }}
+          path: control
+          persist-credentials: false
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        id: read-app
+        with:
+          client-id: ${{ vars.SDK_INTEGRATION_APP_CLIENT_ID }}
+          private-key: ${{ secrets.SDK_INTEGRATION_APP_PRIVATE_KEY }}
+          owner: plaid
+          repositories: plaid-go
+          permission-contents: read
+          permission-pull-requests: read
+          permission-administration: read
+      - name: Recheck the exact PR before minting a write token
+        id: recheck
+        env:
+          GH_TOKEN: ${{ steps.read-app.outputs.token }}
+        run: >-
+          python3 control/scripts/release/integrate.py --control control
+          --control-commit "$SDK_RELEASE_CONTROL_COMMIT" --number "$VERIFIED_PR"
+          --base "$VERIFIED_BASE" --head "$VERIFIED_HEAD"
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        id: write-app
+        if: steps.recheck.outputs.ready == 'true'
+        with:
+          client-id: ${{ vars.SDK_INTEGRATION_APP_CLIENT_ID }}
+          private-key: ${{ secrets.SDK_INTEGRATION_APP_PRIVATE_KEY }}
+          owner: plaid
+          repositories: plaid-go
+          permission-contents: write
+          permission-pull-requests: write
+      - name: Merge only the verified generated head
+        if: steps.recheck.outputs.ready == 'true'
+        env:
+          GH_TOKEN: ${{ steps.read-app.outputs.token }}
+          SDK_INTEGRATION_TOKEN: ${{ steps.write-app.outputs.token }}
+        run: >-
+          python3 control/scripts/release/integrate.py --control control
+          --control-commit "$SDK_RELEASE_CONTROL_COMMIT" --number "$VERIFIED_PR"
+          --base "$VERIFIED_BASE" --head "$VERIFIED_HEAD" --merge

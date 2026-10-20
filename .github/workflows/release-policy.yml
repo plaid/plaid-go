@@ -1,0 +1,41 @@
+name: Check release policy
+
+on:
+  pull_request:
+    paths:
+      - scripts/release/**
+      - .github/workflows/release*.yml
+      - .github/workflows/integrate.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  policy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: 1.26.4
+          cache: false
+      - name: Build canonical module ZIP tool
+        working-directory: scripts/release/modulezip
+        run: |
+          env -i HOME="$HOME" PATH="$PATH" GOENV=off GOWORK=off GOTOOLCHAIN=local \
+            GOFLAGS=-mod=readonly GOPROXY=https://proxy.golang.org GOSUMDB=sum.golang.org \
+            go build -o "$RUNNER_TEMP/modulezip" .
+      - name: Check policy, local Git publication and signing regressions
+        env:
+          MODULEZIP_BIN: ${{ runner.temp }}/modulezip
+        run: python3 -m unittest discover -s scripts/release -p 'test_*.py' -v
+      - name: Verify the real CLI against an existing official signed fixture
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python3 scripts/release/verify_cli_fixture.py
+          --fixture-dir "$RUNNER_TEMP/official-gh-fixture" --download
