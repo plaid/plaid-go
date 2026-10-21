@@ -54,6 +54,10 @@ jobs:
       content_sha256: ${{ steps.verify.outputs.content_sha256 }}
       manifest_sha256: ${{ steps.verify.outputs.manifest_sha256 }}
     steps:
+      - name: Require a failure notification owner
+        env:
+          SDK_FAILURE_ASSIGNEE: ${{ vars.SDK_FAILURE_ASSIGNEE }}
+        run: '[[ "$SDK_FAILURE_ASSIGNEE" =~ ^[A-Za-z0-9][A-Za-z0-9-]{0,38}$ ]]'
       - name: Require an immutable reviewed control commit
         run: '[[ "$SDK_RELEASE_CONTROL_COMMIT" =~ ^[0-9a-f]{40}$ ]]'
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

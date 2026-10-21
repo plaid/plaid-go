@@ -84,7 +84,7 @@ def strict_status_protection():
     contexts = set(checks.get("contexts", []))
     contexts.update(check.get("context") for check in checks.get("checks", []))
     require(checks.get("strict") is True and CI_CONTEXT in contexts,
-            "Integration requires strict, non-bypassed CircleCI branch protection")
+            "Integration requires strict CircleCI branch protection")
 
 
 def require_identity(pull):

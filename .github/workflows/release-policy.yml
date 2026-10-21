@@ -4,8 +4,7 @@ on:
   pull_request:
     paths:
       - scripts/release/**
-      - .github/workflows/release*.yml
-      - .github/workflows/integrate.yml
+      - .github/workflows/**
   workflow_dispatch:
 
 permissions:

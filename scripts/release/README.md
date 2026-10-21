@@ -5,7 +5,7 @@ Go clients and a signed record of their exact inputs and content. The integratio
 workflow checks the generated PR and required CI, then merges it automatically.
 The release workflow verifies that merge and generation record, builds and tests
 the SDK, attests a canonical Go module ZIP, and publishes a signed version tag.
-No human approval or workflow dispatch is required on the normal path. Both
+No human approval or workflow dispatch is required for compatible v49 updates. Both
 automatic integration and publication remain disabled until configured and tested.
 
 A separately human-reviewed SDK PR remains an explicit manual fallback. Neither
@@ -35,32 +35,51 @@ CLI, generator and SDK versions; the signed manifest records the shared spec/con
 
 ## Required GitHub setup
 
-Keep required SDK CI and strict up-to-date checks on `master`. Human changes to
+Verify that GitHub accepts the CODEOWNERS entries and enable required code-owner
+review. Keep required SDK CI and strict up-to-date checks on `master`. Human changes to
 controls, config and workflows require review. The dedicated integration App needs
 an exception to the PR approval requirement for generated SDK PRs; it must not
 bypass required status checks. Its workflow independently verifies the generation
 signature, author ID, exact head/base, maintained files and CI identity before
-merging. A bot must never post a rubber-stamp approval to satisfy review rules.
+merging. The review exception is attached to the App, not to particular PR
+contents; our verifier enforces the generated-content restriction. The current
+verifier reads classic branch protection. A rulesets-only setup is not supported
+without extending that check, and hosted tests must prove CI cannot be bypassed.
+A bot must never post a rubber-stamp approval to satisfy review rules.
 
 Create `sdk-integration` and `release` environments restricted to protected
 `master`, with no per-run human approval on the automatic path. The integration
-App has Contents write, Pull requests write and Administration read (for checking
+App has Contents write, Pull requests read and Administration read (for checking
 branch protection), scoped only to this SDK repository. Its check job obtains a
-read-only token; only the final merge operation receives write permissions. It
-cannot create release tags. The separate release App can create version tags,
-but cannot update/delete them or bypass branch reviews. Neither App gets
-Administration write or workflow write.
+read-only token for inspections, but that job still holds the full App private
+key and must be trusted with its full authority. Generated SDK code never runs
+there. Only the merge command is passed a write-capable installation token.
+Neither App gets Administration write or workflow write.
+
+Contents write permits Git ref operations; role names do not enforce restrictions.
+Configure a tag-creation rule allowing the publisher and approved manual-release
+actors, plus a separate rule blocking tag updates/deletions with no automation
+bypass. Creator and merger identities must not bypass tag creation rules. The
+publisher must not bypass branch review requirements. Keep required CI outside
+any review exception. Prove these restrictions with the actual identities before
+activation; the scripts alone cannot enforce what a stolen credential can do.
 
 The SDK PR creator is a third, separate identity with no review bypass. Pin the
 numeric bot user IDs of the creator and integrator; display names/labels do not
 authorize a merge or release. Generated PRs cannot modify the trusted workflows,
 release scripts, CI, license or maintained customizations. Empty/missing identity
-settings stop automatic integration. Configure workflow-failure notifications
-for the owning team before activation.
+settings stop automatic integration. Set `SDK_FAILURE_ASSIGNEE` to a repository
+maintainer. A separate failure workflow creates or updates one assigned issue per
+failed integration/release workflow, linking the failed run without copying logs.
+It ignores forks, non-master runs and PR-triggered jobs, and has only Issues write.
+Confirm the assignee actually receives notifications before activation; issue
+assignment does not guarantee email or Slack delivery. Close the issue after
+recovery. Pending CI is a normal wait; failed CI produces an integration failure.
 Repository variables:
 
 | Variable | Value |
 |---|---|
+| `SDK_FAILURE_ASSIGNEE` | Assignable maintainer who handles failed automation runs |
 | `SDK_AUTOMERGE_ENABLED` | `true` only after integration rehearsal; otherwise absent or `false` |
 | `SDK_PR_APP_BOT_ID` | Numeric GitHub bot user ID of the generator's PR App |
 | `SDK_INTEGRATION_APP_BOT_ID` | Numeric GitHub bot user ID of the separate integration App |
@@ -76,13 +95,17 @@ Integration environment secret: `SDK_INTEGRATION_APP_PRIVATE_KEY`.
 Release environment secrets: `SDK_RELEASE_APP_PRIVATE_KEY` and
 `SDK_RELEASE_SIGNING_PRIVATE_KEY`. Install the release App only on `plaid/plaid-go`
 with Contents write, no workflow permission, no Admin and no review bypass.
-Register its signing key for the approved identity and verify GitHub's signature
-policy during setup. Generation signatures come from the public spec repository
+Choose the approved SSH signing identity separately from App authentication and
+verify its signature policy during setup. Do not assume an SSH key can be
+registered to an App bot or that a locally valid signature guarantees GitHub's
+Verified badge. Generation signatures come from the public spec repository
 and are verified using ordinary read-only credentials.
 
 Updating either workflow or any control script requires a reviewed PR and then
 updating the control-commit variable. Runs continue to use the pinned scripts; a
-workflow that differs from that pin fails closed.
+workflow that differs from that pin fails closed. The pin does not prevent an
+unreviewed workflow from requesting credentials in the first place; required
+code-owner review and protected environments remain essential.
 
 ## Starting after a manual v49 release
 

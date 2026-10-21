@@ -1,0 +1,70 @@
+name: Report Go SDK automation failures
+
+on:
+  workflow_run:
+    workflows: ["Integrate generated Go SDK", "Release Go SDK"]
+    types: [completed]
+
+permissions: {}
+concurrency:
+  group: sdk-failure-${{ github.event.workflow_run.workflow_id }}
+  cancel-in-progress: false
+
+jobs:
+  report:
+    if: >-
+      github.repository == 'plaid/plaid-go' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      github.event.workflow_run.head_branch == 'master' &&
+      contains(fromJSON('["push", "schedule", "workflow_dispatch", "status"]'), github.event.workflow_run.event) &&
+      contains(fromJSON('["failure", "timed_out"]'), github.event.workflow_run.conclusion)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        env:
+          SDK_FAILURE_ASSIGNEE: ${{ vars.SDK_FAILURE_ASSIGNEE }}
+        with:
+          script: |
+            const run = context.payload.workflow_run;
+            const allowed = {"Integrate generated Go SDK": ".github/workflows/integrate.yml", "Release Go SDK": ".github/workflows/release.yml"};
+            if (context.repo.owner !== 'plaid' || context.repo.repo !== "plaid-go" ||
+                !run || run.head_repository?.full_name !== `plaid/${context.repo.repo}` ||
+                run.head_branch !== 'master' || !['push', 'schedule', 'workflow_dispatch', 'status'].includes(run.event) ||
+                !['failure', 'timed_out'].includes(run.conclusion) || allowed[run.name] !== run.path) {
+              core.info('Not a failed trusted SDK automation run');
+              return;
+            }
+            const assignee = process.env.SDK_FAILURE_ASSIGNEE || '';
+            if (!/^[A-Za-z0-9][A-Za-z0-9-]{0,38}$/.test(assignee)) {
+              throw new Error('Configure SDK_FAILURE_ASSIGNEE with a repository assignee before enabling automation');
+            }
+            if (!Number.isSafeInteger(run.id) || run.id < 1 || !Number.isSafeInteger(run.run_attempt) || run.run_attempt < 1) {
+              throw new Error('Unexpected workflow run identity');
+            }
+            const runUrl = `https://github.com/plaid/${context.repo.repo}/actions/runs/${run.id}/attempts/${run.run_attempt}`;
+            const marker = `<!-- plaid-sdk-failure:${run.path} -->`;
+            const title = `Go SDK automation failed: ${run.name}`;
+            const body = `${marker}
+            The Go SDK automation needs attention.
+
+            [Open the failed workflow run](${runUrl}).
+
+            Check the failed step before retrying. Do not move an existing release tag. Close this issue after recovery.
+
+            This issue tracks the latest failure of this workflow; it contains no job logs or credentials.`;
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              ...context.repo, state: 'open', creator: 'github-actions[bot]', per_page: 100,
+            });
+            const matching = issues.filter(issue => !issue.pull_request && issue.user?.login === 'github-actions[bot]' &&
+              issue.body?.startsWith(marker + '\n'));
+            if (matching.length > 1) throw new Error('Multiple SDK failure issues found; consolidate them before retrying');
+            const fields = { ...context.repo, title, body, assignees: [assignee] };
+            if (matching.length) {
+              if (matching[0].body === body && matching[0].assignees?.some(user => user.login === assignee)) return;
+              await github.rest.issues.update({ ...fields, issue_number: matching[0].number });
+            } else {
+              await github.rest.issues.create(fields);
+            }
