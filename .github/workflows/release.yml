@@ -1,0 +1,263 @@
+name: Release Go SDK
+
+on:
+  push:
+    branches: [master]
+    paths: [.sdk-release/manifest.json]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Validate and package without publishing a tag
+        type: boolean
+        default: true
+        required: true
+      attest_dry_run:
+        description: Explicitly authorize a real test attestation during a dry run
+        type: boolean
+        default: false
+        required: true
+
+permissions: {}
+concurrency:
+  group: plaid-go-release
+  cancel-in-progress: false
+
+env:
+  SDK_RELEASE_ENABLED: ${{ vars.SDK_RELEASE_ENABLED }}
+  SDK_AUTOMERGE_ENABLED: ${{ vars.SDK_AUTOMERGE_ENABLED }}
+  SDK_PR_APP_BOT_ID: ${{ vars.SDK_PR_APP_BOT_ID }}
+  SDK_INTEGRATION_APP_BOT_ID: ${{ vars.SDK_INTEGRATION_APP_BOT_ID }}
+  SDK_RELEASE_DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run == true }}
+  SDK_RELEASE_CONTROL_COMMIT: ${{ vars.SDK_RELEASE_CONTROL_COMMIT }}
+  SDK_RELEASE_MANUAL_PREDECESSOR_TAG: ${{ vars.SDK_RELEASE_MANUAL_PREDECESSOR_TAG }}
+  SDK_RELEASE_MANUAL_PREDECESSOR_COMMIT: ${{ vars.SDK_RELEASE_MANUAL_PREDECESSOR_COMMIT }}
+  SDK_RELEASE_MANUAL_PREDECESSOR_SPEC_COMMIT: ${{ vars.SDK_RELEASE_MANUAL_PREDECESSOR_SPEC_COMMIT }}
+
+jobs:
+  verify-generation:
+    if: >-
+      (vars.SDK_RELEASE_ENABLED == 'true' ||
+      (github.event_name == 'workflow_dispatch' && inputs.dry_run == true)) &&
+      github.repository == 'plaid/plaid-go' &&
+      github.event.repository.private == false &&
+      github.ref == 'refs/heads/master' && github.ref_protected &&
+      github.workflow_ref == 'plaid/plaid-go/.github/workflows/release.yml@refs/heads/master'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: read
+      attestations: read
+    outputs:
+      ready: ${{ steps.verify.outputs.ready }}
+      version: ${{ steps.verify.outputs.version }}
+      content_sha256: ${{ steps.verify.outputs.content_sha256 }}
+      manifest_sha256: ${{ steps.verify.outputs.manifest_sha256 }}
+    steps:
+      - name: Require a failure notification owner
+        env:
+          SDK_FAILURE_ASSIGNEE: ${{ vars.SDK_FAILURE_ASSIGNEE }}
+        run: '[[ "$SDK_FAILURE_ASSIGNEE" =~ ^[A-Za-z0-9][A-Za-z0-9-]{0,38}$ ]]'
+      - name: Require an immutable reviewed control commit
+        run: '[[ "$SDK_RELEASE_CONTROL_COMMIT" =~ ^[0-9a-f]{40}$ ]]'
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ vars.SDK_RELEASE_CONTROL_COMMIT }}
+          path: control
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          path: sdk
+          persist-credentials: false
+      - name: Verify authorized merge, generation signature, inputs and exact content
+        id: verify
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python3 control/scripts/release/release.py gate --sdk sdk --control control
+          --commit "$GITHUB_SHA" --control-commit "$SDK_RELEASE_CONTROL_COMMIT"
+
+  build:
+    needs: verify-generation
+    if: needs.verify-generation.outputs.ready == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ vars.SDK_RELEASE_CONTROL_COMMIT }}
+          path: control
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          path: sdk
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: 1.26.4
+          cache: false
+      - name: Bind test checkout to the verified generation
+        env:
+          VERIFIED_CONTENT_SHA256: ${{ needs.verify-generation.outputs.content_sha256 }}
+          VERIFIED_MANIFEST_SHA256: ${{ needs.verify-generation.outputs.manifest_sha256 }}
+        run: >-
+          python3 control/scripts/release/release.py inspect --sdk sdk
+          --commit "$GITHUB_SHA" --control-commit "$SDK_RELEASE_CONTROL_COMMIT"
+      - name: Build and test without publishing credentials
+        run: |
+          env -i HOME="$HOME" PATH="$PATH" TMPDIR="$RUNNER_TEMP" \
+            SDK_JAVA_BIN="$JAVA_HOME_17_X64/bin/java" \
+            GOENV=off GOWORK=off GOTOOLCHAIN=local GOFLAGS='-mod=readonly -p=2' \
+            GOPROXY=https://proxy.golang.org GOSUMDB=sum.golang.org \
+            GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_NOSYSTEM=1 GIT_TERMINAL_PROMPT=0 \
+            bash control/scripts/release/build.sh sdk
+
+  package:
+    needs: [verify-generation, build]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    outputs:
+      artifact_id: ${{ steps.upload.outputs.artifact-id }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ vars.SDK_RELEASE_CONTROL_COMMIT }}
+          path: control
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          path: sdk
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: 1.26.4
+          cache: false
+      - name: Build the pinned canonical module ZIP tool without credentials
+        working-directory: control/scripts/release/modulezip
+        run: |
+          env -i HOME="$HOME" PATH="$PATH" GOENV=off GOWORK=off \
+            GOTOOLCHAIN=local GOFLAGS=-mod=readonly GOPROXY=https://proxy.golang.org \
+            GOSUMDB=sum.golang.org GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_NOSYSTEM=1 \
+            go build -o "$RUNNER_TEMP/modulezip" .
+      - name: Package a fresh checkout, separate from SDK execution
+        env:
+          VERIFIED_CONTENT_SHA256: ${{ needs.verify-generation.outputs.content_sha256 }}
+          VERIFIED_MANIFEST_SHA256: ${{ needs.verify-generation.outputs.manifest_sha256 }}
+        run: >-
+          python3 control/scripts/release/release.py package --sdk sdk --output release
+          --zip-tool "$RUNNER_TEMP/modulezip" --commit "$GITHUB_SHA"
+          --control-commit "$SDK_RELEASE_CONTROL_COMMIT"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        id: upload
+        with:
+          name: prepared-release-${{ github.run_id }}-${{ github.run_attempt }}
+          path: release/*
+          if-no-files-found: error
+          retention-days: 30
+
+  attest:
+    needs: package
+    if: github.event_name == 'push' || inputs.dry_run == false || inputs.attest_dry_run == true
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    outputs:
+      artifact_id: ${{ steps.upload.outputs.artifact-id }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ vars.SDK_RELEASE_CONTROL_COMMIT }}
+          path: control
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          artifact-ids: ${{ needs.package.outputs.artifact_id }}
+          path: release
+          merge-multiple: true
+      - name: Verify the artifact identity before attesting
+        run: >-
+          python3 control/scripts/release/release.py check-artifacts --output release
+          --commit "$GITHUB_SHA" --control-commit "$SDK_RELEASE_CONTROL_COMMIT"
+      - uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        id: attest
+        with:
+          subject-checksums: release/subjects.sha256
+          predicate-type: https://plaid.com/attestations/sdk-release/v1
+          predicate-path: release/release-manifest.json
+          create-storage-record: false
+      - name: Verify both signed subjects before enabling publication
+        env:
+          BUNDLE_PATH: ${{ steps.attest.outputs.bundle-path }}
+          GH_TOKEN: ${{ github.token }}
+          SDK_RELEASE_SIGNING_PUBLIC_KEY: ${{ vars.SDK_RELEASE_SIGNING_PUBLIC_KEY }}
+        run: |
+          cp "$BUNDLE_PATH" release/release.bundle.json
+          python3 control/scripts/release/release.py verify-release --output release \
+            --commit "$GITHUB_SHA" --control-commit "$SDK_RELEASE_CONTROL_COMMIT"
+          python3 control/scripts/release/release.py publish --output release \
+            --commit "$GITHUB_SHA" --control-commit "$SDK_RELEASE_CONTROL_COMMIT"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        id: upload
+        with:
+          name: attested-release-${{ github.run_id }}-${{ github.run_attempt }}
+          path: release/*
+          if-no-files-found: error
+          retention-days: 90
+
+  publish:
+    needs: attest
+    if: vars.SDK_RELEASE_ENABLED == 'true' && (github.event_name == 'push' || inputs.dry_run == false)
+    environment: release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: read
+      attestations: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ vars.SDK_RELEASE_CONTROL_COMMIT }}
+          path: control
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          artifact-ids: ${{ needs.attest.outputs.artifact_id }}
+          path: release
+          merge-multiple: true
+      - name: Reverify transferred artifacts before accessing publishing secrets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python3 control/scripts/release/release.py verify-release --output release
+          --commit "$GITHUB_SHA" --control-commit "$SDK_RELEASE_CONTROL_COMMIT"
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        id: release-app
+        with:
+          client-id: ${{ vars.SDK_RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.SDK_RELEASE_APP_PRIVATE_KEY }}
+          owner: plaid
+          repositories: plaid-go
+          permission-contents: write
+      - name: Sign and push only the verified version tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SDK_RELEASE_PUBLISH: 'true'
+          SDK_RELEASE_PUSH_TOKEN: ${{ steps.release-app.outputs.token }}
+          SDK_RELEASE_SIGNING_PRIVATE_KEY: ${{ secrets.SDK_RELEASE_SIGNING_PRIVATE_KEY }}
+          SDK_RELEASE_SIGNING_PUBLIC_KEY: ${{ vars.SDK_RELEASE_SIGNING_PUBLIC_KEY }}
+        run: >-
+          python3 control/scripts/release/release.py publish --publish --output release
+          --commit "$GITHUB_SHA" --control-commit "$SDK_RELEASE_CONTROL_COMMIT"
