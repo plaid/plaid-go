@@ -139,6 +139,20 @@ def preserved_content(base_files, files, manifest):
     protected = lambda name: name in PRESERVED_FILES or name.startswith(PRESERVED_PREFIXES)
     before = {name: value for name, value in base_files.items() if protected(name)}
     after = {name: value for name, value in files.items() if protected(name)}
+    require("go.mod" in base_files, "Missing base module")
+    modules = re.findall(rb"^module\s+github\.com/plaid/plaid-go/v([1-9][0-9]*)\s*$",
+                         base_files["go.mod"][1], re.MULTILINE)
+    require(len(modules) == 1 and int(modules[0]) >= 49, "Invalid base SDK module")
+    old_major = int(modules[0])
+    new_major = policy.major_transition(old_major, manifest["sdk"]["version"])
+    if new_major != old_major:
+        # Only the exact old module token changes in maintained Go code/examples.
+        # CI, workflows, release controls and every file mode remain byte-identical.
+        module = re.compile(rb"github\.com/plaid/plaid-go/v" + str(old_major).encode() + rb"(?![0-9A-Za-z_.-])")
+        replacement = f"github.com/plaid/plaid-go/v{new_major}".encode()
+        before = {name: (mode, module.sub(replacement, data)
+                         if name in PRESERVED_FILES and (name.endswith(".go") or name == "README.md") else data)
+                  for name, (mode, data) in before.items()}
     require(before == after, "Generated PR changed protected automation or custom SDK files")
     require("CHANGELOG.md" in base_files and "CHANGELOG.md" in files, "Missing preserved changelog")
     old_mode, old = base_files["CHANGELOG.md"]

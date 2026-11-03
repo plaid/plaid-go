@@ -9,7 +9,7 @@ import tempfile
 from artifacts import verify_release
 from policy import (MANIFEST, PUBLIC_REMOTE, SPEC_REPO, ReleaseError, api, git,
                     hex_value, parse_json, require, require_release_merge, run,
-                    sha256, validate_manifest, validate_tree)
+                    sha256, validate_manifest, validate_tree, major_transition)
 
 
 def network_git(repo, remote, *arguments, push_token=None):
@@ -88,6 +88,7 @@ def publication_state(repo, remote, release, generation):
     require(semver_key(requested) > semver_key(latest), "A newer or equal SDK version is already published")
     if semver_key(latest)[0] < 49:
         return "new"
+    major_transition(semver_key(latest)[0], release["sdk"]["version"])
     network_git(repo, remote, "fetch", "--no-tags", remote, f"refs/tags/{latest}:refs/tags/{latest}")
     previous_commit = git(repo, "rev-parse", f"refs/tags/{latest}^{{commit}}").decode().strip()
     if git(repo, "ls-tree", "--name-only", previous_commit, MANIFEST).strip():

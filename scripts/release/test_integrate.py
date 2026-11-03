@@ -37,7 +37,7 @@ class IntegrationTests(unittest.TestCase):
                             "scripts/release/tool.py": "# trusted\n", ".circleci/config.yml": "trusted-ci\n",
                             ".fernignore": ".github\nscripts/release\n", "LICENSE": "license\n", "README.md": "docs\n",
                             "internal/caller.go": "package internal\n", "CHANGELOG.md": "## [v49.0.0]\n\nOld release.\n",
-                            "sdk.go": "package plaid\n", ".fern/metadata.json": '{"generatorVersion":"1.70.3"}'}.items():
+                            "go.mod": "module github.com/plaid/plaid-go/v49\n", "sdk.go": "package plaid\n", ".fern/metadata.json": '{"generatorVersion":"1.70.3"}'}.items():
             self.write(path, value)
         self.base = self.commit()
         self.cmd("git", "clone", "-q", self.repo, self.control)
@@ -197,6 +197,61 @@ class IntegrationTests(unittest.TestCase):
         integrate.preserved_content(before, candidate, self.manifest)
         candidate["CHANGELOG.md"] = ("100644", prefix + b"history removed")
         with self.assertRaisesRegex(policy.ReleaseError, "exact release entry"):
+            integrate.preserved_content(before, candidate, self.manifest)
+
+    def test_major_transition_allows_only_exact_maintained_module_substitutions(self):
+        before = policy.tree_files(self.repo, self.base)
+        before["internal/caller.go"] = ("100644", b'package internal\nimport "github.com/plaid/plaid-go/v49/core"\n')
+        before["README.md"] = ("100644", b"go get github.com/plaid/plaid-go/v49@latest\n")
+        candidate = copy.deepcopy(before)
+        for path in ("go.mod", "internal/caller.go", "README.md"):
+            mode, data = candidate[path]
+            candidate[path] = (mode, data.replace(b"plaid-go/v49", b"plaid-go/v50"))
+        manifest = copy.deepcopy(self.manifest)
+        manifest["sdk"].update(version="50.0.0", module="github.com/plaid/plaid-go/v50")
+        integrate.preserved_content(before, candidate, manifest)
+        for path in ("internal/caller.go", "README.md", "scripts/release/tool.py", ".circleci/config.yml"):
+            changed = copy.deepcopy(candidate)
+            mode, data = changed[path]
+            changed[path] = (mode, data + b"unexpected change\n")
+            with self.subTest(path=path), self.assertRaisesRegex(policy.ReleaseError, "protected"):
+                integrate.preserved_content(before, changed, manifest)
+        changed = copy.deepcopy(candidate)
+        changed["internal/caller.go"] = ("100755", candidate["internal/caller.go"][1])
+        with self.assertRaisesRegex(policy.ReleaseError, "protected"):
+            integrate.preserved_content(before, changed, manifest)
+
+    def test_major_candidate_passes_full_integration_policy_with_exact_branch_identity(self):
+        self.manifest["sdk"].update(version="50.0.0", module="github.com/plaid/plaid-go/v50")
+        self.amend_candidate("go.mod", "module github.com/plaid/plaid-go/v50\n")
+        identity = policy.sha256(policy.canonical(["50.0.0", policy.sha256(self.spec), "b" * 64]))[:20]
+        self.pull["head"]["ref"] = "sdk-generation/go-v50-" + identity
+        self.assertEqual(self.check()["version"], "50.0.0")
+        self.statuses[0]["state"] = "failure"
+        with self.assertRaisesRegex(policy.ReleaseError, "CircleCI failed"):
+            self.check()
+
+    def test_major_transition_rejects_skips_downgrades_and_noninitial_versions(self):
+        before = policy.tree_files(self.repo, self.base)
+        for version in ("48.1.0", "51.0.0", "50.1.0", "50.0.1", "50.0.0-rc.1"):
+            manifest = copy.deepcopy(self.manifest)
+            manifest["sdk"]["version"] = version
+            with self.subTest(version=version), self.assertRaises(policy.ReleaseError):
+                integrate.preserved_content(before, before, manifest)
+
+    def test_module_rewrite_never_changes_similarly_named_dependencies(self):
+        before = policy.tree_files(self.repo, self.base)
+        text = b'github.com/plaid/plaid-go/v49/core github.com/plaid/plaid-go/v490/core github.com/plaid/plaid-go/v49-extra/core'
+        before["README.md"] = ("100644", text)
+        candidate = copy.deepcopy(before)
+        candidate["README.md"] = ("100644", text.replace(b"/v49/core", b"/v50/core"))
+        manifest = copy.deepcopy(self.manifest)
+        manifest["sdk"]["version"] = "50.0.0"
+        integrate.preserved_content(before, candidate, manifest)
+        candidate["README.md"] = ("100644", text.replace(b"/v49", b"/v50"))
+        with self.assertRaisesRegex(policy.ReleaseError, "protected"):
+            integrate.preserved_content(before, candidate, manifest)
+        with self.assertRaisesRegex(policy.ReleaseError, "protected"):
             integrate.preserved_content(before, candidate, self.manifest)
 
     def test_strict_required_circleci_protection_is_mandatory(self):

@@ -5,8 +5,10 @@ Go clients and a signed record of their exact inputs and content. The integratio
 workflow checks the generated PR and required CI, then merges it automatically.
 The release workflow verifies that merge and generation record, builds and tests
 the SDK, attests a canonical Go module ZIP, and publishes a signed version tag.
-No human approval or workflow dispatch is required for compatible v49 updates. Both
-automatic integration and publication remain disabled until configured and tested.
+The generation pipeline selects a minor release for compatible exported Go APIs
+and the next major version when either client's exported API changes incompatibly.
+No additional SDK PR approval or workflow dispatch is required. Automatic
+integration and publication remain disabled until configured and tested.
 
 A separately human-reviewed SDK PR remains an explicit manual fallback. Neither
 path may ignore an outstanding changes-requested review or alter an existing tag.
@@ -15,6 +17,26 @@ The SDK and `legacy/` must come from the same public OpenAPI spec. The generatio
 record binds the spec, public config commit, immutable generator images, version,
 legacy tree and all tracked SDK content. Public Fern metadata contains only the
 CLI, generator and SDK versions; the signed manifest records the shared spec/config commit.
+
+## Major-version transitions
+
+The source generation workflow selects and signs the version. The integration
+policy permits the existing module major or exactly the next major at `.0.0`;
+it rejects skipped majors, downgrades and partial or prerelease major transitions.
+Both clients must remain bundled under the new root module.
+
+During a major transition, only the exact old `github.com/plaid/plaid-go/vN`
+module token may change to the next major in the explicitly maintained Go files
+and README. This includes imports, comments and examples, but no other edits.
+Similarly named module paths are untouched. Workflows, release scripts, CI,
+license, ignore files and file modes remain unchanged. Same-major releases retain
+the previous byte-for-byte preservation checks.
+
+The publisher independently checks the version against existing tags and keeps
+the exact-manual-predecessor and public-spec ancestry requirements across majors.
+A new major still requires signed generation evidence, trusted CI, and the same
+server-side protections. API comparison cannot prove runtime compatibility;
+generator errors and failing checks remain failures, not reasons to publish.
 
 ## Separation of permissions
 
