@@ -522,14 +522,17 @@ class ReleaseTests(unittest.TestCase):
         self.assertEqual(self.command("git", "-C", self.remote, "rev-parse", "v50.0.0^{}").decode().strip(), self.sha)
         # Later majors use the prior signed-generation manifest, not manual pins.
         first_major_commit = self.sha
-        self.set_candidate_version("51.0.0")
-        self.prepare_artifacts()
-        settings.update(self.automatic_merge())
         for name in list(settings):
             if name.startswith("SDK_RELEASE_MANUAL_PREDECESSOR_"):
                 del settings[name]
-        with self.mock_verifier(), patch.dict(os.environ, settings):
-            self.assertEqual(self.publish_call(publish_requested=True), "published")
+        for version in ("50.1.0", "51.0.0"):
+            self.set_candidate_version(version)
+            self.prepare_artifacts()
+            settings.update(self.automatic_merge())
+            with self.subTest(version=version), self.mock_verifier(), patch.dict(os.environ, settings):
+                self.assertEqual(self.publish_call(publish_requested=True), "published")
+                self.assertEqual(self.publish_call(publish_requested=True), "already-published")
+            self.assertEqual(self.command("git", "-C", self.remote, "rev-parse", f"v{version}^{{}}").decode().strip(), self.sha)
         self.assertEqual(self.command("git", "-C", self.remote, "rev-parse", "v50.0.0^{}").decode().strip(), first_major_commit)
         self.assertEqual(self.command("git", "-C", self.remote, "rev-parse", "v51.0.0^{}").decode().strip(), self.sha)
 

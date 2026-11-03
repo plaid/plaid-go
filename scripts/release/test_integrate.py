@@ -231,6 +231,18 @@ class IntegrationTests(unittest.TestCase):
         with self.assertRaisesRegex(policy.ReleaseError, "CircleCI failed"):
             self.check()
 
+    def test_compatible_release_after_major_requires_unchanged_maintained_paths(self):
+        before = policy.tree_files(self.repo, self.base)
+        before["go.mod"] = ("100644", b"module github.com/plaid/plaid-go/v50\n")
+        before["internal/caller.go"] = ("100644", b'package internal\nimport "github.com/plaid/plaid-go/v50/core"\n')
+        manifest = copy.deepcopy(self.manifest)
+        manifest["sdk"].update(version="50.1.0", module="github.com/plaid/plaid-go/v50")
+        integrate.preserved_content(before, before, manifest)
+        candidate = copy.deepcopy(before)
+        candidate["internal/caller.go"] = ("100644", before["internal/caller.go"][1].replace(b"/v50/", b"/v51/"))
+        with self.assertRaisesRegex(policy.ReleaseError, "protected"):
+            integrate.preserved_content(before, candidate, manifest)
+
     def test_major_transition_rejects_skips_downgrades_and_noninitial_versions(self):
         before = policy.tree_files(self.repo, self.base)
         for version in ("48.1.0", "51.0.0", "50.1.0", "50.0.1", "50.0.0-rc.1"):
