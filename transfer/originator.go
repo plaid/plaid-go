@@ -4,8 +4,8 @@ package transfer
 
 import (
 	json "encoding/json"
-	v49 "github.com/plaid/plaid-go/v49"
-	internal "github.com/plaid/plaid-go/v49/internal"
+	v50 "github.com/plaid/plaid-go/v50"
+	internal "github.com/plaid/plaid-go/v50/internal"
 	big "math/big"
 )
 
@@ -66,7 +66,7 @@ var (
 type TransferOriginatorFundingAccountCreateRequest struct {
 	// The Plaid client ID of the transfer originator.
 	OriginatorClientID string                                     `json:"originator_client_id" url:"-"`
-	FundingAccount     *v49.TransferFundingAccountWithDisplayName `json:"funding_account" url:"-"`
+	FundingAccount     *v50.TransferFundingAccountWithDisplayName `json:"funding_account" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -90,7 +90,7 @@ func (t *TransferOriginatorFundingAccountCreateRequest) SetOriginatorClientID(or
 
 // SetFundingAccount sets the FundingAccount field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferOriginatorFundingAccountCreateRequest) SetFundingAccount(fundingAccount *v49.TransferFundingAccountWithDisplayName) {
+func (t *TransferOriginatorFundingAccountCreateRequest) SetFundingAccount(fundingAccount *v50.TransferFundingAccountWithDisplayName) {
 	t.FundingAccount = fundingAccount
 	t.require(transferOriginatorFundingAccountCreateRequestFieldFundingAccount)
 }
@@ -232,7 +232,7 @@ var (
 type TransferOriginatorFundingAccountUpdateRequest struct {
 	// The Plaid client ID of the transfer originator.
 	OriginatorClientID string                      `json:"originator_client_id" url:"-"`
-	FundingAccount     *v49.TransferFundingAccount `json:"funding_account" url:"-"`
+	FundingAccount     *v50.TransferFundingAccount `json:"funding_account" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -256,7 +256,7 @@ func (t *TransferOriginatorFundingAccountUpdateRequest) SetOriginatorClientID(or
 
 // SetFundingAccount sets the FundingAccount field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferOriginatorFundingAccountUpdateRequest) SetFundingAccount(fundingAccount *v49.TransferFundingAccount) {
+func (t *TransferOriginatorFundingAccountUpdateRequest) SetFundingAccount(fundingAccount *v50.TransferFundingAccount) {
 	t.FundingAccount = fundingAccount
 	t.require(transferOriginatorFundingAccountUpdateRequestFieldFundingAccount)
 }

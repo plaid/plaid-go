@@ -4,7 +4,7 @@ package plaid
 
 import (
 	json "encoding/json"
-	core "github.com/plaid/plaid-go/v49/core"
+	core "github.com/plaid/plaid-go/v50/core"
 )
 
 // Bad request — see error_type and error_code

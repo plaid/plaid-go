@@ -6426,6 +6426,92 @@ func TestRequiredNullableRoundTripAuthMetadata(t *testing.T) {
 	})
 }
 
+func TestRequiredNullableRoundTripHealthIncident(t *testing.T) {
+	requiredNullableKeys := []string{
+		"incident_updates",
+	}
+	marshalToMap := func(t *testing.T, obj *HealthIncident) map[string]json.RawMessage {
+		data, err := json.Marshal(obj)
+		require.NoError(t, err, "marshaling should succeed")
+		var result map[string]json.RawMessage
+		require.NoError(t, json.Unmarshal(data, &result), "marshaled data should be a JSON object")
+		return result
+	}
+
+	t.Run("NullPreserved", func(t *testing.T) {
+		t.Parallel()
+		var obj HealthIncident
+		require.NoError(t, json.Unmarshal([]byte(`{"incident_updates":null}`), &obj))
+		result := marshalToMap(t, &obj)
+		for _, key := range requiredNullableKeys {
+			value, ok := result[key]
+			require.True(t, ok, "required nullable field %q received as null should be present in the output", key)
+			assert.Equal(t, "null", string(value), "required nullable field %q received as null should be null in the output", key)
+		}
+	})
+
+	t.Run("AbsentStaysAbsent", func(t *testing.T) {
+		t.Parallel()
+		var obj HealthIncident
+		require.NoError(t, json.Unmarshal([]byte(`{}`), &obj))
+		result := marshalToMap(t, &obj)
+		for _, key := range requiredNullableKeys {
+			assert.NotContains(t, result, key, "required nullable field %q absent from the input should be absent from the output", key)
+		}
+	})
+
+	t.Run("FreshValueOmits", func(t *testing.T) {
+		t.Parallel()
+		result := marshalToMap(t, &HealthIncident{})
+		for _, key := range requiredNullableKeys {
+			assert.NotContains(t, result, key, "required nullable field %q should be omitted from a freshly constructed value", key)
+		}
+	})
+}
+
+func TestRequiredNullableRoundTripInstitutionStatus(t *testing.T) {
+	requiredNullableKeys := []string{
+		"item_logins",
+	}
+	marshalToMap := func(t *testing.T, obj *InstitutionStatus) map[string]json.RawMessage {
+		data, err := json.Marshal(obj)
+		require.NoError(t, err, "marshaling should succeed")
+		var result map[string]json.RawMessage
+		require.NoError(t, json.Unmarshal(data, &result), "marshaled data should be a JSON object")
+		return result
+	}
+
+	t.Run("NullPreserved", func(t *testing.T) {
+		t.Parallel()
+		var obj InstitutionStatus
+		require.NoError(t, json.Unmarshal([]byte(`{"item_logins":null}`), &obj))
+		result := marshalToMap(t, &obj)
+		for _, key := range requiredNullableKeys {
+			value, ok := result[key]
+			require.True(t, ok, "required nullable field %q received as null should be present in the output", key)
+			assert.Equal(t, "null", string(value), "required nullable field %q received as null should be null in the output", key)
+		}
+	})
+
+	t.Run("AbsentStaysAbsent", func(t *testing.T) {
+		t.Parallel()
+		var obj InstitutionStatus
+		require.NoError(t, json.Unmarshal([]byte(`{}`), &obj))
+		result := marshalToMap(t, &obj)
+		for _, key := range requiredNullableKeys {
+			assert.NotContains(t, result, key, "required nullable field %q absent from the input should be absent from the output", key)
+		}
+	})
+
+	t.Run("FreshValueOmits", func(t *testing.T) {
+		t.Parallel()
+		result := marshalToMap(t, &InstitutionStatus{})
+		for _, key := range requiredNullableKeys {
+			assert.NotContains(t, result, key, "required nullable field %q should be omitted from a freshly constructed value", key)
+		}
+	})
+}
+
 func TestRequiredNullableRoundTripPaymentInitiationMetadata(t *testing.T) {
 	requiredNullableKeys := []string{
 		"standing_order_metadata",
@@ -6605,7 +6691,6 @@ func TestOptionalNullableRoundTripInstitution(t *testing.T) {
 
 func TestOptionalNullableRoundTripInstitutionStatus(t *testing.T) {
 	optionalNullableKeys := []string{
-		"item_logins",
 		"transactions_updates",
 		"auth",
 		"identity",
@@ -6626,7 +6711,7 @@ func TestOptionalNullableRoundTripInstitutionStatus(t *testing.T) {
 	t.Run("NullPreserved", func(t *testing.T) {
 		t.Parallel()
 		var obj InstitutionStatus
-		require.NoError(t, json.Unmarshal([]byte(`{"item_logins":null,"transactions_updates":null,"auth":null,"identity":null,"investments_updates":null,"liabilities_updates":null,"liabilities":null,"investments":null,"health_incidents":null}`), &obj))
+		require.NoError(t, json.Unmarshal([]byte(`{"transactions_updates":null,"auth":null,"identity":null,"investments_updates":null,"liabilities_updates":null,"liabilities":null,"investments":null,"health_incidents":null}`), &obj))
 		result := marshalToMap(t, &obj)
 		for _, key := range optionalNullableKeys {
 			value, ok := result[key]

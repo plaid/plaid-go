@@ -28270,6 +28270,20 @@ func TestEnumCraReportCreateRequestConsumerReportPermissiblePurpose(t *testing.T
 		assert.Equal(t, CraReportCreateRequestConsumerReportPermissiblePurpose("ELIGIBILITY_FOR_GOVT_BENEFITS"), val, "enum value should match expected wire value")
 	})
 
+	t.Run("NewFromString_INSURANCE_UNDERWRITING", func(t *testing.T) {
+		t.Parallel()
+		val, err := NewCraReportCreateRequestConsumerReportPermissiblePurposeFromString("INSURANCE_UNDERWRITING")
+		assert.NoError(t, err, "valid enum value should not return error")
+		assert.Equal(t, CraReportCreateRequestConsumerReportPermissiblePurpose("INSURANCE_UNDERWRITING"), val, "enum value should match expected wire value")
+	})
+
+	t.Run("NewFromString_SECONDARY_INVESTOR", func(t *testing.T) {
+		t.Parallel()
+		val, err := NewCraReportCreateRequestConsumerReportPermissiblePurposeFromString("SECONDARY_INVESTOR")
+		assert.NoError(t, err, "valid enum value should not return error")
+		assert.Equal(t, CraReportCreateRequestConsumerReportPermissiblePurpose("SECONDARY_INVESTOR"), val, "enum value should match expected wire value")
+	})
+
 	t.Run("NewFromString_Invalid", func(t *testing.T) {
 		_, err := NewCraReportCreateRequestConsumerReportPermissiblePurposeFromString("invalid_value_that_does_not_exist")
 		assert.Error(t, err)
@@ -28370,6 +28384,20 @@ func TestEnumCraReportGetReportConsumerReportPermissiblePurpose(t *testing.T) {
 		assert.Equal(t, CraReportGetReportConsumerReportPermissiblePurpose("ELIGIBILITY_FOR_GOVT_BENEFITS"), val, "enum value should match expected wire value")
 	})
 
+	t.Run("NewFromString_INSURANCE_UNDERWRITING", func(t *testing.T) {
+		t.Parallel()
+		val, err := NewCraReportGetReportConsumerReportPermissiblePurposeFromString("INSURANCE_UNDERWRITING")
+		assert.NoError(t, err, "valid enum value should not return error")
+		assert.Equal(t, CraReportGetReportConsumerReportPermissiblePurpose("INSURANCE_UNDERWRITING"), val, "enum value should match expected wire value")
+	})
+
+	t.Run("NewFromString_SECONDARY_INVESTOR", func(t *testing.T) {
+		t.Parallel()
+		val, err := NewCraReportGetReportConsumerReportPermissiblePurposeFromString("SECONDARY_INVESTOR")
+		assert.NoError(t, err, "valid enum value should not return error")
+		assert.Equal(t, CraReportGetReportConsumerReportPermissiblePurpose("SECONDARY_INVESTOR"), val, "enum value should match expected wire value")
+	})
+
 	t.Run("NewFromString_Invalid", func(t *testing.T) {
 		_, err := NewCraReportGetReportConsumerReportPermissiblePurposeFromString("invalid_value_that_does_not_exist")
 		assert.Error(t, err)
@@ -28439,6 +28467,20 @@ func TestEnumCraReportGetRequestConsumerReportPermissiblePurpose(t *testing.T) {
 		val, err := NewCraReportGetRequestConsumerReportPermissiblePurposeFromString("ELIGIBILITY_FOR_GOVT_BENEFITS")
 		assert.NoError(t, err, "valid enum value should not return error")
 		assert.Equal(t, CraReportGetRequestConsumerReportPermissiblePurpose("ELIGIBILITY_FOR_GOVT_BENEFITS"), val, "enum value should match expected wire value")
+	})
+
+	t.Run("NewFromString_INSURANCE_UNDERWRITING", func(t *testing.T) {
+		t.Parallel()
+		val, err := NewCraReportGetRequestConsumerReportPermissiblePurposeFromString("INSURANCE_UNDERWRITING")
+		assert.NoError(t, err, "valid enum value should not return error")
+		assert.Equal(t, CraReportGetRequestConsumerReportPermissiblePurpose("INSURANCE_UNDERWRITING"), val, "enum value should match expected wire value")
+	})
+
+	t.Run("NewFromString_SECONDARY_INVESTOR", func(t *testing.T) {
+		t.Parallel()
+		val, err := NewCraReportGetRequestConsumerReportPermissiblePurposeFromString("SECONDARY_INVESTOR")
+		assert.NoError(t, err, "valid enum value should not return error")
+		assert.Equal(t, CraReportGetRequestConsumerReportPermissiblePurpose("SECONDARY_INVESTOR"), val, "enum value should match expected wire value")
 	})
 
 	t.Run("NewFromString_Invalid", func(t *testing.T) {

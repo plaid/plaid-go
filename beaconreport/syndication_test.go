@@ -4,7 +4,7 @@ package beaconreport
 
 import (
 	json "encoding/json"
-	v49 "github.com/plaid/plaid-go/v49"
+	v50 "github.com/plaid/plaid-go/v50"
 	assert "github.com/stretchr/testify/assert"
 	require "github.com/stretchr/testify/require"
 	testing "testing"
@@ -13,7 +13,7 @@ import (
 func TestSettersBeaconReportSyndicationGetRequest(t *testing.T) {
 	t.Run("SetBeaconReportSyndicationID", func(t *testing.T) {
 		obj := &BeaconReportSyndicationGetRequest{}
-		var fernTestValueBeaconReportSyndicationID v49.BeaconReportSyndicationID
+		var fernTestValueBeaconReportSyndicationID v50.BeaconReportSyndicationID
 		obj.SetBeaconReportSyndicationID(fernTestValueBeaconReportSyndicationID)
 		assert.Equal(t, fernTestValueBeaconReportSyndicationID, obj.BeaconReportSyndicationID)
 		assert.NotNil(t, obj.explicitFields)
@@ -26,7 +26,7 @@ func TestSettersMarkExplicitBeaconReportSyndicationGetRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &BeaconReportSyndicationGetRequest{}
-		var fernTestValueBeaconReportSyndicationID v49.BeaconReportSyndicationID
+		var fernTestValueBeaconReportSyndicationID v50.BeaconReportSyndicationID
 
 		// Act
 		obj.SetBeaconReportSyndicationID(fernTestValueBeaconReportSyndicationID)
@@ -58,7 +58,7 @@ func TestSettersMarkExplicitBeaconReportSyndicationGetRequest(t *testing.T) {
 func TestSettersBeaconReportSyndicationListRequest(t *testing.T) {
 	t.Run("SetBeaconUserID", func(t *testing.T) {
 		obj := &BeaconReportSyndicationListRequest{}
-		var fernTestValueBeaconUserID v49.BeaconUserID
+		var fernTestValueBeaconUserID v50.BeaconUserID
 		obj.SetBeaconUserID(fernTestValueBeaconUserID)
 		assert.Equal(t, fernTestValueBeaconUserID, obj.BeaconUserID)
 		assert.NotNil(t, obj.explicitFields)
@@ -66,7 +66,7 @@ func TestSettersBeaconReportSyndicationListRequest(t *testing.T) {
 
 	t.Run("SetCursor", func(t *testing.T) {
 		obj := &BeaconReportSyndicationListRequest{}
-		var fernTestValueCursor v49.Cursor
+		var fernTestValueCursor v50.Cursor
 		obj.SetCursor(fernTestValueCursor)
 		assert.Equal(t, fernTestValueCursor, obj.Cursor)
 		assert.NotNil(t, obj.explicitFields)
@@ -79,7 +79,7 @@ func TestSettersMarkExplicitBeaconReportSyndicationListRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &BeaconReportSyndicationListRequest{}
-		var fernTestValueBeaconUserID v49.BeaconUserID
+		var fernTestValueBeaconUserID v50.BeaconUserID
 
 		// Act
 		obj.SetBeaconUserID(fernTestValueBeaconUserID)
@@ -110,7 +110,7 @@ func TestSettersMarkExplicitBeaconReportSyndicationListRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &BeaconReportSyndicationListRequest{}
-		var fernTestValueCursor v49.Cursor
+		var fernTestValueCursor v50.Cursor
 
 		// Act
 		obj.SetCursor(fernTestValueCursor)

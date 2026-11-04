@@ -4,8 +4,8 @@ package transfer
 
 import (
 	json "encoding/json"
-	v49 "github.com/plaid/plaid-go/v49"
-	internal "github.com/plaid/plaid-go/v49/internal"
+	v50 "github.com/plaid/plaid-go/v50"
+	internal "github.com/plaid/plaid-go/v50/internal"
 	big "math/big"
 	time "time"
 )
@@ -21,15 +21,15 @@ var (
 )
 
 type TransferLedgerDepositRequest struct {
-	OriginatorClientID v49.TransferOriginatorClientID            `json:"originator_client_id,omitempty" url:"-"`
-	FundingAccountID   v49.TransferLedgerFundingAccountIDRequest `json:"funding_account_id,omitempty" url:"-"`
+	OriginatorClientID v50.TransferOriginatorClientID            `json:"originator_client_id,omitempty" url:"-"`
+	FundingAccountID   v50.TransferLedgerFundingAccountIDRequest `json:"funding_account_id,omitempty" url:"-"`
 	// Specify which ledger balance to deposit to. Customers can find a list of `ledger_id`s in the Accounts page of your Plaid Dashboard. If this field is left blank, this will default to the id of the default ledger balance.
 	LedgerID *string `json:"ledger_id,omitempty" url:"-"`
 	// A positive amount of how much will be deposited into ledger (decimal string with two digits of precision e.g. "5.50").
 	Amount         string                          `json:"amount" url:"-"`
-	Description    v49.SweepDescription            `json:"description,omitempty" url:"-"`
-	IdempotencyKey v49.LedgerDepositIdempotencyKey `json:"idempotency_key" url:"-"`
-	Network        v49.TransferAchNetwork          `json:"network" url:"-"`
+	Description    v50.SweepDescription            `json:"description,omitempty" url:"-"`
+	IdempotencyKey v50.LedgerDepositIdempotencyKey `json:"idempotency_key" url:"-"`
+	Network        v50.TransferAchNetwork          `json:"network" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -46,14 +46,14 @@ func (t *TransferLedgerDepositRequest) require(field *big.Int) {
 
 // SetOriginatorClientID sets the OriginatorClientID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferLedgerDepositRequest) SetOriginatorClientID(originatorClientID v49.TransferOriginatorClientID) {
+func (t *TransferLedgerDepositRequest) SetOriginatorClientID(originatorClientID v50.TransferOriginatorClientID) {
 	t.OriginatorClientID = originatorClientID
 	t.require(transferLedgerDepositRequestFieldOriginatorClientID)
 }
 
 // SetFundingAccountID sets the FundingAccountID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferLedgerDepositRequest) SetFundingAccountID(fundingAccountID v49.TransferLedgerFundingAccountIDRequest) {
+func (t *TransferLedgerDepositRequest) SetFundingAccountID(fundingAccountID v50.TransferLedgerFundingAccountIDRequest) {
 	t.FundingAccountID = fundingAccountID
 	t.require(transferLedgerDepositRequestFieldFundingAccountID)
 }
@@ -74,21 +74,21 @@ func (t *TransferLedgerDepositRequest) SetAmount(amount string) {
 
 // SetDescription sets the Description field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferLedgerDepositRequest) SetDescription(description v49.SweepDescription) {
+func (t *TransferLedgerDepositRequest) SetDescription(description v50.SweepDescription) {
 	t.Description = description
 	t.require(transferLedgerDepositRequestFieldDescription)
 }
 
 // SetIdempotencyKey sets the IdempotencyKey field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferLedgerDepositRequest) SetIdempotencyKey(idempotencyKey v49.LedgerDepositIdempotencyKey) {
+func (t *TransferLedgerDepositRequest) SetIdempotencyKey(idempotencyKey v50.LedgerDepositIdempotencyKey) {
 	t.IdempotencyKey = idempotencyKey
 	t.require(transferLedgerDepositRequestFieldIdempotencyKey)
 }
 
 // SetNetwork sets the Network field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferLedgerDepositRequest) SetNetwork(network v49.TransferAchNetwork) {
+func (t *TransferLedgerDepositRequest) SetNetwork(network v50.TransferAchNetwork) {
 	t.Network = network
 	t.require(transferLedgerDepositRequestFieldNetwork)
 }
@@ -129,7 +129,7 @@ type TransferLedgerDistributeRequest struct {
 	ToLedgerID string `json:"to_ledger_id" url:"-"`
 	// The amount to move (decimal string with two digits of precision e.g. "10.00"). Amount must be positive.
 	Amount         string                             `json:"amount" url:"-"`
-	IdempotencyKey v49.LedgerDistributeIdempotencyKey `json:"idempotency_key" url:"-"`
+	IdempotencyKey v50.LedgerDistributeIdempotencyKey `json:"idempotency_key" url:"-"`
 	// An optional description for the ledger distribute operation.
 	Description *string `json:"description,omitempty" url:"-"`
 
@@ -169,7 +169,7 @@ func (t *TransferLedgerDistributeRequest) SetAmount(amount string) {
 
 // SetIdempotencyKey sets the IdempotencyKey field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferLedgerDistributeRequest) SetIdempotencyKey(idempotencyKey v49.LedgerDistributeIdempotencyKey) {
+func (t *TransferLedgerDistributeRequest) SetIdempotencyKey(idempotencyKey v50.LedgerDistributeIdempotencyKey) {
 	t.IdempotencyKey = idempotencyKey
 	t.require(transferLedgerDistributeRequestFieldIdempotencyKey)
 }
@@ -284,7 +284,7 @@ type TransferLedgerEventListRequest struct {
 	LedgerID *string `json:"ledger_id,omitempty" url:"-"`
 	// Plaid's unique identifier for the ledger event.
 	LedgerEventID *string                    `json:"ledger_event_id,omitempty" url:"-"`
-	SourceType    *v49.LedgerEventSourceType `json:"source_type,omitempty" url:"-"`
+	SourceType    *v50.LedgerEventSourceType `json:"source_type,omitempty" url:"-"`
 	// Plaid's unique identifier for a transfer, sweep, or refund.
 	SourceID *string `json:"source_id,omitempty" url:"-"`
 	// The maximum number of transfer events to return. If the number of events matching the above parameters is greater than `count`, the most recent events will be returned.
@@ -342,7 +342,7 @@ func (t *TransferLedgerEventListRequest) SetLedgerEventID(ledgerEventID *string)
 
 // SetSourceType sets the SourceType field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferLedgerEventListRequest) SetSourceType(sourceType *v49.LedgerEventSourceType) {
+func (t *TransferLedgerEventListRequest) SetSourceType(sourceType *v50.LedgerEventSourceType) {
 	t.SourceType = sourceType
 	t.require(transferLedgerEventListRequestFieldSourceType)
 }
@@ -412,15 +412,15 @@ var (
 )
 
 type TransferLedgerWithdrawRequest struct {
-	OriginatorClientID v49.TransferOriginatorClientID            `json:"originator_client_id,omitempty" url:"-"`
-	FundingAccountID   v49.TransferLedgerFundingAccountIDRequest `json:"funding_account_id,omitempty" url:"-"`
+	OriginatorClientID v50.TransferOriginatorClientID            `json:"originator_client_id,omitempty" url:"-"`
+	FundingAccountID   v50.TransferLedgerFundingAccountIDRequest `json:"funding_account_id,omitempty" url:"-"`
 	// Specify which ledger balance to withdraw from. Customers can find a list of `ledger_id`s in the Accounts page of your Plaid Dashboard. If this field is left blank, this will default to the id of the default ledger balance.
 	LedgerID *string `json:"ledger_id,omitempty" url:"-"`
 	// A positive amount of how much will be withdrawn from the ledger balance (decimal string with two digits of precision e.g. "5.50").
 	Amount         string                           `json:"amount" url:"-"`
-	Description    v49.SweepDescription             `json:"description,omitempty" url:"-"`
-	IdempotencyKey v49.LedgerWithdrawIdempotencyKey `json:"idempotency_key" url:"-"`
-	Network        v49.TransferNetwork              `json:"network" url:"-"`
+	Description    v50.SweepDescription             `json:"description,omitempty" url:"-"`
+	IdempotencyKey v50.LedgerWithdrawIdempotencyKey `json:"idempotency_key" url:"-"`
+	Network        v50.TransferNetwork              `json:"network" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -437,14 +437,14 @@ func (t *TransferLedgerWithdrawRequest) require(field *big.Int) {
 
 // SetOriginatorClientID sets the OriginatorClientID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferLedgerWithdrawRequest) SetOriginatorClientID(originatorClientID v49.TransferOriginatorClientID) {
+func (t *TransferLedgerWithdrawRequest) SetOriginatorClientID(originatorClientID v50.TransferOriginatorClientID) {
 	t.OriginatorClientID = originatorClientID
 	t.require(transferLedgerWithdrawRequestFieldOriginatorClientID)
 }
 
 // SetFundingAccountID sets the FundingAccountID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferLedgerWithdrawRequest) SetFundingAccountID(fundingAccountID v49.TransferLedgerFundingAccountIDRequest) {
+func (t *TransferLedgerWithdrawRequest) SetFundingAccountID(fundingAccountID v50.TransferLedgerFundingAccountIDRequest) {
 	t.FundingAccountID = fundingAccountID
 	t.require(transferLedgerWithdrawRequestFieldFundingAccountID)
 }
@@ -465,21 +465,21 @@ func (t *TransferLedgerWithdrawRequest) SetAmount(amount string) {
 
 // SetDescription sets the Description field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferLedgerWithdrawRequest) SetDescription(description v49.SweepDescription) {
+func (t *TransferLedgerWithdrawRequest) SetDescription(description v50.SweepDescription) {
 	t.Description = description
 	t.require(transferLedgerWithdrawRequestFieldDescription)
 }
 
 // SetIdempotencyKey sets the IdempotencyKey field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferLedgerWithdrawRequest) SetIdempotencyKey(idempotencyKey v49.LedgerWithdrawIdempotencyKey) {
+func (t *TransferLedgerWithdrawRequest) SetIdempotencyKey(idempotencyKey v50.LedgerWithdrawIdempotencyKey) {
 	t.IdempotencyKey = idempotencyKey
 	t.require(transferLedgerWithdrawRequestFieldIdempotencyKey)
 }
 
 // SetNetwork sets the Network field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferLedgerWithdrawRequest) SetNetwork(network v49.TransferNetwork) {
+func (t *TransferLedgerWithdrawRequest) SetNetwork(network v50.TransferNetwork) {
 	t.Network = network
 	t.require(transferLedgerWithdrawRequestFieldNetwork)
 }

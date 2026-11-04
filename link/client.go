@@ -6,10 +6,10 @@ import (
 	context "context"
 	os "os"
 
-	plaid "github.com/plaid/plaid-go/v49"
-	core "github.com/plaid/plaid-go/v49/core"
-	internal "github.com/plaid/plaid-go/v49/internal"
-	option "github.com/plaid/plaid-go/v49/option"
+	plaid "github.com/plaid/plaid-go/v50"
+	core "github.com/plaid/plaid-go/v50/core"
+	internal "github.com/plaid/plaid-go/v50/internal"
+	option "github.com/plaid/plaid-go/v50/option"
 )
 
 type Client struct {
@@ -88,6 +88,8 @@ func (c *Client) CreateToken(
 // The `/link/token/get` endpoint gets information about a Link session, including all callbacks fired during the session along with their metadata, including the public token. This endpoint is used with Link flows that don't provide a public token via frontend callbacks, such as the [Hosted Link flow](https://plaid.com/docs/link/hosted-link/) and the [Multi-Item Link flow](https://plaid.com/docs/link/multi-item-link/). It also can be useful for debugging purposes.
 //
 // By default, this endpoint will only return complete event data for Hosted Link sessions. To use `/link/token/get` to retrieve event data for non-Hosted-Link sessions, contact your account manager to request that your account be enabled for Link events. If you do not have an account manager, you can submit this request via a support ticket. Enablement for Link events will also cause you to receive additional webhooks related to Link events, such as the `SESSION_FINISHED` and `EVENTS` webhook.
+//
+// When called with a delegated OAuth access token, this endpoint returns a reduced view of the session for the delegate. Only `link_token`, `created_at`, `expiration`, and each session's `link_session_id`, `started_at`, `finished_at`, and `results.item_add_results[].public_token` are populated; `public_token` holds the delegate's own `delegated-public-` token, never the customer's public token. All other fields are withheld and carry no information about the session: arrays such as `metadata.initial_products` and `item_add_results[].accounts` are empty, fields such as `metadata.webhook` and `item_add_results[].institution` are `null`, and `user_id`, `events`, `on_success`, `on_exit`, and `exit` are omitted. A delegated public token can be retrieved for 30 minutes after it is created. Item adds whose delegated public token is no longer available are omitted from `item_add_results`, and if none remain the request fails with `INVALID_LINK_TOKEN`; start a new Link session to continue.
 //
 // Example:
 //

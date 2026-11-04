@@ -1,3 +1,7 @@
+## [v50.0.0]
+
+Regenerate the new client and legacy package from OpenAPI `2020-09-14_1.799.0` using Fern Go `1.70.3` for the new client.
+
 This library is generated from an OpenAPI schema (OAS). See full changelog [here](https://github.com/plaid/plaid-openapi/blob/master/CHANGELOG.md) for schema changes.
 
 # 49.0.0

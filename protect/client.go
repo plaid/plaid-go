@@ -6,10 +6,10 @@ import (
 	context "context"
 	os "os"
 
-	plaid "github.com/plaid/plaid-go/v49"
-	core "github.com/plaid/plaid-go/v49/core"
-	internal "github.com/plaid/plaid-go/v49/internal"
-	option "github.com/plaid/plaid-go/v49/option"
+	plaid "github.com/plaid/plaid-go/v50"
+	core "github.com/plaid/plaid-go/v50/core"
+	internal "github.com/plaid/plaid-go/v50/internal"
+	option "github.com/plaid/plaid-go/v50/option"
 )
 
 type Client struct {
@@ -79,7 +79,7 @@ func (c *Client) GetUserInsights(
 
 // Use this endpoint to create a Protect report to document fraud incidents, investigation outcomes, or other risk events. This endpoint allows you to report various types of incidents including account takeovers, identity fraud, unauthorized transactions, and other security events. The reported data helps improve fraud detection models and provides valuable feedback to enhance the overall security of the Plaid network.
 //
-// Reports can be created for confirmed incidents that have been fully investigated, or for suspected incidents that require further review. You can associate reports with specific users, sessions, or transactions to provide comprehensive context about the incident. Each report must include `user_id`, or an `incident_event` with at least one supported identifier: `link_session_id`, `idv_session_id`, `protect_event_id`, `signal_client_transaction_id`, or `access_token`. Context fields such as `internal_reference`, `time`, `amount`, and `bank_account` do not satisfy this identifier requirement.
+// Reports can be created for confirmed incidents that have been fully investigated, or for suspected incidents that require further review. You can associate reports with specific users, sessions, or transactions to provide comprehensive context about the incident. Each report must include `user_id`, `client_user_id`, or an `incident_event` with at least one supported identifier: `link_session_id`, `idv_session_id`, `protect_event_id`, `signal_client_transaction_id`, or `access_token`. Context fields such as `internal_reference`, `time`, `amount`, and `bank_account` do not satisfy this identifier requirement.
 //
 // Example:
 //

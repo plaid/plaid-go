@@ -16,7 +16,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/plaid/plaid-go/v49/core"
+	"github.com/plaid/plaid-go/v50/core"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

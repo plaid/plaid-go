@@ -8,7 +8,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/plaid/plaid-go/v49/core"
+	"github.com/plaid/plaid-go/v50/core"
 )
 
 // ErrorCodes maps HTTP status codes to error constructors.
