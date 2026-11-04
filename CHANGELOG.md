@@ -1,6 +1,7 @@
 ## [v50.0.0]
 
-Regenerate the new client and legacy package from OpenAPI `2020-09-14_1.799.0` using Fern Go `1.70.3` for the new client.
+- Regenerate both clients from OpenAPI `2020-09-14_1.799.0`, using Fern Go `1.70.3` for the new client. Add `/user/transfer/limits/get` and the optional `/transfer/authorization/create.user_id`.
+- Breaking changes: move the module and subpackage imports to `/v50`; update nullable fields, required constructor arguments, Business Verification names, arbitrary JSON maps, and the supported LendScore versions. These changes also affect the legacy client. See the [v49-to-v50 migration notes](MIGRATION.md#version-49-to-version-50).
 
 This library is generated from an OpenAPI schema (OAS). See full changelog [here](https://github.com/plaid/plaid-openapi/blob/master/CHANGELOG.md) for schema changes.
 
