@@ -20,7 +20,7 @@ from policy import (SDK_REPO, PUBLIC_REMOTE, ReleaseError, api, canonical, decim
 
 WORKFLOW = ".github/workflows/integrate.yml"
 CI_CONTEXT = "ci/circleci: build"
-PRESERVED_PREFIXES = (".github/", "scripts/release/", ".circleci/")
+PRESERVED_PREFIXES = (".github/", "scripts/release/", ".circleci/", "legacy/tests/")
 # Keep in sync with the public generation pipeline's preserved files. CHANGELOG
 # has the one permitted deterministic prepend checked separately below.
 PRESERVED_FILES = {
@@ -30,6 +30,27 @@ PRESERVED_FILES = {
     "option/custom_endpoint.go", "retry_default_test.go", "wire_test_security_test.go",
     "transfer_diligence_upload_test.go",
 }
+
+
+# Reviewed generated surface. New endpoint packages need no policy changes, but
+# new scripts, configuration formats or executable files require human review.
+GENERATED_GO_PATH = re.compile(r"(?:[a-z][a-z0-9_]*/)*[a-z][a-z0-9_]*\.go")
+GENERATED_RESOURCES = {
+    "go.mod", "go.sum", ".fern/metadata.json", "reference.md",
+    "wiremock/wiremock-mappings.json",
+}
+
+
+def approved_generated_changes(base_files, files):
+    for name in base_files.keys() | files.keys():
+        before, after = base_files.get(name), files.get(name)
+        if (before == after or name in (policy.MANIFEST, policy.GEN_BUNDLE, "CHANGELOG.md")
+                or name in PRESERVED_FILES or name.startswith(PRESERVED_PREFIXES)):
+            continue  # Identity, maintained content and changelog have stricter checks.
+        allowed = name in GENERATED_RESOURCES or (
+            not name.startswith("scripts/") and GENERATED_GO_PATH.fullmatch(name) is not None)
+        require(allowed and all(value[0] == "100644" for value in (before, after) if value is not None),
+                f"Changed path is not approved generated content: {name}")
 
 
 class NotReady(ReleaseError):
@@ -136,6 +157,7 @@ def ci_and_reviews(number, head):
 
 
 def preserved_content(base_files, files, manifest):
+    approved_generated_changes(base_files, files)
     protected = lambda name: name in PRESERVED_FILES or name.startswith(PRESERVED_PREFIXES)
     before = {name: value for name, value in base_files.items() if protected(name)}
     after = {name: value for name, value in files.items() if protected(name)}
@@ -151,7 +173,8 @@ def preserved_content(base_files, files, manifest):
         module = re.compile(rb"github\.com/plaid/plaid-go/v" + str(old_major).encode() + rb"(?![0-9A-Za-z_.-])")
         replacement = f"github.com/plaid/plaid-go/v{new_major}".encode()
         before = {name: (mode, module.sub(replacement, data)
-                         if name in PRESERVED_FILES and (name.endswith(".go") or name == "README.md") else data)
+                         if (name in PRESERVED_FILES or name.startswith("legacy/tests/"))
+                         and (name.endswith(".go") or name == "README.md") else data)
                   for name, (mode, data) in before.items()}
     require(before == after, "Generated PR changed protected automation or custom SDK files")
     require("CHANGELOG.md" in base_files and "CHANGELOG.md" in files, "Missing preserved changelog")

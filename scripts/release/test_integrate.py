@@ -189,6 +189,73 @@ class IntegrationTests(unittest.TestCase):
         with self.assertRaisesRegex(policy.ReleaseError, "protected"):
             integrate.preserved_content(before, candidate, self.manifest)
 
+    def test_unexpected_signed_script_is_not_an_approved_generated_path(self):
+        before = policy.tree_files(self.repo, self.base)
+        candidate = copy.deepcopy(before)
+        candidate["setup.sh"] = ("100644", b"echo unexpected\n")
+        with self.assertRaisesRegex(policy.ReleaseError, "approved generated"):
+            integrate.preserved_content(before, candidate, self.manifest)
+
+    def test_generated_path_policy_allows_new_endpoints_and_generated_deletions(self):
+        before = policy.tree_files(self.repo, self.base)
+        candidate = copy.deepcopy(before)
+        for name in ("newproduct/client.go", "newproduct/report/raw_client.go", "new_model.go"):
+            candidate[name] = ("100644", b"package fixture\n")
+        for name in integrate.GENERATED_RESOURCES:
+            if name not in candidate:
+                candidate[name] = ("100644", b"fixture")
+        del candidate["sdk.go"]
+        integrate.preserved_content(before, candidate, self.manifest)
+
+    def test_generated_path_policy_rejects_config_scripts_and_executable_modes(self):
+        before = policy.tree_files(self.repo, self.base)
+        for name in ("Makefile", ".env", "newproduct/config.json", "newproduct/setup.py", "scripts/tool.go", "NewClient.go"):
+            candidate = copy.deepcopy(before)
+            candidate[name] = ("100644", b"unexpected")
+            with self.subTest(name=name), self.assertRaisesRegex(policy.ReleaseError, "approved generated"):
+                integrate.preserved_content(before, candidate, self.manifest)
+        for name in ("newproduct/client.go", "go.mod", "reference.md"):
+            candidate = copy.deepcopy(before)
+            candidate[name] = ("100755", b"unexpected")
+            with self.subTest(mode=name), self.assertRaisesRegex(policy.ReleaseError, "approved generated"):
+                integrate.preserved_content(before, candidate, self.manifest)
+
+    def test_unlisted_existing_files_are_frozen_including_deletion(self):
+        before = policy.tree_files(self.repo, self.base)
+        for name in (".gitattributes", ".fern/replay.lock", "CONTRIBUTING.md", "MIGRATION.md", "wiremock/docker-compose.test.yml"):
+            before[name] = ("100644", b"maintained")
+            integrate.preserved_content(before, before, self.manifest)
+            for action in ("edit", "delete", "chmod"):
+                candidate = copy.deepcopy(before)
+                if action == "delete":
+                    del candidate[name]
+                else:
+                    candidate[name] = ("100755" if action == "chmod" else "100644", b"changed")
+                with self.subTest(name=name, action=action), self.assertRaisesRegex(policy.ReleaseError, "approved generated"):
+                    integrate.preserved_content(before, candidate, self.manifest)
+
+    def test_legacy_tests_are_maintained_with_only_major_import_rewrites(self):
+        before = policy.tree_files(self.repo, self.base)
+        name = "legacy/tests/client_test.go"
+        before[name] = ("100644", b'package tests\nimport "github.com/plaid/plaid-go/v49/legacy"\n')
+        candidate = copy.deepcopy(before)
+        candidate[name] = ("100644", before[name][1].replace(b"/v49/", b"/v50/"))
+        manifest = copy.deepcopy(self.manifest)
+        manifest["sdk"]["version"] = "50.0.0"
+        integrate.preserved_content(before, candidate, manifest)
+        for action in ("add", "delete", "edit", "chmod"):
+            changed = copy.deepcopy(candidate)
+            if action == "add":
+                changed["legacy/tests/new_test.go"] = ("100644", b"package tests\n")
+            elif action == "delete":
+                del changed[name]
+            else:
+                changed[name] = ("100755" if action == "chmod" else "100644", b"package changed\n")
+            with self.subTest(action=action), self.assertRaisesRegex(policy.ReleaseError, "protected"):
+                integrate.preserved_content(before, changed, manifest)
+        with self.assertRaisesRegex(policy.ReleaseError, "protected"):
+            integrate.preserved_content(before, candidate, self.manifest)
+
     def test_only_exact_changelog_prepend_preserves_history(self):
         before = policy.tree_files(self.repo, self.base)
         candidate = copy.deepcopy(before)

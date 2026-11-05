@@ -38,6 +38,22 @@ A new major still requires signed generation evidence, trusted CI, and the same
 server-side protections. API comparison cannot prove runtime compatibility;
 generator errors and failing checks remain failures, not reasons to publish.
 
+## Approved generated paths
+
+Generated PR changes are limited to lowercase Go source paths and these exact
+resources: `go.mod`, `go.sum`, `.fern/metadata.json`, `reference.md`, and
+`wiremock/wiremock-mappings.json`. Generated files must use non-executable mode
+`100644`; new endpoint package directories need no policy update. Changes outside
+that list stop integration, including added scripts/configuration and deletion of
+existing unlisted files.
+
+The maintained-file rules take precedence over the Go allowlist. Everything under
+`legacy/tests/` is maintained, with only the exact major module-path substitution
+allowed in existing Go files. New or removed legacy tests require separate review.
+README, changelog and release evidence retain their narrower existing checks.
+A signed generation record establishes origin and exact content; it does not
+expand these approved paths or establish that generated code is correct.
+
 ## Separation of permissions
 
 - Verification reads public source and its public generation signature. The
