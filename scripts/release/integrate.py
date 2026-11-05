@@ -47,7 +47,7 @@ GENERATED_RESOURCES = {
 def approved_generated_changes(base_files, files):
     for name in base_files.keys() | files.keys():
         before, after = base_files.get(name), files.get(name)
-        if (before == after or name in (policy.MANIFEST, policy.GEN_BUNDLE, "CHANGELOG.md")
+        if (before == after or name in (*policy.EVIDENCE_FILES, "CHANGELOG.md")
                 or name in PRESERVED_FILES or name.startswith(PRESERVED_PREFIXES)):
             continue  # Identity, maintained content and changelog have stricter checks.
         allowed = name in GENERATED_RESOURCES or (
@@ -262,6 +262,8 @@ def check(repo, control, control_commit, number, expected_base=None, expected_he
     parents = git(repo, "show", "-s", "--format=%P", head).decode().strip().split()
     require(parents == [base], "Generated commit must be the direct child of current master")
     manifest, files = verify_generation(repo, head)
+    if manifest["schema_version"] == 2:
+        require(manifest["fern"]["sdk_base"] == base, "Fern proof was generated for another SDK base")
     verify_public_spec(manifest)
     identity = sha256(canonical([manifest["sdk"]["version"], manifest["source"]["sha256"], manifest["config"]["sha256"]]))[:20]
     require(pull["head"]["ref"] == f"sdk-generation/go-v{manifest['sdk']['version'].split('.')[0]}-{identity}", "Generated branch identity does not match signed inputs")

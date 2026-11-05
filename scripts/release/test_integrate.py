@@ -43,7 +43,7 @@ class IntegrationTests(unittest.TestCase):
         self.cmd("git", "clone", "-q", self.repo, self.control)
         os.environ["GITHUB_SHA"] = self.base
         self.spec = b"openapi: 3.0.3\ninfo:\n  title: Plaid\n  version: 2020-09-14_1.767.1\n"
-        self.manifest = {"sdk": {"version": "49.1.0"}, "source": {"repository": policy.SPEC_REPO,
+        self.manifest = {"schema_version": 1, "sdk": {"version": "49.1.0"}, "source": {"repository": policy.SPEC_REPO,
                          "commit": "a" * 40, "path": "2020-09-14.yml", "sha256": policy.sha256(self.spec)},
                          "config": {"sha256": "b" * 64}}
         self.write("sdk.go", "package plaid\nconst Changed = true\n")

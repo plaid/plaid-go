@@ -158,6 +158,8 @@ class ReleaseTests(unittest.TestCase):
         real_run = policy.run
 
         def verified_process(*arguments, **kwargs):
+            if arguments[:2] == ("gh", "api") and any("/contents/pipeline/generation/settings.json?ref=" in str(value) for value in arguments):
+                return b'{}'  # Historical schema-1 configuration defaults to local generation.
             if arguments[:3] == ("gh", "attestation", "verify"):
                 self.gh_calls.append(arguments)
                 if fail:

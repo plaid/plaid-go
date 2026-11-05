@@ -18,6 +18,33 @@ record binds the spec, public config commit, immutable generator images, version
 legacy tree and all tracked SDK content. Public Fern metadata contains only the
 CLI, generator and SDK versions; the signed manifest records the shared spec/config commit.
 
+## Fern-hosted generation
+
+Hosted generation uses a schema-2 manifest. Before running generated SDK code,
+Plaid verifies Fern's signed receipt against the expected job, generator, inputs
+and raw Git output, then signs a public record of the selected generated files.
+The final generation manifest embeds that record, binding it to the same public
+spec/config commit, SDK version, CLI, generator image, workflow run and SDK base.
+Plaid assembles the maintained SDK files and regenerates `legacy/` separately.
+
+Integration and release verify both Plaid signatures: the Fern verification
+record and the final assembled SDK generation. The raw Fern receipt stays on the
+private staging PR; the public record contains hashes and public identities only.
+The SDK stores the selected-file index in `.sdk-release/fern-content.json` and
+its Plaid signature in `.sdk-release/fern.bundle.json`. Both are required for
+schema 2 and forbidden for schema 1. All four evidence files are excluded from
+the SDK content digest, while each signature and index is checked independently.
+This lets safe retries produce fresh signature encodings without changing the
+SDK's content identity.
+
+The verifier reads `pipeline/generation/settings.json` at the manifest's exact
+public config commit. `generation_mode: fern-hosted` requires schema 2; it cannot
+be downgraded to local generation by removing Fern evidence. Historical settings
+without the field mean `local`, and an explicitly reviewed `local` setting keeps
+the schema-1 fallback. The hosted generator/CLI must also match those reviewed
+settings. A failed Fern job, unavailable receipt or invalid signature stops the
+pipeline; it does not silently fall back to local generation.
+
 ## Major-version transitions
 
 The source generation workflow selects and signs the version. The integration
