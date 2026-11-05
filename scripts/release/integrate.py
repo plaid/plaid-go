@@ -77,6 +77,7 @@ def context(control, control_commit):
     hex_value(os.environ.get("GITHUB_SHA"), 40, "workflow commit")
     integration_identity()
     decimal(os.environ.get("SDK_CIRCLECI_STATUS_ACTOR_ID"), "CircleCI status actor ID")
+    decimal(os.environ.get("SDK_REVIEW_RULESET_ID"), "SDK review ruleset ID")
     require(git(control, "rev-parse", "HEAD").decode().strip() == control_commit, "Wrong trusted control checkout")
 
 
@@ -106,6 +107,37 @@ def strict_status_protection():
     contexts.update(check.get("context") for check in checks.get("checks", []))
     require(checks.get("strict") is True and CI_CONTEXT in contexts,
             "Integration requires strict CircleCI branch protection")
+    require(not protection.get("required_pull_request_reviews"),
+            "Move approval requirements to the PR-only review ruleset; classic approval bypass is not supported")
+
+
+def approval_ruleset(token=None):
+    ruleset_id = os.environ.get("SDK_REVIEW_RULESET_ID", "")
+    decimal(ruleset_id, "SDK review ruleset ID")
+    # Effective rules include inherited rules and omit disabled/evaluate rulesets.
+    effective = api(f"repos/{SDK_REPO}/rules/branches/master?per_page=100", paginate=True, token=token)
+    require(any(rule.get("type") == "pull_request" and rule.get("ruleset_id") == int(ruleset_id)
+                for rule in effective), "Configured review ruleset is not active on master")
+    ruleset = api(f"repos/{SDK_REPO}/rulesets/{ruleset_id}", token=token)
+    require(ruleset.get("id") == int(ruleset_id) and ruleset.get("source_type") == "Repository"
+            and ruleset.get("source") == SDK_REPO and ruleset.get("target") == "branch"
+            and ruleset.get("enforcement") == "active", "Unexpected review ruleset identity or enforcement")
+    refs = (ruleset.get("conditions") or {}).get("ref_name") or {}
+    require("refs/heads/master" in refs.get("include", []) and refs.get("exclude") == [],
+            "Review ruleset must explicitly include master without exclusions")
+    rules = ruleset.get("rules") or []
+    require(len(rules) == 1 and rules[0].get("type") == "pull_request",
+            "Review bypass ruleset must contain only the pull-request rule")
+    reviews = rules[0].get("parameters") or {}
+    count = reviews.get("required_approving_review_count")
+    require(type(count) is int and count >= 1 and reviews.get("require_code_owner_review") is True
+            and reviews.get("dismiss_stale_reviews_on_push") is True,
+            "Review ruleset requires human approval, code owners and stale-review dismissal")
+    if token is not None:
+        # This is the capability of the exact installation token about to merge.
+        # The full bypass actor list may be hidden from this caller.
+        require(ruleset.get("current_user_can_bypass") == "pull_requests_only",
+                "Merger token must have PR-only approval bypass")
 
 
 def require_identity(pull):
@@ -205,6 +237,7 @@ def check(repo, control, control_commit, number, expected_base=None, expected_he
     require(expected_base is None or base == expected_base, "PR base changed after verification")
     require(expected_head is None or head == expected_head, "PR head changed after verification")
     strict_status_protection()
+    approval_ruleset()
     fetch_objects(repo, base, head, os.environ["GITHUB_SHA"])
     expected_workflow = git(control, "show", f"{control_commit}:{WORKFLOW}")
     require(git(repo, "show", f"{os.environ['GITHUB_SHA']}:{WORKFLOW}") == expected_workflow
@@ -233,6 +266,7 @@ def merge(verified):
     ci_and_reviews(number, head)
     token = os.environ.get("SDK_INTEGRATION_TOKEN", "")
     require(token, "Missing scoped integration App token")
+    approval_ruleset(token=token)
     body = canonical({"sha": head, "merge_method": "squash", "commit_title": f"Generate plaid-go v{verified['version']} (#{number})"})
     environment = dict(os.environ, GH_TOKEN=token, GH_HOST="github.com")
     result = parse_json(run("gh", "api", "--hostname", "github.com", "--method", "PUT",
