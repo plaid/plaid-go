@@ -4,7 +4,7 @@ package processor
 
 import (
 	json "encoding/json"
-	v49 "github.com/plaid/plaid-go/v49"
+	v50 "github.com/plaid/plaid-go/v50"
 	assert "github.com/stretchr/testify/assert"
 	require "github.com/stretchr/testify/require"
 	testing "testing"
@@ -14,7 +14,7 @@ import (
 func TestSettersProcessorSignalEvaluateRequest(t *testing.T) {
 	t.Run("SetProcessorToken", func(t *testing.T) {
 		obj := &ProcessorSignalEvaluateRequest{}
-		var fernTestValueProcessorToken v49.ProcessorToken
+		var fernTestValueProcessorToken v50.ProcessorToken
 		obj.SetProcessorToken(fernTestValueProcessorToken)
 		assert.Equal(t, fernTestValueProcessorToken, obj.ProcessorToken)
 		assert.NotNil(t, obj.explicitFields)
@@ -70,7 +70,7 @@ func TestSettersProcessorSignalEvaluateRequest(t *testing.T) {
 
 	t.Run("SetUser", func(t *testing.T) {
 		obj := &ProcessorSignalEvaluateRequest{}
-		var fernTestValueUser *v49.SignalUser
+		var fernTestValueUser *v50.SignalUser
 		obj.SetUser(fernTestValueUser)
 		assert.Equal(t, fernTestValueUser, obj.User)
 		assert.NotNil(t, obj.explicitFields)
@@ -78,7 +78,7 @@ func TestSettersProcessorSignalEvaluateRequest(t *testing.T) {
 
 	t.Run("SetDevice", func(t *testing.T) {
 		obj := &ProcessorSignalEvaluateRequest{}
-		var fernTestValueDevice *v49.SignalDevice
+		var fernTestValueDevice *v50.SignalDevice
 		obj.SetDevice(fernTestValueDevice)
 		assert.Equal(t, fernTestValueDevice, obj.Device)
 		assert.NotNil(t, obj.explicitFields)
@@ -99,7 +99,7 @@ func TestSettersMarkExplicitProcessorSignalEvaluateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &ProcessorSignalEvaluateRequest{}
-		var fernTestValueProcessorToken v49.ProcessorToken
+		var fernTestValueProcessorToken v50.ProcessorToken
 
 		// Act
 		obj.SetProcessorToken(fernTestValueProcessorToken)
@@ -316,7 +316,7 @@ func TestSettersMarkExplicitProcessorSignalEvaluateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &ProcessorSignalEvaluateRequest{}
-		var fernTestValueUser *v49.SignalUser
+		var fernTestValueUser *v50.SignalUser
 
 		// Act
 		obj.SetUser(fernTestValueUser)
@@ -347,7 +347,7 @@ func TestSettersMarkExplicitProcessorSignalEvaluateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &ProcessorSignalEvaluateRequest{}
-		var fernTestValueDevice *v49.SignalDevice
+		var fernTestValueDevice *v50.SignalDevice
 
 		// Act
 		obj.SetDevice(fernTestValueDevice)
@@ -410,7 +410,7 @@ func TestSettersMarkExplicitProcessorSignalEvaluateRequest(t *testing.T) {
 func TestSettersProcessorSignalPrepareRequest(t *testing.T) {
 	t.Run("SetProcessorToken", func(t *testing.T) {
 		obj := &ProcessorSignalPrepareRequest{}
-		var fernTestValueProcessorToken v49.ProcessorToken
+		var fernTestValueProcessorToken v50.ProcessorToken
 		obj.SetProcessorToken(fernTestValueProcessorToken)
 		assert.Equal(t, fernTestValueProcessorToken, obj.ProcessorToken)
 		assert.NotNil(t, obj.explicitFields)
@@ -423,7 +423,7 @@ func TestSettersMarkExplicitProcessorSignalPrepareRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &ProcessorSignalPrepareRequest{}
-		var fernTestValueProcessorToken v49.ProcessorToken
+		var fernTestValueProcessorToken v50.ProcessorToken
 
 		// Act
 		obj.SetProcessorToken(fernTestValueProcessorToken)
@@ -455,7 +455,7 @@ func TestSettersMarkExplicitProcessorSignalPrepareRequest(t *testing.T) {
 func TestSettersProcessorSignalDecisionReportRequest(t *testing.T) {
 	t.Run("SetProcessorToken", func(t *testing.T) {
 		obj := &ProcessorSignalDecisionReportRequest{}
-		var fernTestValueProcessorToken v49.ProcessorToken
+		var fernTestValueProcessorToken v50.ProcessorToken
 		obj.SetProcessorToken(fernTestValueProcessorToken)
 		assert.Equal(t, fernTestValueProcessorToken, obj.ProcessorToken)
 		assert.NotNil(t, obj.explicitFields)
@@ -487,7 +487,7 @@ func TestSettersProcessorSignalDecisionReportRequest(t *testing.T) {
 
 	t.Run("SetDecisionOutcome", func(t *testing.T) {
 		obj := &ProcessorSignalDecisionReportRequest{}
-		var fernTestValueDecisionOutcome *v49.SignalDecisionOutcome
+		var fernTestValueDecisionOutcome *v50.SignalDecisionOutcome
 		obj.SetDecisionOutcome(fernTestValueDecisionOutcome)
 		assert.Equal(t, fernTestValueDecisionOutcome, obj.DecisionOutcome)
 		assert.NotNil(t, obj.explicitFields)
@@ -495,7 +495,7 @@ func TestSettersProcessorSignalDecisionReportRequest(t *testing.T) {
 
 	t.Run("SetPaymentMethod", func(t *testing.T) {
 		obj := &ProcessorSignalDecisionReportRequest{}
-		var fernTestValuePaymentMethod *v49.SignalPaymentMethod
+		var fernTestValuePaymentMethod *v50.SignalPaymentMethod
 		obj.SetPaymentMethod(fernTestValuePaymentMethod)
 		assert.Equal(t, fernTestValuePaymentMethod, obj.PaymentMethod)
 		assert.NotNil(t, obj.explicitFields)
@@ -516,7 +516,7 @@ func TestSettersMarkExplicitProcessorSignalDecisionReportRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &ProcessorSignalDecisionReportRequest{}
-		var fernTestValueProcessorToken v49.ProcessorToken
+		var fernTestValueProcessorToken v50.ProcessorToken
 
 		// Act
 		obj.SetProcessorToken(fernTestValueProcessorToken)
@@ -640,7 +640,7 @@ func TestSettersMarkExplicitProcessorSignalDecisionReportRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &ProcessorSignalDecisionReportRequest{}
-		var fernTestValueDecisionOutcome *v49.SignalDecisionOutcome
+		var fernTestValueDecisionOutcome *v50.SignalDecisionOutcome
 
 		// Act
 		obj.SetDecisionOutcome(fernTestValueDecisionOutcome)
@@ -671,7 +671,7 @@ func TestSettersMarkExplicitProcessorSignalDecisionReportRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &ProcessorSignalDecisionReportRequest{}
-		var fernTestValuePaymentMethod *v49.SignalPaymentMethod
+		var fernTestValuePaymentMethod *v50.SignalPaymentMethod
 
 		// Act
 		obj.SetPaymentMethod(fernTestValuePaymentMethod)
@@ -734,7 +734,7 @@ func TestSettersMarkExplicitProcessorSignalDecisionReportRequest(t *testing.T) {
 func TestSettersProcessorSignalReturnReportRequest(t *testing.T) {
 	t.Run("SetProcessorToken", func(t *testing.T) {
 		obj := &ProcessorSignalReturnReportRequest{}
-		var fernTestValueProcessorToken v49.ProcessorToken
+		var fernTestValueProcessorToken v50.ProcessorToken
 		obj.SetProcessorToken(fernTestValueProcessorToken)
 		assert.Equal(t, fernTestValueProcessorToken, obj.ProcessorToken)
 		assert.NotNil(t, obj.explicitFields)
@@ -771,7 +771,7 @@ func TestSettersMarkExplicitProcessorSignalReturnReportRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &ProcessorSignalReturnReportRequest{}
-		var fernTestValueProcessorToken v49.ProcessorToken
+		var fernTestValueProcessorToken v50.ProcessorToken
 
 		// Act
 		obj.SetProcessorToken(fernTestValueProcessorToken)

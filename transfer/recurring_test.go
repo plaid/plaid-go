@@ -4,7 +4,7 @@ package transfer
 
 import (
 	json "encoding/json"
-	v49 "github.com/plaid/plaid-go/v49"
+	v50 "github.com/plaid/plaid-go/v50"
 	assert "github.com/stretchr/testify/assert"
 	require "github.com/stretchr/testify/require"
 	testing "testing"
@@ -14,7 +14,7 @@ import (
 func TestSettersTransferRecurringCancelRequest(t *testing.T) {
 	t.Run("SetRecurringTransferID", func(t *testing.T) {
 		obj := &TransferRecurringCancelRequest{}
-		var fernTestValueRecurringTransferID v49.RecurringTransferID
+		var fernTestValueRecurringTransferID v50.RecurringTransferID
 		obj.SetRecurringTransferID(fernTestValueRecurringTransferID)
 		assert.Equal(t, fernTestValueRecurringTransferID, obj.RecurringTransferID)
 		assert.NotNil(t, obj.explicitFields)
@@ -27,7 +27,7 @@ func TestSettersMarkExplicitTransferRecurringCancelRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferRecurringCancelRequest{}
-		var fernTestValueRecurringTransferID v49.RecurringTransferID
+		var fernTestValueRecurringTransferID v50.RecurringTransferID
 
 		// Act
 		obj.SetRecurringTransferID(fernTestValueRecurringTransferID)
@@ -59,7 +59,7 @@ func TestSettersMarkExplicitTransferRecurringCancelRequest(t *testing.T) {
 func TestSettersTransferRecurringCreateRequest(t *testing.T) {
 	t.Run("SetAccessToken", func(t *testing.T) {
 		obj := &TransferRecurringCreateRequest{}
-		var fernTestValueAccessToken v49.TransferAccessToken
+		var fernTestValueAccessToken v50.TransferAccessToken
 		obj.SetAccessToken(fernTestValueAccessToken)
 		assert.Equal(t, fernTestValueAccessToken, obj.AccessToken)
 		assert.NotNil(t, obj.explicitFields)
@@ -67,7 +67,7 @@ func TestSettersTransferRecurringCreateRequest(t *testing.T) {
 
 	t.Run("SetIdempotencyKey", func(t *testing.T) {
 		obj := &TransferRecurringCreateRequest{}
-		var fernTestValueIdempotencyKey v49.TransferRecurringIdempotencyKey
+		var fernTestValueIdempotencyKey v50.TransferRecurringIdempotencyKey
 		obj.SetIdempotencyKey(fernTestValueIdempotencyKey)
 		assert.Equal(t, fernTestValueIdempotencyKey, obj.IdempotencyKey)
 		assert.NotNil(t, obj.explicitFields)
@@ -75,7 +75,7 @@ func TestSettersTransferRecurringCreateRequest(t *testing.T) {
 
 	t.Run("SetAccountID", func(t *testing.T) {
 		obj := &TransferRecurringCreateRequest{}
-		var fernTestValueAccountID v49.TransferAccountID
+		var fernTestValueAccountID v50.TransferAccountID
 		obj.SetAccountID(fernTestValueAccountID)
 		assert.Equal(t, fernTestValueAccountID, obj.AccountID)
 		assert.NotNil(t, obj.explicitFields)
@@ -91,7 +91,7 @@ func TestSettersTransferRecurringCreateRequest(t *testing.T) {
 
 	t.Run("SetType", func(t *testing.T) {
 		obj := &TransferRecurringCreateRequest{}
-		var fernTestValueType v49.TransferType
+		var fernTestValueType v50.TransferType
 		obj.SetType(fernTestValueType)
 		assert.Equal(t, fernTestValueType, obj.Type)
 		assert.NotNil(t, obj.explicitFields)
@@ -99,7 +99,7 @@ func TestSettersTransferRecurringCreateRequest(t *testing.T) {
 
 	t.Run("SetNetwork", func(t *testing.T) {
 		obj := &TransferRecurringCreateRequest{}
-		var fernTestValueNetwork v49.TransferRecurringNetwork
+		var fernTestValueNetwork v50.TransferRecurringNetwork
 		obj.SetNetwork(fernTestValueNetwork)
 		assert.Equal(t, fernTestValueNetwork, obj.Network)
 		assert.NotNil(t, obj.explicitFields)
@@ -107,7 +107,7 @@ func TestSettersTransferRecurringCreateRequest(t *testing.T) {
 
 	t.Run("SetAchClass", func(t *testing.T) {
 		obj := &TransferRecurringCreateRequest{}
-		var fernTestValueAchClass *v49.AchClass
+		var fernTestValueAchClass *v50.AchClass
 		obj.SetAchClass(fernTestValueAchClass)
 		assert.Equal(t, fernTestValueAchClass, obj.AchClass)
 		assert.NotNil(t, obj.explicitFields)
@@ -115,7 +115,7 @@ func TestSettersTransferRecurringCreateRequest(t *testing.T) {
 
 	t.Run("SetAmount", func(t *testing.T) {
 		obj := &TransferRecurringCreateRequest{}
-		var fernTestValueAmount v49.TransferAmount
+		var fernTestValueAmount v50.TransferAmount
 		obj.SetAmount(fernTestValueAmount)
 		assert.Equal(t, fernTestValueAmount, obj.Amount)
 		assert.NotNil(t, obj.explicitFields)
@@ -155,7 +155,7 @@ func TestSettersTransferRecurringCreateRequest(t *testing.T) {
 
 	t.Run("SetSchedule", func(t *testing.T) {
 		obj := &TransferRecurringCreateRequest{}
-		var fernTestValueSchedule *v49.TransferRecurringSchedule
+		var fernTestValueSchedule *v50.TransferRecurringSchedule
 		obj.SetSchedule(fernTestValueSchedule)
 		assert.Equal(t, fernTestValueSchedule, obj.Schedule)
 		assert.NotNil(t, obj.explicitFields)
@@ -163,7 +163,7 @@ func TestSettersTransferRecurringCreateRequest(t *testing.T) {
 
 	t.Run("SetUser", func(t *testing.T) {
 		obj := &TransferRecurringCreateRequest{}
-		var fernTestValueUser *v49.TransferUserInRequest
+		var fernTestValueUser *v50.TransferUserInRequest
 		obj.SetUser(fernTestValueUser)
 		assert.Equal(t, fernTestValueUser, obj.User)
 		assert.NotNil(t, obj.explicitFields)
@@ -171,7 +171,7 @@ func TestSettersTransferRecurringCreateRequest(t *testing.T) {
 
 	t.Run("SetDevice", func(t *testing.T) {
 		obj := &TransferRecurringCreateRequest{}
-		var fernTestValueDevice *v49.TransferDevice
+		var fernTestValueDevice *v50.TransferDevice
 		obj.SetDevice(fernTestValueDevice)
 		assert.Equal(t, fernTestValueDevice, obj.Device)
 		assert.NotNil(t, obj.explicitFields)
@@ -184,7 +184,7 @@ func TestSettersMarkExplicitTransferRecurringCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferRecurringCreateRequest{}
-		var fernTestValueAccessToken v49.TransferAccessToken
+		var fernTestValueAccessToken v50.TransferAccessToken
 
 		// Act
 		obj.SetAccessToken(fernTestValueAccessToken)
@@ -215,7 +215,7 @@ func TestSettersMarkExplicitTransferRecurringCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferRecurringCreateRequest{}
-		var fernTestValueIdempotencyKey v49.TransferRecurringIdempotencyKey
+		var fernTestValueIdempotencyKey v50.TransferRecurringIdempotencyKey
 
 		// Act
 		obj.SetIdempotencyKey(fernTestValueIdempotencyKey)
@@ -246,7 +246,7 @@ func TestSettersMarkExplicitTransferRecurringCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferRecurringCreateRequest{}
-		var fernTestValueAccountID v49.TransferAccountID
+		var fernTestValueAccountID v50.TransferAccountID
 
 		// Act
 		obj.SetAccountID(fernTestValueAccountID)
@@ -308,7 +308,7 @@ func TestSettersMarkExplicitTransferRecurringCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferRecurringCreateRequest{}
-		var fernTestValueType v49.TransferType
+		var fernTestValueType v50.TransferType
 
 		// Act
 		obj.SetType(fernTestValueType)
@@ -339,7 +339,7 @@ func TestSettersMarkExplicitTransferRecurringCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferRecurringCreateRequest{}
-		var fernTestValueNetwork v49.TransferRecurringNetwork
+		var fernTestValueNetwork v50.TransferRecurringNetwork
 
 		// Act
 		obj.SetNetwork(fernTestValueNetwork)
@@ -370,7 +370,7 @@ func TestSettersMarkExplicitTransferRecurringCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferRecurringCreateRequest{}
-		var fernTestValueAchClass *v49.AchClass
+		var fernTestValueAchClass *v50.AchClass
 
 		// Act
 		obj.SetAchClass(fernTestValueAchClass)
@@ -401,7 +401,7 @@ func TestSettersMarkExplicitTransferRecurringCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferRecurringCreateRequest{}
-		var fernTestValueAmount v49.TransferAmount
+		var fernTestValueAmount v50.TransferAmount
 
 		// Act
 		obj.SetAmount(fernTestValueAmount)
@@ -556,7 +556,7 @@ func TestSettersMarkExplicitTransferRecurringCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferRecurringCreateRequest{}
-		var fernTestValueSchedule *v49.TransferRecurringSchedule
+		var fernTestValueSchedule *v50.TransferRecurringSchedule
 
 		// Act
 		obj.SetSchedule(fernTestValueSchedule)
@@ -587,7 +587,7 @@ func TestSettersMarkExplicitTransferRecurringCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferRecurringCreateRequest{}
-		var fernTestValueUser *v49.TransferUserInRequest
+		var fernTestValueUser *v50.TransferUserInRequest
 
 		// Act
 		obj.SetUser(fernTestValueUser)
@@ -618,7 +618,7 @@ func TestSettersMarkExplicitTransferRecurringCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferRecurringCreateRequest{}
-		var fernTestValueDevice *v49.TransferDevice
+		var fernTestValueDevice *v50.TransferDevice
 
 		// Act
 		obj.SetDevice(fernTestValueDevice)
@@ -650,7 +650,7 @@ func TestSettersMarkExplicitTransferRecurringCreateRequest(t *testing.T) {
 func TestSettersTransferRecurringGetRequest(t *testing.T) {
 	t.Run("SetRecurringTransferID", func(t *testing.T) {
 		obj := &TransferRecurringGetRequest{}
-		var fernTestValueRecurringTransferID v49.RecurringTransferID
+		var fernTestValueRecurringTransferID v50.RecurringTransferID
 		obj.SetRecurringTransferID(fernTestValueRecurringTransferID)
 		assert.Equal(t, fernTestValueRecurringTransferID, obj.RecurringTransferID)
 		assert.NotNil(t, obj.explicitFields)
@@ -663,7 +663,7 @@ func TestSettersMarkExplicitTransferRecurringGetRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferRecurringGetRequest{}
-		var fernTestValueRecurringTransferID v49.RecurringTransferID
+		var fernTestValueRecurringTransferID v50.RecurringTransferID
 
 		// Act
 		obj.SetRecurringTransferID(fernTestValueRecurringTransferID)

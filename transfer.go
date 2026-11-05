@@ -5,7 +5,7 @@ package plaid
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/plaid/plaid-go/v49/internal"
+	internal "github.com/plaid/plaid-go/v50/internal"
 	big "math/big"
 	time "time"
 )
@@ -2440,7 +2440,7 @@ func (t TransferStatus) Ptr() *TransferStatus {
 
 // The status of the sweep for the transfer.
 //
-// `unswept`: The transfer hasn't been swept yet.
+// `unswept`: The transfer hasn't been swept yet. Transfers that are cancelled, fail, or are returned before being swept remain `unswept`.
 //
 // `swept`: The transfer was swept to the sweep account.
 //
@@ -2448,7 +2448,7 @@ func (t TransferStatus) Ptr() *TransferStatus {
 //
 // `return_swept`: The transfer was returned, funds were pulled back or pushed back to the sweep account.
 //
-// `null`: The transfer will never be swept (e.g. if the transfer is cancelled or returned before being swept)
+// `null`: The transfer will never be swept because it is a credit funded from a prefunded balance.
 type TransferSweepStatus string
 
 const (

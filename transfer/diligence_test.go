@@ -4,7 +4,7 @@ package transfer
 
 import (
 	json "encoding/json"
-	v49 "github.com/plaid/plaid-go/v49"
+	v50 "github.com/plaid/plaid-go/v50"
 	assert "github.com/stretchr/testify/assert"
 	require "github.com/stretchr/testify/require"
 	testing "testing"
@@ -21,7 +21,7 @@ func TestSettersTransferDiligenceSubmitRequest(t *testing.T) {
 
 	t.Run("SetOriginatorDiligence", func(t *testing.T) {
 		obj := &TransferDiligenceSubmitRequest{}
-		var fernTestValueOriginatorDiligence *v49.TransferOriginatorDiligence
+		var fernTestValueOriginatorDiligence *v50.TransferOriginatorDiligence
 		obj.SetOriginatorDiligence(fernTestValueOriginatorDiligence)
 		assert.Equal(t, fernTestValueOriginatorDiligence, obj.OriginatorDiligence)
 		assert.NotNil(t, obj.explicitFields)
@@ -65,7 +65,7 @@ func TestSettersMarkExplicitTransferDiligenceSubmitRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferDiligenceSubmitRequest{}
-		var fernTestValueOriginatorDiligence *v49.TransferOriginatorDiligence
+		var fernTestValueOriginatorDiligence *v50.TransferOriginatorDiligence
 
 		// Act
 		obj.SetOriginatorDiligence(fernTestValueOriginatorDiligence)

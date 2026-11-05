@@ -4,7 +4,7 @@ package transfer
 
 import (
 	json "encoding/json"
-	v49 "github.com/plaid/plaid-go/v49"
+	v50 "github.com/plaid/plaid-go/v50"
 	assert "github.com/stretchr/testify/assert"
 	require "github.com/stretchr/testify/require"
 	testing "testing"
@@ -13,7 +13,7 @@ import (
 func TestSettersTransferRefundCancelRequest(t *testing.T) {
 	t.Run("SetRefundID", func(t *testing.T) {
 		obj := &TransferRefundCancelRequest{}
-		var fernTestValueRefundID v49.TransferRefundID
+		var fernTestValueRefundID v50.TransferRefundID
 		obj.SetRefundID(fernTestValueRefundID)
 		assert.Equal(t, fernTestValueRefundID, obj.RefundID)
 		assert.NotNil(t, obj.explicitFields)
@@ -26,7 +26,7 @@ func TestSettersMarkExplicitTransferRefundCancelRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferRefundCancelRequest{}
-		var fernTestValueRefundID v49.TransferRefundID
+		var fernTestValueRefundID v50.TransferRefundID
 
 		// Act
 		obj.SetRefundID(fernTestValueRefundID)
@@ -58,7 +58,7 @@ func TestSettersMarkExplicitTransferRefundCancelRequest(t *testing.T) {
 func TestSettersTransferRefundCreateRequest(t *testing.T) {
 	t.Run("SetTransferID", func(t *testing.T) {
 		obj := &TransferRefundCreateRequest{}
-		var fernTestValueTransferID v49.TransferIDForRefund
+		var fernTestValueTransferID v50.TransferIDForRefund
 		obj.SetTransferID(fernTestValueTransferID)
 		assert.Equal(t, fernTestValueTransferID, obj.TransferID)
 		assert.NotNil(t, obj.explicitFields)
@@ -66,7 +66,7 @@ func TestSettersTransferRefundCreateRequest(t *testing.T) {
 
 	t.Run("SetAmount", func(t *testing.T) {
 		obj := &TransferRefundCreateRequest{}
-		var fernTestValueAmount v49.TransferRefundAmount
+		var fernTestValueAmount v50.TransferRefundAmount
 		obj.SetAmount(fernTestValueAmount)
 		assert.Equal(t, fernTestValueAmount, obj.Amount)
 		assert.NotNil(t, obj.explicitFields)
@@ -74,7 +74,7 @@ func TestSettersTransferRefundCreateRequest(t *testing.T) {
 
 	t.Run("SetIdempotencyKey", func(t *testing.T) {
 		obj := &TransferRefundCreateRequest{}
-		var fernTestValueIdempotencyKey v49.TransferRefundIdempotencyKey
+		var fernTestValueIdempotencyKey v50.TransferRefundIdempotencyKey
 		obj.SetIdempotencyKey(fernTestValueIdempotencyKey)
 		assert.Equal(t, fernTestValueIdempotencyKey, obj.IdempotencyKey)
 		assert.NotNil(t, obj.explicitFields)
@@ -87,7 +87,7 @@ func TestSettersMarkExplicitTransferRefundCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferRefundCreateRequest{}
-		var fernTestValueTransferID v49.TransferIDForRefund
+		var fernTestValueTransferID v50.TransferIDForRefund
 
 		// Act
 		obj.SetTransferID(fernTestValueTransferID)
@@ -118,7 +118,7 @@ func TestSettersMarkExplicitTransferRefundCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferRefundCreateRequest{}
-		var fernTestValueAmount v49.TransferRefundAmount
+		var fernTestValueAmount v50.TransferRefundAmount
 
 		// Act
 		obj.SetAmount(fernTestValueAmount)
@@ -149,7 +149,7 @@ func TestSettersMarkExplicitTransferRefundCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferRefundCreateRequest{}
-		var fernTestValueIdempotencyKey v49.TransferRefundIdempotencyKey
+		var fernTestValueIdempotencyKey v50.TransferRefundIdempotencyKey
 
 		// Act
 		obj.SetIdempotencyKey(fernTestValueIdempotencyKey)
@@ -181,7 +181,7 @@ func TestSettersMarkExplicitTransferRefundCreateRequest(t *testing.T) {
 func TestSettersTransferRefundGetRequest(t *testing.T) {
 	t.Run("SetRefundID", func(t *testing.T) {
 		obj := &TransferRefundGetRequest{}
-		var fernTestValueRefundID v49.TransferRefundID
+		var fernTestValueRefundID v50.TransferRefundID
 		obj.SetRefundID(fernTestValueRefundID)
 		assert.Equal(t, fernTestValueRefundID, obj.RefundID)
 		assert.NotNil(t, obj.explicitFields)
@@ -194,7 +194,7 @@ func TestSettersMarkExplicitTransferRefundGetRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferRefundGetRequest{}
-		var fernTestValueRefundID v49.TransferRefundID
+		var fernTestValueRefundID v50.TransferRefundID
 
 		// Act
 		obj.SetRefundID(fernTestValueRefundID)

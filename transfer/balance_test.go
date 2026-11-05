@@ -4,7 +4,7 @@ package transfer
 
 import (
 	json "encoding/json"
-	v49 "github.com/plaid/plaid-go/v49"
+	v50 "github.com/plaid/plaid-go/v50"
 	assert "github.com/stretchr/testify/assert"
 	require "github.com/stretchr/testify/require"
 	testing "testing"
@@ -21,7 +21,7 @@ func TestSettersTransferBalanceGetRequest(t *testing.T) {
 
 	t.Run("SetType", func(t *testing.T) {
 		obj := &TransferBalanceGetRequest{}
-		var fernTestValueType *v49.TransferBalanceType
+		var fernTestValueType *v50.TransferBalanceType
 		obj.SetType(fernTestValueType)
 		assert.Equal(t, fernTestValueType, obj.Type)
 		assert.NotNil(t, obj.explicitFields)
@@ -65,7 +65,7 @@ func TestSettersMarkExplicitTransferBalanceGetRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferBalanceGetRequest{}
-		var fernTestValueType *v49.TransferBalanceType
+		var fernTestValueType *v50.TransferBalanceType
 
 		// Act
 		obj.SetType(fernTestValueType)

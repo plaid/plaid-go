@@ -5,7 +5,7 @@ package plaid
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/plaid/plaid-go/v49/internal"
+	internal "github.com/plaid/plaid-go/v50/internal"
 	big "math/big"
 	time "time"
 )
@@ -296,18 +296,21 @@ func (p *ProtectCashAdvanceRepaymentCreateRequest) MarshalJSON() ([]byte, error)
 
 var (
 	protectReportCreateRequestFieldUserID           = big.NewInt(1 << 0)
-	protectReportCreateRequestFieldIncidentEvent    = big.NewInt(1 << 1)
-	protectReportCreateRequestFieldReportConfidence = big.NewInt(1 << 2)
-	protectReportCreateRequestFieldReportType       = big.NewInt(1 << 3)
-	protectReportCreateRequestFieldReportSource     = big.NewInt(1 << 4)
-	protectReportCreateRequestFieldBankAccount      = big.NewInt(1 << 5)
-	protectReportCreateRequestFieldAchReturnCode    = big.NewInt(1 << 6)
-	protectReportCreateRequestFieldNotes            = big.NewInt(1 << 7)
+	protectReportCreateRequestFieldClientUserID     = big.NewInt(1 << 1)
+	protectReportCreateRequestFieldIncidentEvent    = big.NewInt(1 << 2)
+	protectReportCreateRequestFieldReportConfidence = big.NewInt(1 << 3)
+	protectReportCreateRequestFieldReportType       = big.NewInt(1 << 4)
+	protectReportCreateRequestFieldReportSource     = big.NewInt(1 << 5)
+	protectReportCreateRequestFieldBankAccount      = big.NewInt(1 << 6)
+	protectReportCreateRequestFieldAchReturnCode    = big.NewInt(1 << 7)
+	protectReportCreateRequestFieldNotes            = big.NewInt(1 << 8)
 )
 
 type ProtectReportCreateRequest struct {
-	// The Plaid User ID associated with the report.
-	UserID           *string                 `json:"user_id,omitempty" url:"-"`
+	// The Plaid User ID associated with the report. This or `client_user_id` can be provided, not both.
+	UserID *string `json:"user_id,omitempty" url:"-"`
+	// A unique ID representing the end user. Maximum of 128 characters. Typically this will be a user ID number from your application. Personally identifiable information, such as an email address or phone number, should not be used in the `client_user_id`. This or `user_id` can be provided, not both. If a Plaid User does not already exist for this `client_user_id` within your client account, one will be created.
+	ClientUserID     *string                 `json:"client_user_id,omitempty" url:"-"`
 	IncidentEvent    *ProtectIncidentEvent   `json:"incident_event,omitempty" url:"-"`
 	ReportConfidence ProtectReportConfidence `json:"report_confidence" url:"-"`
 	ReportType       ProtectReportType       `json:"report_type" url:"-"`
@@ -336,6 +339,13 @@ func (p *ProtectReportCreateRequest) require(field *big.Int) {
 func (p *ProtectReportCreateRequest) SetUserID(userID *string) {
 	p.UserID = userID
 	p.require(protectReportCreateRequestFieldUserID)
+}
+
+// SetClientUserID sets the ClientUserID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *ProtectReportCreateRequest) SetClientUserID(clientUserID *string) {
+	p.ClientUserID = clientUserID
+	p.require(protectReportCreateRequestFieldClientUserID)
 }
 
 // SetIncidentEvent sets the IncidentEvent field and marks it as non-optional;

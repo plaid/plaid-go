@@ -10,7 +10,15 @@ jobs:
       GOWORK: "off"
       GOFLAGS: -mod=readonly
     steps:
-      - checkout
+      - run:
+          name: Check out the public SDK at the exact commit
+          command: |
+            [[ "$CIRCLE_SHA1" =~ ^[0-9a-f]{40}$ ]]
+            git init .
+            git remote add origin https://github.com/plaid/plaid-go.git
+            GIT_TERMINAL_PROMPT=0 git -c credential.helper= fetch --no-tags --depth=1 origin "$CIRCLE_SHA1"
+            git checkout --detach FETCH_HEAD
+            test "$(git rev-parse HEAD)" = "$CIRCLE_SHA1"
       - run:
           name: Build both SDK packages
           command: go build ./...

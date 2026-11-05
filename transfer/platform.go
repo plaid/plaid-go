@@ -4,8 +4,8 @@ package transfer
 
 import (
 	json "encoding/json"
-	v49 "github.com/plaid/plaid-go/v49"
-	internal "github.com/plaid/plaid-go/v49/internal"
+	v50 "github.com/plaid/plaid-go/v50"
+	internal "github.com/plaid/plaid-go/v50/internal"
 	big "math/big"
 	time "time"
 )
@@ -18,8 +18,8 @@ var (
 )
 
 type TransferPlatformOriginatorCreateRequest struct {
-	OriginatorClientID    v49.TransferPlatformOriginatorClientID     `json:"originator_client_id" url:"-"`
-	TosAcceptanceMetadata *v49.TransferPlatformTosAcceptanceMetadata `json:"tos_acceptance_metadata" url:"-"`
+	OriginatorClientID    v50.TransferPlatformOriginatorClientID     `json:"originator_client_id" url:"-"`
+	TosAcceptanceMetadata *v50.TransferPlatformTosAcceptanceMetadata `json:"tos_acceptance_metadata" url:"-"`
 	// ISO8601 timestamp indicating the most recent time the platform collected onboarding data from the originator
 	OriginatorReviewedAt time.Time `json:"originator_reviewed_at" url:"-"`
 	// The webhook URL to which a `PLATFORM_ONBOARDING_UPDATE` webhook should be sent.
@@ -40,14 +40,14 @@ func (t *TransferPlatformOriginatorCreateRequest) require(field *big.Int) {
 
 // SetOriginatorClientID sets the OriginatorClientID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferPlatformOriginatorCreateRequest) SetOriginatorClientID(originatorClientID v49.TransferPlatformOriginatorClientID) {
+func (t *TransferPlatformOriginatorCreateRequest) SetOriginatorClientID(originatorClientID v50.TransferPlatformOriginatorClientID) {
 	t.OriginatorClientID = originatorClientID
 	t.require(transferPlatformOriginatorCreateRequestFieldOriginatorClientID)
 }
 
 // SetTosAcceptanceMetadata sets the TosAcceptanceMetadata field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferPlatformOriginatorCreateRequest) SetTosAcceptanceMetadata(tosAcceptanceMetadata *v49.TransferPlatformTosAcceptanceMetadata) {
+func (t *TransferPlatformOriginatorCreateRequest) SetTosAcceptanceMetadata(tosAcceptanceMetadata *v50.TransferPlatformTosAcceptanceMetadata) {
 	t.TosAcceptanceMetadata = tosAcceptanceMetadata
 	t.require(transferPlatformOriginatorCreateRequestFieldTosAcceptanceMetadata)
 }
@@ -109,14 +109,14 @@ var (
 )
 
 type TransferPlatformPersonCreateRequest struct {
-	OriginatorClientID v49.TransferPlatformOriginatorClientID `json:"originator_client_id" url:"-"`
-	Name               *v49.TransferPlatformPersonName        `json:"name,omitempty" url:"-"`
+	OriginatorClientID v50.TransferPlatformOriginatorClientID `json:"originator_client_id" url:"-"`
+	Name               *v50.TransferPlatformPersonName        `json:"name,omitempty" url:"-"`
 	// A valid email address. Must not have leading or trailing spaces.
 	EmailAddress *string `json:"email_address,omitempty" url:"-"`
 	// A valid phone number in E.164 format. Phone number input may be validated against valid number ranges; number strings that do not match a real-world phone numbering scheme may cause the request to fail, even in the Sandbox test environment.
 	PhoneNumber *string                             `json:"phone_number,omitempty" url:"-"`
-	Address     *v49.TransferPlatformPersonAddress  `json:"address,omitempty" url:"-"`
-	IDNumber    *v49.TransferPlatformPersonIDNumber `json:"id_number,omitempty" url:"-"`
+	Address     *v50.TransferPlatformPersonAddress  `json:"address,omitempty" url:"-"`
+	IDNumber    *v50.TransferPlatformPersonIDNumber `json:"id_number,omitempty" url:"-"`
 	// The date of birth of the person. Formatted as YYYY-MM-DD.
 	DateOfBirth *time.Time `json:"date_of_birth,omitempty" url:"-" format:"date"`
 	// The relationship between this person and the originator they are related to.
@@ -141,14 +141,14 @@ func (t *TransferPlatformPersonCreateRequest) require(field *big.Int) {
 
 // SetOriginatorClientID sets the OriginatorClientID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferPlatformPersonCreateRequest) SetOriginatorClientID(originatorClientID v49.TransferPlatformOriginatorClientID) {
+func (t *TransferPlatformPersonCreateRequest) SetOriginatorClientID(originatorClientID v50.TransferPlatformOriginatorClientID) {
 	t.OriginatorClientID = originatorClientID
 	t.require(transferPlatformPersonCreateRequestFieldOriginatorClientID)
 }
 
 // SetName sets the Name field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferPlatformPersonCreateRequest) SetName(name *v49.TransferPlatformPersonName) {
+func (t *TransferPlatformPersonCreateRequest) SetName(name *v50.TransferPlatformPersonName) {
 	t.Name = name
 	t.require(transferPlatformPersonCreateRequestFieldName)
 }
@@ -169,14 +169,14 @@ func (t *TransferPlatformPersonCreateRequest) SetPhoneNumber(phoneNumber *string
 
 // SetAddress sets the Address field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferPlatformPersonCreateRequest) SetAddress(address *v49.TransferPlatformPersonAddress) {
+func (t *TransferPlatformPersonCreateRequest) SetAddress(address *v50.TransferPlatformPersonAddress) {
 	t.Address = address
 	t.require(transferPlatformPersonCreateRequestFieldAddress)
 }
 
 // SetIDNumber sets the IDNumber field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferPlatformPersonCreateRequest) SetIDNumber(idNumber *v49.TransferPlatformPersonIDNumber) {
+func (t *TransferPlatformPersonCreateRequest) SetIDNumber(idNumber *v50.TransferPlatformPersonIDNumber) {
 	t.IDNumber = idNumber
 	t.require(transferPlatformPersonCreateRequestFieldIDNumber)
 }
@@ -247,7 +247,7 @@ type TransferPlatformRequirementSubmitRequest struct {
 	// The client ID of the originator
 	OriginatorClientID string `json:"originator_client_id" url:"-"`
 	// Use the `/transfer/platform/requirement/submit` endpoint to submit a list of requirement submissions that all relate to the originator. Must contain between 1 and 50 requirement submissions. See [Requirement type schema documentation](https://docs.google.com/document/d/1NEQkTD0sVK50iAQi6xHigrexDUxZ4QxXqSEfV_FFTiU/) for a list of requirements and possible values.
-	RequirementSubmissions []*v49.TransferPlatformRequirementSubmission `json:"requirement_submissions" url:"-"`
+	RequirementSubmissions []*v50.TransferPlatformRequirementSubmission `json:"requirement_submissions" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -271,7 +271,7 @@ func (t *TransferPlatformRequirementSubmitRequest) SetOriginatorClientID(origina
 
 // SetRequirementSubmissions sets the RequirementSubmissions field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferPlatformRequirementSubmitRequest) SetRequirementSubmissions(requirementSubmissions []*v49.TransferPlatformRequirementSubmission) {
+func (t *TransferPlatformRequirementSubmitRequest) SetRequirementSubmissions(requirementSubmissions []*v50.TransferPlatformRequirementSubmission) {
 	t.RequirementSubmissions = requirementSubmissions
 	t.require(transferPlatformRequirementSubmitRequestFieldRequirementSubmissions)
 }

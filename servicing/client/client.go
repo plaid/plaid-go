@@ -5,9 +5,9 @@ package client
 import (
 	os "os"
 
-	core "github.com/plaid/plaid-go/v49/core"
-	internal "github.com/plaid/plaid-go/v49/internal"
-	subscription "github.com/plaid/plaid-go/v49/servicing/subscription"
+	core "github.com/plaid/plaid-go/v50/core"
+	internal "github.com/plaid/plaid-go/v50/internal"
+	subscription "github.com/plaid/plaid-go/v50/servicing/subscription"
 )
 
 type Client struct {
