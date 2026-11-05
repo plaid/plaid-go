@@ -1,0 +1,17 @@
+name: SDK review signal
+
+# This unprivileged notification can run in PR context. Trusted integration code
+# independently rereads GitHub state; it never consumes code or artifacts here.
+on:
+  pull_request_review:
+    types: [submitted, dismissed, edited]
+
+permissions: {}
+
+jobs:
+  signal:
+    if: github.repository == 'plaid/plaid-go' && github.event.pull_request.base.ref == 'master'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
+    steps:
+      - run: 'true'

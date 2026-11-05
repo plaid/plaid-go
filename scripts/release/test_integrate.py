@@ -55,7 +55,8 @@ class IntegrationTests(unittest.TestCase):
                      "head": {"sha": self.head, "ref": "sdk-generation/go-v49-" + branch_identity,
                               "repo": {"full_name": policy.SDK_REPO}}}
         self.branch = {"protected": True, "commit": {"sha": self.base}}
-        self.protection = {"required_status_checks": {"strict": True, "contexts": [integrate.CI_CONTEXT]}}
+        self.protection = {"required_status_checks": {"strict": True, "contexts": [integrate.CI_CONTEXT],
+                          "checks": [{"context": integrate.VERIFIED_CONTEXT, "app_id": integrate.ACTIONS_APP_ID}]}}
         self.effective_rules = [{"type": "pull_request", "ruleset_id": 12345}]
         self.ruleset = {"id": 12345, "source_type": "Repository", "source": policy.SDK_REPO,
                         "target": "branch", "enforcement": "active",
@@ -66,6 +67,9 @@ class IntegrationTests(unittest.TestCase):
         self.ruleset_tokens = []
         self.statuses = [{"context": integrate.CI_CONTEXT, "state": "success", "creator": {"id": 456},
                           "target_url": "https://circleci.com/gh/plaid/plaid-go/123"}]
+        self.statuses.append({"context": integrate.VERIFIED_CONTEXT, "state": "success",
+                              "creator": {"id": integrate.ACTIONS_BOT_ID},
+                              "target_url": "https://github.com/plaid/plaid-go/actions/runs/123"})
         self.combined = {"sha": self.head, "state": "success"}
         self.reviews = []
         self.api_calls = []
@@ -353,6 +357,39 @@ class IntegrationTests(unittest.TestCase):
             with self.subTest(change=change), self.assertRaisesRegex(policy.ReleaseError, "strict"):
                 self.check()
             self.protection = original
+
+    def test_status_only_checks_remain_available_without_automatic_merging(self):
+        with patch.dict(os.environ, {"SDK_AUTOMERGE_ENABLED": "false"}):
+            verified = self.check(status_only=True)
+            with patch.object(integrate, "run", side_effect=AssertionError("Must not merge")), self.assertRaisesRegex(policy.ReleaseError, "disabled"):
+                integrate.merge(verified)
+
+    def test_native_verification_status_requires_github_actions_binding(self):
+        for app_id in (None, -1, 999):
+            self.protection["required_status_checks"]["checks"][0]["app_id"] = app_id
+            with self.subTest(app_id=app_id), self.assertRaisesRegex(policy.ReleaseError, "bound to GitHub Actions"):
+                self.check()
+
+    def test_own_pending_verification_is_not_a_circular_ci_dependency(self):
+        self.statuses[1]["state"] = "pending"
+        self.combined["state"] = "pending"
+        self.check()
+        self.statuses.insert(0, {"context": "security-scan", "state": "failure"})
+        with self.assertRaisesRegex(policy.ReleaseError, "reported commit status failed"):
+            self.check()
+
+    def test_unverified_or_forged_status_cannot_reach_merge(self):
+        verified = self.check()
+        for change in ({"state": "pending"}, {"state": "failure"}, {"creator": {"id": 789}},
+                       {"target_url": "https://attacker.example/verified"}):
+            original = copy.deepcopy(self.statuses[1])
+            self.statuses[1].update(change)
+            with self.subTest(change=change), patch.object(integrate, "run", side_effect=AssertionError("Must not merge")), self.assertRaises(policy.ReleaseError):
+                integrate.merge(verified)
+            self.statuses[1] = original
+        self.statuses.pop()
+        with patch.object(integrate, "run", side_effect=AssertionError("Must not merge")), self.assertRaises(policy.ReleaseError):
+            integrate.merge(verified)
 
     def test_review_ruleset_must_be_active_applicable_and_approval_only(self):
         original = copy.deepcopy(self.ruleset)
