@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: '7,22,37,52 * * * *'
   status:
+  workflow_run:
+    workflows: [SDK review signal]
+    types: [completed]
   workflow_dispatch:
     inputs:
       dry_run:
@@ -29,18 +32,18 @@ env:
 jobs:
   check:
     if: >-
-      (vars.SDK_AUTOMERGE_ENABLED == 'true' ||
-      (github.event_name == 'workflow_dispatch' && inputs.dry_run == true)) &&
+      vars.SDK_REVIEW_RULESET_ID != '' && vars.SDK_RELEASE_CONTROL_COMMIT != '' &&
       github.repository == 'plaid/plaid-go' &&
       github.event.repository.private == false && github.ref == 'refs/heads/master' &&
       github.ref_protected &&
       github.workflow_ref == 'plaid/plaid-go/.github/workflows/integrate.yml@refs/heads/master' &&
-      (github.event_name != 'status' || github.event.state == 'success')
+      (github.event_name != 'status' || github.event.context != 'sdk-generation/verified')
     runs-on: ubuntu-24.04
     environment: sdk-integration
     timeout-minutes: 15
     permissions:
       contents: read
+      statuses: write
     outputs:
       ready: ${{ steps.check.outputs.ready }}
       number: ${{ steps.check.outputs.number }}
@@ -68,7 +71,16 @@ jobs:
           permission-contents: read
           permission-pull-requests: read
           permission-administration: read
+          permission-statuses: read
+      - name: Report required verification for generated or human-reviewed PRs
+        env:
+          GH_TOKEN: ${{ steps.read-app.outputs.token }}
+          SDK_VERIFICATION_STATUS_TOKEN: ${{ github.token }}
+        run: >-
+          python3 control/scripts/release/verify_prs.py --control control
+          --control-commit "$SDK_RELEASE_CONTROL_COMMIT"
       - name: Verify generated content, generation signature, CI and branch controls
+        if: vars.SDK_AUTOMERGE_ENABLED == 'true' || (github.event_name == 'workflow_dispatch' && inputs.dry_run == true)
         id: check
         env:
           GH_TOKEN: ${{ steps.read-app.outputs.token }}
@@ -106,6 +118,7 @@ jobs:
           permission-contents: read
           permission-pull-requests: read
           permission-administration: read
+          permission-statuses: read
       - name: Recheck the exact PR before minting a write token
         id: recheck
         env:
@@ -124,6 +137,8 @@ jobs:
           repositories: plaid-go
           permission-contents: write
           permission-pull-requests: read
+          permission-administration: read
+          permission-statuses: read
       - name: Merge only the verified generated head
         if: steps.recheck.outputs.ready == 'true'
         env:

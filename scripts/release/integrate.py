@@ -20,6 +20,9 @@ from policy import (SDK_REPO, PUBLIC_REMOTE, ReleaseError, api, canonical, decim
 
 WORKFLOW = ".github/workflows/integrate.yml"
 CI_CONTEXT = "ci/circleci: build"
+VERIFIED_CONTEXT = "sdk-generation/verified"
+ACTIONS_APP_ID = 15368
+ACTIONS_BOT_ID = 41898282
 PRESERVED_PREFIXES = (".github/", "scripts/release/", ".circleci/", "legacy/tests/")
 # Keep in sync with the public generation pipeline's preserved files. CHANGELOG
 # has the one permitted deterministic prepend checked separately below.
@@ -64,15 +67,15 @@ def integration_identity():
             "Generation and integration must use distinct Apps")
 
 
-def context(control, control_commit):
+def context(control, control_commit, *, status_only=False):
     dry_run = (os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch"
                and os.environ.get("SDK_INTEGRATION_DRY_RUN") == "true")
-    require(os.environ.get("SDK_AUTOMERGE_ENABLED") == "true" or dry_run, "SDK integration is disabled")
+    require(os.environ.get("SDK_AUTOMERGE_ENABLED") == "true" or dry_run or status_only, "SDK integration is disabled")
     require(os.environ.get("GITHUB_REPOSITORY") == SDK_REPO, "Untrusted integration repository")
     require(os.environ.get("GITHUB_REF") == "refs/heads/master"
             and os.environ.get("GITHUB_REF_PROTECTED") == "true", "Integration requires protected master")
     require(os.environ.get("GITHUB_WORKFLOW_REF") == f"{SDK_REPO}/{WORKFLOW}@refs/heads/master", "Untrusted integration workflow")
-    require(os.environ.get("GITHUB_EVENT_NAME") in ("status", "schedule", "workflow_dispatch"), "Untrusted integration event")
+    require(os.environ.get("GITHUB_EVENT_NAME") in ("status", "schedule", "workflow_dispatch", "workflow_run"), "Untrusted integration event")
     hex_value(control_commit, 40, "control commit")
     hex_value(os.environ.get("GITHUB_SHA"), 40, "workflow commit")
     integration_identity()
@@ -107,6 +110,8 @@ def strict_status_protection():
     contexts.update(check.get("context") for check in checks.get("checks", []))
     require(checks.get("strict") is True and CI_CONTEXT in contexts,
             "Integration requires strict CircleCI branch protection")
+    require([item.get("app_id") for item in checks.get("checks", []) if item.get("context") == VERIFIED_CONTEXT] == [ACTIONS_APP_ID],
+            "Integration requires the generated-output status bound to GitHub Actions")
     require(not protection.get("required_pull_request_reviews"),
             "Move approval requirements to the PR-only review ruleset; classic approval bypass is not supported")
 
@@ -162,7 +167,7 @@ def discover():
     return candidates[0] if candidates else None
 
 
-def ci_and_reviews(number, head):
+def ci_and_reviews(number, head, require_verified=False):
     combined = api(f"repos/{SDK_REPO}/commits/{head}/status")
     require(combined.get("sha") == head, "CI status is for another head")
     statuses = api(f"repos/{SDK_REPO}/commits/{head}/statuses?per_page=100", paginate=True)
@@ -175,9 +180,21 @@ def ci_and_reviews(number, head):
     require(status.get("state") == "success", "CircleCI failed on the generated head")
     require(str(status.get("creator", {}).get("id")) == os.environ["SDK_CIRCLECI_STATUS_ACTOR_ID"], "CircleCI status has an untrusted author")
     require(re.fullmatch(r"https://(?:circleci\.com/gh/plaid/plaid-go/[1-9][0-9]*|app\.circleci\.com/pipelines/github/plaid/plaid-go/[1-9][0-9]*(?:/workflows/[0-9a-f-]+)?)", status.get("target_url", "")), "Unexpected CircleCI build URL")
-    if combined.get("state") == "pending":
+    # The verifier posts pending before evaluating this head. Exclude only its own
+    # context to avoid a circular dependency, keeping every other latest status.
+    latest_statuses = {}
+    for item in statuses:
+        latest_statuses.setdefault(item.get("context"), item)
+    other = [item for name, item in latest_statuses.items() if name != VERIFIED_CONTEXT]
+    if any(item.get("state") == "pending" for item in other):
         raise NotReady("Waiting for all reported commit statuses")
-    require(combined.get("state") == "success", "A reported commit status failed")
+    require(other and all(item.get("state") == "success" for item in other), "A reported commit status failed")
+    if require_verified:
+        verified = latest_statuses.get(VERIFIED_CONTEXT) or {}
+        require(verified.get("state") == "success" and verified.get("creator", {}).get("id") == ACTIONS_BOT_ID,
+                "Missing trusted generated-output verification on the exact head")
+        require(re.fullmatch(r"https://github\.com/plaid/plaid-go/actions/runs/[1-9][0-9]*", verified.get("target_url", "")),
+                "Unexpected verification workflow URL")
     reviews = api(f"repos/{SDK_REPO}/pulls/{number}/reviews?per_page=100", paginate=True)
     latest = {}
     for review in reviews:
@@ -228,8 +245,8 @@ def preserved_content(base_files, files, manifest):
     require(new == prefix + old, "Generated changelog must only prepend the exact release entry")
 
 
-def check(repo, control, control_commit, number, expected_base=None, expected_head=None):
-    context(control, control_commit)
+def check(repo, control, control_commit, number, expected_base=None, expected_head=None, *, status_only=False):
+    context(control, control_commit, status_only=status_only)
     pull = api(f"repos/{SDK_REPO}/pulls/{number}")
     require_identity(pull)
     base, head = pull["base"]["sha"], pull["head"]["sha"]
@@ -263,7 +280,7 @@ def merge(verified):
     require_identity(pull)
     require(pull["head"]["sha"] == head and pull["base"]["sha"] == base and current_base() == base, "PR changed immediately before merge")
     strict_status_protection()
-    ci_and_reviews(number, head)
+    ci_and_reviews(number, head, require_verified=True)
     token = os.environ.get("SDK_INTEGRATION_TOKEN", "")
     require(token, "Missing scoped integration App token")
     approval_ruleset(token=token)

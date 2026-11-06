@@ -97,10 +97,52 @@ alongside the native PR-only approval ruleset. Hosted tests must demonstrate tha
 passing direct pushes fail, passing generated PRs merge, and required CI cannot
 be bypassed. A bot must never post a rubber-stamp approval to satisfy review rules.
 
+Require `sdk-generation/verified` in the same classic strict status checks, bound
+to the GitHub Actions App (integration ID `15368`), alongside CircleCI. This is a
+server-enforced condition: the merger App has no status-write permission and
+cannot satisfy it by calling the merge API directly.
+
+Only the trusted integration check job receives `statuses: write`. It reports a
+status only when the verified outcome changes, avoiding GitHub's per-commit status
+limit. Success requires complete signed-generation and
+approved-path checks, or after exact-head human approval and GitHub's `APPROVED`
+review decision for a manual PR. Pending checks or missing reviews leave pending;
+verification errors mark failure. This preserves separately reviewed SDK/control
+changes without granting an author-based exemption. The manual path does not
+create generation evidence or make an unsigned candidate publishable.
+
+The verifier ignores its own pending status while checking other CI, avoiding a
+circular dependency; the merge boundary and GitHub both require its success.
+A zero-permission review signal workflow triggers a trusted default-branch rescan
+when reviews are submitted, dismissed or edited. No signal-run code or artifacts
+are executed by the trusted workflow, and its own status updates do not retrigger
+it. Scheduled checks remain a fallback.
+
+Merge these controls and the review-signal workflow through the existing reviewed
+path first, then update the immutable control pin. Configure the approval ruleset
+and both classic required statuses before setting `SDK_REVIEW_RULESET_ID`. A
+configured ruleset ID and control pin enable status verification independently of
+`SDK_AUTOMERGE_ENABLED`; manual PRs can receive verification while automatic
+merging stays off. Manual dry runs still write no statuses. Use a normal dispatch
+with automatic merging disabled to exercise status reporting without merging.
+
+A control-workflow PR is checked against the current pinned base, so it can obtain
+human-review verification before its new workflow lands. Refresh the control pin
+after merging it. Turning automatic merging off retains verification for manual
+PRs. If retiring status verification itself, first remove its required status
+through the reviewed repository-configuration process; then remove credentials
+or settings. Otherwise manual PRs would be left waiting for a status no job emits.
+
+App binding identifies GitHub Actions, not an individual workflow. Other workflows
+must not give status-write credentials to candidate code. Reviews, CI and statuses
+can change between checks and merging; notifications reduce stale-status windows
+but are not an atomic per-PR approval exception. The normal merger still rechecks
+live CI, exact head/base and human objections immediately before its merge call.
+
 Create `sdk-integration` and `release` environments restricted to protected
 `master`, with no per-run human approval on the automatic path. The integration
-App has Contents write, Pull requests read and Administration read (for checking
-branch protection), scoped only to this SDK repository. Its check job obtains a
+App has Contents write, Pull requests read, Commit statuses read and Administration
+read (for checking branch protection), scoped only to this SDK repository. Its check job obtains a
 read-only token for inspections, but that job still holds the full App private
 key and must be trusted with its full authority. Generated SDK code never runs
 there. Only the merge command is passed a write-capable installation token.
