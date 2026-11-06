@@ -5,7 +5,7 @@ package plaid
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/plaid/plaid-go/v49/internal"
+	internal "github.com/plaid/plaid-go/v50/internal"
 	big "math/big"
 	time "time"
 )
@@ -9406,10 +9406,11 @@ var (
 
 // bankTransferNullableFields maps the wire names of BankTransfer's nullable fields (required or optional) to their field bits.
 var bankTransferNullableFields = map[string]*big.Int{
-	"failure_reason": bankTransferFieldFailureReason,
-	"custom_tag":     bankTransferFieldCustomTag,
-	"metadata":       bankTransferFieldMetadata,
-	"direction":      bankTransferFieldDirection,
+	"failure_reason":         bankTransferFieldFailureReason,
+	"custom_tag":             bankTransferFieldCustomTag,
+	"metadata":               bankTransferFieldMetadata,
+	"origination_account_id": bankTransferFieldOriginationAccountID,
+	"direction":              bankTransferFieldDirection,
 }
 
 // Represents a bank transfer within the Bank Transfers API.
@@ -9436,7 +9437,7 @@ type BankTransfer struct {
 	CustomTag *string               `json:"custom_tag,omitempty" url:"custom_tag,omitempty"`
 	Metadata  *BankTransferMetadata `json:"metadata,omitempty" url:"metadata,omitempty"`
 	// Plaid's unique identifier for the origination account that was used for this transfer.
-	OriginationAccountID string                 `json:"origination_account_id" url:"origination_account_id"`
+	OriginationAccountID *string                `json:"origination_account_id,omitempty" url:"origination_account_id,omitempty"`
 	Direction            *BankTransferDirection `json:"direction,omitempty" url:"direction,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
@@ -9552,9 +9553,9 @@ func (b *BankTransfer) GetMetadata() *BankTransferMetadata {
 	return b.Metadata
 }
 
-func (b *BankTransfer) GetOriginationAccountID() string {
+func (b *BankTransfer) GetOriginationAccountID() *string {
 	if b == nil {
-		return ""
+		return nil
 	}
 	return b.OriginationAccountID
 }
@@ -9689,7 +9690,7 @@ func (b *BankTransfer) SetMetadata(metadata *BankTransferMetadata) {
 
 // SetOriginationAccountID sets the OriginationAccountID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (b *BankTransfer) SetOriginationAccountID(originationAccountID string) {
+func (b *BankTransfer) SetOriginationAccountID(originationAccountID *string) {
 	b.OriginationAccountID = originationAccountID
 	b.require(bankTransferFieldOriginationAccountID)
 }
@@ -10640,6 +10641,7 @@ var (
 // bankTransferFailureNullableFields maps the wire names of BankTransferFailure's nullable fields (required or optional) to their field bits.
 var bankTransferFailureNullableFields = map[string]*big.Int{
 	"ach_return_code": bankTransferFailureFieldAchReturnCode,
+	"description":     bankTransferFailureFieldDescription,
 }
 
 // The failure reason if the type of this transfer is `"failed"` or `"reversed"`. Null value otherwise.
@@ -11619,18 +11621,20 @@ var (
 	baseReportAccountFieldDaysAvailable      = big.NewInt(1 << 9)
 	baseReportAccountFieldTransactions       = big.NewInt(1 << 10)
 	baseReportAccountFieldOwners             = big.NewInt(1 << 11)
-	baseReportAccountFieldOwnershipType      = big.NewInt(1 << 12)
-	baseReportAccountFieldHistoricalBalances = big.NewInt(1 << 13)
-	baseReportAccountFieldAccountInsights    = big.NewInt(1 << 14)
-	baseReportAccountFieldAttributes         = big.NewInt(1 << 15)
+	baseReportAccountFieldHolderCategory     = big.NewInt(1 << 12)
+	baseReportAccountFieldOwnershipType      = big.NewInt(1 << 13)
+	baseReportAccountFieldHistoricalBalances = big.NewInt(1 << 14)
+	baseReportAccountFieldAccountInsights    = big.NewInt(1 << 15)
+	baseReportAccountFieldAttributes         = big.NewInt(1 << 16)
 )
 
 // baseReportAccountNullableFields maps the wire names of BaseReportAccount's nullable fields (required or optional) to their field bits.
 var baseReportAccountNullableFields = map[string]*big.Int{
-	"mask":           baseReportAccountFieldMask,
-	"official_name":  baseReportAccountFieldOfficialName,
-	"subtype":        baseReportAccountFieldSubtype,
-	"ownership_type": baseReportAccountFieldOwnershipType,
+	"mask":            baseReportAccountFieldMask,
+	"official_name":   baseReportAccountFieldOfficialName,
+	"subtype":         baseReportAccountFieldSubtype,
+	"holder_category": baseReportAccountFieldHolderCategory,
+	"ownership_type":  baseReportAccountFieldOwnershipType,
 }
 
 // Base Report information about an account
@@ -11658,8 +11662,10 @@ type BaseReportAccount struct {
 	// Transaction history associated with the account. Transaction history returned by endpoints such as `/transactions/get` or `/investments/transactions/get` will be returned in the top-level `transactions` field instead. Some transactions may have their details masked in accordance with the FCRA. These will appear with a `credit_category` of `MASKED_TRANSACTION_CATEGORY`.
 	Transactions []*BaseReportTransaction `json:"transactions" url:"transactions"`
 	// Data returned by the financial institution about the account owner or owners. For business accounts, the name reported may be either the name of the individual or the name of the business, depending on the institution. Multiple owners on a single account will be represented in the same `owner` object, not in multiple owner objects within the array. This array can also be empty if no owners are found.
-	Owners        []*Owner       `json:"owners" url:"owners"`
-	OwnershipType *OwnershipType `json:"ownership_type,omitempty" url:"ownership_type,omitempty"`
+	Owners []*Owner `json:"owners" url:"owners"`
+	// This field contains the account holder category extracted from the financial institution. The value is `personal`, `business`, or `unrecognized`. The field is omitted when the extracted category is unavailable.
+	HolderCategory *BaseReportAccountHolderCategory `json:"holder_category,omitempty" url:"holder_category,omitempty"`
+	OwnershipType  *OwnershipType                   `json:"ownership_type,omitempty" url:"ownership_type,omitempty"`
 	// Calculated data about the historical balances on the account. Currently not supported by `brokerage` or `investment` accounts.
 	HistoricalBalances []*BaseReportHistoricalBalance `json:"historical_balances,omitempty" url:"historical_balances,omitempty"`
 	AccountInsights    *BaseReportAccountInsights     `json:"account_insights,omitempty" url:"account_insights,omitempty"`
@@ -11755,6 +11761,13 @@ func (b *BaseReportAccount) GetOwners() []*Owner {
 		return nil
 	}
 	return b.Owners
+}
+
+func (b *BaseReportAccount) GetHolderCategory() *BaseReportAccountHolderCategory {
+	if b == nil {
+		return nil
+	}
+	return b.HolderCategory
 }
 
 func (b *BaseReportAccount) GetOwnershipType() *OwnershipType {
@@ -11883,6 +11896,13 @@ func (b *BaseReportAccount) SetTransactions(transactions []*BaseReportTransactio
 func (b *BaseReportAccount) SetOwners(owners []*Owner) {
 	b.Owners = owners
 	b.require(baseReportAccountFieldOwners)
+}
+
+// SetHolderCategory sets the HolderCategory field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportAccount) SetHolderCategory(holderCategory *BaseReportAccountHolderCategory) {
+	b.HolderCategory = holderCategory
+	b.require(baseReportAccountFieldHolderCategory)
 }
 
 // SetOwnershipType sets the OwnershipType field and marks it as non-optional;
@@ -12247,6 +12267,32 @@ func (b *BaseReportAccountBalances) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", b)
+}
+
+// This field contains the account holder category extracted from the financial institution. The value is `personal`, `business`, or `unrecognized`. The field is omitted when the extracted category is unavailable.
+type BaseReportAccountHolderCategory string
+
+const (
+	BaseReportAccountHolderCategoryBusiness     BaseReportAccountHolderCategory = "business"
+	BaseReportAccountHolderCategoryPersonal     BaseReportAccountHolderCategory = "personal"
+	BaseReportAccountHolderCategoryUnrecognized BaseReportAccountHolderCategory = "unrecognized"
+)
+
+func NewBaseReportAccountHolderCategoryFromString(s string) (BaseReportAccountHolderCategory, error) {
+	switch s {
+	case "business":
+		return BaseReportAccountHolderCategoryBusiness, nil
+	case "personal":
+		return BaseReportAccountHolderCategoryPersonal, nil
+	case "unrecognized":
+		return BaseReportAccountHolderCategoryUnrecognized, nil
+	}
+	var t BaseReportAccountHolderCategory
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (b BaseReportAccountHolderCategory) Ptr() *BaseReportAccountHolderCategory {
+	return &b
 }
 
 var (
@@ -18922,6 +18968,10 @@ type ConsumerReportPdfGetResponse = string
 // `WRITTEN_INSTRUCTION_OTHER`: In accordance with the written instructions of the consumer pursuant to FCRA Section 604(a)(2), such as when an individual agrees to act as a guarantor or assumes personal liability for a consumer, business, or commercial loan.
 //
 // `ELIGIBILITY_FOR_GOVT_BENEFITS`:  In connection with an eligibility determination for a government benefit where the entity is required to consider an applicant's financial status pursuant to FCRA Section 604(a)(3)(D).
+//
+// `INSURANCE_UNDERWRITING`: In connection with the underwriting of insurance involving the consumer pursuant to FCRA Section 604(a)(3)(C).
+//
+// `SECONDARY_INVESTOR`: As a potential investor or servicer, or current insurer, in connection with a valuation of, or an assessment of the credit or prepayment risks associated with, an existing credit obligation pursuant to FCRA Section 604(a)(3)(E).
 type ConsumerReportPermissiblePurpose string
 
 const (
@@ -18933,6 +18983,8 @@ const (
 	ConsumerReportPermissiblePurposeWrittenInstructionPrequalification    ConsumerReportPermissiblePurpose = "WRITTEN_INSTRUCTION_PREQUALIFICATION"
 	ConsumerReportPermissiblePurposeWrittenInstructionOther               ConsumerReportPermissiblePurpose = "WRITTEN_INSTRUCTION_OTHER"
 	ConsumerReportPermissiblePurposeEligibilityForGovtBenefits            ConsumerReportPermissiblePurpose = "ELIGIBILITY_FOR_GOVT_BENEFITS"
+	ConsumerReportPermissiblePurposeInsuranceUnderwriting                 ConsumerReportPermissiblePurpose = "INSURANCE_UNDERWRITING"
+	ConsumerReportPermissiblePurposeSecondaryInvestor                     ConsumerReportPermissiblePurpose = "SECONDARY_INVESTOR"
 )
 
 func NewConsumerReportPermissiblePurposeFromString(s string) (ConsumerReportPermissiblePurpose, error) {
@@ -18953,6 +19005,10 @@ func NewConsumerReportPermissiblePurposeFromString(s string) (ConsumerReportPerm
 		return ConsumerReportPermissiblePurposeWrittenInstructionOther, nil
 	case "ELIGIBILITY_FOR_GOVT_BENEFITS":
 		return ConsumerReportPermissiblePurposeEligibilityForGovtBenefits, nil
+	case "INSURANCE_UNDERWRITING":
+		return ConsumerReportPermissiblePurposeInsuranceUnderwriting, nil
+	case "SECONDARY_INVESTOR":
+		return ConsumerReportPermissiblePurposeSecondaryInvestor, nil
 	}
 	var t ConsumerReportPermissiblePurpose
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
@@ -21265,7 +21321,7 @@ func (c CraCheckReportVerificationGetReportType) Ptr() *CraCheckReportVerificati
 	return &c
 }
 
-// CraCheckReportVerificationPdfGetResponse defines the response schema for `/cra/check_report/verification/pdf/get`
+// The verification report in PDF format. Investment account pages may be excluded when recent investment data was unavailable at report generation.
 type CraCheckReportVerificationPdfGetResponse = string
 
 // A map of cash flow attributes, where the key is a string, and the value is a string, float, int, or boolean. The specific list of attributes will depend on the cash flow attributes version used. For a full list of all ~2,000 attributes, contact your account manager.
@@ -28080,6 +28136,7 @@ func (c *CraReportCreateQualifyProductConfig) String() string {
 //
 // - `ELIGIBILITY_FOR_GOVT_BENEFITS`
 // - `EXTENSION_OF_CREDIT`
+// - `INSURANCE_UNDERWRITING`
 // - `LEGITIMATE_BUSINESS_NEED_OTHER`
 // - `LEGITIMATE_BUSINESS_NEED_TENANT_SCREENING`
 // - `WRITTEN_INSTRUCTION_OTHER`
@@ -31263,14 +31320,20 @@ var (
 	creditCategoryFieldDetailed = big.NewInt(1 << 1)
 )
 
+// creditCategoryNullableFields maps the wire names of CreditCategory's nullable fields (required or optional) to their field bits.
+var creditCategoryNullableFields = map[string]*big.Int{
+	"primary":  creditCategoryFieldPrimary,
+	"detailed": creditCategoryFieldDetailed,
+}
+
 // Information describing the intent of the transaction. Most relevant for credit use cases, but not limited to such use cases.
 //
 // See the [`taxonomy csv file`](https://plaid.com/documents/credit-category-taxonomy.csv) for a full list of credit categories.
 type CreditCategory struct {
-	// A high level category that communicates the broad category of the transaction.
-	Primary string `json:"primary" url:"primary"`
-	// A granular category conveying the transaction's intent. This field can also be used as a unique identifier for the category.
-	Detailed string `json:"detailed" url:"detailed"`
+	// A high level category that communicates the broad category of the transaction. Can be `null` when no credit category is available.
+	Primary *string `json:"primary,omitempty" url:"primary,omitempty"`
+	// A granular category conveying the transaction's intent. This field can also be used as a unique identifier for the category. Can be `null` when no credit category is available.
+	Detailed *string `json:"detailed,omitempty" url:"detailed,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -31280,16 +31343,16 @@ type CreditCategory struct {
 	rawJSON json.RawMessage
 }
 
-func (c *CreditCategory) GetPrimary() string {
+func (c *CreditCategory) GetPrimary() *string {
 	if c == nil {
-		return ""
+		return nil
 	}
 	return c.Primary
 }
 
-func (c *CreditCategory) GetDetailed() string {
+func (c *CreditCategory) GetDetailed() *string {
 	if c == nil {
-		return ""
+		return nil
 	}
 	return c.Detailed
 }
@@ -31312,14 +31375,14 @@ func (c *CreditCategory) require(field *big.Int) {
 
 // SetPrimary sets the Primary field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CreditCategory) SetPrimary(primary string) {
+func (c *CreditCategory) SetPrimary(primary *string) {
 	c.Primary = primary
 	c.require(creditCategoryFieldPrimary)
 }
 
 // SetDetailed sets the Detailed field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CreditCategory) SetDetailed(detailed string) {
+func (c *CreditCategory) SetDetailed(detailed *string) {
 	c.Detailed = detailed
 	c.require(creditCategoryFieldDetailed)
 }
@@ -31340,6 +31403,13 @@ func (c *CreditCategory) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	c.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, creditCategoryNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
 	c.rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -38019,7 +38089,7 @@ var identityMatchUserNullableFields = map[string]*big.Int{
 type IdentityMatchUser struct {
 	// The user's full legal name.
 	LegalName *string `json:"legal_name,omitempty" url:"legal_name,omitempty"`
-	// The user's phone number, in E.164 format: +{countrycode}{number}. For example: "+14157452130". Phone numbers provided in other formats will be parsed on a best-effort basis. Phone number input is validated against valid number ranges; number strings that do not match a real-world phone numbering scheme may cause the request to fail, even in the Sandbox test environment.
+	// The user's phone number, in E.164 format: +{countrycode}{number}. For example: "+14157452130". Phone numbers provided in other formats will be parsed on a best-effort basis.
 	PhoneNumber *string `json:"phone_number,omitempty" url:"phone_number,omitempty"`
 	// The user's email address.
 	EmailAddress *string                              `json:"email_address,omitempty" url:"email_address,omitempty"`
@@ -43655,7 +43725,7 @@ func (i *IncomeInsightsFilter) String() string {
 	return fmt.Sprintf("%#v", i)
 }
 
-// The version of Income Insights to use. This value is not shared across API calls for the same resource. If it is omitted from a request, the default version is used, even if a version was set in an earlier call such as `/link/token/create` or `/cra/check_report/create`.
+// The version of Income Insights to use. Set this to `II2`. The value applies only to the request it is sent with; a version set in an earlier call, such as `/link/token/create` or `/cra/check_report/create`, is not reused.
 type IncomeInsightsVersion string
 
 const (
@@ -45585,11 +45655,11 @@ type InflowModel struct {
 	Type string `json:"type" url:"type"`
 	// Amount of income per month. This value is required if `type` is `monthly-income`.
 	IncomeAmount *float64 `json:"income_amount,omitempty" url:"income_amount,omitempty"`
-	// Either a whole number between 1 and 28 or the string `last`, meaning the last day of the month. The day of the month on which the income transaction will appear. This field is required if `type` is `monthly-income`, `monthly-balance-payment` or `monthly-interest-only-payment`.
+	// The day of the month on which the income transaction will appear: a whole number between 1 and 28, or the string `last` for the last day of the month. This field is required if `type` is `monthly-income`, `monthly-balance-payment` or `monthly-interest-only-payment`.
 	PaymentDayOfMonth any `json:"payment_day_of_month,omitempty" url:"payment_day_of_month,omitempty"`
 	// The name of the income transaction. This field is required if `type` is `monthly-income`, `monthly-balance-payment` or `monthly-interest-only-payment`.
 	TransactionName *string `json:"transaction_name,omitempty" url:"transaction_name,omitempty"`
-	// Either a whole number between 1 and 28 or the string `last`, meaning the last day of the month. The day of the month on which the balance is calculated for the next payment. This field is required if `type` is `monthly-balance-payment` or `monthly-interest-only-payment`.
+	// The day of the month on which the balance is calculated for the next payment: a whole number between 1 and 28, or the string `last` for the last day of the month. For compatibility with client libraries generated before 1.776.0, which typed this field as a string, a quoted number such as `"15"` is also accepted. This field is required if `type` is `monthly-balance-payment` or `monthly-interest-only-payment`.
 	StatementDayOfMonth any `json:"statement_day_of_month,omitempty" url:"statement_day_of_month,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
@@ -49375,7 +49445,7 @@ type Item struct {
 	//
 	// `user_present_required` - Item requires user interaction to be updated
 	UpdateType ItemUpdateType `json:"update_type" url:"update_type"`
-	// The `item_id` of the Item that was created alongside this one in a single Link session. Only present for Items created in a hybrid Link flow that produces separate Plaid Inc and Plaid Check items; `null` for every other Item.
+	// The `item_id` of the Item that was created alongside this one when a single Link session used both Plaid Inc and Plaid Check products (see [Using Plaid Check products alongside Plaid products](https://plaid.com/docs/check/add-to-app/#using-plaid-check-products-alongside-plaid-products)). For a Plaid Inc Item, this is the paired Plaid Check Item, and the reverse for a Plaid Check Item. The field is omitted for Items that have no paired Item. It is also omitted if Plaid cannot look up the paired Item at request time, so do not treat its absence as proof that an Item is unpaired.
 	PairedItemID *string `json:"paired_item_id,omitempty" url:"paired_item_id,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
@@ -51720,8 +51790,12 @@ func (k *KycCheckPhoneSummary) String() string {
 }
 
 var (
-	kycCheckSsaAnalysisFieldMatch      = big.NewInt(1 << 0)
-	kycCheckSsaAnalysisFieldIsDeceased = big.NewInt(1 << 1)
+	kycCheckSsaAnalysisFieldMatch            = big.NewInt(1 << 0)
+	kycCheckSsaAnalysisFieldIsDeceased       = big.NewInt(1 << 1)
+	kycCheckSsaAnalysisFieldNameMatch        = big.NewInt(1 << 2)
+	kycCheckSsaAnalysisFieldDateOfBirthMatch = big.NewInt(1 << 3)
+	kycCheckSsaAnalysisFieldSsnMatch         = big.NewInt(1 << 4)
+	kycCheckSsaAnalysisFieldOtherMatch       = big.NewInt(1 << 5)
 )
 
 // kycCheckSsaAnalysisNullableFields maps the wire names of KycCheckSsaAnalysis's nullable fields (required or optional) to their field bits.
@@ -51739,6 +51813,14 @@ type KycCheckSsaAnalysis struct {
 	Match KycCheckSsaMatchStatus `json:"match" url:"match"`
 	// Whether the Social Security Administration reported the person as deceased. Null when the status is unavailable.
 	IsDeceased *bool `json:"is_deceased,omitempty" url:"is_deceased,omitempty"`
+	// Whether the person's name matches SSA records. `no_data` indicates that this field result is unavailable.
+	NameMatch *KycCheckSsaMatchStatus `json:"name_match,omitempty" url:"name_match,omitempty"`
+	// Whether the person's date of birth matches SSA records. `no_data` indicates that this field result is unavailable.
+	DateOfBirthMatch *KycCheckSsaMatchStatus `json:"date_of_birth_match,omitempty" url:"date_of_birth_match,omitempty"`
+	// Whether the person's Social Security number matches SSA records. `no_data` indicates that this field result is unavailable.
+	SsnMatch *KycCheckSsaMatchStatus `json:"ssn_match,omitempty" url:"ssn_match,omitempty"`
+	// The match result when SSA does not disclose individual field results. `no_data` indicates that this field result is unavailable.
+	OtherMatch *KycCheckSsaMatchStatus `json:"other_match,omitempty" url:"other_match,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -51760,6 +51842,34 @@ func (k *KycCheckSsaAnalysis) GetIsDeceased() *bool {
 		return nil
 	}
 	return k.IsDeceased
+}
+
+func (k *KycCheckSsaAnalysis) GetNameMatch() *KycCheckSsaMatchStatus {
+	if k == nil {
+		return nil
+	}
+	return k.NameMatch
+}
+
+func (k *KycCheckSsaAnalysis) GetDateOfBirthMatch() *KycCheckSsaMatchStatus {
+	if k == nil {
+		return nil
+	}
+	return k.DateOfBirthMatch
+}
+
+func (k *KycCheckSsaAnalysis) GetSsnMatch() *KycCheckSsaMatchStatus {
+	if k == nil {
+		return nil
+	}
+	return k.SsnMatch
+}
+
+func (k *KycCheckSsaAnalysis) GetOtherMatch() *KycCheckSsaMatchStatus {
+	if k == nil {
+		return nil
+	}
+	return k.OtherMatch
 }
 
 func (k *KycCheckSsaAnalysis) GetExtraProperties() map[string]interface{} {
@@ -51790,6 +51900,34 @@ func (k *KycCheckSsaAnalysis) SetMatch(match KycCheckSsaMatchStatus) {
 func (k *KycCheckSsaAnalysis) SetIsDeceased(isDeceased *bool) {
 	k.IsDeceased = isDeceased
 	k.require(kycCheckSsaAnalysisFieldIsDeceased)
+}
+
+// SetNameMatch sets the NameMatch field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (k *KycCheckSsaAnalysis) SetNameMatch(nameMatch *KycCheckSsaMatchStatus) {
+	k.NameMatch = nameMatch
+	k.require(kycCheckSsaAnalysisFieldNameMatch)
+}
+
+// SetDateOfBirthMatch sets the DateOfBirthMatch field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (k *KycCheckSsaAnalysis) SetDateOfBirthMatch(dateOfBirthMatch *KycCheckSsaMatchStatus) {
+	k.DateOfBirthMatch = dateOfBirthMatch
+	k.require(kycCheckSsaAnalysisFieldDateOfBirthMatch)
+}
+
+// SetSsnMatch sets the SsnMatch field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (k *KycCheckSsaAnalysis) SetSsnMatch(ssnMatch *KycCheckSsaMatchStatus) {
+	k.SsnMatch = ssnMatch
+	k.require(kycCheckSsaAnalysisFieldSsnMatch)
+}
+
+// SetOtherMatch sets the OtherMatch field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (k *KycCheckSsaAnalysis) SetOtherMatch(otherMatch *KycCheckSsaMatchStatus) {
+	k.OtherMatch = otherMatch
+	k.require(kycCheckSsaAnalysisFieldOtherMatch)
 }
 
 func (k *KycCheckSsaAnalysis) UnmarshalJSON(data []byte) error {
@@ -57906,7 +58044,7 @@ type Meta struct {
 	Limit *float64 `json:"limit,omitempty" url:"limit,omitempty"`
 	// The account's mask. Should be an empty string or a string of 2-4 alphanumeric characters. This allows you to model a mask which does not match the account number (such as with a virtual account number).
 	Mask *string `json:"mask,omitempty" url:"mask,omitempty"`
-	// The annual percentage yield (APY) to report on the account, expressed as a percentage (e.g. `4.25` means 4.25%). Applies to interest-bearing depository accounts; if omitted, the account reports no APY.
+	// The annual percentage yield (APY) to report on the account, expressed as a percentage (e.g. `4.25` means 4.25%). Applies to interest-bearing depository accounts. If omitted, savings, money market, CD, cash management, and HSA accounts report a generated APY, and other accounts report none.
 	Apy *float64 `json:"apy,omitempty" url:"apy,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
@@ -60087,6 +60225,9 @@ func (n *NewAccountsAvailableWebhook) String() string {
 
 // A unique user identifier, created by `/user/create`. Integrations that began using `/user/create` after December 10, 2025 use this field to identify a user instead of the `user_token`. For more details, see [New User APIs](https://plaid.com/docs/api/users/user-apis).
 type NewUserID = string
+
+// A unique user identifier, created by `/user/create`. Integrations that began using `/user/create` after December 10, 2025 use this field to identify a user instead of the `user_token`. For more details, see [New User APIs](https://plaid.com/docs/api/users/user-apis).
+type NewUserIDNullable = *string
 
 var (
 	numbersFieldAccount           = big.NewInt(1 << 0)
@@ -68443,15 +68584,12 @@ func (p PlaidErrorType) Ptr() *PlaidErrorType {
 type PlaidLendScoreVersion string
 
 const (
-	PlaidLendScoreVersionV10 PlaidLendScoreVersion = "v1.0"
 	PlaidLendScoreVersionV20 PlaidLendScoreVersion = "v2.0"
 	PlaidLendScoreVersionLs1 PlaidLendScoreVersion = "LS1"
 )
 
 func NewPlaidLendScoreVersionFromString(s string) (PlaidLendScoreVersion, error) {
 	switch s {
-	case "v1.0":
-		return PlaidLendScoreVersionV10, nil
 	case "v2.0":
 		return PlaidLendScoreVersionV20, nil
 	case "LS1":
@@ -71988,6 +72126,8 @@ const (
 	ProductsCraPlaidCreditScore   Products = "cra_plaid_credit_score"
 	ProductsCraQualify            Products = "cra_qualify"
 	ProductsCraHomeLending        Products = "cra_home_lending"
+	ProductsCraLendScoreComplete  Products = "cra_lend_score_complete"
+	ProductsCraIncomeComplete     Products = "cra_income_complete"
 	ProductsLayer                 Products = "layer"
 	ProductsPayByBank             Products = "pay_by_bank"
 	ProductsProtectLinkedBank     Products = "protect_linked_bank"
@@ -72068,6 +72208,10 @@ func NewProductsFromString(s string) (Products, error) {
 		return ProductsCraQualify, nil
 	case "cra_home_lending":
 		return ProductsCraHomeLending, nil
+	case "cra_lend_score_complete":
+		return ProductsCraLendScoreComplete, nil
+	case "cra_income_complete":
+		return ProductsCraIncomeComplete, nil
 	case "layer":
 		return ProductsLayer, nil
 	case "pay_by_bank":
@@ -80312,7 +80456,7 @@ var signalDeviceNullableFields = map[string]*big.Int{
 	"user_agent": signalDeviceFieldUserAgent,
 }
 
-// Details about the end user's device. These fields are optional, but strongly recommended to increase the accuracy of results when using Signal Transaction Scores. When using a Balance-only Ruleset, these fields are ignored if the Signal Addendum has been signed; if it has not been signed, using these fields will result in an error.
+// Details about the end user's device. These fields are optional, but strongly recommended to increase the accuracy of results when using Signal Transaction Scores. When using a Balance-only ruleset, these fields are ignored.
 type SignalDevice struct {
 	// The IP address of the device that initiated the transaction
 	IPAddress *string `json:"ip_address,omitempty" url:"ip_address,omitempty"`
@@ -82320,7 +82464,7 @@ var signalUserNullableFields = map[string]*big.Int{
 	"address":       signalUserFieldAddress,
 }
 
-// Details about the end user initiating the transaction (i.e., the account holder). These fields are optional, but strongly recommended to increase the accuracy of results when using Signal Transaction Scores. When using a Balance-only ruleset, if the Signal Addendum has been signed, these fields are ignored; if the Addendum has not been signed, using these fields will result in an error.
+// Details about the end user initiating the transaction (i.e., the account holder). These fields are optional, but strongly recommended to increase the accuracy of results when using Signal Transaction Scores. When using a Balance-only ruleset, these fields are ignored.
 type SignalUser struct {
 	Name *SignalPersonName `json:"name,omitempty" url:"name,omitempty"`
 	// The user's phone number, in E.164 format: +{countrycode}{number}. For example: "+14151234567"
@@ -92070,7 +92214,7 @@ func (t *TransferAuthorizationDecisionRationale) String() string {
 //
 // The following codes indicate that the authorization decision was `declined`:
 //
-// `NSF` - Transaction has an elevated risk of resulting in a return due to insufficient funds.
+// `NSF` - Transaction has an elevated risk of resulting in a return due to insufficient funds, or, for credit transfers, your available balance (in your Plaid Ledger or prefunded account) is insufficient to cover the transfer.
 //
 // `RISK` - Transaction is high-risk.
 //
@@ -93071,7 +93215,7 @@ var (
 	transferAuthorizationUserInRequestFieldAddress      = big.NewInt(1 << 3)
 )
 
-// The legal name and other information for the account holder.  If the account has multiple account holders, provide the information for the account holder on whose behalf the authorization is being requested. The `user.legal_name` field is required. Other fields are not currently used and are present to support planned future functionality.
+// The legal name and other information for the account holder.  If the account has multiple account holders, provide the information for the account holder on whose behalf the authorization is being requested. The `user.legal_name` field is required. Other fields are optional (for `rfp` transfers, `address` is required, including `street`, `city`, `region`, `postal_code`, and `country`), but if provided, they must be validly formatted and may be used in Plaid's risk evaluation.
 type TransferAuthorizationUserInRequest struct {
 	// The user's legal name. If the user is a business, provide the business name.
 	LegalName string `json:"legal_name" url:"legal_name"`
@@ -94807,7 +94951,7 @@ type TransferEvent struct {
 	// The ID of the origination account that this balance belongs to.
 	OriginationAccountID *string                `json:"origination_account_id,omitempty" url:"origination_account_id,omitempty"`
 	TransferType         *OmittableTransferType `json:"transfer_type,omitempty" url:"transfer_type,omitempty"`
-	// The amount of the transfer (decimal string with two digits of precision e.g. "10.00"). This field is omitted for Plaid Ledger Sweep events.
+	// The amount of the transfer (decimal string with two digits of precision e.g. "10.00"). For refund events and `funds_available` events, this is the amount associated with the event, such as the refund amount, rather than the original transfer amount. This field is omitted for Plaid Ledger Sweep events.
 	TransferAmount *string                 `json:"transfer_amount,omitempty" url:"transfer_amount,omitempty"`
 	FailureReason  *TransferFailure        `json:"failure_reason,omitempty" url:"failure_reason,omitempty"`
 	SweepID        TransferSweepIDNullable `json:"sweep_id,omitempty" url:"sweep_id,omitempty"`
@@ -104457,7 +104601,7 @@ var transferWireDetailsNullableFields = map[string]*big.Int{
 
 // Information specific to wire transfers.
 type TransferWireDetails struct {
-	// Additional information from the wire originator to the beneficiary. Max 140 characters.
+	// Additional information from the wire originator to the beneficiary. Max 140 characters; no single word may exceed 35 characters.
 	MessageToBeneficiary *string `json:"message_to_beneficiary,omitempty" url:"message_to_beneficiary,omitempty"`
 	// The fee amount deducted from the original transfer during a wire return, if applicable.
 	WireReturnFee *string `json:"wire_return_fee,omitempty" url:"wire_return_fee,omitempty"`
@@ -106912,10 +107056,11 @@ var (
 	userCustomPasswordFieldVersion          = big.NewInt(1 << 0)
 	userCustomPasswordFieldSeed             = big.NewInt(1 << 1)
 	userCustomPasswordFieldRollDatesForward = big.NewInt(1 << 2)
-	userCustomPasswordFieldOverrideAccounts = big.NewInt(1 << 3)
-	userCustomPasswordFieldMfa              = big.NewInt(1 << 4)
-	userCustomPasswordFieldRecaptcha        = big.NewInt(1 << 5)
-	userCustomPasswordFieldForceError       = big.NewInt(1 << 6)
+	userCustomPasswordFieldHasPerpetualOtp  = big.NewInt(1 << 3)
+	userCustomPasswordFieldOverrideAccounts = big.NewInt(1 << 4)
+	userCustomPasswordFieldMfa              = big.NewInt(1 << 5)
+	userCustomPasswordFieldRecaptcha        = big.NewInt(1 << 6)
+	userCustomPasswordFieldForceError       = big.NewInt(1 << 7)
 )
 
 // userCustomPasswordNullableFields maps the wire names of UserCustomPassword's nullable fields (required or optional) to their field bits.
@@ -106935,6 +107080,8 @@ type UserCustomPassword struct {
 	//
 	// A `date_posted` later than its `date_transacted` stays later, so the most recent transaction can still be pending. Dates are UTC calendar dates. The shift happens once, when the Item is created; the Item keeps the shifted dates afterwards. Defaults to `false`.
 	RollDatesForward *bool `json:"roll_dates_forward,omitempty" url:"roll_dates_forward,omitempty"`
+	// When `true`, the Item behaves like an Item at an institution that requires a one-time passcode (OTP) or other multi-factor authentication at every login, so it can be updated only while the user is present. `/item/get` returns an `update_type` of `user_present_required`. Endpoints that fetch new data from the institution, such as `/transactions/refresh` and `/accounts/balance/get`, return `ITEM_LOGIN_REQUIRED`. If your integration isn't enabled for this kind of institution, they return [`MFA_NOT_SUPPORTED`](https://plaid.com/docs/errors/item/#mfa_not_supported) instead. Endpoints that return data Plaid already has, such as `/transactions/sync` and `/accounts/get`, still work. Defaults to `false`.
+	HasPerpetualOtp *bool `json:"has_perpetual_otp,omitempty" url:"has_perpetual_otp,omitempty"`
 	// An array of account overrides to configure the accounts for the Item. By default, if no override is specified, transactions and account data will be randomly generated based on the account type and subtype, and other products will have fixed or empty data.
 	OverrideAccounts []*OverrideAccounts `json:"override_accounts,omitempty" url:"override_accounts,omitempty"`
 	Mfa              *Mfa                `json:"mfa,omitempty" url:"mfa,omitempty"`
@@ -106984,6 +107131,13 @@ func (u *UserCustomPassword) GetRollDatesForward() *bool {
 		return nil
 	}
 	return u.RollDatesForward
+}
+
+func (u *UserCustomPassword) GetHasPerpetualOtp() *bool {
+	if u == nil {
+		return nil
+	}
+	return u.HasPerpetualOtp
 }
 
 func (u *UserCustomPassword) GetOverrideAccounts() []*OverrideAccounts {
@@ -107049,6 +107203,13 @@ func (u *UserCustomPassword) SetSeed(seed *string) {
 func (u *UserCustomPassword) SetRollDatesForward(rollDatesForward *bool) {
 	u.RollDatesForward = rollDatesForward
 	u.require(userCustomPasswordFieldRollDatesForward)
+}
+
+// SetHasPerpetualOtp sets the HasPerpetualOtp field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UserCustomPassword) SetHasPerpetualOtp(hasPerpetualOtp *bool) {
+	u.HasPerpetualOtp = hasPerpetualOtp
+	u.require(userCustomPasswordFieldHasPerpetualOtp)
 }
 
 // SetOverrideAccounts sets the OverrideAccounts field and marks it as non-optional;

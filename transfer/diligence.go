@@ -4,8 +4,8 @@ package transfer
 
 import (
 	json "encoding/json"
-	v49 "github.com/plaid/plaid-go/v49"
-	internal "github.com/plaid/plaid-go/v49/internal"
+	v50 "github.com/plaid/plaid-go/v50"
+	internal "github.com/plaid/plaid-go/v50/internal"
 	io "io"
 	big "math/big"
 )
@@ -18,7 +18,7 @@ var (
 type TransferDiligenceSubmitRequest struct {
 	// Client ID of the originator whose diligence that you want to submit.
 	OriginatorClientID  string                           `json:"originator_client_id" url:"-"`
-	OriginatorDiligence *v49.TransferOriginatorDiligence `json:"originator_diligence" url:"-"`
+	OriginatorDiligence *v50.TransferOriginatorDiligence `json:"originator_diligence" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -42,7 +42,7 @@ func (t *TransferDiligenceSubmitRequest) SetOriginatorClientID(originatorClientI
 
 // SetOriginatorDiligence sets the OriginatorDiligence field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferDiligenceSubmitRequest) SetOriginatorDiligence(originatorDiligence *v49.TransferOriginatorDiligence) {
+func (t *TransferDiligenceSubmitRequest) SetOriginatorDiligence(originatorDiligence *v50.TransferOriginatorDiligence) {
 	t.OriginatorDiligence = originatorDiligence
 	t.require(transferDiligenceSubmitRequestFieldOriginatorDiligence)
 }
@@ -72,7 +72,7 @@ type TransferDiligenceDocumentUploadRequest struct {
 	File io.Reader `json:"-" url:"-"`
 	// The Client ID of the originator whose document that you want to upload.
 	OriginatorClientID string                      `json:"originator_client_id" url:"-"`
-	Purpose            v49.TransferDocumentPurpose `json:"purpose" url:"-"`
+	Purpose            v50.TransferDocumentPurpose `json:"purpose" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`

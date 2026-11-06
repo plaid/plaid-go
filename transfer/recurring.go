@@ -4,8 +4,8 @@ package transfer
 
 import (
 	json "encoding/json"
-	v49 "github.com/plaid/plaid-go/v49"
-	internal "github.com/plaid/plaid-go/v49/internal"
+	v50 "github.com/plaid/plaid-go/v50"
+	internal "github.com/plaid/plaid-go/v50/internal"
 	big "math/big"
 	time "time"
 )
@@ -15,7 +15,7 @@ var (
 )
 
 type TransferRecurringCancelRequest struct {
-	RecurringTransferID v49.RecurringTransferID `json:"recurring_transfer_id" url:"-"`
+	RecurringTransferID v50.RecurringTransferID `json:"recurring_transfer_id" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -32,7 +32,7 @@ func (t *TransferRecurringCancelRequest) require(field *big.Int) {
 
 // SetRecurringTransferID sets the RecurringTransferID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferRecurringCancelRequest) SetRecurringTransferID(recurringTransferID v49.RecurringTransferID) {
+func (t *TransferRecurringCancelRequest) SetRecurringTransferID(recurringTransferID v50.RecurringTransferID) {
 	t.RecurringTransferID = recurringTransferID
 	t.require(transferRecurringCancelRequestFieldRecurringTransferID)
 }
@@ -77,15 +77,15 @@ var (
 )
 
 type TransferRecurringCreateRequest struct {
-	AccessToken    v49.TransferAccessToken             `json:"access_token" url:"-"`
-	IdempotencyKey v49.TransferRecurringIdempotencyKey `json:"idempotency_key" url:"-"`
-	AccountID      v49.TransferAccountID               `json:"account_id" url:"-"`
+	AccessToken    v50.TransferAccessToken             `json:"access_token" url:"-"`
+	IdempotencyKey v50.TransferRecurringIdempotencyKey `json:"idempotency_key" url:"-"`
+	AccountID      v50.TransferAccountID               `json:"account_id" url:"-"`
 	// Specify the account used to fund the transfer. Customers can find a list of `funding_account_id`s in the Accounts page of your Plaid Dashboard, under the "Account ID" column. If this field is left blank, it will default to the default `funding_account_id` specified during onboarding.
 	FundingAccountID *string                      `json:"funding_account_id,omitempty" url:"-"`
-	Type             v49.TransferType             `json:"type" url:"-"`
-	Network          v49.TransferRecurringNetwork `json:"network" url:"-"`
-	AchClass         *v49.AchClass                `json:"ach_class,omitempty" url:"-"`
-	Amount           v49.TransferAmount           `json:"amount" url:"-"`
+	Type             v50.TransferType             `json:"type" url:"-"`
+	Network          v50.TransferRecurringNetwork `json:"network" url:"-"`
+	AchClass         *v50.AchClass                `json:"ach_class,omitempty" url:"-"`
+	Amount           v50.TransferAmount           `json:"amount" url:"-"`
 	// If the end user is initiating the specific transfer themselves via an interactive UI, this should be `true`; for automatic recurring payments where the end user is not actually initiating each individual transfer, it should be `false`.
 	UserPresent *bool `json:"user_present,omitempty" url:"-"`
 	// The currency of the transfer amount. The default value is "USD".
@@ -94,9 +94,9 @@ type TransferRecurringCreateRequest struct {
 	Description string `json:"description" url:"-"`
 	// Plaid's unique identifier for a test clock. This field may only be used when using the `sandbox` environment. If provided, the created `recurring_transfer` is associated with the `test_clock`. New originations are automatically generated when the associated `test_clock` advances. For more details, see [Simulating recurring transfers](https://plaid.com/docs/transfer/sandbox/#simulating-recurring-transfers).
 	TestClockID *string                        `json:"test_clock_id,omitempty" url:"-"`
-	Schedule    *v49.TransferRecurringSchedule `json:"schedule" url:"-"`
-	User        *v49.TransferUserInRequest     `json:"user" url:"-"`
-	Device      *v49.TransferDevice            `json:"device,omitempty" url:"-"`
+	Schedule    *v50.TransferRecurringSchedule `json:"schedule" url:"-"`
+	User        *v50.TransferUserInRequest     `json:"user" url:"-"`
+	Device      *v50.TransferDevice            `json:"device,omitempty" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -113,21 +113,21 @@ func (t *TransferRecurringCreateRequest) require(field *big.Int) {
 
 // SetAccessToken sets the AccessToken field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferRecurringCreateRequest) SetAccessToken(accessToken v49.TransferAccessToken) {
+func (t *TransferRecurringCreateRequest) SetAccessToken(accessToken v50.TransferAccessToken) {
 	t.AccessToken = accessToken
 	t.require(transferRecurringCreateRequestFieldAccessToken)
 }
 
 // SetIdempotencyKey sets the IdempotencyKey field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferRecurringCreateRequest) SetIdempotencyKey(idempotencyKey v49.TransferRecurringIdempotencyKey) {
+func (t *TransferRecurringCreateRequest) SetIdempotencyKey(idempotencyKey v50.TransferRecurringIdempotencyKey) {
 	t.IdempotencyKey = idempotencyKey
 	t.require(transferRecurringCreateRequestFieldIdempotencyKey)
 }
 
 // SetAccountID sets the AccountID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferRecurringCreateRequest) SetAccountID(accountID v49.TransferAccountID) {
+func (t *TransferRecurringCreateRequest) SetAccountID(accountID v50.TransferAccountID) {
 	t.AccountID = accountID
 	t.require(transferRecurringCreateRequestFieldAccountID)
 }
@@ -141,28 +141,28 @@ func (t *TransferRecurringCreateRequest) SetFundingAccountID(fundingAccountID *s
 
 // SetType sets the Type field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferRecurringCreateRequest) SetType(type_ v49.TransferType) {
+func (t *TransferRecurringCreateRequest) SetType(type_ v50.TransferType) {
 	t.Type = type_
 	t.require(transferRecurringCreateRequestFieldType)
 }
 
 // SetNetwork sets the Network field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferRecurringCreateRequest) SetNetwork(network v49.TransferRecurringNetwork) {
+func (t *TransferRecurringCreateRequest) SetNetwork(network v50.TransferRecurringNetwork) {
 	t.Network = network
 	t.require(transferRecurringCreateRequestFieldNetwork)
 }
 
 // SetAchClass sets the AchClass field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferRecurringCreateRequest) SetAchClass(achClass *v49.AchClass) {
+func (t *TransferRecurringCreateRequest) SetAchClass(achClass *v50.AchClass) {
 	t.AchClass = achClass
 	t.require(transferRecurringCreateRequestFieldAchClass)
 }
 
 // SetAmount sets the Amount field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferRecurringCreateRequest) SetAmount(amount v49.TransferAmount) {
+func (t *TransferRecurringCreateRequest) SetAmount(amount v50.TransferAmount) {
 	t.Amount = amount
 	t.require(transferRecurringCreateRequestFieldAmount)
 }
@@ -197,21 +197,21 @@ func (t *TransferRecurringCreateRequest) SetTestClockID(testClockID *string) {
 
 // SetSchedule sets the Schedule field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferRecurringCreateRequest) SetSchedule(schedule *v49.TransferRecurringSchedule) {
+func (t *TransferRecurringCreateRequest) SetSchedule(schedule *v50.TransferRecurringSchedule) {
 	t.Schedule = schedule
 	t.require(transferRecurringCreateRequestFieldSchedule)
 }
 
 // SetUser sets the User field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferRecurringCreateRequest) SetUser(user *v49.TransferUserInRequest) {
+func (t *TransferRecurringCreateRequest) SetUser(user *v50.TransferUserInRequest) {
 	t.User = user
 	t.require(transferRecurringCreateRequestFieldUser)
 }
 
 // SetDevice sets the Device field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferRecurringCreateRequest) SetDevice(device *v49.TransferDevice) {
+func (t *TransferRecurringCreateRequest) SetDevice(device *v50.TransferDevice) {
 	t.Device = device
 	t.require(transferRecurringCreateRequestFieldDevice)
 }
@@ -242,7 +242,7 @@ var (
 )
 
 type TransferRecurringGetRequest struct {
-	RecurringTransferID v49.RecurringTransferID `json:"recurring_transfer_id" url:"-"`
+	RecurringTransferID v50.RecurringTransferID `json:"recurring_transfer_id" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -259,7 +259,7 @@ func (t *TransferRecurringGetRequest) require(field *big.Int) {
 
 // SetRecurringTransferID sets the RecurringTransferID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferRecurringGetRequest) SetRecurringTransferID(recurringTransferID v49.RecurringTransferID) {
+func (t *TransferRecurringGetRequest) SetRecurringTransferID(recurringTransferID v50.RecurringTransferID) {
 	t.RecurringTransferID = recurringTransferID
 	t.require(transferRecurringGetRequestFieldRecurringTransferID)
 }

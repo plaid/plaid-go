@@ -5,7 +5,7 @@ package plaid
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/plaid/plaid-go/v49/internal"
+	internal "github.com/plaid/plaid-go/v50/internal"
 	big "math/big"
 	time "time"
 )
@@ -4615,7 +4615,8 @@ var (
 	paymentInitiationPaymentGetResponseFieldTransactionID     = big.NewInt(1 << 17)
 	paymentInitiationPaymentGetResponseFieldEndToEndID        = big.NewInt(1 << 18)
 	paymentInitiationPaymentGetResponseFieldError             = big.NewInt(1 << 19)
-	paymentInitiationPaymentGetResponseFieldRequestID         = big.NewInt(1 << 20)
+	paymentInitiationPaymentGetResponseFieldInstitutionID     = big.NewInt(1 << 20)
+	paymentInitiationPaymentGetResponseFieldRequestID         = big.NewInt(1 << 21)
 )
 
 // paymentInitiationPaymentGetResponseNullableFields maps the wire names of PaymentInitiationPaymentGetResponse's nullable fields (required or optional) to their field bits.
@@ -4633,6 +4634,7 @@ var paymentInitiationPaymentGetResponseNullableFields = map[string]*big.Int{
 	"transaction_id":     paymentInitiationPaymentGetResponseFieldTransactionID,
 	"end_to_end_id":      paymentInitiationPaymentGetResponseFieldEndToEndID,
 	"error":              paymentInitiationPaymentGetResponseFieldError,
+	"institution_id":     paymentInitiationPaymentGetResponseFieldInstitutionID,
 }
 
 // PaymentInitiationPaymentGetResponse defines the response schema for `/payment_initiation/payment/get`
@@ -4670,7 +4672,9 @@ type PaymentInitiationPaymentGetResponse struct {
 	// Note: Not all banks handle `end_to_end_id` consistently. To ensure accurate matching, clients should convert both the incoming `end_to_end_id` and the one provided by Plaid to the same case (either lower or upper) before comparison. For virtual account payments, Plaid manages this field automatically.
 	EndToEndID *string     `json:"end_to_end_id,omitempty" url:"end_to_end_id,omitempty"`
 	Error      *PlaidError `json:"error,omitempty" url:"error,omitempty"`
-	RequestID  RequestID   `json:"request_id" url:"request_id"`
+	// The Plaid institution ID of the end user's financial institution from which the payment was initiated, such as `ins_61`. `null` if the institution is not known, for example when the end user has not linked an account. A later request may return a value.
+	InstitutionID *string   `json:"institution_id,omitempty" url:"institution_id,omitempty"`
+	RequestID     RequestID `json:"request_id" url:"request_id"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -4818,6 +4822,13 @@ func (p *PaymentInitiationPaymentGetResponse) GetError() *PlaidError {
 		return nil
 	}
 	return p.Error
+}
+
+func (p *PaymentInitiationPaymentGetResponse) GetInstitutionID() *string {
+	if p == nil {
+		return nil
+	}
+	return p.InstitutionID
 }
 
 func (p *PaymentInitiationPaymentGetResponse) GetRequestID() RequestID {
@@ -4981,6 +4992,13 @@ func (p *PaymentInitiationPaymentGetResponse) SetEndToEndID(endToEndID *string) 
 func (p *PaymentInitiationPaymentGetResponse) SetError(error_ *PlaidError) {
 	p.Error = error_
 	p.require(paymentInitiationPaymentGetResponseFieldError)
+}
+
+// SetInstitutionID sets the InstitutionID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (p *PaymentInitiationPaymentGetResponse) SetInstitutionID(institutionID *string) {
+	p.InstitutionID = institutionID
+	p.require(paymentInitiationPaymentGetResponseFieldInstitutionID)
 }
 
 // SetRequestID sets the RequestID field and marks it as non-optional;

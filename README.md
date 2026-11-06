@@ -2,7 +2,7 @@
 
 The official Go client library for the [Plaid API](https://plaid.com/docs), generated from our [OpenAPI schema](https://github.com/plaid/plaid-openapi).
 
-Version 49 introduces a new SDK with endpoints grouped by product, simpler method calls, typed errors, and iterators for many paginated endpoints. The previous calling style remains available through the `legacy` package, so you can migrate one endpoint at a time. The updated API schema may also require changes to legacy models. See the [Go SDK Migration Guide](MIGRATION.md) for upgrade instructions.
+Starting with version 49, the SDK groups endpoints by product and provides simpler method calls, typed errors, and iterators for many paginated endpoints. The previous calling style remains available through the `legacy` package, so you can migrate one endpoint at a time. The updated API schema may also require changes to legacy models. See the [Go SDK Migration Guide](MIGRATION.md) for upgrade instructions.
 
 If you are upgrading from a manually written version of this library from August 2021 or earlier, see the [older migration guide](#pre-august-2021-to-the-previous-sdk).
 
@@ -31,10 +31,10 @@ Library versions follow Semantic Versioning ("SemVer") and are formatted as `v1.
 
 As of `v1.0.0`, we've moved to support `GOMODULES`.
 
-Edit your go.mod to include `github.com/plaid/plaid-go/v49 {VERSION}`
+Edit your go.mod to include `github.com/plaid/plaid-go/v50 {VERSION}`
 
 ```console
-$ go get github.com/plaid/plaid-go/v49@{VERSION}
+$ go get github.com/plaid/plaid-go/v50@{VERSION}
 ```
 
 All users are strongly recommended to use a recent version of the library, as older versions do not contain support for new endpoints and fields. For more details, see the [Migration Guide](#migration-guide).
@@ -42,6 +42,14 @@ All users are strongly recommended to use a recent version of the library, as ol
 ## Getting Started
 
 ### Calling Endpoints
+
+The examples in Getting Started and Examples use the bundled legacy client. Import it as `plaid`:
+
+```go
+import plaid "github.com/plaid/plaid-go/v50/legacy"
+```
+
+For the new client, see the [migration guide](MIGRATION.md).
 
 To call an endpoint, you must create a Plaid API client. Here's how to configure it:
 
@@ -199,7 +207,7 @@ import (
     "context"
     "os"
 
-    "github.com/plaid/plaid-go/v49/plaid"
+    plaid "github.com/plaid/plaid-go/v50/legacy"
 )
 
 configuration := plaid.NewConfiguration()
@@ -241,6 +249,10 @@ processorTokenCreateResp, _, err := client.PlaidApi.ProcessorTokenCreate(ctx).Pr
 
 ## Migration guide
 
+### Version 49 to version 50
+
+Both clients remain bundled. Update all `/v49` imports to `/v50` and review the [v50 model changes](MIGRATION.md#version-49-to-version-50); some changes also affect the legacy client. Go 1.21 remains the minimum supported version.
+
 ### Version 48 to version 49
 
 Version 49 introduces a new SDK and includes the previous SDK in a `legacy` package so you can migrate one endpoint at a time. Follow the [Go SDK Migration Guide](MIGRATION.md) for the walkthrough and code examples.
@@ -271,7 +283,7 @@ client, err := plaid.NewClient(plaid.ClientOptions{
 To:
 ```go
 import (
-  "github.com/plaid/plaid-go/v49/plaid"
+  "github.com/plaid/plaid-go/v48/plaid"
 )
 
 configuration := plaid.NewConfiguration()

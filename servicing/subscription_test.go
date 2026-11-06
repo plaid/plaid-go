@@ -4,7 +4,7 @@ package servicing
 
 import (
 	json "encoding/json"
-	v49 "github.com/plaid/plaid-go/v49"
+	v50 "github.com/plaid/plaid-go/v50"
 	assert "github.com/stretchr/testify/assert"
 	require "github.com/stretchr/testify/require"
 	testing "testing"
@@ -13,7 +13,7 @@ import (
 func TestSettersCraServicingSubscriptionCreateRequest(t *testing.T) {
 	t.Run("SetUserID", func(t *testing.T) {
 		obj := &CraServicingSubscriptionCreateRequest{}
-		var fernTestValueUserID v49.NewUserID
+		var fernTestValueUserID v50.NewUserID
 		obj.SetUserID(fernTestValueUserID)
 		assert.Equal(t, fernTestValueUserID, obj.UserID)
 		assert.NotNil(t, obj.explicitFields)
@@ -21,7 +21,7 @@ func TestSettersCraServicingSubscriptionCreateRequest(t *testing.T) {
 
 	t.Run("SetScope", func(t *testing.T) {
 		obj := &CraServicingSubscriptionCreateRequest{}
-		var fernTestValueScope v49.CraReportScope
+		var fernTestValueScope v50.CraReportScope
 		obj.SetScope(fernTestValueScope)
 		assert.Equal(t, fernTestValueScope, obj.Scope)
 		assert.NotNil(t, obj.explicitFields)
@@ -29,7 +29,7 @@ func TestSettersCraServicingSubscriptionCreateRequest(t *testing.T) {
 
 	t.Run("SetCadence", func(t *testing.T) {
 		obj := &CraServicingSubscriptionCreateRequest{}
-		var fernTestValueCadence *v49.CraSubscriptionCadence
+		var fernTestValueCadence *v50.CraSubscriptionCadence
 		obj.SetCadence(fernTestValueCadence)
 		assert.Equal(t, fernTestValueCadence, obj.Cadence)
 		assert.NotNil(t, obj.explicitFields)
@@ -45,7 +45,7 @@ func TestSettersCraServicingSubscriptionCreateRequest(t *testing.T) {
 
 	t.Run("SetProducts", func(t *testing.T) {
 		obj := &CraServicingSubscriptionCreateRequest{}
-		var fernTestValueProducts []*v49.CraSubscriptionProductConfig
+		var fernTestValueProducts []*v50.CraSubscriptionProductConfig
 		obj.SetProducts(fernTestValueProducts)
 		assert.Equal(t, fernTestValueProducts, obj.Products)
 		assert.NotNil(t, obj.explicitFields)
@@ -58,7 +58,7 @@ func TestSettersMarkExplicitCraServicingSubscriptionCreateRequest(t *testing.T) 
 		t.Parallel()
 		// Arrange
 		obj := &CraServicingSubscriptionCreateRequest{}
-		var fernTestValueUserID v49.NewUserID
+		var fernTestValueUserID v50.NewUserID
 
 		// Act
 		obj.SetUserID(fernTestValueUserID)
@@ -89,7 +89,7 @@ func TestSettersMarkExplicitCraServicingSubscriptionCreateRequest(t *testing.T) 
 		t.Parallel()
 		// Arrange
 		obj := &CraServicingSubscriptionCreateRequest{}
-		var fernTestValueScope v49.CraReportScope
+		var fernTestValueScope v50.CraReportScope
 
 		// Act
 		obj.SetScope(fernTestValueScope)
@@ -120,7 +120,7 @@ func TestSettersMarkExplicitCraServicingSubscriptionCreateRequest(t *testing.T) 
 		t.Parallel()
 		// Arrange
 		obj := &CraServicingSubscriptionCreateRequest{}
-		var fernTestValueCadence *v49.CraSubscriptionCadence
+		var fernTestValueCadence *v50.CraSubscriptionCadence
 
 		// Act
 		obj.SetCadence(fernTestValueCadence)
@@ -182,7 +182,7 @@ func TestSettersMarkExplicitCraServicingSubscriptionCreateRequest(t *testing.T) 
 		t.Parallel()
 		// Arrange
 		obj := &CraServicingSubscriptionCreateRequest{}
-		var fernTestValueProducts []*v49.CraSubscriptionProductConfig
+		var fernTestValueProducts []*v50.CraSubscriptionProductConfig
 
 		// Act
 		obj.SetProducts(fernTestValueProducts)
@@ -214,7 +214,7 @@ func TestSettersMarkExplicitCraServicingSubscriptionCreateRequest(t *testing.T) 
 func TestSettersCraServicingSubscriptionDeleteRequest(t *testing.T) {
 	t.Run("SetSubscriptionID", func(t *testing.T) {
 		obj := &CraServicingSubscriptionDeleteRequest{}
-		var fernTestValueSubscriptionID v49.CraSubscriptionID
+		var fernTestValueSubscriptionID v50.CraSubscriptionID
 		obj.SetSubscriptionID(fernTestValueSubscriptionID)
 		assert.Equal(t, fernTestValueSubscriptionID, obj.SubscriptionID)
 		assert.NotNil(t, obj.explicitFields)
@@ -227,7 +227,7 @@ func TestSettersMarkExplicitCraServicingSubscriptionDeleteRequest(t *testing.T) 
 		t.Parallel()
 		// Arrange
 		obj := &CraServicingSubscriptionDeleteRequest{}
-		var fernTestValueSubscriptionID v49.CraSubscriptionID
+		var fernTestValueSubscriptionID v50.CraSubscriptionID
 
 		// Act
 		obj.SetSubscriptionID(fernTestValueSubscriptionID)
@@ -259,7 +259,7 @@ func TestSettersMarkExplicitCraServicingSubscriptionDeleteRequest(t *testing.T) 
 func TestSettersCraServicingSubscriptionGetRequest(t *testing.T) {
 	t.Run("SetSubscriptionID", func(t *testing.T) {
 		obj := &CraServicingSubscriptionGetRequest{}
-		var fernTestValueSubscriptionID v49.CraSubscriptionID
+		var fernTestValueSubscriptionID v50.CraSubscriptionID
 		obj.SetSubscriptionID(fernTestValueSubscriptionID)
 		assert.Equal(t, fernTestValueSubscriptionID, obj.SubscriptionID)
 		assert.NotNil(t, obj.explicitFields)
@@ -272,7 +272,7 @@ func TestSettersMarkExplicitCraServicingSubscriptionGetRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &CraServicingSubscriptionGetRequest{}
-		var fernTestValueSubscriptionID v49.CraSubscriptionID
+		var fernTestValueSubscriptionID v50.CraSubscriptionID
 
 		// Act
 		obj.SetSubscriptionID(fernTestValueSubscriptionID)
@@ -304,7 +304,7 @@ func TestSettersMarkExplicitCraServicingSubscriptionGetRequest(t *testing.T) {
 func TestSettersCraServicingSubscriptionListRequest(t *testing.T) {
 	t.Run("SetUserID", func(t *testing.T) {
 		obj := &CraServicingSubscriptionListRequest{}
-		var fernTestValueUserID v49.NewUserID
+		var fernTestValueUserID v50.NewUserID
 		obj.SetUserID(fernTestValueUserID)
 		assert.Equal(t, fernTestValueUserID, obj.UserID)
 		assert.NotNil(t, obj.explicitFields)
@@ -317,7 +317,7 @@ func TestSettersMarkExplicitCraServicingSubscriptionListRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &CraServicingSubscriptionListRequest{}
-		var fernTestValueUserID v49.NewUserID
+		var fernTestValueUserID v50.NewUserID
 
 		// Act
 		obj.SetUserID(fernTestValueUserID)
@@ -349,7 +349,7 @@ func TestSettersMarkExplicitCraServicingSubscriptionListRequest(t *testing.T) {
 func TestSettersCraServicingSubscriptionUpdateRequest(t *testing.T) {
 	t.Run("SetSubscriptionID", func(t *testing.T) {
 		obj := &CraServicingSubscriptionUpdateRequest{}
-		var fernTestValueSubscriptionID v49.CraSubscriptionID
+		var fernTestValueSubscriptionID v50.CraSubscriptionID
 		obj.SetSubscriptionID(fernTestValueSubscriptionID)
 		assert.Equal(t, fernTestValueSubscriptionID, obj.SubscriptionID)
 		assert.NotNil(t, obj.explicitFields)
@@ -365,7 +365,7 @@ func TestSettersCraServicingSubscriptionUpdateRequest(t *testing.T) {
 
 	t.Run("SetProducts", func(t *testing.T) {
 		obj := &CraServicingSubscriptionUpdateRequest{}
-		var fernTestValueProducts []*v49.CraSubscriptionProductConfig
+		var fernTestValueProducts []*v50.CraSubscriptionProductConfig
 		obj.SetProducts(fernTestValueProducts)
 		assert.Equal(t, fernTestValueProducts, obj.Products)
 		assert.NotNil(t, obj.explicitFields)
@@ -373,7 +373,7 @@ func TestSettersCraServicingSubscriptionUpdateRequest(t *testing.T) {
 
 	t.Run("SetResetFields", func(t *testing.T) {
 		obj := &CraServicingSubscriptionUpdateRequest{}
-		var fernTestValueResetFields *v49.CraServicingSubscriptionUpdateRequestResettableFieldList
+		var fernTestValueResetFields *v50.CraServicingSubscriptionUpdateRequestResettableFieldList
 		obj.SetResetFields(fernTestValueResetFields)
 		assert.Equal(t, fernTestValueResetFields, obj.ResetFields)
 		assert.NotNil(t, obj.explicitFields)
@@ -386,7 +386,7 @@ func TestSettersMarkExplicitCraServicingSubscriptionUpdateRequest(t *testing.T) 
 		t.Parallel()
 		// Arrange
 		obj := &CraServicingSubscriptionUpdateRequest{}
-		var fernTestValueSubscriptionID v49.CraSubscriptionID
+		var fernTestValueSubscriptionID v50.CraSubscriptionID
 
 		// Act
 		obj.SetSubscriptionID(fernTestValueSubscriptionID)
@@ -448,7 +448,7 @@ func TestSettersMarkExplicitCraServicingSubscriptionUpdateRequest(t *testing.T) 
 		t.Parallel()
 		// Arrange
 		obj := &CraServicingSubscriptionUpdateRequest{}
-		var fernTestValueProducts []*v49.CraSubscriptionProductConfig
+		var fernTestValueProducts []*v50.CraSubscriptionProductConfig
 
 		// Act
 		obj.SetProducts(fernTestValueProducts)
@@ -479,7 +479,7 @@ func TestSettersMarkExplicitCraServicingSubscriptionUpdateRequest(t *testing.T) 
 		t.Parallel()
 		// Arrange
 		obj := &CraServicingSubscriptionUpdateRequest{}
-		var fernTestValueResetFields *v49.CraServicingSubscriptionUpdateRequestResettableFieldList
+		var fernTestValueResetFields *v50.CraServicingSubscriptionUpdateRequestResettableFieldList
 
 		// Act
 		obj.SetResetFields(fernTestValueResetFields)

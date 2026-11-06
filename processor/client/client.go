@@ -7,11 +7,11 @@ import (
 	http "net/http"
 	os "os"
 
-	plaid "github.com/plaid/plaid-go/v49"
-	core "github.com/plaid/plaid-go/v49/core"
-	internal "github.com/plaid/plaid-go/v49/internal"
-	option "github.com/plaid/plaid-go/v49/option"
-	signal "github.com/plaid/plaid-go/v49/processor/signal"
+	plaid "github.com/plaid/plaid-go/v50"
+	core "github.com/plaid/plaid-go/v50/core"
+	internal "github.com/plaid/plaid-go/v50/internal"
+	option "github.com/plaid/plaid-go/v50/option"
+	signal "github.com/plaid/plaid-go/v50/processor/signal"
 )
 
 type Client struct {
@@ -606,7 +606,7 @@ func (c *Client) GetBalance(
 	return response.Body, nil
 }
 
-// Used to create a token suitable for sending to one of Plaid's partners to enable integrations. Note that Stripe partnerships use bank account tokens instead; see `/processor/stripe/bank_account_token/create` for creating tokens for use with Stripe integrations. If using multiple processors, multiple different processor tokens can be created for a single access token. Once created, a processor token for a given Item can be modified by calling `/processor/token/permissions/set`. To revoke the processor's access, the entire Item must be deleted by calling `/item/remove`.
+// Used to create a token suitable for sending to one of Plaid's partners to enable integrations. To create a Stripe bank account token (`btok_...`), use `/processor/stripe/bank_account_token/create`. If using multiple processors, multiple different processor tokens can be created for a single access token. Once created, a processor token for a given Item can be modified by calling `/processor/token/permissions/set`. To revoke the processor's access, the entire Item must be deleted by calling `/item/remove`.
 //
 // Example:
 //

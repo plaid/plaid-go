@@ -4343,11 +4343,25 @@ func TestEnumMonitoringConsumerReportPermissiblePurpose(t *testing.T) {
 		assert.Equal(t, MonitoringConsumerReportPermissiblePurpose("ACCOUNT_REVIEW_CREDIT"), val, "enum value should match expected wire value")
 	})
 
+	t.Run("NewFromString_ACCOUNT_REVIEW_NON_CREDIT", func(t *testing.T) {
+		t.Parallel()
+		val, err := NewMonitoringConsumerReportPermissiblePurposeFromString("ACCOUNT_REVIEW_NON_CREDIT")
+		assert.NoError(t, err, "valid enum value should not return error")
+		assert.Equal(t, MonitoringConsumerReportPermissiblePurpose("ACCOUNT_REVIEW_NON_CREDIT"), val, "enum value should match expected wire value")
+	})
+
 	t.Run("NewFromString_WRITTEN_INSTRUCTION_OTHER", func(t *testing.T) {
 		t.Parallel()
 		val, err := NewMonitoringConsumerReportPermissiblePurposeFromString("WRITTEN_INSTRUCTION_OTHER")
 		assert.NoError(t, err, "valid enum value should not return error")
 		assert.Equal(t, MonitoringConsumerReportPermissiblePurpose("WRITTEN_INSTRUCTION_OTHER"), val, "enum value should match expected wire value")
+	})
+
+	t.Run("NewFromString_SECONDARY_INVESTOR", func(t *testing.T) {
+		t.Parallel()
+		val, err := NewMonitoringConsumerReportPermissiblePurposeFromString("SECONDARY_INVESTOR")
+		assert.NoError(t, err, "valid enum value should not return error")
+		assert.Equal(t, MonitoringConsumerReportPermissiblePurpose("SECONDARY_INVESTOR"), val, "enum value should match expected wire value")
 	})
 
 	t.Run("NewFromString_Invalid", func(t *testing.T) {

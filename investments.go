@@ -5,7 +5,7 @@ package plaid
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/plaid/plaid-go/v49/internal"
+	internal "github.com/plaid/plaid-go/v50/internal"
 	big "math/big"
 	time "time"
 )
@@ -949,7 +949,7 @@ type InvestmentsTransactionsGetResponse struct {
 	Securities []*Security `json:"securities" url:"securities"`
 	// The transactions being fetched
 	InvestmentTransactions []*InvestmentTransaction `json:"investment_transactions" url:"investment_transactions"`
-	// The total number of transactions available within the date range specified. If `total_investment_transactions` is larger than the size of the `transactions` array, more transactions are available and can be fetched via manipulating the `offset` parameter.
+	// The total number of transactions available within the date range specified. If `total_investment_transactions` is larger than the size of the `investment_transactions` array, more transactions are available and can be fetched via manipulating the `offset` parameter.
 	TotalInvestmentTransactions int       `json:"total_investment_transactions" url:"total_investment_transactions"`
 	RequestID                   RequestID `json:"request_id" url:"request_id"`
 	// When true, this field indicates that the Item's portfolio was manually created with the Investments Fallback flow.

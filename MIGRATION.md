@@ -1,6 +1,52 @@
 # Go SDK Migration Guide
 
-Learn how to migrate to version 49 of the Plaid Go SDK, or continue using the previous SDK.
+Upgrade from version 49 to version 50 below. The remaining sections preserve the version 48-to-49 migration walkthrough.
+
+## Version 49 to version 50
+
+Version 50 includes both the new client and the `legacy` client, generated from OpenAPI `2020-09-14_1.799.0`. It adds user transfer limits and the optional transfer authorization `user_id`, alongside the other API changes since version 49. Go 1.21 remains supported.
+
+Install the new major version and change every `github.com/plaid/plaid-go/v49` import prefix to `github.com/plaid/plaid-go/v50`, including subpackages such as `/client`, `/option`, `/transfer`, and `/legacy`:
+
+```sh
+go get github.com/plaid/plaid-go/v50@v50.0.0
+```
+
+Both clients have model changes. Recompile and test your integration after updating imports; remaining on the legacy calling style does not avoid these changes.
+
+| Affected models | Upgrade action |
+| --- | --- |
+| Business Verification | Replace `KybCheck` with `BusinessVerification` and the corresponding check/status types with their `BusinessVerificationCheck` equivalents. Supply `business`, `business.name`, and `business.address` when creating a verification. |
+| Bank Transfer, Credit Category, Business Verification scores and website status | Handle newly nullable values. The new client uses pointers; legacy fields use nullable wrappers. Prefer setters and check for null before reading a value. |
+| Legacy Link token metadata and account filters | `InstitutionData`, `AccountFilters`, and the depository, credit, loan, and investment filters now use nullable wrappers. Use their generated accessors/setters instead of assigning pointers directly. |
+| Legacy Protect attributes and partner customer product statuses | Arbitrary JSON maps now hold `interface{}` values directly, rather than requiring every value to be another map. Update assignments and type assertions accordingly. |
+| Legacy constructors | Required fields and nullable types change the constructor arguments for `BankTransfer`, `CreditCategory`, `InstitutionStatus`, `LinkSessionResults`, `PaymentInitiationPaymentGetResponse`, and several Business Verification and Protect models. Follow the new constructor signatures; the compiler identifies affected calls. |
+| Legacy `ProtectReportCreateRequest.UserId` | This optional field is now nullable; use `SetUserId` rather than assigning a `*string` directly. |
+| LendScore version enums | The unsupported `v1.0` value was removed. Use the supported `LS1` value where applicable. |
+
+For the complete API input changes, see the [OpenAPI changelog](https://github.com/plaid/plaid-openapi/blob/master/CHANGELOG.md), versions `1.778.1` through `1.799.0`.
+
+### User transfer limits in either client
+
+With a configured v50 new client `c` and `plaid` imported from the module root:
+
+```go
+limits, err := c.User.GetTransferLimits(ctx, &plaid.UserTransferLimitsGetRequest{
+    UserID: userID,
+})
+```
+
+With a configured v50 legacy client and `legacy` imported from `github.com/plaid/plaid-go/v50/legacy`:
+
+```go
+request := legacy.NewUserTransferLimitsGetRequest(userID)
+limits, _, err := legacyClient.PlaidApi.UserTransferLimitsGet(ctx).
+    UserTransferLimitsGetRequest(*request).Execute()
+```
+
+Check `err` before using either response. Limits are decimal dollar strings with a currency code; a zero limit is `"0.00"`. Daily, weekly, and monthly limits can be null when no ceiling is configured. Access to this endpoint must be enabled for your client.
+
+The examples below intentionally keep their v49 import paths to document the original v48-to-v49 transition. Use the v50 prefixes above when applying that walkthrough to version 50.
 
 ## Overview
 

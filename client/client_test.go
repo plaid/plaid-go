@@ -3,7 +3,7 @@
 package client
 
 import (
-	option "github.com/plaid/plaid-go/v49/option"
+	option "github.com/plaid/plaid-go/v50/option"
 	assert "github.com/stretchr/testify/assert"
 	http "net/http"
 	testing "testing"

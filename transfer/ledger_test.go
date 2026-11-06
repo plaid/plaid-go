@@ -4,7 +4,7 @@ package transfer
 
 import (
 	json "encoding/json"
-	v49 "github.com/plaid/plaid-go/v49"
+	v50 "github.com/plaid/plaid-go/v50"
 	assert "github.com/stretchr/testify/assert"
 	require "github.com/stretchr/testify/require"
 	testing "testing"
@@ -14,7 +14,7 @@ import (
 func TestSettersTransferLedgerDepositRequest(t *testing.T) {
 	t.Run("SetOriginatorClientID", func(t *testing.T) {
 		obj := &TransferLedgerDepositRequest{}
-		var fernTestValueOriginatorClientID v49.TransferOriginatorClientID
+		var fernTestValueOriginatorClientID v50.TransferOriginatorClientID
 		obj.SetOriginatorClientID(fernTestValueOriginatorClientID)
 		assert.Equal(t, fernTestValueOriginatorClientID, obj.OriginatorClientID)
 		assert.NotNil(t, obj.explicitFields)
@@ -22,7 +22,7 @@ func TestSettersTransferLedgerDepositRequest(t *testing.T) {
 
 	t.Run("SetFundingAccountID", func(t *testing.T) {
 		obj := &TransferLedgerDepositRequest{}
-		var fernTestValueFundingAccountID v49.TransferLedgerFundingAccountIDRequest
+		var fernTestValueFundingAccountID v50.TransferLedgerFundingAccountIDRequest
 		obj.SetFundingAccountID(fernTestValueFundingAccountID)
 		assert.Equal(t, fernTestValueFundingAccountID, obj.FundingAccountID)
 		assert.NotNil(t, obj.explicitFields)
@@ -46,7 +46,7 @@ func TestSettersTransferLedgerDepositRequest(t *testing.T) {
 
 	t.Run("SetDescription", func(t *testing.T) {
 		obj := &TransferLedgerDepositRequest{}
-		var fernTestValueDescription v49.SweepDescription
+		var fernTestValueDescription v50.SweepDescription
 		obj.SetDescription(fernTestValueDescription)
 		assert.Equal(t, fernTestValueDescription, obj.Description)
 		assert.NotNil(t, obj.explicitFields)
@@ -54,7 +54,7 @@ func TestSettersTransferLedgerDepositRequest(t *testing.T) {
 
 	t.Run("SetIdempotencyKey", func(t *testing.T) {
 		obj := &TransferLedgerDepositRequest{}
-		var fernTestValueIdempotencyKey v49.LedgerDepositIdempotencyKey
+		var fernTestValueIdempotencyKey v50.LedgerDepositIdempotencyKey
 		obj.SetIdempotencyKey(fernTestValueIdempotencyKey)
 		assert.Equal(t, fernTestValueIdempotencyKey, obj.IdempotencyKey)
 		assert.NotNil(t, obj.explicitFields)
@@ -62,7 +62,7 @@ func TestSettersTransferLedgerDepositRequest(t *testing.T) {
 
 	t.Run("SetNetwork", func(t *testing.T) {
 		obj := &TransferLedgerDepositRequest{}
-		var fernTestValueNetwork v49.TransferAchNetwork
+		var fernTestValueNetwork v50.TransferAchNetwork
 		obj.SetNetwork(fernTestValueNetwork)
 		assert.Equal(t, fernTestValueNetwork, obj.Network)
 		assert.NotNil(t, obj.explicitFields)
@@ -75,7 +75,7 @@ func TestSettersMarkExplicitTransferLedgerDepositRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferLedgerDepositRequest{}
-		var fernTestValueOriginatorClientID v49.TransferOriginatorClientID
+		var fernTestValueOriginatorClientID v50.TransferOriginatorClientID
 
 		// Act
 		obj.SetOriginatorClientID(fernTestValueOriginatorClientID)
@@ -106,7 +106,7 @@ func TestSettersMarkExplicitTransferLedgerDepositRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferLedgerDepositRequest{}
-		var fernTestValueFundingAccountID v49.TransferLedgerFundingAccountIDRequest
+		var fernTestValueFundingAccountID v50.TransferLedgerFundingAccountIDRequest
 
 		// Act
 		obj.SetFundingAccountID(fernTestValueFundingAccountID)
@@ -199,7 +199,7 @@ func TestSettersMarkExplicitTransferLedgerDepositRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferLedgerDepositRequest{}
-		var fernTestValueDescription v49.SweepDescription
+		var fernTestValueDescription v50.SweepDescription
 
 		// Act
 		obj.SetDescription(fernTestValueDescription)
@@ -230,7 +230,7 @@ func TestSettersMarkExplicitTransferLedgerDepositRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferLedgerDepositRequest{}
-		var fernTestValueIdempotencyKey v49.LedgerDepositIdempotencyKey
+		var fernTestValueIdempotencyKey v50.LedgerDepositIdempotencyKey
 
 		// Act
 		obj.SetIdempotencyKey(fernTestValueIdempotencyKey)
@@ -261,7 +261,7 @@ func TestSettersMarkExplicitTransferLedgerDepositRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferLedgerDepositRequest{}
-		var fernTestValueNetwork v49.TransferAchNetwork
+		var fernTestValueNetwork v50.TransferAchNetwork
 
 		// Act
 		obj.SetNetwork(fernTestValueNetwork)
@@ -317,7 +317,7 @@ func TestSettersTransferLedgerDistributeRequest(t *testing.T) {
 
 	t.Run("SetIdempotencyKey", func(t *testing.T) {
 		obj := &TransferLedgerDistributeRequest{}
-		var fernTestValueIdempotencyKey v49.LedgerDistributeIdempotencyKey
+		var fernTestValueIdempotencyKey v50.LedgerDistributeIdempotencyKey
 		obj.SetIdempotencyKey(fernTestValueIdempotencyKey)
 		assert.Equal(t, fernTestValueIdempotencyKey, obj.IdempotencyKey)
 		assert.NotNil(t, obj.explicitFields)
@@ -431,7 +431,7 @@ func TestSettersMarkExplicitTransferLedgerDistributeRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferLedgerDistributeRequest{}
-		var fernTestValueIdempotencyKey v49.LedgerDistributeIdempotencyKey
+		var fernTestValueIdempotencyKey v50.LedgerDistributeIdempotencyKey
 
 		// Act
 		obj.SetIdempotencyKey(fernTestValueIdempotencyKey)
@@ -618,7 +618,7 @@ func TestSettersTransferLedgerEventListRequest(t *testing.T) {
 
 	t.Run("SetSourceType", func(t *testing.T) {
 		obj := &TransferLedgerEventListRequest{}
-		var fernTestValueSourceType *v49.LedgerEventSourceType
+		var fernTestValueSourceType *v50.LedgerEventSourceType
 		obj.SetSourceType(fernTestValueSourceType)
 		assert.Equal(t, fernTestValueSourceType, obj.SourceType)
 		assert.NotNil(t, obj.explicitFields)
@@ -810,7 +810,7 @@ func TestSettersMarkExplicitTransferLedgerEventListRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferLedgerEventListRequest{}
-		var fernTestValueSourceType *v49.LedgerEventSourceType
+		var fernTestValueSourceType *v50.LedgerEventSourceType
 
 		// Act
 		obj.SetSourceType(fernTestValueSourceType)
@@ -935,7 +935,7 @@ func TestSettersMarkExplicitTransferLedgerEventListRequest(t *testing.T) {
 func TestSettersTransferLedgerWithdrawRequest(t *testing.T) {
 	t.Run("SetOriginatorClientID", func(t *testing.T) {
 		obj := &TransferLedgerWithdrawRequest{}
-		var fernTestValueOriginatorClientID v49.TransferOriginatorClientID
+		var fernTestValueOriginatorClientID v50.TransferOriginatorClientID
 		obj.SetOriginatorClientID(fernTestValueOriginatorClientID)
 		assert.Equal(t, fernTestValueOriginatorClientID, obj.OriginatorClientID)
 		assert.NotNil(t, obj.explicitFields)
@@ -943,7 +943,7 @@ func TestSettersTransferLedgerWithdrawRequest(t *testing.T) {
 
 	t.Run("SetFundingAccountID", func(t *testing.T) {
 		obj := &TransferLedgerWithdrawRequest{}
-		var fernTestValueFundingAccountID v49.TransferLedgerFundingAccountIDRequest
+		var fernTestValueFundingAccountID v50.TransferLedgerFundingAccountIDRequest
 		obj.SetFundingAccountID(fernTestValueFundingAccountID)
 		assert.Equal(t, fernTestValueFundingAccountID, obj.FundingAccountID)
 		assert.NotNil(t, obj.explicitFields)
@@ -967,7 +967,7 @@ func TestSettersTransferLedgerWithdrawRequest(t *testing.T) {
 
 	t.Run("SetDescription", func(t *testing.T) {
 		obj := &TransferLedgerWithdrawRequest{}
-		var fernTestValueDescription v49.SweepDescription
+		var fernTestValueDescription v50.SweepDescription
 		obj.SetDescription(fernTestValueDescription)
 		assert.Equal(t, fernTestValueDescription, obj.Description)
 		assert.NotNil(t, obj.explicitFields)
@@ -975,7 +975,7 @@ func TestSettersTransferLedgerWithdrawRequest(t *testing.T) {
 
 	t.Run("SetIdempotencyKey", func(t *testing.T) {
 		obj := &TransferLedgerWithdrawRequest{}
-		var fernTestValueIdempotencyKey v49.LedgerWithdrawIdempotencyKey
+		var fernTestValueIdempotencyKey v50.LedgerWithdrawIdempotencyKey
 		obj.SetIdempotencyKey(fernTestValueIdempotencyKey)
 		assert.Equal(t, fernTestValueIdempotencyKey, obj.IdempotencyKey)
 		assert.NotNil(t, obj.explicitFields)
@@ -983,7 +983,7 @@ func TestSettersTransferLedgerWithdrawRequest(t *testing.T) {
 
 	t.Run("SetNetwork", func(t *testing.T) {
 		obj := &TransferLedgerWithdrawRequest{}
-		var fernTestValueNetwork v49.TransferNetwork
+		var fernTestValueNetwork v50.TransferNetwork
 		obj.SetNetwork(fernTestValueNetwork)
 		assert.Equal(t, fernTestValueNetwork, obj.Network)
 		assert.NotNil(t, obj.explicitFields)
@@ -996,7 +996,7 @@ func TestSettersMarkExplicitTransferLedgerWithdrawRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferLedgerWithdrawRequest{}
-		var fernTestValueOriginatorClientID v49.TransferOriginatorClientID
+		var fernTestValueOriginatorClientID v50.TransferOriginatorClientID
 
 		// Act
 		obj.SetOriginatorClientID(fernTestValueOriginatorClientID)
@@ -1027,7 +1027,7 @@ func TestSettersMarkExplicitTransferLedgerWithdrawRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferLedgerWithdrawRequest{}
-		var fernTestValueFundingAccountID v49.TransferLedgerFundingAccountIDRequest
+		var fernTestValueFundingAccountID v50.TransferLedgerFundingAccountIDRequest
 
 		// Act
 		obj.SetFundingAccountID(fernTestValueFundingAccountID)
@@ -1120,7 +1120,7 @@ func TestSettersMarkExplicitTransferLedgerWithdrawRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferLedgerWithdrawRequest{}
-		var fernTestValueDescription v49.SweepDescription
+		var fernTestValueDescription v50.SweepDescription
 
 		// Act
 		obj.SetDescription(fernTestValueDescription)
@@ -1151,7 +1151,7 @@ func TestSettersMarkExplicitTransferLedgerWithdrawRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferLedgerWithdrawRequest{}
-		var fernTestValueIdempotencyKey v49.LedgerWithdrawIdempotencyKey
+		var fernTestValueIdempotencyKey v50.LedgerWithdrawIdempotencyKey
 
 		// Act
 		obj.SetIdempotencyKey(fernTestValueIdempotencyKey)
@@ -1182,7 +1182,7 @@ func TestSettersMarkExplicitTransferLedgerWithdrawRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferLedgerWithdrawRequest{}
-		var fernTestValueNetwork v49.TransferNetwork
+		var fernTestValueNetwork v50.TransferNetwork
 
 		// Act
 		obj.SetNetwork(fernTestValueNetwork)

@@ -5,7 +5,7 @@ package plaid
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/plaid/plaid-go/v49/internal"
+	internal "github.com/plaid/plaid-go/v50/internal"
 	big "math/big"
 	time "time"
 )
@@ -1988,7 +1988,7 @@ var (
 	baseReportInvestmentsFieldInvestmentTransactions = big.NewInt(1 << 2)
 )
 
-// A set of fields describing the investments data on an account.
+// A set of fields describing the investments data on an account. Its arrays may be empty.
 type BaseReportInvestments struct {
 	// Quantities and values of securities held in the investment account. Map to the `securities` array for security details.
 	Holdings []*BaseReportInvestmentHolding `json:"holdings" url:"holdings"`
@@ -5377,6 +5377,7 @@ var (
 	craCheckReportCreateBaseReportOptionsFieldGseOptions               = big.NewInt(1 << 1)
 	craCheckReportCreateBaseReportOptionsFieldRequireIdentity          = big.NewInt(1 << 2)
 	craCheckReportCreateBaseReportOptionsFieldHomeLendingReportOptions = big.NewInt(1 << 3)
+	craCheckReportCreateBaseReportOptionsFieldExcludeTransactions      = big.NewInt(1 << 4)
 )
 
 // craCheckReportCreateBaseReportOptionsNullableFields maps the wire names of CraCheckReportCreateBaseReportOptions's nullable fields (required or optional) to their field bits.
@@ -5385,6 +5386,7 @@ var craCheckReportCreateBaseReportOptionsNullableFields = map[string]*big.Int{
 	"gse_options":                 craCheckReportCreateBaseReportOptionsFieldGseOptions,
 	"require_identity":            craCheckReportCreateBaseReportOptionsFieldRequireIdentity,
 	"home_lending_report_options": craCheckReportCreateBaseReportOptionsFieldHomeLendingReportOptions,
+	"exclude_transactions":        craCheckReportCreateBaseReportOptionsFieldExcludeTransactions,
 }
 
 // Defines configuration options to generate a Base Report
@@ -5395,6 +5397,12 @@ type CraCheckReportCreateBaseReportOptions struct {
 	// Indicates that the report must include identity information. If identity information is not available, the report will fail.
 	RequireIdentity          *bool                                   `json:"require_identity,omitempty" url:"require_identity,omitempty"`
 	HomeLendingReportOptions *CraCheckReportHomeLendingReportOptions `json:"home_lending_report_options,omitempty" url:"home_lending_report_options,omitempty"`
+	// When set to `true`, this option excludes account transaction records from the Base Report before it is stored. In the `/cra/check_report/base_report/get` response, each account's `transactions` field remains present as an empty array. This option does not affect insight calculations.
+	//
+	// Omitting this option or setting it to `null` or `false` preserves existing behavior. These values do not override any client configuration that excludes transactions.
+	//
+	// Requests with `exclude_transactions` set to `true` are rejected with an `INVALID_FIELD` error if they also request GSE or Home Lending reports. A Base Report created with this option set to `true` cannot be used to generate those reports later.
+	ExcludeTransactions *bool `json:"exclude_transactions,omitempty" url:"exclude_transactions,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -5429,6 +5437,13 @@ func (c *CraCheckReportCreateBaseReportOptions) GetHomeLendingReportOptions() *C
 		return nil
 	}
 	return c.HomeLendingReportOptions
+}
+
+func (c *CraCheckReportCreateBaseReportOptions) GetExcludeTransactions() *bool {
+	if c == nil {
+		return nil
+	}
+	return c.ExcludeTransactions
 }
 
 func (c *CraCheckReportCreateBaseReportOptions) GetExtraProperties() map[string]interface{} {
@@ -5473,6 +5488,13 @@ func (c *CraCheckReportCreateBaseReportOptions) SetRequireIdentity(requireIdenti
 func (c *CraCheckReportCreateBaseReportOptions) SetHomeLendingReportOptions(homeLendingReportOptions *CraCheckReportHomeLendingReportOptions) {
 	c.HomeLendingReportOptions = homeLendingReportOptions
 	c.require(craCheckReportCreateBaseReportOptionsFieldHomeLendingReportOptions)
+}
+
+// SetExcludeTransactions sets the ExcludeTransactions field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraCheckReportCreateBaseReportOptions) SetExcludeTransactions(excludeTransactions *bool) {
+	c.ExcludeTransactions = excludeTransactions
+	c.require(craCheckReportCreateBaseReportOptionsFieldExcludeTransactions)
 }
 
 func (c *CraCheckReportCreateBaseReportOptions) UnmarshalJSON(data []byte) error {
@@ -7151,15 +7173,21 @@ type CraCheckReportPermissiblePurpose string
 
 const (
 	CraCheckReportPermissiblePurposeAccountReviewCredit     CraCheckReportPermissiblePurpose = "ACCOUNT_REVIEW_CREDIT"
+	CraCheckReportPermissiblePurposeAccountReviewNonCredit  CraCheckReportPermissiblePurpose = "ACCOUNT_REVIEW_NON_CREDIT"
 	CraCheckReportPermissiblePurposeWrittenInstructionOther CraCheckReportPermissiblePurpose = "WRITTEN_INSTRUCTION_OTHER"
+	CraCheckReportPermissiblePurposeSecondaryInvestor       CraCheckReportPermissiblePurpose = "SECONDARY_INVESTOR"
 )
 
 func NewCraCheckReportPermissiblePurposeFromString(s string) (CraCheckReportPermissiblePurpose, error) {
 	switch s {
 	case "ACCOUNT_REVIEW_CREDIT":
 		return CraCheckReportPermissiblePurposeAccountReviewCredit, nil
+	case "ACCOUNT_REVIEW_NON_CREDIT":
+		return CraCheckReportPermissiblePurposeAccountReviewNonCredit, nil
 	case "WRITTEN_INSTRUCTION_OTHER":
 		return CraCheckReportPermissiblePurposeWrittenInstructionOther, nil
+	case "SECONDARY_INVESTOR":
+		return CraCheckReportPermissiblePurposeSecondaryInvestor, nil
 	}
 	var t CraCheckReportPermissiblePurpose
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
@@ -12427,7 +12455,7 @@ var (
 
 // A representation of an Item within a VOA report.
 type CraVoaReportItem struct {
-	// Data about each of the accounts open on the Item.
+	// Data about each of the accounts open on the Item. Investment accounts are included only when `include_investments` in `/cra/check_report/create` or `cra_options.include_investments` in `/link/token/create` was `true`. They are excluded if recent investment data was unavailable at report generation.
 	Accounts []*CraVoaReportAccount `json:"accounts" url:"accounts"`
 	// The full financial institution name associated with the Item.
 	InstitutionName string `json:"institution_name" url:"institution_name"`
