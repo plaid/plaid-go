@@ -24,6 +24,10 @@ GEN_PREDICATE = "https://plaid.com/attestations/sdk-generation/v1"
 RELEASE_PREDICATE = "https://plaid.com/attestations/sdk-release/v1"
 MANIFEST = ".sdk-release/manifest.json"
 GEN_BUNDLE = ".sdk-release/generation.bundle.json"
+FERN_INDEX = ".sdk-release/fern-content.json"
+FERN_BUNDLE = ".sdk-release/fern.bundle.json"
+FERN_PROVENANCE = ".sdk-release/fern-provenance.json"
+EVIDENCE_FILES = (MANIFEST, GEN_BUNDLE, FERN_INDEX, FERN_BUNDLE, FERN_PROVENANCE)
 PUBLIC_REMOTE = "https://github.com/plaid/plaid-go.git"
 
 
@@ -103,8 +107,10 @@ def keys(value, expected, label):
 
 
 def validate_manifest(value):
-    keys(value, "schema_version sdk source config generator legacy content_sha256 generation", "manifest")
-    require(type(value["schema_version"]) is int and value["schema_version"] == 1, "Unsupported manifest schema")
+    require(isinstance(value, dict) and type(value.get("schema_version")) is int and
+            value["schema_version"] in (1, 2), "Unsupported manifest schema")
+    fields = "schema_version sdk source config generator legacy content_sha256 generation"
+    keys(value, fields + (" fern" if value["schema_version"] == 2 else ""), "manifest")
     keys(value["sdk"], "repository version module", "sdk")
     sdk = value["sdk"]
     require(sdk["repository"] == SDK_REPO, "Untrusted SDK repository")
@@ -133,6 +139,9 @@ def validate_manifest(value):
     keys(value["generation"], "repository workflow run_id", "generation")
     require(value["generation"]["repository"] == CONFIG_REPO and value["generation"]["workflow"] == GEN_WORKFLOW, "Untrusted generation workflow")
     decimal(value["generation"]["run_id"], "generation run ID")
+    if value["schema_version"] == 2:
+        from hosted import validate_fern_record
+        validate_fern_record(value["fern"], value)
     return value
 
 
@@ -149,7 +158,8 @@ def tree_files(repo, commit):
         require(mode in ("100644", "100755") and kind == "blob", "Symlinks/submodules are forbidden")
         require(not path.startswith("/") and "\\" not in path and all(part not in ("", ".", "..") and part.lower() != ".git" for part in path.split("/")), "Unsafe tracked path")
         require(not any(ord(char) < 32 or ord(char) == 127 for char in path), "Control character in tracked path")
-        require(not path.startswith(".sdk-release/") or path in (MANIFEST, GEN_BUNDLE), "Unexpected .sdk-release file")
+        require(not path.startswith(".sdk-release/") or path in EVIDENCE_FILES, "Unexpected .sdk-release file")
+        require(path not in EVIDENCE_FILES or mode == "100644", "Release evidence must not be executable")
         entries.append((path, mode, oid))
     objects = list(dict.fromkeys(oid for _, _, oid in entries))
     data = run("git", "-C", repo, "cat-file", "--batch", input=("\n".join(objects) + "\n").encode())
@@ -169,7 +179,7 @@ def tree_files(repo, commit):
 
 def content_bytes(files, legacy_only=False):
     entries = [[path, mode, sha256(data)] for path, (mode, data) in sorted(files.items())
-               if path not in (MANIFEST, GEN_BUNDLE) and (not legacy_only or path.startswith("legacy/"))]
+               if path not in EVIDENCE_FILES and (not legacy_only or path.startswith("legacy/"))]
     return canonical(entries)
 
 
@@ -177,6 +187,14 @@ def validate_tree(repo, commit):
     files = tree_files(repo, commit)
     require(MANIFEST in files and GEN_BUNDLE in files, "SDK has no generation manifest and signed bundle")
     manifest = validate_manifest(parse_json(files[MANIFEST][1]))
+    if manifest["schema_version"] == 2:
+        from hosted import validate_fern_index, validate_fern_provenance
+        require(all(name in files for name in (FERN_INDEX, FERN_BUNDLE, FERN_PROVENANCE)), "Hosted SDK lacks Fern proof files")
+        validate_fern_index(files[FERN_INDEX][1], manifest["fern"])
+        validate_fern_provenance(files[FERN_PROVENANCE][1], manifest["fern"])
+    else:
+        require(not any(name in files for name in (FERN_INDEX, FERN_BUNDLE, FERN_PROVENANCE)),
+                "Local generation must not carry unverified Fern proof")
     require(sha256(content_bytes(files)) == manifest["content_sha256"], "SDK content was changed after generation")
     require(sha256(content_bytes(files, legacy_only=True)) == manifest["legacy"]["tree_sha256"], "Legacy tree digest mismatch")
     require("go.mod" in files and "go.sum" in files, "Missing module files")
@@ -189,6 +207,8 @@ def validate_tree(repo, commit):
     require(metadata.get("cliVersion") == manifest["generator"]["cli_version"], "Fern CLI version mismatch")
     require(metadata["generatorName"] == "fernapi/fern-go-sdk" and isinstance(metadata["generatorVersion"], str)
             and re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", metadata["generatorVersion"]), "Unexpected public generator metadata")
+    if manifest["schema_version"] == 2:
+        require(metadata["generatorVersion"] == manifest["fern"]["generator"]["version"], "Fern proof generator version differs from SDK")
     require(not any(path.endswith("/go.mod") and path.startswith("legacy/") for path in files), "Legacy must share the root module")
     require("legacy/client.go" in files and "legacy/configuration.go" in files, "SDK must bundle legacy")
     return manifest, files
@@ -234,7 +254,19 @@ def verified_attestation(artifact, bundle, *, repository, workflow, ref, commit,
 
 def verify_generation(repo, commit):
     manifest, files = validate_tree(repo, commit)
+    from hosted import validate_generation_mode, verify_fern_evidence
+    config_commit = manifest["config"]["commit"]
+    settings = parse_json(api(f"repos/{CONFIG_REPO}/contents/pipeline/generation/settings.json?ref={config_commit}", raw=True))
+    validate_generation_mode(manifest, settings)
     with tempfile.TemporaryDirectory(prefix="sdk-generation-verification-") as directory:
+        if manifest["schema_version"] == 2:
+            parents = git(repo, "show", "-s", "--format=%P", commit).decode().strip().split()
+            require(parents and parents[0] == manifest["fern"]["sdk_base"], "Hosted SDK base differs from signed Fern request")
+            index = Path(directory) / "fern-content.json"
+            fern_bundle = Path(directory) / "fern.bundle.json"
+            index.write_bytes(files[FERN_INDEX][1])
+            fern_bundle.write_bytes(files[FERN_BUNDLE][1])
+            verify_fern_evidence(index, fern_bundle, manifest["fern"])
         content = Path(directory) / "canonical-content.json"
         bundle = Path(directory) / "generation.bundle.json"
         content.write_bytes(content_bytes(files))

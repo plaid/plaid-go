@@ -18,6 +18,39 @@ record binds the spec, public config commit, immutable generator images, version
 legacy tree and all tracked SDK content. Public Fern metadata contains only the
 CLI, generator and SDK versions; the signed manifest records the shared spec/config commit.
 
+## Fern-hosted generation
+
+Hosted generation uses a schema-2 manifest. Before running generated SDK code,
+Plaid verifies Fern's signed receipt against the expected job, generator, inputs
+and downloaded file tree, then signs a public record of the selected generated files.
+The final generation manifest embeds that record, binding it to the same public
+spec/config commit, SDK version, CLI, generator image, workflow run and SDK base.
+Plaid assembles the maintained SDK files and regenerates `legacy/` separately.
+
+Integration and release verify both Plaid signatures: the Fern verification
+record and the final assembled SDK generation. The SDK retains Fern's original
+signed payload and signature in `.sdk-release/fern-provenance.json`, with the
+unsigned key identifier removed. Its exact bytes and signed job, file tree,
+output mode, inputs and generator must match the Plaid verification record.
+The producer verifies Fern's signature; consumers verify that retained receipt
+against the record and verify Plaid's signatures.
+
+The SDK also stores the selected-file index in `.sdk-release/fern-content.json`
+and its Plaid signature in `.sdk-release/fern.bundle.json`. All three Fern files
+are required for schema 2 and forbidden for schema 1. All five evidence files are
+excluded from the SDK content digest, while each receipt, signature and index is
+checked independently.
+This lets safe retries produce fresh signature encodings without changing the
+SDK's content identity.
+
+The verifier reads `pipeline/generation/settings.json` at the manifest's exact
+public config commit. `generation_mode: fern-hosted` requires schema 2; it cannot
+be downgraded to local generation by removing Fern evidence. Historical settings
+without the field mean `local`, and an explicitly reviewed `local` setting keeps
+the schema-1 fallback. The hosted generator/CLI must also match those reviewed
+settings. A failed Fern job, unavailable receipt or invalid signature stops the
+pipeline; it does not silently fall back to local generation.
+
 ## Major-version transitions
 
 The source generation workflow selects and signs the version. The integration
