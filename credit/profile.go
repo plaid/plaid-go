@@ -4,8 +4,8 @@ package credit
 
 import (
 	json "encoding/json"
-	v49 "github.com/plaid/plaid-go/v49"
-	internal "github.com/plaid/plaid-go/v49/internal"
+	v50 "github.com/plaid/plaid-go/v50"
+	internal "github.com/plaid/plaid-go/v50/internal"
 	big "math/big"
 )
 
@@ -19,13 +19,13 @@ var (
 )
 
 type CraCreditProfileReportGetRequest struct {
-	UserID                           v49.NewUserID                        `json:"user_id" url:"-"`
-	ConsumerReportPermissiblePurpose v49.ConsumerReportPermissiblePurpose `json:"consumer_report_permissible_purpose" url:"-"`
+	UserID                           v50.NewUserID                        `json:"user_id" url:"-"`
+	ConsumerReportPermissiblePurpose v50.ConsumerReportPermissiblePurpose `json:"consumer_report_permissible_purpose" url:"-"`
 	// Client-generated identifier, which can be used by lenders to track loan applications.
 	ClientReportID string                            `json:"client_report_id" url:"-"`
-	ReportType     v49.CraCreditProfileReportType    `json:"report_type" url:"-"`
-	InquiryType    v49.CraCreditProfileInquiryType   `json:"inquiry_type" url:"-"`
-	Version        v49.CraCreditProfileReportVersion `json:"version" url:"-"`
+	ReportType     v50.CraCreditProfileReportType    `json:"report_type" url:"-"`
+	InquiryType    v50.CraCreditProfileInquiryType   `json:"inquiry_type" url:"-"`
+	Version        v50.CraCreditProfileReportVersion `json:"version" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -42,14 +42,14 @@ func (c *CraCreditProfileReportGetRequest) require(field *big.Int) {
 
 // SetUserID sets the UserID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraCreditProfileReportGetRequest) SetUserID(userID v49.NewUserID) {
+func (c *CraCreditProfileReportGetRequest) SetUserID(userID v50.NewUserID) {
 	c.UserID = userID
 	c.require(craCreditProfileReportGetRequestFieldUserID)
 }
 
 // SetConsumerReportPermissiblePurpose sets the ConsumerReportPermissiblePurpose field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraCreditProfileReportGetRequest) SetConsumerReportPermissiblePurpose(consumerReportPermissiblePurpose v49.ConsumerReportPermissiblePurpose) {
+func (c *CraCreditProfileReportGetRequest) SetConsumerReportPermissiblePurpose(consumerReportPermissiblePurpose v50.ConsumerReportPermissiblePurpose) {
 	c.ConsumerReportPermissiblePurpose = consumerReportPermissiblePurpose
 	c.require(craCreditProfileReportGetRequestFieldConsumerReportPermissiblePurpose)
 }
@@ -63,21 +63,21 @@ func (c *CraCreditProfileReportGetRequest) SetClientReportID(clientReportID stri
 
 // SetReportType sets the ReportType field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraCreditProfileReportGetRequest) SetReportType(reportType v49.CraCreditProfileReportType) {
+func (c *CraCreditProfileReportGetRequest) SetReportType(reportType v50.CraCreditProfileReportType) {
 	c.ReportType = reportType
 	c.require(craCreditProfileReportGetRequestFieldReportType)
 }
 
 // SetInquiryType sets the InquiryType field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraCreditProfileReportGetRequest) SetInquiryType(inquiryType v49.CraCreditProfileInquiryType) {
+func (c *CraCreditProfileReportGetRequest) SetInquiryType(inquiryType v50.CraCreditProfileInquiryType) {
 	c.InquiryType = inquiryType
 	c.require(craCreditProfileReportGetRequestFieldInquiryType)
 }
 
 // SetVersion sets the Version field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraCreditProfileReportGetRequest) SetVersion(version v49.CraCreditProfileReportVersion) {
+func (c *CraCreditProfileReportGetRequest) SetVersion(version v50.CraCreditProfileReportVersion) {
 	c.Version = version
 	c.require(craCreditProfileReportGetRequestFieldVersion)
 }

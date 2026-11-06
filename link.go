@@ -5,7 +5,7 @@ package plaid
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/plaid/plaid-go/v49/internal"
+	internal "github.com/plaid/plaid-go/v50/internal"
 	big "math/big"
 	time "time"
 )
@@ -90,7 +90,7 @@ type LinkTokenCreateRequest struct {
 	//
 	// If using Identity Verification, `country_codes` should be set to the country where your company is based, not the country where your user is located. For all other products, `country_codes` represents the location of your user's financial institution.
 	//
-	// If Link is launched with multiple country codes, only products that you are enabled for in all countries will be used by Link. While all countries are enabled by default in Sandbox, in Production only the countries you have requested access for are shown. To request access to additional countries, [file a product access Support ticket](https://dashboard.plaid.com/support/new/product-and-development/product-troubleshooting/request-product-access) via the Plaid dashboard.
+	// If Link is launched with multiple country codes, every product you specify, in any product array, must be enabled for your account in all of the listed countries; otherwise, the request fails with an `INVALID_PRODUCT` error. While all countries are enabled by default in Sandbox, in Production only the countries you have requested access for are shown. To request access to additional countries, [file a product access Support ticket](https://dashboard.plaid.com/support/new/product-and-development/product-troubleshooting/request-product-access) via the Plaid dashboard.
 	//
 	// If using a Link customization, make sure the country codes in the customization match those specified in `country_codes`, or the customization may not be applied.
 	//
@@ -106,8 +106,6 @@ type LinkTokenCreateRequest struct {
 	// To add products without limiting the institution list or account types, use the [`optional_products`](https://plaid.com/docs/api/link/#link-token-create-request-optional-products) or  [`required_if_supported_products`](https://plaid.com/docs/api/link/#link-token-create-request-required-if-supported-products) fields. Products can also be added to an Item by calling the product endpoint after obtaining an access token; this may require the product to be listed in the [`additional_consented_products`](https://plaid.com/docs/api/link/#link-token-create-request-additional-consented-products) array. For details, see [Choosing when to initialize products](https://plaid.com/docs/link/initializing-products/).
 	//
 	// `balance` is *not* a valid value, the Balance product does not require explicit initialization and will automatically be initialized when any other product is initialized.
-	//
-	// If launching Link with CRA products, `cra_base_report` is required and must be included in the `products` array.
 	//
 	// Note that, unless you have opted to disable Instant Match support, institutions that support Instant Match will also be shown in Link if `auth` is specified as a product, even though these institutions do not contain `auth` in their product array.
 	//
@@ -645,6 +643,14 @@ var (
 	accountFiltersResponseFieldInvestment = big.NewInt(1 << 3)
 )
 
+// accountFiltersResponseNullableFields maps the wire names of AccountFiltersResponse's nullable fields (required or optional) to their field bits.
+var accountFiltersResponseNullableFields = map[string]*big.Int{
+	"depository": accountFiltersResponseFieldDepository,
+	"credit":     accountFiltersResponseFieldCredit,
+	"loan":       accountFiltersResponseFieldLoan,
+	"investment": accountFiltersResponseFieldInvestment,
+}
+
 // The `account_filters` specified in the original call to `/link/token/create`.
 type AccountFiltersResponse struct {
 	Depository *DepositoryFilter `json:"depository,omitempty" url:"depository,omitempty"`
@@ -748,6 +754,13 @@ func (a *AccountFiltersResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	a.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, accountFiltersResponseNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		a.require(presentFields)
+	}
 	a.rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -2353,6 +2366,111 @@ func (l *LinkSessionCraItemAddResult) String() string {
 }
 
 var (
+	linkSessionCraReportResultFieldReportID = big.NewInt(1 << 0)
+)
+
+// linkSessionCraReportResultNullableFields maps the wire names of LinkSessionCraReportResult's nullable fields (required or optional) to their field bits.
+var linkSessionCraReportResultNullableFields = map[string]*big.Int{
+	"report_id": linkSessionCraReportResultFieldReportID,
+}
+
+// Plaid Check report details for the Link session.
+type LinkSessionCraReportResult struct {
+	// The identifier of the report being generated. Use it to retrieve the report with `/cra/report/get` once its products are ready. `null` if no report identifier is available for the session.
+	ReportID *string `json:"report_id,omitempty" url:"report_id,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (l *LinkSessionCraReportResult) GetReportID() *string {
+	if l == nil {
+		return nil
+	}
+	return l.ReportID
+}
+
+func (l *LinkSessionCraReportResult) GetExtraProperties() map[string]interface{} {
+	if l == nil {
+		return nil
+	}
+	return l.ExtraProperties
+}
+
+func (l *LinkSessionCraReportResult) require(field *big.Int) {
+	next := new(big.Int)
+	if l.explicitFields != nil {
+		next.Set(l.explicitFields)
+	}
+	next.Or(next, field)
+	l.explicitFields = next
+}
+
+// SetReportID sets the ReportID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (l *LinkSessionCraReportResult) SetReportID(reportID *string) {
+	l.ReportID = reportID
+	l.require(linkSessionCraReportResultFieldReportID)
+}
+
+func (l *LinkSessionCraReportResult) UnmarshalJSON(data []byte) error {
+	type embed LinkSessionCraReportResult
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*l),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*l = LinkSessionCraReportResult(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, linkSessionCraReportResultNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		l.require(presentFields)
+	}
+	l.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (l *LinkSessionCraReportResult) MarshalJSON() ([]byte, error) {
+	type embed LinkSessionCraReportResult
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*l),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, l.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, l.ExtraProperties)
+}
+
+func (l *LinkSessionCraReportResult) String() string {
+	if l == nil {
+		return "<nil>"
+	}
+	if len(l.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(l.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
+}
+
+var (
 	linkSessionCraUpdateResultFieldItemID      = big.NewInt(1 << 0)
 	linkSessionCraUpdateResultFieldAccounts    = big.NewInt(1 << 1)
 	linkSessionCraUpdateResultFieldInstitution = big.NewInt(1 << 2)
@@ -3271,12 +3389,14 @@ var (
 	linkSessionResultsFieldPayrollIncomeResults     = big.NewInt(1 << 4)
 	linkSessionResultsFieldDocumentIncomeResults    = big.NewInt(1 << 5)
 	linkSessionResultsFieldCraDocumentUploadResults = big.NewInt(1 << 6)
+	linkSessionResultsFieldCraReportResults         = big.NewInt(1 << 7)
 )
 
 // linkSessionResultsNullableFields maps the wire names of LinkSessionResults's nullable fields (required or optional) to their field bits.
 var linkSessionResultsNullableFields = map[string]*big.Int{
 	"document_income_results":     linkSessionResultsFieldDocumentIncomeResults,
 	"cra_document_upload_results": linkSessionResultsFieldCraDocumentUploadResults,
+	"cra_report_results":          linkSessionResultsFieldCraReportResults,
 }
 
 // The set of results for a Link session.
@@ -3293,6 +3413,7 @@ type LinkSessionResults struct {
 	PayrollIncomeResults     []*LinkSessionPayrollIncomeResult   `json:"payroll_income_results" url:"payroll_income_results"`
 	DocumentIncomeResults    *CreditSessionDocumentIncomeResult  `json:"document_income_results,omitempty" url:"document_income_results,omitempty"`
 	CraDocumentUploadResults *LinkSessionCraDocumentUploadResult `json:"cra_document_upload_results,omitempty" url:"cra_document_upload_results,omitempty"`
+	CraReportResults         *LinkSessionCraReportResult         `json:"cra_report_results,omitempty" url:"cra_report_results,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -3349,6 +3470,13 @@ func (l *LinkSessionResults) GetCraDocumentUploadResults() *LinkSessionCraDocume
 		return nil
 	}
 	return l.CraDocumentUploadResults
+}
+
+func (l *LinkSessionResults) GetCraReportResults() *LinkSessionCraReportResult {
+	if l == nil {
+		return nil
+	}
+	return l.CraReportResults
 }
 
 func (l *LinkSessionResults) GetExtraProperties() map[string]interface{} {
@@ -3414,6 +3542,13 @@ func (l *LinkSessionResults) SetDocumentIncomeResults(documentIncomeResults *Cre
 func (l *LinkSessionResults) SetCraDocumentUploadResults(craDocumentUploadResults *LinkSessionCraDocumentUploadResult) {
 	l.CraDocumentUploadResults = craDocumentUploadResults
 	l.require(linkSessionResultsFieldCraDocumentUploadResults)
+}
+
+// SetCraReportResults sets the CraReportResults field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (l *LinkSessionResults) SetCraReportResults(craReportResults *LinkSessionCraReportResult) {
+	l.CraReportResults = craReportResults
+	l.require(linkSessionResultsFieldCraReportResults)
 }
 
 func (l *LinkSessionResults) UnmarshalJSON(data []byte) error {
@@ -5497,6 +5632,7 @@ var (
 	linkTokenCreateRequestCraOptionsBaseReportFieldGseOptions               = big.NewInt(1 << 1)
 	linkTokenCreateRequestCraOptionsBaseReportFieldRequireIdentity          = big.NewInt(1 << 2)
 	linkTokenCreateRequestCraOptionsBaseReportFieldHomeLendingReportOptions = big.NewInt(1 << 3)
+	linkTokenCreateRequestCraOptionsBaseReportFieldExcludeTransactions      = big.NewInt(1 << 4)
 )
 
 // linkTokenCreateRequestCraOptionsBaseReportNullableFields maps the wire names of LinkTokenCreateRequestCraOptionsBaseReport's nullable fields (required or optional) to their field bits.
@@ -5505,6 +5641,7 @@ var linkTokenCreateRequestCraOptionsBaseReportNullableFields = map[string]*big.I
 	"gse_options":                 linkTokenCreateRequestCraOptionsBaseReportFieldGseOptions,
 	"require_identity":            linkTokenCreateRequestCraOptionsBaseReportFieldRequireIdentity,
 	"home_lending_report_options": linkTokenCreateRequestCraOptionsBaseReportFieldHomeLendingReportOptions,
+	"exclude_transactions":        linkTokenCreateRequestCraOptionsBaseReportFieldExcludeTransactions,
 }
 
 // Specifies options for initializing Link for use with the Base Report product, specifically the `client_report_id`.
@@ -5515,6 +5652,12 @@ type LinkTokenCreateRequestCraOptionsBaseReport struct {
 	// Indicates that the report must include identity information. If identity information is not available, the report will fail.
 	RequireIdentity          *bool                                   `json:"require_identity,omitempty" url:"require_identity,omitempty"`
 	HomeLendingReportOptions *CraCheckReportHomeLendingReportOptions `json:"home_lending_report_options,omitempty" url:"home_lending_report_options,omitempty"`
+	// When set to `true`, this option excludes account transaction records from the Base Report before it is stored. In the `/cra/check_report/base_report/get` response, each account's `transactions` field remains present as an empty array. This option does not affect insight calculations.
+	//
+	// Omitting this option or setting it to `null` or `false` preserves existing behavior. These values do not override any client configuration that excludes transactions.
+	//
+	// Requests with `exclude_transactions` set to `true` are rejected with an `INVALID_FIELD` error if they also request GSE or Home Lending reports. A Base Report created with this option set to `true` cannot be used to generate those reports later.
+	ExcludeTransactions *bool `json:"exclude_transactions,omitempty" url:"exclude_transactions,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -5549,6 +5692,13 @@ func (l *LinkTokenCreateRequestCraOptionsBaseReport) GetHomeLendingReportOptions
 		return nil
 	}
 	return l.HomeLendingReportOptions
+}
+
+func (l *LinkTokenCreateRequestCraOptionsBaseReport) GetExcludeTransactions() *bool {
+	if l == nil {
+		return nil
+	}
+	return l.ExcludeTransactions
 }
 
 func (l *LinkTokenCreateRequestCraOptionsBaseReport) GetExtraProperties() map[string]interface{} {
@@ -5593,6 +5743,13 @@ func (l *LinkTokenCreateRequestCraOptionsBaseReport) SetRequireIdentity(requireI
 func (l *LinkTokenCreateRequestCraOptionsBaseReport) SetHomeLendingReportOptions(homeLendingReportOptions *CraCheckReportHomeLendingReportOptions) {
 	l.HomeLendingReportOptions = homeLendingReportOptions
 	l.require(linkTokenCreateRequestCraOptionsBaseReportFieldHomeLendingReportOptions)
+}
+
+// SetExcludeTransactions sets the ExcludeTransactions field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (l *LinkTokenCreateRequestCraOptionsBaseReport) SetExcludeTransactions(excludeTransactions *bool) {
+	l.ExcludeTransactions = excludeTransactions
+	l.require(linkTokenCreateRequestCraOptionsBaseReportFieldExcludeTransactions)
 }
 
 func (l *LinkTokenCreateRequestCraOptionsBaseReport) UnmarshalJSON(data []byte) error {
@@ -9111,10 +9268,12 @@ var (
 
 // linkTokenGetMetadataResponseNullableFields maps the wire names of LinkTokenGetMetadataResponse's nullable fields (required or optional) to their field bits.
 var linkTokenGetMetadataResponseNullableFields = map[string]*big.Int{
-	"webhook":      linkTokenGetMetadataResponseFieldWebhook,
-	"language":     linkTokenGetMetadataResponseFieldLanguage,
-	"redirect_uri": linkTokenGetMetadataResponseFieldRedirectURI,
-	"client_name":  linkTokenGetMetadataResponseFieldClientName,
+	"webhook":          linkTokenGetMetadataResponseFieldWebhook,
+	"language":         linkTokenGetMetadataResponseFieldLanguage,
+	"institution_data": linkTokenGetMetadataResponseFieldInstitutionData,
+	"account_filters":  linkTokenGetMetadataResponseFieldAccountFilters,
+	"redirect_uri":     linkTokenGetMetadataResponseFieldRedirectURI,
+	"client_name":      linkTokenGetMetadataResponseFieldClientName,
 }
 
 // An object specifying the arguments originally provided to the `/link/token/create` call.
@@ -9771,7 +9930,13 @@ func (l *LinkTokenGetSessionsResponse) String() string {
 var (
 	linkTokenInvestmentsFieldAllowUnverifiedCryptoWallets = big.NewInt(1 << 0)
 	linkTokenInvestmentsFieldAllowManualEntry             = big.NewInt(1 << 1)
+	linkTokenInvestmentsFieldAsyncUpdate                  = big.NewInt(1 << 2)
 )
+
+// linkTokenInvestmentsNullableFields maps the wire names of LinkTokenInvestments's nullable fields (required or optional) to their field bits.
+var linkTokenInvestmentsNullableFields = map[string]*big.Int{
+	"async_update": linkTokenInvestmentsFieldAsyncUpdate,
+}
 
 // Configuration parameters for the Investments product
 type LinkTokenInvestments struct {
@@ -9779,6 +9944,8 @@ type LinkTokenInvestments struct {
 	AllowUnverifiedCryptoWallets *bool `json:"allow_unverified_crypto_wallets,omitempty" url:"allow_unverified_crypto_wallets,omitempty"`
 	// If `true`, allow users to manually enter Investments account and holdings information. Defaults to `false`.
 	AllowManualEntry *bool `json:"allow_manual_entry,omitempty" url:"allow_manual_entry,omitempty"`
+	// If `true`, only a 30-day initial history of investment transactions is pulled synchronously before the Link session completes, with the full history being pulled asynchronously after Link. When the full history is available, an `INVESTMENTS_TRANSACTIONS: HISTORICAL_UPDATE` webhook will be sent. If `false`, Link pulls the full history before the session completes. Only applies when `investments` is initialized in the `products` array. This field is configurable only for clients created before November 30, 2026, and will default to `false` if omitted. For newer clients created on or after that date, this field is ignored and is automatically `true`.
+	AsyncUpdate *bool `json:"async_update,omitempty" url:"async_update,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -9799,6 +9966,13 @@ func (l *LinkTokenInvestments) GetAllowManualEntry() *bool {
 		return nil
 	}
 	return l.AllowManualEntry
+}
+
+func (l *LinkTokenInvestments) GetAsyncUpdate() *bool {
+	if l == nil {
+		return nil
+	}
+	return l.AsyncUpdate
 }
 
 func (l *LinkTokenInvestments) GetExtraProperties() map[string]interface{} {
@@ -9831,6 +10005,13 @@ func (l *LinkTokenInvestments) SetAllowManualEntry(allowManualEntry *bool) {
 	l.require(linkTokenInvestmentsFieldAllowManualEntry)
 }
 
+// SetAsyncUpdate sets the AsyncUpdate field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (l *LinkTokenInvestments) SetAsyncUpdate(asyncUpdate *bool) {
+	l.AsyncUpdate = asyncUpdate
+	l.require(linkTokenInvestmentsFieldAsyncUpdate)
+}
+
 func (l *LinkTokenInvestments) UnmarshalJSON(data []byte) error {
 	type unmarshaler LinkTokenInvestments
 	var value unmarshaler
@@ -9843,6 +10024,13 @@ func (l *LinkTokenInvestments) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	l.extraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, linkTokenInvestmentsNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		l.require(presentFields)
+	}
 	l.rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -9888,13 +10076,13 @@ var linkTokenInvestmentsAuthNullableFields = map[string]*big.Int{
 	"rollover_401k_enabled":         linkTokenInvestmentsAuthFieldRollover401KEnabled,
 }
 
-// Configuration parameters for the Investments Move product
+// Configuration parameters for the Investments Move product. Masked Number Match and Stated Account Number default to `true` when omitted. Manual Entry defaults to `false`.
 type LinkTokenInvestmentsAuth struct {
-	// If `true`, show institutions that use the manual entry fallback flow.
+	// If `true`, show institutions that use the manual entry fallback flow. If omitted, this defaults to `false`.
 	ManualEntryEnabled *bool `json:"manual_entry_enabled,omitempty" url:"manual_entry_enabled,omitempty"`
-	// If `true`, show institutions that use the masked number match fallback flow.
+	// If `true`, show institutions that use the masked number match fallback flow. If omitted, this defaults to `true`.
 	MaskedNumberMatchEnabled *bool `json:"masked_number_match_enabled,omitempty" url:"masked_number_match_enabled,omitempty"`
-	// If `true`, show institutions that use the stated account number fallback flow.
+	// If `true`, show institutions that use the stated account number fallback flow. If omitted, this defaults to `true`.
 	StatedAccountNumberEnabled *bool `json:"stated_account_number_enabled,omitempty" url:"stated_account_number_enabled,omitempty"`
 	// If `true`, the fee and contribution details for 401k accounts will be returned.
 	Rollover401KEnabled *bool `json:"rollover_401k_enabled,omitempty" url:"rollover_401k_enabled,omitempty"`

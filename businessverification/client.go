@@ -6,10 +6,10 @@ import (
 	context "context"
 	os "os"
 
-	plaid "github.com/plaid/plaid-go/v49"
-	core "github.com/plaid/plaid-go/v49/core"
-	internal "github.com/plaid/plaid-go/v49/internal"
-	option "github.com/plaid/plaid-go/v49/option"
+	plaid "github.com/plaid/plaid-go/v50"
+	core "github.com/plaid/plaid-go/v50/core"
+	internal "github.com/plaid/plaid-go/v50/internal"
+	option "github.com/plaid/plaid-go/v50/option"
 )
 
 type Client struct {
@@ -85,6 +85,14 @@ func (c *Client) Get(
 //
 //	request := &plaid.BusinessVerificationCreateRequest{
 //	    ClientUserID: "your-db-id-3b24110",
+//	    Business: &plaid.BusinessVerificationCreateRequestBusiness{
+//	        Name: "Acme Corporation",
+//	        Address: &plaid.RequestBusinessAddress{
+//	            Street: "123 Main St.",
+//	            City: "Pawnee",
+//	            Country: "US",
+//	        },
+//	    },
 //	}
 //	client.BusinessVerification.Create(
 //	    context.TODO(),

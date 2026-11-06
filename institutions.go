@@ -5,7 +5,7 @@ package plaid
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/plaid/plaid-go/v49/internal"
+	internal "github.com/plaid/plaid-go/v50/internal"
 	big "math/big"
 	time "time"
 )
@@ -493,7 +493,8 @@ var (
 
 // healthIncidentNullableFields maps the wire names of HealthIncident's nullable fields (required or optional) to their field bits.
 var healthIncidentNullableFields = map[string]*big.Int{
-	"end_date": healthIncidentFieldEndDate,
+	"end_date":         healthIncidentFieldEndDate,
+	"incident_updates": healthIncidentFieldIncidentUpdates,
 }
 
 // A status health incident
@@ -505,7 +506,7 @@ type HealthIncident struct {
 	// The title of the incident
 	Title string `json:"title" url:"title"`
 	// Updates on the health incident.
-	IncidentUpdates []*IncidentUpdate `json:"incident_updates" url:"incident_updates"`
+	IncidentUpdates []*IncidentUpdate `json:"incident_updates,omitempty" url:"incident_updates,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`

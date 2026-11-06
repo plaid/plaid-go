@@ -5,7 +5,7 @@ package plaid
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/plaid/plaid-go/v49/internal"
+	internal "github.com/plaid/plaid-go/v50/internal"
 	big "math/big"
 	time "time"
 )
@@ -1314,20 +1314,30 @@ func (l *LoanPaymentsMerchantCounts) String() string {
 //
 // `ACCOUNT_REVIEW_CREDIT`: In connection with a consumer credit transaction for the review or collection of an account pursuant to FCRA Section 604(a)(3)(A).
 //
+// `ACCOUNT_REVIEW_NON_CREDIT`: For a legitimate business need of the information to review a non-credit account provided primarily for personal, family, or household purposes to determine whether the consumer continues to meet the terms of the account pursuant to FCRA Section 604(a)(3)(F)(2).
+//
 // `WRITTEN_INSTRUCTION_OTHER`: In accordance with the written instructions of the consumer pursuant to FCRA Section 604(a)(2), such as when an individual agrees to act as a guarantor or assumes personal liability for a consumer, business, or commercial loan.
+//
+// `SECONDARY_INVESTOR`: As a potential investor or servicer, or current insurer, in connection with a valuation of, or an assessment of the credit or prepayment risks associated with, an existing credit obligation pursuant to FCRA Section 604(a)(3)(E).
 type MonitoringConsumerReportPermissiblePurpose string
 
 const (
 	MonitoringConsumerReportPermissiblePurposeAccountReviewCredit     MonitoringConsumerReportPermissiblePurpose = "ACCOUNT_REVIEW_CREDIT"
+	MonitoringConsumerReportPermissiblePurposeAccountReviewNonCredit  MonitoringConsumerReportPermissiblePurpose = "ACCOUNT_REVIEW_NON_CREDIT"
 	MonitoringConsumerReportPermissiblePurposeWrittenInstructionOther MonitoringConsumerReportPermissiblePurpose = "WRITTEN_INSTRUCTION_OTHER"
+	MonitoringConsumerReportPermissiblePurposeSecondaryInvestor       MonitoringConsumerReportPermissiblePurpose = "SECONDARY_INVESTOR"
 )
 
 func NewMonitoringConsumerReportPermissiblePurposeFromString(s string) (MonitoringConsumerReportPermissiblePurpose, error) {
 	switch s {
 	case "ACCOUNT_REVIEW_CREDIT":
 		return MonitoringConsumerReportPermissiblePurposeAccountReviewCredit, nil
+	case "ACCOUNT_REVIEW_NON_CREDIT":
+		return MonitoringConsumerReportPermissiblePurposeAccountReviewNonCredit, nil
 	case "WRITTEN_INSTRUCTION_OTHER":
 		return MonitoringConsumerReportPermissiblePurposeWrittenInstructionOther, nil
+	case "SECONDARY_INVESTOR":
+		return MonitoringConsumerReportPermissiblePurposeSecondaryInvestor, nil
 	}
 	var t MonitoringConsumerReportPermissiblePurpose
 	return "", fmt.Errorf("%s is not a valid %T", s, t)

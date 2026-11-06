@@ -5,7 +5,7 @@ package plaid
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/plaid/plaid-go/v49/internal"
+	internal "github.com/plaid/plaid-go/v50/internal"
 	big "math/big"
 	time "time"
 )
@@ -1416,7 +1416,7 @@ var assetDetailNullableFields = map[string]*big.Int{
 	"AssetEmployerSponsoredIndicator":    assetDetailFieldAssetEmployerSponsoredIndicator,
 }
 
-// Details about an asset.
+// Details about an asset. In CRA reports, holdings-derived balances, `AssetRetirementIndicator`, and `AssetEmployerSponsoredIndicator` may be omitted when recent investment data was unavailable at report generation. The account's current and available balances remain included.
 type AssetDetail struct {
 	// A vendor created unique Identifier.
 	AssetUniqueIdentifier string `json:"AssetUniqueIdentifier" url:"AssetUniqueIdentifier"`
@@ -2405,6 +2405,7 @@ var (
 
 // Documentation not found in the MISMO model viewer and not provided by Freddie Mac.
 type AssetHoldings struct {
+	// The holdings associated with the account. In CRA reports, this array may be empty when recent investment data was unavailable at report generation.
 	AssetHolding []*AssetHolding `json:"ASSET_HOLDING" url:"ASSET_HOLDING"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
@@ -11583,6 +11584,7 @@ var (
 
 // Documentation not found in the MISMO model viewer and not provided by Freddie Mac.
 type CreditFreddieMacAssetTransactions struct {
+	// The transactions associated with the account. In CRA reports, investment transactions may be excluded when recent investment data was unavailable at report generation. Other account transactions remain included.
 	AssetTransaction []*CreditFreddieMacAssetTransaction `json:"ASSET_TRANSACTION" url:"ASSET_TRANSACTION"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted

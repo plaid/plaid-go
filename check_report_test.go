@@ -12435,6 +12435,14 @@ func TestSettersCraCheckReportCreateBaseReportOptions(t *testing.T) {
 		assert.NotNil(t, obj.explicitFields)
 	})
 
+	t.Run("SetExcludeTransactions", func(t *testing.T) {
+		obj := &CraCheckReportCreateBaseReportOptions{}
+		var fernTestValueExcludeTransactions *bool
+		obj.SetExcludeTransactions(fernTestValueExcludeTransactions)
+		assert.Equal(t, fernTestValueExcludeTransactions, obj.ExcludeTransactions)
+		assert.NotNil(t, obj.explicitFields)
+	})
+
 }
 
 func TestGettersCraCheckReportCreateBaseReportOptions(t *testing.T) {
@@ -12570,6 +12578,39 @@ func TestGettersCraCheckReportCreateBaseReportOptions(t *testing.T) {
 		_ = obj.GetHomeLendingReportOptions() // Should return zero value
 	})
 
+	t.Run("GetExcludeTransactions", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		obj := &CraCheckReportCreateBaseReportOptions{}
+		var expected *bool
+		obj.ExcludeTransactions = expected
+
+		// Act & Assert
+		assert.Equal(t, expected, obj.GetExcludeTransactions(), "getter should return the property value")
+	})
+
+	t.Run("GetExcludeTransactions_NilValue", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		obj := &CraCheckReportCreateBaseReportOptions{}
+		obj.ExcludeTransactions = nil
+
+		// Act & Assert
+		assert.Nil(t, obj.GetExcludeTransactions(), "getter should return nil when property is nil")
+	})
+
+	t.Run("GetExcludeTransactions_NilReceiver", func(t *testing.T) {
+		t.Parallel()
+		var obj *CraCheckReportCreateBaseReportOptions
+		// Should not panic - getters should handle nil receiver gracefully
+		defer func() {
+			if r := recover(); r != nil {
+				t.Errorf("Getter panicked on nil receiver: %v", r)
+			}
+		}()
+		_ = obj.GetExcludeTransactions() // Should return zero value
+	})
+
 }
 
 func TestSettersMarkExplicitCraCheckReportCreateBaseReportOptions(t *testing.T) {
@@ -12674,6 +12715,37 @@ func TestSettersMarkExplicitCraCheckReportCreateBaseReportOptions(t *testing.T) 
 
 		// Act
 		obj.SetHomeLendingReportOptions(fernTestValueHomeLendingReportOptions)
+
+		// Assert - object with explicitly set field can be marshaled/unmarshaled
+		bytes, err := json.Marshal(obj)
+		require.NoError(t, err, "marshaling should succeed for test setup")
+
+		// This test ensures JSON marshaling and unmarshaling succeed when the field has a zero/nil value
+		// Detect if marshaled JSON is an object or primitive to use correct unmarshal target
+		if len(bytes) > 0 && bytes[0] == '{' {
+			// JSON object - unmarshal into map
+			var unmarshaled map[string]interface{}
+			err = json.Unmarshal(bytes, &unmarshaled)
+			require.NoError(t, err, "unmarshaling should succeed for test verification")
+		} else {
+			// JSON primitive (string, number, boolean, null) - unmarshal into interface{}
+			var unmarshaled interface{}
+			err = json.Unmarshal(bytes, &unmarshaled)
+			require.NoError(t, err, "unmarshaling should succeed for test verification")
+		}
+
+		// Note: This does not explicitly assert the presence of a specific JSON field
+		// It verifies that setting a field via setter allows successful JSON round-trip
+	})
+
+	t.Run("SetExcludeTransactions_MarksExplicit", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		obj := &CraCheckReportCreateBaseReportOptions{}
+		var fernTestValueExcludeTransactions *bool
+
+		// Act
+		obj.SetExcludeTransactions(fernTestValueExcludeTransactions)
 
 		// Assert - object with explicitly set field can be marshaled/unmarshaled
 		bytes, err := json.Marshal(obj)
@@ -29271,6 +29343,7 @@ func TestOptionalNullableRoundTripCraCheckReportCreateBaseReportOptions(t *testi
 		"gse_options",
 		"require_identity",
 		"home_lending_report_options",
+		"exclude_transactions",
 	}
 	marshalToMap := func(t *testing.T, obj *CraCheckReportCreateBaseReportOptions) map[string]json.RawMessage {
 		data, err := json.Marshal(obj)
@@ -29283,7 +29356,7 @@ func TestOptionalNullableRoundTripCraCheckReportCreateBaseReportOptions(t *testi
 	t.Run("NullPreserved", func(t *testing.T) {
 		t.Parallel()
 		var obj CraCheckReportCreateBaseReportOptions
-		require.NoError(t, json.Unmarshal([]byte(`{"client_report_id":null,"gse_options":null,"require_identity":null,"home_lending_report_options":null}`), &obj))
+		require.NoError(t, json.Unmarshal([]byte(`{"client_report_id":null,"gse_options":null,"require_identity":null,"home_lending_report_options":null,"exclude_transactions":null}`), &obj))
 		result := marshalToMap(t, &obj)
 		for _, key := range optionalNullableKeys {
 			value, ok := result[key]
@@ -31355,11 +31428,25 @@ func TestEnumCraCheckReportPermissiblePurpose(t *testing.T) {
 		assert.Equal(t, CraCheckReportPermissiblePurpose("ACCOUNT_REVIEW_CREDIT"), val, "enum value should match expected wire value")
 	})
 
+	t.Run("NewFromString_ACCOUNT_REVIEW_NON_CREDIT", func(t *testing.T) {
+		t.Parallel()
+		val, err := NewCraCheckReportPermissiblePurposeFromString("ACCOUNT_REVIEW_NON_CREDIT")
+		assert.NoError(t, err, "valid enum value should not return error")
+		assert.Equal(t, CraCheckReportPermissiblePurpose("ACCOUNT_REVIEW_NON_CREDIT"), val, "enum value should match expected wire value")
+	})
+
 	t.Run("NewFromString_WRITTEN_INSTRUCTION_OTHER", func(t *testing.T) {
 		t.Parallel()
 		val, err := NewCraCheckReportPermissiblePurposeFromString("WRITTEN_INSTRUCTION_OTHER")
 		assert.NoError(t, err, "valid enum value should not return error")
 		assert.Equal(t, CraCheckReportPermissiblePurpose("WRITTEN_INSTRUCTION_OTHER"), val, "enum value should match expected wire value")
+	})
+
+	t.Run("NewFromString_SECONDARY_INVESTOR", func(t *testing.T) {
+		t.Parallel()
+		val, err := NewCraCheckReportPermissiblePurposeFromString("SECONDARY_INVESTOR")
+		assert.NoError(t, err, "valid enum value should not return error")
+		assert.Equal(t, CraCheckReportPermissiblePurpose("SECONDARY_INVESTOR"), val, "enum value should match expected wire value")
 	})
 
 	t.Run("NewFromString_Invalid", func(t *testing.T) {

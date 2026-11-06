@@ -4,7 +4,7 @@ package partner
 
 import (
 	json "encoding/json"
-	v49 "github.com/plaid/plaid-go/v49"
+	v50 "github.com/plaid/plaid-go/v50"
 	assert "github.com/stretchr/testify/assert"
 	require "github.com/stretchr/testify/require"
 	testing "testing"
@@ -13,7 +13,7 @@ import (
 func TestSettersCraPartnerInsightsGetRequest(t *testing.T) {
 	t.Run("SetUserToken", func(t *testing.T) {
 		obj := &CraPartnerInsightsGetRequest{}
-		var fernTestValueUserToken v49.UserToken
+		var fernTestValueUserToken v50.UserToken
 		obj.SetUserToken(fernTestValueUserToken)
 		assert.Equal(t, fernTestValueUserToken, obj.UserToken)
 		assert.NotNil(t, obj.explicitFields)
@@ -21,7 +21,7 @@ func TestSettersCraPartnerInsightsGetRequest(t *testing.T) {
 
 	t.Run("SetUserTier", func(t *testing.T) {
 		obj := &CraPartnerInsightsGetRequest{}
-		var fernTestValueUserTier *v49.CraUserTier
+		var fernTestValueUserTier *v50.CraUserTier
 		obj.SetUserTier(fernTestValueUserTier)
 		assert.Equal(t, fernTestValueUserTier, obj.UserTier)
 		assert.NotNil(t, obj.explicitFields)
@@ -34,7 +34,7 @@ func TestSettersMarkExplicitCraPartnerInsightsGetRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &CraPartnerInsightsGetRequest{}
-		var fernTestValueUserToken v49.UserToken
+		var fernTestValueUserToken v50.UserToken
 
 		// Act
 		obj.SetUserToken(fernTestValueUserToken)
@@ -65,7 +65,7 @@ func TestSettersMarkExplicitCraPartnerInsightsGetRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &CraPartnerInsightsGetRequest{}
-		var fernTestValueUserTier *v49.CraUserTier
+		var fernTestValueUserTier *v50.CraUserTier
 
 		// Act
 		obj.SetUserTier(fernTestValueUserTier)

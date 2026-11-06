@@ -6,11 +6,11 @@ import (
 	context "context"
 	os "os"
 
-	plaid "github.com/plaid/plaid-go/v49"
-	core "github.com/plaid/plaid-go/v49/core"
-	internal "github.com/plaid/plaid-go/v49/internal"
-	option "github.com/plaid/plaid-go/v49/option"
-	account "github.com/plaid/plaid-go/v49/user/account"
+	plaid "github.com/plaid/plaid-go/v50"
+	core "github.com/plaid/plaid-go/v50/core"
+	internal "github.com/plaid/plaid-go/v50/internal"
+	option "github.com/plaid/plaid-go/v50/option"
+	account "github.com/plaid/plaid-go/v50/user/account"
 )
 
 type Client struct {
@@ -270,6 +270,8 @@ func (c *Client) Remove(
 //
 // For Plaid Protect, this endpoint terminates Protect products. For Servicing, it cancels the subscription and preserves CRA Items and historical data for future report requests.
 //
+// To learn how terminating products affects billing, see [Billing](https://plaid.com/docs/account/billing/#subscription-fee).
+//
 // Example:
 //
 //	request := &plaid.UserProductsTerminateRequest{
@@ -289,6 +291,33 @@ func (c *Client) TerminateProducts(
 	opts ...option.RequestOption,
 ) (*plaid.UserProductsTerminateResponse, error) {
 	response, err := c.WithRawResponse.TerminateProducts(
+		ctx,
+		request,
+		opts...,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return response.Body, nil
+}
+
+// Retrieve the user's current Guaranteed ACH per-transaction limit and configured daily, weekly, and monthly ceilings. Amounts are returned as decimal strings in dollars with two decimal places and an ISO currency code. Access to this endpoint must be enabled for your client.
+//
+// Example:
+//
+//	request := &plaid.UserTransferLimitsGetRequest{
+//	    UserID: "user_id",
+//	}
+//	client.User.GetTransferLimits(
+//	    context.TODO(),
+//	    request,
+//	)
+func (c *Client) GetTransferLimits(
+	ctx context.Context,
+	request *plaid.UserTransferLimitsGetRequest,
+	opts ...option.RequestOption,
+) (*plaid.UserTransferLimitsGetResponse, error) {
+	response, err := c.WithRawResponse.GetTransferLimits(
 		ctx,
 		request,
 		opts...,

@@ -4,8 +4,8 @@ package transfer
 
 import (
 	json "encoding/json"
-	v49 "github.com/plaid/plaid-go/v49"
-	internal "github.com/plaid/plaid-go/v49/internal"
+	v50 "github.com/plaid/plaid-go/v50"
+	internal "github.com/plaid/plaid-go/v50/internal"
 	big "math/big"
 )
 
@@ -14,7 +14,7 @@ var (
 )
 
 type TransferRefundCancelRequest struct {
-	RefundID v49.TransferRefundID `json:"refund_id" url:"-"`
+	RefundID v50.TransferRefundID `json:"refund_id" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -31,7 +31,7 @@ func (t *TransferRefundCancelRequest) require(field *big.Int) {
 
 // SetRefundID sets the RefundID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferRefundCancelRequest) SetRefundID(refundID v49.TransferRefundID) {
+func (t *TransferRefundCancelRequest) SetRefundID(refundID v50.TransferRefundID) {
 	t.RefundID = refundID
 	t.require(transferRefundCancelRequestFieldRefundID)
 }
@@ -64,9 +64,9 @@ var (
 )
 
 type TransferRefundCreateRequest struct {
-	TransferID     v49.TransferIDForRefund          `json:"transfer_id" url:"-"`
-	Amount         v49.TransferRefundAmount         `json:"amount" url:"-"`
-	IdempotencyKey v49.TransferRefundIdempotencyKey `json:"idempotency_key" url:"-"`
+	TransferID     v50.TransferIDForRefund          `json:"transfer_id" url:"-"`
+	Amount         v50.TransferRefundAmount         `json:"amount" url:"-"`
+	IdempotencyKey v50.TransferRefundIdempotencyKey `json:"idempotency_key" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -83,21 +83,21 @@ func (t *TransferRefundCreateRequest) require(field *big.Int) {
 
 // SetTransferID sets the TransferID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferRefundCreateRequest) SetTransferID(transferID v49.TransferIDForRefund) {
+func (t *TransferRefundCreateRequest) SetTransferID(transferID v50.TransferIDForRefund) {
 	t.TransferID = transferID
 	t.require(transferRefundCreateRequestFieldTransferID)
 }
 
 // SetAmount sets the Amount field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferRefundCreateRequest) SetAmount(amount v49.TransferRefundAmount) {
+func (t *TransferRefundCreateRequest) SetAmount(amount v50.TransferRefundAmount) {
 	t.Amount = amount
 	t.require(transferRefundCreateRequestFieldAmount)
 }
 
 // SetIdempotencyKey sets the IdempotencyKey field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferRefundCreateRequest) SetIdempotencyKey(idempotencyKey v49.TransferRefundIdempotencyKey) {
+func (t *TransferRefundCreateRequest) SetIdempotencyKey(idempotencyKey v50.TransferRefundIdempotencyKey) {
 	t.IdempotencyKey = idempotencyKey
 	t.require(transferRefundCreateRequestFieldIdempotencyKey)
 }
@@ -128,7 +128,7 @@ var (
 )
 
 type TransferRefundGetRequest struct {
-	RefundID v49.TransferRefundID `json:"refund_id" url:"-"`
+	RefundID v50.TransferRefundID `json:"refund_id" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -145,7 +145,7 @@ func (t *TransferRefundGetRequest) require(field *big.Int) {
 
 // SetRefundID sets the RefundID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferRefundGetRequest) SetRefundID(refundID v49.TransferRefundID) {
+func (t *TransferRefundGetRequest) SetRefundID(refundID v50.TransferRefundID) {
 	t.RefundID = refundID
 	t.require(transferRefundGetRequestFieldRefundID)
 }
