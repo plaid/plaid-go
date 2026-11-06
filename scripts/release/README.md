@@ -102,8 +102,9 @@ to the GitHub Actions App (integration ID `15368`), alongside CircleCI. This is 
 server-enforced condition: the merger App has no status-write permission and
 cannot satisfy it by calling the merge API directly.
 
-Only the trusted integration check job receives `statuses: write`. It first marks
-each PR head pending, then grants success after complete signed-generation and
+Only the trusted integration check job receives `statuses: write`. It reports a
+status only when the verified outcome changes, avoiding GitHub's per-commit status
+limit. Success requires complete signed-generation and
 approved-path checks, or after exact-head human approval and GitHub's `APPROVED`
 review decision for a manual PR. Pending checks or missing reviews leave pending;
 verification errors mark failure. This preserves separately reviewed SDK/control

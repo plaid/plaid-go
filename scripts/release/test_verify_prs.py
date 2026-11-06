@@ -52,7 +52,7 @@ class VerificationTests(unittest.TestCase):
 
     def test_human_path_requires_exact_head_approval_and_github_review_decision(self):
         self.verify()
-        self.assertEqual(self.statuses, [(self.head, "pending"), (self.head, "success")])
+        self.assertEqual(self.statuses, [(self.head, "success")])
         for review in ([], [{"state": "APPROVED", "commit_id": "c" * 40}]):
             self.statuses.clear(); self.reviews = review; self.verify()
             self.assertEqual(self.statuses, [(self.head, "pending")])
@@ -70,7 +70,7 @@ class VerificationTests(unittest.TestCase):
         self.statuses.clear()
         with patch.object(integrate, "check", side_effect=policy.ReleaseError("bad signed output")), self.assertRaises(policy.ReleaseError):
             self.verify()
-        self.assertEqual(self.statuses, [(self.head, "pending"), (self.head, "failure")])
+        self.assertEqual(self.statuses, [(self.head, "failure")])
 
     def test_pending_ci_clears_prior_success_without_self_status_deadlock(self):
         with patch.object(integrate, "ci_and_reviews", side_effect=integrate.NotReady("pending")):
@@ -88,12 +88,12 @@ class VerificationTests(unittest.TestCase):
         moved = copy.deepcopy(self.pull); moved["head"]["sha"] = "c" * 40
         with patch.object(verify_prs, "api", side_effect=[copy.deepcopy(self.pull), moved]), self.assertRaisesRegex(policy.ReleaseError, "changed before"):
             self.verify()
-        self.assertEqual(self.statuses, [(self.head, "pending"), (self.head, "failure")])
+        self.assertEqual(self.statuses, [(self.head, "failure")])
 
     def test_status_credentials_are_only_subprocess_environment(self):
         # Restore the real reporter while keeping its subprocess boundary mocked.
         self.patches[2].stop()
-        with patch.dict(os.environ, {"SDK_VERIFICATION_STATUS_TOKEN": "status-fixture", "GITHUB_RUN_ID": "123"}), patch.object(verify_prs, "run", return_value=b"{}") as command:
+        with patch.dict(os.environ, {"SDK_VERIFICATION_STATUS_TOKEN": "status-fixture", "GITHUB_RUN_ID": "123"}), patch.object(verify_prs, "api", return_value=[]), patch.object(verify_prs, "run", return_value=b"{}") as command:
             verify_prs.report(self.head, "pending")
         args, kwargs = command.call_args
         self.assertNotIn("status-fixture", args)
@@ -141,6 +141,95 @@ class VerificationTests(unittest.TestCase):
         with patch('sys.argv', ['verify_prs', '--control', 'control', '--control-commit', self.base]), patch.object(integrate, 'context'), patch.dict(os.environ, {"SDK_INTEGRATION_DRY_RUN": "true"}):
             verify_prs.main()
         self.assertEqual(self.statuses, [])
+
+    def test_repeated_scans_do_not_exhaust_github_status_limit(self):
+        # Exercise the real reporter; only GitHub's API/subprocess boundary is fake.
+        self.patches[2].stop()
+        remote_statuses, writes = [], []
+
+        def api(path, **kwargs):
+            if "/statuses?" in path:
+                return copy.deepcopy(remote_statuses)
+            return copy.deepcopy(self.pull)
+
+        def run(*args, **kwargs):
+            if "--method" in args:
+                if len(writes) >= 1000:
+                    raise policy.ReleaseError("GitHub rejects more than 1000 statuses per SHA/context")
+                status = json.loads(kwargs["input"])
+                writes.append(status["state"])
+                remote_statuses.insert(0, {**status, "creator": {"id": integrate.ACTIONS_BOT_ID}})
+                return b"{}"
+            if "graphql" in args:
+                return json.dumps({"data": {"repository": {"pullRequest": self.decision}}}).encode()
+            return b""
+
+        environment = {"SDK_VERIFICATION_STATUS_TOKEN": "status-fixture", "GITHUB_RUN_ID": "123"}
+        with patch.object(verify_prs, "api", side_effect=api), patch.object(verify_prs, "run", side_effect=run), patch.dict(os.environ, environment):
+            for expected in ("success", "pending", "failure"):
+                with self.subTest(expected=expected):
+                    if expected == "pending":
+                        self.reviews = []
+                    elif expected == "failure":
+                        self.pull["draft"] = True
+                    remote_statuses.clear()
+                    writes.clear()
+                    for _ in range(1001):
+                        if expected == "failure":
+                            with self.assertRaisesRegex(policy.ReleaseError, "open ready PR"):
+                                self.verify()
+                        else:
+                            self.verify()
+                    self.assertEqual(writes, [expected])
+
+
+class StatusReportingTests(unittest.TestCase):
+    def setUp(self):
+        self.head = "a" * 40
+        self.statuses, self.writes = [], []
+        self.environment = patch.dict(os.environ, {"SDK_VERIFICATION_STATUS_TOKEN": "status-fixture", "GITHUB_RUN_ID": "123"})
+        self.environment.start()
+        self.addCleanup(self.environment.stop)
+        read = patch.object(verify_prs, "api", side_effect=lambda *a, **kw: copy.deepcopy(self.statuses))
+        read.start()
+        self.addCleanup(read.stop)
+        write = patch.object(verify_prs, "run", side_effect=self.write)
+        write.start()
+        self.addCleanup(write.stop)
+
+    def write(self, *args, **kwargs):
+        status = json.loads(kwargs["input"])
+        self.writes.append(status["state"])
+        self.statuses.insert(0, {**status, "creator": {"id": integrate.ACTIONS_BOT_ID}})
+        return b"{}"
+
+    def test_pending_and_failure_replace_success_without_repeating_unchanged_states(self):
+        for state in ("success", "pending", "failure", "success"):
+            verify_prs.report(self.head, state)
+            verify_prs.report(self.head, state)
+        self.assertEqual(self.writes, ["success", "pending", "failure", "success"])
+
+    def test_untrusted_same_state_does_not_suppress_corrective_write(self):
+        verify_prs.report(self.head, "success")
+        for mutation in ({"creator": {"id": 1}}, {"creator": None},
+                         {"target_url": "https://example.com/123"}, {"target_url": None}):
+            with self.subTest(mutation=mutation):
+                self.statuses[0].update(mutation)
+                before = len(self.writes)
+                verify_prs.report(self.head, "success")
+                self.assertEqual(len(self.writes), before + 1)
+
+    def test_latest_status_wins_even_with_different_context_case(self):
+        verify_prs.report(self.head, "success")
+        self.statuses.insert(0, {**self.statuses[0], "context": "SDK-GENERATION/VERIFIED", "state": "pending"})
+        verify_prs.report(self.head, "success")
+        self.assertEqual(self.writes, ["success", "success"])
+
+    def test_deduplication_read_failure_still_revokes_success(self):
+        verify_prs.report(self.head, "success")
+        with patch.object(verify_prs, "api", side_effect=policy.ReleaseError("GitHub read failed")):
+            verify_prs.report(self.head, "failure")
+        self.assertEqual(self.writes, ["success", "failure"])
 
 
 if __name__ == '__main__':
