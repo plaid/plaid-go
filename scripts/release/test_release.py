@@ -291,7 +291,7 @@ class ReleaseTests(unittest.TestCase):
     def automatic_merge(self):
         self.reviews = []
         self.pull.update(user={"type": "Bot", "id": 1001}, merged_by={"type": "Bot", "id": 1002})
-        self.pull["head"].update(repo={"full_name": policy.SDK_REPO}, ref="sdk-generation/go-v49-" + "a" * 20)
+        self.pull["head"].update(repo={"full_name": policy.SDK_REPO}, ref=f"sdk-generation/go-v{self.manifest['sdk']['version'].split('.')[0]}-" + "a" * 20)
         return {"SDK_AUTOMERGE_ENABLED": "true", "SDK_PR_APP_BOT_ID": "1001", "SDK_INTEGRATION_APP_BOT_ID": "1002"}
 
     def test_configured_automatic_merge_needs_no_human_approval(self):
@@ -494,6 +494,69 @@ class ReleaseTests(unittest.TestCase):
             self.assertEqual(self.publish_call(publish_requested=True), "already-published")
         self.assertEqual(self.command("git", "-C", self.remote, "rev-parse", "v49.0.0^{}").decode().strip(), self.control_commit)
         self.assertEqual(self.command("git", "-C", self.remote, "rev-parse", "v49.1.0^{}").decode().strip(), self.sha)
+
+    def set_candidate_version(self, version):
+        for artifact in self.out.iterdir():
+            artifact.unlink()
+        self.manifest["sdk"].update(version=version, module=f"github.com/plaid/plaid-go/v{version.split('.')[0]}")
+        self.metadata["sdkVersion"] = "v" + version
+        self.write(".fern/metadata.json", json.dumps(self.metadata))
+        self.write("go.mod", f"module {self.manifest['sdk']['module']}\n\ngo 1.24\n")
+        self.refresh_content()
+        self.command("git", "-C", self.repo, "push", "-q", "origin", "master")
+
+    def test_major_release_packages_both_clients_and_signs_only_new_tag(self):
+        settings = self.prepare_manual_predecessor()
+        self.set_candidate_version("50.0.0")
+        self.prepare_artifacts()
+        settings.update(self.automatic_merge())
+        settings.update(SDK_RELEASE_PUBLISH="true", SDK_RELEASE_PUSH_TOKEN="fixture-token",
+                        SDK_RELEASE_SIGNING_PRIVATE_KEY=self.key.read_text())
+        with zipfile.ZipFile(self.out / "plaid-go-v50.0.0.zip") as zipped:
+            self.assertIn("github.com/plaid/plaid-go/v50@v50.0.0/sdk.go", zipped.namelist())
+            self.assertIn("github.com/plaid/plaid-go/v50@v50.0.0/legacy/client.go", zipped.namelist())
+        with self.mock_verifier(), patch.dict(os.environ, settings):
+            self.assertEqual(self.publish_call(publish_requested=True), "published")
+            self.assertEqual(self.publish_call(publish_requested=True), "already-published")
+        self.assertEqual(self.command("git", "-C", self.remote, "rev-parse", "v49.0.0^{}").decode().strip(), self.control_commit)
+        self.assertEqual(self.command("git", "-C", self.remote, "rev-parse", "v50.0.0^{}").decode().strip(), self.sha)
+        # Later majors use the prior signed-generation manifest, not manual pins.
+        first_major_commit = self.sha
+        for name in list(settings):
+            if name.startswith("SDK_RELEASE_MANUAL_PREDECESSOR_"):
+                del settings[name]
+        for version in ("50.1.0", "51.0.0"):
+            self.set_candidate_version(version)
+            self.prepare_artifacts()
+            settings.update(self.automatic_merge())
+            with self.subTest(version=version), self.mock_verifier(), patch.dict(os.environ, settings):
+                self.assertEqual(self.publish_call(publish_requested=True), "published")
+                self.assertEqual(self.publish_call(publish_requested=True), "already-published")
+            self.assertEqual(self.command("git", "-C", self.remote, "rev-parse", f"v{version}^{{}}").decode().strip(), self.sha)
+        self.assertEqual(self.command("git", "-C", self.remote, "rev-parse", "v50.0.0^{}").decode().strip(), first_major_commit)
+        self.assertEqual(self.command("git", "-C", self.remote, "rev-parse", "v51.0.0^{}").decode().strip(), self.sha)
+
+    def test_major_release_requires_legacy_and_matching_module(self):
+        self.set_candidate_version("50.0.0")
+        (self.repo / "legacy/client.go").unlink()
+        self.refresh_content()
+        with self.assertRaisesRegex(policy.ReleaseError, "must bundle legacy"):
+            policy.validate_tree(self.repo, self.sha)
+        self.write("legacy/client.go", "package legacy\n")
+        self.write("go.mod", "module github.com/plaid/plaid-go/v49\n")
+        self.refresh_content()
+        with self.assertRaisesRegex(policy.ReleaseError, "module differs"):
+            policy.validate_tree(self.repo, self.sha)
+
+    def test_publisher_rejects_skipped_or_noninitial_major_without_writing(self):
+        settings = self.prepare_manual_predecessor()
+        for version in ("51.0.0", "50.1.0", "50.0.1", "50.0.0-rc.1"):
+            self.set_candidate_version(version)
+            self.prepare_artifacts()
+            with self.subTest(version=version), self.mock_verifier(), patch.dict(os.environ, settings):
+                with self.assertRaisesRegex(policy.ReleaseError, "immediate next major"):
+                    self.publish_call()
+            self.assertEqual(self.command("git", "-C", self.remote, "tag").strip(), b"v49.0.0")
 
     def test_git_url_rewrites_fail_before_network_in_all_config_scopes(self):
         remote = policy.PUBLIC_REMOTE

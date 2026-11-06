@@ -88,6 +88,16 @@ def version(value):
         require(not (identifier.isdigit() and len(identifier) > 1 and identifier.startswith("0")), "Invalid prerelease version")
 
 
+def major_transition(previous_major, candidate_version):
+    """Allow the current module line or exactly the next stable major's first release."""
+    version(candidate_version)
+    candidate_major = int(candidate_version.split(".")[0])
+    require(candidate_major == previous_major or
+            (candidate_major == previous_major + 1 and candidate_version == f"{candidate_major}.0.0"),
+            "SDK major transition must be the immediate next major at .0.0")
+    return candidate_major
+
+
 def keys(value, expected, label):
     require(isinstance(value, dict) and set(value) == set(expected.split()), f"Invalid {label} fields")
 
@@ -180,8 +190,7 @@ def validate_tree(repo, commit):
     require(metadata["generatorName"] == "fernapi/fern-go-sdk" and isinstance(metadata["generatorVersion"], str)
             and re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", metadata["generatorVersion"]), "Unexpected public generator metadata")
     require(not any(path.endswith("/go.mod") and path.startswith("legacy/") for path in files), "Legacy must share the root module")
-    if manifest["sdk"]["version"].split(".")[0] == "49":
-        require("legacy/client.go" in files and "legacy/configuration.go" in files, "v49 must bundle legacy")
+    require("legacy/client.go" in files and "legacy/configuration.go" in files, "SDK must bundle legacy")
     return manifest, files
 
 
