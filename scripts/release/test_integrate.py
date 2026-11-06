@@ -25,7 +25,7 @@ class IntegrationTests(unittest.TestCase):
             "GIT_AUTHOR_NAME": "Fixture", "GIT_COMMITTER_NAME": "Fixture",
             "GIT_AUTHOR_EMAIL": "fixture@example.com", "GIT_COMMITTER_EMAIL": "fixture@example.com",
             "SDK_AUTOMERGE_ENABLED": "true", "SDK_PR_APP_BOT_ID": "123", "SDK_CIRCLECI_STATUS_ACTOR_ID": "456",
-            "SDK_INTEGRATION_APP_BOT_ID": "789",
+            "SDK_INTEGRATION_APP_BOT_ID": "789", "SDK_REVIEW_RULESET_ID": "12345",
             "GITHUB_REPOSITORY": policy.SDK_REPO, "GITHUB_REF": "refs/heads/master", "GITHUB_REF_PROTECTED": "true",
             "GITHUB_WORKFLOW_REF": f"{policy.SDK_REPO}/{integrate.WORKFLOW}@refs/heads/master", "GITHUB_EVENT_NAME": "schedule",
             "GH_TOKEN": "read-only-fixture",
@@ -56,6 +56,14 @@ class IntegrationTests(unittest.TestCase):
                               "repo": {"full_name": policy.SDK_REPO}}}
         self.branch = {"protected": True, "commit": {"sha": self.base}}
         self.protection = {"required_status_checks": {"strict": True, "contexts": [integrate.CI_CONTEXT]}}
+        self.effective_rules = [{"type": "pull_request", "ruleset_id": 12345}]
+        self.ruleset = {"id": 12345, "source_type": "Repository", "source": policy.SDK_REPO,
+                        "target": "branch", "enforcement": "active",
+                        "conditions": {"ref_name": {"include": ["refs/heads/master"], "exclude": []}},
+                        "rules": [{"type": "pull_request", "parameters": {"required_approving_review_count": 1,
+                                   "require_code_owner_review": True, "dismiss_stale_reviews_on_push": True}}],
+                        "current_user_can_bypass": "pull_requests_only"}
+        self.ruleset_tokens = []
         self.statuses = [{"context": integrate.CI_CONTEXT, "state": "success", "creator": {"id": 456},
                           "target_url": "https://circleci.com/gh/plaid/plaid-go/123"}]
         self.combined = {"sha": self.head, "state": "success"}
@@ -99,6 +107,11 @@ class IntegrationTests(unittest.TestCase):
             return copy.deepcopy(self.branch)
         if path.endswith("/branches/master/protection"):
             return copy.deepcopy(self.protection)
+        if "/rules/branches/master?" in path:
+            return copy.deepcopy(self.effective_rules)
+        if path.endswith("/rulesets/12345"):
+            self.ruleset_tokens.append(kwargs.get("token"))
+            return copy.deepcopy(self.ruleset)
         if path.endswith("/pulls/42"):
             return copy.deepcopy(self.pull)
         if "/pulls?" in path:
@@ -340,6 +353,71 @@ class IntegrationTests(unittest.TestCase):
             with self.subTest(change=change), self.assertRaisesRegex(policy.ReleaseError, "strict"):
                 self.check()
             self.protection = original
+
+    def test_review_ruleset_must_be_active_applicable_and_approval_only(self):
+        original = copy.deepcopy(self.ruleset)
+        mutations = [
+            lambda rule: rule.update(id=999),
+            lambda rule: rule.update(source="other/plaid-go"),
+            lambda rule: rule.update(source_type="Organization"),
+            lambda rule: rule.update(target="tag"),
+            lambda rule: rule.update(enforcement="disabled"),
+            lambda rule: rule.update(enforcement="evaluate"),
+            lambda rule: rule["conditions"]["ref_name"].update(include=["refs/heads/other"]),
+            lambda rule: rule["conditions"]["ref_name"].update(exclude=["refs/heads/master"]),
+            lambda rule: rule["rules"].append({"type": "required_status_checks"}),
+            lambda rule: rule["rules"][0]["parameters"].update(required_approving_review_count=0),
+            lambda rule: rule["rules"][0]["parameters"].update(require_code_owner_review=False),
+            lambda rule: rule["rules"][0]["parameters"].update(dismiss_stale_reviews_on_push=False),
+        ]
+        for index, mutate in enumerate(mutations):
+            self.ruleset = copy.deepcopy(original)
+            mutate(self.ruleset)
+            with self.subTest(case=index), self.assertRaises(policy.ReleaseError):
+                self.check()
+        self.ruleset = original
+        self.effective_rules = [{"type": "pull_request", "ruleset_id": 999}]
+        with self.assertRaisesRegex(policy.ReleaseError, "not active on master"):
+            self.check()
+
+    def test_missing_review_ruleset_id_or_classic_review_bypass_is_rejected(self):
+        for value in ("", "0", "not-an-id"):
+            with self.subTest(value=value), patch.dict(os.environ, {"SDK_REVIEW_RULESET_ID": value}), self.assertRaises(policy.ReleaseError):
+                self.check()
+        self.protection["required_pull_request_reviews"] = {"required_approving_review_count": 1}
+        with self.assertRaisesRegex(policy.ReleaseError, "classic approval bypass"):
+            self.check()
+
+    def test_broad_or_missing_merger_bypass_stops_before_write(self):
+        verified = self.check()
+        for capability in (None, "never", "always", "exempt", "pull_request", "unknown"):
+            self.ruleset["current_user_can_bypass"] = capability
+            with self.subTest(capability=capability), patch.dict(os.environ, {"SDK_INTEGRATION_TOKEN": "write-fixture"}):
+                with patch.object(integrate, "run", side_effect=AssertionError("Must not merge")), self.assertRaisesRegex(policy.ReleaseError, "PR-only approval bypass"):
+                    integrate.merge(verified)
+
+    def test_read_phase_does_not_assume_capability_but_write_token_must_prove_it(self):
+        original_api = self.api
+        def token_specific(path, **kwargs):
+            response = original_api(path, **kwargs)
+            if "/rulesets/" in path:
+                response.pop("bypass_actors", None)
+                response["current_user_can_bypass"] = "pull_requests_only" if kwargs.get("token") == "write-fixture" else "never"
+            return response
+        with patch.object(integrate, "api", side_effect=token_specific):
+            verified = self.check()
+            with patch.dict(os.environ, {"SDK_INTEGRATION_TOKEN": "write-fixture"}), patch.object(integrate, "run", return_value=json.dumps({"merged": True, "sha": "e" * 40}).encode()):
+                integrate.merge(verified)
+        self.assertEqual(self.ruleset_tokens, [None, "write-fixture"])
+        self.assertEqual(os.environ["GH_TOKEN"], "read-only-fixture")
+
+    def test_api_token_override_is_scoped_to_read_subprocess_environment(self):
+        with patch.object(policy, "run", return_value=b'{}') as command:
+            policy.api("repos/plaid/plaid-go/rulesets/12345", token="write-fixture")
+        args, kwargs = command.call_args
+        self.assertNotIn("write-fixture", args)
+        self.assertEqual(kwargs["env"]["GH_TOKEN"], "write-fixture")
+        self.assertEqual(os.environ["GH_TOKEN"], "read-only-fixture")
 
     def test_pending_failed_stale_or_wrong_author_ci_cannot_merge(self):
         original = copy.deepcopy(self.statuses[0])

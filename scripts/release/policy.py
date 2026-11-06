@@ -247,13 +247,13 @@ def verify_generation(repo, commit):
     return manifest, files
 
 
-def api(path, paginate=False, raw=False):
+def api(path, paginate=False, raw=False, token=None):
     arguments = ["gh", "api", "--hostname", "github.com", path]
     if paginate:
         arguments += ["--paginate", "--slurp"]
     if raw:
         arguments += ["-H", "Accept: application/vnd.github.raw+json"]
-    result = run(*arguments)
+    result = run(*arguments, env=dict(os.environ, GH_TOKEN=token, GH_HOST="github.com")) if token is not None else run(*arguments)
     if raw:
         return result
     value = parse_json(result)

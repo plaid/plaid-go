@@ -73,17 +73,29 @@ expand these approved paths or establish that generated code is correct.
 
 ## Required GitHub setup
 
-Verify that GitHub accepts the CODEOWNERS entries and enable required code-owner
-review. Keep required SDK CI and strict up-to-date checks on `master`. Human changes to
-controls, config and workflows require review. The dedicated integration App needs
-an exception to the PR approval requirement for generated SDK PRs; it must not
-bypass required status checks. Its workflow independently verifies the generation
-signature, author ID, exact head/base, maintained files and CI identity before
-merging. The review exception is attached to the App, not to particular PR
-contents; our verifier enforces the generated-content restriction. The current
-verifier reads classic branch protection. A rulesets-only setup is not supported
-without extending that check, and hosted tests must prove CI cannot be bypassed.
-A bot must never post a rubber-stamp approval to satisfy review rules.
+Verify that GitHub accepts the CODEOWNERS entries. Keep strict, up-to-date required
+SDK CI in classic branch protection on `master`, with no classic PR approval
+requirement or classic approval bypass. Human approval is enforced separately by
+an active repository branch ruleset that explicitly includes `refs/heads/master`
+without exclusions. It must contain only a pull-request rule requiring at least
+one approval, code-owner review, and dismissal of stale reviews.
+
+Set `SDK_REVIEW_RULESET_ID` to that ruleset's numeric ID. Give only the integration
+App bypass on this approval ruleset with mode `pull_request` ("For pull requests
+only"). Do not use `always` or `exempt`, and do not place required CI in the
+bypassed ruleset. PR-only mode prevents direct pushes; it applies to the App's PR
+operations, not to specific generated files. Our verifier enforces the generated
+content restrictions and checks the App's effective PR-only capability using the
+exact installation token about to merge. The read-only phase checks ruleset
+identity, applicability and review requirements without assuming its token can merge.
+
+GitHub can omit the full bypass list from API responses to limited tokens. Runtime
+verification checks our merger's effective capability; the setup audit must still
+confirm that no other identity has unintended bypass rights. A rulesets-only CI
+setup remains unsupported: the verifier deliberately requires classic strict CI
+alongside the native PR-only approval ruleset. Hosted tests must demonstrate that
+passing direct pushes fail, passing generated PRs merge, and required CI cannot
+be bypassed. A bot must never post a rubber-stamp approval to satisfy review rules.
 
 Create `sdk-integration` and `release` environments restricted to protected
 `master`, with no per-run human approval on the automatic path. The integration
@@ -122,6 +134,7 @@ Repository variables:
 | `SDK_PR_APP_BOT_ID` | Numeric GitHub bot user ID of the generator's PR App |
 | `SDK_INTEGRATION_APP_BOT_ID` | Numeric GitHub bot user ID of the separate integration App |
 | `SDK_INTEGRATION_APP_CLIENT_ID` | Integration App client ID |
+| `SDK_REVIEW_RULESET_ID` | Active repository approval ruleset with merger PR-only bypass |
 | `SDK_CIRCLECI_STATUS_ACTOR_ID` | Verified numeric identity publishing the required CircleCI status |
 | `SDK_RELEASE_ENABLED` | `true` only after the hosted rehearsal succeeds; otherwise absent or `false` |
 | `SDK_RELEASE_CONTROL_COMMIT` | Full commit SHA containing the reviewed release workflow and scripts |
