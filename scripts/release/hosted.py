@@ -1,4 +1,7 @@
 """Public-safe linkage from verified Fern output to Plaid's final SDK generation."""
+import base64
+import binascii
+import json
 import re
 from pathlib import Path
 
@@ -20,6 +23,7 @@ def protected(path):
 
 FERN_INDEX = ".sdk-release/fern-content.json"
 FERN_BUNDLE = ".sdk-release/fern.bundle.json"
+FERN_PROVENANCE = ".sdk-release/fern-provenance.json"
 FERN_PREDICATE = "https://plaid.com/attestations/fern-generation/v1"
 FERN_KEY_SHA256 = "f2751e378c0e9a6bb48bd8f16d90e0b44c456a86374066f7cf2477e8c7626b8b"
 
@@ -27,7 +31,7 @@ FERN_KEY_SHA256 = "f2751e378c0e9a6bb48bd8f16d90e0b44c456a86374066f7cf2477e8c7626
 def validate_fern_record(record, manifest=None):
     keys, hex_value = attestation.keys, attestation.hex_value
     keys(record, "schema_version sdk_version source config sdk_base generator cli evidence content_sha256 generation", "Fern record")
-    require(type(record["schema_version"]) is int and record["schema_version"] == 1, "Unsupported Fern record schema")
+    require(type(record["schema_version"]) is int and record["schema_version"] == 2, "Unsupported Fern record schema")
     attestation.version(record["sdk_version"])
     keys(record["source"], "repository commit path sha256", "Fern source")
     keys(record["config"], "repository commit sha256", "Fern config")
@@ -48,9 +52,11 @@ def validate_fern_record(record, manifest=None):
     require(isinstance(record["cli"]["version"], str) and
             re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", record["cli"]["version"]), "Invalid Fern CLI version")
     hex_value(record["cli"]["sha256"], 64, "Fern CLI digest")
-    keys(record["evidence"], "receipt_sha256 key_sha256 git_commit git_tree inputs_sha256 job_id_sha256", "Fern evidence")
+    keys(record["evidence"], "receipt_sha256 key_sha256 output_mode git_tree inputs_sha256 job_id_sha256", "Fern evidence")
+    require(record["evidence"]["output_mode"] == "downloadFiles", "Unexpected Fern output mode")
     for name, digest in record["evidence"].items():
-        hex_value(digest, 40 if name in {"git_commit", "git_tree"} else 64, "Fern evidence digest")
+        if name != "output_mode":
+            hex_value(digest, 40 if name == "git_tree" else 64, "Fern evidence digest")
     require(record["evidence"]["key_sha256"] == FERN_KEY_SHA256, "Unexpected Fern signing key")
     hex_value(record["content_sha256"], 64, "Fern content digest")
     keys(record["generation"], "repository workflow run_id", "Fern verification workflow")
@@ -66,6 +72,83 @@ def validate_fern_record(record, manifest=None):
                 "sha256:" + generator["sha256"] == manifest["generator"]["image_digest"],
                 "Fern proof generator/CLI differs from final generation")
     return record
+
+
+def validate_fern_provenance(data, record):
+    """Bind the portable original receipt to Plaid's signed verification record.
+
+    The producer verifies Fern's signature and complete downloaded tree. Consumers
+    check its exact retained receipt and context, then verify Plaid's attestation.
+    The unsigned vendor key identifier is deliberately absent from this envelope.
+    """
+    validate_fern_record(record)
+    require(isinstance(data, bytes) and 0 < len(data) <= 1024 * 1024 and
+            sha256(data) == record["evidence"]["receipt_sha256"], "Portable Fern receipt differs from signed record")
+    try:
+        keys = attestation.keys
+        envelope = attestation.parse_json(data)
+        keys(envelope, "payloadType payload signatures", "portable Fern envelope")
+        require(json.dumps(envelope, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode() == data,
+                "Portable Fern envelope is not canonical")
+        require(envelope["payloadType"] == "application/vnd.in-toto+json" and
+                isinstance(envelope["signatures"], list) and len(envelope["signatures"]) == 1,
+                "Unexpected portable Fern signature envelope")
+        keys(envelope["signatures"][0], "sig", "portable Fern signature")
+        payload = base64.b64decode(envelope["payload"], validate=True)
+        signature = base64.b64decode(envelope["signatures"][0]["sig"], validate=True)
+        require(base64.b64encode(payload).decode() == envelope["payload"] and 0 < len(signature) <= 1024 and
+                base64.b64encode(signature).decode() == envelope["signatures"][0]["sig"],
+                "Portable Fern base64 is not canonical")
+        statement = attestation.parse_json(payload)
+        keys(statement, "_type subject predicateType predicate", "portable Fern statement")
+        require(statement["_type"] == "https://in-toto.io/Statement/v1" and
+                statement["predicateType"] == "https://slsa.dev/provenance/v1" and
+                statement["subject"] == [{"name": "fern:generated-files", "digest": {"gitTree": record["evidence"]["git_tree"]}}],
+                "Portable Fern statement or generated tree differs")
+        predicate = statement["predicate"]
+        keys(predicate, "buildDefinition runDetails", "portable Fern predicate")
+        definition, details = predicate["buildDefinition"], predicate["runDetails"]
+        keys(definition, "buildType externalParameters internalParameters resolvedDependencies", "portable Fern build")
+        keys(details, "builder metadata", "portable Fern run")
+        require(definition["buildType"] == "https://buildwithfern.com/provenance/sdk-generation/v1" and
+                details["builder"] == {"id": "https://buildwithfern.com/fiddle"}, "Unexpected portable Fern builder")
+        generator = record["generator"]
+        require(definition["externalParameters"] == {"organization": "plaid", "api": "api",
+                "generator": {key: generator[key] for key in ("image", "version")}, "output": {"mode": "downloadFiles"}},
+                "Portable Fern output or generator differs")
+        internal, metadata = definition["internalParameters"], details["metadata"]
+        keys(internal, "jobId taskId", "portable Fern invocation")
+        keys(metadata, "invocationId finishedOn", "portable Fern run metadata")
+        uuid = r"[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}"
+        require(all(isinstance(value, str) and re.fullmatch(uuid, value) for value in internal.values()) and
+                sha256(internal["jobId"].encode()) == record["evidence"]["job_id_sha256"] and
+                metadata["invocationId"] == internal["jobId"] + "/" + internal["taskId"] and
+                isinstance(metadata["finishedOn"], str) and
+                re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?Z", metadata["finishedOn"]),
+                "Portable Fern invocation differs")
+        inputs, images = {}, []
+        require(isinstance(definition["resolvedDependencies"], list), "Invalid portable Fern dependencies")
+        for dependency in definition["resolvedDependencies"]:
+            require(isinstance(dependency, dict) and set(dependency) in ({"name", "digest"}, {"uri", "digest"}),
+                    "Unexpected portable Fern dependency")
+            keys(dependency["digest"], "sha256", "portable Fern dependency digest")
+            attestation.hex_value(dependency["digest"]["sha256"], 64, "portable Fern dependency digest")
+            if "uri" in dependency:
+                images.append(dependency)
+            else:
+                name = dependency["name"]
+                require(isinstance(name, str) and name not in inputs, "Duplicate portable Fern input")
+                inputs[name] = dependency["digest"]["sha256"]
+        required = {"fern:../2020-09-14.yml", "fern:openapi-overlay.yml", "fern:generators.yml",
+                    "fern:generators.yml#" + generator["image"]}
+        require(images == [{"uri": "docker://docker.io/" + generator["image"] + ":" + generator["version"],
+                            "digest": {"sha256": generator["sha256"]}}] and set(inputs) == required | {"fern:ir.json"} and
+                inputs["fern:../2020-09-14.yml"] == record["source"]["sha256"] and
+                sha256(canonical(dict(sorted((key, value) for key, value in inputs.items() if key != "fern:ir.json")))) ==
+                record["evidence"]["inputs_sha256"], "Portable Fern inputs or image digest differ")
+        return statement
+    except (ValueError, TypeError, KeyError, IndexError, UnicodeError, binascii.Error, RecursionError):
+        require(False, "Malformed portable Fern provenance")
 
 
 def validate_generation_mode(manifest, settings):

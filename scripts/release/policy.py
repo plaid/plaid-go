@@ -26,7 +26,8 @@ MANIFEST = ".sdk-release/manifest.json"
 GEN_BUNDLE = ".sdk-release/generation.bundle.json"
 FERN_INDEX = ".sdk-release/fern-content.json"
 FERN_BUNDLE = ".sdk-release/fern.bundle.json"
-EVIDENCE_FILES = (MANIFEST, GEN_BUNDLE, FERN_INDEX, FERN_BUNDLE)
+FERN_PROVENANCE = ".sdk-release/fern-provenance.json"
+EVIDENCE_FILES = (MANIFEST, GEN_BUNDLE, FERN_INDEX, FERN_BUNDLE, FERN_PROVENANCE)
 PUBLIC_REMOTE = "https://github.com/plaid/plaid-go.git"
 
 
@@ -187,11 +188,13 @@ def validate_tree(repo, commit):
     require(MANIFEST in files and GEN_BUNDLE in files, "SDK has no generation manifest and signed bundle")
     manifest = validate_manifest(parse_json(files[MANIFEST][1]))
     if manifest["schema_version"] == 2:
-        from hosted import validate_fern_index
-        require(FERN_INDEX in files and FERN_BUNDLE in files, "Hosted SDK lacks Fern proof files")
+        from hosted import validate_fern_index, validate_fern_provenance
+        require(all(name in files for name in (FERN_INDEX, FERN_BUNDLE, FERN_PROVENANCE)), "Hosted SDK lacks Fern proof files")
         validate_fern_index(files[FERN_INDEX][1], manifest["fern"])
+        validate_fern_provenance(files[FERN_PROVENANCE][1], manifest["fern"])
     else:
-        require(FERN_INDEX not in files and FERN_BUNDLE not in files, "Local generation must not carry unverified Fern proof")
+        require(not any(name in files for name in (FERN_INDEX, FERN_BUNDLE, FERN_PROVENANCE)),
+                "Local generation must not carry unverified Fern proof")
     require(sha256(content_bytes(files)) == manifest["content_sha256"], "SDK content was changed after generation")
     require(sha256(content_bytes(files, legacy_only=True)) == manifest["legacy"]["tree_sha256"], "Legacy tree digest mismatch")
     require("go.mod" in files and "go.sum" in files, "Missing module files")

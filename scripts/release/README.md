@@ -22,18 +22,24 @@ CLI, generator and SDK versions; the signed manifest records the shared spec/con
 
 Hosted generation uses a schema-2 manifest. Before running generated SDK code,
 Plaid verifies Fern's signed receipt against the expected job, generator, inputs
-and raw Git output, then signs a public record of the selected generated files.
+and downloaded file tree, then signs a public record of the selected generated files.
 The final generation manifest embeds that record, binding it to the same public
 spec/config commit, SDK version, CLI, generator image, workflow run and SDK base.
 Plaid assembles the maintained SDK files and regenerates `legacy/` separately.
 
 Integration and release verify both Plaid signatures: the Fern verification
-record and the final assembled SDK generation. The raw Fern receipt stays on the
-private staging PR; the public record contains hashes and public identities only.
-The SDK stores the selected-file index in `.sdk-release/fern-content.json` and
-its Plaid signature in `.sdk-release/fern.bundle.json`. Both are required for
-schema 2 and forbidden for schema 1. All four evidence files are excluded from
-the SDK content digest, while each signature and index is checked independently.
+record and the final assembled SDK generation. The SDK retains Fern's original
+signed payload and signature in `.sdk-release/fern-provenance.json`, with the
+unsigned key identifier removed. Its exact bytes and signed job, file tree,
+output mode, inputs and generator must match the Plaid verification record.
+The producer verifies Fern's signature; consumers verify that retained receipt
+against the record and verify Plaid's signatures.
+
+The SDK also stores the selected-file index in `.sdk-release/fern-content.json`
+and its Plaid signature in `.sdk-release/fern.bundle.json`. All three Fern files
+are required for schema 2 and forbidden for schema 1. All five evidence files are
+excluded from the SDK content digest, while each receipt, signature and index is
+checked independently.
 This lets safe retries produce fresh signature encodings without changing the
 SDK's content identity.
 
