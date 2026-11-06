@@ -5,7 +5,7 @@ package plaid
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/plaid/plaid-go/v49/internal"
+	internal "github.com/plaid/plaid-go/v50/internal"
 	big "math/big"
 	time "time"
 )
@@ -2294,7 +2294,7 @@ var craReportGetBaseReportAccountAttributesNullableFields = map[string]*big.Int{
 
 // Attributes derived from the account's transaction-level data. May be `null` if attributes were not available.
 type CraReportGetBaseReportAccountAttributes struct {
-	// Whether the account is predicted to be the user's primary account. At most one account per account type across the user's Items is `true`. `null` if the prediction could not be computed.
+	// Whether the account is predicted to be the user's primary account, based on an Item-level view of the user's transaction history. At most one account per account type across the user's Items is `true`. `null` if the prediction could not be computed.
 	IsPrimaryAccount *bool `json:"is_primary_account,omitempty" url:"is_primary_account,omitempty"`
 	// A value from 0 to 1 expressing confidence that the account is the user's primary account; higher is more confident. `null` if the score could not be computed.
 	PrimaryAccountScore *float64 `json:"primary_account_score,omitempty" url:"primary_account_score,omitempty"`
@@ -4002,7 +4002,7 @@ type CraReportGetBaseReportMetadata struct {
 	InstitutionIDs []string `json:"institution_ids" url:"institution_ids"`
 	// The number of days of transaction history requested.
 	DaysRequested int `json:"days_requested" url:"days_requested"`
-	// The number of accounts carrying Plaid's primary account indicator.
+	// The number of accounts carrying Plaid's primary account indicator, based on a report-level view of the user's transaction history.
 	PrimaryAccountCount int `json:"primary_account_count" url:"primary_account_count"`
 	// The number of depository accounts used to generate the report.
 	DepositoryAccountTypeCount int `json:"depository_account_type_count" url:"depository_account_type_count"`
@@ -4905,7 +4905,7 @@ type CraReportGetCashflowInsightsMetadata struct {
 	AccountCount int `json:"account_count" url:"account_count"`
 	// The institution IDs of the Items used to generate the report.
 	InstitutionIDs []string `json:"institution_ids" url:"institution_ids"`
-	// The number of accounts carrying Plaid's primary account indicator.
+	// The number of accounts carrying Plaid's primary account indicator, based on a report-level view of the user's transaction history.
 	PrimaryAccountCount int `json:"primary_account_count" url:"primary_account_count"`
 	// The number of depository accounts used to generate the report.
 	DepositoryAccountTypeCount int `json:"depository_account_type_count" url:"depository_account_type_count"`
@@ -6902,7 +6902,7 @@ type CraReportGetIncomeCompleteMetadata struct {
 	AccountCount int `json:"account_count" url:"account_count"`
 	// The institution IDs of the Items used to generate the report.
 	InstitutionIDs []string `json:"institution_ids" url:"institution_ids"`
-	// The number of accounts carrying Plaid's primary account indicator.
+	// The number of accounts carrying Plaid's primary account indicator, based on a report-level view of the user's transaction history.
 	PrimaryAccountCount int `json:"primary_account_count" url:"primary_account_count"`
 	// The number of depository accounts used to generate the report.
 	DepositoryAccountTypeCount int `json:"depository_account_type_count" url:"depository_account_type_count"`
@@ -7500,7 +7500,7 @@ type CraReportGetIncomeInsightsMetadata struct {
 	AccountCount int `json:"account_count" url:"account_count"`
 	// The institution IDs of the Items used to generate the report.
 	InstitutionIDs []string `json:"institution_ids" url:"institution_ids"`
-	// The number of accounts carrying Plaid's primary account indicator.
+	// The number of accounts carrying Plaid's primary account indicator, based on a report-level view of the user's transaction history.
 	PrimaryAccountCount int `json:"primary_account_count" url:"primary_account_count"`
 	// The number of depository accounts used to generate the report.
 	DepositoryAccountTypeCount int `json:"depository_account_type_count" url:"depository_account_type_count"`
@@ -8330,7 +8330,7 @@ type CraReportGetLendScoreCompleteMetadata struct {
 	AccountCount int `json:"account_count" url:"account_count"`
 	// The institution IDs of the Items used to generate the report.
 	InstitutionIDs []string `json:"institution_ids" url:"institution_ids"`
-	// The number of accounts carrying Plaid's primary account indicator.
+	// The number of accounts carrying Plaid's primary account indicator, based on a report-level view of the user's transaction history.
 	PrimaryAccountCount int `json:"primary_account_count" url:"primary_account_count"`
 	// The number of depository accounts used to generate the report.
 	DepositoryAccountTypeCount int `json:"depository_account_type_count" url:"depository_account_type_count"`
@@ -8895,7 +8895,7 @@ type CraReportGetLendScoreMetadata struct {
 	AccountCount int `json:"account_count" url:"account_count"`
 	// The institution IDs of the Items used to generate the report.
 	InstitutionIDs []string `json:"institution_ids" url:"institution_ids"`
-	// The number of accounts carrying Plaid's primary account indicator.
+	// The number of accounts carrying Plaid's primary account indicator, based on a report-level view of the user's transaction history.
 	PrimaryAccountCount int `json:"primary_account_count" url:"primary_account_count"`
 	// The number of depository accounts used to generate the report.
 	DepositoryAccountTypeCount int `json:"depository_account_type_count" url:"depository_account_type_count"`
@@ -9431,7 +9431,23 @@ type CraReportGetLendScoreVariantScore struct {
 	Score *int `json:"score,omitempty" url:"score,omitempty"`
 	// The reasons for an individual having risk according to this LendScore variant. For a full list of possible reason codes and a mapping of reason codes to human-readable reasons, contact your Plaid account manager. Empty if the variant could not be computed.
 	ReasonCodes []string `json:"reason_codes" url:"reason_codes"`
-	// The error code explaining why this LendScore variant could not be computed, such as `INSUFFICIENT_TRANSACTION_DATA` or `NO_ACCOUNTS`. `null` on success. New codes may be added over time, so treat an unrecognized value as a generic failure.
+	// The error code explaining why this LendScore variant could not be computed. `null` on success. Possible values:
+	//
+	// `INSUFFICIENT_TRANSACTION_HISTORY_30D`: User must have at least 30 days of transaction history
+	//
+	// `INSUFFICIENT_TRANSACTIONS_30D`: User must have at least 1 transaction in the past 30 days
+	//
+	// `INSUFFICIENT_INFLOW_TRANSACTIONS_30D`: User must have at least 1 inflow transaction in the past 30 days
+	//
+	// `INSUFFICIENT_INFLOW_TRANSACTIONS_180D`: User must have at least 2 inflow transactions in the past 180 days
+	//
+	// `INSUFFICIENT_OUTFLOW_TRANSACTIONS_30D`: User must have at least 2 outflow transactions in the past 30 days
+	//
+	// `INSUFFICIENT_OUTFLOW_TRANSACTIONS_180D`: User must have at least 4 outflow transactions in the past 180 days
+	//
+	// `BALANCE_UNAVAILABLE`: Balance unavailable for one or more of the user's accounts
+	//
+	// Other failures return `PRODUCT_GENERATION_FAILED`. New codes may be added over time, so treat an unrecognized value as a generic failure.
 	ErrorCode *string `json:"error_code,omitempty" url:"error_code,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
@@ -9602,7 +9618,7 @@ type CraReportGetNetworkInsightsMetadata struct {
 	AccountCount int `json:"account_count" url:"account_count"`
 	// The institution IDs of the Items used to generate the report.
 	InstitutionIDs []string `json:"institution_ids" url:"institution_ids"`
-	// The number of accounts carrying Plaid's primary account indicator.
+	// The number of accounts carrying Plaid's primary account indicator, based on a report-level view of the user's transaction history.
 	PrimaryAccountCount int `json:"primary_account_count" url:"primary_account_count"`
 	// The number of depository accounts used to generate the report.
 	DepositoryAccountTypeCount int `json:"depository_account_type_count" url:"depository_account_type_count"`
@@ -10600,6 +10616,8 @@ const (
 	CraReportGetReportConsumerReportPermissiblePurposeWrittenInstructionPrequalification    CraReportGetReportConsumerReportPermissiblePurpose = "WRITTEN_INSTRUCTION_PREQUALIFICATION"
 	CraReportGetReportConsumerReportPermissiblePurposeWrittenInstructionOther               CraReportGetReportConsumerReportPermissiblePurpose = "WRITTEN_INSTRUCTION_OTHER"
 	CraReportGetReportConsumerReportPermissiblePurposeEligibilityForGovtBenefits            CraReportGetReportConsumerReportPermissiblePurpose = "ELIGIBILITY_FOR_GOVT_BENEFITS"
+	CraReportGetReportConsumerReportPermissiblePurposeInsuranceUnderwriting                 CraReportGetReportConsumerReportPermissiblePurpose = "INSURANCE_UNDERWRITING"
+	CraReportGetReportConsumerReportPermissiblePurposeSecondaryInvestor                     CraReportGetReportConsumerReportPermissiblePurpose = "SECONDARY_INVESTOR"
 )
 
 func NewCraReportGetReportConsumerReportPermissiblePurposeFromString(s string) (CraReportGetReportConsumerReportPermissiblePurpose, error) {
@@ -10620,6 +10638,10 @@ func NewCraReportGetReportConsumerReportPermissiblePurposeFromString(s string) (
 		return CraReportGetReportConsumerReportPermissiblePurposeWrittenInstructionOther, nil
 	case "ELIGIBILITY_FOR_GOVT_BENEFITS":
 		return CraReportGetReportConsumerReportPermissiblePurposeEligibilityForGovtBenefits, nil
+	case "INSURANCE_UNDERWRITING":
+		return CraReportGetReportConsumerReportPermissiblePurposeInsuranceUnderwriting, nil
+	case "SECONDARY_INVESTOR":
+		return CraReportGetReportConsumerReportPermissiblePurposeSecondaryInvestor, nil
 	}
 	var t CraReportGetReportConsumerReportPermissiblePurpose
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
@@ -11415,6 +11437,8 @@ const (
 	CraReportCreateRequestConsumerReportPermissiblePurposeWrittenInstructionPrequalification    CraReportCreateRequestConsumerReportPermissiblePurpose = "WRITTEN_INSTRUCTION_PREQUALIFICATION"
 	CraReportCreateRequestConsumerReportPermissiblePurposeWrittenInstructionOther               CraReportCreateRequestConsumerReportPermissiblePurpose = "WRITTEN_INSTRUCTION_OTHER"
 	CraReportCreateRequestConsumerReportPermissiblePurposeEligibilityForGovtBenefits            CraReportCreateRequestConsumerReportPermissiblePurpose = "ELIGIBILITY_FOR_GOVT_BENEFITS"
+	CraReportCreateRequestConsumerReportPermissiblePurposeInsuranceUnderwriting                 CraReportCreateRequestConsumerReportPermissiblePurpose = "INSURANCE_UNDERWRITING"
+	CraReportCreateRequestConsumerReportPermissiblePurposeSecondaryInvestor                     CraReportCreateRequestConsumerReportPermissiblePurpose = "SECONDARY_INVESTOR"
 )
 
 func NewCraReportCreateRequestConsumerReportPermissiblePurposeFromString(s string) (CraReportCreateRequestConsumerReportPermissiblePurpose, error) {
@@ -11435,6 +11459,10 @@ func NewCraReportCreateRequestConsumerReportPermissiblePurposeFromString(s strin
 		return CraReportCreateRequestConsumerReportPermissiblePurposeWrittenInstructionOther, nil
 	case "ELIGIBILITY_FOR_GOVT_BENEFITS":
 		return CraReportCreateRequestConsumerReportPermissiblePurposeEligibilityForGovtBenefits, nil
+	case "INSURANCE_UNDERWRITING":
+		return CraReportCreateRequestConsumerReportPermissiblePurposeInsuranceUnderwriting, nil
+	case "SECONDARY_INVESTOR":
+		return CraReportCreateRequestConsumerReportPermissiblePurposeSecondaryInvestor, nil
 	}
 	var t CraReportCreateRequestConsumerReportPermissiblePurpose
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
@@ -11493,6 +11521,8 @@ const (
 	CraReportGetRequestConsumerReportPermissiblePurposeWrittenInstructionPrequalification    CraReportGetRequestConsumerReportPermissiblePurpose = "WRITTEN_INSTRUCTION_PREQUALIFICATION"
 	CraReportGetRequestConsumerReportPermissiblePurposeWrittenInstructionOther               CraReportGetRequestConsumerReportPermissiblePurpose = "WRITTEN_INSTRUCTION_OTHER"
 	CraReportGetRequestConsumerReportPermissiblePurposeEligibilityForGovtBenefits            CraReportGetRequestConsumerReportPermissiblePurpose = "ELIGIBILITY_FOR_GOVT_BENEFITS"
+	CraReportGetRequestConsumerReportPermissiblePurposeInsuranceUnderwriting                 CraReportGetRequestConsumerReportPermissiblePurpose = "INSURANCE_UNDERWRITING"
+	CraReportGetRequestConsumerReportPermissiblePurposeSecondaryInvestor                     CraReportGetRequestConsumerReportPermissiblePurpose = "SECONDARY_INVESTOR"
 )
 
 func NewCraReportGetRequestConsumerReportPermissiblePurposeFromString(s string) (CraReportGetRequestConsumerReportPermissiblePurpose, error) {
@@ -11513,6 +11543,10 @@ func NewCraReportGetRequestConsumerReportPermissiblePurposeFromString(s string) 
 		return CraReportGetRequestConsumerReportPermissiblePurposeWrittenInstructionOther, nil
 	case "ELIGIBILITY_FOR_GOVT_BENEFITS":
 		return CraReportGetRequestConsumerReportPermissiblePurposeEligibilityForGovtBenefits, nil
+	case "INSURANCE_UNDERWRITING":
+		return CraReportGetRequestConsumerReportPermissiblePurposeInsuranceUnderwriting, nil
+	case "SECONDARY_INVESTOR":
+		return CraReportGetRequestConsumerReportPermissiblePurposeSecondaryInvestor, nil
 	}
 	var t CraReportGetRequestConsumerReportPermissiblePurpose
 	return "", fmt.Errorf("%s is not a valid %T", s, t)

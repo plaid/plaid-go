@@ -4,7 +4,7 @@ package transfer
 
 import (
 	json "encoding/json"
-	v49 "github.com/plaid/plaid-go/v49"
+	v50 "github.com/plaid/plaid-go/v50"
 	assert "github.com/stretchr/testify/assert"
 	require "github.com/stretchr/testify/require"
 	testing "testing"
@@ -99,7 +99,7 @@ func TestSettersTransferSweepListRequest(t *testing.T) {
 
 	t.Run("SetStatus", func(t *testing.T) {
 		obj := &TransferSweepListRequest{}
-		var fernTestValueStatus *v49.SweepStatus
+		var fernTestValueStatus *v50.SweepStatus
 		obj.SetStatus(fernTestValueStatus)
 		assert.Equal(t, fernTestValueStatus, obj.Status)
 		assert.NotNil(t, obj.explicitFields)
@@ -131,7 +131,7 @@ func TestSettersTransferSweepListRequest(t *testing.T) {
 
 	t.Run("SetTrigger", func(t *testing.T) {
 		obj := &TransferSweepListRequest{}
-		var fernTestValueTrigger *v49.SweepTrigger
+		var fernTestValueTrigger *v50.SweepTrigger
 		obj.SetTrigger(fernTestValueTrigger)
 		assert.Equal(t, fernTestValueTrigger, obj.Trigger)
 		assert.NotNil(t, obj.explicitFields)
@@ -299,7 +299,7 @@ func TestSettersMarkExplicitTransferSweepListRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferSweepListRequest{}
-		var fernTestValueStatus *v49.SweepStatus
+		var fernTestValueStatus *v50.SweepStatus
 
 		// Act
 		obj.SetStatus(fernTestValueStatus)
@@ -423,7 +423,7 @@ func TestSettersMarkExplicitTransferSweepListRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferSweepListRequest{}
-		var fernTestValueTrigger *v49.SweepTrigger
+		var fernTestValueTrigger *v50.SweepTrigger
 
 		// Act
 		obj.SetTrigger(fernTestValueTrigger)

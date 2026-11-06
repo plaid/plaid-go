@@ -10,9 +10,9 @@ import (
 	os "os"
 	testing "testing"
 
-	plaid "github.com/plaid/plaid-go/v49"
-	client "github.com/plaid/plaid-go/v49/client"
-	option "github.com/plaid/plaid-go/v49/option"
+	plaid "github.com/plaid/plaid-go/v50"
+	client "github.com/plaid/plaid-go/v50/client"
+	option "github.com/plaid/plaid-go/v50/option"
 	require "github.com/stretchr/testify/require"
 )
 
@@ -120,6 +120,14 @@ func TestBusinessVerificationCreateWithWireMock(
 	)
 	request := &plaid.BusinessVerificationCreateRequest{
 		ClientUserID: "your-db-id-3b24110",
+		Business: &plaid.BusinessVerificationCreateRequestBusiness{
+			Name: "Acme Corporation",
+			Address: &plaid.RequestBusinessAddress{
+				Street:  "123 Main St.",
+				City:    "Pawnee",
+				Country: "US",
+			},
+		},
 	}
 	_, invocationErr := client.BusinessVerification.Create(
 		context.TODO(),

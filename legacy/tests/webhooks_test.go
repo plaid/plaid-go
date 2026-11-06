@@ -9,7 +9,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/plaid/plaid-go/v49/legacy"
+	"github.com/plaid/plaid-go/v50/legacy"
 	"github.com/stretchr/testify/assert"
 )
 

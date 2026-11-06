@@ -4,8 +4,8 @@ package transfer
 
 import (
 	json "encoding/json"
-	v49 "github.com/plaid/plaid-go/v49"
-	internal "github.com/plaid/plaid-go/v49/internal"
+	v50 "github.com/plaid/plaid-go/v50"
+	internal "github.com/plaid/plaid-go/v50/internal"
 	big "math/big"
 	time "time"
 )
@@ -34,9 +34,9 @@ type TransferEventListRequest struct {
 	TransferID *string `json:"transfer_id,omitempty" url:"-"`
 	// The account ID to get events for all transactions to/from an account.
 	AccountID    *string                            `json:"account_id,omitempty" url:"-"`
-	TransferType *v49.TransferEventListTransferType `json:"transfer_type,omitempty" url:"-"`
+	TransferType *v50.TransferEventListTransferType `json:"transfer_type,omitempty" url:"-"`
 	// Filter events by event type.
-	EventTypes []v49.TransferEventType `json:"event_types,omitempty" url:"-"`
+	EventTypes []v50.TransferEventType `json:"event_types,omitempty" url:"-"`
 	// Plaid's unique identifier for a sweep.
 	SweepID *string `json:"sweep_id,omitempty" url:"-"`
 	// The maximum number of transfer events to return. If the number of events matching the above parameters is greater than `count`, the most recent events will be returned.
@@ -93,14 +93,14 @@ func (t *TransferEventListRequest) SetAccountID(accountID *string) {
 
 // SetTransferType sets the TransferType field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferEventListRequest) SetTransferType(transferType *v49.TransferEventListTransferType) {
+func (t *TransferEventListRequest) SetTransferType(transferType *v50.TransferEventListTransferType) {
 	t.TransferType = transferType
 	t.require(transferEventListRequestFieldTransferType)
 }
 
 // SetEventTypes sets the EventTypes field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferEventListRequest) SetEventTypes(eventTypes []v49.TransferEventType) {
+func (t *TransferEventListRequest) SetEventTypes(eventTypes []v50.TransferEventType) {
 	t.EventTypes = eventTypes
 	t.require(transferEventListRequestFieldEventTypes)
 }

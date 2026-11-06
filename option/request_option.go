@@ -3,7 +3,7 @@
 package option
 
 import (
-	core "github.com/plaid/plaid-go/v49/core"
+	core "github.com/plaid/plaid-go/v50/core"
 	http "net/http"
 	url "net/url"
 )

@@ -7,11 +7,11 @@ import (
 	http "net/http"
 	os "os"
 
-	plaid "github.com/plaid/plaid-go/v49"
-	syndication "github.com/plaid/plaid-go/v49/beaconreport/syndication"
-	core "github.com/plaid/plaid-go/v49/core"
-	internal "github.com/plaid/plaid-go/v49/internal"
-	option "github.com/plaid/plaid-go/v49/option"
+	plaid "github.com/plaid/plaid-go/v50"
+	syndication "github.com/plaid/plaid-go/v50/beaconreport/syndication"
+	core "github.com/plaid/plaid-go/v50/core"
+	internal "github.com/plaid/plaid-go/v50/internal"
+	option "github.com/plaid/plaid-go/v50/option"
 )
 
 type Client struct {

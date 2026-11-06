@@ -4,7 +4,7 @@ package identity
 
 import (
 	json "encoding/json"
-	v49 "github.com/plaid/plaid-go/v49"
+	v50 "github.com/plaid/plaid-go/v50"
 	assert "github.com/stretchr/testify/assert"
 	require "github.com/stretchr/testify/require"
 	testing "testing"
@@ -13,7 +13,7 @@ import (
 func TestSettersIdentityVerificationCreateRequest(t *testing.T) {
 	t.Run("SetClientUserID", func(t *testing.T) {
 		obj := &IdentityVerificationCreateRequest{}
-		var fernTestValueClientUserID *v49.ClientUserID
+		var fernTestValueClientUserID *v50.ClientUserID
 		obj.SetClientUserID(fernTestValueClientUserID)
 		assert.Equal(t, fernTestValueClientUserID, obj.ClientUserID)
 		assert.NotNil(t, obj.explicitFields)
@@ -21,7 +21,7 @@ func TestSettersIdentityVerificationCreateRequest(t *testing.T) {
 
 	t.Run("SetUserID", func(t *testing.T) {
 		obj := &IdentityVerificationCreateRequest{}
-		var fernTestValueUserID *v49.PlaidUserID
+		var fernTestValueUserID *v50.PlaidUserID
 		obj.SetUserID(fernTestValueUserID)
 		assert.Equal(t, fernTestValueUserID, obj.UserID)
 		assert.NotNil(t, obj.explicitFields)
@@ -37,7 +37,7 @@ func TestSettersIdentityVerificationCreateRequest(t *testing.T) {
 
 	t.Run("SetTemplateID", func(t *testing.T) {
 		obj := &IdentityVerificationCreateRequest{}
-		var fernTestValueTemplateID v49.IdentityVerificationTemplateID
+		var fernTestValueTemplateID v50.IdentityVerificationTemplateID
 		obj.SetTemplateID(fernTestValueTemplateID)
 		assert.Equal(t, fernTestValueTemplateID, obj.TemplateID)
 		assert.NotNil(t, obj.explicitFields)
@@ -45,7 +45,7 @@ func TestSettersIdentityVerificationCreateRequest(t *testing.T) {
 
 	t.Run("SetLanguage", func(t *testing.T) {
 		obj := &IdentityVerificationCreateRequest{}
-		var fernTestValueLanguage *v49.IdentityVerificationLanguage
+		var fernTestValueLanguage *v50.IdentityVerificationLanguage
 		obj.SetLanguage(fernTestValueLanguage)
 		assert.Equal(t, fernTestValueLanguage, obj.Language)
 		assert.NotNil(t, obj.explicitFields)
@@ -53,7 +53,7 @@ func TestSettersIdentityVerificationCreateRequest(t *testing.T) {
 
 	t.Run("SetGaveConsent", func(t *testing.T) {
 		obj := &IdentityVerificationCreateRequest{}
-		var fernTestValueGaveConsent v49.IdentityVerificationConsent
+		var fernTestValueGaveConsent v50.IdentityVerificationConsent
 		obj.SetGaveConsent(fernTestValueGaveConsent)
 		assert.Equal(t, fernTestValueGaveConsent, obj.GaveConsent)
 		assert.NotNil(t, obj.explicitFields)
@@ -61,7 +61,7 @@ func TestSettersIdentityVerificationCreateRequest(t *testing.T) {
 
 	t.Run("SetUser", func(t *testing.T) {
 		obj := &IdentityVerificationCreateRequest{}
-		var fernTestValueUser *v49.IdentityVerificationCreateRequestUser
+		var fernTestValueUser *v50.IdentityVerificationCreateRequestUser
 		obj.SetUser(fernTestValueUser)
 		assert.Equal(t, fernTestValueUser, obj.User)
 		assert.NotNil(t, obj.explicitFields)
@@ -69,7 +69,7 @@ func TestSettersIdentityVerificationCreateRequest(t *testing.T) {
 
 	t.Run("SetIsIdempotent", func(t *testing.T) {
 		obj := &IdentityVerificationCreateRequest{}
-		var fernTestValueIsIdempotent v49.IdempotencyFlag
+		var fernTestValueIsIdempotent v50.IdempotencyFlag
 		obj.SetIsIdempotent(fernTestValueIsIdempotent)
 		assert.Equal(t, fernTestValueIsIdempotent, obj.IsIdempotent)
 		assert.NotNil(t, obj.explicitFields)
@@ -82,7 +82,7 @@ func TestSettersMarkExplicitIdentityVerificationCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &IdentityVerificationCreateRequest{}
-		var fernTestValueClientUserID *v49.ClientUserID
+		var fernTestValueClientUserID *v50.ClientUserID
 
 		// Act
 		obj.SetClientUserID(fernTestValueClientUserID)
@@ -113,7 +113,7 @@ func TestSettersMarkExplicitIdentityVerificationCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &IdentityVerificationCreateRequest{}
-		var fernTestValueUserID *v49.PlaidUserID
+		var fernTestValueUserID *v50.PlaidUserID
 
 		// Act
 		obj.SetUserID(fernTestValueUserID)
@@ -175,7 +175,7 @@ func TestSettersMarkExplicitIdentityVerificationCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &IdentityVerificationCreateRequest{}
-		var fernTestValueTemplateID v49.IdentityVerificationTemplateID
+		var fernTestValueTemplateID v50.IdentityVerificationTemplateID
 
 		// Act
 		obj.SetTemplateID(fernTestValueTemplateID)
@@ -206,7 +206,7 @@ func TestSettersMarkExplicitIdentityVerificationCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &IdentityVerificationCreateRequest{}
-		var fernTestValueLanguage *v49.IdentityVerificationLanguage
+		var fernTestValueLanguage *v50.IdentityVerificationLanguage
 
 		// Act
 		obj.SetLanguage(fernTestValueLanguage)
@@ -237,7 +237,7 @@ func TestSettersMarkExplicitIdentityVerificationCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &IdentityVerificationCreateRequest{}
-		var fernTestValueGaveConsent v49.IdentityVerificationConsent
+		var fernTestValueGaveConsent v50.IdentityVerificationConsent
 
 		// Act
 		obj.SetGaveConsent(fernTestValueGaveConsent)
@@ -268,7 +268,7 @@ func TestSettersMarkExplicitIdentityVerificationCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &IdentityVerificationCreateRequest{}
-		var fernTestValueUser *v49.IdentityVerificationCreateRequestUser
+		var fernTestValueUser *v50.IdentityVerificationCreateRequestUser
 
 		// Act
 		obj.SetUser(fernTestValueUser)
@@ -299,7 +299,7 @@ func TestSettersMarkExplicitIdentityVerificationCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &IdentityVerificationCreateRequest{}
-		var fernTestValueIsIdempotent v49.IdempotencyFlag
+		var fernTestValueIsIdempotent v50.IdempotencyFlag
 
 		// Act
 		obj.SetIsIdempotent(fernTestValueIsIdempotent)
@@ -331,7 +331,7 @@ func TestSettersMarkExplicitIdentityVerificationCreateRequest(t *testing.T) {
 func TestSettersIdentityVerificationAutofillCreateRequest(t *testing.T) {
 	t.Run("SetIdentityVerificationID", func(t *testing.T) {
 		obj := &IdentityVerificationAutofillCreateRequest{}
-		var fernTestValueIdentityVerificationID v49.IdentityVerificationID
+		var fernTestValueIdentityVerificationID v50.IdentityVerificationID
 		obj.SetIdentityVerificationID(fernTestValueIdentityVerificationID)
 		assert.Equal(t, fernTestValueIdentityVerificationID, obj.IdentityVerificationID)
 		assert.NotNil(t, obj.explicitFields)
@@ -344,7 +344,7 @@ func TestSettersMarkExplicitIdentityVerificationAutofillCreateRequest(t *testing
 		t.Parallel()
 		// Arrange
 		obj := &IdentityVerificationAutofillCreateRequest{}
-		var fernTestValueIdentityVerificationID v49.IdentityVerificationID
+		var fernTestValueIdentityVerificationID v50.IdentityVerificationID
 
 		// Act
 		obj.SetIdentityVerificationID(fernTestValueIdentityVerificationID)
@@ -376,7 +376,7 @@ func TestSettersMarkExplicitIdentityVerificationAutofillCreateRequest(t *testing
 func TestSettersIdentityVerificationGetRequest(t *testing.T) {
 	t.Run("SetIdentityVerificationID", func(t *testing.T) {
 		obj := &IdentityVerificationGetRequest{}
-		var fernTestValueIdentityVerificationID v49.IdentityVerificationID
+		var fernTestValueIdentityVerificationID v50.IdentityVerificationID
 		obj.SetIdentityVerificationID(fernTestValueIdentityVerificationID)
 		assert.Equal(t, fernTestValueIdentityVerificationID, obj.IdentityVerificationID)
 		assert.NotNil(t, obj.explicitFields)
@@ -389,7 +389,7 @@ func TestSettersMarkExplicitIdentityVerificationGetRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &IdentityVerificationGetRequest{}
-		var fernTestValueIdentityVerificationID v49.IdentityVerificationID
+		var fernTestValueIdentityVerificationID v50.IdentityVerificationID
 
 		// Act
 		obj.SetIdentityVerificationID(fernTestValueIdentityVerificationID)
@@ -421,7 +421,7 @@ func TestSettersMarkExplicitIdentityVerificationGetRequest(t *testing.T) {
 func TestSettersIdentityVerificationListRequest(t *testing.T) {
 	t.Run("SetTemplateID", func(t *testing.T) {
 		obj := &IdentityVerificationListRequest{}
-		var fernTestValueTemplateID v49.IdentityVerificationTemplateID
+		var fernTestValueTemplateID v50.IdentityVerificationTemplateID
 		obj.SetTemplateID(fernTestValueTemplateID)
 		assert.Equal(t, fernTestValueTemplateID, obj.TemplateID)
 		assert.NotNil(t, obj.explicitFields)
@@ -429,7 +429,7 @@ func TestSettersIdentityVerificationListRequest(t *testing.T) {
 
 	t.Run("SetClientUserID", func(t *testing.T) {
 		obj := &IdentityVerificationListRequest{}
-		var fernTestValueClientUserID *v49.ClientUserID
+		var fernTestValueClientUserID *v50.ClientUserID
 		obj.SetClientUserID(fernTestValueClientUserID)
 		assert.Equal(t, fernTestValueClientUserID, obj.ClientUserID)
 		assert.NotNil(t, obj.explicitFields)
@@ -437,7 +437,7 @@ func TestSettersIdentityVerificationListRequest(t *testing.T) {
 
 	t.Run("SetUserID", func(t *testing.T) {
 		obj := &IdentityVerificationListRequest{}
-		var fernTestValueUserID *v49.PlaidUserID
+		var fernTestValueUserID *v50.PlaidUserID
 		obj.SetUserID(fernTestValueUserID)
 		assert.Equal(t, fernTestValueUserID, obj.UserID)
 		assert.NotNil(t, obj.explicitFields)
@@ -445,7 +445,7 @@ func TestSettersIdentityVerificationListRequest(t *testing.T) {
 
 	t.Run("SetCursor", func(t *testing.T) {
 		obj := &IdentityVerificationListRequest{}
-		var fernTestValueCursor v49.Cursor
+		var fernTestValueCursor v50.Cursor
 		obj.SetCursor(fernTestValueCursor)
 		assert.Equal(t, fernTestValueCursor, obj.Cursor)
 		assert.NotNil(t, obj.explicitFields)
@@ -458,7 +458,7 @@ func TestSettersMarkExplicitIdentityVerificationListRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &IdentityVerificationListRequest{}
-		var fernTestValueTemplateID v49.IdentityVerificationTemplateID
+		var fernTestValueTemplateID v50.IdentityVerificationTemplateID
 
 		// Act
 		obj.SetTemplateID(fernTestValueTemplateID)
@@ -489,7 +489,7 @@ func TestSettersMarkExplicitIdentityVerificationListRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &IdentityVerificationListRequest{}
-		var fernTestValueClientUserID *v49.ClientUserID
+		var fernTestValueClientUserID *v50.ClientUserID
 
 		// Act
 		obj.SetClientUserID(fernTestValueClientUserID)
@@ -520,7 +520,7 @@ func TestSettersMarkExplicitIdentityVerificationListRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &IdentityVerificationListRequest{}
-		var fernTestValueUserID *v49.PlaidUserID
+		var fernTestValueUserID *v50.PlaidUserID
 
 		// Act
 		obj.SetUserID(fernTestValueUserID)
@@ -551,7 +551,7 @@ func TestSettersMarkExplicitIdentityVerificationListRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &IdentityVerificationListRequest{}
-		var fernTestValueCursor v49.Cursor
+		var fernTestValueCursor v50.Cursor
 
 		// Act
 		obj.SetCursor(fernTestValueCursor)
@@ -583,7 +583,7 @@ func TestSettersMarkExplicitIdentityVerificationListRequest(t *testing.T) {
 func TestSettersIdentityVerificationRetryRequest(t *testing.T) {
 	t.Run("SetClientUserID", func(t *testing.T) {
 		obj := &IdentityVerificationRetryRequest{}
-		var fernTestValueClientUserID v49.ClientUserID
+		var fernTestValueClientUserID v50.ClientUserID
 		obj.SetClientUserID(fernTestValueClientUserID)
 		assert.Equal(t, fernTestValueClientUserID, obj.ClientUserID)
 		assert.NotNil(t, obj.explicitFields)
@@ -591,7 +591,7 @@ func TestSettersIdentityVerificationRetryRequest(t *testing.T) {
 
 	t.Run("SetTemplateID", func(t *testing.T) {
 		obj := &IdentityVerificationRetryRequest{}
-		var fernTestValueTemplateID v49.IdentityVerificationTemplateID
+		var fernTestValueTemplateID v50.IdentityVerificationTemplateID
 		obj.SetTemplateID(fernTestValueTemplateID)
 		assert.Equal(t, fernTestValueTemplateID, obj.TemplateID)
 		assert.NotNil(t, obj.explicitFields)
@@ -599,7 +599,7 @@ func TestSettersIdentityVerificationRetryRequest(t *testing.T) {
 
 	t.Run("SetStrategy", func(t *testing.T) {
 		obj := &IdentityVerificationRetryRequest{}
-		var fernTestValueStrategy v49.Strategy
+		var fernTestValueStrategy v50.Strategy
 		obj.SetStrategy(fernTestValueStrategy)
 		assert.Equal(t, fernTestValueStrategy, obj.Strategy)
 		assert.NotNil(t, obj.explicitFields)
@@ -607,7 +607,7 @@ func TestSettersIdentityVerificationRetryRequest(t *testing.T) {
 
 	t.Run("SetUser", func(t *testing.T) {
 		obj := &IdentityVerificationRetryRequest{}
-		var fernTestValueUser *v49.IdentityVerificationRequestUser
+		var fernTestValueUser *v50.IdentityVerificationRequestUser
 		obj.SetUser(fernTestValueUser)
 		assert.Equal(t, fernTestValueUser, obj.User)
 		assert.NotNil(t, obj.explicitFields)
@@ -615,7 +615,7 @@ func TestSettersIdentityVerificationRetryRequest(t *testing.T) {
 
 	t.Run("SetSteps", func(t *testing.T) {
 		obj := &IdentityVerificationRetryRequest{}
-		var fernTestValueSteps *v49.IdentityVerificationRetryRequestStepsObject
+		var fernTestValueSteps *v50.IdentityVerificationRetryRequestStepsObject
 		obj.SetSteps(fernTestValueSteps)
 		assert.Equal(t, fernTestValueSteps, obj.Steps)
 		assert.NotNil(t, obj.explicitFields)
@@ -636,7 +636,7 @@ func TestSettersMarkExplicitIdentityVerificationRetryRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &IdentityVerificationRetryRequest{}
-		var fernTestValueClientUserID v49.ClientUserID
+		var fernTestValueClientUserID v50.ClientUserID
 
 		// Act
 		obj.SetClientUserID(fernTestValueClientUserID)
@@ -667,7 +667,7 @@ func TestSettersMarkExplicitIdentityVerificationRetryRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &IdentityVerificationRetryRequest{}
-		var fernTestValueTemplateID v49.IdentityVerificationTemplateID
+		var fernTestValueTemplateID v50.IdentityVerificationTemplateID
 
 		// Act
 		obj.SetTemplateID(fernTestValueTemplateID)
@@ -698,7 +698,7 @@ func TestSettersMarkExplicitIdentityVerificationRetryRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &IdentityVerificationRetryRequest{}
-		var fernTestValueStrategy v49.Strategy
+		var fernTestValueStrategy v50.Strategy
 
 		// Act
 		obj.SetStrategy(fernTestValueStrategy)
@@ -729,7 +729,7 @@ func TestSettersMarkExplicitIdentityVerificationRetryRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &IdentityVerificationRetryRequest{}
-		var fernTestValueUser *v49.IdentityVerificationRequestUser
+		var fernTestValueUser *v50.IdentityVerificationRequestUser
 
 		// Act
 		obj.SetUser(fernTestValueUser)
@@ -760,7 +760,7 @@ func TestSettersMarkExplicitIdentityVerificationRetryRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &IdentityVerificationRetryRequest{}
-		var fernTestValueSteps *v49.IdentityVerificationRetryRequestStepsObject
+		var fernTestValueSteps *v50.IdentityVerificationRetryRequestStepsObject
 
 		// Act
 		obj.SetSteps(fernTestValueSteps)
