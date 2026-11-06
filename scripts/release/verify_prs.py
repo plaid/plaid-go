@@ -3,6 +3,7 @@
 import argparse
 import os
 from pathlib import Path
+import re
 import sys
 import tempfile
 
@@ -26,6 +27,19 @@ def report(head, state):
     body = canonical({"state": state, "context": integrate.VERIFIED_CONTEXT,
                       "description": "Trusted SDK generation or exact-head human review verification",
                       "target_url": f"https://github.com/{SDK_REPO}/actions/runs/{run_id}"})
+    try:
+        statuses = api(f"repos/{SDK_REPO}/commits/{head}/statuses?per_page=100", paginate=True)
+        latest = next((item for item in statuses
+                       if isinstance(item.get("context"), str)
+                       and item["context"].casefold() == integrate.VERIFIED_CONTEXT), {})
+    except (ReleaseError, OSError, ValueError, KeyError):
+        # A failed deduplication read must not prevent revoking an old success.
+        latest = {}
+    creator, target_url = latest.get("creator"), latest.get("target_url")
+    if (latest.get("state") == state and isinstance(creator, dict) and creator.get("id") == integrate.ACTIONS_BOT_ID
+            and isinstance(target_url, str)
+            and re.fullmatch(r"https://github\.com/plaid/plaid-go/actions/runs/[1-9][0-9]*", target_url)):
+        return
     try:
         run("gh", "api", "--hostname", "github.com", "--method", "POST",
             f"repos/{SDK_REPO}/statuses/{head}", "--input", "-", input=body,
@@ -66,8 +80,6 @@ def verify_one(control, control_commit, number):
     pull = api(f"repos/{SDK_REPO}/pulls/{number}")
     head = pull.get("head", {}).get("sha")
     hex_value(head, 40, "PR status head")
-    # Clear a previous success before any signature, CI or review check can fail.
-    report(head, "pending")
     try:
         open_pull(pull)
         require(integrate.current_base() == pull["base"]["sha"], "PR base moved")
@@ -98,10 +110,13 @@ def verify_one(control, control_commit, number):
         require(latest["head"]["sha"] == head and latest["base"]["sha"] == pull["base"]["sha"],
                 "PR changed before verification status publication")
     except integrate.NotReady:
+        report(head, "pending")
         return  # Pending remains non-mergeable, including after a prior success.
     except Exception:
         report(head, "failure")
         raise
+    # Decide first: a pending/success pair on every unchanged scan exhausts
+    # GitHub's 1,000-status limit even when the final state never changes.
     report(head, "success")
 
 
