@@ -10,10 +10,10 @@ import (
 	os "os"
 	testing "testing"
 
-	plaid "github.com/plaid/plaid-go/v49"
-	client "github.com/plaid/plaid-go/v49/client"
-	option "github.com/plaid/plaid-go/v49/option"
-	user "github.com/plaid/plaid-go/v49/user"
+	plaid "github.com/plaid/plaid-go/v50"
+	client "github.com/plaid/plaid-go/v50/client"
+	option "github.com/plaid/plaid-go/v50/option"
+	user "github.com/plaid/plaid-go/v50/user"
 	require "github.com/stretchr/testify/require"
 )
 

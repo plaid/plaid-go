@@ -4,8 +4,8 @@ package processor
 
 import (
 	json "encoding/json"
-	v49 "github.com/plaid/plaid-go/v49"
-	internal "github.com/plaid/plaid-go/v49/internal"
+	v50 "github.com/plaid/plaid-go/v50"
+	internal "github.com/plaid/plaid-go/v50/internal"
 	big "math/big"
 	time "time"
 )
@@ -24,7 +24,7 @@ var (
 )
 
 type ProcessorSignalEvaluateRequest struct {
-	ProcessorToken v49.ProcessorToken `json:"processor_token" url:"-"`
+	ProcessorToken v50.ProcessorToken `json:"processor_token" url:"-"`
 	// The unique ID that you would like to use to refer to this transaction. For your convenience mapping your internal data, you could use your internal ID/identifier for this transaction. The max length for this field is 36 characters.
 	ClientTransactionID string `json:"client_transaction_id" url:"-"`
 	// The transaction amount, in USD (e.g. `102.05`)
@@ -45,8 +45,8 @@ type ProcessorSignalEvaluateRequest struct {
 	//
 	// Possible values:  `SAME_DAY_ACH`, `STANDARD_ACH`, `MULTIPLE_PAYMENT_METHODS`
 	DefaultPaymentMethod *string           `json:"default_payment_method,omitempty" url:"-"`
-	User                 *v49.SignalUser   `json:"user,omitempty" url:"-"`
-	Device               *v49.SignalDevice `json:"device,omitempty" url:"-"`
+	User                 *v50.SignalUser   `json:"user,omitempty" url:"-"`
+	Device               *v50.SignalDevice `json:"device,omitempty" url:"-"`
 	// The key of the ruleset to use for this transaction. You can configure a ruleset using the Plaid Dashboard, under [Signal->Rules](https://dashboard.plaid.com/signal/risk-profiles). If not provided, for customers who began using Signal Transaction Scores before October 15, 2025, by default, no ruleset will be used; for customers who began using Signal Transaction Scores after that date, or for Balance customers, the `default` ruleset will be used. For more details, or to opt out of using a ruleset, see [Signal Rules](https://plaid.com/docs/signal/signal-rules/).
 	RulesetKey *string `json:"ruleset_key,omitempty" url:"-"`
 
@@ -65,7 +65,7 @@ func (p *ProcessorSignalEvaluateRequest) require(field *big.Int) {
 
 // SetProcessorToken sets the ProcessorToken field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (p *ProcessorSignalEvaluateRequest) SetProcessorToken(processorToken v49.ProcessorToken) {
+func (p *ProcessorSignalEvaluateRequest) SetProcessorToken(processorToken v50.ProcessorToken) {
 	p.ProcessorToken = processorToken
 	p.require(processorSignalEvaluateRequestFieldProcessorToken)
 }
@@ -114,14 +114,14 @@ func (p *ProcessorSignalEvaluateRequest) SetDefaultPaymentMethod(defaultPaymentM
 
 // SetUser sets the User field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (p *ProcessorSignalEvaluateRequest) SetUser(user *v49.SignalUser) {
+func (p *ProcessorSignalEvaluateRequest) SetUser(user *v50.SignalUser) {
 	p.User = user
 	p.require(processorSignalEvaluateRequestFieldUser)
 }
 
 // SetDevice sets the Device field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (p *ProcessorSignalEvaluateRequest) SetDevice(device *v49.SignalDevice) {
+func (p *ProcessorSignalEvaluateRequest) SetDevice(device *v50.SignalDevice) {
 	p.Device = device
 	p.require(processorSignalEvaluateRequestFieldDevice)
 }
@@ -159,7 +159,7 @@ var (
 )
 
 type ProcessorSignalPrepareRequest struct {
-	ProcessorToken v49.ProcessorToken `json:"processor_token" url:"-"`
+	ProcessorToken v50.ProcessorToken `json:"processor_token" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -176,7 +176,7 @@ func (p *ProcessorSignalPrepareRequest) require(field *big.Int) {
 
 // SetProcessorToken sets the ProcessorToken field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (p *ProcessorSignalPrepareRequest) SetProcessorToken(processorToken v49.ProcessorToken) {
+func (p *ProcessorSignalPrepareRequest) SetProcessorToken(processorToken v50.ProcessorToken) {
 	p.ProcessorToken = processorToken
 	p.require(processorSignalPrepareRequestFieldProcessorToken)
 }
@@ -213,7 +213,7 @@ var (
 )
 
 type ProcessorSignalDecisionReportRequest struct {
-	ProcessorToken v49.ProcessorToken `json:"processor_token" url:"-"`
+	ProcessorToken v50.ProcessorToken `json:"processor_token" url:"-"`
 	// Must be the same as the `client_transaction_id` supplied when calling `/processor/signal/evaluate`
 	ClientTransactionID string `json:"client_transaction_id" url:"-"`
 	// `true` if the ACH transaction was initiated, `false` otherwise.
@@ -224,8 +224,8 @@ type ProcessorSignalDecisionReportRequest struct {
 	//
 	// For example, use 0 if you make funds available to your customers instantly or the same day following the debit transaction, or 1 if you make funds available the next day following the debit initialization.
 	DaysFundsOnHold *int                       `json:"days_funds_on_hold,omitempty" url:"-"`
-	DecisionOutcome *v49.SignalDecisionOutcome `json:"decision_outcome,omitempty" url:"-"`
-	PaymentMethod   *v49.SignalPaymentMethod   `json:"payment_method,omitempty" url:"-"`
+	DecisionOutcome *v50.SignalDecisionOutcome `json:"decision_outcome,omitempty" url:"-"`
+	PaymentMethod   *v50.SignalPaymentMethod   `json:"payment_method,omitempty" url:"-"`
 	// The amount (in USD) made available to your customers instantly following the debit transaction. It could be a partial amount of the requested transaction (example: 102.05).
 	AmountInstantlyAvailable *float64 `json:"amount_instantly_available,omitempty" url:"-"`
 
@@ -244,7 +244,7 @@ func (p *ProcessorSignalDecisionReportRequest) require(field *big.Int) {
 
 // SetProcessorToken sets the ProcessorToken field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (p *ProcessorSignalDecisionReportRequest) SetProcessorToken(processorToken v49.ProcessorToken) {
+func (p *ProcessorSignalDecisionReportRequest) SetProcessorToken(processorToken v50.ProcessorToken) {
 	p.ProcessorToken = processorToken
 	p.require(processorSignalDecisionReportRequestFieldProcessorToken)
 }
@@ -272,14 +272,14 @@ func (p *ProcessorSignalDecisionReportRequest) SetDaysFundsOnHold(daysFundsOnHol
 
 // SetDecisionOutcome sets the DecisionOutcome field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (p *ProcessorSignalDecisionReportRequest) SetDecisionOutcome(decisionOutcome *v49.SignalDecisionOutcome) {
+func (p *ProcessorSignalDecisionReportRequest) SetDecisionOutcome(decisionOutcome *v50.SignalDecisionOutcome) {
 	p.DecisionOutcome = decisionOutcome
 	p.require(processorSignalDecisionReportRequestFieldDecisionOutcome)
 }
 
 // SetPaymentMethod sets the PaymentMethod field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (p *ProcessorSignalDecisionReportRequest) SetPaymentMethod(paymentMethod *v49.SignalPaymentMethod) {
+func (p *ProcessorSignalDecisionReportRequest) SetPaymentMethod(paymentMethod *v50.SignalPaymentMethod) {
 	p.PaymentMethod = paymentMethod
 	p.require(processorSignalDecisionReportRequestFieldPaymentMethod)
 }
@@ -320,7 +320,7 @@ var (
 )
 
 type ProcessorSignalReturnReportRequest struct {
-	ProcessorToken v49.ProcessorToken `json:"processor_token" url:"-"`
+	ProcessorToken v50.ProcessorToken `json:"processor_token" url:"-"`
 	// Must be the same as the `client_transaction_id` supplied when calling `/processor/signal/evaluate`
 	ClientTransactionID string `json:"client_transaction_id" url:"-"`
 	// Must be a valid ACH return code (e.g. "R01")
@@ -345,7 +345,7 @@ func (p *ProcessorSignalReturnReportRequest) require(field *big.Int) {
 
 // SetProcessorToken sets the ProcessorToken field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (p *ProcessorSignalReturnReportRequest) SetProcessorToken(processorToken v49.ProcessorToken) {
+func (p *ProcessorSignalReturnReportRequest) SetProcessorToken(processorToken v50.ProcessorToken) {
 	p.ProcessorToken = processorToken
 	p.require(processorSignalReturnReportRequestFieldProcessorToken)
 }

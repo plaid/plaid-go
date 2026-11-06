@@ -5,7 +5,7 @@ package plaid
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/plaid/plaid-go/v49/internal"
+	internal "github.com/plaid/plaid-go/v50/internal"
 	big "math/big"
 	time "time"
 )
@@ -3338,7 +3338,7 @@ type ProcessorInvestmentsTransactionsGetResponse struct {
 	InvestmentTransactions []*InvestmentTransaction `json:"investment_transactions" url:"investment_transactions"`
 	// All securities for which there is a corresponding transaction being fetched.
 	Securities []*Security `json:"securities" url:"securities"`
-	// The total number of transactions available within the date range specified. If `total_investment_transactions` is larger than the size of the `transactions` array, more transactions are available and can be fetched via manipulating the `offset` parameter.
+	// The total number of transactions available within the date range specified. If `total_investment_transactions` is larger than the size of the `investment_transactions` array, more transactions are available and can be fetched via manipulating the `offset` parameter.
 	TotalInvestmentTransactions int       `json:"total_investment_transactions" url:"total_investment_transactions"`
 	RequestID                   RequestID `json:"request_id" url:"request_id"`
 	// When true, this field indicates that the Item's portfolio was manually created with the Investments Fallback flow.
@@ -5099,6 +5099,7 @@ const (
 	ProcessorTokenCreateRequestProcessorGalileo          ProcessorTokenCreateRequestProcessor = "galileo"
 	ProcessorTokenCreateRequestProcessorModernTreasury   ProcessorTokenCreateRequestProcessor = "modern_treasury"
 	ProcessorTokenCreateRequestProcessorOcrolus          ProcessorTokenCreateRequestProcessor = "ocrolus"
+	ProcessorTokenCreateRequestProcessorStripe           ProcessorTokenCreateRequestProcessor = "stripe"
 	ProcessorTokenCreateRequestProcessorVesta            ProcessorTokenCreateRequestProcessor = "vesta"
 	ProcessorTokenCreateRequestProcessorDrivewealth      ProcessorTokenCreateRequestProcessor = "drivewealth"
 	ProcessorTokenCreateRequestProcessorVopay            ProcessorTokenCreateRequestProcessor = "vopay"
@@ -5195,6 +5196,8 @@ func NewProcessorTokenCreateRequestProcessorFromString(s string) (ProcessorToken
 		return ProcessorTokenCreateRequestProcessorModernTreasury, nil
 	case "ocrolus":
 		return ProcessorTokenCreateRequestProcessorOcrolus, nil
+	case "stripe":
+		return ProcessorTokenCreateRequestProcessorStripe, nil
 	case "vesta":
 		return ProcessorTokenCreateRequestProcessorVesta, nil
 	case "drivewealth":

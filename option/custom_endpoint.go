@@ -1,7 +1,7 @@
 package option
 
 import (
-	core "github.com/plaid/plaid-go/v49/core"
+	core "github.com/plaid/plaid-go/v50/core"
 )
 
 // WithCustomEndpoint sends requests to baseURL instead of a public Plaid

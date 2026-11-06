@@ -4,8 +4,8 @@ package transfer
 
 import (
 	json "encoding/json"
-	v49 "github.com/plaid/plaid-go/v49"
-	internal "github.com/plaid/plaid-go/v49/internal"
+	v50 "github.com/plaid/plaid-go/v50"
+	internal "github.com/plaid/plaid-go/v50/internal"
 	big "math/big"
 )
 
@@ -17,7 +17,7 @@ var (
 type TransferBalanceGetRequest struct {
 	// Client ID of the end customer.
 	OriginatorClientID *string                  `json:"originator_client_id,omitempty" url:"-"`
-	Type               *v49.TransferBalanceType `json:"type,omitempty" url:"-"`
+	Type               *v50.TransferBalanceType `json:"type,omitempty" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -41,7 +41,7 @@ func (t *TransferBalanceGetRequest) SetOriginatorClientID(originatorClientID *st
 
 // SetType sets the Type field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferBalanceGetRequest) SetType(type_ *v49.TransferBalanceType) {
+func (t *TransferBalanceGetRequest) SetType(type_ *v50.TransferBalanceType) {
 	t.Type = type_
 	t.require(transferBalanceGetRequestFieldType)
 }

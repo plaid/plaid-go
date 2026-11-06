@@ -4,7 +4,7 @@ package user
 
 import (
 	json "encoding/json"
-	v49 "github.com/plaid/plaid-go/v49"
+	v50 "github.com/plaid/plaid-go/v50"
 	assert "github.com/stretchr/testify/assert"
 	require "github.com/stretchr/testify/require"
 	testing "testing"
@@ -74,7 +74,7 @@ func TestSettersUserAccountSessionEventSendRequest(t *testing.T) {
 
 	t.Run("SetEvent", func(t *testing.T) {
 		obj := &UserAccountSessionEventSendRequest{}
-		var fernTestValueEvent *v49.UserAccountSessionEvent
+		var fernTestValueEvent *v50.UserAccountSessionEvent
 		obj.SetEvent(fernTestValueEvent)
 		assert.Equal(t, fernTestValueEvent, obj.Event)
 		assert.NotNil(t, obj.explicitFields)
@@ -149,7 +149,7 @@ func TestSettersMarkExplicitUserAccountSessionEventSendRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &UserAccountSessionEventSendRequest{}
-		var fernTestValueEvent *v49.UserAccountSessionEvent
+		var fernTestValueEvent *v50.UserAccountSessionEvent
 
 		// Act
 		obj.SetEvent(fernTestValueEvent)

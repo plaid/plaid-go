@@ -4,8 +4,8 @@ package servicing
 
 import (
 	json "encoding/json"
-	v49 "github.com/plaid/plaid-go/v49"
-	internal "github.com/plaid/plaid-go/v49/internal"
+	v50 "github.com/plaid/plaid-go/v50"
+	internal "github.com/plaid/plaid-go/v50/internal"
 	big "math/big"
 )
 
@@ -18,13 +18,13 @@ var (
 )
 
 type CraServicingSubscriptionCreateRequest struct {
-	UserID  v49.NewUserID               `json:"user_id" url:"-"`
-	Scope   v49.CraReportScope          `json:"scope" url:"-"`
-	Cadence *v49.CraSubscriptionCadence `json:"cadence,omitempty" url:"-"`
+	UserID  v50.NewUserID               `json:"user_id" url:"-"`
+	Scope   v50.CraReportScope          `json:"scope" url:"-"`
+	Cadence *v50.CraSubscriptionCadence `json:"cadence,omitempty" url:"-"`
 	// The URL to which the webhook should be sent. If provided, this will override the URL set in the dashboard.
 	Webhook *string `json:"webhook,omitempty" url:"-"`
 	// The products included in this subscription.
-	Products []*v49.CraSubscriptionProductConfig `json:"products" url:"-"`
+	Products []*v50.CraSubscriptionProductConfig `json:"products" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -41,21 +41,21 @@ func (c *CraServicingSubscriptionCreateRequest) require(field *big.Int) {
 
 // SetUserID sets the UserID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraServicingSubscriptionCreateRequest) SetUserID(userID v49.NewUserID) {
+func (c *CraServicingSubscriptionCreateRequest) SetUserID(userID v50.NewUserID) {
 	c.UserID = userID
 	c.require(craServicingSubscriptionCreateRequestFieldUserID)
 }
 
 // SetScope sets the Scope field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraServicingSubscriptionCreateRequest) SetScope(scope v49.CraReportScope) {
+func (c *CraServicingSubscriptionCreateRequest) SetScope(scope v50.CraReportScope) {
 	c.Scope = scope
 	c.require(craServicingSubscriptionCreateRequestFieldScope)
 }
 
 // SetCadence sets the Cadence field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraServicingSubscriptionCreateRequest) SetCadence(cadence *v49.CraSubscriptionCadence) {
+func (c *CraServicingSubscriptionCreateRequest) SetCadence(cadence *v50.CraSubscriptionCadence) {
 	c.Cadence = cadence
 	c.require(craServicingSubscriptionCreateRequestFieldCadence)
 }
@@ -69,7 +69,7 @@ func (c *CraServicingSubscriptionCreateRequest) SetWebhook(webhook *string) {
 
 // SetProducts sets the Products field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraServicingSubscriptionCreateRequest) SetProducts(products []*v49.CraSubscriptionProductConfig) {
+func (c *CraServicingSubscriptionCreateRequest) SetProducts(products []*v50.CraSubscriptionProductConfig) {
 	c.Products = products
 	c.require(craServicingSubscriptionCreateRequestFieldProducts)
 }
@@ -100,7 +100,7 @@ var (
 )
 
 type CraServicingSubscriptionDeleteRequest struct {
-	SubscriptionID v49.CraSubscriptionID `json:"subscription_id" url:"-"`
+	SubscriptionID v50.CraSubscriptionID `json:"subscription_id" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -117,7 +117,7 @@ func (c *CraServicingSubscriptionDeleteRequest) require(field *big.Int) {
 
 // SetSubscriptionID sets the SubscriptionID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraServicingSubscriptionDeleteRequest) SetSubscriptionID(subscriptionID v49.CraSubscriptionID) {
+func (c *CraServicingSubscriptionDeleteRequest) SetSubscriptionID(subscriptionID v50.CraSubscriptionID) {
 	c.SubscriptionID = subscriptionID
 	c.require(craServicingSubscriptionDeleteRequestFieldSubscriptionID)
 }
@@ -148,7 +148,7 @@ var (
 )
 
 type CraServicingSubscriptionGetRequest struct {
-	SubscriptionID v49.CraSubscriptionID `json:"subscription_id" url:"-"`
+	SubscriptionID v50.CraSubscriptionID `json:"subscription_id" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -165,7 +165,7 @@ func (c *CraServicingSubscriptionGetRequest) require(field *big.Int) {
 
 // SetSubscriptionID sets the SubscriptionID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraServicingSubscriptionGetRequest) SetSubscriptionID(subscriptionID v49.CraSubscriptionID) {
+func (c *CraServicingSubscriptionGetRequest) SetSubscriptionID(subscriptionID v50.CraSubscriptionID) {
 	c.SubscriptionID = subscriptionID
 	c.require(craServicingSubscriptionGetRequestFieldSubscriptionID)
 }
@@ -196,7 +196,7 @@ var (
 )
 
 type CraServicingSubscriptionListRequest struct {
-	UserID v49.NewUserID `json:"user_id" url:"-"`
+	UserID v50.NewUserID `json:"user_id" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -213,7 +213,7 @@ func (c *CraServicingSubscriptionListRequest) require(field *big.Int) {
 
 // SetUserID sets the UserID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraServicingSubscriptionListRequest) SetUserID(userID v49.NewUserID) {
+func (c *CraServicingSubscriptionListRequest) SetUserID(userID v50.NewUserID) {
 	c.UserID = userID
 	c.require(craServicingSubscriptionListRequestFieldUserID)
 }
@@ -247,12 +247,12 @@ var (
 )
 
 type CraServicingSubscriptionUpdateRequest struct {
-	SubscriptionID v49.CraSubscriptionID `json:"subscription_id" url:"-"`
+	SubscriptionID v50.CraSubscriptionID `json:"subscription_id" url:"-"`
 	// The URL to which the webhook should be sent. If provided, this will override the URL set in the dashboard.
 	Webhook *string `json:"webhook,omitempty" url:"-"`
 	// The products included in this subscription. If provided, this replaces the subscription's entire product list.
-	Products    []*v49.CraSubscriptionProductConfig                           `json:"products,omitempty" url:"-"`
-	ResetFields *v49.CraServicingSubscriptionUpdateRequestResettableFieldList `json:"reset_fields,omitempty" url:"-"`
+	Products    []*v50.CraSubscriptionProductConfig                           `json:"products,omitempty" url:"-"`
+	ResetFields *v50.CraServicingSubscriptionUpdateRequestResettableFieldList `json:"reset_fields,omitempty" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -269,7 +269,7 @@ func (c *CraServicingSubscriptionUpdateRequest) require(field *big.Int) {
 
 // SetSubscriptionID sets the SubscriptionID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraServicingSubscriptionUpdateRequest) SetSubscriptionID(subscriptionID v49.CraSubscriptionID) {
+func (c *CraServicingSubscriptionUpdateRequest) SetSubscriptionID(subscriptionID v50.CraSubscriptionID) {
 	c.SubscriptionID = subscriptionID
 	c.require(craServicingSubscriptionUpdateRequestFieldSubscriptionID)
 }
@@ -283,14 +283,14 @@ func (c *CraServicingSubscriptionUpdateRequest) SetWebhook(webhook *string) {
 
 // SetProducts sets the Products field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraServicingSubscriptionUpdateRequest) SetProducts(products []*v49.CraSubscriptionProductConfig) {
+func (c *CraServicingSubscriptionUpdateRequest) SetProducts(products []*v50.CraSubscriptionProductConfig) {
 	c.Products = products
 	c.require(craServicingSubscriptionUpdateRequestFieldProducts)
 }
 
 // SetResetFields sets the ResetFields field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraServicingSubscriptionUpdateRequest) SetResetFields(resetFields *v49.CraServicingSubscriptionUpdateRequestResettableFieldList) {
+func (c *CraServicingSubscriptionUpdateRequest) SetResetFields(resetFields *v50.CraServicingSubscriptionUpdateRequestResettableFieldList) {
 	c.ResetFields = resetFields
 	c.require(craServicingSubscriptionUpdateRequestFieldResetFields)
 }

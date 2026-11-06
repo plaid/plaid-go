@@ -3,9 +3,9 @@
 package identity
 
 import (
-	plaid "github.com/plaid/plaid-go/v49"
-	core "github.com/plaid/plaid-go/v49/core"
-	internal "github.com/plaid/plaid-go/v49/internal"
+	plaid "github.com/plaid/plaid-go/v50"
+	core "github.com/plaid/plaid-go/v50/core"
+	internal "github.com/plaid/plaid-go/v50/internal"
 )
 
 var ErrorCodes internal.ErrorCodes = internal.ErrorCodes{

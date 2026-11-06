@@ -5,7 +5,7 @@ package plaid
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/plaid/plaid-go/v49/internal"
+	internal "github.com/plaid/plaid-go/v50/internal"
 	big "math/big"
 )
 

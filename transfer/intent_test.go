@@ -4,7 +4,7 @@ package transfer
 
 import (
 	json "encoding/json"
-	v49 "github.com/plaid/plaid-go/v49"
+	v50 "github.com/plaid/plaid-go/v50"
 	assert "github.com/stretchr/testify/assert"
 	require "github.com/stretchr/testify/require"
 	testing "testing"
@@ -21,7 +21,7 @@ func TestSettersTransferIntentCreateRequest(t *testing.T) {
 
 	t.Run("SetFundingAccountID", func(t *testing.T) {
 		obj := &TransferIntentCreateRequest{}
-		var fernTestValueFundingAccountID v49.TransferMigratedFundingAccountIDRequest
+		var fernTestValueFundingAccountID v50.TransferMigratedFundingAccountIDRequest
 		obj.SetFundingAccountID(fernTestValueFundingAccountID)
 		assert.Equal(t, fernTestValueFundingAccountID, obj.FundingAccountID)
 		assert.NotNil(t, obj.explicitFields)
@@ -29,7 +29,7 @@ func TestSettersTransferIntentCreateRequest(t *testing.T) {
 
 	t.Run("SetMode", func(t *testing.T) {
 		obj := &TransferIntentCreateRequest{}
-		var fernTestValueMode v49.TransferIntentCreateMode
+		var fernTestValueMode v50.TransferIntentCreateMode
 		obj.SetMode(fernTestValueMode)
 		assert.Equal(t, fernTestValueMode, obj.Mode)
 		assert.NotNil(t, obj.explicitFields)
@@ -37,7 +37,7 @@ func TestSettersTransferIntentCreateRequest(t *testing.T) {
 
 	t.Run("SetNetwork", func(t *testing.T) {
 		obj := &TransferIntentCreateRequest{}
-		var fernTestValueNetwork *v49.TransferIntentCreateNetwork
+		var fernTestValueNetwork *v50.TransferIntentCreateNetwork
 		obj.SetNetwork(fernTestValueNetwork)
 		assert.Equal(t, fernTestValueNetwork, obj.Network)
 		assert.NotNil(t, obj.explicitFields)
@@ -45,7 +45,7 @@ func TestSettersTransferIntentCreateRequest(t *testing.T) {
 
 	t.Run("SetAmount", func(t *testing.T) {
 		obj := &TransferIntentCreateRequest{}
-		var fernTestValueAmount v49.TransferAmount
+		var fernTestValueAmount v50.TransferAmount
 		obj.SetAmount(fernTestValueAmount)
 		assert.Equal(t, fernTestValueAmount, obj.Amount)
 		assert.NotNil(t, obj.explicitFields)
@@ -61,7 +61,7 @@ func TestSettersTransferIntentCreateRequest(t *testing.T) {
 
 	t.Run("SetAchClass", func(t *testing.T) {
 		obj := &TransferIntentCreateRequest{}
-		var fernTestValueAchClass *v49.AchClass
+		var fernTestValueAchClass *v50.AchClass
 		obj.SetAchClass(fernTestValueAchClass)
 		assert.Equal(t, fernTestValueAchClass, obj.AchClass)
 		assert.NotNil(t, obj.explicitFields)
@@ -77,7 +77,7 @@ func TestSettersTransferIntentCreateRequest(t *testing.T) {
 
 	t.Run("SetUser", func(t *testing.T) {
 		obj := &TransferIntentCreateRequest{}
-		var fernTestValueUser *v49.TransferUserInRequest
+		var fernTestValueUser *v50.TransferUserInRequest
 		obj.SetUser(fernTestValueUser)
 		assert.Equal(t, fernTestValueUser, obj.User)
 		assert.NotNil(t, obj.explicitFields)
@@ -85,7 +85,7 @@ func TestSettersTransferIntentCreateRequest(t *testing.T) {
 
 	t.Run("SetMetadata", func(t *testing.T) {
 		obj := &TransferIntentCreateRequest{}
-		var fernTestValueMetadata *v49.TransferMetadata
+		var fernTestValueMetadata *v50.TransferMetadata
 		obj.SetMetadata(fernTestValueMetadata)
 		assert.Equal(t, fernTestValueMetadata, obj.Metadata)
 		assert.NotNil(t, obj.explicitFields)
@@ -145,7 +145,7 @@ func TestSettersMarkExplicitTransferIntentCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferIntentCreateRequest{}
-		var fernTestValueFundingAccountID v49.TransferMigratedFundingAccountIDRequest
+		var fernTestValueFundingAccountID v50.TransferMigratedFundingAccountIDRequest
 
 		// Act
 		obj.SetFundingAccountID(fernTestValueFundingAccountID)
@@ -176,7 +176,7 @@ func TestSettersMarkExplicitTransferIntentCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferIntentCreateRequest{}
-		var fernTestValueMode v49.TransferIntentCreateMode
+		var fernTestValueMode v50.TransferIntentCreateMode
 
 		// Act
 		obj.SetMode(fernTestValueMode)
@@ -207,7 +207,7 @@ func TestSettersMarkExplicitTransferIntentCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferIntentCreateRequest{}
-		var fernTestValueNetwork *v49.TransferIntentCreateNetwork
+		var fernTestValueNetwork *v50.TransferIntentCreateNetwork
 
 		// Act
 		obj.SetNetwork(fernTestValueNetwork)
@@ -238,7 +238,7 @@ func TestSettersMarkExplicitTransferIntentCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferIntentCreateRequest{}
-		var fernTestValueAmount v49.TransferAmount
+		var fernTestValueAmount v50.TransferAmount
 
 		// Act
 		obj.SetAmount(fernTestValueAmount)
@@ -300,7 +300,7 @@ func TestSettersMarkExplicitTransferIntentCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferIntentCreateRequest{}
-		var fernTestValueAchClass *v49.AchClass
+		var fernTestValueAchClass *v50.AchClass
 
 		// Act
 		obj.SetAchClass(fernTestValueAchClass)
@@ -362,7 +362,7 @@ func TestSettersMarkExplicitTransferIntentCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferIntentCreateRequest{}
-		var fernTestValueUser *v49.TransferUserInRequest
+		var fernTestValueUser *v50.TransferUserInRequest
 
 		// Act
 		obj.SetUser(fernTestValueUser)
@@ -393,7 +393,7 @@ func TestSettersMarkExplicitTransferIntentCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferIntentCreateRequest{}
-		var fernTestValueMetadata *v49.TransferMetadata
+		var fernTestValueMetadata *v50.TransferMetadata
 
 		// Act
 		obj.SetMetadata(fernTestValueMetadata)

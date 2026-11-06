@@ -4,8 +4,8 @@ package identity
 
 import (
 	json "encoding/json"
-	v49 "github.com/plaid/plaid-go/v49"
-	internal "github.com/plaid/plaid-go/v49/internal"
+	v50 "github.com/plaid/plaid-go/v50"
+	internal "github.com/plaid/plaid-go/v50/internal"
 	big "math/big"
 )
 
@@ -21,15 +21,15 @@ var (
 )
 
 type IdentityVerificationCreateRequest struct {
-	ClientUserID *v49.ClientUserID `json:"client_user_id,omitempty" url:"-"`
-	UserID       *v49.PlaidUserID  `json:"user_id,omitempty" url:"-"`
+	ClientUserID *v50.ClientUserID `json:"client_user_id,omitempty" url:"-"`
+	UserID       *v50.PlaidUserID  `json:"user_id,omitempty" url:"-"`
 	// A flag specifying whether you would like Plaid to expose a shareable URL for the verification being created.
 	IsShareable  bool                                       `json:"is_shareable" url:"-"`
-	TemplateID   v49.IdentityVerificationTemplateID         `json:"template_id" url:"-"`
-	Language     *v49.IdentityVerificationLanguage          `json:"language,omitempty" url:"-"`
-	GaveConsent  v49.IdentityVerificationConsent            `json:"gave_consent" url:"-"`
-	User         *v49.IdentityVerificationCreateRequestUser `json:"user,omitempty" url:"-"`
-	IsIdempotent v49.IdempotencyFlag                        `json:"is_idempotent,omitempty" url:"-"`
+	TemplateID   v50.IdentityVerificationTemplateID         `json:"template_id" url:"-"`
+	Language     *v50.IdentityVerificationLanguage          `json:"language,omitempty" url:"-"`
+	GaveConsent  v50.IdentityVerificationConsent            `json:"gave_consent" url:"-"`
+	User         *v50.IdentityVerificationCreateRequestUser `json:"user,omitempty" url:"-"`
+	IsIdempotent v50.IdempotencyFlag                        `json:"is_idempotent,omitempty" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -46,14 +46,14 @@ func (i *IdentityVerificationCreateRequest) require(field *big.Int) {
 
 // SetClientUserID sets the ClientUserID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (i *IdentityVerificationCreateRequest) SetClientUserID(clientUserID *v49.ClientUserID) {
+func (i *IdentityVerificationCreateRequest) SetClientUserID(clientUserID *v50.ClientUserID) {
 	i.ClientUserID = clientUserID
 	i.require(identityVerificationCreateRequestFieldClientUserID)
 }
 
 // SetUserID sets the UserID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (i *IdentityVerificationCreateRequest) SetUserID(userID *v49.PlaidUserID) {
+func (i *IdentityVerificationCreateRequest) SetUserID(userID *v50.PlaidUserID) {
 	i.UserID = userID
 	i.require(identityVerificationCreateRequestFieldUserID)
 }
@@ -67,35 +67,35 @@ func (i *IdentityVerificationCreateRequest) SetIsShareable(isShareable bool) {
 
 // SetTemplateID sets the TemplateID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (i *IdentityVerificationCreateRequest) SetTemplateID(templateID v49.IdentityVerificationTemplateID) {
+func (i *IdentityVerificationCreateRequest) SetTemplateID(templateID v50.IdentityVerificationTemplateID) {
 	i.TemplateID = templateID
 	i.require(identityVerificationCreateRequestFieldTemplateID)
 }
 
 // SetLanguage sets the Language field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (i *IdentityVerificationCreateRequest) SetLanguage(language *v49.IdentityVerificationLanguage) {
+func (i *IdentityVerificationCreateRequest) SetLanguage(language *v50.IdentityVerificationLanguage) {
 	i.Language = language
 	i.require(identityVerificationCreateRequestFieldLanguage)
 }
 
 // SetGaveConsent sets the GaveConsent field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (i *IdentityVerificationCreateRequest) SetGaveConsent(gaveConsent v49.IdentityVerificationConsent) {
+func (i *IdentityVerificationCreateRequest) SetGaveConsent(gaveConsent v50.IdentityVerificationConsent) {
 	i.GaveConsent = gaveConsent
 	i.require(identityVerificationCreateRequestFieldGaveConsent)
 }
 
 // SetUser sets the User field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (i *IdentityVerificationCreateRequest) SetUser(user *v49.IdentityVerificationCreateRequestUser) {
+func (i *IdentityVerificationCreateRequest) SetUser(user *v50.IdentityVerificationCreateRequestUser) {
 	i.User = user
 	i.require(identityVerificationCreateRequestFieldUser)
 }
 
 // SetIsIdempotent sets the IsIdempotent field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (i *IdentityVerificationCreateRequest) SetIsIdempotent(isIdempotent v49.IdempotencyFlag) {
+func (i *IdentityVerificationCreateRequest) SetIsIdempotent(isIdempotent v50.IdempotencyFlag) {
 	i.IsIdempotent = isIdempotent
 	i.require(identityVerificationCreateRequestFieldIsIdempotent)
 }
@@ -126,7 +126,7 @@ var (
 )
 
 type IdentityVerificationAutofillCreateRequest struct {
-	IdentityVerificationID v49.IdentityVerificationID `json:"identity_verification_id" url:"-"`
+	IdentityVerificationID v50.IdentityVerificationID `json:"identity_verification_id" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -143,7 +143,7 @@ func (i *IdentityVerificationAutofillCreateRequest) require(field *big.Int) {
 
 // SetIdentityVerificationID sets the IdentityVerificationID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (i *IdentityVerificationAutofillCreateRequest) SetIdentityVerificationID(identityVerificationID v49.IdentityVerificationID) {
+func (i *IdentityVerificationAutofillCreateRequest) SetIdentityVerificationID(identityVerificationID v50.IdentityVerificationID) {
 	i.IdentityVerificationID = identityVerificationID
 	i.require(identityVerificationAutofillCreateRequestFieldIdentityVerificationID)
 }
@@ -174,7 +174,7 @@ var (
 )
 
 type IdentityVerificationGetRequest struct {
-	IdentityVerificationID v49.IdentityVerificationID `json:"identity_verification_id" url:"-"`
+	IdentityVerificationID v50.IdentityVerificationID `json:"identity_verification_id" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -191,7 +191,7 @@ func (i *IdentityVerificationGetRequest) require(field *big.Int) {
 
 // SetIdentityVerificationID sets the IdentityVerificationID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (i *IdentityVerificationGetRequest) SetIdentityVerificationID(identityVerificationID v49.IdentityVerificationID) {
+func (i *IdentityVerificationGetRequest) SetIdentityVerificationID(identityVerificationID v50.IdentityVerificationID) {
 	i.IdentityVerificationID = identityVerificationID
 	i.require(identityVerificationGetRequestFieldIdentityVerificationID)
 }
@@ -225,11 +225,11 @@ var (
 )
 
 type IdentityVerificationListRequest struct {
-	TemplateID   v49.IdentityVerificationTemplateID `json:"template_id" url:"-"`
-	ClientUserID *v49.ClientUserID                  `json:"client_user_id,omitempty" url:"-"`
+	TemplateID   v50.IdentityVerificationTemplateID `json:"template_id" url:"-"`
+	ClientUserID *v50.ClientUserID                  `json:"client_user_id,omitempty" url:"-"`
 	// A unique user identifier, created by calling `/user/create`. Either a `user_id` or the `client_user_id` must be provided. The `user_id` may only be used instead of the `client_user_id` if you were not a pre-existing user of `/user/create` as of December 10, 2025, or if you have since [migrated to the new User APIs](https://plaid.com/docs/api/users/migrate-to-new-user-apis); for more details, see [New User APIs](https://plaid.com/docs/api/users/user-apis). If both this field and the `client_user_id` are present in the request, the `user_id` must have been created from the provided `client_user_id`.
-	UserID *v49.PlaidUserID `json:"user_id,omitempty" url:"-"`
-	Cursor v49.Cursor       `json:"cursor,omitempty" url:"-"`
+	UserID *v50.PlaidUserID `json:"user_id,omitempty" url:"-"`
+	Cursor v50.Cursor       `json:"cursor,omitempty" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -246,28 +246,28 @@ func (i *IdentityVerificationListRequest) require(field *big.Int) {
 
 // SetTemplateID sets the TemplateID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (i *IdentityVerificationListRequest) SetTemplateID(templateID v49.IdentityVerificationTemplateID) {
+func (i *IdentityVerificationListRequest) SetTemplateID(templateID v50.IdentityVerificationTemplateID) {
 	i.TemplateID = templateID
 	i.require(identityVerificationListRequestFieldTemplateID)
 }
 
 // SetClientUserID sets the ClientUserID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (i *IdentityVerificationListRequest) SetClientUserID(clientUserID *v49.ClientUserID) {
+func (i *IdentityVerificationListRequest) SetClientUserID(clientUserID *v50.ClientUserID) {
 	i.ClientUserID = clientUserID
 	i.require(identityVerificationListRequestFieldClientUserID)
 }
 
 // SetUserID sets the UserID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (i *IdentityVerificationListRequest) SetUserID(userID *v49.PlaidUserID) {
+func (i *IdentityVerificationListRequest) SetUserID(userID *v50.PlaidUserID) {
 	i.UserID = userID
 	i.require(identityVerificationListRequestFieldUserID)
 }
 
 // SetCursor sets the Cursor field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (i *IdentityVerificationListRequest) SetCursor(cursor v49.Cursor) {
+func (i *IdentityVerificationListRequest) SetCursor(cursor v50.Cursor) {
 	i.Cursor = cursor
 	i.require(identityVerificationListRequestFieldCursor)
 }
@@ -303,11 +303,11 @@ var (
 )
 
 type IdentityVerificationRetryRequest struct {
-	ClientUserID v49.ClientUserID                                 `json:"client_user_id" url:"-"`
-	TemplateID   v49.IdentityVerificationTemplateID               `json:"template_id" url:"-"`
-	Strategy     v49.Strategy                                     `json:"strategy" url:"-"`
-	User         *v49.IdentityVerificationRequestUser             `json:"user,omitempty" url:"-"`
-	Steps        *v49.IdentityVerificationRetryRequestStepsObject `json:"steps,omitempty" url:"-"`
+	ClientUserID v50.ClientUserID                                 `json:"client_user_id" url:"-"`
+	TemplateID   v50.IdentityVerificationTemplateID               `json:"template_id" url:"-"`
+	Strategy     v50.Strategy                                     `json:"strategy" url:"-"`
+	User         *v50.IdentityVerificationRequestUser             `json:"user,omitempty" url:"-"`
+	Steps        *v50.IdentityVerificationRetryRequestStepsObject `json:"steps,omitempty" url:"-"`
 	// A flag specifying whether you would like Plaid to expose a shareable URL for the verification being retried. If a value for this flag is not specified, the `is_shareable` setting from the original verification attempt will be used.
 	IsShareable *bool `json:"is_shareable,omitempty" url:"-"`
 
@@ -326,35 +326,35 @@ func (i *IdentityVerificationRetryRequest) require(field *big.Int) {
 
 // SetClientUserID sets the ClientUserID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (i *IdentityVerificationRetryRequest) SetClientUserID(clientUserID v49.ClientUserID) {
+func (i *IdentityVerificationRetryRequest) SetClientUserID(clientUserID v50.ClientUserID) {
 	i.ClientUserID = clientUserID
 	i.require(identityVerificationRetryRequestFieldClientUserID)
 }
 
 // SetTemplateID sets the TemplateID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (i *IdentityVerificationRetryRequest) SetTemplateID(templateID v49.IdentityVerificationTemplateID) {
+func (i *IdentityVerificationRetryRequest) SetTemplateID(templateID v50.IdentityVerificationTemplateID) {
 	i.TemplateID = templateID
 	i.require(identityVerificationRetryRequestFieldTemplateID)
 }
 
 // SetStrategy sets the Strategy field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (i *IdentityVerificationRetryRequest) SetStrategy(strategy v49.Strategy) {
+func (i *IdentityVerificationRetryRequest) SetStrategy(strategy v50.Strategy) {
 	i.Strategy = strategy
 	i.require(identityVerificationRetryRequestFieldStrategy)
 }
 
 // SetUser sets the User field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (i *IdentityVerificationRetryRequest) SetUser(user *v49.IdentityVerificationRequestUser) {
+func (i *IdentityVerificationRetryRequest) SetUser(user *v50.IdentityVerificationRequestUser) {
 	i.User = user
 	i.require(identityVerificationRetryRequestFieldUser)
 }
 
 // SetSteps sets the Steps field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (i *IdentityVerificationRetryRequest) SetSteps(steps *v49.IdentityVerificationRetryRequestStepsObject) {
+func (i *IdentityVerificationRetryRequest) SetSteps(steps *v50.IdentityVerificationRetryRequestStepsObject) {
 	i.Steps = steps
 	i.require(identityVerificationRetryRequestFieldSteps)
 }

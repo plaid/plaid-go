@@ -10,9 +10,9 @@ import (
 	os "os"
 	testing "testing"
 
-	plaid "github.com/plaid/plaid-go/v49"
-	client "github.com/plaid/plaid-go/v49/client"
-	option "github.com/plaid/plaid-go/v49/option"
+	plaid "github.com/plaid/plaid-go/v50"
+	client "github.com/plaid/plaid-go/v50/client"
+	option "github.com/plaid/plaid-go/v50/option"
 	require "github.com/stretchr/testify/require"
 )
 
@@ -299,6 +299,34 @@ func TestUserTerminateProductsWithWireMock(
 
 	require.NoError(t, invocationErr, "Client method call should succeed")
 	VerifyRequestCount(t, "TestUserTerminateProductsWithWireMock", "POST", "/user/products/terminate", nil, 1)
+}
+
+func TestUserGetTransferLimitsWithWireMock(
+	t *testing.T,
+) {
+	WireMockBaseURL := os.Getenv("WIREMOCK_URL")
+	if WireMockBaseURL == "" {
+		WireMockBaseURL = "http://localhost:8080"
+	}
+	wireMockClientID := "wiremock-client-id"
+	client := client.NewClient(
+		option.WithCustomEndpoint(WireMockBaseURL, nil),
+		option.WithClientID(&wireMockClientID),
+		option.WithSecret("wiremock-secret"),
+	)
+	request := &plaid.UserTransferLimitsGetRequest{
+		UserID: "user_id",
+	}
+	_, invocationErr := client.User.GetTransferLimits(
+		context.TODO(),
+		request,
+		option.WithHTTPHeader(
+			http.Header{"X-Test-Id": []string{"TestUserGetTransferLimitsWithWireMock"}},
+		),
+	)
+
+	require.NoError(t, invocationErr, "Client method call should succeed")
+	VerifyRequestCount(t, "TestUserGetTransferLimitsWithWireMock", "POST", "/user/transfer/limits/get", nil, 1)
 }
 
 func TestUserGetItemsWithWireMock(

@@ -5,7 +5,7 @@ package plaid
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/plaid/plaid-go/v49/internal"
+	internal "github.com/plaid/plaid-go/v50/internal"
 	big "math/big"
 	time "time"
 )
@@ -356,6 +356,54 @@ func (u *UserItemsGetRequest) UnmarshalJSON(data []byte) error {
 
 func (u *UserItemsGetRequest) MarshalJSON() ([]byte, error) {
 	type embed UserItemsGetRequest
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*u),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, u.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+var (
+	userTransferLimitsGetRequestFieldUserID = big.NewInt(1 << 0)
+)
+
+type UserTransferLimitsGetRequest struct {
+	UserID NewUserID `json:"user_id" url:"-"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+}
+
+func (u *UserTransferLimitsGetRequest) require(field *big.Int) {
+	next := new(big.Int)
+	if u.explicitFields != nil {
+		next.Set(u.explicitFields)
+	}
+	next.Or(next, field)
+	u.explicitFields = next
+}
+
+// SetUserID sets the UserID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UserTransferLimitsGetRequest) SetUserID(userID NewUserID) {
+	u.UserID = userID
+	u.require(userTransferLimitsGetRequestFieldUserID)
+}
+
+func (u *UserTransferLimitsGetRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler UserTransferLimitsGetRequest
+	var body unmarshaler
+	if err := json.Unmarshal(data, &body); err != nil {
+		return err
+	}
+	*u = UserTransferLimitsGetRequest(body)
+	return nil
+}
+
+func (u *UserTransferLimitsGetRequest) MarshalJSON() ([]byte, error) {
+	type embed UserTransferLimitsGetRequest
 	var marshaler = struct {
 		embed
 	}{
@@ -2302,6 +2350,271 @@ func (u *UserGetResponse) String() string {
 }
 
 var (
+	userGuaranteeLimitsFieldTransactionLimit = big.NewInt(1 << 0)
+	userGuaranteeLimitsFieldDailyLimit       = big.NewInt(1 << 1)
+	userGuaranteeLimitsFieldWeeklyLimit      = big.NewInt(1 << 2)
+	userGuaranteeLimitsFieldMonthlyLimit     = big.NewInt(1 << 3)
+)
+
+// userGuaranteeLimitsNullableFields maps the wire names of UserGuaranteeLimits's nullable fields (required or optional) to their field bits.
+var userGuaranteeLimitsNullableFields = map[string]*big.Int{
+	"daily_limit":   userGuaranteeLimitsFieldDailyLimit,
+	"weekly_limit":  userGuaranteeLimitsFieldWeeklyLimit,
+	"monthly_limit": userGuaranteeLimitsFieldMonthlyLimit,
+}
+
+// The user's Guaranteed ACH debit limits. Daily, weekly, and monthly limits are configured ceilings, not remaining capacity. Each rolling limit is `null` when no ceiling is enabled for that window.
+type UserGuaranteeLimits struct {
+	// The user's current per-transaction guarantee limit. A zero-dollar limit is returned with a value of `"0.00"`.
+	TransactionLimit *UserGuaranteeLimitsTransactionLimit `json:"transaction_limit" url:"transaction_limit"`
+	DailyLimit       *UserTransferLimitAmountNullable     `json:"daily_limit,omitempty" url:"daily_limit,omitempty"`
+	WeeklyLimit      *UserTransferLimitAmountNullable     `json:"weekly_limit,omitempty" url:"weekly_limit,omitempty"`
+	MonthlyLimit     *UserTransferLimitAmountNullable     `json:"monthly_limit,omitempty" url:"monthly_limit,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (u *UserGuaranteeLimits) GetTransactionLimit() *UserGuaranteeLimitsTransactionLimit {
+	if u == nil {
+		return nil
+	}
+	return u.TransactionLimit
+}
+
+func (u *UserGuaranteeLimits) GetDailyLimit() *UserTransferLimitAmountNullable {
+	if u == nil {
+		return nil
+	}
+	return u.DailyLimit
+}
+
+func (u *UserGuaranteeLimits) GetWeeklyLimit() *UserTransferLimitAmountNullable {
+	if u == nil {
+		return nil
+	}
+	return u.WeeklyLimit
+}
+
+func (u *UserGuaranteeLimits) GetMonthlyLimit() *UserTransferLimitAmountNullable {
+	if u == nil {
+		return nil
+	}
+	return u.MonthlyLimit
+}
+
+func (u *UserGuaranteeLimits) GetExtraProperties() map[string]interface{} {
+	if u == nil {
+		return nil
+	}
+	return u.ExtraProperties
+}
+
+func (u *UserGuaranteeLimits) require(field *big.Int) {
+	next := new(big.Int)
+	if u.explicitFields != nil {
+		next.Set(u.explicitFields)
+	}
+	next.Or(next, field)
+	u.explicitFields = next
+}
+
+// SetTransactionLimit sets the TransactionLimit field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UserGuaranteeLimits) SetTransactionLimit(transactionLimit *UserGuaranteeLimitsTransactionLimit) {
+	u.TransactionLimit = transactionLimit
+	u.require(userGuaranteeLimitsFieldTransactionLimit)
+}
+
+// SetDailyLimit sets the DailyLimit field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UserGuaranteeLimits) SetDailyLimit(dailyLimit *UserTransferLimitAmountNullable) {
+	u.DailyLimit = dailyLimit
+	u.require(userGuaranteeLimitsFieldDailyLimit)
+}
+
+// SetWeeklyLimit sets the WeeklyLimit field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UserGuaranteeLimits) SetWeeklyLimit(weeklyLimit *UserTransferLimitAmountNullable) {
+	u.WeeklyLimit = weeklyLimit
+	u.require(userGuaranteeLimitsFieldWeeklyLimit)
+}
+
+// SetMonthlyLimit sets the MonthlyLimit field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UserGuaranteeLimits) SetMonthlyLimit(monthlyLimit *UserTransferLimitAmountNullable) {
+	u.MonthlyLimit = monthlyLimit
+	u.require(userGuaranteeLimitsFieldMonthlyLimit)
+}
+
+func (u *UserGuaranteeLimits) UnmarshalJSON(data []byte) error {
+	type embed UserGuaranteeLimits
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*u),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*u = UserGuaranteeLimits(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, userGuaranteeLimitsNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		u.require(presentFields)
+	}
+	u.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (u *UserGuaranteeLimits) MarshalJSON() ([]byte, error) {
+	type embed UserGuaranteeLimits
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*u),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, u.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, u.ExtraProperties)
+}
+
+func (u *UserGuaranteeLimits) String() string {
+	if u == nil {
+		return "<nil>"
+	}
+	if len(u.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(u.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(u); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", u)
+}
+
+var (
+	userGuaranteeLimitsTransactionLimitFieldValue           = big.NewInt(1 << 0)
+	userGuaranteeLimitsTransactionLimitFieldIsoCurrencyCode = big.NewInt(1 << 1)
+)
+
+// The user's current per-transaction guarantee limit. A zero-dollar limit is returned with a value of `"0.00"`.
+type UserGuaranteeLimitsTransactionLimit struct {
+	// The limit in dollars, formatted as a decimal string with two digits of precision (for example, `"150.25"` represents $150.25).
+	Value string `json:"value" url:"value"`
+	// The ISO-4217 currency code of the limit. Currently always `USD`.
+	IsoCurrencyCode string `json:"iso_currency_code" url:"iso_currency_code"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (u *UserGuaranteeLimitsTransactionLimit) GetValue() string {
+	if u == nil {
+		return ""
+	}
+	return u.Value
+}
+
+func (u *UserGuaranteeLimitsTransactionLimit) GetIsoCurrencyCode() string {
+	if u == nil {
+		return ""
+	}
+	return u.IsoCurrencyCode
+}
+
+func (u *UserGuaranteeLimitsTransactionLimit) GetExtraProperties() map[string]interface{} {
+	if u == nil {
+		return nil
+	}
+	return u.ExtraProperties
+}
+
+func (u *UserGuaranteeLimitsTransactionLimit) require(field *big.Int) {
+	next := new(big.Int)
+	if u.explicitFields != nil {
+		next.Set(u.explicitFields)
+	}
+	next.Or(next, field)
+	u.explicitFields = next
+}
+
+// SetValue sets the Value field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UserGuaranteeLimitsTransactionLimit) SetValue(value string) {
+	u.Value = value
+	u.require(userGuaranteeLimitsTransactionLimitFieldValue)
+}
+
+// SetIsoCurrencyCode sets the IsoCurrencyCode field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UserGuaranteeLimitsTransactionLimit) SetIsoCurrencyCode(isoCurrencyCode string) {
+	u.IsoCurrencyCode = isoCurrencyCode
+	u.require(userGuaranteeLimitsTransactionLimitFieldIsoCurrencyCode)
+}
+
+func (u *UserGuaranteeLimitsTransactionLimit) UnmarshalJSON(data []byte) error {
+	type embed UserGuaranteeLimitsTransactionLimit
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*u),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*u = UserGuaranteeLimitsTransactionLimit(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.ExtraProperties = extraProperties
+	u.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (u *UserGuaranteeLimitsTransactionLimit) MarshalJSON() ([]byte, error) {
+	type embed UserGuaranteeLimitsTransactionLimit
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*u),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, u.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, u.ExtraProperties)
+}
+
+func (u *UserGuaranteeLimitsTransactionLimit) String() string {
+	if u == nil {
+		return "<nil>"
+	}
+	if len(u.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(u.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(u); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", u)
+}
+
+var (
 	userIdentityRemoveResponseFieldRequestID = big.NewInt(1 << 0)
 )
 
@@ -3197,6 +3510,329 @@ func (u *UserTransactionsRefreshResponse) MarshalJSON() ([]byte, error) {
 }
 
 func (u *UserTransactionsRefreshResponse) String() string {
+	if u == nil {
+		return "<nil>"
+	}
+	if len(u.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(u.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(u); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", u)
+}
+
+var (
+	userTransferLimitAmountFieldValue           = big.NewInt(1 << 0)
+	userTransferLimitAmountFieldIsoCurrencyCode = big.NewInt(1 << 1)
+)
+
+// A transfer limit amount and its currency.
+type UserTransferLimitAmount struct {
+	// The limit in dollars, formatted as a decimal string with two digits of precision (for example, `"150.25"` represents $150.25).
+	Value string `json:"value" url:"value"`
+	// The ISO-4217 currency code of the limit. Currently always `USD`.
+	IsoCurrencyCode string `json:"iso_currency_code" url:"iso_currency_code"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (u *UserTransferLimitAmount) GetValue() string {
+	if u == nil {
+		return ""
+	}
+	return u.Value
+}
+
+func (u *UserTransferLimitAmount) GetIsoCurrencyCode() string {
+	if u == nil {
+		return ""
+	}
+	return u.IsoCurrencyCode
+}
+
+func (u *UserTransferLimitAmount) GetExtraProperties() map[string]interface{} {
+	if u == nil {
+		return nil
+	}
+	return u.ExtraProperties
+}
+
+func (u *UserTransferLimitAmount) require(field *big.Int) {
+	next := new(big.Int)
+	if u.explicitFields != nil {
+		next.Set(u.explicitFields)
+	}
+	next.Or(next, field)
+	u.explicitFields = next
+}
+
+// SetValue sets the Value field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UserTransferLimitAmount) SetValue(value string) {
+	u.Value = value
+	u.require(userTransferLimitAmountFieldValue)
+}
+
+// SetIsoCurrencyCode sets the IsoCurrencyCode field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UserTransferLimitAmount) SetIsoCurrencyCode(isoCurrencyCode string) {
+	u.IsoCurrencyCode = isoCurrencyCode
+	u.require(userTransferLimitAmountFieldIsoCurrencyCode)
+}
+
+func (u *UserTransferLimitAmount) UnmarshalJSON(data []byte) error {
+	type embed UserTransferLimitAmount
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*u),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*u = UserTransferLimitAmount(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.ExtraProperties = extraProperties
+	u.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (u *UserTransferLimitAmount) MarshalJSON() ([]byte, error) {
+	type embed UserTransferLimitAmount
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*u),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, u.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, u.ExtraProperties)
+}
+
+func (u *UserTransferLimitAmount) String() string {
+	if u == nil {
+		return "<nil>"
+	}
+	if len(u.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(u.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(u); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", u)
+}
+
+var (
+	userTransferLimitAmountNullableFieldValue           = big.NewInt(1 << 0)
+	userTransferLimitAmountNullableFieldIsoCurrencyCode = big.NewInt(1 << 1)
+)
+
+// A transfer limit amount and its currency, or `null` when the limit is not configured.
+type UserTransferLimitAmountNullable struct {
+	// The limit in dollars, formatted as a decimal string with two digits of precision (for example, `"150.25"` represents $150.25).
+	Value string `json:"value" url:"value"`
+	// The ISO-4217 currency code of the limit. Currently always `USD`.
+	IsoCurrencyCode string `json:"iso_currency_code" url:"iso_currency_code"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (u *UserTransferLimitAmountNullable) GetValue() string {
+	if u == nil {
+		return ""
+	}
+	return u.Value
+}
+
+func (u *UserTransferLimitAmountNullable) GetIsoCurrencyCode() string {
+	if u == nil {
+		return ""
+	}
+	return u.IsoCurrencyCode
+}
+
+func (u *UserTransferLimitAmountNullable) GetExtraProperties() map[string]interface{} {
+	if u == nil {
+		return nil
+	}
+	return u.extraProperties
+}
+
+func (u *UserTransferLimitAmountNullable) require(field *big.Int) {
+	next := new(big.Int)
+	if u.explicitFields != nil {
+		next.Set(u.explicitFields)
+	}
+	next.Or(next, field)
+	u.explicitFields = next
+}
+
+// SetValue sets the Value field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UserTransferLimitAmountNullable) SetValue(value string) {
+	u.Value = value
+	u.require(userTransferLimitAmountNullableFieldValue)
+}
+
+// SetIsoCurrencyCode sets the IsoCurrencyCode field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UserTransferLimitAmountNullable) SetIsoCurrencyCode(isoCurrencyCode string) {
+	u.IsoCurrencyCode = isoCurrencyCode
+	u.require(userTransferLimitAmountNullableFieldIsoCurrencyCode)
+}
+
+func (u *UserTransferLimitAmountNullable) UnmarshalJSON(data []byte) error {
+	type unmarshaler UserTransferLimitAmountNullable
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*u = UserTransferLimitAmountNullable(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.extraProperties = extraProperties
+	u.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (u *UserTransferLimitAmountNullable) MarshalJSON() ([]byte, error) {
+	type embed UserTransferLimitAmountNullable
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*u),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, u.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (u *UserTransferLimitAmountNullable) String() string {
+	if u == nil {
+		return "<nil>"
+	}
+	if len(u.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(u.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(u); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", u)
+}
+
+var (
+	userTransferLimitsGetResponseFieldGuaranteeLimits = big.NewInt(1 << 0)
+	userTransferLimitsGetResponseFieldRequestID       = big.NewInt(1 << 1)
+)
+
+// UserTransferLimitsGetResponse defines the response schema for `/user/transfer/limits/get`.
+type UserTransferLimitsGetResponse struct {
+	GuaranteeLimits *UserGuaranteeLimits `json:"guarantee_limits" url:"guarantee_limits"`
+	RequestID       RequestID            `json:"request_id" url:"request_id"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (u *UserTransferLimitsGetResponse) GetGuaranteeLimits() *UserGuaranteeLimits {
+	if u == nil {
+		return nil
+	}
+	return u.GuaranteeLimits
+}
+
+func (u *UserTransferLimitsGetResponse) GetRequestID() RequestID {
+	if u == nil {
+		return ""
+	}
+	return u.RequestID
+}
+
+func (u *UserTransferLimitsGetResponse) GetExtraProperties() map[string]interface{} {
+	if u == nil {
+		return nil
+	}
+	return u.ExtraProperties
+}
+
+func (u *UserTransferLimitsGetResponse) require(field *big.Int) {
+	next := new(big.Int)
+	if u.explicitFields != nil {
+		next.Set(u.explicitFields)
+	}
+	next.Or(next, field)
+	u.explicitFields = next
+}
+
+// SetGuaranteeLimits sets the GuaranteeLimits field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UserTransferLimitsGetResponse) SetGuaranteeLimits(guaranteeLimits *UserGuaranteeLimits) {
+	u.GuaranteeLimits = guaranteeLimits
+	u.require(userTransferLimitsGetResponseFieldGuaranteeLimits)
+}
+
+// SetRequestID sets the RequestID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (u *UserTransferLimitsGetResponse) SetRequestID(requestID RequestID) {
+	u.RequestID = requestID
+	u.require(userTransferLimitsGetResponseFieldRequestID)
+}
+
+func (u *UserTransferLimitsGetResponse) UnmarshalJSON(data []byte) error {
+	type embed UserTransferLimitsGetResponse
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*u),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*u = UserTransferLimitsGetResponse(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.ExtraProperties = extraProperties
+	u.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (u *UserTransferLimitsGetResponse) MarshalJSON() ([]byte, error) {
+	type embed UserTransferLimitsGetResponse
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*u),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, u.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, u.ExtraProperties)
+}
+
+func (u *UserTransferLimitsGetResponse) String() string {
 	if u == nil {
 		return "<nil>"
 	}
