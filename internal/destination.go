@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/plaid/plaid-go/v49/core"
+	"github.com/plaid/plaid-go/v50/core"
 )
 
 // Every Plaid API request carries the client ID and secret, so the SDK only

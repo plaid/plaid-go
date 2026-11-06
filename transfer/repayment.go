@@ -4,7 +4,7 @@ package transfer
 
 import (
 	json "encoding/json"
-	internal "github.com/plaid/plaid-go/v49/internal"
+	internal "github.com/plaid/plaid-go/v50/internal"
 	big "math/big"
 	time "time"
 )

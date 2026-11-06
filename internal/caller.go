@@ -14,7 +14,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/plaid/plaid-go/v49/core"
+	"github.com/plaid/plaid-go/v50/core"
 )
 
 const (

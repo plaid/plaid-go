@@ -5,7 +5,7 @@ package plaid
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/plaid/plaid-go/v49/internal"
+	internal "github.com/plaid/plaid-go/v50/internal"
 	big "math/big"
 	time "time"
 )
@@ -4286,7 +4286,7 @@ type ItemWithConsentFields struct {
 	//
 	// `user_present_required` - Item requires user interaction to be updated
 	UpdateType ItemUpdateType `json:"update_type" url:"update_type"`
-	// The `item_id` of the Item that was created alongside this one in a single Link session. Only present for Items created in a hybrid Link flow that produces separate Plaid Inc and Plaid Check items; `null` for every other Item.
+	// The `item_id` of the Item that was created alongside this one when a single Link session used both Plaid Inc and Plaid Check products (see [Using Plaid Check products alongside Plaid products](https://plaid.com/docs/check/add-to-app/#using-plaid-check-products-alongside-plaid-products)). For a Plaid Inc Item, this is the paired Plaid Check Item, and the reverse for a Plaid Check Item. The field is omitted for Items that have no paired Item. It is also omitted if Plaid cannot look up the paired Item at request time, so do not treat its absence as proof that an Item is unpaired.
 	PairedItemID *string `json:"paired_item_id,omitempty" url:"paired_item_id,omitempty"`
 	// The date and time when the Item was created, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format.
 	CreatedAt *time.Time `json:"created_at,omitempty" url:"created_at,omitempty"`

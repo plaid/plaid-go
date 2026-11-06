@@ -4,8 +4,8 @@ package transfer
 
 import (
 	json "encoding/json"
-	v49 "github.com/plaid/plaid-go/v49"
-	internal "github.com/plaid/plaid-go/v49/internal"
+	v50 "github.com/plaid/plaid-go/v50"
+	internal "github.com/plaid/plaid-go/v50/internal"
 	big "math/big"
 	time "time"
 )
@@ -83,14 +83,14 @@ type TransferSweepListRequest struct {
 	Offset *int `json:"offset,omitempty" url:"-"`
 	// Filter sweeps to only those with the specified amount.
 	Amount *string          `json:"amount,omitempty" url:"-"`
-	Status *v49.SweepStatus `json:"status,omitempty" url:"-"`
+	Status *v50.SweepStatus `json:"status,omitempty" url:"-"`
 	// Filter sweeps to only those with the specified originator client.
 	OriginatorClientID *string `json:"originator_client_id,omitempty" url:"-"`
 	// Filter sweeps to only those with the specified `funding_account_id`.
 	FundingAccountID *string `json:"funding_account_id,omitempty" url:"-"`
 	// Filter sweeps to only those with the included `transfer_id`.
 	TransferID *string           `json:"transfer_id,omitempty" url:"-"`
-	Trigger    *v49.SweepTrigger `json:"trigger,omitempty" url:"-"`
+	Trigger    *v50.SweepTrigger `json:"trigger,omitempty" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -142,7 +142,7 @@ func (t *TransferSweepListRequest) SetAmount(amount *string) {
 
 // SetStatus sets the Status field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferSweepListRequest) SetStatus(status *v49.SweepStatus) {
+func (t *TransferSweepListRequest) SetStatus(status *v50.SweepStatus) {
 	t.Status = status
 	t.require(transferSweepListRequestFieldStatus)
 }
@@ -170,7 +170,7 @@ func (t *TransferSweepListRequest) SetTransferID(transferID *string) {
 
 // SetTrigger sets the Trigger field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferSweepListRequest) SetTrigger(trigger *v49.SweepTrigger) {
+func (t *TransferSweepListRequest) SetTrigger(trigger *v50.SweepTrigger) {
 	t.Trigger = trigger
 	t.require(transferSweepListRequestFieldTrigger)
 }

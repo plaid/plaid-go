@@ -4462,6 +4462,87 @@ func TestSettersMarkExplicitLinkSessionCraItemAddResult(t *testing.T) {
 
 }
 
+func TestSettersLinkSessionCraReportResult(t *testing.T) {
+	t.Run("SetReportID", func(t *testing.T) {
+		obj := &LinkSessionCraReportResult{}
+		var fernTestValueReportID *string
+		obj.SetReportID(fernTestValueReportID)
+		assert.Equal(t, fernTestValueReportID, obj.ReportID)
+		assert.NotNil(t, obj.explicitFields)
+	})
+
+}
+
+func TestGettersLinkSessionCraReportResult(t *testing.T) {
+	t.Run("GetReportID", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		obj := &LinkSessionCraReportResult{}
+		var expected *string
+		obj.ReportID = expected
+
+		// Act & Assert
+		assert.Equal(t, expected, obj.GetReportID(), "getter should return the property value")
+	})
+
+	t.Run("GetReportID_NilValue", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		obj := &LinkSessionCraReportResult{}
+		obj.ReportID = nil
+
+		// Act & Assert
+		assert.Nil(t, obj.GetReportID(), "getter should return nil when property is nil")
+	})
+
+	t.Run("GetReportID_NilReceiver", func(t *testing.T) {
+		t.Parallel()
+		var obj *LinkSessionCraReportResult
+		// Should not panic - getters should handle nil receiver gracefully
+		defer func() {
+			if r := recover(); r != nil {
+				t.Errorf("Getter panicked on nil receiver: %v", r)
+			}
+		}()
+		_ = obj.GetReportID() // Should return zero value
+	})
+
+}
+
+func TestSettersMarkExplicitLinkSessionCraReportResult(t *testing.T) {
+	t.Run("SetReportID_MarksExplicit", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		obj := &LinkSessionCraReportResult{}
+		var fernTestValueReportID *string
+
+		// Act
+		obj.SetReportID(fernTestValueReportID)
+
+		// Assert - object with explicitly set field can be marshaled/unmarshaled
+		bytes, err := json.Marshal(obj)
+		require.NoError(t, err, "marshaling should succeed for test setup")
+
+		// This test ensures JSON marshaling and unmarshaling succeed when the field has a zero/nil value
+		// Detect if marshaled JSON is an object or primitive to use correct unmarshal target
+		if len(bytes) > 0 && bytes[0] == '{' {
+			// JSON object - unmarshal into map
+			var unmarshaled map[string]interface{}
+			err = json.Unmarshal(bytes, &unmarshaled)
+			require.NoError(t, err, "unmarshaling should succeed for test verification")
+		} else {
+			// JSON primitive (string, number, boolean, null) - unmarshal into interface{}
+			var unmarshaled interface{}
+			err = json.Unmarshal(bytes, &unmarshaled)
+			require.NoError(t, err, "unmarshaling should succeed for test verification")
+		}
+
+		// Note: This does not explicitly assert the presence of a specific JSON field
+		// It verifies that setting a field via setter allows successful JSON round-trip
+	})
+
+}
+
 func TestSettersLinkSessionCraUpdateResult(t *testing.T) {
 	t.Run("SetItemID", func(t *testing.T) {
 		obj := &LinkSessionCraUpdateResult{}
@@ -5910,6 +5991,14 @@ func TestSettersLinkSessionResults(t *testing.T) {
 		assert.NotNil(t, obj.explicitFields)
 	})
 
+	t.Run("SetCraReportResults", func(t *testing.T) {
+		obj := &LinkSessionResults{}
+		var fernTestValueCraReportResults *LinkSessionCraReportResult
+		obj.SetCraReportResults(fernTestValueCraReportResults)
+		assert.Equal(t, fernTestValueCraReportResults, obj.CraReportResults)
+		assert.NotNil(t, obj.explicitFields)
+	})
+
 }
 
 func TestGettersLinkSessionResults(t *testing.T) {
@@ -6144,6 +6233,39 @@ func TestGettersLinkSessionResults(t *testing.T) {
 		_ = obj.GetCraDocumentUploadResults() // Should return zero value
 	})
 
+	t.Run("GetCraReportResults", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		obj := &LinkSessionResults{}
+		var expected *LinkSessionCraReportResult
+		obj.CraReportResults = expected
+
+		// Act & Assert
+		assert.Equal(t, expected, obj.GetCraReportResults(), "getter should return the property value")
+	})
+
+	t.Run("GetCraReportResults_NilValue", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		obj := &LinkSessionResults{}
+		obj.CraReportResults = nil
+
+		// Act & Assert
+		assert.Nil(t, obj.GetCraReportResults(), "getter should return nil when property is nil")
+	})
+
+	t.Run("GetCraReportResults_NilReceiver", func(t *testing.T) {
+		t.Parallel()
+		var obj *LinkSessionResults
+		// Should not panic - getters should handle nil receiver gracefully
+		defer func() {
+			if r := recover(); r != nil {
+				t.Errorf("Getter panicked on nil receiver: %v", r)
+			}
+		}()
+		_ = obj.GetCraReportResults() // Should return zero value
+	})
+
 }
 
 func TestSettersMarkExplicitLinkSessionResults(t *testing.T) {
@@ -6341,6 +6463,37 @@ func TestSettersMarkExplicitLinkSessionResults(t *testing.T) {
 
 		// Act
 		obj.SetCraDocumentUploadResults(fernTestValueCraDocumentUploadResults)
+
+		// Assert - object with explicitly set field can be marshaled/unmarshaled
+		bytes, err := json.Marshal(obj)
+		require.NoError(t, err, "marshaling should succeed for test setup")
+
+		// This test ensures JSON marshaling and unmarshaling succeed when the field has a zero/nil value
+		// Detect if marshaled JSON is an object or primitive to use correct unmarshal target
+		if len(bytes) > 0 && bytes[0] == '{' {
+			// JSON object - unmarshal into map
+			var unmarshaled map[string]interface{}
+			err = json.Unmarshal(bytes, &unmarshaled)
+			require.NoError(t, err, "unmarshaling should succeed for test verification")
+		} else {
+			// JSON primitive (string, number, boolean, null) - unmarshal into interface{}
+			var unmarshaled interface{}
+			err = json.Unmarshal(bytes, &unmarshaled)
+			require.NoError(t, err, "unmarshaling should succeed for test verification")
+		}
+
+		// Note: This does not explicitly assert the presence of a specific JSON field
+		// It verifies that setting a field via setter allows successful JSON round-trip
+	})
+
+	t.Run("SetCraReportResults_MarksExplicit", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		obj := &LinkSessionResults{}
+		var fernTestValueCraReportResults *LinkSessionCraReportResult
+
+		// Act
+		obj.SetCraReportResults(fernTestValueCraReportResults)
 
 		// Assert - object with explicitly set field can be marshaled/unmarshaled
 		bytes, err := json.Marshal(obj)
@@ -10364,6 +10517,14 @@ func TestSettersLinkTokenCreateRequestCraOptionsBaseReport(t *testing.T) {
 		assert.NotNil(t, obj.explicitFields)
 	})
 
+	t.Run("SetExcludeTransactions", func(t *testing.T) {
+		obj := &LinkTokenCreateRequestCraOptionsBaseReport{}
+		var fernTestValueExcludeTransactions *bool
+		obj.SetExcludeTransactions(fernTestValueExcludeTransactions)
+		assert.Equal(t, fernTestValueExcludeTransactions, obj.ExcludeTransactions)
+		assert.NotNil(t, obj.explicitFields)
+	})
+
 }
 
 func TestGettersLinkTokenCreateRequestCraOptionsBaseReport(t *testing.T) {
@@ -10499,6 +10660,39 @@ func TestGettersLinkTokenCreateRequestCraOptionsBaseReport(t *testing.T) {
 		_ = obj.GetHomeLendingReportOptions() // Should return zero value
 	})
 
+	t.Run("GetExcludeTransactions", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		obj := &LinkTokenCreateRequestCraOptionsBaseReport{}
+		var expected *bool
+		obj.ExcludeTransactions = expected
+
+		// Act & Assert
+		assert.Equal(t, expected, obj.GetExcludeTransactions(), "getter should return the property value")
+	})
+
+	t.Run("GetExcludeTransactions_NilValue", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		obj := &LinkTokenCreateRequestCraOptionsBaseReport{}
+		obj.ExcludeTransactions = nil
+
+		// Act & Assert
+		assert.Nil(t, obj.GetExcludeTransactions(), "getter should return nil when property is nil")
+	})
+
+	t.Run("GetExcludeTransactions_NilReceiver", func(t *testing.T) {
+		t.Parallel()
+		var obj *LinkTokenCreateRequestCraOptionsBaseReport
+		// Should not panic - getters should handle nil receiver gracefully
+		defer func() {
+			if r := recover(); r != nil {
+				t.Errorf("Getter panicked on nil receiver: %v", r)
+			}
+		}()
+		_ = obj.GetExcludeTransactions() // Should return zero value
+	})
+
 }
 
 func TestSettersMarkExplicitLinkTokenCreateRequestCraOptionsBaseReport(t *testing.T) {
@@ -10603,6 +10797,37 @@ func TestSettersMarkExplicitLinkTokenCreateRequestCraOptionsBaseReport(t *testin
 
 		// Act
 		obj.SetHomeLendingReportOptions(fernTestValueHomeLendingReportOptions)
+
+		// Assert - object with explicitly set field can be marshaled/unmarshaled
+		bytes, err := json.Marshal(obj)
+		require.NoError(t, err, "marshaling should succeed for test setup")
+
+		// This test ensures JSON marshaling and unmarshaling succeed when the field has a zero/nil value
+		// Detect if marshaled JSON is an object or primitive to use correct unmarshal target
+		if len(bytes) > 0 && bytes[0] == '{' {
+			// JSON object - unmarshal into map
+			var unmarshaled map[string]interface{}
+			err = json.Unmarshal(bytes, &unmarshaled)
+			require.NoError(t, err, "unmarshaling should succeed for test verification")
+		} else {
+			// JSON primitive (string, number, boolean, null) - unmarshal into interface{}
+			var unmarshaled interface{}
+			err = json.Unmarshal(bytes, &unmarshaled)
+			require.NoError(t, err, "unmarshaling should succeed for test verification")
+		}
+
+		// Note: This does not explicitly assert the presence of a specific JSON field
+		// It verifies that setting a field via setter allows successful JSON round-trip
+	})
+
+	t.Run("SetExcludeTransactions_MarksExplicit", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		obj := &LinkTokenCreateRequestCraOptionsBaseReport{}
+		var fernTestValueExcludeTransactions *bool
+
+		// Act
+		obj.SetExcludeTransactions(fernTestValueExcludeTransactions)
 
 		// Assert - object with explicitly set field can be marshaled/unmarshaled
 		bytes, err := json.Marshal(obj)
@@ -18216,6 +18441,14 @@ func TestSettersLinkTokenInvestments(t *testing.T) {
 		assert.NotNil(t, obj.explicitFields)
 	})
 
+	t.Run("SetAsyncUpdate", func(t *testing.T) {
+		obj := &LinkTokenInvestments{}
+		var fernTestValueAsyncUpdate *bool
+		obj.SetAsyncUpdate(fernTestValueAsyncUpdate)
+		assert.Equal(t, fernTestValueAsyncUpdate, obj.AsyncUpdate)
+		assert.NotNil(t, obj.explicitFields)
+	})
+
 }
 
 func TestGettersLinkTokenInvestments(t *testing.T) {
@@ -18285,6 +18518,39 @@ func TestGettersLinkTokenInvestments(t *testing.T) {
 		_ = obj.GetAllowManualEntry() // Should return zero value
 	})
 
+	t.Run("GetAsyncUpdate", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		obj := &LinkTokenInvestments{}
+		var expected *bool
+		obj.AsyncUpdate = expected
+
+		// Act & Assert
+		assert.Equal(t, expected, obj.GetAsyncUpdate(), "getter should return the property value")
+	})
+
+	t.Run("GetAsyncUpdate_NilValue", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		obj := &LinkTokenInvestments{}
+		obj.AsyncUpdate = nil
+
+		// Act & Assert
+		assert.Nil(t, obj.GetAsyncUpdate(), "getter should return nil when property is nil")
+	})
+
+	t.Run("GetAsyncUpdate_NilReceiver", func(t *testing.T) {
+		t.Parallel()
+		var obj *LinkTokenInvestments
+		// Should not panic - getters should handle nil receiver gracefully
+		defer func() {
+			if r := recover(); r != nil {
+				t.Errorf("Getter panicked on nil receiver: %v", r)
+			}
+		}()
+		_ = obj.GetAsyncUpdate() // Should return zero value
+	})
+
 }
 
 func TestSettersMarkExplicitLinkTokenInvestments(t *testing.T) {
@@ -18327,6 +18593,37 @@ func TestSettersMarkExplicitLinkTokenInvestments(t *testing.T) {
 
 		// Act
 		obj.SetAllowManualEntry(fernTestValueAllowManualEntry)
+
+		// Assert - object with explicitly set field can be marshaled/unmarshaled
+		bytes, err := json.Marshal(obj)
+		require.NoError(t, err, "marshaling should succeed for test setup")
+
+		// This test ensures JSON marshaling and unmarshaling succeed when the field has a zero/nil value
+		// Detect if marshaled JSON is an object or primitive to use correct unmarshal target
+		if len(bytes) > 0 && bytes[0] == '{' {
+			// JSON object - unmarshal into map
+			var unmarshaled map[string]interface{}
+			err = json.Unmarshal(bytes, &unmarshaled)
+			require.NoError(t, err, "unmarshaling should succeed for test verification")
+		} else {
+			// JSON primitive (string, number, boolean, null) - unmarshal into interface{}
+			var unmarshaled interface{}
+			err = json.Unmarshal(bytes, &unmarshaled)
+			require.NoError(t, err, "unmarshaling should succeed for test verification")
+		}
+
+		// Note: This does not explicitly assert the presence of a specific JSON field
+		// It verifies that setting a field via setter allows successful JSON round-trip
+	})
+
+	t.Run("SetAsyncUpdate_MarksExplicit", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		obj := &LinkTokenInvestments{}
+		var fernTestValueAsyncUpdate *bool
+
+		// Act
+		obj.SetAsyncUpdate(fernTestValueAsyncUpdate)
 
 		// Assert - object with explicitly set field can be marshaled/unmarshaled
 		bytes, err := json.Marshal(obj)
@@ -19197,6 +19494,39 @@ func TestJSONMarshalingLinkSessionCraItemAddResult(t *testing.T) {
 	t.Run("UnmarshalEmptyObject", func(t *testing.T) {
 		t.Parallel()
 		var obj LinkSessionCraItemAddResult
+		err := json.Unmarshal([]byte(`{}`), &obj)
+		assert.NoError(t, err, "unmarshaling empty object should succeed")
+	})
+}
+
+func TestJSONMarshalingLinkSessionCraReportResult(t *testing.T) {
+	t.Run("MarshalUnmarshal", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		obj := &LinkSessionCraReportResult{}
+
+		// Act - Marshal to JSON
+		data, err := json.Marshal(obj)
+		require.NoError(t, err, "marshaling should succeed")
+		assert.NotNil(t, data, "marshaled data should not be nil")
+		assert.NotEmpty(t, data, "marshaled data should not be empty")
+
+		// Unmarshal back and verify round-trip
+		var unmarshaled LinkSessionCraReportResult
+		err = json.Unmarshal(data, &unmarshaled)
+		assert.NoError(t, err, "round-trip unmarshal should succeed")
+	})
+
+	t.Run("UnmarshalInvalidJSON", func(t *testing.T) {
+		t.Parallel()
+		var obj LinkSessionCraReportResult
+		err := json.Unmarshal([]byte(`{invalid json}`), &obj)
+		assert.Error(t, err, "unmarshaling invalid JSON should return an error")
+	})
+
+	t.Run("UnmarshalEmptyObject", func(t *testing.T) {
+		t.Parallel()
+		var obj LinkSessionCraReportResult
 		err := json.Unmarshal([]byte(`{}`), &obj)
 		assert.NoError(t, err, "unmarshaling empty object should succeed")
 	})
@@ -21136,6 +21466,49 @@ func TestRequiredNullableRoundTripLinkSessionCraItemAddResult(t *testing.T) {
 	})
 }
 
+func TestRequiredNullableRoundTripLinkSessionCraReportResult(t *testing.T) {
+	requiredNullableKeys := []string{
+		"report_id",
+	}
+	marshalToMap := func(t *testing.T, obj *LinkSessionCraReportResult) map[string]json.RawMessage {
+		data, err := json.Marshal(obj)
+		require.NoError(t, err, "marshaling should succeed")
+		var result map[string]json.RawMessage
+		require.NoError(t, json.Unmarshal(data, &result), "marshaled data should be a JSON object")
+		return result
+	}
+
+	t.Run("NullPreserved", func(t *testing.T) {
+		t.Parallel()
+		var obj LinkSessionCraReportResult
+		require.NoError(t, json.Unmarshal([]byte(`{"report_id":null}`), &obj))
+		result := marshalToMap(t, &obj)
+		for _, key := range requiredNullableKeys {
+			value, ok := result[key]
+			require.True(t, ok, "required nullable field %q received as null should be present in the output", key)
+			assert.Equal(t, "null", string(value), "required nullable field %q received as null should be null in the output", key)
+		}
+	})
+
+	t.Run("AbsentStaysAbsent", func(t *testing.T) {
+		t.Parallel()
+		var obj LinkSessionCraReportResult
+		require.NoError(t, json.Unmarshal([]byte(`{}`), &obj))
+		result := marshalToMap(t, &obj)
+		for _, key := range requiredNullableKeys {
+			assert.NotContains(t, result, key, "required nullable field %q absent from the input should be absent from the output", key)
+		}
+	})
+
+	t.Run("FreshValueOmits", func(t *testing.T) {
+		t.Parallel()
+		result := marshalToMap(t, &LinkSessionCraReportResult{})
+		for _, key := range requiredNullableKeys {
+			assert.NotContains(t, result, key, "required nullable field %q should be omitted from a freshly constructed value", key)
+		}
+	})
+}
+
 func TestRequiredNullableRoundTripLinkSessionCraUpdateResult(t *testing.T) {
 	requiredNullableKeys := []string{
 		"institution",
@@ -21356,6 +21729,7 @@ func TestRequiredNullableRoundTripLinkSessionPayrollIncomeResult(t *testing.T) {
 func TestRequiredNullableRoundTripLinkSessionResults(t *testing.T) {
 	requiredNullableKeys := []string{
 		"document_income_results",
+		"cra_report_results",
 	}
 	marshalToMap := func(t *testing.T, obj *LinkSessionResults) map[string]json.RawMessage {
 		data, err := json.Marshal(obj)
@@ -21368,7 +21742,7 @@ func TestRequiredNullableRoundTripLinkSessionResults(t *testing.T) {
 	t.Run("NullPreserved", func(t *testing.T) {
 		t.Parallel()
 		var obj LinkSessionResults
-		require.NoError(t, json.Unmarshal([]byte(`{"document_income_results":null}`), &obj))
+		require.NoError(t, json.Unmarshal([]byte(`{"document_income_results":null,"cra_report_results":null}`), &obj))
 		result := marshalToMap(t, &obj)
 		for _, key := range requiredNullableKeys {
 			value, ok := result[key]
@@ -21568,6 +21942,52 @@ func TestRequiredNullableRoundTripLinkTokenGetResponse(t *testing.T) {
 		result := marshalToMap(t, &LinkTokenGetResponse{})
 		for _, key := range requiredNullableKeys {
 			assert.NotContains(t, result, key, "required nullable field %q should be omitted from a freshly constructed value", key)
+		}
+	})
+}
+
+func TestOptionalNullableRoundTripAccountFiltersResponse(t *testing.T) {
+	optionalNullableKeys := []string{
+		"depository",
+		"credit",
+		"loan",
+		"investment",
+	}
+	marshalToMap := func(t *testing.T, obj *AccountFiltersResponse) map[string]json.RawMessage {
+		data, err := json.Marshal(obj)
+		require.NoError(t, err, "marshaling should succeed")
+		var result map[string]json.RawMessage
+		require.NoError(t, json.Unmarshal(data, &result), "marshaled data should be a JSON object")
+		return result
+	}
+
+	t.Run("NullPreserved", func(t *testing.T) {
+		t.Parallel()
+		var obj AccountFiltersResponse
+		require.NoError(t, json.Unmarshal([]byte(`{"depository":null,"credit":null,"loan":null,"investment":null}`), &obj))
+		result := marshalToMap(t, &obj)
+		for _, key := range optionalNullableKeys {
+			value, ok := result[key]
+			require.True(t, ok, "optional nullable field %q received as null should be present in the output", key)
+			assert.Equal(t, "null", string(value), "optional nullable field %q received as null should be null in the output", key)
+		}
+	})
+
+	t.Run("AbsentStaysAbsent", func(t *testing.T) {
+		t.Parallel()
+		var obj AccountFiltersResponse
+		require.NoError(t, json.Unmarshal([]byte(`{}`), &obj))
+		result := marshalToMap(t, &obj)
+		for _, key := range optionalNullableKeys {
+			assert.NotContains(t, result, key, "optional nullable field %q absent from the input should be absent from the output", key)
+		}
+	})
+
+	t.Run("FreshValueOmits", func(t *testing.T) {
+		t.Parallel()
+		result := marshalToMap(t, &AccountFiltersResponse{})
+		for _, key := range optionalNullableKeys {
+			assert.NotContains(t, result, key, "optional nullable field %q should be omitted from a freshly constructed value", key)
 		}
 	})
 }
@@ -21840,6 +22260,7 @@ func TestOptionalNullableRoundTripLinkTokenCreateRequestCraOptionsBaseReport(t *
 		"gse_options",
 		"require_identity",
 		"home_lending_report_options",
+		"exclude_transactions",
 	}
 	marshalToMap := func(t *testing.T, obj *LinkTokenCreateRequestCraOptionsBaseReport) map[string]json.RawMessage {
 		data, err := json.Marshal(obj)
@@ -21852,7 +22273,7 @@ func TestOptionalNullableRoundTripLinkTokenCreateRequestCraOptionsBaseReport(t *
 	t.Run("NullPreserved", func(t *testing.T) {
 		t.Parallel()
 		var obj LinkTokenCreateRequestCraOptionsBaseReport
-		require.NoError(t, json.Unmarshal([]byte(`{"client_report_id":null,"gse_options":null,"require_identity":null,"home_lending_report_options":null}`), &obj))
+		require.NoError(t, json.Unmarshal([]byte(`{"client_report_id":null,"gse_options":null,"require_identity":null,"home_lending_report_options":null,"exclude_transactions":null}`), &obj))
 		result := marshalToMap(t, &obj)
 		for _, key := range optionalNullableKeys {
 			value, ok := result[key]
@@ -22412,6 +22833,50 @@ func TestOptionalNullableRoundTripLinkTokenCreateRequestUserAddress(t *testing.T
 	})
 }
 
+func TestOptionalNullableRoundTripLinkTokenGetMetadataResponse(t *testing.T) {
+	optionalNullableKeys := []string{
+		"institution_data",
+		"account_filters",
+	}
+	marshalToMap := func(t *testing.T, obj *LinkTokenGetMetadataResponse) map[string]json.RawMessage {
+		data, err := json.Marshal(obj)
+		require.NoError(t, err, "marshaling should succeed")
+		var result map[string]json.RawMessage
+		require.NoError(t, json.Unmarshal(data, &result), "marshaled data should be a JSON object")
+		return result
+	}
+
+	t.Run("NullPreserved", func(t *testing.T) {
+		t.Parallel()
+		var obj LinkTokenGetMetadataResponse
+		require.NoError(t, json.Unmarshal([]byte(`{"institution_data":null,"account_filters":null}`), &obj))
+		result := marshalToMap(t, &obj)
+		for _, key := range optionalNullableKeys {
+			value, ok := result[key]
+			require.True(t, ok, "optional nullable field %q received as null should be present in the output", key)
+			assert.Equal(t, "null", string(value), "optional nullable field %q received as null should be null in the output", key)
+		}
+	})
+
+	t.Run("AbsentStaysAbsent", func(t *testing.T) {
+		t.Parallel()
+		var obj LinkTokenGetMetadataResponse
+		require.NoError(t, json.Unmarshal([]byte(`{}`), &obj))
+		result := marshalToMap(t, &obj)
+		for _, key := range optionalNullableKeys {
+			assert.NotContains(t, result, key, "optional nullable field %q absent from the input should be absent from the output", key)
+		}
+	})
+
+	t.Run("FreshValueOmits", func(t *testing.T) {
+		t.Parallel()
+		result := marshalToMap(t, &LinkTokenGetMetadataResponse{})
+		for _, key := range optionalNullableKeys {
+			assert.NotContains(t, result, key, "optional nullable field %q should be omitted from a freshly constructed value", key)
+		}
+	})
+}
+
 func TestOptionalNullableRoundTripLinkTokenGetSessionsResponse(t *testing.T) {
 	optionalNullableKeys := []string{
 		"finished_at",
@@ -22453,6 +22918,49 @@ func TestOptionalNullableRoundTripLinkTokenGetSessionsResponse(t *testing.T) {
 	t.Run("FreshValueOmits", func(t *testing.T) {
 		t.Parallel()
 		result := marshalToMap(t, &LinkTokenGetSessionsResponse{})
+		for _, key := range optionalNullableKeys {
+			assert.NotContains(t, result, key, "optional nullable field %q should be omitted from a freshly constructed value", key)
+		}
+	})
+}
+
+func TestOptionalNullableRoundTripLinkTokenInvestments(t *testing.T) {
+	optionalNullableKeys := []string{
+		"async_update",
+	}
+	marshalToMap := func(t *testing.T, obj *LinkTokenInvestments) map[string]json.RawMessage {
+		data, err := json.Marshal(obj)
+		require.NoError(t, err, "marshaling should succeed")
+		var result map[string]json.RawMessage
+		require.NoError(t, json.Unmarshal(data, &result), "marshaled data should be a JSON object")
+		return result
+	}
+
+	t.Run("NullPreserved", func(t *testing.T) {
+		t.Parallel()
+		var obj LinkTokenInvestments
+		require.NoError(t, json.Unmarshal([]byte(`{"async_update":null}`), &obj))
+		result := marshalToMap(t, &obj)
+		for _, key := range optionalNullableKeys {
+			value, ok := result[key]
+			require.True(t, ok, "optional nullable field %q received as null should be present in the output", key)
+			assert.Equal(t, "null", string(value), "optional nullable field %q received as null should be null in the output", key)
+		}
+	})
+
+	t.Run("AbsentStaysAbsent", func(t *testing.T) {
+		t.Parallel()
+		var obj LinkTokenInvestments
+		require.NoError(t, json.Unmarshal([]byte(`{}`), &obj))
+		result := marshalToMap(t, &obj)
+		for _, key := range optionalNullableKeys {
+			assert.NotContains(t, result, key, "optional nullable field %q absent from the input should be absent from the output", key)
+		}
+	})
+
+	t.Run("FreshValueOmits", func(t *testing.T) {
+		t.Parallel()
+		result := marshalToMap(t, &LinkTokenInvestments{})
 		for _, key := range optionalNullableKeys {
 			assert.NotContains(t, result, key, "optional nullable field %q should be omitted from a freshly constructed value", key)
 		}
@@ -22660,6 +23168,22 @@ func TestStringLinkSessionCraItemAddResult(t *testing.T) {
 	t.Run("StringMethod_NilReceiver", func(t *testing.T) {
 		t.Parallel()
 		var obj *LinkSessionCraItemAddResult
+		result := obj.String()
+		assert.Equal(t, "<nil>", result, "String() should return <nil> for nil receiver")
+	})
+}
+
+func TestStringLinkSessionCraReportResult(t *testing.T) {
+	t.Run("StringMethod", func(t *testing.T) {
+		t.Parallel()
+		obj := &LinkSessionCraReportResult{}
+		result := obj.String()
+		assert.NotEmpty(t, result, "String() should return a non-empty representation")
+	})
+
+	t.Run("StringMethod_NilReceiver", func(t *testing.T) {
+		t.Parallel()
+		var obj *LinkSessionCraReportResult
 		result := obj.String()
 		assert.Equal(t, "<nil>", result, "String() should return <nil> for nil receiver")
 	})
@@ -24838,6 +25362,29 @@ func TestExtraPropertiesLinkSessionCraItemAddResult(t *testing.T) {
 	t.Run("GetExtraProperties_NilReceiver", func(t *testing.T) {
 		t.Parallel()
 		var obj *LinkSessionCraItemAddResult
+		extraProps := obj.GetExtraProperties()
+		assert.Nil(t, extraProps, "nil receiver should return nil without panicking")
+	})
+}
+
+func TestExtraPropertiesLinkSessionCraReportResult(t *testing.T) {
+	t.Run("GetExtraProperties", func(t *testing.T) {
+		t.Parallel()
+		obj := &LinkSessionCraReportResult{}
+		// Should not panic when calling GetExtraProperties()
+		defer func() {
+			if r := recover(); r != nil {
+				t.Errorf("GetExtraProperties() panicked: %v", r)
+			}
+		}()
+		extraProps := obj.GetExtraProperties()
+		// Result can be nil or an empty/non-empty map
+		_ = extraProps
+	})
+
+	t.Run("GetExtraProperties_NilReceiver", func(t *testing.T) {
+		t.Parallel()
+		var obj *LinkSessionCraReportResult
 		extraProps := obj.GetExtraProperties()
 		assert.Nil(t, extraProps, "nil receiver should return nil without panicking")
 	})

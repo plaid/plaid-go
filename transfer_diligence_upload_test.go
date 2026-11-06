@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	plaid "github.com/plaid/plaid-go/v49"
-	"github.com/plaid/plaid-go/v49/client"
-	"github.com/plaid/plaid-go/v49/option"
-	"github.com/plaid/plaid-go/v49/transfer"
+	plaid "github.com/plaid/plaid-go/v50"
+	"github.com/plaid/plaid-go/v50/client"
+	"github.com/plaid/plaid-go/v50/option"
+	"github.com/plaid/plaid-go/v50/transfer"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

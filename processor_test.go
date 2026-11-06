@@ -11075,6 +11075,13 @@ func TestEnumProcessorTokenCreateRequestProcessor(t *testing.T) {
 		assert.Equal(t, ProcessorTokenCreateRequestProcessor("ocrolus"), val, "enum value should match expected wire value")
 	})
 
+	t.Run("NewFromString_stripe", func(t *testing.T) {
+		t.Parallel()
+		val, err := NewProcessorTokenCreateRequestProcessorFromString("stripe")
+		assert.NoError(t, err, "valid enum value should not return error")
+		assert.Equal(t, ProcessorTokenCreateRequestProcessor("stripe"), val, "enum value should match expected wire value")
+	})
+
 	t.Run("NewFromString_vesta", func(t *testing.T) {
 		t.Parallel()
 		val, err := NewProcessorTokenCreateRequestProcessorFromString("vesta")

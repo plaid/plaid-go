@@ -6,11 +6,11 @@ import (
 	context "context"
 	os "os"
 
-	plaid "github.com/plaid/plaid-go/v49"
-	core "github.com/plaid/plaid-go/v49/core"
-	internal "github.com/plaid/plaid-go/v49/internal"
-	option "github.com/plaid/plaid-go/v49/option"
-	transfer "github.com/plaid/plaid-go/v49/transfer"
+	plaid "github.com/plaid/plaid-go/v50"
+	core "github.com/plaid/plaid-go/v50/core"
+	internal "github.com/plaid/plaid-go/v50/internal"
+	option "github.com/plaid/plaid-go/v50/option"
+	transfer "github.com/plaid/plaid-go/v50/transfer"
 )
 
 type Client struct {

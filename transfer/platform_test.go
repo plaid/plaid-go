@@ -4,7 +4,7 @@ package transfer
 
 import (
 	json "encoding/json"
-	v49 "github.com/plaid/plaid-go/v49"
+	v50 "github.com/plaid/plaid-go/v50"
 	assert "github.com/stretchr/testify/assert"
 	require "github.com/stretchr/testify/require"
 	testing "testing"
@@ -14,7 +14,7 @@ import (
 func TestSettersTransferPlatformOriginatorCreateRequest(t *testing.T) {
 	t.Run("SetOriginatorClientID", func(t *testing.T) {
 		obj := &TransferPlatformOriginatorCreateRequest{}
-		var fernTestValueOriginatorClientID v49.TransferPlatformOriginatorClientID
+		var fernTestValueOriginatorClientID v50.TransferPlatformOriginatorClientID
 		obj.SetOriginatorClientID(fernTestValueOriginatorClientID)
 		assert.Equal(t, fernTestValueOriginatorClientID, obj.OriginatorClientID)
 		assert.NotNil(t, obj.explicitFields)
@@ -22,7 +22,7 @@ func TestSettersTransferPlatformOriginatorCreateRequest(t *testing.T) {
 
 	t.Run("SetTosAcceptanceMetadata", func(t *testing.T) {
 		obj := &TransferPlatformOriginatorCreateRequest{}
-		var fernTestValueTosAcceptanceMetadata *v49.TransferPlatformTosAcceptanceMetadata
+		var fernTestValueTosAcceptanceMetadata *v50.TransferPlatformTosAcceptanceMetadata
 		obj.SetTosAcceptanceMetadata(fernTestValueTosAcceptanceMetadata)
 		assert.Equal(t, fernTestValueTosAcceptanceMetadata, obj.TosAcceptanceMetadata)
 		assert.NotNil(t, obj.explicitFields)
@@ -51,7 +51,7 @@ func TestSettersMarkExplicitTransferPlatformOriginatorCreateRequest(t *testing.T
 		t.Parallel()
 		// Arrange
 		obj := &TransferPlatformOriginatorCreateRequest{}
-		var fernTestValueOriginatorClientID v49.TransferPlatformOriginatorClientID
+		var fernTestValueOriginatorClientID v50.TransferPlatformOriginatorClientID
 
 		// Act
 		obj.SetOriginatorClientID(fernTestValueOriginatorClientID)
@@ -82,7 +82,7 @@ func TestSettersMarkExplicitTransferPlatformOriginatorCreateRequest(t *testing.T
 		t.Parallel()
 		// Arrange
 		obj := &TransferPlatformOriginatorCreateRequest{}
-		var fernTestValueTosAcceptanceMetadata *v49.TransferPlatformTosAcceptanceMetadata
+		var fernTestValueTosAcceptanceMetadata *v50.TransferPlatformTosAcceptanceMetadata
 
 		// Act
 		obj.SetTosAcceptanceMetadata(fernTestValueTosAcceptanceMetadata)
@@ -176,7 +176,7 @@ func TestSettersMarkExplicitTransferPlatformOriginatorCreateRequest(t *testing.T
 func TestSettersTransferPlatformPersonCreateRequest(t *testing.T) {
 	t.Run("SetOriginatorClientID", func(t *testing.T) {
 		obj := &TransferPlatformPersonCreateRequest{}
-		var fernTestValueOriginatorClientID v49.TransferPlatformOriginatorClientID
+		var fernTestValueOriginatorClientID v50.TransferPlatformOriginatorClientID
 		obj.SetOriginatorClientID(fernTestValueOriginatorClientID)
 		assert.Equal(t, fernTestValueOriginatorClientID, obj.OriginatorClientID)
 		assert.NotNil(t, obj.explicitFields)
@@ -184,7 +184,7 @@ func TestSettersTransferPlatformPersonCreateRequest(t *testing.T) {
 
 	t.Run("SetName", func(t *testing.T) {
 		obj := &TransferPlatformPersonCreateRequest{}
-		var fernTestValueName *v49.TransferPlatformPersonName
+		var fernTestValueName *v50.TransferPlatformPersonName
 		obj.SetName(fernTestValueName)
 		assert.Equal(t, fernTestValueName, obj.Name)
 		assert.NotNil(t, obj.explicitFields)
@@ -208,7 +208,7 @@ func TestSettersTransferPlatformPersonCreateRequest(t *testing.T) {
 
 	t.Run("SetAddress", func(t *testing.T) {
 		obj := &TransferPlatformPersonCreateRequest{}
-		var fernTestValueAddress *v49.TransferPlatformPersonAddress
+		var fernTestValueAddress *v50.TransferPlatformPersonAddress
 		obj.SetAddress(fernTestValueAddress)
 		assert.Equal(t, fernTestValueAddress, obj.Address)
 		assert.NotNil(t, obj.explicitFields)
@@ -216,7 +216,7 @@ func TestSettersTransferPlatformPersonCreateRequest(t *testing.T) {
 
 	t.Run("SetIDNumber", func(t *testing.T) {
 		obj := &TransferPlatformPersonCreateRequest{}
-		var fernTestValueIDNumber *v49.TransferPlatformPersonIDNumber
+		var fernTestValueIDNumber *v50.TransferPlatformPersonIDNumber
 		obj.SetIDNumber(fernTestValueIDNumber)
 		assert.Equal(t, fernTestValueIDNumber, obj.IDNumber)
 		assert.NotNil(t, obj.explicitFields)
@@ -261,7 +261,7 @@ func TestSettersMarkExplicitTransferPlatformPersonCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferPlatformPersonCreateRequest{}
-		var fernTestValueOriginatorClientID v49.TransferPlatformOriginatorClientID
+		var fernTestValueOriginatorClientID v50.TransferPlatformOriginatorClientID
 
 		// Act
 		obj.SetOriginatorClientID(fernTestValueOriginatorClientID)
@@ -292,7 +292,7 @@ func TestSettersMarkExplicitTransferPlatformPersonCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferPlatformPersonCreateRequest{}
-		var fernTestValueName *v49.TransferPlatformPersonName
+		var fernTestValueName *v50.TransferPlatformPersonName
 
 		// Act
 		obj.SetName(fernTestValueName)
@@ -385,7 +385,7 @@ func TestSettersMarkExplicitTransferPlatformPersonCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferPlatformPersonCreateRequest{}
-		var fernTestValueAddress *v49.TransferPlatformPersonAddress
+		var fernTestValueAddress *v50.TransferPlatformPersonAddress
 
 		// Act
 		obj.SetAddress(fernTestValueAddress)
@@ -416,7 +416,7 @@ func TestSettersMarkExplicitTransferPlatformPersonCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferPlatformPersonCreateRequest{}
-		var fernTestValueIDNumber *v49.TransferPlatformPersonIDNumber
+		var fernTestValueIDNumber *v50.TransferPlatformPersonIDNumber
 
 		// Act
 		obj.SetIDNumber(fernTestValueIDNumber)
@@ -580,7 +580,7 @@ func TestSettersTransferPlatformRequirementSubmitRequest(t *testing.T) {
 
 	t.Run("SetRequirementSubmissions", func(t *testing.T) {
 		obj := &TransferPlatformRequirementSubmitRequest{}
-		var fernTestValueRequirementSubmissions []*v49.TransferPlatformRequirementSubmission
+		var fernTestValueRequirementSubmissions []*v50.TransferPlatformRequirementSubmission
 		obj.SetRequirementSubmissions(fernTestValueRequirementSubmissions)
 		assert.Equal(t, fernTestValueRequirementSubmissions, obj.RequirementSubmissions)
 		assert.NotNil(t, obj.explicitFields)
@@ -624,7 +624,7 @@ func TestSettersMarkExplicitTransferPlatformRequirementSubmitRequest(t *testing.
 		t.Parallel()
 		// Arrange
 		obj := &TransferPlatformRequirementSubmitRequest{}
-		var fernTestValueRequirementSubmissions []*v49.TransferPlatformRequirementSubmission
+		var fernTestValueRequirementSubmissions []*v50.TransferPlatformRequirementSubmission
 
 		// Act
 		obj.SetRequirementSubmissions(fernTestValueRequirementSubmissions)
