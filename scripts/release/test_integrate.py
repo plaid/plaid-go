@@ -48,7 +48,7 @@ class IntegrationTests(unittest.TestCase):
                          "config": {"sha256": "b" * 64}}
         self.write("sdk.go", "package plaid\nconst Changed = true\n")
         self.head = self.commit()
-        branch_identity = policy.sha256(policy.canonical(["49.1.0", policy.sha256(self.spec), "b" * 64]))[:20]
+        branch_identity = policy.sha256(policy.canonical(["49.1.0", policy.sha256(self.spec), "b" * 64, self.base]))[:20]
         self.pull = {"number": 42, "state": "open", "draft": False, "merged": False, "commits": 1,
                      "user": {"type": "Bot", "id": 123},
                      "base": {"sha": self.base, "ref": "master", "repo": {"full_name": policy.SDK_REPO}},
@@ -149,6 +149,18 @@ class IntegrationTests(unittest.TestCase):
         self.assertEqual(result["tree"], self.tree())
         self.assertEqual(self.checks, [(self.head, "read-only-fixture")])
         self.assertNotIn("/merge", " ".join(self.api_calls))
+
+    def test_branch_identity_binds_the_current_sdk_base(self):
+        def branch(base):
+            identity = policy.sha256(policy.canonical([
+                self.manifest["sdk"]["version"], self.manifest["source"]["sha256"],
+                self.manifest["config"]["sha256"], base]))[:20]
+            return "sdk-generation/go-v49-" + identity
+        self.pull["head"]["ref"] = branch(self.base)
+        self.assertEqual(self.check()["head"], self.head)
+        self.pull["head"]["ref"] = branch("f" * 40)
+        with self.assertRaisesRegex(policy.ReleaseError, "branch identity"):
+            self.check()
 
     def test_discovery_accepts_only_the_pinned_bot_and_same_repo_branch(self):
         self.assertEqual(integrate.discover(), 42)
@@ -308,7 +320,7 @@ class IntegrationTests(unittest.TestCase):
     def test_major_candidate_passes_full_integration_policy_with_exact_branch_identity(self):
         self.manifest["sdk"].update(version="50.0.0", module="github.com/plaid/plaid-go/v50")
         self.amend_candidate("go.mod", "module github.com/plaid/plaid-go/v50\n")
-        identity = policy.sha256(policy.canonical(["50.0.0", policy.sha256(self.spec), "b" * 64]))[:20]
+        identity = policy.sha256(policy.canonical(["50.0.0", policy.sha256(self.spec), "b" * 64, self.base]))[:20]
         self.pull["head"]["ref"] = "sdk-generation/go-v50-" + identity
         self.assertEqual(self.check()["version"], "50.0.0")
         self.statuses[0]["state"] = "failure"

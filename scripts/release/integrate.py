@@ -265,7 +265,7 @@ def check(repo, control, control_commit, number, expected_base=None, expected_he
     if manifest["schema_version"] == 2:
         require(manifest["fern"]["sdk_base"] == base, "Fern proof was generated for another SDK base")
     verify_public_spec(manifest)
-    identity = sha256(canonical([manifest["sdk"]["version"], manifest["source"]["sha256"], manifest["config"]["sha256"]]))[:20]
+    identity = sha256(canonical([manifest["sdk"]["version"], manifest["source"]["sha256"], manifest["config"]["sha256"], base]))[:20]
     require(pull["head"]["ref"] == f"sdk-generation/go-v{manifest['sdk']['version'].split('.')[0]}-{identity}", "Generated branch identity does not match signed inputs")
     preserved_content(tree_files(repo, base), files, manifest)
     ci_and_reviews(number, head)
