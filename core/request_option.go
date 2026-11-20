@@ -68,9 +68,9 @@ func (r *RequestOptions) ToHeader() http.Header {
 func (r *RequestOptions) cloneHeader() http.Header {
 	headers := r.HTTPHeader.Clone()
 	headers.Set("X-Fern-Language", "Go")
-	headers.Set("X-Fern-SDK-Name", "github.com/plaid/plaid-go/v50")
-	headers.Set("X-Fern-SDK-Version", "v50.0.0")
-	headers.Set("User-Agent", "Plaid Go v50.0.0")
+	headers.Set("X-Fern-SDK-Name", "github.com/plaid/plaid-go/v51")
+	headers.Set("X-Fern-SDK-Version", "v51.0.0")
+	headers.Set("User-Agent", "Plaid Go v51.0.0")
 	return headers
 }
 

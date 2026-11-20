@@ -5,7 +5,7 @@ package plaid
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/plaid/plaid-go/v50/internal"
+	internal "github.com/plaid/plaid-go/v51/internal"
 	big "math/big"
 	time "time"
 )
@@ -6940,6 +6940,7 @@ const (
 	SandboxItemFireWebhookRequestWebhookCodeUserPermissionRevoked        SandboxItemFireWebhookRequestWebhookCode = "USER_PERMISSION_REVOKED"
 	SandboxItemFireWebhookRequestWebhookCodeUserAccountRevoked           SandboxItemFireWebhookRequestWebhookCode = "USER_ACCOUNT_REVOKED"
 	SandboxItemFireWebhookRequestWebhookCodePendingDisconnect            SandboxItemFireWebhookRequestWebhookCode = "PENDING_DISCONNECT"
+	SandboxItemFireWebhookRequestWebhookCodeConsentUpdated               SandboxItemFireWebhookRequestWebhookCode = "CONSENT_UPDATED"
 	SandboxItemFireWebhookRequestWebhookCodeRecurringTransactionsUpdate  SandboxItemFireWebhookRequestWebhookCode = "RECURRING_TRANSACTIONS_UPDATE"
 	SandboxItemFireWebhookRequestWebhookCodeLoginRepaired                SandboxItemFireWebhookRequestWebhookCode = "LOGIN_REPAIRED"
 	SandboxItemFireWebhookRequestWebhookCodeSyncUpdatesAvailable         SandboxItemFireWebhookRequestWebhookCode = "SYNC_UPDATES_AVAILABLE"
@@ -6963,6 +6964,8 @@ func NewSandboxItemFireWebhookRequestWebhookCodeFromString(s string) (SandboxIte
 		return SandboxItemFireWebhookRequestWebhookCodeUserAccountRevoked, nil
 	case "PENDING_DISCONNECT":
 		return SandboxItemFireWebhookRequestWebhookCodePendingDisconnect, nil
+	case "CONSENT_UPDATED":
+		return SandboxItemFireWebhookRequestWebhookCodeConsentUpdated, nil
 	case "RECURRING_TRANSACTIONS_UPDATE":
 		return SandboxItemFireWebhookRequestWebhookCodeRecurringTransactionsUpdate, nil
 	case "LOGIN_REPAIRED":

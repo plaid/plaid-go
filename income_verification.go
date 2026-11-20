@@ -5,7 +5,7 @@ package plaid
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/plaid/plaid-go/v50/internal"
+	internal "github.com/plaid/plaid-go/v51/internal"
 	big "math/big"
 	time "time"
 )
@@ -1069,6 +1069,8 @@ func (d *DistributionBreakdown) String() string {
 
 // The type of document.
 //
+// `DOCUMENT_TYPE_UNKNOWN`: Document type could not be determined.
+//
 // `DOCUMENT_TYPE_PAYSTUB`: A paystub.
 //
 // `DOCUMENT_TYPE_BANK_STATEMENT`: A bank statement.
@@ -1097,6 +1099,7 @@ func (d *DistributionBreakdown) String() string {
 type DocType string
 
 const (
+	DocTypeDocumentTypeUnknown                  DocType = "DOCUMENT_TYPE_UNKNOWN"
 	DocTypeUnknown                              DocType = "UNKNOWN"
 	DocTypeDocumentTypePaystub                  DocType = "DOCUMENT_TYPE_PAYSTUB"
 	DocTypeDocumentTypeBankStatement            DocType = "DOCUMENT_TYPE_BANK_STATEMENT"
@@ -1114,6 +1117,8 @@ const (
 
 func NewDocTypeFromString(s string) (DocType, error) {
 	switch s {
+	case "DOCUMENT_TYPE_UNKNOWN":
+		return DocTypeDocumentTypeUnknown, nil
 	case "UNKNOWN":
 		return DocTypeUnknown, nil
 	case "DOCUMENT_TYPE_PAYSTUB":
@@ -1164,7 +1169,7 @@ var documentMetadataNullableFields = map[string]*big.Int{
 // An object representing metadata from the end user's uploaded document.
 type DocumentMetadata struct {
 	// The name of the document.
-	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	Name string `json:"name" url:"name"`
 	// The processing status of the document.
 	//
 	// `PROCESSING_COMPLETE`: The document was successfully processed.
@@ -1174,8 +1179,8 @@ type DocumentMetadata struct {
 	// `UNKNOWN` or `null`: An internal error occurred. If this happens repeatedly, contact support or your Plaid account manager.
 	Status *string `json:"status,omitempty" url:"status,omitempty"`
 	// An identifier of the document that is also present in the paystub response.
-	DocID   *string  `json:"doc_id,omitempty" url:"doc_id,omitempty"`
-	DocType *DocType `json:"doc_type,omitempty" url:"doc_type,omitempty"`
+	DocID   string  `json:"doc_id" url:"doc_id"`
+	DocType DocType `json:"doc_type" url:"doc_type"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -1185,9 +1190,9 @@ type DocumentMetadata struct {
 	rawJSON json.RawMessage
 }
 
-func (d *DocumentMetadata) GetName() *string {
+func (d *DocumentMetadata) GetName() string {
 	if d == nil {
-		return nil
+		return ""
 	}
 	return d.Name
 }
@@ -1199,16 +1204,16 @@ func (d *DocumentMetadata) GetStatus() *string {
 	return d.Status
 }
 
-func (d *DocumentMetadata) GetDocID() *string {
+func (d *DocumentMetadata) GetDocID() string {
 	if d == nil {
-		return nil
+		return ""
 	}
 	return d.DocID
 }
 
-func (d *DocumentMetadata) GetDocType() *DocType {
+func (d *DocumentMetadata) GetDocType() DocType {
 	if d == nil {
-		return nil
+		return ""
 	}
 	return d.DocType
 }
@@ -1231,7 +1236,7 @@ func (d *DocumentMetadata) require(field *big.Int) {
 
 // SetName sets the Name field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (d *DocumentMetadata) SetName(name *string) {
+func (d *DocumentMetadata) SetName(name string) {
 	d.Name = name
 	d.require(documentMetadataFieldName)
 }
@@ -1245,14 +1250,14 @@ func (d *DocumentMetadata) SetStatus(status *string) {
 
 // SetDocID sets the DocID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (d *DocumentMetadata) SetDocID(docID *string) {
+func (d *DocumentMetadata) SetDocID(docID string) {
 	d.DocID = docID
 	d.require(documentMetadataFieldDocID)
 }
 
 // SetDocType sets the DocType field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (d *DocumentMetadata) SetDocType(docType *DocType) {
+func (d *DocumentMetadata) SetDocType(docType DocType) {
 	d.DocType = docType
 	d.require(documentMetadataFieldDocType)
 }

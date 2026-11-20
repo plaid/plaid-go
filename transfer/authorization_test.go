@@ -4,7 +4,7 @@ package transfer
 
 import (
 	json "encoding/json"
-	v50 "github.com/plaid/plaid-go/v50"
+	v51 "github.com/plaid/plaid-go/v51"
 	assert "github.com/stretchr/testify/assert"
 	require "github.com/stretchr/testify/require"
 	testing "testing"
@@ -13,7 +13,7 @@ import (
 func TestSettersTransferAuthorizationCancelRequest(t *testing.T) {
 	t.Run("SetAuthorizationID", func(t *testing.T) {
 		obj := &TransferAuthorizationCancelRequest{}
-		var fernTestValueAuthorizationID v50.TransferAuthorizationID
+		var fernTestValueAuthorizationID v51.TransferAuthorizationID
 		obj.SetAuthorizationID(fernTestValueAuthorizationID)
 		assert.Equal(t, fernTestValueAuthorizationID, obj.AuthorizationID)
 		assert.NotNil(t, obj.explicitFields)
@@ -26,7 +26,7 @@ func TestSettersMarkExplicitTransferAuthorizationCancelRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferAuthorizationCancelRequest{}
-		var fernTestValueAuthorizationID v50.TransferAuthorizationID
+		var fernTestValueAuthorizationID v51.TransferAuthorizationID
 
 		// Act
 		obj.SetAuthorizationID(fernTestValueAuthorizationID)
@@ -58,7 +58,7 @@ func TestSettersMarkExplicitTransferAuthorizationCancelRequest(t *testing.T) {
 func TestSettersTransferAuthorizationCreateRequest(t *testing.T) {
 	t.Run("SetAccessToken", func(t *testing.T) {
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValueAccessToken v50.TransferAccessToken
+		var fernTestValueAccessToken v51.TransferAccessToken
 		obj.SetAccessToken(fernTestValueAccessToken)
 		assert.Equal(t, fernTestValueAccessToken, obj.AccessToken)
 		assert.NotNil(t, obj.explicitFields)
@@ -66,7 +66,7 @@ func TestSettersTransferAuthorizationCreateRequest(t *testing.T) {
 
 	t.Run("SetAccountID", func(t *testing.T) {
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValueAccountID v50.TransferAccountID
+		var fernTestValueAccountID v51.TransferAccountID
 		obj.SetAccountID(fernTestValueAccountID)
 		assert.Equal(t, fernTestValueAccountID, obj.AccountID)
 		assert.NotNil(t, obj.explicitFields)
@@ -74,7 +74,7 @@ func TestSettersTransferAuthorizationCreateRequest(t *testing.T) {
 
 	t.Run("SetFundingAccountID", func(t *testing.T) {
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValueFundingAccountID v50.TransferMigratedFundingAccountIDRequest
+		var fernTestValueFundingAccountID v51.TransferMigratedFundingAccountIDRequest
 		obj.SetFundingAccountID(fernTestValueFundingAccountID)
 		assert.Equal(t, fernTestValueFundingAccountID, obj.FundingAccountID)
 		assert.NotNil(t, obj.explicitFields)
@@ -90,7 +90,7 @@ func TestSettersTransferAuthorizationCreateRequest(t *testing.T) {
 
 	t.Run("SetPaymentProfileToken", func(t *testing.T) {
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValuePaymentProfileToken *v50.TransferPaymentProfileToken
+		var fernTestValuePaymentProfileToken *v51.TransferPaymentProfileToken
 		obj.SetPaymentProfileToken(fernTestValuePaymentProfileToken)
 		assert.Equal(t, fernTestValuePaymentProfileToken, obj.PaymentProfileToken)
 		assert.NotNil(t, obj.explicitFields)
@@ -98,7 +98,7 @@ func TestSettersTransferAuthorizationCreateRequest(t *testing.T) {
 
 	t.Run("SetType", func(t *testing.T) {
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValueType v50.TransferType
+		var fernTestValueType v51.TransferType
 		obj.SetType(fernTestValueType)
 		assert.Equal(t, fernTestValueType, obj.Type)
 		assert.NotNil(t, obj.explicitFields)
@@ -106,7 +106,7 @@ func TestSettersTransferAuthorizationCreateRequest(t *testing.T) {
 
 	t.Run("SetNetwork", func(t *testing.T) {
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValueNetwork v50.TransferNetwork
+		var fernTestValueNetwork v51.TransferNetwork
 		obj.SetNetwork(fernTestValueNetwork)
 		assert.Equal(t, fernTestValueNetwork, obj.Network)
 		assert.NotNil(t, obj.explicitFields)
@@ -114,7 +114,7 @@ func TestSettersTransferAuthorizationCreateRequest(t *testing.T) {
 
 	t.Run("SetAmount", func(t *testing.T) {
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValueAmount v50.TransferAmount
+		var fernTestValueAmount v51.TransferAmount
 		obj.SetAmount(fernTestValueAmount)
 		assert.Equal(t, fernTestValueAmount, obj.Amount)
 		assert.NotNil(t, obj.explicitFields)
@@ -122,7 +122,7 @@ func TestSettersTransferAuthorizationCreateRequest(t *testing.T) {
 
 	t.Run("SetAchClass", func(t *testing.T) {
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValueAchClass *v50.AchClass
+		var fernTestValueAchClass *v51.AchClass
 		obj.SetAchClass(fernTestValueAchClass)
 		assert.Equal(t, fernTestValueAchClass, obj.AchClass)
 		assert.NotNil(t, obj.explicitFields)
@@ -130,7 +130,7 @@ func TestSettersTransferAuthorizationCreateRequest(t *testing.T) {
 
 	t.Run("SetWireDetails", func(t *testing.T) {
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValueWireDetails *v50.TransferWireDetails
+		var fernTestValueWireDetails *v51.TransferWireDetails
 		obj.SetWireDetails(fernTestValueWireDetails)
 		assert.Equal(t, fernTestValueWireDetails, obj.WireDetails)
 		assert.NotNil(t, obj.explicitFields)
@@ -138,7 +138,7 @@ func TestSettersTransferAuthorizationCreateRequest(t *testing.T) {
 
 	t.Run("SetUser", func(t *testing.T) {
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValueUser *v50.TransferAuthorizationUserInRequest
+		var fernTestValueUser *v51.TransferAuthorizationUserInRequest
 		obj.SetUser(fernTestValueUser)
 		assert.Equal(t, fernTestValueUser, obj.User)
 		assert.NotNil(t, obj.explicitFields)
@@ -146,7 +146,7 @@ func TestSettersTransferAuthorizationCreateRequest(t *testing.T) {
 
 	t.Run("SetUserID", func(t *testing.T) {
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValueUserID v50.NewUserIDNullable
+		var fernTestValueUserID v51.NewUserIDNullable
 		obj.SetUserID(fernTestValueUserID)
 		assert.Equal(t, fernTestValueUserID, obj.UserID)
 		assert.NotNil(t, obj.explicitFields)
@@ -154,7 +154,7 @@ func TestSettersTransferAuthorizationCreateRequest(t *testing.T) {
 
 	t.Run("SetDevice", func(t *testing.T) {
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValueDevice *v50.TransferAuthorizationDevice
+		var fernTestValueDevice *v51.TransferAuthorizationDevice
 		obj.SetDevice(fernTestValueDevice)
 		assert.Equal(t, fernTestValueDevice, obj.Device)
 		assert.NotNil(t, obj.explicitFields)
@@ -178,7 +178,7 @@ func TestSettersTransferAuthorizationCreateRequest(t *testing.T) {
 
 	t.Run("SetIdempotencyKey", func(t *testing.T) {
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValueIdempotencyKey v50.TransferAuthorizationIdempotencyKey
+		var fernTestValueIdempotencyKey v51.TransferAuthorizationIdempotencyKey
 		obj.SetIdempotencyKey(fernTestValueIdempotencyKey)
 		assert.Equal(t, fernTestValueIdempotencyKey, obj.IdempotencyKey)
 		assert.NotNil(t, obj.explicitFields)
@@ -226,7 +226,7 @@ func TestSettersTransferAuthorizationCreateRequest(t *testing.T) {
 
 	t.Run("SetCreditFundsSource", func(t *testing.T) {
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValueCreditFundsSource *v50.TransferCreditFundsSource
+		var fernTestValueCreditFundsSource *v51.TransferCreditFundsSource
 		obj.SetCreditFundsSource(fernTestValueCreditFundsSource)
 		assert.Equal(t, fernTestValueCreditFundsSource, obj.CreditFundsSource)
 		assert.NotNil(t, obj.explicitFields)
@@ -250,7 +250,7 @@ func TestSettersTransferAuthorizationCreateRequest(t *testing.T) {
 
 	t.Run("SetCustomAttributes", func(t *testing.T) {
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValueCustomAttributes *v50.TransferAuthorizationCustomAttributes
+		var fernTestValueCustomAttributes *v51.TransferAuthorizationCustomAttributes
 		obj.SetCustomAttributes(fernTestValueCustomAttributes)
 		assert.Equal(t, fernTestValueCustomAttributes, obj.CustomAttributes)
 		assert.NotNil(t, obj.explicitFields)
@@ -258,7 +258,7 @@ func TestSettersTransferAuthorizationCreateRequest(t *testing.T) {
 
 	t.Run("SetUserAttributes", func(t *testing.T) {
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValueUserAttributes *v50.TransferAuthorizationUserAttributes
+		var fernTestValueUserAttributes *v51.TransferAuthorizationUserAttributes
 		obj.SetUserAttributes(fernTestValueUserAttributes)
 		assert.Equal(t, fernTestValueUserAttributes, obj.UserAttributes)
 		assert.NotNil(t, obj.explicitFields)
@@ -271,7 +271,7 @@ func TestSettersMarkExplicitTransferAuthorizationCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValueAccessToken v50.TransferAccessToken
+		var fernTestValueAccessToken v51.TransferAccessToken
 
 		// Act
 		obj.SetAccessToken(fernTestValueAccessToken)
@@ -302,7 +302,7 @@ func TestSettersMarkExplicitTransferAuthorizationCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValueAccountID v50.TransferAccountID
+		var fernTestValueAccountID v51.TransferAccountID
 
 		// Act
 		obj.SetAccountID(fernTestValueAccountID)
@@ -333,7 +333,7 @@ func TestSettersMarkExplicitTransferAuthorizationCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValueFundingAccountID v50.TransferMigratedFundingAccountIDRequest
+		var fernTestValueFundingAccountID v51.TransferMigratedFundingAccountIDRequest
 
 		// Act
 		obj.SetFundingAccountID(fernTestValueFundingAccountID)
@@ -395,7 +395,7 @@ func TestSettersMarkExplicitTransferAuthorizationCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValuePaymentProfileToken *v50.TransferPaymentProfileToken
+		var fernTestValuePaymentProfileToken *v51.TransferPaymentProfileToken
 
 		// Act
 		obj.SetPaymentProfileToken(fernTestValuePaymentProfileToken)
@@ -426,7 +426,7 @@ func TestSettersMarkExplicitTransferAuthorizationCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValueType v50.TransferType
+		var fernTestValueType v51.TransferType
 
 		// Act
 		obj.SetType(fernTestValueType)
@@ -457,7 +457,7 @@ func TestSettersMarkExplicitTransferAuthorizationCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValueNetwork v50.TransferNetwork
+		var fernTestValueNetwork v51.TransferNetwork
 
 		// Act
 		obj.SetNetwork(fernTestValueNetwork)
@@ -488,7 +488,7 @@ func TestSettersMarkExplicitTransferAuthorizationCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValueAmount v50.TransferAmount
+		var fernTestValueAmount v51.TransferAmount
 
 		// Act
 		obj.SetAmount(fernTestValueAmount)
@@ -519,7 +519,7 @@ func TestSettersMarkExplicitTransferAuthorizationCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValueAchClass *v50.AchClass
+		var fernTestValueAchClass *v51.AchClass
 
 		// Act
 		obj.SetAchClass(fernTestValueAchClass)
@@ -550,7 +550,7 @@ func TestSettersMarkExplicitTransferAuthorizationCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValueWireDetails *v50.TransferWireDetails
+		var fernTestValueWireDetails *v51.TransferWireDetails
 
 		// Act
 		obj.SetWireDetails(fernTestValueWireDetails)
@@ -581,7 +581,7 @@ func TestSettersMarkExplicitTransferAuthorizationCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValueUser *v50.TransferAuthorizationUserInRequest
+		var fernTestValueUser *v51.TransferAuthorizationUserInRequest
 
 		// Act
 		obj.SetUser(fernTestValueUser)
@@ -612,7 +612,7 @@ func TestSettersMarkExplicitTransferAuthorizationCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValueUserID v50.NewUserIDNullable
+		var fernTestValueUserID v51.NewUserIDNullable
 
 		// Act
 		obj.SetUserID(fernTestValueUserID)
@@ -643,7 +643,7 @@ func TestSettersMarkExplicitTransferAuthorizationCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValueDevice *v50.TransferAuthorizationDevice
+		var fernTestValueDevice *v51.TransferAuthorizationDevice
 
 		// Act
 		obj.SetDevice(fernTestValueDevice)
@@ -736,7 +736,7 @@ func TestSettersMarkExplicitTransferAuthorizationCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValueIdempotencyKey v50.TransferAuthorizationIdempotencyKey
+		var fernTestValueIdempotencyKey v51.TransferAuthorizationIdempotencyKey
 
 		// Act
 		obj.SetIdempotencyKey(fernTestValueIdempotencyKey)
@@ -922,7 +922,7 @@ func TestSettersMarkExplicitTransferAuthorizationCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValueCreditFundsSource *v50.TransferCreditFundsSource
+		var fernTestValueCreditFundsSource *v51.TransferCreditFundsSource
 
 		// Act
 		obj.SetCreditFundsSource(fernTestValueCreditFundsSource)
@@ -1015,7 +1015,7 @@ func TestSettersMarkExplicitTransferAuthorizationCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValueCustomAttributes *v50.TransferAuthorizationCustomAttributes
+		var fernTestValueCustomAttributes *v51.TransferAuthorizationCustomAttributes
 
 		// Act
 		obj.SetCustomAttributes(fernTestValueCustomAttributes)
@@ -1046,7 +1046,7 @@ func TestSettersMarkExplicitTransferAuthorizationCreateRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferAuthorizationCreateRequest{}
-		var fernTestValueUserAttributes *v50.TransferAuthorizationUserAttributes
+		var fernTestValueUserAttributes *v51.TransferAuthorizationUserAttributes
 
 		// Act
 		obj.SetUserAttributes(fernTestValueUserAttributes)

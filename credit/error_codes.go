@@ -3,9 +3,9 @@
 package credit
 
 import (
-	plaid "github.com/plaid/plaid-go/v50"
-	core "github.com/plaid/plaid-go/v50/core"
-	internal "github.com/plaid/plaid-go/v50/internal"
+	plaid "github.com/plaid/plaid-go/v51"
+	core "github.com/plaid/plaid-go/v51/core"
+	internal "github.com/plaid/plaid-go/v51/internal"
 )
 
 var ErrorCodes internal.ErrorCodes = internal.ErrorCodes{

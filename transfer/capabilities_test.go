@@ -4,7 +4,7 @@ package transfer
 
 import (
 	json "encoding/json"
-	v50 "github.com/plaid/plaid-go/v50"
+	v51 "github.com/plaid/plaid-go/v51"
 	assert "github.com/stretchr/testify/assert"
 	require "github.com/stretchr/testify/require"
 	testing "testing"
@@ -13,7 +13,7 @@ import (
 func TestSettersTransferCapabilitiesGetRequest(t *testing.T) {
 	t.Run("SetAccessToken", func(t *testing.T) {
 		obj := &TransferCapabilitiesGetRequest{}
-		var fernTestValueAccessToken v50.TransferAccessToken
+		var fernTestValueAccessToken v51.TransferAccessToken
 		obj.SetAccessToken(fernTestValueAccessToken)
 		assert.Equal(t, fernTestValueAccessToken, obj.AccessToken)
 		assert.NotNil(t, obj.explicitFields)
@@ -21,7 +21,7 @@ func TestSettersTransferCapabilitiesGetRequest(t *testing.T) {
 
 	t.Run("SetAccountID", func(t *testing.T) {
 		obj := &TransferCapabilitiesGetRequest{}
-		var fernTestValueAccountID v50.TransferAccountID
+		var fernTestValueAccountID v51.TransferAccountID
 		obj.SetAccountID(fernTestValueAccountID)
 		assert.Equal(t, fernTestValueAccountID, obj.AccountID)
 		assert.NotNil(t, obj.explicitFields)
@@ -29,7 +29,7 @@ func TestSettersTransferCapabilitiesGetRequest(t *testing.T) {
 
 	t.Run("SetPaymentProfileToken", func(t *testing.T) {
 		obj := &TransferCapabilitiesGetRequest{}
-		var fernTestValuePaymentProfileToken *v50.PaymentProfileToken
+		var fernTestValuePaymentProfileToken *v51.PaymentProfileToken
 		obj.SetPaymentProfileToken(fernTestValuePaymentProfileToken)
 		assert.Equal(t, fernTestValuePaymentProfileToken, obj.PaymentProfileToken)
 		assert.NotNil(t, obj.explicitFields)
@@ -42,7 +42,7 @@ func TestSettersMarkExplicitTransferCapabilitiesGetRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferCapabilitiesGetRequest{}
-		var fernTestValueAccessToken v50.TransferAccessToken
+		var fernTestValueAccessToken v51.TransferAccessToken
 
 		// Act
 		obj.SetAccessToken(fernTestValueAccessToken)
@@ -73,7 +73,7 @@ func TestSettersMarkExplicitTransferCapabilitiesGetRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferCapabilitiesGetRequest{}
-		var fernTestValueAccountID v50.TransferAccountID
+		var fernTestValueAccountID v51.TransferAccountID
 
 		// Act
 		obj.SetAccountID(fernTestValueAccountID)
@@ -104,7 +104,7 @@ func TestSettersMarkExplicitTransferCapabilitiesGetRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferCapabilitiesGetRequest{}
-		var fernTestValuePaymentProfileToken *v50.PaymentProfileToken
+		var fernTestValuePaymentProfileToken *v51.PaymentProfileToken
 
 		// Act
 		obj.SetPaymentProfileToken(fernTestValuePaymentProfileToken)

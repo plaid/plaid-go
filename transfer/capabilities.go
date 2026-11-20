@@ -4,8 +4,8 @@ package transfer
 
 import (
 	json "encoding/json"
-	v50 "github.com/plaid/plaid-go/v50"
-	internal "github.com/plaid/plaid-go/v50/internal"
+	v51 "github.com/plaid/plaid-go/v51"
+	internal "github.com/plaid/plaid-go/v51/internal"
 	big "math/big"
 )
 
@@ -16,9 +16,9 @@ var (
 )
 
 type TransferCapabilitiesGetRequest struct {
-	AccessToken         v50.TransferAccessToken  `json:"access_token" url:"-"`
-	AccountID           v50.TransferAccountID    `json:"account_id" url:"-"`
-	PaymentProfileToken *v50.PaymentProfileToken `json:"payment_profile_token,omitempty" url:"-"`
+	AccessToken         v51.TransferAccessToken  `json:"access_token" url:"-"`
+	AccountID           v51.TransferAccountID    `json:"account_id" url:"-"`
+	PaymentProfileToken *v51.PaymentProfileToken `json:"payment_profile_token,omitempty" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -35,21 +35,21 @@ func (t *TransferCapabilitiesGetRequest) require(field *big.Int) {
 
 // SetAccessToken sets the AccessToken field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferCapabilitiesGetRequest) SetAccessToken(accessToken v50.TransferAccessToken) {
+func (t *TransferCapabilitiesGetRequest) SetAccessToken(accessToken v51.TransferAccessToken) {
 	t.AccessToken = accessToken
 	t.require(transferCapabilitiesGetRequestFieldAccessToken)
 }
 
 // SetAccountID sets the AccountID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferCapabilitiesGetRequest) SetAccountID(accountID v50.TransferAccountID) {
+func (t *TransferCapabilitiesGetRequest) SetAccountID(accountID v51.TransferAccountID) {
 	t.AccountID = accountID
 	t.require(transferCapabilitiesGetRequestFieldAccountID)
 }
 
 // SetPaymentProfileToken sets the PaymentProfileToken field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferCapabilitiesGetRequest) SetPaymentProfileToken(paymentProfileToken *v50.PaymentProfileToken) {
+func (t *TransferCapabilitiesGetRequest) SetPaymentProfileToken(paymentProfileToken *v51.PaymentProfileToken) {
 	t.PaymentProfileToken = paymentProfileToken
 	t.require(transferCapabilitiesGetRequestFieldPaymentProfileToken)
 }

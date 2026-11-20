@@ -4,7 +4,7 @@ package transfer
 
 import (
 	json "encoding/json"
-	v50 "github.com/plaid/plaid-go/v50"
+	v51 "github.com/plaid/plaid-go/v51"
 	assert "github.com/stretchr/testify/assert"
 	require "github.com/stretchr/testify/require"
 	testing "testing"
@@ -46,7 +46,7 @@ func TestSettersTransferEventListRequest(t *testing.T) {
 
 	t.Run("SetTransferType", func(t *testing.T) {
 		obj := &TransferEventListRequest{}
-		var fernTestValueTransferType *v50.TransferEventListTransferType
+		var fernTestValueTransferType *v51.TransferEventListTransferType
 		obj.SetTransferType(fernTestValueTransferType)
 		assert.Equal(t, fernTestValueTransferType, obj.TransferType)
 		assert.NotNil(t, obj.explicitFields)
@@ -54,7 +54,7 @@ func TestSettersTransferEventListRequest(t *testing.T) {
 
 	t.Run("SetEventTypes", func(t *testing.T) {
 		obj := &TransferEventListRequest{}
-		var fernTestValueEventTypes []v50.TransferEventType
+		var fernTestValueEventTypes []v51.TransferEventType
 		obj.SetEventTypes(fernTestValueEventTypes)
 		assert.Equal(t, fernTestValueEventTypes, obj.EventTypes)
 		assert.NotNil(t, obj.explicitFields)
@@ -239,7 +239,7 @@ func TestSettersMarkExplicitTransferEventListRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferEventListRequest{}
-		var fernTestValueTransferType *v50.TransferEventListTransferType
+		var fernTestValueTransferType *v51.TransferEventListTransferType
 
 		// Act
 		obj.SetTransferType(fernTestValueTransferType)
@@ -270,7 +270,7 @@ func TestSettersMarkExplicitTransferEventListRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &TransferEventListRequest{}
-		var fernTestValueEventTypes []v50.TransferEventType
+		var fernTestValueEventTypes []v51.TransferEventType
 
 		// Act
 		obj.SetEventTypes(fernTestValueEventTypes)

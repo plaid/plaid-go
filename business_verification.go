@@ -5,7 +5,7 @@ package plaid
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/plaid/plaid-go/v50/internal"
+	internal "github.com/plaid/plaid-go/v51/internal"
 	big "math/big"
 	time "time"
 )
@@ -13,11 +13,13 @@ import (
 var (
 	businessVerificationCreateRequestFieldClientUserID = big.NewInt(1 << 0)
 	businessVerificationCreateRequestFieldBusiness     = big.NewInt(1 << 1)
+	businessVerificationCreateRequestFieldOptions      = big.NewInt(1 << 2)
 )
 
 type BusinessVerificationCreateRequest struct {
 	ClientUserID ClientUserID                               `json:"client_user_id" url:"-"`
 	Business     *BusinessVerificationCreateRequestBusiness `json:"business" url:"-"`
+	Options      *BusinessVerificationCreateRequestOptions  `json:"options,omitempty" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -44,6 +46,13 @@ func (b *BusinessVerificationCreateRequest) SetClientUserID(clientUserID ClientU
 func (b *BusinessVerificationCreateRequest) SetBusiness(business *BusinessVerificationCreateRequestBusiness) {
 	b.Business = business
 	b.require(businessVerificationCreateRequestFieldBusiness)
+}
+
+// SetOptions sets the Options field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessVerificationCreateRequest) SetOptions(options *BusinessVerificationCreateRequestOptions) {
+	b.Options = options
+	b.require(businessVerificationCreateRequestFieldOptions)
 }
 
 func (b *BusinessVerificationCreateRequest) UnmarshalJSON(data []byte) error {
@@ -115,6 +124,604 @@ func (b *BusinessVerificationGetRequest) MarshalJSON() ([]byte, error) {
 	return json.Marshal(explicitMarshaler)
 }
 
+var (
+	businessAddressDeliverabilityFieldIsDeliverable        = big.NewInt(1 << 0)
+	businessAddressDeliverabilityFieldIsCmra               = big.NewInt(1 << 1)
+	businessAddressDeliverabilityFieldResidentialIndicator = big.NewInt(1 << 2)
+	businessAddressDeliverabilityFieldDeliveryType         = big.NewInt(1 << 3)
+)
+
+// businessAddressDeliverabilityNullableFields maps the wire names of BusinessAddressDeliverability's nullable fields (required or optional) to their field bits.
+var businessAddressDeliverabilityNullableFields = map[string]*big.Int{
+	"is_deliverable":        businessAddressDeliverabilityFieldIsDeliverable,
+	"is_cmra":               businessAddressDeliverabilityFieldIsCmra,
+	"residential_indicator": businessAddressDeliverabilityFieldResidentialIndicator,
+	"delivery_type":         businessAddressDeliverabilityFieldDeliveryType,
+}
+
+// Delivery details for the address, as reported by the data provider.
+type BusinessAddressDeliverability struct {
+	// Whether the data provider reported the address as deliverable. `null` when not available.
+	IsDeliverable *bool `json:"is_deliverable,omitempty" url:"is_deliverable,omitempty"`
+	// Whether the address is a Commercial Mail Receiving Agency (CMRA), such as a mailbox rental store. `null` when not available.
+	IsCmra               *bool                         `json:"is_cmra,omitempty" url:"is_cmra,omitempty"`
+	ResidentialIndicator *BusinessResidentialIndicator `json:"residential_indicator,omitempty" url:"residential_indicator,omitempty"`
+	DeliveryType         *BusinessDeliveryType         `json:"delivery_type,omitempty" url:"delivery_type,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (b *BusinessAddressDeliverability) GetIsDeliverable() *bool {
+	if b == nil {
+		return nil
+	}
+	return b.IsDeliverable
+}
+
+func (b *BusinessAddressDeliverability) GetIsCmra() *bool {
+	if b == nil {
+		return nil
+	}
+	return b.IsCmra
+}
+
+func (b *BusinessAddressDeliverability) GetResidentialIndicator() *BusinessResidentialIndicator {
+	if b == nil {
+		return nil
+	}
+	return b.ResidentialIndicator
+}
+
+func (b *BusinessAddressDeliverability) GetDeliveryType() *BusinessDeliveryType {
+	if b == nil {
+		return nil
+	}
+	return b.DeliveryType
+}
+
+func (b *BusinessAddressDeliverability) GetExtraProperties() map[string]interface{} {
+	if b == nil {
+		return nil
+	}
+	return b.ExtraProperties
+}
+
+func (b *BusinessAddressDeliverability) require(field *big.Int) {
+	next := new(big.Int)
+	if b.explicitFields != nil {
+		next.Set(b.explicitFields)
+	}
+	next.Or(next, field)
+	b.explicitFields = next
+}
+
+// SetIsDeliverable sets the IsDeliverable field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessAddressDeliverability) SetIsDeliverable(isDeliverable *bool) {
+	b.IsDeliverable = isDeliverable
+	b.require(businessAddressDeliverabilityFieldIsDeliverable)
+}
+
+// SetIsCmra sets the IsCmra field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessAddressDeliverability) SetIsCmra(isCmra *bool) {
+	b.IsCmra = isCmra
+	b.require(businessAddressDeliverabilityFieldIsCmra)
+}
+
+// SetResidentialIndicator sets the ResidentialIndicator field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessAddressDeliverability) SetResidentialIndicator(residentialIndicator *BusinessResidentialIndicator) {
+	b.ResidentialIndicator = residentialIndicator
+	b.require(businessAddressDeliverabilityFieldResidentialIndicator)
+}
+
+// SetDeliveryType sets the DeliveryType field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessAddressDeliverability) SetDeliveryType(deliveryType *BusinessDeliveryType) {
+	b.DeliveryType = deliveryType
+	b.require(businessAddressDeliverabilityFieldDeliveryType)
+}
+
+func (b *BusinessAddressDeliverability) UnmarshalJSON(data []byte) error {
+	type embed BusinessAddressDeliverability
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*b = BusinessAddressDeliverability(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, businessAddressDeliverabilityNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		b.require(presentFields)
+	}
+	b.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (b *BusinessAddressDeliverability) MarshalJSON() ([]byte, error) {
+	type embed BusinessAddressDeliverability
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, b.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, b.ExtraProperties)
+}
+
+func (b *BusinessAddressDeliverability) String() string {
+	if b == nil {
+		return "<nil>"
+	}
+	if len(b.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(b.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
+var (
+	businessAddressDeliverabilityNullableFieldIsDeliverable        = big.NewInt(1 << 0)
+	businessAddressDeliverabilityNullableFieldIsCmra               = big.NewInt(1 << 1)
+	businessAddressDeliverabilityNullableFieldResidentialIndicator = big.NewInt(1 << 2)
+	businessAddressDeliverabilityNullableFieldDeliveryType         = big.NewInt(1 << 3)
+)
+
+// businessAddressDeliverabilityNullableNullableFields maps the wire names of BusinessAddressDeliverabilityNullable's nullable fields (required or optional) to their field bits.
+var businessAddressDeliverabilityNullableNullableFields = map[string]*big.Int{
+	"is_deliverable":        businessAddressDeliverabilityNullableFieldIsDeliverable,
+	"is_cmra":               businessAddressDeliverabilityNullableFieldIsCmra,
+	"residential_indicator": businessAddressDeliverabilityNullableFieldResidentialIndicator,
+	"delivery_type":         businessAddressDeliverabilityNullableFieldDeliveryType,
+}
+
+// Delivery details for the standardized address, as reported by the data provider. `null` when `standardized_address` is `null`.
+type BusinessAddressDeliverabilityNullable struct {
+	// Whether the data provider reported the address as deliverable. `null` when the provider did not report it.
+	IsDeliverable *bool `json:"is_deliverable,omitempty" url:"is_deliverable,omitempty"`
+	// Whether the address is a Commercial Mail Receiving Agency (CMRA), such as a mailbox rental store. `null` when the provider did not report it.
+	IsCmra               *bool                         `json:"is_cmra,omitempty" url:"is_cmra,omitempty"`
+	ResidentialIndicator *BusinessResidentialIndicator `json:"residential_indicator,omitempty" url:"residential_indicator,omitempty"`
+	DeliveryType         *BusinessDeliveryType         `json:"delivery_type,omitempty" url:"delivery_type,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (b *BusinessAddressDeliverabilityNullable) GetIsDeliverable() *bool {
+	if b == nil {
+		return nil
+	}
+	return b.IsDeliverable
+}
+
+func (b *BusinessAddressDeliverabilityNullable) GetIsCmra() *bool {
+	if b == nil {
+		return nil
+	}
+	return b.IsCmra
+}
+
+func (b *BusinessAddressDeliverabilityNullable) GetResidentialIndicator() *BusinessResidentialIndicator {
+	if b == nil {
+		return nil
+	}
+	return b.ResidentialIndicator
+}
+
+func (b *BusinessAddressDeliverabilityNullable) GetDeliveryType() *BusinessDeliveryType {
+	if b == nil {
+		return nil
+	}
+	return b.DeliveryType
+}
+
+func (b *BusinessAddressDeliverabilityNullable) GetExtraProperties() map[string]interface{} {
+	if b == nil {
+		return nil
+	}
+	return b.ExtraProperties
+}
+
+func (b *BusinessAddressDeliverabilityNullable) require(field *big.Int) {
+	next := new(big.Int)
+	if b.explicitFields != nil {
+		next.Set(b.explicitFields)
+	}
+	next.Or(next, field)
+	b.explicitFields = next
+}
+
+// SetIsDeliverable sets the IsDeliverable field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessAddressDeliverabilityNullable) SetIsDeliverable(isDeliverable *bool) {
+	b.IsDeliverable = isDeliverable
+	b.require(businessAddressDeliverabilityNullableFieldIsDeliverable)
+}
+
+// SetIsCmra sets the IsCmra field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessAddressDeliverabilityNullable) SetIsCmra(isCmra *bool) {
+	b.IsCmra = isCmra
+	b.require(businessAddressDeliverabilityNullableFieldIsCmra)
+}
+
+// SetResidentialIndicator sets the ResidentialIndicator field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessAddressDeliverabilityNullable) SetResidentialIndicator(residentialIndicator *BusinessResidentialIndicator) {
+	b.ResidentialIndicator = residentialIndicator
+	b.require(businessAddressDeliverabilityNullableFieldResidentialIndicator)
+}
+
+// SetDeliveryType sets the DeliveryType field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessAddressDeliverabilityNullable) SetDeliveryType(deliveryType *BusinessDeliveryType) {
+	b.DeliveryType = deliveryType
+	b.require(businessAddressDeliverabilityNullableFieldDeliveryType)
+}
+
+func (b *BusinessAddressDeliverabilityNullable) UnmarshalJSON(data []byte) error {
+	type embed BusinessAddressDeliverabilityNullable
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*b = BusinessAddressDeliverabilityNullable(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, businessAddressDeliverabilityNullableNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		b.require(presentFields)
+	}
+	b.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (b *BusinessAddressDeliverabilityNullable) MarshalJSON() ([]byte, error) {
+	type embed BusinessAddressDeliverabilityNullable
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, b.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, b.ExtraProperties)
+}
+
+func (b *BusinessAddressDeliverabilityNullable) String() string {
+	if b == nil {
+		return "<nil>"
+	}
+	if len(b.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(b.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
+var (
+	businessAddressMatchFieldSummary    = big.NewInt(1 << 0)
+	businessAddressMatchFieldValidation = big.NewInt(1 << 1)
+)
+
+// businessAddressMatchNullableFields maps the wire names of BusinessAddressMatch's nullable fields (required or optional) to their field bits.
+var businessAddressMatchNullableFields = map[string]*big.Int{
+	"validation": businessAddressMatchFieldValidation,
+}
+
+// How the submitted address matched data provider records, and how the provider validated it.
+type BusinessAddressMatch struct {
+	Summary    MatchSummaryCode           `json:"summary" url:"summary"`
+	Validation *BusinessAddressValidation `json:"validation,omitempty" url:"validation,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (b *BusinessAddressMatch) GetSummary() MatchSummaryCode {
+	if b == nil {
+		return ""
+	}
+	return b.Summary
+}
+
+func (b *BusinessAddressMatch) GetValidation() *BusinessAddressValidation {
+	if b == nil {
+		return nil
+	}
+	return b.Validation
+}
+
+func (b *BusinessAddressMatch) GetExtraProperties() map[string]interface{} {
+	if b == nil {
+		return nil
+	}
+	return b.ExtraProperties
+}
+
+func (b *BusinessAddressMatch) require(field *big.Int) {
+	next := new(big.Int)
+	if b.explicitFields != nil {
+		next.Set(b.explicitFields)
+	}
+	next.Or(next, field)
+	b.explicitFields = next
+}
+
+// SetSummary sets the Summary field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessAddressMatch) SetSummary(summary MatchSummaryCode) {
+	b.Summary = summary
+	b.require(businessAddressMatchFieldSummary)
+}
+
+// SetValidation sets the Validation field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessAddressMatch) SetValidation(validation *BusinessAddressValidation) {
+	b.Validation = validation
+	b.require(businessAddressMatchFieldValidation)
+}
+
+func (b *BusinessAddressMatch) UnmarshalJSON(data []byte) error {
+	type embed BusinessAddressMatch
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*b = BusinessAddressMatch(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, businessAddressMatchNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		b.require(presentFields)
+	}
+	b.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (b *BusinessAddressMatch) MarshalJSON() ([]byte, error) {
+	type embed BusinessAddressMatch
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, b.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, b.ExtraProperties)
+}
+
+func (b *BusinessAddressMatch) String() string {
+	if b == nil {
+		return "<nil>"
+	}
+	if len(b.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(b.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
+var (
+	businessAddressValidationFieldLevel               = big.NewInt(1 << 0)
+	businessAddressValidationFieldStandardizedAddress = big.NewInt(1 << 1)
+	businessAddressValidationFieldDeliverability      = big.NewInt(1 << 2)
+)
+
+// businessAddressValidationNullableFields maps the wire names of BusinessAddressValidation's nullable fields (required or optional) to their field bits.
+var businessAddressValidationNullableFields = map[string]*big.Int{
+	"level":                businessAddressValidationFieldLevel,
+	"standardized_address": businessAddressValidationFieldStandardizedAddress,
+	"deliverability":       businessAddressValidationFieldDeliverability,
+}
+
+// How the data provider standardized and validated the submitted address. `null` when the provider returned neither a validation level nor a standardized address. Only US addresses are validated, so this is always `null` when the submitted address is outside the US.
+type BusinessAddressValidation struct {
+	Level               *BusinessAddressValidationLevel        `json:"level,omitempty" url:"level,omitempty"`
+	StandardizedAddress *BusinessStandardizedAddress           `json:"standardized_address,omitempty" url:"standardized_address,omitempty"`
+	Deliverability      *BusinessAddressDeliverabilityNullable `json:"deliverability,omitempty" url:"deliverability,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (b *BusinessAddressValidation) GetLevel() *BusinessAddressValidationLevel {
+	if b == nil {
+		return nil
+	}
+	return b.Level
+}
+
+func (b *BusinessAddressValidation) GetStandardizedAddress() *BusinessStandardizedAddress {
+	if b == nil {
+		return nil
+	}
+	return b.StandardizedAddress
+}
+
+func (b *BusinessAddressValidation) GetDeliverability() *BusinessAddressDeliverabilityNullable {
+	if b == nil {
+		return nil
+	}
+	return b.Deliverability
+}
+
+func (b *BusinessAddressValidation) GetExtraProperties() map[string]interface{} {
+	if b == nil {
+		return nil
+	}
+	return b.ExtraProperties
+}
+
+func (b *BusinessAddressValidation) require(field *big.Int) {
+	next := new(big.Int)
+	if b.explicitFields != nil {
+		next.Set(b.explicitFields)
+	}
+	next.Or(next, field)
+	b.explicitFields = next
+}
+
+// SetLevel sets the Level field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessAddressValidation) SetLevel(level *BusinessAddressValidationLevel) {
+	b.Level = level
+	b.require(businessAddressValidationFieldLevel)
+}
+
+// SetStandardizedAddress sets the StandardizedAddress field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessAddressValidation) SetStandardizedAddress(standardizedAddress *BusinessStandardizedAddress) {
+	b.StandardizedAddress = standardizedAddress
+	b.require(businessAddressValidationFieldStandardizedAddress)
+}
+
+// SetDeliverability sets the Deliverability field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessAddressValidation) SetDeliverability(deliverability *BusinessAddressDeliverabilityNullable) {
+	b.Deliverability = deliverability
+	b.require(businessAddressValidationFieldDeliverability)
+}
+
+func (b *BusinessAddressValidation) UnmarshalJSON(data []byte) error {
+	type embed BusinessAddressValidation
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*b = BusinessAddressValidation(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, businessAddressValidationNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		b.require(presentFields)
+	}
+	b.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (b *BusinessAddressValidation) MarshalJSON() ([]byte, error) {
+	type embed BusinessAddressValidation
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, b.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, b.ExtraProperties)
+}
+
+func (b *BusinessAddressValidation) String() string {
+	if b == nil {
+		return "<nil>"
+	}
+	if len(b.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(b.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
+// How completely the data provider validated the submitted address against postal records. `full`: the whole address, including any unit, matched a known deliverable address. `partial`: only part of the address matched, for example the building but not the suite. `invalid`: the address could not be matched to a known address. `null` when the provider returned a standardized address without a validation level.
+type BusinessAddressValidationLevel string
+
+const (
+	BusinessAddressValidationLevelFull    BusinessAddressValidationLevel = "full"
+	BusinessAddressValidationLevelPartial BusinessAddressValidationLevel = "partial"
+	BusinessAddressValidationLevelInvalid BusinessAddressValidationLevel = "invalid"
+)
+
+func NewBusinessAddressValidationLevelFromString(s string) (BusinessAddressValidationLevel, error) {
+	switch s {
+	case "full":
+		return BusinessAddressValidationLevelFull, nil
+	case "partial":
+		return BusinessAddressValidationLevelPartial, nil
+	case "invalid":
+		return BusinessAddressValidationLevelInvalid, nil
+	}
+	var t BusinessAddressValidationLevel
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (b BusinessAddressValidationLevel) Ptr() *BusinessAddressValidationLevel {
+	return &b
+}
+
 // Tri-state boolean status, where `no_data` indicates the check could not determine a value.
 type BusinessCheckBooleanStatus string
 
@@ -139,6 +746,784 @@ func NewBusinessCheckBooleanStatusFromString(s string) (BusinessCheckBooleanStat
 
 func (b BusinessCheckBooleanStatus) Ptr() *BusinessCheckBooleanStatus {
 	return &b
+}
+
+// The USPS record type of the delivery point at the address, as reported by the data provider. `street`: a street address. `firm`: an address assigned to a specific business. `general_delivery`: mail held at a post office for pickup. `high_rise`: a building with many units, such as an apartment or office building. `post_office`: a PO box. `rural_route`: a rural route or highway contract address. `null` when the provider did not report one.
+type BusinessDeliveryType string
+
+const (
+	BusinessDeliveryTypeStreet          BusinessDeliveryType = "street"
+	BusinessDeliveryTypeFirm            BusinessDeliveryType = "firm"
+	BusinessDeliveryTypeGeneralDelivery BusinessDeliveryType = "general_delivery"
+	BusinessDeliveryTypeHighRise        BusinessDeliveryType = "high_rise"
+	BusinessDeliveryTypePostOffice      BusinessDeliveryType = "post_office"
+	BusinessDeliveryTypeRuralRoute      BusinessDeliveryType = "rural_route"
+)
+
+func NewBusinessDeliveryTypeFromString(s string) (BusinessDeliveryType, error) {
+	switch s {
+	case "street":
+		return BusinessDeliveryTypeStreet, nil
+	case "firm":
+		return BusinessDeliveryTypeFirm, nil
+	case "general_delivery":
+		return BusinessDeliveryTypeGeneralDelivery, nil
+	case "high_rise":
+		return BusinessDeliveryTypeHighRise, nil
+	case "post_office":
+		return BusinessDeliveryTypePostOffice, nil
+	case "rural_route":
+		return BusinessDeliveryTypeRuralRoute, nil
+	}
+	var t BusinessDeliveryType
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (b BusinessDeliveryType) Ptr() *BusinessDeliveryType {
+	return &b
+}
+
+var (
+	businessDetailAddressFieldIsPrimary      = big.NewInt(1 << 0)
+	businessDetailAddressFieldStreet         = big.NewInt(1 << 1)
+	businessDetailAddressFieldStreet2        = big.NewInt(1 << 2)
+	businessDetailAddressFieldCity           = big.NewInt(1 << 3)
+	businessDetailAddressFieldRegion         = big.NewInt(1 << 4)
+	businessDetailAddressFieldPostalCode     = big.NewInt(1 << 5)
+	businessDetailAddressFieldCountry        = big.NewInt(1 << 6)
+	businessDetailAddressFieldLat            = big.NewInt(1 << 7)
+	businessDetailAddressFieldLon            = big.NewInt(1 << 8)
+	businessDetailAddressFieldDeliverability = big.NewInt(1 << 9)
+	businessDetailAddressFieldSources        = big.NewInt(1 << 10)
+)
+
+// businessDetailAddressNullableFields maps the wire names of BusinessDetailAddress's nullable fields (required or optional) to their field bits.
+var businessDetailAddressNullableFields = map[string]*big.Int{
+	"street":      businessDetailAddressFieldStreet,
+	"street2":     businessDetailAddressFieldStreet2,
+	"city":        businessDetailAddressFieldCity,
+	"region":      businessDetailAddressFieldRegion,
+	"postal_code": businessDetailAddressFieldPostalCode,
+	"lat":         businessDetailAddressFieldLat,
+	"lon":         businessDetailAddressFieldLon,
+}
+
+// An address the data provider attributes to the business. The provider returns a single street line, so `street2` is always `null`. `country` is always `US`.
+type BusinessDetailAddress struct {
+	// Whether the data provider reported this as the business's primary address.
+	IsPrimary  bool               `json:"is_primary" url:"is_primary"`
+	Street     StreetNullable     `json:"street,omitempty" url:"street,omitempty"`
+	Street2    Street2            `json:"street2,omitempty" url:"street2,omitempty"`
+	City       CityNullable       `json:"city,omitempty" url:"city,omitempty"`
+	Region     Region             `json:"region,omitempty" url:"region,omitempty"`
+	PostalCode PostalCode         `json:"postal_code,omitempty" url:"postal_code,omitempty"`
+	Country    GenericCountryCode `json:"country" url:"country"`
+	// The latitude of the address. `null` when not available.
+	Lat *float64 `json:"lat,omitempty" url:"lat,omitempty"`
+	// The longitude of the address. `null` when not available.
+	Lon            *float64                       `json:"lon,omitempty" url:"lon,omitempty"`
+	Deliverability *BusinessAddressDeliverability `json:"deliverability" url:"deliverability"`
+	// Where the data provider found the address. Empty when the provider did not say.
+	Sources []BusinessEntitySource `json:"sources" url:"sources"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (b *BusinessDetailAddress) GetIsPrimary() bool {
+	if b == nil {
+		return false
+	}
+	return b.IsPrimary
+}
+
+func (b *BusinessDetailAddress) GetStreet() StreetNullable {
+	if b == nil {
+		return nil
+	}
+	return b.Street
+}
+
+func (b *BusinessDetailAddress) GetStreet2() Street2 {
+	if b == nil {
+		return nil
+	}
+	return b.Street2
+}
+
+func (b *BusinessDetailAddress) GetCity() CityNullable {
+	if b == nil {
+		return nil
+	}
+	return b.City
+}
+
+func (b *BusinessDetailAddress) GetRegion() Region {
+	if b == nil {
+		return nil
+	}
+	return b.Region
+}
+
+func (b *BusinessDetailAddress) GetPostalCode() PostalCode {
+	if b == nil {
+		return nil
+	}
+	return b.PostalCode
+}
+
+func (b *BusinessDetailAddress) GetCountry() GenericCountryCode {
+	if b == nil {
+		return ""
+	}
+	return b.Country
+}
+
+func (b *BusinessDetailAddress) GetLat() *float64 {
+	if b == nil {
+		return nil
+	}
+	return b.Lat
+}
+
+func (b *BusinessDetailAddress) GetLon() *float64 {
+	if b == nil {
+		return nil
+	}
+	return b.Lon
+}
+
+func (b *BusinessDetailAddress) GetDeliverability() *BusinessAddressDeliverability {
+	if b == nil {
+		return nil
+	}
+	return b.Deliverability
+}
+
+func (b *BusinessDetailAddress) GetSources() []BusinessEntitySource {
+	if b == nil {
+		return nil
+	}
+	return b.Sources
+}
+
+func (b *BusinessDetailAddress) GetExtraProperties() map[string]interface{} {
+	if b == nil {
+		return nil
+	}
+	return b.ExtraProperties
+}
+
+func (b *BusinessDetailAddress) require(field *big.Int) {
+	next := new(big.Int)
+	if b.explicitFields != nil {
+		next.Set(b.explicitFields)
+	}
+	next.Or(next, field)
+	b.explicitFields = next
+}
+
+// SetIsPrimary sets the IsPrimary field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessDetailAddress) SetIsPrimary(isPrimary bool) {
+	b.IsPrimary = isPrimary
+	b.require(businessDetailAddressFieldIsPrimary)
+}
+
+// SetStreet sets the Street field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessDetailAddress) SetStreet(street StreetNullable) {
+	b.Street = street
+	b.require(businessDetailAddressFieldStreet)
+}
+
+// SetStreet2 sets the Street2 field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessDetailAddress) SetStreet2(street2 Street2) {
+	b.Street2 = street2
+	b.require(businessDetailAddressFieldStreet2)
+}
+
+// SetCity sets the City field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessDetailAddress) SetCity(city CityNullable) {
+	b.City = city
+	b.require(businessDetailAddressFieldCity)
+}
+
+// SetRegion sets the Region field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessDetailAddress) SetRegion(region Region) {
+	b.Region = region
+	b.require(businessDetailAddressFieldRegion)
+}
+
+// SetPostalCode sets the PostalCode field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessDetailAddress) SetPostalCode(postalCode PostalCode) {
+	b.PostalCode = postalCode
+	b.require(businessDetailAddressFieldPostalCode)
+}
+
+// SetCountry sets the Country field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessDetailAddress) SetCountry(country GenericCountryCode) {
+	b.Country = country
+	b.require(businessDetailAddressFieldCountry)
+}
+
+// SetLat sets the Lat field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessDetailAddress) SetLat(lat *float64) {
+	b.Lat = lat
+	b.require(businessDetailAddressFieldLat)
+}
+
+// SetLon sets the Lon field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessDetailAddress) SetLon(lon *float64) {
+	b.Lon = lon
+	b.require(businessDetailAddressFieldLon)
+}
+
+// SetDeliverability sets the Deliverability field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessDetailAddress) SetDeliverability(deliverability *BusinessAddressDeliverability) {
+	b.Deliverability = deliverability
+	b.require(businessDetailAddressFieldDeliverability)
+}
+
+// SetSources sets the Sources field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessDetailAddress) SetSources(sources []BusinessEntitySource) {
+	b.Sources = sources
+	b.require(businessDetailAddressFieldSources)
+}
+
+func (b *BusinessDetailAddress) UnmarshalJSON(data []byte) error {
+	type embed BusinessDetailAddress
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*b = BusinessDetailAddress(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, businessDetailAddressNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		b.require(presentFields)
+	}
+	b.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (b *BusinessDetailAddress) MarshalJSON() ([]byte, error) {
+	type embed BusinessDetailAddress
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, b.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, b.ExtraProperties)
+}
+
+func (b *BusinessDetailAddress) String() string {
+	if b == nil {
+		return "<nil>"
+	}
+	if len(b.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(b.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
+var (
+	businessDetailOfficerFieldName          = big.NewInt(1 << 0)
+	businessDetailOfficerFieldTitles        = big.NewInt(1 << 1)
+	businessDetailOfficerFieldJurisdictions = big.NewInt(1 << 2)
+	businessDetailOfficerFieldSources       = big.NewInt(1 << 3)
+)
+
+// businessDetailOfficerNullableFields maps the wire names of BusinessDetailOfficer's nullable fields (required or optional) to their field bits.
+var businessDetailOfficerNullableFields = map[string]*big.Int{
+	"name": businessDetailOfficerFieldName,
+}
+
+// An officer the data provider attributes to the business.
+type BusinessDetailOfficer struct {
+	// The officer's name, as the data provider reported it. `null` when not available.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// The officer's titles, as the data provider reported them.
+	Titles []string `json:"titles" url:"titles"`
+	// The US states the officer is registered in, as subdivision codes such as `IN`.
+	Jurisdictions []string `json:"jurisdictions" url:"jurisdictions"`
+	// Where the data provider found the officer. Empty when the provider did not say.
+	Sources []BusinessEntitySource `json:"sources" url:"sources"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (b *BusinessDetailOfficer) GetName() *string {
+	if b == nil {
+		return nil
+	}
+	return b.Name
+}
+
+func (b *BusinessDetailOfficer) GetTitles() []string {
+	if b == nil {
+		return nil
+	}
+	return b.Titles
+}
+
+func (b *BusinessDetailOfficer) GetJurisdictions() []string {
+	if b == nil {
+		return nil
+	}
+	return b.Jurisdictions
+}
+
+func (b *BusinessDetailOfficer) GetSources() []BusinessEntitySource {
+	if b == nil {
+		return nil
+	}
+	return b.Sources
+}
+
+func (b *BusinessDetailOfficer) GetExtraProperties() map[string]interface{} {
+	if b == nil {
+		return nil
+	}
+	return b.ExtraProperties
+}
+
+func (b *BusinessDetailOfficer) require(field *big.Int) {
+	next := new(big.Int)
+	if b.explicitFields != nil {
+		next.Set(b.explicitFields)
+	}
+	next.Or(next, field)
+	b.explicitFields = next
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessDetailOfficer) SetName(name *string) {
+	b.Name = name
+	b.require(businessDetailOfficerFieldName)
+}
+
+// SetTitles sets the Titles field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessDetailOfficer) SetTitles(titles []string) {
+	b.Titles = titles
+	b.require(businessDetailOfficerFieldTitles)
+}
+
+// SetJurisdictions sets the Jurisdictions field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessDetailOfficer) SetJurisdictions(jurisdictions []string) {
+	b.Jurisdictions = jurisdictions
+	b.require(businessDetailOfficerFieldJurisdictions)
+}
+
+// SetSources sets the Sources field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessDetailOfficer) SetSources(sources []BusinessEntitySource) {
+	b.Sources = sources
+	b.require(businessDetailOfficerFieldSources)
+}
+
+func (b *BusinessDetailOfficer) UnmarshalJSON(data []byte) error {
+	type embed BusinessDetailOfficer
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*b = BusinessDetailOfficer(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, businessDetailOfficerNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		b.require(presentFields)
+	}
+	b.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (b *BusinessDetailOfficer) MarshalJSON() ([]byte, error) {
+	type embed BusinessDetailOfficer
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, b.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, b.ExtraProperties)
+}
+
+func (b *BusinessDetailOfficer) String() string {
+	if b == nil {
+		return "<nil>"
+	}
+	if len(b.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(b.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
+var (
+	businessDetailsFieldName                      = big.NewInt(1 << 0)
+	businessDetailsFieldAlternativeNames          = big.NewInt(1 << 1)
+	businessDetailsFieldEntityType                = big.NewInt(1 << 2)
+	businessDetailsFieldIncorporationDate         = big.NewInt(1 << 3)
+	businessDetailsFieldIncorporationJurisdiction = big.NewInt(1 << 4)
+	businessDetailsFieldAddresses                 = big.NewInt(1 << 5)
+	businessDetailsFieldPhoneNumbers              = big.NewInt(1 << 6)
+	businessDetailsFieldEmailAddresses            = big.NewInt(1 << 7)
+	businessDetailsFieldWebsites                  = big.NewInt(1 << 8)
+	businessDetailsFieldOfficers                  = big.NewInt(1 << 9)
+	businessDetailsFieldRegistrations             = big.NewInt(1 << 10)
+	businessDetailsFieldIndustry                  = big.NewInt(1 << 11)
+	businessDetailsFieldSecRegistrations          = big.NewInt(1 << 12)
+)
+
+// businessDetailsNullableFields maps the wire names of BusinessDetails's nullable fields (required or optional) to their field bits.
+var businessDetailsNullableFields = map[string]*big.Int{
+	"name":                       businessDetailsFieldName,
+	"entity_type":                businessDetailsFieldEntityType,
+	"incorporation_date":         businessDetailsFieldIncorporationDate,
+	"incorporation_jurisdiction": businessDetailsFieldIncorporationJurisdiction,
+}
+
+// The business the data provider matched, and the records it holds for it. When there is no business search result, for example when only industry classification ran, every scalar is `null` and every list is empty. `incorporation_date` is the date the business was incorporated, or `null` when not available.
+type BusinessDetails struct {
+	// The name of the business, as the data provider reported it. `null` when not available.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// Other names the data provider holds for the business.
+	AlternativeNames  []string            `json:"alternative_names" url:"alternative_names"`
+	EntityType        *BusinessEntityType `json:"entity_type,omitempty" url:"entity_type,omitempty"`
+	IncorporationDate Iso8601DateNullable `json:"incorporation_date,omitempty" url:"incorporation_date,omitempty" format:"date"`
+	// The US state the business was incorporated in, as a subdivision code such as `IN`. `null` when not available.
+	IncorporationJurisdiction *string `json:"incorporation_jurisdiction,omitempty" url:"incorporation_jurisdiction,omitempty"`
+	// Addresses the data provider attributes to the business. Addresses listed on a registration are under `registrations` instead.
+	Addresses []*BusinessDetailAddress `json:"addresses" url:"addresses"`
+	// Phone numbers the data provider holds for the business.
+	PhoneNumbers []*BusinessPhoneNumber `json:"phone_numbers" url:"phone_numbers"`
+	// Email addresses the data provider holds for the business.
+	EmailAddresses []*BusinessEmailAddress `json:"email_addresses" url:"email_addresses"`
+	// The business's website, as the data provider reported it. Holds at most one entry.
+	Websites []*BusinessWebsite `json:"websites" url:"websites"`
+	// Officers the data provider attributes to the business. Officers listed on a registration are under `registrations` instead.
+	Officers []*BusinessDetailOfficer `json:"officers" url:"officers"`
+	// The business's state registrations, as the data provider reported them.
+	Registrations []*BusinessRegistration `json:"registrations" url:"registrations"`
+	Industry      *BusinessIndustry       `json:"industry" url:"industry"`
+	// SEC EDGAR registrations the data provider linked to the business.
+	SecRegistrations []*BusinessSecRegistration `json:"sec_registrations" url:"sec_registrations"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (b *BusinessDetails) GetName() *string {
+	if b == nil {
+		return nil
+	}
+	return b.Name
+}
+
+func (b *BusinessDetails) GetAlternativeNames() []string {
+	if b == nil {
+		return nil
+	}
+	return b.AlternativeNames
+}
+
+func (b *BusinessDetails) GetEntityType() *BusinessEntityType {
+	if b == nil {
+		return nil
+	}
+	return b.EntityType
+}
+
+func (b *BusinessDetails) GetIncorporationDate() Iso8601DateNullable {
+	if b == nil {
+		return nil
+	}
+	return b.IncorporationDate
+}
+
+func (b *BusinessDetails) GetIncorporationJurisdiction() *string {
+	if b == nil {
+		return nil
+	}
+	return b.IncorporationJurisdiction
+}
+
+func (b *BusinessDetails) GetAddresses() []*BusinessDetailAddress {
+	if b == nil {
+		return nil
+	}
+	return b.Addresses
+}
+
+func (b *BusinessDetails) GetPhoneNumbers() []*BusinessPhoneNumber {
+	if b == nil {
+		return nil
+	}
+	return b.PhoneNumbers
+}
+
+func (b *BusinessDetails) GetEmailAddresses() []*BusinessEmailAddress {
+	if b == nil {
+		return nil
+	}
+	return b.EmailAddresses
+}
+
+func (b *BusinessDetails) GetWebsites() []*BusinessWebsite {
+	if b == nil {
+		return nil
+	}
+	return b.Websites
+}
+
+func (b *BusinessDetails) GetOfficers() []*BusinessDetailOfficer {
+	if b == nil {
+		return nil
+	}
+	return b.Officers
+}
+
+func (b *BusinessDetails) GetRegistrations() []*BusinessRegistration {
+	if b == nil {
+		return nil
+	}
+	return b.Registrations
+}
+
+func (b *BusinessDetails) GetIndustry() *BusinessIndustry {
+	if b == nil {
+		return nil
+	}
+	return b.Industry
+}
+
+func (b *BusinessDetails) GetSecRegistrations() []*BusinessSecRegistration {
+	if b == nil {
+		return nil
+	}
+	return b.SecRegistrations
+}
+
+func (b *BusinessDetails) GetExtraProperties() map[string]interface{} {
+	if b == nil {
+		return nil
+	}
+	return b.ExtraProperties
+}
+
+func (b *BusinessDetails) require(field *big.Int) {
+	next := new(big.Int)
+	if b.explicitFields != nil {
+		next.Set(b.explicitFields)
+	}
+	next.Or(next, field)
+	b.explicitFields = next
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessDetails) SetName(name *string) {
+	b.Name = name
+	b.require(businessDetailsFieldName)
+}
+
+// SetAlternativeNames sets the AlternativeNames field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessDetails) SetAlternativeNames(alternativeNames []string) {
+	b.AlternativeNames = alternativeNames
+	b.require(businessDetailsFieldAlternativeNames)
+}
+
+// SetEntityType sets the EntityType field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessDetails) SetEntityType(entityType *BusinessEntityType) {
+	b.EntityType = entityType
+	b.require(businessDetailsFieldEntityType)
+}
+
+// SetIncorporationDate sets the IncorporationDate field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessDetails) SetIncorporationDate(incorporationDate Iso8601DateNullable) {
+	b.IncorporationDate = incorporationDate
+	b.require(businessDetailsFieldIncorporationDate)
+}
+
+// SetIncorporationJurisdiction sets the IncorporationJurisdiction field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessDetails) SetIncorporationJurisdiction(incorporationJurisdiction *string) {
+	b.IncorporationJurisdiction = incorporationJurisdiction
+	b.require(businessDetailsFieldIncorporationJurisdiction)
+}
+
+// SetAddresses sets the Addresses field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessDetails) SetAddresses(addresses []*BusinessDetailAddress) {
+	b.Addresses = addresses
+	b.require(businessDetailsFieldAddresses)
+}
+
+// SetPhoneNumbers sets the PhoneNumbers field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessDetails) SetPhoneNumbers(phoneNumbers []*BusinessPhoneNumber) {
+	b.PhoneNumbers = phoneNumbers
+	b.require(businessDetailsFieldPhoneNumbers)
+}
+
+// SetEmailAddresses sets the EmailAddresses field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessDetails) SetEmailAddresses(emailAddresses []*BusinessEmailAddress) {
+	b.EmailAddresses = emailAddresses
+	b.require(businessDetailsFieldEmailAddresses)
+}
+
+// SetWebsites sets the Websites field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessDetails) SetWebsites(websites []*BusinessWebsite) {
+	b.Websites = websites
+	b.require(businessDetailsFieldWebsites)
+}
+
+// SetOfficers sets the Officers field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessDetails) SetOfficers(officers []*BusinessDetailOfficer) {
+	b.Officers = officers
+	b.require(businessDetailsFieldOfficers)
+}
+
+// SetRegistrations sets the Registrations field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessDetails) SetRegistrations(registrations []*BusinessRegistration) {
+	b.Registrations = registrations
+	b.require(businessDetailsFieldRegistrations)
+}
+
+// SetIndustry sets the Industry field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessDetails) SetIndustry(industry *BusinessIndustry) {
+	b.Industry = industry
+	b.require(businessDetailsFieldIndustry)
+}
+
+// SetSecRegistrations sets the SecRegistrations field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessDetails) SetSecRegistrations(secRegistrations []*BusinessSecRegistration) {
+	b.SecRegistrations = secRegistrations
+	b.require(businessDetailsFieldSecRegistrations)
+}
+
+func (b *BusinessDetails) UnmarshalJSON(data []byte) error {
+	type embed BusinessDetails
+	var unmarshaler = struct {
+		embed
+		IncorporationDate *internal.Date `json:"incorporation_date,omitempty"`
+	}{
+		embed: embed(*b),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*b = BusinessDetails(unmarshaler.embed)
+	b.IncorporationDate = unmarshaler.IncorporationDate.TimePtr()
+	extraProperties, err := internal.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, businessDetailsNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		b.require(presentFields)
+	}
+	b.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (b *BusinessDetails) MarshalJSON() ([]byte, error) {
+	type embed BusinessDetails
+	var marshaler = struct {
+		embed
+		IncorporationDate *internal.Date `json:"incorporation_date,omitempty"`
+	}{
+		embed:             embed(*b),
+		IncorporationDate: internal.NewOptionalDate(b.IncorporationDate),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, b.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, b.ExtraProperties)
+}
+
+func (b *BusinessDetails) String() string {
+	if b == nil {
+		return "<nil>"
+	}
+	if len(b.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(b.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
 }
 
 var (
@@ -448,6 +1833,29 @@ func (b *BusinessEmailAddress) String() string {
 	return fmt.Sprintf("%#v", b)
 }
 
+// Where the data provider found the record: `secretary_of_state` for a Secretary of State filing, or `online` for an online source.
+type BusinessEntitySource string
+
+const (
+	BusinessEntitySourceSecretaryOfState BusinessEntitySource = "secretary_of_state"
+	BusinessEntitySourceOnline           BusinessEntitySource = "online"
+)
+
+func NewBusinessEntitySourceFromString(s string) (BusinessEntitySource, error) {
+	switch s {
+	case "secretary_of_state":
+		return BusinessEntitySourceSecretaryOfState, nil
+	case "online":
+		return BusinessEntitySourceOnline, nil
+	}
+	var t BusinessEntitySource
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (b BusinessEntitySource) Ptr() *BusinessEntitySource {
+	return &b
+}
+
 // The legal structure or type of business entity
 type BusinessEntityType string
 
@@ -618,16 +2026,17 @@ func (b *BusinessFieldMatchSummary) String() string {
 }
 
 var (
-	businessIndustryPredictionFieldCode  = big.NewInt(1 << 0)
-	businessIndustryPredictionFieldTitle = big.NewInt(1 << 1)
+	businessIndustryFieldClassification = big.NewInt(1 << 0)
 )
 
-// The predicted industry classification for the business, based on digital presence assessments.
-type BusinessIndustryPrediction struct {
-	// NAICS code for the predicted business industry.
-	Code int `json:"code" url:"code"`
-	// The business industry classification of the predicted NAICS code.
-	Title string `json:"title" url:"title"`
+// businessIndustryNullableFields maps the wire names of BusinessIndustry's nullable fields (required or optional) to their field bits.
+var businessIndustryNullableFields = map[string]*big.Int{
+	"classification": businessIndustryFieldClassification,
+}
+
+// Industry classifications for the business.
+type BusinessIndustry struct {
+	Classification *IndustryClassification `json:"classification,omitempty" url:"classification,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -637,28 +2046,21 @@ type BusinessIndustryPrediction struct {
 	rawJSON json.RawMessage
 }
 
-func (b *BusinessIndustryPrediction) GetCode() int {
+func (b *BusinessIndustry) GetClassification() *IndustryClassification {
 	if b == nil {
-		return 0
+		return nil
 	}
-	return b.Code
+	return b.Classification
 }
 
-func (b *BusinessIndustryPrediction) GetTitle() string {
-	if b == nil {
-		return ""
-	}
-	return b.Title
-}
-
-func (b *BusinessIndustryPrediction) GetExtraProperties() map[string]interface{} {
+func (b *BusinessIndustry) GetExtraProperties() map[string]interface{} {
 	if b == nil {
 		return nil
 	}
 	return b.ExtraProperties
 }
 
-func (b *BusinessIndustryPrediction) require(field *big.Int) {
+func (b *BusinessIndustry) require(field *big.Int) {
 	next := new(big.Int)
 	if b.explicitFields != nil {
 		next.Set(b.explicitFields)
@@ -667,22 +2069,15 @@ func (b *BusinessIndustryPrediction) require(field *big.Int) {
 	b.explicitFields = next
 }
 
-// SetCode sets the Code field and marks it as non-optional;
+// SetClassification sets the Classification field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (b *BusinessIndustryPrediction) SetCode(code int) {
-	b.Code = code
-	b.require(businessIndustryPredictionFieldCode)
+func (b *BusinessIndustry) SetClassification(classification *IndustryClassification) {
+	b.Classification = classification
+	b.require(businessIndustryFieldClassification)
 }
 
-// SetTitle sets the Title field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (b *BusinessIndustryPrediction) SetTitle(title string) {
-	b.Title = title
-	b.require(businessIndustryPredictionFieldTitle)
-}
-
-func (b *BusinessIndustryPrediction) UnmarshalJSON(data []byte) error {
-	type embed BusinessIndustryPrediction
+func (b *BusinessIndustry) UnmarshalJSON(data []byte) error {
+	type embed BusinessIndustry
 	var unmarshaler = struct {
 		embed
 	}{
@@ -691,324 +2086,13 @@ func (b *BusinessIndustryPrediction) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &unmarshaler); err != nil {
 		return err
 	}
-	*b = BusinessIndustryPrediction(unmarshaler.embed)
+	*b = BusinessIndustry(unmarshaler.embed)
 	extraProperties, err := internal.ExtractExtraProperties(data, *b)
 	if err != nil {
 		return err
 	}
 	b.ExtraProperties = extraProperties
-	b.rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (b *BusinessIndustryPrediction) MarshalJSON() ([]byte, error) {
-	type embed BusinessIndustryPrediction
-	var marshaler = struct {
-		embed
-	}{
-		embed: embed(*b),
-	}
-	explicitMarshaler := internal.HandleExplicitFields(marshaler, b.explicitFields)
-	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, b.ExtraProperties)
-}
-
-func (b *BusinessIndustryPrediction) String() string {
-	if b == nil {
-		return "<nil>"
-	}
-	if len(b.rawJSON) > 0 {
-		if value, err := internal.StringifyJSON(b.rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := internal.StringifyJSON(b); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", b)
-}
-
-var (
-	businessIndustryPredictionNullableFieldCode  = big.NewInt(1 << 0)
-	businessIndustryPredictionNullableFieldTitle = big.NewInt(1 << 1)
-)
-
-// Nullable industry prediction details.
-type BusinessIndustryPredictionNullable struct {
-	// NAICS code for the predicted business industry.
-	Code int `json:"code" url:"code"`
-	// The business industry classification of the predicted NAICS code.
-	Title string `json:"title" url:"title"`
-
-	// Private bitmask of fields set to an explicit value and therefore not to be omitted
-	explicitFields *big.Int `json:"-" url:"-"`
-
-	ExtraProperties map[string]interface{} `json:"-" url:"-"`
-
-	rawJSON json.RawMessage
-}
-
-func (b *BusinessIndustryPredictionNullable) GetCode() int {
-	if b == nil {
-		return 0
-	}
-	return b.Code
-}
-
-func (b *BusinessIndustryPredictionNullable) GetTitle() string {
-	if b == nil {
-		return ""
-	}
-	return b.Title
-}
-
-func (b *BusinessIndustryPredictionNullable) GetExtraProperties() map[string]interface{} {
-	if b == nil {
-		return nil
-	}
-	return b.ExtraProperties
-}
-
-func (b *BusinessIndustryPredictionNullable) require(field *big.Int) {
-	next := new(big.Int)
-	if b.explicitFields != nil {
-		next.Set(b.explicitFields)
-	}
-	next.Or(next, field)
-	b.explicitFields = next
-}
-
-// SetCode sets the Code field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (b *BusinessIndustryPredictionNullable) SetCode(code int) {
-	b.Code = code
-	b.require(businessIndustryPredictionNullableFieldCode)
-}
-
-// SetTitle sets the Title field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (b *BusinessIndustryPredictionNullable) SetTitle(title string) {
-	b.Title = title
-	b.require(businessIndustryPredictionNullableFieldTitle)
-}
-
-func (b *BusinessIndustryPredictionNullable) UnmarshalJSON(data []byte) error {
-	type embed BusinessIndustryPredictionNullable
-	var unmarshaler = struct {
-		embed
-	}{
-		embed: embed(*b),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*b = BusinessIndustryPredictionNullable(unmarshaler.embed)
-	extraProperties, err := internal.ExtractExtraProperties(data, *b)
-	if err != nil {
-		return err
-	}
-	b.ExtraProperties = extraProperties
-	b.rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (b *BusinessIndustryPredictionNullable) MarshalJSON() ([]byte, error) {
-	type embed BusinessIndustryPredictionNullable
-	var marshaler = struct {
-		embed
-	}{
-		embed: embed(*b),
-	}
-	explicitMarshaler := internal.HandleExplicitFields(marshaler, b.explicitFields)
-	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, b.ExtraProperties)
-}
-
-func (b *BusinessIndustryPredictionNullable) String() string {
-	if b == nil {
-		return "<nil>"
-	}
-	if len(b.rawJSON) > 0 {
-		if value, err := internal.StringifyJSON(b.rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := internal.StringifyJSON(b); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", b)
-}
-
-var (
-	businessKybMatchDetailsFieldNames          = big.NewInt(1 << 0)
-	businessKybMatchDetailsFieldEntityType     = big.NewInt(1 << 1)
-	businessKybMatchDetailsFieldAddresses      = big.NewInt(1 << 2)
-	businessKybMatchDetailsFieldPhoneNumbers   = big.NewInt(1 << 3)
-	businessKybMatchDetailsFieldEmailAddresses = big.NewInt(1 << 4)
-	businessKybMatchDetailsFieldWebsites       = big.NewInt(1 << 5)
-	businessKybMatchDetailsFieldFormationDate  = big.NewInt(1 << 6)
-)
-
-// businessKybMatchDetailsNullableFields maps the wire names of BusinessKybMatchDetails's nullable fields (required or optional) to their field bits.
-var businessKybMatchDetailsNullableFields = map[string]*big.Int{
-	"entity_type":    businessKybMatchDetailsFieldEntityType,
-	"formation_date": businessKybMatchDetailsFieldFormationDate,
-}
-
-// Detailed information about the business from data provider results
-type BusinessKybMatchDetails struct {
-	// Names associated with the business.
-	Names      []*ProviderBusinessName `json:"names" url:"names"`
-	EntityType *BusinessEntityType     `json:"entity_type,omitempty" url:"entity_type,omitempty"`
-	// Addresses associated with the business
-	Addresses []*ProviderBusinessAddress `json:"addresses" url:"addresses"`
-	// Phone numbers associated with the business
-	PhoneNumbers []*BusinessPhoneNumber `json:"phone_numbers" url:"phone_numbers"`
-	// Email addresses associated with the business
-	EmailAddresses []*BusinessEmailAddress `json:"email_addresses" url:"email_addresses"`
-	// Websites associated with the business
-	Websites      []*BusinessWebsite  `json:"websites" url:"websites"`
-	FormationDate Iso8601DateNullable `json:"formation_date,omitempty" url:"formation_date,omitempty" format:"date"`
-
-	// Private bitmask of fields set to an explicit value and therefore not to be omitted
-	explicitFields *big.Int `json:"-" url:"-"`
-
-	ExtraProperties map[string]interface{} `json:"-" url:"-"`
-
-	rawJSON json.RawMessage
-}
-
-func (b *BusinessKybMatchDetails) GetNames() []*ProviderBusinessName {
-	if b == nil {
-		return nil
-	}
-	return b.Names
-}
-
-func (b *BusinessKybMatchDetails) GetEntityType() *BusinessEntityType {
-	if b == nil {
-		return nil
-	}
-	return b.EntityType
-}
-
-func (b *BusinessKybMatchDetails) GetAddresses() []*ProviderBusinessAddress {
-	if b == nil {
-		return nil
-	}
-	return b.Addresses
-}
-
-func (b *BusinessKybMatchDetails) GetPhoneNumbers() []*BusinessPhoneNumber {
-	if b == nil {
-		return nil
-	}
-	return b.PhoneNumbers
-}
-
-func (b *BusinessKybMatchDetails) GetEmailAddresses() []*BusinessEmailAddress {
-	if b == nil {
-		return nil
-	}
-	return b.EmailAddresses
-}
-
-func (b *BusinessKybMatchDetails) GetWebsites() []*BusinessWebsite {
-	if b == nil {
-		return nil
-	}
-	return b.Websites
-}
-
-func (b *BusinessKybMatchDetails) GetFormationDate() Iso8601DateNullable {
-	if b == nil {
-		return nil
-	}
-	return b.FormationDate
-}
-
-func (b *BusinessKybMatchDetails) GetExtraProperties() map[string]interface{} {
-	if b == nil {
-		return nil
-	}
-	return b.ExtraProperties
-}
-
-func (b *BusinessKybMatchDetails) require(field *big.Int) {
-	next := new(big.Int)
-	if b.explicitFields != nil {
-		next.Set(b.explicitFields)
-	}
-	next.Or(next, field)
-	b.explicitFields = next
-}
-
-// SetNames sets the Names field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (b *BusinessKybMatchDetails) SetNames(names []*ProviderBusinessName) {
-	b.Names = names
-	b.require(businessKybMatchDetailsFieldNames)
-}
-
-// SetEntityType sets the EntityType field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (b *BusinessKybMatchDetails) SetEntityType(entityType *BusinessEntityType) {
-	b.EntityType = entityType
-	b.require(businessKybMatchDetailsFieldEntityType)
-}
-
-// SetAddresses sets the Addresses field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (b *BusinessKybMatchDetails) SetAddresses(addresses []*ProviderBusinessAddress) {
-	b.Addresses = addresses
-	b.require(businessKybMatchDetailsFieldAddresses)
-}
-
-// SetPhoneNumbers sets the PhoneNumbers field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (b *BusinessKybMatchDetails) SetPhoneNumbers(phoneNumbers []*BusinessPhoneNumber) {
-	b.PhoneNumbers = phoneNumbers
-	b.require(businessKybMatchDetailsFieldPhoneNumbers)
-}
-
-// SetEmailAddresses sets the EmailAddresses field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (b *BusinessKybMatchDetails) SetEmailAddresses(emailAddresses []*BusinessEmailAddress) {
-	b.EmailAddresses = emailAddresses
-	b.require(businessKybMatchDetailsFieldEmailAddresses)
-}
-
-// SetWebsites sets the Websites field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (b *BusinessKybMatchDetails) SetWebsites(websites []*BusinessWebsite) {
-	b.Websites = websites
-	b.require(businessKybMatchDetailsFieldWebsites)
-}
-
-// SetFormationDate sets the FormationDate field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (b *BusinessKybMatchDetails) SetFormationDate(formationDate Iso8601DateNullable) {
-	b.FormationDate = formationDate
-	b.require(businessKybMatchDetailsFieldFormationDate)
-}
-
-func (b *BusinessKybMatchDetails) UnmarshalJSON(data []byte) error {
-	type embed BusinessKybMatchDetails
-	var unmarshaler = struct {
-		embed
-		FormationDate *internal.Date `json:"formation_date,omitempty"`
-	}{
-		embed: embed(*b),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*b = BusinessKybMatchDetails(unmarshaler.embed)
-	b.FormationDate = unmarshaler.FormationDate.TimePtr()
-	extraProperties, err := internal.ExtractExtraProperties(data, *b)
-	if err != nil {
-		return err
-	}
-	b.ExtraProperties = extraProperties
-	presentFields, err := internal.ExplicitFieldsFromJSON(data, businessKybMatchDetailsNullableFields)
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, businessIndustryNullableFields)
 	if err != nil {
 		return err
 	}
@@ -1019,20 +2103,170 @@ func (b *BusinessKybMatchDetails) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (b *BusinessKybMatchDetails) MarshalJSON() ([]byte, error) {
-	type embed BusinessKybMatchDetails
+func (b *BusinessIndustry) MarshalJSON() ([]byte, error) {
+	type embed BusinessIndustry
 	var marshaler = struct {
 		embed
-		FormationDate *internal.Date `json:"formation_date,omitempty"`
 	}{
-		embed:         embed(*b),
-		FormationDate: internal.NewOptionalDate(b.FormationDate),
+		embed: embed(*b),
 	}
 	explicitMarshaler := internal.HandleExplicitFields(marshaler, b.explicitFields)
 	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, b.ExtraProperties)
 }
 
-func (b *BusinessKybMatchDetails) String() string {
+func (b *BusinessIndustry) String() string {
+	if b == nil {
+		return "<nil>"
+	}
+	if len(b.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(b.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
+// Confidence in the business's industry classification.
+// `high`: High confidence in the classification.
+// `medium`: Moderate confidence in the classification.
+// `low`: Low confidence in the classification.
+// `null`: Confidence is unavailable.
+type BusinessIndustryConfidence string
+
+const (
+	BusinessIndustryConfidenceLow    BusinessIndustryConfidence = "low"
+	BusinessIndustryConfidenceMedium BusinessIndustryConfidence = "medium"
+	BusinessIndustryConfidenceHigh   BusinessIndustryConfidence = "high"
+)
+
+func NewBusinessIndustryConfidenceFromString(s string) (BusinessIndustryConfidence, error) {
+	switch s {
+	case "low":
+		return BusinessIndustryConfidenceLow, nil
+	case "medium":
+		return BusinessIndustryConfidenceMedium, nil
+	case "high":
+		return BusinessIndustryConfidenceHigh, nil
+	}
+	var t BusinessIndustryConfidence
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (b BusinessIndustryConfidence) Ptr() *BusinessIndustryConfidence {
+	return &b
+}
+
+var (
+	businessMerchantCategoryCodeFieldCode        = big.NewInt(1 << 0)
+	businessMerchantCategoryCodeFieldDescription = big.NewInt(1 << 1)
+)
+
+// businessMerchantCategoryCodeNullableFields maps the wire names of BusinessMerchantCategoryCode's nullable fields (required or optional) to their field bits.
+var businessMerchantCategoryCodeNullableFields = map[string]*big.Int{
+	"description": businessMerchantCategoryCodeFieldDescription,
+}
+
+// A related Merchant Category Code (MCC) and its description.
+type BusinessMerchantCategoryCode struct {
+	// A four-digit Merchant Category Code (MCC).
+	Code string `json:"code" url:"code"`
+	// Description of the MCC code. `null` when unavailable.
+	Description *string `json:"description,omitempty" url:"description,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (b *BusinessMerchantCategoryCode) GetCode() string {
+	if b == nil {
+		return ""
+	}
+	return b.Code
+}
+
+func (b *BusinessMerchantCategoryCode) GetDescription() *string {
+	if b == nil {
+		return nil
+	}
+	return b.Description
+}
+
+func (b *BusinessMerchantCategoryCode) GetExtraProperties() map[string]interface{} {
+	if b == nil {
+		return nil
+	}
+	return b.ExtraProperties
+}
+
+func (b *BusinessMerchantCategoryCode) require(field *big.Int) {
+	next := new(big.Int)
+	if b.explicitFields != nil {
+		next.Set(b.explicitFields)
+	}
+	next.Or(next, field)
+	b.explicitFields = next
+}
+
+// SetCode sets the Code field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessMerchantCategoryCode) SetCode(code string) {
+	b.Code = code
+	b.require(businessMerchantCategoryCodeFieldCode)
+}
+
+// SetDescription sets the Description field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessMerchantCategoryCode) SetDescription(description *string) {
+	b.Description = description
+	b.require(businessMerchantCategoryCodeFieldDescription)
+}
+
+func (b *BusinessMerchantCategoryCode) UnmarshalJSON(data []byte) error {
+	type embed BusinessMerchantCategoryCode
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*b = BusinessMerchantCategoryCode(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, businessMerchantCategoryCodeNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		b.require(presentFields)
+	}
+	b.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (b *BusinessMerchantCategoryCode) MarshalJSON() ([]byte, error) {
+	type embed BusinessMerchantCategoryCode
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, b.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, b.ExtraProperties)
+}
+
+func (b *BusinessMerchantCategoryCode) String() string {
 	if b == nil {
 		return "<nil>"
 	}
@@ -1252,23 +2486,886 @@ func (b *BusinessPhoneNumber) String() string {
 }
 
 var (
-	businessRiskCheckFieldStatus             = big.NewInt(1 << 0)
-	businessRiskCheckFieldScore              = big.NewInt(1 << 1)
-	businessRiskCheckFieldIndustryPrediction = big.NewInt(1 << 2)
+	businessRegisteredAgentFieldName    = big.NewInt(1 << 0)
+	businessRegisteredAgentFieldAddress = big.NewInt(1 << 1)
+)
+
+// businessRegisteredAgentNullableFields maps the wire names of BusinessRegisteredAgent's nullable fields (required or optional) to their field bits.
+var businessRegisteredAgentNullableFields = map[string]*big.Int{
+	"name":    businessRegisteredAgentFieldName,
+	"address": businessRegisteredAgentFieldAddress,
+}
+
+// The registered agent the data provider listed on the registration. `null` when the provider listed none.
+type BusinessRegisteredAgent struct {
+	// The registered agent's name. `null` when not available.
+	Name    *string                              `json:"name,omitempty" url:"name,omitempty"`
+	Address *BusinessRegistrationAddressNullable `json:"address,omitempty" url:"address,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (b *BusinessRegisteredAgent) GetName() *string {
+	if b == nil {
+		return nil
+	}
+	return b.Name
+}
+
+func (b *BusinessRegisteredAgent) GetAddress() *BusinessRegistrationAddressNullable {
+	if b == nil {
+		return nil
+	}
+	return b.Address
+}
+
+func (b *BusinessRegisteredAgent) GetExtraProperties() map[string]interface{} {
+	if b == nil {
+		return nil
+	}
+	return b.ExtraProperties
+}
+
+func (b *BusinessRegisteredAgent) require(field *big.Int) {
+	next := new(big.Int)
+	if b.explicitFields != nil {
+		next.Set(b.explicitFields)
+	}
+	next.Or(next, field)
+	b.explicitFields = next
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessRegisteredAgent) SetName(name *string) {
+	b.Name = name
+	b.require(businessRegisteredAgentFieldName)
+}
+
+// SetAddress sets the Address field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessRegisteredAgent) SetAddress(address *BusinessRegistrationAddressNullable) {
+	b.Address = address
+	b.require(businessRegisteredAgentFieldAddress)
+}
+
+func (b *BusinessRegisteredAgent) UnmarshalJSON(data []byte) error {
+	type embed BusinessRegisteredAgent
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*b = BusinessRegisteredAgent(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, businessRegisteredAgentNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		b.require(presentFields)
+	}
+	b.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (b *BusinessRegisteredAgent) MarshalJSON() ([]byte, error) {
+	type embed BusinessRegisteredAgent
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, b.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, b.ExtraProperties)
+}
+
+func (b *BusinessRegisteredAgent) String() string {
+	if b == nil {
+		return "<nil>"
+	}
+	if len(b.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(b.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
+var (
+	businessRegistrationFieldName            = big.NewInt(1 << 0)
+	businessRegistrationFieldFileNumber      = big.NewInt(1 << 1)
+	businessRegistrationFieldJurisdiction    = big.NewInt(1 << 2)
+	businessRegistrationFieldType            = big.NewInt(1 << 3)
+	businessRegistrationFieldStatus          = big.NewInt(1 << 4)
+	businessRegistrationFieldStanding        = big.NewInt(1 << 5)
+	businessRegistrationFieldIssueDate       = big.NewInt(1 << 6)
+	businessRegistrationFieldInactiveDate    = big.NewInt(1 << 7)
+	businessRegistrationFieldDissolutionDate = big.NewInt(1 << 8)
+	businessRegistrationFieldAddress         = big.NewInt(1 << 9)
+	businessRegistrationFieldRegisteredAgent = big.NewInt(1 << 10)
+	businessRegistrationFieldOfficers        = big.NewInt(1 << 11)
+)
+
+// businessRegistrationNullableFields maps the wire names of BusinessRegistration's nullable fields (required or optional) to their field bits.
+var businessRegistrationNullableFields = map[string]*big.Int{
+	"name":             businessRegistrationFieldName,
+	"file_number":      businessRegistrationFieldFileNumber,
+	"jurisdiction":     businessRegistrationFieldJurisdiction,
+	"type":             businessRegistrationFieldType,
+	"status":           businessRegistrationFieldStatus,
+	"standing":         businessRegistrationFieldStanding,
+	"issue_date":       businessRegistrationFieldIssueDate,
+	"inactive_date":    businessRegistrationFieldInactiveDate,
+	"dissolution_date": businessRegistrationFieldDissolutionDate,
+	"address":          businessRegistrationFieldAddress,
+	"registered_agent": businessRegistrationFieldRegisteredAgent,
+}
+
+// A registration of the business with a US state, as the data provider reported it. `issue_date`, `inactive_date`, and `dissolution_date` are each `null` when not available.
+type BusinessRegistration struct {
+	// The business name on the registration. `null` when not available.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// The file number the state assigned to the registration. `null` when not available.
+	FileNumber *string `json:"file_number,omitempty" url:"file_number,omitempty"`
+	// The US state of the registration, as a subdivision code such as `IN`. `null` when not available.
+	Jurisdiction *string                     `json:"jurisdiction,omitempty" url:"jurisdiction,omitempty"`
+	Type         *BusinessRegistrationType   `json:"type,omitempty" url:"type,omitempty"`
+	Status       *BusinessRegistrationStatus `json:"status,omitempty" url:"status,omitempty"`
+	// The registration's standing in the state's own words, such as `In Good Standing`. The wording varies by state; read `status` for a normalized value. `null` when not available.
+	Standing        *string                              `json:"standing,omitempty" url:"standing,omitempty"`
+	IssueDate       Iso8601DateNullable                  `json:"issue_date,omitempty" url:"issue_date,omitempty" format:"date"`
+	InactiveDate    Iso8601DateNullable                  `json:"inactive_date,omitempty" url:"inactive_date,omitempty" format:"date"`
+	DissolutionDate Iso8601DateNullable                  `json:"dissolution_date,omitempty" url:"dissolution_date,omitempty" format:"date"`
+	Address         *BusinessRegistrationAddressNullable `json:"address,omitempty" url:"address,omitempty"`
+	RegisteredAgent *BusinessRegisteredAgent             `json:"registered_agent,omitempty" url:"registered_agent,omitempty"`
+	// The officers listed on the registration.
+	Officers []*BusinessRegistrationOfficer `json:"officers" url:"officers"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (b *BusinessRegistration) GetName() *string {
+	if b == nil {
+		return nil
+	}
+	return b.Name
+}
+
+func (b *BusinessRegistration) GetFileNumber() *string {
+	if b == nil {
+		return nil
+	}
+	return b.FileNumber
+}
+
+func (b *BusinessRegistration) GetJurisdiction() *string {
+	if b == nil {
+		return nil
+	}
+	return b.Jurisdiction
+}
+
+func (b *BusinessRegistration) GetType() *BusinessRegistrationType {
+	if b == nil {
+		return nil
+	}
+	return b.Type
+}
+
+func (b *BusinessRegistration) GetStatus() *BusinessRegistrationStatus {
+	if b == nil {
+		return nil
+	}
+	return b.Status
+}
+
+func (b *BusinessRegistration) GetStanding() *string {
+	if b == nil {
+		return nil
+	}
+	return b.Standing
+}
+
+func (b *BusinessRegistration) GetIssueDate() Iso8601DateNullable {
+	if b == nil {
+		return nil
+	}
+	return b.IssueDate
+}
+
+func (b *BusinessRegistration) GetInactiveDate() Iso8601DateNullable {
+	if b == nil {
+		return nil
+	}
+	return b.InactiveDate
+}
+
+func (b *BusinessRegistration) GetDissolutionDate() Iso8601DateNullable {
+	if b == nil {
+		return nil
+	}
+	return b.DissolutionDate
+}
+
+func (b *BusinessRegistration) GetAddress() *BusinessRegistrationAddressNullable {
+	if b == nil {
+		return nil
+	}
+	return b.Address
+}
+
+func (b *BusinessRegistration) GetRegisteredAgent() *BusinessRegisteredAgent {
+	if b == nil {
+		return nil
+	}
+	return b.RegisteredAgent
+}
+
+func (b *BusinessRegistration) GetOfficers() []*BusinessRegistrationOfficer {
+	if b == nil {
+		return nil
+	}
+	return b.Officers
+}
+
+func (b *BusinessRegistration) GetExtraProperties() map[string]interface{} {
+	if b == nil {
+		return nil
+	}
+	return b.ExtraProperties
+}
+
+func (b *BusinessRegistration) require(field *big.Int) {
+	next := new(big.Int)
+	if b.explicitFields != nil {
+		next.Set(b.explicitFields)
+	}
+	next.Or(next, field)
+	b.explicitFields = next
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessRegistration) SetName(name *string) {
+	b.Name = name
+	b.require(businessRegistrationFieldName)
+}
+
+// SetFileNumber sets the FileNumber field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessRegistration) SetFileNumber(fileNumber *string) {
+	b.FileNumber = fileNumber
+	b.require(businessRegistrationFieldFileNumber)
+}
+
+// SetJurisdiction sets the Jurisdiction field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessRegistration) SetJurisdiction(jurisdiction *string) {
+	b.Jurisdiction = jurisdiction
+	b.require(businessRegistrationFieldJurisdiction)
+}
+
+// SetType sets the Type field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessRegistration) SetType(type_ *BusinessRegistrationType) {
+	b.Type = type_
+	b.require(businessRegistrationFieldType)
+}
+
+// SetStatus sets the Status field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessRegistration) SetStatus(status *BusinessRegistrationStatus) {
+	b.Status = status
+	b.require(businessRegistrationFieldStatus)
+}
+
+// SetStanding sets the Standing field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessRegistration) SetStanding(standing *string) {
+	b.Standing = standing
+	b.require(businessRegistrationFieldStanding)
+}
+
+// SetIssueDate sets the IssueDate field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessRegistration) SetIssueDate(issueDate Iso8601DateNullable) {
+	b.IssueDate = issueDate
+	b.require(businessRegistrationFieldIssueDate)
+}
+
+// SetInactiveDate sets the InactiveDate field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessRegistration) SetInactiveDate(inactiveDate Iso8601DateNullable) {
+	b.InactiveDate = inactiveDate
+	b.require(businessRegistrationFieldInactiveDate)
+}
+
+// SetDissolutionDate sets the DissolutionDate field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessRegistration) SetDissolutionDate(dissolutionDate Iso8601DateNullable) {
+	b.DissolutionDate = dissolutionDate
+	b.require(businessRegistrationFieldDissolutionDate)
+}
+
+// SetAddress sets the Address field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessRegistration) SetAddress(address *BusinessRegistrationAddressNullable) {
+	b.Address = address
+	b.require(businessRegistrationFieldAddress)
+}
+
+// SetRegisteredAgent sets the RegisteredAgent field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessRegistration) SetRegisteredAgent(registeredAgent *BusinessRegisteredAgent) {
+	b.RegisteredAgent = registeredAgent
+	b.require(businessRegistrationFieldRegisteredAgent)
+}
+
+// SetOfficers sets the Officers field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessRegistration) SetOfficers(officers []*BusinessRegistrationOfficer) {
+	b.Officers = officers
+	b.require(businessRegistrationFieldOfficers)
+}
+
+func (b *BusinessRegistration) UnmarshalJSON(data []byte) error {
+	type embed BusinessRegistration
+	var unmarshaler = struct {
+		embed
+		IssueDate       *internal.Date `json:"issue_date,omitempty"`
+		InactiveDate    *internal.Date `json:"inactive_date,omitempty"`
+		DissolutionDate *internal.Date `json:"dissolution_date,omitempty"`
+	}{
+		embed: embed(*b),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*b = BusinessRegistration(unmarshaler.embed)
+	b.IssueDate = unmarshaler.IssueDate.TimePtr()
+	b.InactiveDate = unmarshaler.InactiveDate.TimePtr()
+	b.DissolutionDate = unmarshaler.DissolutionDate.TimePtr()
+	extraProperties, err := internal.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, businessRegistrationNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		b.require(presentFields)
+	}
+	b.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (b *BusinessRegistration) MarshalJSON() ([]byte, error) {
+	type embed BusinessRegistration
+	var marshaler = struct {
+		embed
+		IssueDate       *internal.Date `json:"issue_date,omitempty"`
+		InactiveDate    *internal.Date `json:"inactive_date,omitempty"`
+		DissolutionDate *internal.Date `json:"dissolution_date,omitempty"`
+	}{
+		embed:           embed(*b),
+		IssueDate:       internal.NewOptionalDate(b.IssueDate),
+		InactiveDate:    internal.NewOptionalDate(b.InactiveDate),
+		DissolutionDate: internal.NewOptionalDate(b.DissolutionDate),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, b.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, b.ExtraProperties)
+}
+
+func (b *BusinessRegistration) String() string {
+	if b == nil {
+		return "<nil>"
+	}
+	if len(b.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(b.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
+var (
+	businessRegistrationAddressNullableFieldStreet         = big.NewInt(1 << 0)
+	businessRegistrationAddressNullableFieldStreet2        = big.NewInt(1 << 1)
+	businessRegistrationAddressNullableFieldCity           = big.NewInt(1 << 2)
+	businessRegistrationAddressNullableFieldRegion         = big.NewInt(1 << 3)
+	businessRegistrationAddressNullableFieldPostalCode     = big.NewInt(1 << 4)
+	businessRegistrationAddressNullableFieldCountry        = big.NewInt(1 << 5)
+	businessRegistrationAddressNullableFieldLat            = big.NewInt(1 << 6)
+	businessRegistrationAddressNullableFieldLon            = big.NewInt(1 << 7)
+	businessRegistrationAddressNullableFieldDeliverability = big.NewInt(1 << 8)
+)
+
+// businessRegistrationAddressNullableNullableFields maps the wire names of BusinessRegistrationAddressNullable's nullable fields (required or optional) to their field bits.
+var businessRegistrationAddressNullableNullableFields = map[string]*big.Int{
+	"street":      businessRegistrationAddressNullableFieldStreet,
+	"street2":     businessRegistrationAddressNullableFieldStreet2,
+	"city":        businessRegistrationAddressNullableFieldCity,
+	"region":      businessRegistrationAddressNullableFieldRegion,
+	"postal_code": businessRegistrationAddressNullableFieldPostalCode,
+	"lat":         businessRegistrationAddressNullableFieldLat,
+	"lon":         businessRegistrationAddressNullableFieldLon,
+}
+
+// An address the data provider listed on a registration, for the registration itself or for its registered agent. `null` when the provider listed none. The provider returns a single street line, so `street2` is always `null`. `country` is always `US`.
+type BusinessRegistrationAddressNullable struct {
+	Street     StreetNullable     `json:"street,omitempty" url:"street,omitempty"`
+	Street2    Street2            `json:"street2,omitempty" url:"street2,omitempty"`
+	City       CityNullable       `json:"city,omitempty" url:"city,omitempty"`
+	Region     Region             `json:"region,omitempty" url:"region,omitempty"`
+	PostalCode PostalCode         `json:"postal_code,omitempty" url:"postal_code,omitempty"`
+	Country    GenericCountryCode `json:"country" url:"country"`
+	// The latitude of the address. `null` when not available.
+	Lat *float64 `json:"lat,omitempty" url:"lat,omitempty"`
+	// The longitude of the address. `null` when not available.
+	Lon            *float64                       `json:"lon,omitempty" url:"lon,omitempty"`
+	Deliverability *BusinessAddressDeliverability `json:"deliverability" url:"deliverability"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (b *BusinessRegistrationAddressNullable) GetStreet() StreetNullable {
+	if b == nil {
+		return nil
+	}
+	return b.Street
+}
+
+func (b *BusinessRegistrationAddressNullable) GetStreet2() Street2 {
+	if b == nil {
+		return nil
+	}
+	return b.Street2
+}
+
+func (b *BusinessRegistrationAddressNullable) GetCity() CityNullable {
+	if b == nil {
+		return nil
+	}
+	return b.City
+}
+
+func (b *BusinessRegistrationAddressNullable) GetRegion() Region {
+	if b == nil {
+		return nil
+	}
+	return b.Region
+}
+
+func (b *BusinessRegistrationAddressNullable) GetPostalCode() PostalCode {
+	if b == nil {
+		return nil
+	}
+	return b.PostalCode
+}
+
+func (b *BusinessRegistrationAddressNullable) GetCountry() GenericCountryCode {
+	if b == nil {
+		return ""
+	}
+	return b.Country
+}
+
+func (b *BusinessRegistrationAddressNullable) GetLat() *float64 {
+	if b == nil {
+		return nil
+	}
+	return b.Lat
+}
+
+func (b *BusinessRegistrationAddressNullable) GetLon() *float64 {
+	if b == nil {
+		return nil
+	}
+	return b.Lon
+}
+
+func (b *BusinessRegistrationAddressNullable) GetDeliverability() *BusinessAddressDeliverability {
+	if b == nil {
+		return nil
+	}
+	return b.Deliverability
+}
+
+func (b *BusinessRegistrationAddressNullable) GetExtraProperties() map[string]interface{} {
+	if b == nil {
+		return nil
+	}
+	return b.ExtraProperties
+}
+
+func (b *BusinessRegistrationAddressNullable) require(field *big.Int) {
+	next := new(big.Int)
+	if b.explicitFields != nil {
+		next.Set(b.explicitFields)
+	}
+	next.Or(next, field)
+	b.explicitFields = next
+}
+
+// SetStreet sets the Street field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessRegistrationAddressNullable) SetStreet(street StreetNullable) {
+	b.Street = street
+	b.require(businessRegistrationAddressNullableFieldStreet)
+}
+
+// SetStreet2 sets the Street2 field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessRegistrationAddressNullable) SetStreet2(street2 Street2) {
+	b.Street2 = street2
+	b.require(businessRegistrationAddressNullableFieldStreet2)
+}
+
+// SetCity sets the City field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessRegistrationAddressNullable) SetCity(city CityNullable) {
+	b.City = city
+	b.require(businessRegistrationAddressNullableFieldCity)
+}
+
+// SetRegion sets the Region field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessRegistrationAddressNullable) SetRegion(region Region) {
+	b.Region = region
+	b.require(businessRegistrationAddressNullableFieldRegion)
+}
+
+// SetPostalCode sets the PostalCode field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessRegistrationAddressNullable) SetPostalCode(postalCode PostalCode) {
+	b.PostalCode = postalCode
+	b.require(businessRegistrationAddressNullableFieldPostalCode)
+}
+
+// SetCountry sets the Country field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessRegistrationAddressNullable) SetCountry(country GenericCountryCode) {
+	b.Country = country
+	b.require(businessRegistrationAddressNullableFieldCountry)
+}
+
+// SetLat sets the Lat field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessRegistrationAddressNullable) SetLat(lat *float64) {
+	b.Lat = lat
+	b.require(businessRegistrationAddressNullableFieldLat)
+}
+
+// SetLon sets the Lon field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessRegistrationAddressNullable) SetLon(lon *float64) {
+	b.Lon = lon
+	b.require(businessRegistrationAddressNullableFieldLon)
+}
+
+// SetDeliverability sets the Deliverability field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessRegistrationAddressNullable) SetDeliverability(deliverability *BusinessAddressDeliverability) {
+	b.Deliverability = deliverability
+	b.require(businessRegistrationAddressNullableFieldDeliverability)
+}
+
+func (b *BusinessRegistrationAddressNullable) UnmarshalJSON(data []byte) error {
+	type embed BusinessRegistrationAddressNullable
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*b = BusinessRegistrationAddressNullable(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, businessRegistrationAddressNullableNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		b.require(presentFields)
+	}
+	b.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (b *BusinessRegistrationAddressNullable) MarshalJSON() ([]byte, error) {
+	type embed BusinessRegistrationAddressNullable
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, b.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, b.ExtraProperties)
+}
+
+func (b *BusinessRegistrationAddressNullable) String() string {
+	if b == nil {
+		return "<nil>"
+	}
+	if len(b.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(b.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
+var (
+	businessRegistrationOfficerFieldName   = big.NewInt(1 << 0)
+	businessRegistrationOfficerFieldTitles = big.NewInt(1 << 1)
+)
+
+// businessRegistrationOfficerNullableFields maps the wire names of BusinessRegistrationOfficer's nullable fields (required or optional) to their field bits.
+var businessRegistrationOfficerNullableFields = map[string]*big.Int{
+	"name": businessRegistrationOfficerFieldName,
+}
+
+// An officer listed on a registration.
+type BusinessRegistrationOfficer struct {
+	// The officer's name. `null` when not available.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// The officer's titles on the registration.
+	Titles []string `json:"titles" url:"titles"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (b *BusinessRegistrationOfficer) GetName() *string {
+	if b == nil {
+		return nil
+	}
+	return b.Name
+}
+
+func (b *BusinessRegistrationOfficer) GetTitles() []string {
+	if b == nil {
+		return nil
+	}
+	return b.Titles
+}
+
+func (b *BusinessRegistrationOfficer) GetExtraProperties() map[string]interface{} {
+	if b == nil {
+		return nil
+	}
+	return b.ExtraProperties
+}
+
+func (b *BusinessRegistrationOfficer) require(field *big.Int) {
+	next := new(big.Int)
+	if b.explicitFields != nil {
+		next.Set(b.explicitFields)
+	}
+	next.Or(next, field)
+	b.explicitFields = next
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessRegistrationOfficer) SetName(name *string) {
+	b.Name = name
+	b.require(businessRegistrationOfficerFieldName)
+}
+
+// SetTitles sets the Titles field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessRegistrationOfficer) SetTitles(titles []string) {
+	b.Titles = titles
+	b.require(businessRegistrationOfficerFieldTitles)
+}
+
+func (b *BusinessRegistrationOfficer) UnmarshalJSON(data []byte) error {
+	type embed BusinessRegistrationOfficer
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*b = BusinessRegistrationOfficer(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, businessRegistrationOfficerNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		b.require(presentFields)
+	}
+	b.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (b *BusinessRegistrationOfficer) MarshalJSON() ([]byte, error) {
+	type embed BusinessRegistrationOfficer
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, b.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, b.ExtraProperties)
+}
+
+func (b *BusinessRegistrationOfficer) String() string {
+	if b == nil {
+		return "<nil>"
+	}
+	if len(b.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(b.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
+// Whether the registration is `active` or `inactive`, as the data provider normalized the state's standing. `unknown` means the provider could not tell. `null` when not available.
+type BusinessRegistrationStatus string
+
+const (
+	BusinessRegistrationStatusActive   BusinessRegistrationStatus = "active"
+	BusinessRegistrationStatusInactive BusinessRegistrationStatus = "inactive"
+	BusinessRegistrationStatusUnknown  BusinessRegistrationStatus = "unknown"
+)
+
+func NewBusinessRegistrationStatusFromString(s string) (BusinessRegistrationStatus, error) {
+	switch s {
+	case "active":
+		return BusinessRegistrationStatusActive, nil
+	case "inactive":
+		return BusinessRegistrationStatusInactive, nil
+	case "unknown":
+		return BusinessRegistrationStatusUnknown, nil
+	}
+	var t BusinessRegistrationStatus
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (b BusinessRegistrationStatus) Ptr() *BusinessRegistrationStatus {
+	return &b
+}
+
+// Whether the registration is `domestic`, in the state where the business was first registered, or `foreign`, in another state where it registered to operate. `unknown` means the data provider could not tell. `null` when not available.
+type BusinessRegistrationType string
+
+const (
+	BusinessRegistrationTypeDomestic BusinessRegistrationType = "domestic"
+	BusinessRegistrationTypeForeign  BusinessRegistrationType = "foreign"
+	BusinessRegistrationTypeUnknown  BusinessRegistrationType = "unknown"
+)
+
+func NewBusinessRegistrationTypeFromString(s string) (BusinessRegistrationType, error) {
+	switch s {
+	case "domestic":
+		return BusinessRegistrationTypeDomestic, nil
+	case "foreign":
+		return BusinessRegistrationTypeForeign, nil
+	case "unknown":
+		return BusinessRegistrationTypeUnknown, nil
+	}
+	var t BusinessRegistrationType
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (b BusinessRegistrationType) Ptr() *BusinessRegistrationType {
+	return &b
+}
+
+// Whether the data provider classified the address as `residential` or `commercial`. `null` when the provider did not classify it.
+type BusinessResidentialIndicator string
+
+const (
+	BusinessResidentialIndicatorResidential BusinessResidentialIndicator = "residential"
+	BusinessResidentialIndicatorCommercial  BusinessResidentialIndicator = "commercial"
+)
+
+func NewBusinessResidentialIndicatorFromString(s string) (BusinessResidentialIndicator, error) {
+	switch s {
+	case "residential":
+		return BusinessResidentialIndicatorResidential, nil
+	case "commercial":
+		return BusinessResidentialIndicatorCommercial, nil
+	}
+	var t BusinessResidentialIndicator
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (b BusinessResidentialIndicator) Ptr() *BusinessResidentialIndicator {
+	return &b
+}
+
+var (
+	businessRiskCheckFieldStatus = big.NewInt(1 << 0)
+	businessRiskCheckFieldScore  = big.NewInt(1 << 1)
 )
 
 // businessRiskCheckNullableFields maps the wire names of BusinessRiskCheck's nullable fields (required or optional) to their field bits.
 var businessRiskCheckNullableFields = map[string]*big.Int{
-	"score":               businessRiskCheckFieldScore,
-	"industry_prediction": businessRiskCheckFieldIndustryPrediction,
+	"score": businessRiskCheckFieldScore,
 }
 
 // Results from the business risk assessment check
 type BusinessRiskCheck struct {
 	Status BusinessVerificationStatusRiskCheck `json:"status" url:"status"`
 	// A score from 0 to 100 indicating the risk assessment for the business. `null` if no risk score is available for this verification. Industry classification may still be available when the risk score is `null`. A completed check can have `status: failed` and a `null` score when the risk assessment could not be completed; this does not represent a score of zero or a high-risk assessment. Read `status` separately to determine the check outcome; `null` does not mean the check is still running.
-	Score              *int                                `json:"score,omitempty" url:"score,omitempty"`
-	IndustryPrediction *BusinessIndustryPredictionNullable `json:"industry_prediction,omitempty" url:"industry_prediction,omitempty"`
+	Score *int `json:"score,omitempty" url:"score,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -1290,13 +3387,6 @@ func (b *BusinessRiskCheck) GetScore() *int {
 		return nil
 	}
 	return b.Score
-}
-
-func (b *BusinessRiskCheck) GetIndustryPrediction() *BusinessIndustryPredictionNullable {
-	if b == nil {
-		return nil
-	}
-	return b.IndustryPrediction
 }
 
 func (b *BusinessRiskCheck) GetExtraProperties() map[string]interface{} {
@@ -1327,13 +3417,6 @@ func (b *BusinessRiskCheck) SetStatus(status BusinessVerificationStatusRiskCheck
 func (b *BusinessRiskCheck) SetScore(score *int) {
 	b.Score = score
 	b.require(businessRiskCheckFieldScore)
-}
-
-// SetIndustryPrediction sets the IndustryPrediction field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (b *BusinessRiskCheck) SetIndustryPrediction(industryPrediction *BusinessIndustryPredictionNullable) {
-	b.IndustryPrediction = industryPrediction
-	b.require(businessRiskCheckFieldIndustryPrediction)
 }
 
 func (b *BusinessRiskCheck) UnmarshalJSON(data []byte) error {
@@ -1613,6 +3696,509 @@ func (b *BusinessSearchTerms) String() string {
 }
 
 var (
+	businessSecRegistrationFieldCik       = big.NewInt(1 << 0)
+	businessSecRegistrationFieldTickers   = big.NewInt(1 << 1)
+	businessSecRegistrationFieldExchanges = big.NewInt(1 << 2)
+	businessSecRegistrationFieldEdgarURL  = big.NewInt(1 << 3)
+)
+
+// businessSecRegistrationNullableFields maps the wire names of BusinessSecRegistration's nullable fields (required or optional) to their field bits.
+var businessSecRegistrationNullableFields = map[string]*big.Int{
+	"cik":       businessSecRegistrationFieldCik,
+	"edgar_url": businessSecRegistrationFieldEdgarURL,
+}
+
+// An SEC EDGAR registration the data provider linked to the business.
+type BusinessSecRegistration struct {
+	// The registrant's SEC Central Index Key (CIK). `null` when not available.
+	Cik *string `json:"cik,omitempty" url:"cik,omitempty"`
+	// The registrant's ticker symbols. Empty when the registrant has no listed securities.
+	Tickers []string `json:"tickers" url:"tickers"`
+	// The exchanges the registrant's securities trade on. Empty when the registrant has no listed securities.
+	Exchanges []string `json:"exchanges" url:"exchanges"`
+	// The registrant's page on SEC EDGAR. `null` when not available.
+	EdgarURL *string `json:"edgar_url,omitempty" url:"edgar_url,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (b *BusinessSecRegistration) GetCik() *string {
+	if b == nil {
+		return nil
+	}
+	return b.Cik
+}
+
+func (b *BusinessSecRegistration) GetTickers() []string {
+	if b == nil {
+		return nil
+	}
+	return b.Tickers
+}
+
+func (b *BusinessSecRegistration) GetExchanges() []string {
+	if b == nil {
+		return nil
+	}
+	return b.Exchanges
+}
+
+func (b *BusinessSecRegistration) GetEdgarURL() *string {
+	if b == nil {
+		return nil
+	}
+	return b.EdgarURL
+}
+
+func (b *BusinessSecRegistration) GetExtraProperties() map[string]interface{} {
+	if b == nil {
+		return nil
+	}
+	return b.ExtraProperties
+}
+
+func (b *BusinessSecRegistration) require(field *big.Int) {
+	next := new(big.Int)
+	if b.explicitFields != nil {
+		next.Set(b.explicitFields)
+	}
+	next.Or(next, field)
+	b.explicitFields = next
+}
+
+// SetCik sets the Cik field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessSecRegistration) SetCik(cik *string) {
+	b.Cik = cik
+	b.require(businessSecRegistrationFieldCik)
+}
+
+// SetTickers sets the Tickers field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessSecRegistration) SetTickers(tickers []string) {
+	b.Tickers = tickers
+	b.require(businessSecRegistrationFieldTickers)
+}
+
+// SetExchanges sets the Exchanges field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessSecRegistration) SetExchanges(exchanges []string) {
+	b.Exchanges = exchanges
+	b.require(businessSecRegistrationFieldExchanges)
+}
+
+// SetEdgarURL sets the EdgarURL field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessSecRegistration) SetEdgarURL(edgarURL *string) {
+	b.EdgarURL = edgarURL
+	b.require(businessSecRegistrationFieldEdgarURL)
+}
+
+func (b *BusinessSecRegistration) UnmarshalJSON(data []byte) error {
+	type embed BusinessSecRegistration
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*b = BusinessSecRegistration(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, businessSecRegistrationNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		b.require(presentFields)
+	}
+	b.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (b *BusinessSecRegistration) MarshalJSON() ([]byte, error) {
+	type embed BusinessSecRegistration
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, b.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, b.ExtraProperties)
+}
+
+func (b *BusinessSecRegistration) String() string {
+	if b == nil {
+		return "<nil>"
+	}
+	if len(b.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(b.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
+var (
+	businessStandardIndustrialClassificationCodeFieldCode        = big.NewInt(1 << 0)
+	businessStandardIndustrialClassificationCodeFieldDescription = big.NewInt(1 << 1)
+)
+
+// businessStandardIndustrialClassificationCodeNullableFields maps the wire names of BusinessStandardIndustrialClassificationCode's nullable fields (required or optional) to their field bits.
+var businessStandardIndustrialClassificationCodeNullableFields = map[string]*big.Int{
+	"description": businessStandardIndustrialClassificationCodeFieldDescription,
+}
+
+// A related Standard Industrial Classification (SIC) code and its description.
+type BusinessStandardIndustrialClassificationCode struct {
+	// A four-digit Standard Industrial Classification (SIC) code.
+	Code string `json:"code" url:"code"`
+	// Description of the SIC code. `null` when unavailable.
+	Description *string `json:"description,omitempty" url:"description,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (b *BusinessStandardIndustrialClassificationCode) GetCode() string {
+	if b == nil {
+		return ""
+	}
+	return b.Code
+}
+
+func (b *BusinessStandardIndustrialClassificationCode) GetDescription() *string {
+	if b == nil {
+		return nil
+	}
+	return b.Description
+}
+
+func (b *BusinessStandardIndustrialClassificationCode) GetExtraProperties() map[string]interface{} {
+	if b == nil {
+		return nil
+	}
+	return b.ExtraProperties
+}
+
+func (b *BusinessStandardIndustrialClassificationCode) require(field *big.Int) {
+	next := new(big.Int)
+	if b.explicitFields != nil {
+		next.Set(b.explicitFields)
+	}
+	next.Or(next, field)
+	b.explicitFields = next
+}
+
+// SetCode sets the Code field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessStandardIndustrialClassificationCode) SetCode(code string) {
+	b.Code = code
+	b.require(businessStandardIndustrialClassificationCodeFieldCode)
+}
+
+// SetDescription sets the Description field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessStandardIndustrialClassificationCode) SetDescription(description *string) {
+	b.Description = description
+	b.require(businessStandardIndustrialClassificationCodeFieldDescription)
+}
+
+func (b *BusinessStandardIndustrialClassificationCode) UnmarshalJSON(data []byte) error {
+	type embed BusinessStandardIndustrialClassificationCode
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*b = BusinessStandardIndustrialClassificationCode(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, businessStandardIndustrialClassificationCodeNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		b.require(presentFields)
+	}
+	b.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (b *BusinessStandardIndustrialClassificationCode) MarshalJSON() ([]byte, error) {
+	type embed BusinessStandardIndustrialClassificationCode
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, b.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, b.ExtraProperties)
+}
+
+func (b *BusinessStandardIndustrialClassificationCode) String() string {
+	if b == nil {
+		return "<nil>"
+	}
+	if len(b.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(b.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
+var (
+	businessStandardizedAddressFieldStreet     = big.NewInt(1 << 0)
+	businessStandardizedAddressFieldStreet2    = big.NewInt(1 << 1)
+	businessStandardizedAddressFieldCity       = big.NewInt(1 << 2)
+	businessStandardizedAddressFieldRegion     = big.NewInt(1 << 3)
+	businessStandardizedAddressFieldPostalCode = big.NewInt(1 << 4)
+	businessStandardizedAddressFieldCountry    = big.NewInt(1 << 5)
+	businessStandardizedAddressFieldLat        = big.NewInt(1 << 6)
+	businessStandardizedAddressFieldLon        = big.NewInt(1 << 7)
+)
+
+// businessStandardizedAddressNullableFields maps the wire names of BusinessStandardizedAddress's nullable fields (required or optional) to their field bits.
+var businessStandardizedAddressNullableFields = map[string]*big.Int{
+	"street":      businessStandardizedAddressFieldStreet,
+	"street2":     businessStandardizedAddressFieldStreet2,
+	"city":        businessStandardizedAddressFieldCity,
+	"region":      businessStandardizedAddressFieldRegion,
+	"postal_code": businessStandardizedAddressFieldPostalCode,
+	"lat":         businessStandardizedAddressFieldLat,
+	"lon":         businessStandardizedAddressFieldLon,
+}
+
+// The submitted address as the data provider standardized it. `null` when the provider returned a validation level without a standardized address. The provider returns a single street line, so `street2` is always `null`. `country` is always `US`.
+type BusinessStandardizedAddress struct {
+	Street     StreetNullable     `json:"street,omitempty" url:"street,omitempty"`
+	Street2    Street2            `json:"street2,omitempty" url:"street2,omitempty"`
+	City       CityNullable       `json:"city,omitempty" url:"city,omitempty"`
+	Region     Region             `json:"region,omitempty" url:"region,omitempty"`
+	PostalCode PostalCode         `json:"postal_code,omitempty" url:"postal_code,omitempty"`
+	Country    GenericCountryCode `json:"country" url:"country"`
+	// The latitude of the standardized address.
+	Lat *float64 `json:"lat,omitempty" url:"lat,omitempty"`
+	// The longitude of the standardized address.
+	Lon *float64 `json:"lon,omitempty" url:"lon,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (b *BusinessStandardizedAddress) GetStreet() StreetNullable {
+	if b == nil {
+		return nil
+	}
+	return b.Street
+}
+
+func (b *BusinessStandardizedAddress) GetStreet2() Street2 {
+	if b == nil {
+		return nil
+	}
+	return b.Street2
+}
+
+func (b *BusinessStandardizedAddress) GetCity() CityNullable {
+	if b == nil {
+		return nil
+	}
+	return b.City
+}
+
+func (b *BusinessStandardizedAddress) GetRegion() Region {
+	if b == nil {
+		return nil
+	}
+	return b.Region
+}
+
+func (b *BusinessStandardizedAddress) GetPostalCode() PostalCode {
+	if b == nil {
+		return nil
+	}
+	return b.PostalCode
+}
+
+func (b *BusinessStandardizedAddress) GetCountry() GenericCountryCode {
+	if b == nil {
+		return ""
+	}
+	return b.Country
+}
+
+func (b *BusinessStandardizedAddress) GetLat() *float64 {
+	if b == nil {
+		return nil
+	}
+	return b.Lat
+}
+
+func (b *BusinessStandardizedAddress) GetLon() *float64 {
+	if b == nil {
+		return nil
+	}
+	return b.Lon
+}
+
+func (b *BusinessStandardizedAddress) GetExtraProperties() map[string]interface{} {
+	if b == nil {
+		return nil
+	}
+	return b.ExtraProperties
+}
+
+func (b *BusinessStandardizedAddress) require(field *big.Int) {
+	next := new(big.Int)
+	if b.explicitFields != nil {
+		next.Set(b.explicitFields)
+	}
+	next.Or(next, field)
+	b.explicitFields = next
+}
+
+// SetStreet sets the Street field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessStandardizedAddress) SetStreet(street StreetNullable) {
+	b.Street = street
+	b.require(businessStandardizedAddressFieldStreet)
+}
+
+// SetStreet2 sets the Street2 field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessStandardizedAddress) SetStreet2(street2 Street2) {
+	b.Street2 = street2
+	b.require(businessStandardizedAddressFieldStreet2)
+}
+
+// SetCity sets the City field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessStandardizedAddress) SetCity(city CityNullable) {
+	b.City = city
+	b.require(businessStandardizedAddressFieldCity)
+}
+
+// SetRegion sets the Region field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessStandardizedAddress) SetRegion(region Region) {
+	b.Region = region
+	b.require(businessStandardizedAddressFieldRegion)
+}
+
+// SetPostalCode sets the PostalCode field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessStandardizedAddress) SetPostalCode(postalCode PostalCode) {
+	b.PostalCode = postalCode
+	b.require(businessStandardizedAddressFieldPostalCode)
+}
+
+// SetCountry sets the Country field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessStandardizedAddress) SetCountry(country GenericCountryCode) {
+	b.Country = country
+	b.require(businessStandardizedAddressFieldCountry)
+}
+
+// SetLat sets the Lat field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessStandardizedAddress) SetLat(lat *float64) {
+	b.Lat = lat
+	b.require(businessStandardizedAddressFieldLat)
+}
+
+// SetLon sets the Lon field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessStandardizedAddress) SetLon(lon *float64) {
+	b.Lon = lon
+	b.require(businessStandardizedAddressFieldLon)
+}
+
+func (b *BusinessStandardizedAddress) UnmarshalJSON(data []byte) error {
+	type embed BusinessStandardizedAddress
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*b = BusinessStandardizedAddress(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, businessStandardizedAddressNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		b.require(presentFields)
+	}
+	b.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (b *BusinessStandardizedAddress) MarshalJSON() ([]byte, error) {
+	type embed BusinessStandardizedAddress
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, b.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, b.ExtraProperties)
+}
+
+func (b *BusinessStandardizedAddress) String() string {
+	if b == nil {
+		return "<nil>"
+	}
+	if len(b.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(b.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
+var (
 	businessTinMatchFieldSummary = big.NewInt(1 << 0)
 	businessTinMatchFieldTinType = big.NewInt(1 << 1)
 )
@@ -1767,26 +4353,26 @@ var (
 	businessVerificationCheckFieldTin             = big.NewInt(1 << 5)
 	businessVerificationCheckFieldOfficers        = big.NewInt(1 << 6)
 	businessVerificationCheckFieldRegisteredAgent = big.NewInt(1 << 7)
-	businessVerificationCheckFieldMatchDetails    = big.NewInt(1 << 8)
+	businessVerificationCheckFieldBusinessDetails = big.NewInt(1 << 8)
 )
 
 // businessVerificationCheckNullableFields maps the wire names of BusinessVerificationCheck's nullable fields (required or optional) to their field bits.
 var businessVerificationCheckNullableFields = map[string]*big.Int{
-	"match_details": businessVerificationCheckFieldMatchDetails,
+	"score": businessVerificationCheckFieldScore,
 }
 
 // Results from the business identity verification check, which matches the submitted business information against data provider records. `officers` is one result for all submitted officers, as reported by the data provider. `registered_agent` compares the submitted officer names against the business's registered agent. Both are `no_input` when no officers were submitted.
 type BusinessVerificationCheck struct {
 	Status BusinessVerificationStatusBusinessVerificationCheck `json:"status" url:"status"`
-	// A score from 0 to 100 indicating the confidence in the identity verification of the business.
-	Score           int                        `json:"score" url:"score"`
+	// A score from 0 to 100 indicating confidence in the business identity assessment. `null` when no score is available, including when industry classification succeeds without a business search result.
+	Score           *int                       `json:"score,omitempty" url:"score,omitempty"`
 	Name            *BusinessFieldMatchSummary `json:"name" url:"name"`
-	Address         *BusinessFieldMatchSummary `json:"address" url:"address"`
+	Address         *BusinessAddressMatch      `json:"address" url:"address"`
 	Website         *BusinessFieldMatchSummary `json:"website" url:"website"`
 	Tin             *BusinessTinMatch          `json:"tin" url:"tin"`
 	Officers        *BusinessFieldMatchSummary `json:"officers" url:"officers"`
 	RegisteredAgent *BusinessFieldMatchSummary `json:"registered_agent" url:"registered_agent"`
-	MatchDetails    *BusinessKybMatchDetails   `json:"match_details,omitempty" url:"match_details,omitempty"`
+	BusinessDetails *BusinessDetails           `json:"business_details" url:"business_details"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -1803,9 +4389,9 @@ func (b *BusinessVerificationCheck) GetStatus() BusinessVerificationStatusBusine
 	return b.Status
 }
 
-func (b *BusinessVerificationCheck) GetScore() int {
+func (b *BusinessVerificationCheck) GetScore() *int {
 	if b == nil {
-		return 0
+		return nil
 	}
 	return b.Score
 }
@@ -1817,7 +4403,7 @@ func (b *BusinessVerificationCheck) GetName() *BusinessFieldMatchSummary {
 	return b.Name
 }
 
-func (b *BusinessVerificationCheck) GetAddress() *BusinessFieldMatchSummary {
+func (b *BusinessVerificationCheck) GetAddress() *BusinessAddressMatch {
 	if b == nil {
 		return nil
 	}
@@ -1852,11 +4438,11 @@ func (b *BusinessVerificationCheck) GetRegisteredAgent() *BusinessFieldMatchSumm
 	return b.RegisteredAgent
 }
 
-func (b *BusinessVerificationCheck) GetMatchDetails() *BusinessKybMatchDetails {
+func (b *BusinessVerificationCheck) GetBusinessDetails() *BusinessDetails {
 	if b == nil {
 		return nil
 	}
-	return b.MatchDetails
+	return b.BusinessDetails
 }
 
 func (b *BusinessVerificationCheck) GetExtraProperties() map[string]interface{} {
@@ -1884,7 +4470,7 @@ func (b *BusinessVerificationCheck) SetStatus(status BusinessVerificationStatusB
 
 // SetScore sets the Score field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (b *BusinessVerificationCheck) SetScore(score int) {
+func (b *BusinessVerificationCheck) SetScore(score *int) {
 	b.Score = score
 	b.require(businessVerificationCheckFieldScore)
 }
@@ -1898,7 +4484,7 @@ func (b *BusinessVerificationCheck) SetName(name *BusinessFieldMatchSummary) {
 
 // SetAddress sets the Address field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (b *BusinessVerificationCheck) SetAddress(address *BusinessFieldMatchSummary) {
+func (b *BusinessVerificationCheck) SetAddress(address *BusinessAddressMatch) {
 	b.Address = address
 	b.require(businessVerificationCheckFieldAddress)
 }
@@ -1931,11 +4517,11 @@ func (b *BusinessVerificationCheck) SetRegisteredAgent(registeredAgent *Business
 	b.require(businessVerificationCheckFieldRegisteredAgent)
 }
 
-// SetMatchDetails sets the MatchDetails field and marks it as non-optional;
+// SetBusinessDetails sets the BusinessDetails field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (b *BusinessVerificationCheck) SetMatchDetails(matchDetails *BusinessKybMatchDetails) {
-	b.MatchDetails = matchDetails
-	b.require(businessVerificationCheckFieldMatchDetails)
+func (b *BusinessVerificationCheck) SetBusinessDetails(businessDetails *BusinessDetails) {
+	b.BusinessDetails = businessDetails
+	b.require(businessVerificationCheckFieldBusinessDetails)
 }
 
 func (b *BusinessVerificationCheck) UnmarshalJSON(data []byte) error {
@@ -2212,18 +4798,137 @@ func (b *BusinessVerificationCreateRequestBusiness) String() string {
 }
 
 var (
+	businessVerificationCreateRequestOptionsFieldIncludeWebsiteAnalysis        = big.NewInt(1 << 0)
+	businessVerificationCreateRequestOptionsFieldIncludeIndustryClassification = big.NewInt(1 << 1)
+)
+
+// businessVerificationCreateRequestOptionsNullableFields maps the wire names of BusinessVerificationCreateRequestOptions's nullable fields (required or optional) to their field bits.
+var businessVerificationCreateRequestOptionsNullableFields = map[string]*big.Int{
+	"include_website_analysis":        businessVerificationCreateRequestOptionsFieldIncludeWebsiteAnalysis,
+	"include_industry_classification": businessVerificationCreateRequestOptionsFieldIncludeIndustryClassification,
+}
+
+// Optional checks to run for this verification. Omit or set to null to run Business Search only.
+type BusinessVerificationCreateRequestOptions struct {
+	// Whether to run website analysis. Defaults to `false` when omitted or `null`. When `true`, `business.website` is required.
+	IncludeWebsiteAnalysis *bool `json:"include_website_analysis,omitempty" url:"include_website_analysis,omitempty"`
+	// Whether to run industry classification. Defaults to `false` when omitted or `null`.
+	IncludeIndustryClassification *bool `json:"include_industry_classification,omitempty" url:"include_industry_classification,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (b *BusinessVerificationCreateRequestOptions) GetIncludeWebsiteAnalysis() *bool {
+	if b == nil {
+		return nil
+	}
+	return b.IncludeWebsiteAnalysis
+}
+
+func (b *BusinessVerificationCreateRequestOptions) GetIncludeIndustryClassification() *bool {
+	if b == nil {
+		return nil
+	}
+	return b.IncludeIndustryClassification
+}
+
+func (b *BusinessVerificationCreateRequestOptions) GetExtraProperties() map[string]interface{} {
+	if b == nil {
+		return nil
+	}
+	return b.extraProperties
+}
+
+func (b *BusinessVerificationCreateRequestOptions) require(field *big.Int) {
+	next := new(big.Int)
+	if b.explicitFields != nil {
+		next.Set(b.explicitFields)
+	}
+	next.Or(next, field)
+	b.explicitFields = next
+}
+
+// SetIncludeWebsiteAnalysis sets the IncludeWebsiteAnalysis field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessVerificationCreateRequestOptions) SetIncludeWebsiteAnalysis(includeWebsiteAnalysis *bool) {
+	b.IncludeWebsiteAnalysis = includeWebsiteAnalysis
+	b.require(businessVerificationCreateRequestOptionsFieldIncludeWebsiteAnalysis)
+}
+
+// SetIncludeIndustryClassification sets the IncludeIndustryClassification field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessVerificationCreateRequestOptions) SetIncludeIndustryClassification(includeIndustryClassification *bool) {
+	b.IncludeIndustryClassification = includeIndustryClassification
+	b.require(businessVerificationCreateRequestOptionsFieldIncludeIndustryClassification)
+}
+
+func (b *BusinessVerificationCreateRequestOptions) UnmarshalJSON(data []byte) error {
+	type unmarshaler BusinessVerificationCreateRequestOptions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*b = BusinessVerificationCreateRequestOptions(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.extraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, businessVerificationCreateRequestOptionsNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		b.require(presentFields)
+	}
+	b.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (b *BusinessVerificationCreateRequestOptions) MarshalJSON() ([]byte, error) {
+	type embed BusinessVerificationCreateRequestOptions
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, b.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (b *BusinessVerificationCreateRequestOptions) String() string {
+	if b == nil {
+		return "<nil>"
+	}
+	if len(b.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(b.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
+var (
 	businessVerificationCreateResponseFieldID                   = big.NewInt(1 << 0)
 	businessVerificationCreateResponseFieldClientUserID         = big.NewInt(1 << 1)
 	businessVerificationCreateResponseFieldCreatedAt            = big.NewInt(1 << 2)
 	businessVerificationCreateResponseFieldCompletedAt          = big.NewInt(1 << 3)
 	businessVerificationCreateResponseFieldRedactedAt           = big.NewInt(1 << 4)
 	businessVerificationCreateResponseFieldStatus               = big.NewInt(1 << 5)
-	businessVerificationCreateResponseFieldSearchTerms          = big.NewInt(1 << 6)
-	businessVerificationCreateResponseFieldBusinessVerification = big.NewInt(1 << 7)
-	businessVerificationCreateResponseFieldRiskCheck            = big.NewInt(1 << 8)
-	businessVerificationCreateResponseFieldDigitalPresenceCheck = big.NewInt(1 << 9)
-	businessVerificationCreateResponseFieldRequestID            = big.NewInt(1 << 10)
-	businessVerificationCreateResponseFieldShareableURL         = big.NewInt(1 << 11)
+	businessVerificationCreateResponseFieldRequestedChecks      = big.NewInt(1 << 6)
+	businessVerificationCreateResponseFieldSearchTerms          = big.NewInt(1 << 7)
+	businessVerificationCreateResponseFieldBusinessVerification = big.NewInt(1 << 8)
+	businessVerificationCreateResponseFieldRiskCheck            = big.NewInt(1 << 9)
+	businessVerificationCreateResponseFieldDigitalPresenceCheck = big.NewInt(1 << 10)
+	businessVerificationCreateResponseFieldRequestID            = big.NewInt(1 << 11)
+	businessVerificationCreateResponseFieldShareableURL         = big.NewInt(1 << 12)
 )
 
 // businessVerificationCreateResponseNullableFields maps the wire names of BusinessVerificationCreateResponse's nullable fields (required or optional) to their field bits.
@@ -2238,18 +4943,19 @@ var businessVerificationCreateResponseNullableFields = map[string]*big.Int{
 
 // A business verification represents a check of a business's identity and risk profile, including information collected about the business and results from third-party data providers.
 type BusinessVerificationCreateResponse struct {
-	ID                   BusinessVerificationID            `json:"id" url:"id"`
-	ClientUserID         ClientUserID                      `json:"client_user_id" url:"client_user_id"`
-	CreatedAt            Timestamp                         `json:"created_at" url:"created_at"`
-	CompletedAt          TimestampNullable                 `json:"completed_at,omitempty" url:"completed_at,omitempty"`
-	RedactedAt           TimestampNullable                 `json:"redacted_at,omitempty" url:"redacted_at,omitempty"`
-	Status               BusinessVerificationStatusOverall `json:"status" url:"status"`
-	SearchTerms          *BusinessSearchTerms              `json:"search_terms" url:"search_terms"`
-	BusinessVerification *BusinessVerificationCheck        `json:"business_verification,omitempty" url:"business_verification,omitempty"`
-	RiskCheck            *BusinessRiskCheck                `json:"risk_check,omitempty" url:"risk_check,omitempty"`
-	DigitalPresenceCheck *BusinessDigitalPresenceCheck     `json:"digital_presence_check,omitempty" url:"digital_presence_check,omitempty"`
-	RequestID            RequestID                         `json:"request_id" url:"request_id"`
-	ShareableURL         BusinessVerificationShareableURL  `json:"shareable_url,omitempty" url:"shareable_url,omitempty"`
+	ID                   BusinessVerificationID               `json:"id" url:"id"`
+	ClientUserID         ClientUserID                         `json:"client_user_id" url:"client_user_id"`
+	CreatedAt            Timestamp                            `json:"created_at" url:"created_at"`
+	CompletedAt          TimestampNullable                    `json:"completed_at,omitempty" url:"completed_at,omitempty"`
+	RedactedAt           TimestampNullable                    `json:"redacted_at,omitempty" url:"redacted_at,omitempty"`
+	Status               BusinessVerificationStatusOverall    `json:"status" url:"status"`
+	RequestedChecks      *BusinessVerificationRequestedChecks `json:"requested_checks" url:"requested_checks"`
+	SearchTerms          *BusinessSearchTerms                 `json:"search_terms" url:"search_terms"`
+	BusinessVerification *BusinessVerificationCheck           `json:"business_verification,omitempty" url:"business_verification,omitempty"`
+	RiskCheck            *BusinessRiskCheck                   `json:"risk_check,omitempty" url:"risk_check,omitempty"`
+	DigitalPresenceCheck *BusinessDigitalPresenceCheck        `json:"digital_presence_check,omitempty" url:"digital_presence_check,omitempty"`
+	RequestID            RequestID                            `json:"request_id" url:"request_id"`
+	ShareableURL         BusinessVerificationShareableURL     `json:"shareable_url,omitempty" url:"shareable_url,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -2299,6 +5005,13 @@ func (b *BusinessVerificationCreateResponse) GetStatus() BusinessVerificationSta
 		return ""
 	}
 	return b.Status
+}
+
+func (b *BusinessVerificationCreateResponse) GetRequestedChecks() *BusinessVerificationRequestedChecks {
+	if b == nil {
+		return nil
+	}
+	return b.RequestedChecks
 }
 
 func (b *BusinessVerificationCreateResponse) GetSearchTerms() *BusinessSearchTerms {
@@ -2399,6 +5112,13 @@ func (b *BusinessVerificationCreateResponse) SetRedactedAt(redactedAt TimestampN
 func (b *BusinessVerificationCreateResponse) SetStatus(status BusinessVerificationStatusOverall) {
 	b.Status = status
 	b.require(businessVerificationCreateResponseFieldStatus)
+}
+
+// SetRequestedChecks sets the RequestedChecks field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessVerificationCreateResponse) SetRequestedChecks(requestedChecks *BusinessVerificationRequestedChecks) {
+	b.RequestedChecks = requestedChecks
+	b.require(businessVerificationCreateResponseFieldRequestedChecks)
 }
 
 // SetSearchTerms sets the SearchTerms field and marks it as non-optional;
@@ -2515,12 +5235,13 @@ var (
 	businessVerificationGetResponseFieldCompletedAt          = big.NewInt(1 << 3)
 	businessVerificationGetResponseFieldRedactedAt           = big.NewInt(1 << 4)
 	businessVerificationGetResponseFieldStatus               = big.NewInt(1 << 5)
-	businessVerificationGetResponseFieldSearchTerms          = big.NewInt(1 << 6)
-	businessVerificationGetResponseFieldBusinessVerification = big.NewInt(1 << 7)
-	businessVerificationGetResponseFieldRiskCheck            = big.NewInt(1 << 8)
-	businessVerificationGetResponseFieldDigitalPresenceCheck = big.NewInt(1 << 9)
-	businessVerificationGetResponseFieldRequestID            = big.NewInt(1 << 10)
-	businessVerificationGetResponseFieldShareableURL         = big.NewInt(1 << 11)
+	businessVerificationGetResponseFieldRequestedChecks      = big.NewInt(1 << 6)
+	businessVerificationGetResponseFieldSearchTerms          = big.NewInt(1 << 7)
+	businessVerificationGetResponseFieldBusinessVerification = big.NewInt(1 << 8)
+	businessVerificationGetResponseFieldRiskCheck            = big.NewInt(1 << 9)
+	businessVerificationGetResponseFieldDigitalPresenceCheck = big.NewInt(1 << 10)
+	businessVerificationGetResponseFieldRequestID            = big.NewInt(1 << 11)
+	businessVerificationGetResponseFieldShareableURL         = big.NewInt(1 << 12)
 )
 
 // businessVerificationGetResponseNullableFields maps the wire names of BusinessVerificationGetResponse's nullable fields (required or optional) to their field bits.
@@ -2535,18 +5256,19 @@ var businessVerificationGetResponseNullableFields = map[string]*big.Int{
 
 // A business verification represents a check of a business's identity and risk profile, including information collected about the business and results from third-party data providers.
 type BusinessVerificationGetResponse struct {
-	ID                   BusinessVerificationID            `json:"id" url:"id"`
-	ClientUserID         ClientUserID                      `json:"client_user_id" url:"client_user_id"`
-	CreatedAt            Timestamp                         `json:"created_at" url:"created_at"`
-	CompletedAt          TimestampNullable                 `json:"completed_at,omitempty" url:"completed_at,omitempty"`
-	RedactedAt           TimestampNullable                 `json:"redacted_at,omitempty" url:"redacted_at,omitempty"`
-	Status               BusinessVerificationStatusOverall `json:"status" url:"status"`
-	SearchTerms          *BusinessSearchTerms              `json:"search_terms" url:"search_terms"`
-	BusinessVerification *BusinessVerificationCheck        `json:"business_verification,omitempty" url:"business_verification,omitempty"`
-	RiskCheck            *BusinessRiskCheck                `json:"risk_check,omitempty" url:"risk_check,omitempty"`
-	DigitalPresenceCheck *BusinessDigitalPresenceCheck     `json:"digital_presence_check,omitempty" url:"digital_presence_check,omitempty"`
-	RequestID            RequestID                         `json:"request_id" url:"request_id"`
-	ShareableURL         BusinessVerificationShareableURL  `json:"shareable_url,omitempty" url:"shareable_url,omitempty"`
+	ID                   BusinessVerificationID               `json:"id" url:"id"`
+	ClientUserID         ClientUserID                         `json:"client_user_id" url:"client_user_id"`
+	CreatedAt            Timestamp                            `json:"created_at" url:"created_at"`
+	CompletedAt          TimestampNullable                    `json:"completed_at,omitempty" url:"completed_at,omitempty"`
+	RedactedAt           TimestampNullable                    `json:"redacted_at,omitempty" url:"redacted_at,omitempty"`
+	Status               BusinessVerificationStatusOverall    `json:"status" url:"status"`
+	RequestedChecks      *BusinessVerificationRequestedChecks `json:"requested_checks" url:"requested_checks"`
+	SearchTerms          *BusinessSearchTerms                 `json:"search_terms" url:"search_terms"`
+	BusinessVerification *BusinessVerificationCheck           `json:"business_verification,omitempty" url:"business_verification,omitempty"`
+	RiskCheck            *BusinessRiskCheck                   `json:"risk_check,omitempty" url:"risk_check,omitempty"`
+	DigitalPresenceCheck *BusinessDigitalPresenceCheck        `json:"digital_presence_check,omitempty" url:"digital_presence_check,omitempty"`
+	RequestID            RequestID                            `json:"request_id" url:"request_id"`
+	ShareableURL         BusinessVerificationShareableURL     `json:"shareable_url,omitempty" url:"shareable_url,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -2596,6 +5318,13 @@ func (b *BusinessVerificationGetResponse) GetStatus() BusinessVerificationStatus
 		return ""
 	}
 	return b.Status
+}
+
+func (b *BusinessVerificationGetResponse) GetRequestedChecks() *BusinessVerificationRequestedChecks {
+	if b == nil {
+		return nil
+	}
+	return b.RequestedChecks
 }
 
 func (b *BusinessVerificationGetResponse) GetSearchTerms() *BusinessSearchTerms {
@@ -2696,6 +5425,13 @@ func (b *BusinessVerificationGetResponse) SetRedactedAt(redactedAt TimestampNull
 func (b *BusinessVerificationGetResponse) SetStatus(status BusinessVerificationStatusOverall) {
 	b.Status = status
 	b.require(businessVerificationGetResponseFieldStatus)
+}
+
+// SetRequestedChecks sets the RequestedChecks field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessVerificationGetResponse) SetRequestedChecks(requestedChecks *BusinessVerificationRequestedChecks) {
+	b.RequestedChecks = requestedChecks
+	b.require(businessVerificationGetResponseFieldRequestedChecks)
 }
 
 // SetSearchTerms sets the SearchTerms field and marks it as non-optional;
@@ -2813,6 +5549,116 @@ type BusinessVerificationPhoneNumber = string
 
 // A phone number in E.164 format.
 type BusinessVerificationPhoneNumberNullable = *string
+
+var (
+	businessVerificationRequestedChecksFieldIncludeWebsiteAnalysis        = big.NewInt(1 << 0)
+	businessVerificationRequestedChecksFieldIncludeIndustryClassification = big.NewInt(1 << 1)
+)
+
+// The optional checks requested for this business verification.
+type BusinessVerificationRequestedChecks struct {
+	// Whether website analysis was requested.
+	IncludeWebsiteAnalysis bool `json:"include_website_analysis" url:"include_website_analysis"`
+	// Whether industry classification was requested.
+	IncludeIndustryClassification bool `json:"include_industry_classification" url:"include_industry_classification"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (b *BusinessVerificationRequestedChecks) GetIncludeWebsiteAnalysis() bool {
+	if b == nil {
+		return false
+	}
+	return b.IncludeWebsiteAnalysis
+}
+
+func (b *BusinessVerificationRequestedChecks) GetIncludeIndustryClassification() bool {
+	if b == nil {
+		return false
+	}
+	return b.IncludeIndustryClassification
+}
+
+func (b *BusinessVerificationRequestedChecks) GetExtraProperties() map[string]interface{} {
+	if b == nil {
+		return nil
+	}
+	return b.ExtraProperties
+}
+
+func (b *BusinessVerificationRequestedChecks) require(field *big.Int) {
+	next := new(big.Int)
+	if b.explicitFields != nil {
+		next.Set(b.explicitFields)
+	}
+	next.Or(next, field)
+	b.explicitFields = next
+}
+
+// SetIncludeWebsiteAnalysis sets the IncludeWebsiteAnalysis field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessVerificationRequestedChecks) SetIncludeWebsiteAnalysis(includeWebsiteAnalysis bool) {
+	b.IncludeWebsiteAnalysis = includeWebsiteAnalysis
+	b.require(businessVerificationRequestedChecksFieldIncludeWebsiteAnalysis)
+}
+
+// SetIncludeIndustryClassification sets the IncludeIndustryClassification field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BusinessVerificationRequestedChecks) SetIncludeIndustryClassification(includeIndustryClassification bool) {
+	b.IncludeIndustryClassification = includeIndustryClassification
+	b.require(businessVerificationRequestedChecksFieldIncludeIndustryClassification)
+}
+
+func (b *BusinessVerificationRequestedChecks) UnmarshalJSON(data []byte) error {
+	type embed BusinessVerificationRequestedChecks
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*b = BusinessVerificationRequestedChecks(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.ExtraProperties = extraProperties
+	b.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (b *BusinessVerificationRequestedChecks) MarshalJSON() ([]byte, error) {
+	type embed BusinessVerificationRequestedChecks
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, b.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, b.ExtraProperties)
+}
+
+func (b *BusinessVerificationRequestedChecks) String() string {
+	if b == nil {
+		return "<nil>"
+	}
+	if len(b.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(b.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
 
 // A shareable URL that can be sent directly to the user to complete verification
 type BusinessVerificationShareableURL = *string
@@ -3484,220 +6330,29 @@ func (b *BusinessWhoisRecord) String() string {
 }
 
 var (
-	providerBusinessAddressFieldStreet     = big.NewInt(1 << 0)
-	providerBusinessAddressFieldStreet2    = big.NewInt(1 << 1)
-	providerBusinessAddressFieldCity       = big.NewInt(1 << 2)
-	providerBusinessAddressFieldRegion     = big.NewInt(1 << 3)
-	providerBusinessAddressFieldPostalCode = big.NewInt(1 << 4)
-	providerBusinessAddressFieldCountry    = big.NewInt(1 << 5)
-	providerBusinessAddressFieldIsPrimary  = big.NewInt(1 << 6)
+	industryClassificationFieldCode        = big.NewInt(1 << 0)
+	industryClassificationFieldDescription = big.NewInt(1 << 1)
+	industryClassificationFieldConfidence  = big.NewInt(1 << 2)
+	industryClassificationFieldMccCodes    = big.NewInt(1 << 3)
+	industryClassificationFieldSicCodes    = big.NewInt(1 << 4)
 )
 
-// providerBusinessAddressNullableFields maps the wire names of ProviderBusinessAddress's nullable fields (required or optional) to their field bits.
-var providerBusinessAddressNullableFields = map[string]*big.Int{
-	"street":      providerBusinessAddressFieldStreet,
-	"street2":     providerBusinessAddressFieldStreet2,
-	"city":        providerBusinessAddressFieldCity,
-	"region":      providerBusinessAddressFieldRegion,
-	"postal_code": providerBusinessAddressFieldPostalCode,
+// industryClassificationNullableFields maps the wire names of IndustryClassification's nullable fields (required or optional) to their field bits.
+var industryClassificationNullableFields = map[string]*big.Int{
+	"confidence": industryClassificationFieldConfidence,
 }
 
-// Detailed address information for a business from data provider
-type ProviderBusinessAddress struct {
-	Street     StreetNullable     `json:"street,omitempty" url:"street,omitempty"`
-	Street2    Street2            `json:"street2,omitempty" url:"street2,omitempty"`
-	City       CityNullable       `json:"city,omitempty" url:"city,omitempty"`
-	Region     Region             `json:"region,omitempty" url:"region,omitempty"`
-	PostalCode PostalCode         `json:"postal_code,omitempty" url:"postal_code,omitempty"`
-	Country    GenericCountryCode `json:"country" url:"country"`
-	// Whether this is the primary address for the business
-	IsPrimary bool `json:"is_primary" url:"is_primary"`
-
-	// Private bitmask of fields set to an explicit value and therefore not to be omitted
-	explicitFields *big.Int `json:"-" url:"-"`
-
-	extraProperties map[string]interface{}
-	rawJSON         json.RawMessage
-}
-
-func (p *ProviderBusinessAddress) GetStreet() StreetNullable {
-	if p == nil {
-		return nil
-	}
-	return p.Street
-}
-
-func (p *ProviderBusinessAddress) GetStreet2() Street2 {
-	if p == nil {
-		return nil
-	}
-	return p.Street2
-}
-
-func (p *ProviderBusinessAddress) GetCity() CityNullable {
-	if p == nil {
-		return nil
-	}
-	return p.City
-}
-
-func (p *ProviderBusinessAddress) GetRegion() Region {
-	if p == nil {
-		return nil
-	}
-	return p.Region
-}
-
-func (p *ProviderBusinessAddress) GetPostalCode() PostalCode {
-	if p == nil {
-		return nil
-	}
-	return p.PostalCode
-}
-
-func (p *ProviderBusinessAddress) GetCountry() GenericCountryCode {
-	if p == nil {
-		return ""
-	}
-	return p.Country
-}
-
-func (p *ProviderBusinessAddress) GetIsPrimary() bool {
-	if p == nil {
-		return false
-	}
-	return p.IsPrimary
-}
-
-func (p *ProviderBusinessAddress) GetExtraProperties() map[string]interface{} {
-	if p == nil {
-		return nil
-	}
-	return p.extraProperties
-}
-
-func (p *ProviderBusinessAddress) require(field *big.Int) {
-	next := new(big.Int)
-	if p.explicitFields != nil {
-		next.Set(p.explicitFields)
-	}
-	next.Or(next, field)
-	p.explicitFields = next
-}
-
-// SetStreet sets the Street field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (p *ProviderBusinessAddress) SetStreet(street StreetNullable) {
-	p.Street = street
-	p.require(providerBusinessAddressFieldStreet)
-}
-
-// SetStreet2 sets the Street2 field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (p *ProviderBusinessAddress) SetStreet2(street2 Street2) {
-	p.Street2 = street2
-	p.require(providerBusinessAddressFieldStreet2)
-}
-
-// SetCity sets the City field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (p *ProviderBusinessAddress) SetCity(city CityNullable) {
-	p.City = city
-	p.require(providerBusinessAddressFieldCity)
-}
-
-// SetRegion sets the Region field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (p *ProviderBusinessAddress) SetRegion(region Region) {
-	p.Region = region
-	p.require(providerBusinessAddressFieldRegion)
-}
-
-// SetPostalCode sets the PostalCode field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (p *ProviderBusinessAddress) SetPostalCode(postalCode PostalCode) {
-	p.PostalCode = postalCode
-	p.require(providerBusinessAddressFieldPostalCode)
-}
-
-// SetCountry sets the Country field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (p *ProviderBusinessAddress) SetCountry(country GenericCountryCode) {
-	p.Country = country
-	p.require(providerBusinessAddressFieldCountry)
-}
-
-// SetIsPrimary sets the IsPrimary field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (p *ProviderBusinessAddress) SetIsPrimary(isPrimary bool) {
-	p.IsPrimary = isPrimary
-	p.require(providerBusinessAddressFieldIsPrimary)
-}
-
-func (p *ProviderBusinessAddress) UnmarshalJSON(data []byte) error {
-	type unmarshaler ProviderBusinessAddress
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*p = ProviderBusinessAddress(value)
-	extraProperties, err := internal.ExtractExtraProperties(data, *p)
-	if err != nil {
-		return err
-	}
-	p.extraProperties = extraProperties
-	presentFields, err := internal.ExplicitFieldsFromJSON(data, providerBusinessAddressNullableFields)
-	if err != nil {
-		return err
-	}
-	if presentFields != nil {
-		p.require(presentFields)
-	}
-	p.rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (p *ProviderBusinessAddress) MarshalJSON() ([]byte, error) {
-	type embed ProviderBusinessAddress
-	var marshaler = struct {
-		embed
-	}{
-		embed: embed(*p),
-	}
-	explicitMarshaler := internal.HandleExplicitFields(marshaler, p.explicitFields)
-	return json.Marshal(explicitMarshaler)
-}
-
-func (p *ProviderBusinessAddress) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	if len(p.rawJSON) > 0 {
-		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := internal.StringifyJSON(p); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", p)
-}
-
-var (
-	providerBusinessNameFieldIsPrimary = big.NewInt(1 << 0)
-	providerBusinessNameFieldName      = big.NewInt(1 << 1)
-)
-
-// providerBusinessNameNullableFields maps the wire names of ProviderBusinessName's nullable fields (required or optional) to their field bits.
-var providerBusinessNameNullableFields = map[string]*big.Int{
-	"name": providerBusinessNameFieldName,
-}
-
-// Name associated with a business
-type ProviderBusinessName struct {
-	// Indicates whether this is the primary name for the business.
-	IsPrimary bool                 `json:"is_primary" url:"is_primary"`
-	Name      BusinessNameNullable `json:"name,omitempty" url:"name,omitempty"`
+// A predicted NAICS industry classification. Null when classification was not requested or no prediction is available.
+type IndustryClassification struct {
+	// NAICS industry code.
+	Code string `json:"code" url:"code"`
+	// Description of the NAICS industry.
+	Description string                      `json:"description" url:"description"`
+	Confidence  *BusinessIndustryConfidence `json:"confidence,omitempty" url:"confidence,omitempty"`
+	// Related Merchant Category Codes. Empty when no codes are available.
+	MccCodes []*BusinessMerchantCategoryCode `json:"mcc_codes" url:"mcc_codes"`
+	// Related Standard Industrial Classification codes. Empty when no codes are available.
+	SicCodes []*BusinessStandardIndustrialClassificationCode `json:"sic_codes" url:"sic_codes"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -3707,101 +6362,143 @@ type ProviderBusinessName struct {
 	rawJSON json.RawMessage
 }
 
-func (p *ProviderBusinessName) GetIsPrimary() bool {
-	if p == nil {
-		return false
+func (i *IndustryClassification) GetCode() string {
+	if i == nil {
+		return ""
 	}
-	return p.IsPrimary
+	return i.Code
 }
 
-func (p *ProviderBusinessName) GetName() BusinessNameNullable {
-	if p == nil {
+func (i *IndustryClassification) GetDescription() string {
+	if i == nil {
+		return ""
+	}
+	return i.Description
+}
+
+func (i *IndustryClassification) GetConfidence() *BusinessIndustryConfidence {
+	if i == nil {
 		return nil
 	}
-	return p.Name
+	return i.Confidence
 }
 
-func (p *ProviderBusinessName) GetExtraProperties() map[string]interface{} {
-	if p == nil {
+func (i *IndustryClassification) GetMccCodes() []*BusinessMerchantCategoryCode {
+	if i == nil {
 		return nil
 	}
-	return p.ExtraProperties
+	return i.MccCodes
 }
 
-func (p *ProviderBusinessName) require(field *big.Int) {
+func (i *IndustryClassification) GetSicCodes() []*BusinessStandardIndustrialClassificationCode {
+	if i == nil {
+		return nil
+	}
+	return i.SicCodes
+}
+
+func (i *IndustryClassification) GetExtraProperties() map[string]interface{} {
+	if i == nil {
+		return nil
+	}
+	return i.ExtraProperties
+}
+
+func (i *IndustryClassification) require(field *big.Int) {
 	next := new(big.Int)
-	if p.explicitFields != nil {
-		next.Set(p.explicitFields)
+	if i.explicitFields != nil {
+		next.Set(i.explicitFields)
 	}
 	next.Or(next, field)
-	p.explicitFields = next
+	i.explicitFields = next
 }
 
-// SetIsPrimary sets the IsPrimary field and marks it as non-optional;
+// SetCode sets the Code field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (p *ProviderBusinessName) SetIsPrimary(isPrimary bool) {
-	p.IsPrimary = isPrimary
-	p.require(providerBusinessNameFieldIsPrimary)
+func (i *IndustryClassification) SetCode(code string) {
+	i.Code = code
+	i.require(industryClassificationFieldCode)
 }
 
-// SetName sets the Name field and marks it as non-optional;
+// SetDescription sets the Description field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (p *ProviderBusinessName) SetName(name BusinessNameNullable) {
-	p.Name = name
-	p.require(providerBusinessNameFieldName)
+func (i *IndustryClassification) SetDescription(description string) {
+	i.Description = description
+	i.require(industryClassificationFieldDescription)
 }
 
-func (p *ProviderBusinessName) UnmarshalJSON(data []byte) error {
-	type embed ProviderBusinessName
+// SetConfidence sets the Confidence field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IndustryClassification) SetConfidence(confidence *BusinessIndustryConfidence) {
+	i.Confidence = confidence
+	i.require(industryClassificationFieldConfidence)
+}
+
+// SetMccCodes sets the MccCodes field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IndustryClassification) SetMccCodes(mccCodes []*BusinessMerchantCategoryCode) {
+	i.MccCodes = mccCodes
+	i.require(industryClassificationFieldMccCodes)
+}
+
+// SetSicCodes sets the SicCodes field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (i *IndustryClassification) SetSicCodes(sicCodes []*BusinessStandardIndustrialClassificationCode) {
+	i.SicCodes = sicCodes
+	i.require(industryClassificationFieldSicCodes)
+}
+
+func (i *IndustryClassification) UnmarshalJSON(data []byte) error {
+	type embed IndustryClassification
 	var unmarshaler = struct {
 		embed
 	}{
-		embed: embed(*p),
+		embed: embed(*i),
 	}
 	if err := json.Unmarshal(data, &unmarshaler); err != nil {
 		return err
 	}
-	*p = ProviderBusinessName(unmarshaler.embed)
-	extraProperties, err := internal.ExtractExtraProperties(data, *p)
+	*i = IndustryClassification(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *i)
 	if err != nil {
 		return err
 	}
-	p.ExtraProperties = extraProperties
-	presentFields, err := internal.ExplicitFieldsFromJSON(data, providerBusinessNameNullableFields)
+	i.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, industryClassificationNullableFields)
 	if err != nil {
 		return err
 	}
 	if presentFields != nil {
-		p.require(presentFields)
+		i.require(presentFields)
 	}
-	p.rawJSON = json.RawMessage(data)
+	i.rawJSON = json.RawMessage(data)
 	return nil
 }
 
-func (p *ProviderBusinessName) MarshalJSON() ([]byte, error) {
-	type embed ProviderBusinessName
+func (i *IndustryClassification) MarshalJSON() ([]byte, error) {
+	type embed IndustryClassification
 	var marshaler = struct {
 		embed
 	}{
-		embed: embed(*p),
+		embed: embed(*i),
 	}
-	explicitMarshaler := internal.HandleExplicitFields(marshaler, p.explicitFields)
-	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, p.ExtraProperties)
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, i.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, i.ExtraProperties)
 }
 
-func (p *ProviderBusinessName) String() string {
-	if p == nil {
+func (i *IndustryClassification) String() string {
+	if i == nil {
 		return "<nil>"
 	}
-	if len(p.rawJSON) > 0 {
-		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
+	if len(i.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(i.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := internal.StringifyJSON(p); err == nil {
+	if value, err := internal.StringifyJSON(i); err == nil {
 		return value
 	}
-	return fmt.Sprintf("%#v", p)
+	return fmt.Sprintf("%#v", i)
 }
 
 var (

@@ -5671,6 +5671,7 @@ func TestRequiredNullableRoundTripIdentityMatchListResponse(t *testing.T) {
 
 func TestOptionalNullableRoundTripAccountIdentityDocumentUpload(t *testing.T) {
 	optionalNullableKeys := []string{
+		"verification_insights",
 		"apy",
 		"holder_category",
 		"paired_account_id",
@@ -5687,7 +5688,7 @@ func TestOptionalNullableRoundTripAccountIdentityDocumentUpload(t *testing.T) {
 	t.Run("NullPreserved", func(t *testing.T) {
 		t.Parallel()
 		var obj AccountIdentityDocumentUpload
-		require.NoError(t, json.Unmarshal([]byte(`{"apy":null,"holder_category":null,"paired_account_id":null,"documents":null}`), &obj))
+		require.NoError(t, json.Unmarshal([]byte(`{"verification_insights":null,"apy":null,"holder_category":null,"paired_account_id":null,"documents":null}`), &obj))
 		result := marshalToMap(t, &obj)
 		for _, key := range optionalNullableKeys {
 			value, ok := result[key]

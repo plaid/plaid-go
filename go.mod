@@ -1,4 +1,4 @@
-module github.com/plaid/plaid-go/v50
+module github.com/plaid/plaid-go/v51
 
 go 1.21
 

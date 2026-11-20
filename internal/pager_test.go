@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/plaid/plaid-go/v50/core"
+	"github.com/plaid/plaid-go/v51/core"
 )
 
 type TestPageResponse struct {

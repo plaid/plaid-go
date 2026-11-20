@@ -5,7 +5,7 @@ package plaid
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/plaid/plaid-go/v50/internal"
+	internal "github.com/plaid/plaid-go/v51/internal"
 	big "math/big"
 	time "time"
 )
@@ -350,13 +350,14 @@ var (
 
 // accountIdentityDocumentUploadNullableFields maps the wire names of AccountIdentityDocumentUpload's nullable fields (required or optional) to their field bits.
 var accountIdentityDocumentUploadNullableFields = map[string]*big.Int{
-	"mask":              accountIdentityDocumentUploadFieldMask,
-	"official_name":     accountIdentityDocumentUploadFieldOfficialName,
-	"subtype":           accountIdentityDocumentUploadFieldSubtype,
-	"apy":               accountIdentityDocumentUploadFieldApy,
-	"holder_category":   accountIdentityDocumentUploadFieldHolderCategory,
-	"paired_account_id": accountIdentityDocumentUploadFieldPairedAccountID,
-	"documents":         accountIdentityDocumentUploadFieldDocuments,
+	"mask":                  accountIdentityDocumentUploadFieldMask,
+	"official_name":         accountIdentityDocumentUploadFieldOfficialName,
+	"subtype":               accountIdentityDocumentUploadFieldSubtype,
+	"verification_insights": accountIdentityDocumentUploadFieldVerificationInsights,
+	"apy":                   accountIdentityDocumentUploadFieldApy,
+	"holder_category":       accountIdentityDocumentUploadFieldHolderCategory,
+	"paired_account_id":     accountIdentityDocumentUploadFieldPairedAccountID,
+	"documents":             accountIdentityDocumentUploadFieldDocuments,
 }
 
 // Identity information about an account

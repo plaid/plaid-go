@@ -150,7 +150,7 @@ client.AssetReport.Get(
 <dl>
 <dd>
 
-**includeInsights:** `*bool` — `true` if you would like to retrieve the Asset Report with Insights, `false` otherwise. This field defaults to `false` if omitted.
+**includeInsights:** `*bool` — If `true`, retrieves the Asset Report with Insights.
     
 </dd>
 </dl>
@@ -158,7 +158,7 @@ client.AssetReport.Get(
 <dl>
 <dd>
 
-**fastReport:** `*bool` — `true` to fetch "fast" version of asset report. Defaults to false if omitted. Can only be used if `/asset_report/create` was called with `options.add_ons` set to `["fast_assets"]`.
+**fastReport:** `*bool` — If `true`, retrieves the Fast Asset Report. If `false`, retrieves the Full Asset Report. To set this field to `true`, you must call `/asset_report/create` with `options.add_ons` set to `["fast_assets"]`.
     
 </dd>
 </dl>
@@ -4170,7 +4170,7 @@ Describes the reason you are generating a Consumer Report for this user. The pur
 <dl>
 <dd>
 
-**reportID:** `*string` — A unique ID identifying a Consumer Report. Like all Plaid identifiers, this ID is case sensitive. When provided, that specific report is returned; when omitted, the most recent report matching the request is returned. Omit this field when retrieving a report without a prior `/cra/report/create` or `/link/token/create` request.
+**reportID:** `*string` — A unique ID identifying a Consumer Report. Like all Plaid identifiers, this ID is case sensitive. Required when `scope` is `CLIENT_USER`. When provided, that specific report is returned. Otherwise, the most recent report matching the request is returned. Omit this field when retrieving a report without a prior `/cra/report/create` or `/link/token/create` request.
     
 </dd>
 </dl>
@@ -6997,6 +6997,8 @@ The `/sandbox/item/fire_webhook` endpoint is used to test that code correctly ha
 `LOGIN_REPAIRED`: Fired when an Item recovers from the `ITEM_LOGIN_REQUIRED` without the user going through update mode in your app.
 
 `PENDING_DISCONNECT`: Fired when an Item will stop working in the near future (e.g. due to a planned bank migration) and must be sent through update mode to continue working.
+
+`CONSENT_UPDATED`: Fired when the user changes the consent duration at their institution and the Item's `consent_expiration_time` changes. Sandbox Items have no stored consent expiration, so the payload's `consent_expiration_time` is one year from the time the webhook is fired.
 
 `RECURRING_TRANSACTIONS_UPDATE`: Recurring Transactions webhook to be fired for a given Sandbox Item. If your client is not enabled for Recurring Transactions, a `SANDBOX_PRODUCT_NOT_ENABLED` error will result.
 
@@ -14637,6 +14639,14 @@ client.BusinessVerification.Create(
 <dd>
 
 **business:** `*plaid.BusinessVerificationCreateRequestBusiness` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**options:** `*plaid.BusinessVerificationCreateRequestOptions` 
     
 </dd>
 </dl>
@@ -26675,6 +26685,10 @@ client.Transfer.Ledger.Withdraw(
 <dd>
 
 **network:** `plaid.TransferNetwork` 
+
+The network or rails used for the withdrawal: `ach` for Standard ACH or `same-day-ach` for Same Day ACH. The limit for a single Standard ACH withdrawal is $10,000,000, and the limit for a single Same Day ACH withdrawal is $1,000,000; withdrawals above the limit for their network will fail.
+
+The Same Day ACH cutoff is 3:00 PM Eastern Time and the Standard ACH cutoff is 8:30 PM Eastern Time. If a `same-day-ach` withdrawal is submitted on a banking day after the Same Day ACH cutoff and before the Standard ACH cutoff, it may be downgraded to Standard ACH. Withdrawals submitted after the Standard ACH cutoff, or on a weekend or bank holiday, stay Same Day ACH and are submitted in the first Same Day ACH window of the next banking day. See [ACH processing windows](https://plaid.com/docs/transfer/creating-transfers/#ach-processing-windows).
     
 </dd>
 </dl>

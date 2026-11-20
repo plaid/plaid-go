@@ -2215,7 +2215,7 @@ func TestSettersMarkExplicitDistributionBreakdown(t *testing.T) {
 func TestSettersDocumentMetadata(t *testing.T) {
 	t.Run("SetName", func(t *testing.T) {
 		obj := &DocumentMetadata{}
-		var fernTestValueName *string
+		var fernTestValueName string
 		obj.SetName(fernTestValueName)
 		assert.Equal(t, fernTestValueName, obj.Name)
 		assert.NotNil(t, obj.explicitFields)
@@ -2231,7 +2231,7 @@ func TestSettersDocumentMetadata(t *testing.T) {
 
 	t.Run("SetDocID", func(t *testing.T) {
 		obj := &DocumentMetadata{}
-		var fernTestValueDocID *string
+		var fernTestValueDocID string
 		obj.SetDocID(fernTestValueDocID)
 		assert.Equal(t, fernTestValueDocID, obj.DocID)
 		assert.NotNil(t, obj.explicitFields)
@@ -2239,7 +2239,7 @@ func TestSettersDocumentMetadata(t *testing.T) {
 
 	t.Run("SetDocType", func(t *testing.T) {
 		obj := &DocumentMetadata{}
-		var fernTestValueDocType *DocType
+		var fernTestValueDocType DocType
 		obj.SetDocType(fernTestValueDocType)
 		assert.Equal(t, fernTestValueDocType, obj.DocType)
 		assert.NotNil(t, obj.explicitFields)
@@ -2252,21 +2252,11 @@ func TestGettersDocumentMetadata(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &DocumentMetadata{}
-		var expected *string
+		var expected string
 		obj.Name = expected
 
 		// Act & Assert
 		assert.Equal(t, expected, obj.GetName(), "getter should return the property value")
-	})
-
-	t.Run("GetName_NilValue", func(t *testing.T) {
-		t.Parallel()
-		// Arrange
-		obj := &DocumentMetadata{}
-		obj.Name = nil
-
-		// Act & Assert
-		assert.Nil(t, obj.GetName(), "getter should return nil when property is nil")
 	})
 
 	t.Run("GetName_NilReceiver", func(t *testing.T) {
@@ -2318,21 +2308,11 @@ func TestGettersDocumentMetadata(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &DocumentMetadata{}
-		var expected *string
+		var expected string
 		obj.DocID = expected
 
 		// Act & Assert
 		assert.Equal(t, expected, obj.GetDocID(), "getter should return the property value")
-	})
-
-	t.Run("GetDocID_NilValue", func(t *testing.T) {
-		t.Parallel()
-		// Arrange
-		obj := &DocumentMetadata{}
-		obj.DocID = nil
-
-		// Act & Assert
-		assert.Nil(t, obj.GetDocID(), "getter should return nil when property is nil")
 	})
 
 	t.Run("GetDocID_NilReceiver", func(t *testing.T) {
@@ -2351,21 +2331,11 @@ func TestGettersDocumentMetadata(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &DocumentMetadata{}
-		var expected *DocType
+		var expected DocType
 		obj.DocType = expected
 
 		// Act & Assert
 		assert.Equal(t, expected, obj.GetDocType(), "getter should return the property value")
-	})
-
-	t.Run("GetDocType_NilValue", func(t *testing.T) {
-		t.Parallel()
-		// Arrange
-		obj := &DocumentMetadata{}
-		obj.DocType = nil
-
-		// Act & Assert
-		assert.Nil(t, obj.GetDocType(), "getter should return nil when property is nil")
 	})
 
 	t.Run("GetDocType_NilReceiver", func(t *testing.T) {
@@ -2387,7 +2357,7 @@ func TestSettersMarkExplicitDocumentMetadata(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &DocumentMetadata{}
-		var fernTestValueName *string
+		var fernTestValueName string
 
 		// Act
 		obj.SetName(fernTestValueName)
@@ -2449,7 +2419,7 @@ func TestSettersMarkExplicitDocumentMetadata(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &DocumentMetadata{}
-		var fernTestValueDocID *string
+		var fernTestValueDocID string
 
 		// Act
 		obj.SetDocID(fernTestValueDocID)
@@ -2480,7 +2450,7 @@ func TestSettersMarkExplicitDocumentMetadata(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &DocumentMetadata{}
-		var fernTestValueDocType *DocType
+		var fernTestValueDocType DocType
 
 		// Act
 		obj.SetDocType(fernTestValueDocType)
@@ -13912,6 +13882,13 @@ func TestStringW2(t *testing.T) {
 }
 
 func TestEnumDocType(t *testing.T) {
+	t.Run("NewFromString_DOCUMENT_TYPE_UNKNOWN", func(t *testing.T) {
+		t.Parallel()
+		val, err := NewDocTypeFromString("DOCUMENT_TYPE_UNKNOWN")
+		assert.NoError(t, err, "valid enum value should not return error")
+		assert.Equal(t, DocType("DOCUMENT_TYPE_UNKNOWN"), val, "enum value should match expected wire value")
+	})
+
 	t.Run("NewFromString_UNKNOWN", func(t *testing.T) {
 		t.Parallel()
 		val, err := NewDocTypeFromString("UNKNOWN")
@@ -14009,7 +13986,7 @@ func TestEnumDocType(t *testing.T) {
 	})
 
 	t.Run("Ptr", func(t *testing.T) {
-		val, err := NewDocTypeFromString("UNKNOWN")
+		val, err := NewDocTypeFromString("DOCUMENT_TYPE_UNKNOWN")
 		assert.NoError(t, err)
 		ptr := val.Ptr()
 		assert.NotNil(t, ptr)

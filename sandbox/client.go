@@ -7,10 +7,10 @@ import (
 	http "net/http"
 	os "os"
 
-	plaid "github.com/plaid/plaid-go/v50"
-	core "github.com/plaid/plaid-go/v50/core"
-	internal "github.com/plaid/plaid-go/v50/internal"
-	option "github.com/plaid/plaid-go/v50/option"
+	plaid "github.com/plaid/plaid-go/v51"
+	core "github.com/plaid/plaid-go/v51/core"
+	internal "github.com/plaid/plaid-go/v51/internal"
+	option "github.com/plaid/plaid-go/v51/option"
 )
 
 type Client struct {
@@ -164,6 +164,8 @@ func (c *Client) CreatePublicToken(
 // `LOGIN_REPAIRED`: Fired when an Item recovers from the `ITEM_LOGIN_REQUIRED` without the user going through update mode in your app.
 //
 // `PENDING_DISCONNECT`: Fired when an Item will stop working in the near future (e.g. due to a planned bank migration) and must be sent through update mode to continue working.
+//
+// `CONSENT_UPDATED`: Fired when the user changes the consent duration at their institution and the Item's `consent_expiration_time` changes. Sandbox Items have no stored consent expiration, so the payload's `consent_expiration_time` is one year from the time the webhook is fired.
 //
 // `RECURRING_TRANSACTIONS_UPDATE`: Recurring Transactions webhook to be fired for a given Sandbox Item. If your client is not enabled for Recurring Transactions, a `SANDBOX_PRODUCT_NOT_ENABLED` error will result.
 //

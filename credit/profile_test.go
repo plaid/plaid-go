@@ -4,7 +4,7 @@ package credit
 
 import (
 	json "encoding/json"
-	v50 "github.com/plaid/plaid-go/v50"
+	v51 "github.com/plaid/plaid-go/v51"
 	assert "github.com/stretchr/testify/assert"
 	require "github.com/stretchr/testify/require"
 	testing "testing"
@@ -13,7 +13,7 @@ import (
 func TestSettersCraCreditProfileReportGetRequest(t *testing.T) {
 	t.Run("SetUserID", func(t *testing.T) {
 		obj := &CraCreditProfileReportGetRequest{}
-		var fernTestValueUserID v50.NewUserID
+		var fernTestValueUserID v51.NewUserID
 		obj.SetUserID(fernTestValueUserID)
 		assert.Equal(t, fernTestValueUserID, obj.UserID)
 		assert.NotNil(t, obj.explicitFields)
@@ -21,7 +21,7 @@ func TestSettersCraCreditProfileReportGetRequest(t *testing.T) {
 
 	t.Run("SetConsumerReportPermissiblePurpose", func(t *testing.T) {
 		obj := &CraCreditProfileReportGetRequest{}
-		var fernTestValueConsumerReportPermissiblePurpose v50.ConsumerReportPermissiblePurpose
+		var fernTestValueConsumerReportPermissiblePurpose v51.ConsumerReportPermissiblePurpose
 		obj.SetConsumerReportPermissiblePurpose(fernTestValueConsumerReportPermissiblePurpose)
 		assert.Equal(t, fernTestValueConsumerReportPermissiblePurpose, obj.ConsumerReportPermissiblePurpose)
 		assert.NotNil(t, obj.explicitFields)
@@ -37,7 +37,7 @@ func TestSettersCraCreditProfileReportGetRequest(t *testing.T) {
 
 	t.Run("SetReportType", func(t *testing.T) {
 		obj := &CraCreditProfileReportGetRequest{}
-		var fernTestValueReportType v50.CraCreditProfileReportType
+		var fernTestValueReportType v51.CraCreditProfileReportType
 		obj.SetReportType(fernTestValueReportType)
 		assert.Equal(t, fernTestValueReportType, obj.ReportType)
 		assert.NotNil(t, obj.explicitFields)
@@ -45,7 +45,7 @@ func TestSettersCraCreditProfileReportGetRequest(t *testing.T) {
 
 	t.Run("SetInquiryType", func(t *testing.T) {
 		obj := &CraCreditProfileReportGetRequest{}
-		var fernTestValueInquiryType v50.CraCreditProfileInquiryType
+		var fernTestValueInquiryType v51.CraCreditProfileInquiryType
 		obj.SetInquiryType(fernTestValueInquiryType)
 		assert.Equal(t, fernTestValueInquiryType, obj.InquiryType)
 		assert.NotNil(t, obj.explicitFields)
@@ -53,7 +53,7 @@ func TestSettersCraCreditProfileReportGetRequest(t *testing.T) {
 
 	t.Run("SetVersion", func(t *testing.T) {
 		obj := &CraCreditProfileReportGetRequest{}
-		var fernTestValueVersion v50.CraCreditProfileReportVersion
+		var fernTestValueVersion v51.CraCreditProfileReportVersion
 		obj.SetVersion(fernTestValueVersion)
 		assert.Equal(t, fernTestValueVersion, obj.Version)
 		assert.NotNil(t, obj.explicitFields)
@@ -66,7 +66,7 @@ func TestSettersMarkExplicitCraCreditProfileReportGetRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &CraCreditProfileReportGetRequest{}
-		var fernTestValueUserID v50.NewUserID
+		var fernTestValueUserID v51.NewUserID
 
 		// Act
 		obj.SetUserID(fernTestValueUserID)
@@ -97,7 +97,7 @@ func TestSettersMarkExplicitCraCreditProfileReportGetRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &CraCreditProfileReportGetRequest{}
-		var fernTestValueConsumerReportPermissiblePurpose v50.ConsumerReportPermissiblePurpose
+		var fernTestValueConsumerReportPermissiblePurpose v51.ConsumerReportPermissiblePurpose
 
 		// Act
 		obj.SetConsumerReportPermissiblePurpose(fernTestValueConsumerReportPermissiblePurpose)
@@ -159,7 +159,7 @@ func TestSettersMarkExplicitCraCreditProfileReportGetRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &CraCreditProfileReportGetRequest{}
-		var fernTestValueReportType v50.CraCreditProfileReportType
+		var fernTestValueReportType v51.CraCreditProfileReportType
 
 		// Act
 		obj.SetReportType(fernTestValueReportType)
@@ -190,7 +190,7 @@ func TestSettersMarkExplicitCraCreditProfileReportGetRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &CraCreditProfileReportGetRequest{}
-		var fernTestValueInquiryType v50.CraCreditProfileInquiryType
+		var fernTestValueInquiryType v51.CraCreditProfileInquiryType
 
 		// Act
 		obj.SetInquiryType(fernTestValueInquiryType)
@@ -221,7 +221,7 @@ func TestSettersMarkExplicitCraCreditProfileReportGetRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &CraCreditProfileReportGetRequest{}
-		var fernTestValueVersion v50.CraCreditProfileReportVersion
+		var fernTestValueVersion v51.CraCreditProfileReportVersion
 
 		// Act
 		obj.SetVersion(fernTestValueVersion)

@@ -5,7 +5,7 @@ package plaid
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/plaid/plaid-go/v50/internal"
+	internal "github.com/plaid/plaid-go/v51/internal"
 	big "math/big"
 	time "time"
 )
@@ -412,6 +412,7 @@ var accountAssetsNullableFields = map[string]*big.Int{
 	"mask":             accountAssetsFieldMask,
 	"official_name":    accountAssetsFieldOfficialName,
 	"subtype":          accountAssetsFieldSubtype,
+	"investments":      accountAssetsFieldInvestments,
 	"ownership_type":   accountAssetsFieldOwnershipType,
 	"account_insights": accountAssetsFieldAccountInsights,
 }
@@ -853,7 +854,7 @@ type AccountBalance struct {
 	//
 	// Available balance may be cached and is not guaranteed to be up-to-date in real-time unless the value was returned by `/accounts/balance/get`, or by `/signal/evaluate` with a Balance-only ruleset.
 	//
-	// If `current` is `null` this field is guaranteed not to be `null`, unless you have opted into enabling [limited-purpose checking accounts](https://plaid.com/docs/auth/#enabling-limited-purpose-checking-accounts-for-rent-or-mortgage), which always have `null` values for both `available` and `current` balance.
+	// If `current` is `null` this field is guaranteed not to be `null`, unless you have opted into enabling [limited-purpose checking accounts](https://plaid.com/docs/auth/#enabling-limited-purpose-checking-accounts), which always have `null` values for both `available` and `current` balance.
 	Available *float64 `json:"available,omitempty" url:"available,omitempty"`
 	// The total amount of funds in or owed by the account.
 	//
@@ -865,7 +866,7 @@ type AccountBalance struct {
 	//
 	// Note that balance information may be cached unless the value was returned by `/accounts/balance/get` or by `/signal/evaluate` with a Balance-only ruleset; if the Item is enabled for Transactions, the balance will be at least as recent as the most recent Transaction update. If you require real-time balance information, use the `available` balance as provided by `/accounts/balance/get` or `/signal/evaluate` called with a Balance-only `ruleset_key`.
 	//
-	// When returned by `/accounts/balance/get`, this field may be `null`. When this happens, `available` is guaranteed not to be `null`, unless you have opted into enabling [limited-purpose checking accounts](https://plaid.com/docs/auth/#enabling-limited-purpose-checking-accounts-for-rent-or-mortgage), which always have `null` values for both `available` and `current` balance.
+	// When returned by `/accounts/balance/get`, this field may be `null`. When this happens, `available` is guaranteed not to be `null`, unless you have opted into enabling [limited-purpose checking accounts](https://plaid.com/docs/auth/#enabling-limited-purpose-checking-accounts), which always have `null` values for both `available` and `current` balance.
 	Current *float64 `json:"current,omitempty" url:"current,omitempty"`
 	// For `credit`-type accounts, this represents the credit limit.
 	//
@@ -1068,12 +1069,13 @@ var (
 
 // accountBaseNullableFields maps the wire names of AccountBase's nullable fields (required or optional) to their field bits.
 var accountBaseNullableFields = map[string]*big.Int{
-	"mask":              accountBaseFieldMask,
-	"official_name":     accountBaseFieldOfficialName,
-	"subtype":           accountBaseFieldSubtype,
-	"apy":               accountBaseFieldApy,
-	"holder_category":   accountBaseFieldHolderCategory,
-	"paired_account_id": accountBaseFieldPairedAccountID,
+	"mask":                  accountBaseFieldMask,
+	"official_name":         accountBaseFieldOfficialName,
+	"subtype":               accountBaseFieldSubtype,
+	"verification_insights": accountBaseFieldVerificationInsights,
+	"apy":                   accountBaseFieldApy,
+	"holder_category":       accountBaseFieldHolderCategory,
+	"paired_account_id":     accountBaseFieldPairedAccountID,
 }
 
 // A single account at a financial institution.
@@ -1665,12 +1667,13 @@ var (
 
 // accountIdentityNullableFields maps the wire names of AccountIdentity's nullable fields (required or optional) to their field bits.
 var accountIdentityNullableFields = map[string]*big.Int{
-	"mask":              accountIdentityFieldMask,
-	"official_name":     accountIdentityFieldOfficialName,
-	"subtype":           accountIdentityFieldSubtype,
-	"apy":               accountIdentityFieldApy,
-	"holder_category":   accountIdentityFieldHolderCategory,
-	"paired_account_id": accountIdentityFieldPairedAccountID,
+	"mask":                  accountIdentityFieldMask,
+	"official_name":         accountIdentityFieldOfficialName,
+	"subtype":               accountIdentityFieldSubtype,
+	"verification_insights": accountIdentityFieldVerificationInsights,
+	"apy":                   accountIdentityFieldApy,
+	"holder_category":       accountIdentityFieldHolderCategory,
+	"paired_account_id":     accountIdentityFieldPairedAccountID,
 }
 
 // Identity information about an account
@@ -2038,12 +2041,13 @@ var (
 
 // accountIdentityMatchScoreNullableFields maps the wire names of AccountIdentityMatchScore's nullable fields (required or optional) to their field bits.
 var accountIdentityMatchScoreNullableFields = map[string]*big.Int{
-	"mask":              accountIdentityMatchScoreFieldMask,
-	"official_name":     accountIdentityMatchScoreFieldOfficialName,
-	"subtype":           accountIdentityMatchScoreFieldSubtype,
-	"apy":               accountIdentityMatchScoreFieldApy,
-	"holder_category":   accountIdentityMatchScoreFieldHolderCategory,
-	"paired_account_id": accountIdentityMatchScoreFieldPairedAccountID,
+	"mask":                  accountIdentityMatchScoreFieldMask,
+	"official_name":         accountIdentityMatchScoreFieldOfficialName,
+	"subtype":               accountIdentityMatchScoreFieldSubtype,
+	"verification_insights": accountIdentityMatchScoreFieldVerificationInsights,
+	"apy":                   accountIdentityMatchScoreFieldApy,
+	"holder_category":       accountIdentityMatchScoreFieldHolderCategory,
+	"paired_account_id":     accountIdentityMatchScoreFieldPairedAccountID,
 }
 
 // Identity match scores for an account
@@ -2607,6 +2611,7 @@ const (
 	AccountSubtypeFourHundredThreeB              AccountSubtype = "403B"
 	AccountSubtypeFourHundredFiftySevenB         AccountSubtype = "457b"
 	AccountSubtypeFiveHundredTwentyNine          AccountSubtype = "529"
+	AccountSubtypeFiveHundredThirtyA             AccountSubtype = "530a"
 	AccountSubtypeAuto                           AccountSubtype = "auto"
 	AccountSubtypeBrokerage                      AccountSubtype = "brokerage"
 	AccountSubtypeBusiness                       AccountSubtype = "business"
@@ -2697,6 +2702,8 @@ func NewAccountSubtypeFromString(s string) (AccountSubtype, error) {
 		return AccountSubtypeFourHundredFiftySevenB, nil
 	case "529":
 		return AccountSubtypeFiveHundredTwentyNine, nil
+	case "530a":
+		return AccountSubtypeFiveHundredThirtyA, nil
 	case "auto":
 		return AccountSubtypeAuto, nil
 	case "brokerage":
@@ -2869,6 +2876,8 @@ type AccountSubtypes = []*AccountSubtype
 //
 // `loan:` Loan account
 //
+// `payroll:` Payroll account
+//
 // `other:` Non-specified account type
 //
 // See the [Account type schema](https://plaid.com/docs/api/accounts#account-type-schema) for a full listing of account types and corresponding subtypes.
@@ -2880,6 +2889,7 @@ const (
 	AccountTypeDepository AccountType = "depository"
 	AccountTypeLoan       AccountType = "loan"
 	AccountTypeBrokerage  AccountType = "brokerage"
+	AccountTypePayroll    AccountType = "payroll"
 	AccountTypeOther      AccountType = "other"
 )
 
@@ -2895,6 +2905,8 @@ func NewAccountTypeFromString(s string) (AccountType, error) {
 		return AccountTypeLoan, nil
 	case "brokerage":
 		return AccountTypeBrokerage, nil
+	case "payroll":
+		return AccountTypePayroll, nil
 	case "other":
 		return AccountTypeOther, nil
 	}
@@ -2916,13 +2928,15 @@ var (
 // accountVerificationInsightsNullableFields maps the wire names of AccountVerificationInsights's nullable fields (required or optional) to their field bits.
 var accountVerificationInsightsNullableFields = map[string]*big.Int{
 	"name_match_score": accountVerificationInsightsFieldNameMatchScore,
+	"network_status":   accountVerificationInsightsFieldNetworkStatus,
+	"previous_returns": accountVerificationInsightsFieldPreviousReturns,
 }
 
 // Insights from performing database verification for the account. Only returned for Auth Items using Database Auth.
 type AccountVerificationInsights struct {
 	// Indicates the score of the name match between the given name provided during database verification (available in the [`verification_name`](https://plaid.com/docs/api/products/auth/#auth-get-response-accounts-verification-name) field if using standard Database Auth, or provided in the request if using `/auth/verify`) and matched Plaid network accounts. If defined, will be a value between 0 and 100. Will be undefined if name matching was not enabled for the database verification session or if there were no eligible Plaid network matches to compare the given name with. For Items at Canadian institutions, name matching is not currently supported, so this field will always be omitted.
 	NameMatchScore      *int                                           `json:"name_match_score,omitempty" url:"name_match_score,omitempty"`
-	NetworkStatus       *AccountVerificationInsightsNetworkStatus      `json:"network_status" url:"network_status"`
+	NetworkStatus       *AccountVerificationInsightsNetworkStatus      `json:"network_status,omitempty" url:"network_status,omitempty"`
 	PreviousReturns     *AccountVerificationInsightsPreviousReturns    `json:"previous_returns,omitempty" url:"previous_returns,omitempty"`
 	AccountNumberFormat AccountVerificationInsightsAccountNumberFormat `json:"account_number_format" url:"account_number_format"`
 
@@ -4774,6 +4788,7 @@ var (
 	amountWithCurrencyWithMonthlyAverageFieldAmount                 = big.NewInt(1 << 0)
 	amountWithCurrencyWithMonthlyAverageFieldIsoCurrencyCode        = big.NewInt(1 << 1)
 	amountWithCurrencyWithMonthlyAverageFieldUnofficialCurrencyCode = big.NewInt(1 << 2)
+	amountWithCurrencyWithMonthlyAverageFieldMonthlyAverage         = big.NewInt(1 << 3)
 )
 
 // amountWithCurrencyWithMonthlyAverageNullableFields maps the wire names of AmountWithCurrencyWithMonthlyAverage's nullable fields (required or optional) to their field bits.
@@ -4781,6 +4796,7 @@ var amountWithCurrencyWithMonthlyAverageNullableFields = map[string]*big.Int{
 	"amount":                   amountWithCurrencyWithMonthlyAverageFieldAmount,
 	"iso_currency_code":        amountWithCurrencyWithMonthlyAverageFieldIsoCurrencyCode,
 	"unofficial_currency_code": amountWithCurrencyWithMonthlyAverageFieldUnofficialCurrencyCode,
+	"monthly_average":          amountWithCurrencyWithMonthlyAverageFieldMonthlyAverage,
 }
 
 // Represents an amount and a monthly average
@@ -4796,7 +4812,8 @@ type AmountWithCurrencyWithMonthlyAverage struct {
 	// The unofficial currency code associated with the amount. Always `null` if `iso_currency_code` is non-`null`.
 	//
 	// See the [currency code schema](https://plaid.com/docs/api/accounts#currency-code-schema) for a full listing of supported `unofficial_currency_code`s.
-	UnofficialCurrencyCode *string `json:"unofficial_currency_code,omitempty" url:"unofficial_currency_code,omitempty"`
+	UnofficialCurrencyCode *string         `json:"unofficial_currency_code,omitempty" url:"unofficial_currency_code,omitempty"`
+	MonthlyAverage         *MonthlyAverage `json:"monthly_average,omitempty" url:"monthly_average,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -4825,6 +4842,13 @@ func (a *AmountWithCurrencyWithMonthlyAverage) GetUnofficialCurrencyCode() *stri
 		return nil
 	}
 	return a.UnofficialCurrencyCode
+}
+
+func (a *AmountWithCurrencyWithMonthlyAverage) GetMonthlyAverage() *MonthlyAverage {
+	if a == nil {
+		return nil
+	}
+	return a.MonthlyAverage
 }
 
 func (a *AmountWithCurrencyWithMonthlyAverage) GetExtraProperties() map[string]interface{} {
@@ -4862,6 +4886,13 @@ func (a *AmountWithCurrencyWithMonthlyAverage) SetIsoCurrencyCode(isoCurrencyCod
 func (a *AmountWithCurrencyWithMonthlyAverage) SetUnofficialCurrencyCode(unofficialCurrencyCode *string) {
 	a.UnofficialCurrencyCode = unofficialCurrencyCode
 	a.require(amountWithCurrencyWithMonthlyAverageFieldUnofficialCurrencyCode)
+}
+
+// SetMonthlyAverage sets the MonthlyAverage field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AmountWithCurrencyWithMonthlyAverage) SetMonthlyAverage(monthlyAverage *MonthlyAverage) {
+	a.MonthlyAverage = monthlyAverage
+	a.require(amountWithCurrencyWithMonthlyAverageFieldMonthlyAverage)
 }
 
 func (a *AmountWithCurrencyWithMonthlyAverage) UnmarshalJSON(data []byte) error {
@@ -5707,21 +5738,26 @@ var (
 	assetReportInvestmentHoldingFieldAccountID              = big.NewInt(1 << 0)
 	assetReportInvestmentHoldingFieldSecurityID             = big.NewInt(1 << 1)
 	assetReportInvestmentHoldingFieldTickerSymbol           = big.NewInt(1 << 2)
-	assetReportInvestmentHoldingFieldInstitutionPrice       = big.NewInt(1 << 3)
-	assetReportInvestmentHoldingFieldInstitutionPriceAsOf   = big.NewInt(1 << 4)
-	assetReportInvestmentHoldingFieldInstitutionValue       = big.NewInt(1 << 5)
-	assetReportInvestmentHoldingFieldQuantity               = big.NewInt(1 << 6)
-	assetReportInvestmentHoldingFieldVestedQuantity         = big.NewInt(1 << 7)
-	assetReportInvestmentHoldingFieldVestedValue            = big.NewInt(1 << 8)
-	assetReportInvestmentHoldingFieldIsoCurrencyCode        = big.NewInt(1 << 9)
-	assetReportInvestmentHoldingFieldUnofficialCurrencyCode = big.NewInt(1 << 10)
-	assetReportInvestmentHoldingFieldTaxLots                = big.NewInt(1 << 11)
+	assetReportInvestmentHoldingFieldName                   = big.NewInt(1 << 3)
+	assetReportInvestmentHoldingFieldInstitutionPrice       = big.NewInt(1 << 4)
+	assetReportInvestmentHoldingFieldInstitutionPriceAsOf   = big.NewInt(1 << 5)
+	assetReportInvestmentHoldingFieldInstitutionValue       = big.NewInt(1 << 6)
+	assetReportInvestmentHoldingFieldQuantity               = big.NewInt(1 << 7)
+	assetReportInvestmentHoldingFieldVestedQuantity         = big.NewInt(1 << 8)
+	assetReportInvestmentHoldingFieldVestedValue            = big.NewInt(1 << 9)
+	assetReportInvestmentHoldingFieldIsoCurrencyCode        = big.NewInt(1 << 10)
+	assetReportInvestmentHoldingFieldUnofficialCurrencyCode = big.NewInt(1 << 11)
+	assetReportInvestmentHoldingFieldTaxLots                = big.NewInt(1 << 12)
 )
 
 // assetReportInvestmentHoldingNullableFields maps the wire names of AssetReportInvestmentHolding's nullable fields (required or optional) to their field bits.
 var assetReportInvestmentHoldingNullableFields = map[string]*big.Int{
 	"ticker_symbol":            assetReportInvestmentHoldingFieldTickerSymbol,
+	"name":                     assetReportInvestmentHoldingFieldName,
+	"institution_price":        assetReportInvestmentHoldingFieldInstitutionPrice,
 	"institution_price_as_of":  assetReportInvestmentHoldingFieldInstitutionPriceAsOf,
+	"institution_value":        assetReportInvestmentHoldingFieldInstitutionValue,
+	"quantity":                 assetReportInvestmentHoldingFieldQuantity,
 	"vested_quantity":          assetReportInvestmentHoldingFieldVestedQuantity,
 	"vested_value":             assetReportInvestmentHoldingFieldVestedValue,
 	"iso_currency_code":        assetReportInvestmentHoldingFieldIsoCurrencyCode,
@@ -5736,14 +5772,16 @@ type AssetReportInvestmentHolding struct {
 	SecurityID string `json:"security_id" url:"security_id"`
 	// The holding's trading symbol for publicly traded holdings, and otherwise a short identifier if available.
 	TickerSymbol *string `json:"ticker_symbol,omitempty" url:"ticker_symbol,omitempty"`
+	// The name of the security.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The last price given by the institution for this security.
-	InstitutionPrice float64 `json:"institution_price" url:"institution_price"`
+	InstitutionPrice *float64 `json:"institution_price,omitempty" url:"institution_price,omitempty"`
 	// The date at which `institution_price` was current.
 	InstitutionPriceAsOf *time.Time `json:"institution_price_as_of,omitempty" url:"institution_price_as_of,omitempty" format:"date"`
 	// The value of the holding, as reported by the institution.
-	InstitutionValue float64 `json:"institution_value" url:"institution_value"`
+	InstitutionValue *float64 `json:"institution_value,omitempty" url:"institution_value,omitempty"`
 	// The total quantity of the asset held, as reported by the financial institution. If the security is an option, `quantity` will reflect the total number of options (typically the number of contracts multiplied by 100), not the number of contracts.
-	Quantity float64 `json:"quantity" url:"quantity"`
+	Quantity *float64 `json:"quantity,omitempty" url:"quantity,omitempty"`
 	// The total quantity of vested assets held, as reported by the financial institution. Vested assets are only associated with [equities](https://plaid.com/docs/api/products/investments/#investments-holdings-get-response-securities-type).
 	VestedQuantity *float64 `json:"vested_quantity,omitempty" url:"vested_quantity,omitempty"`
 	// The value of the vested holdings as reported by the institution.
@@ -5786,9 +5824,16 @@ func (a *AssetReportInvestmentHolding) GetTickerSymbol() *string {
 	return a.TickerSymbol
 }
 
-func (a *AssetReportInvestmentHolding) GetInstitutionPrice() float64 {
+func (a *AssetReportInvestmentHolding) GetName() *string {
 	if a == nil {
-		return 0
+		return nil
+	}
+	return a.Name
+}
+
+func (a *AssetReportInvestmentHolding) GetInstitutionPrice() *float64 {
+	if a == nil {
+		return nil
 	}
 	return a.InstitutionPrice
 }
@@ -5800,16 +5845,16 @@ func (a *AssetReportInvestmentHolding) GetInstitutionPriceAsOf() *time.Time {
 	return a.InstitutionPriceAsOf
 }
 
-func (a *AssetReportInvestmentHolding) GetInstitutionValue() float64 {
+func (a *AssetReportInvestmentHolding) GetInstitutionValue() *float64 {
 	if a == nil {
-		return 0
+		return nil
 	}
 	return a.InstitutionValue
 }
 
-func (a *AssetReportInvestmentHolding) GetQuantity() float64 {
+func (a *AssetReportInvestmentHolding) GetQuantity() *float64 {
 	if a == nil {
-		return 0
+		return nil
 	}
 	return a.Quantity
 }
@@ -5886,9 +5931,16 @@ func (a *AssetReportInvestmentHolding) SetTickerSymbol(tickerSymbol *string) {
 	a.require(assetReportInvestmentHoldingFieldTickerSymbol)
 }
 
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (a *AssetReportInvestmentHolding) SetName(name *string) {
+	a.Name = name
+	a.require(assetReportInvestmentHoldingFieldName)
+}
+
 // SetInstitutionPrice sets the InstitutionPrice field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (a *AssetReportInvestmentHolding) SetInstitutionPrice(institutionPrice float64) {
+func (a *AssetReportInvestmentHolding) SetInstitutionPrice(institutionPrice *float64) {
 	a.InstitutionPrice = institutionPrice
 	a.require(assetReportInvestmentHoldingFieldInstitutionPrice)
 }
@@ -5902,14 +5954,14 @@ func (a *AssetReportInvestmentHolding) SetInstitutionPriceAsOf(institutionPriceA
 
 // SetInstitutionValue sets the InstitutionValue field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (a *AssetReportInvestmentHolding) SetInstitutionValue(institutionValue float64) {
+func (a *AssetReportInvestmentHolding) SetInstitutionValue(institutionValue *float64) {
 	a.InstitutionValue = institutionValue
 	a.require(assetReportInvestmentHoldingFieldInstitutionValue)
 }
 
 // SetQuantity sets the Quantity field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (a *AssetReportInvestmentHolding) SetQuantity(quantity float64) {
+func (a *AssetReportInvestmentHolding) SetQuantity(quantity *float64) {
 	a.Quantity = quantity
 	a.require(assetReportInvestmentHoldingFieldQuantity)
 }
@@ -6201,7 +6253,13 @@ var (
 // assetReportInvestmentTransactionNullableFields maps the wire names of AssetReportInvestmentTransaction's nullable fields (required or optional) to their field bits.
 var assetReportInvestmentTransactionNullableFields = map[string]*big.Int{
 	"security_id":              assetReportInvestmentTransactionFieldSecurityID,
+	"name":                     assetReportInvestmentTransactionFieldName,
+	"quantity":                 assetReportInvestmentTransactionFieldQuantity,
+	"amount":                   assetReportInvestmentTransactionFieldAmount,
+	"price":                    assetReportInvestmentTransactionFieldPrice,
 	"fees":                     assetReportInvestmentTransactionFieldFees,
+	"type":                     assetReportInvestmentTransactionFieldType,
+	"subtype":                  assetReportInvestmentTransactionFieldSubtype,
 	"iso_currency_code":        assetReportInvestmentTransactionFieldIsoCurrencyCode,
 	"unofficial_currency_code": assetReportInvestmentTransactionFieldUnofficialCurrencyCode,
 }
@@ -6217,17 +6275,17 @@ type AssetReportInvestmentTransaction struct {
 	// The [ISO 8601](https://wikipedia.org/wiki/ISO_8601) posting date for the transaction.
 	Date time.Time `json:"date" url:"date" format:"date"`
 	// The institution's description of the transaction.
-	Name string `json:"name" url:"name"`
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The number of units of the security involved in this transaction. Positive for buy transactions; negative for sell transactions.
-	Quantity float64 `json:"quantity" url:"quantity"`
+	Quantity *float64 `json:"quantity,omitempty" url:"quantity,omitempty"`
 	// The complete value of the transaction. Positive values when cash is debited, e.g. purchases of stock; negative values when cash is credited, e.g. sales of stock. Treatment remains the same for cash-only movements unassociated with securities. For transactions representing a simultaneous cash contribution and purchase of a security, the portion of the transaction representing the purchase takes precedence, and the `amount` is represented as positive.
-	Amount float64 `json:"amount" url:"amount"`
+	Amount *float64 `json:"amount,omitempty" url:"amount,omitempty"`
 	// The price of the security at which this transaction occurred.
-	Price float64 `json:"price" url:"price"`
+	Price *float64 `json:"price,omitempty" url:"price,omitempty"`
 	// The combined value of all fees applied to this transaction
-	Fees    *float64                     `json:"fees,omitempty" url:"fees,omitempty"`
-	Type    InvestmentTransactionType    `json:"type" url:"type"`
-	Subtype InvestmentTransactionSubtype `json:"subtype" url:"subtype"`
+	Fees    *float64                      `json:"fees,omitempty" url:"fees,omitempty"`
+	Type    *InvestmentTransactionType    `json:"type,omitempty" url:"type,omitempty"`
+	Subtype *InvestmentTransactionSubtype `json:"subtype,omitempty" url:"subtype,omitempty"`
 	// The ISO-4217 currency code of the transaction. Always `null` if `unofficial_currency_code` is non-`null`.
 	IsoCurrencyCode *string `json:"iso_currency_code,omitempty" url:"iso_currency_code,omitempty"`
 	// The unofficial currency code associated with the transaction. Always `null` if `iso_currency_code` is non-`null`. Unofficial currency codes are used for currencies that do not have official ISO currency codes, such as cryptocurrencies and the currencies of certain countries.
@@ -6271,30 +6329,30 @@ func (a *AssetReportInvestmentTransaction) GetDate() time.Time {
 	return a.Date
 }
 
-func (a *AssetReportInvestmentTransaction) GetName() string {
+func (a *AssetReportInvestmentTransaction) GetName() *string {
 	if a == nil {
-		return ""
+		return nil
 	}
 	return a.Name
 }
 
-func (a *AssetReportInvestmentTransaction) GetQuantity() float64 {
+func (a *AssetReportInvestmentTransaction) GetQuantity() *float64 {
 	if a == nil {
-		return 0
+		return nil
 	}
 	return a.Quantity
 }
 
-func (a *AssetReportInvestmentTransaction) GetAmount() float64 {
+func (a *AssetReportInvestmentTransaction) GetAmount() *float64 {
 	if a == nil {
-		return 0
+		return nil
 	}
 	return a.Amount
 }
 
-func (a *AssetReportInvestmentTransaction) GetPrice() float64 {
+func (a *AssetReportInvestmentTransaction) GetPrice() *float64 {
 	if a == nil {
-		return 0
+		return nil
 	}
 	return a.Price
 }
@@ -6306,16 +6364,16 @@ func (a *AssetReportInvestmentTransaction) GetFees() *float64 {
 	return a.Fees
 }
 
-func (a *AssetReportInvestmentTransaction) GetType() InvestmentTransactionType {
+func (a *AssetReportInvestmentTransaction) GetType() *InvestmentTransactionType {
 	if a == nil {
-		return ""
+		return nil
 	}
 	return a.Type
 }
 
-func (a *AssetReportInvestmentTransaction) GetSubtype() InvestmentTransactionSubtype {
+func (a *AssetReportInvestmentTransaction) GetSubtype() *InvestmentTransactionSubtype {
 	if a == nil {
-		return ""
+		return nil
 	}
 	return a.Subtype
 }
@@ -6380,28 +6438,28 @@ func (a *AssetReportInvestmentTransaction) SetDate(date time.Time) {
 
 // SetName sets the Name field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (a *AssetReportInvestmentTransaction) SetName(name string) {
+func (a *AssetReportInvestmentTransaction) SetName(name *string) {
 	a.Name = name
 	a.require(assetReportInvestmentTransactionFieldName)
 }
 
 // SetQuantity sets the Quantity field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (a *AssetReportInvestmentTransaction) SetQuantity(quantity float64) {
+func (a *AssetReportInvestmentTransaction) SetQuantity(quantity *float64) {
 	a.Quantity = quantity
 	a.require(assetReportInvestmentTransactionFieldQuantity)
 }
 
 // SetAmount sets the Amount field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (a *AssetReportInvestmentTransaction) SetAmount(amount float64) {
+func (a *AssetReportInvestmentTransaction) SetAmount(amount *float64) {
 	a.Amount = amount
 	a.require(assetReportInvestmentTransactionFieldAmount)
 }
 
 // SetPrice sets the Price field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (a *AssetReportInvestmentTransaction) SetPrice(price float64) {
+func (a *AssetReportInvestmentTransaction) SetPrice(price *float64) {
 	a.Price = price
 	a.require(assetReportInvestmentTransactionFieldPrice)
 }
@@ -6415,14 +6473,14 @@ func (a *AssetReportInvestmentTransaction) SetFees(fees *float64) {
 
 // SetType sets the Type field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (a *AssetReportInvestmentTransaction) SetType(type_ InvestmentTransactionType) {
+func (a *AssetReportInvestmentTransaction) SetType(type_ *InvestmentTransactionType) {
 	a.Type = type_
 	a.require(assetReportInvestmentTransactionFieldType)
 }
 
 // SetSubtype sets the Subtype field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (a *AssetReportInvestmentTransaction) SetSubtype(subtype InvestmentTransactionSubtype) {
+func (a *AssetReportInvestmentTransaction) SetSubtype(subtype *InvestmentTransactionSubtype) {
 	a.Subtype = subtype
 	a.require(assetReportInvestmentTransactionFieldSubtype)
 }
@@ -6507,11 +6565,11 @@ var (
 // A set of fields describing the investments data on an account.
 type AssetReportInvestments struct {
 	// Quantities and values of securities held in the investment account. Map to the `securities` array for security details.
-	Holdings []*AssetReportInvestmentHolding `json:"holdings,omitempty" url:"holdings,omitempty"`
+	Holdings []*AssetReportInvestmentHolding `json:"holdings" url:"holdings"`
 	// Details of specific securities held in on the investment account.
-	Securities []*AssetReportInvestmentSecurity `json:"securities,omitempty" url:"securities,omitempty"`
+	Securities []*AssetReportInvestmentSecurity `json:"securities" url:"securities"`
 	// Transaction history on the investment account.
-	Transactions []*AssetReportInvestmentTransaction `json:"transactions,omitempty" url:"transactions,omitempty"`
+	Transactions []*AssetReportInvestmentTransaction `json:"transactions" url:"transactions"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -6829,9 +6887,13 @@ var assetReportTransactionNullableFields = map[string]*big.Int{
 	"credit_category":          assetReportTransactionFieldCreditCategory,
 	"check_number":             assetReportTransactionFieldCheckNumber,
 	"date_transacted":          assetReportTransactionFieldDateTransacted,
+	"location":                 assetReportTransactionFieldLocation,
+	"name":                     assetReportTransactionFieldName,
 	"merchant_name":            assetReportTransactionFieldMerchantName,
+	"payment_meta":             assetReportTransactionFieldPaymentMeta,
 	"pending_transaction_id":   assetReportTransactionFieldPendingTransactionID,
 	"account_owner":            assetReportTransactionFieldAccountOwner,
+	"transaction_type":         assetReportTransactionFieldTransactionType,
 }
 
 // A transaction on the asset report
@@ -9170,11 +9232,11 @@ type BankPenaltiesIndicators struct {
 	UnofficialCurrencyCode *string         `json:"unofficial_currency_code,omitempty" url:"unofficial_currency_code,omitempty"`
 	MonthlyAverage         *MonthlyAverage `json:"monthly_average,omitempty" url:"monthly_average,omitempty"`
 	// Detailed categories view of all the transactions that fall into the `BANK_PENALTIES` credit category within the given time window, across all the accounts in the report.
-	CategoryDetails []*CategoryExpenses `json:"category_details,omitempty" url:"category_details,omitempty"`
+	CategoryDetails []*CategoryExpenses `json:"category_details" url:"category_details"`
 	// The total number of transactions that fall into the `BANK_PENALTIES` credit category, across all the accounts in the report.
 	TransactionsCount *int `json:"transactions_count,omitempty" url:"transactions_count,omitempty"`
 	// The monthly summaries of the transactions that fall into the `BANK_PENALTIES` credit category within the given time window, across all the accounts in the report.
-	MonthlySummaries []*MonthlySummary `json:"monthly_summaries,omitempty" url:"monthly_summaries,omitempty"`
+	MonthlySummaries []*MonthlySummary `json:"monthly_summaries" url:"monthly_summaries"`
 	// The number of days since the last transaction that falls into the `BANK_PENALTIES` credit category, across all the accounts in the report.
 	DaysSinceLastOccurrence *int `json:"days_since_last_occurrence,omitempty" url:"days_since_last_occurrence,omitempty"`
 	// The percentage of the user's monthly inflows that was spent on transactions that fall into the `BANK_PENALTIES` credit category within the given time window, across all the accounts in the report. For example, a value of 100 represents that 100% of the inflows were spent on transactions that fall into the `BANK_PENALTIES` credit category.
@@ -11623,9 +11685,10 @@ var (
 	baseReportAccountFieldOwners             = big.NewInt(1 << 11)
 	baseReportAccountFieldHolderCategory     = big.NewInt(1 << 12)
 	baseReportAccountFieldOwnershipType      = big.NewInt(1 << 13)
-	baseReportAccountFieldHistoricalBalances = big.NewInt(1 << 14)
-	baseReportAccountFieldAccountInsights    = big.NewInt(1 << 15)
-	baseReportAccountFieldAttributes         = big.NewInt(1 << 16)
+	baseReportAccountFieldInvestments        = big.NewInt(1 << 14)
+	baseReportAccountFieldHistoricalBalances = big.NewInt(1 << 15)
+	baseReportAccountFieldAccountInsights    = big.NewInt(1 << 16)
+	baseReportAccountFieldAttributes         = big.NewInt(1 << 17)
 )
 
 // baseReportAccountNullableFields maps the wire names of BaseReportAccount's nullable fields (required or optional) to their field bits.
@@ -11635,6 +11698,7 @@ var baseReportAccountNullableFields = map[string]*big.Int{
 	"subtype":         baseReportAccountFieldSubtype,
 	"holder_category": baseReportAccountFieldHolderCategory,
 	"ownership_type":  baseReportAccountFieldOwnershipType,
+	"investments":     baseReportAccountFieldInvestments,
 }
 
 // Base Report information about an account
@@ -11663,9 +11727,11 @@ type BaseReportAccount struct {
 	Transactions []*BaseReportTransaction `json:"transactions" url:"transactions"`
 	// Data returned by the financial institution about the account owner or owners. For business accounts, the name reported may be either the name of the individual or the name of the business, depending on the institution. Multiple owners on a single account will be represented in the same `owner` object, not in multiple owner objects within the array. This array can also be empty if no owners are found.
 	Owners []*Owner `json:"owners" url:"owners"`
-	// This field contains the account holder category extracted from the financial institution. The value is `personal`, `business`, or `unrecognized`. The field is omitted when the extracted category is unavailable.
+	// This field contains the account holder category extracted from the financial institution. The value is `personal`, `business`, or `unrecognized`. The field is null when the extracted category is unavailable.
 	HolderCategory *BaseReportAccountHolderCategory `json:"holder_category,omitempty" url:"holder_category,omitempty"`
 	OwnershipType  *OwnershipType                   `json:"ownership_type,omitempty" url:"ownership_type,omitempty"`
+	// This field contains investment data only for investment accounts when `include_investments` in `/cra/check_report/create` or `cra_options.include_investments` in `/link/token/create` is set to `true`. This field may be omitted if recent investment data was unavailable at report generation. The account remains in the report when this field is omitted.
+	Investments *BaseReportInvestments `json:"investments,omitempty" url:"investments,omitempty"`
 	// Calculated data about the historical balances on the account. Currently not supported by `brokerage` or `investment` accounts.
 	HistoricalBalances []*BaseReportHistoricalBalance `json:"historical_balances,omitempty" url:"historical_balances,omitempty"`
 	AccountInsights    *BaseReportAccountInsights     `json:"account_insights,omitempty" url:"account_insights,omitempty"`
@@ -11775,6 +11841,13 @@ func (b *BaseReportAccount) GetOwnershipType() *OwnershipType {
 		return nil
 	}
 	return b.OwnershipType
+}
+
+func (b *BaseReportAccount) GetInvestments() *BaseReportInvestments {
+	if b == nil {
+		return nil
+	}
+	return b.Investments
 }
 
 func (b *BaseReportAccount) GetHistoricalBalances() []*BaseReportHistoricalBalance {
@@ -11910,6 +11983,13 @@ func (b *BaseReportAccount) SetHolderCategory(holderCategory *BaseReportAccountH
 func (b *BaseReportAccount) SetOwnershipType(ownershipType *OwnershipType) {
 	b.OwnershipType = ownershipType
 	b.require(baseReportAccountFieldOwnershipType)
+}
+
+// SetInvestments sets the Investments field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportAccount) SetInvestments(investments *BaseReportInvestments) {
+	b.Investments = investments
+	b.require(baseReportAccountFieldInvestments)
 }
 
 // SetHistoricalBalances sets the HistoricalBalances field and marks it as non-optional;
@@ -12269,7 +12349,7 @@ func (b *BaseReportAccountBalances) String() string {
 	return fmt.Sprintf("%#v", b)
 }
 
-// This field contains the account holder category extracted from the financial institution. The value is `personal`, `business`, or `unrecognized`. The field is omitted when the extracted category is unavailable.
+// This field contains the account holder category extracted from the financial institution. The value is `personal`, `business`, or `unrecognized`. The field is null when the extracted category is unavailable.
 type BaseReportAccountHolderCategory string
 
 const (
@@ -12712,16 +12792,20 @@ var (
 
 // baseReportAttributesNullableFields maps the wire names of BaseReportAttributes's nullable fields (required or optional) to their field bits.
 var baseReportAttributesNullableFields = map[string]*big.Int{
-	"is_primary_account":       baseReportAttributesFieldIsPrimaryAccount,
-	"primary_account_score":    baseReportAttributesFieldPrimaryAccountScore,
-	"total_inflow_amount":      baseReportAttributesFieldTotalInflowAmount,
-	"total_inflow_amount_30d":  baseReportAttributesFieldTotalInflowAmount30D,
-	"total_inflow_amount_60d":  baseReportAttributesFieldTotalInflowAmount60D,
-	"total_inflow_amount_90d":  baseReportAttributesFieldTotalInflowAmount90D,
-	"total_outflow_amount":     baseReportAttributesFieldTotalOutflowAmount,
-	"total_outflow_amount_30d": baseReportAttributesFieldTotalOutflowAmount30D,
-	"total_outflow_amount_60d": baseReportAttributesFieldTotalOutflowAmount60D,
-	"total_outflow_amount_90d": baseReportAttributesFieldTotalOutflowAmount90D,
+	"is_primary_account":                   baseReportAttributesFieldIsPrimaryAccount,
+	"primary_account_score":                baseReportAttributesFieldPrimaryAccountScore,
+	"nsf_overdraft_transactions_count":     baseReportAttributesFieldNsfOverdraftTransactionsCount,
+	"nsf_overdraft_transactions_count_30d": baseReportAttributesFieldNsfOverdraftTransactionsCount30D,
+	"nsf_overdraft_transactions_count_60d": baseReportAttributesFieldNsfOverdraftTransactionsCount60D,
+	"nsf_overdraft_transactions_count_90d": baseReportAttributesFieldNsfOverdraftTransactionsCount90D,
+	"total_inflow_amount":                  baseReportAttributesFieldTotalInflowAmount,
+	"total_inflow_amount_30d":              baseReportAttributesFieldTotalInflowAmount30D,
+	"total_inflow_amount_60d":              baseReportAttributesFieldTotalInflowAmount60D,
+	"total_inflow_amount_90d":              baseReportAttributesFieldTotalInflowAmount90D,
+	"total_outflow_amount":                 baseReportAttributesFieldTotalOutflowAmount,
+	"total_outflow_amount_30d":             baseReportAttributesFieldTotalOutflowAmount30D,
+	"total_outflow_amount_60d":             baseReportAttributesFieldTotalOutflowAmount60D,
+	"total_outflow_amount_90d":             baseReportAttributesFieldTotalOutflowAmount90D,
 }
 
 // Calculated attributes derived from transaction-level data.
@@ -13450,6 +13534,964 @@ func (b *BaseReportHistoricalBalance) String() string {
 }
 
 var (
+	baseReportInvestmentHoldingFieldAccountID              = big.NewInt(1 << 0)
+	baseReportInvestmentHoldingFieldSecurityID             = big.NewInt(1 << 1)
+	baseReportInvestmentHoldingFieldInstitutionPrice       = big.NewInt(1 << 2)
+	baseReportInvestmentHoldingFieldInstitutionPriceAsOf   = big.NewInt(1 << 3)
+	baseReportInvestmentHoldingFieldInstitutionValue       = big.NewInt(1 << 4)
+	baseReportInvestmentHoldingFieldCostBasis              = big.NewInt(1 << 5)
+	baseReportInvestmentHoldingFieldQuantity               = big.NewInt(1 << 6)
+	baseReportInvestmentHoldingFieldIsoCurrencyCode        = big.NewInt(1 << 7)
+	baseReportInvestmentHoldingFieldUnofficialCurrencyCode = big.NewInt(1 << 8)
+	baseReportInvestmentHoldingFieldTaxLots                = big.NewInt(1 << 9)
+)
+
+// baseReportInvestmentHoldingNullableFields maps the wire names of BaseReportInvestmentHolding's nullable fields (required or optional) to their field bits.
+var baseReportInvestmentHoldingNullableFields = map[string]*big.Int{
+	"institution_price_as_of":  baseReportInvestmentHoldingFieldInstitutionPriceAsOf,
+	"cost_basis":               baseReportInvestmentHoldingFieldCostBasis,
+	"iso_currency_code":        baseReportInvestmentHoldingFieldIsoCurrencyCode,
+	"unofficial_currency_code": baseReportInvestmentHoldingFieldUnofficialCurrencyCode,
+}
+
+// A securities holding at an institution.
+type BaseReportInvestmentHolding struct {
+	// The Plaid `account_id` associated with the holding.
+	AccountID string `json:"account_id" url:"account_id"`
+	// The Plaid `security_id` associated with the holding. Security data is not specific to a user's account; any user who held the same security at the same financial institution at the same time would have identical security data. The `security_id` for the same security will typically be the same across different institutions, but this is not guaranteed. The `security_id` does not typically change, but may change if inherent details of the security change due to a corporate action, for example, in the event of a ticker symbol change or CUSIP change.
+	SecurityID string `json:"security_id" url:"security_id"`
+	// The last price given by the institution for this security.
+	InstitutionPrice float64 `json:"institution_price" url:"institution_price"`
+	// The date at which `institution_price` was current.
+	InstitutionPriceAsOf *time.Time `json:"institution_price_as_of,omitempty" url:"institution_price_as_of,omitempty" format:"date"`
+	// The value of the holding, as reported by the institution.
+	InstitutionValue float64 `json:"institution_value" url:"institution_value"`
+	// The original total value of the holding. This field is calculated by Plaid as the sum of the purchase price of all of the shares in the holding.
+	CostBasis *float64 `json:"cost_basis,omitempty" url:"cost_basis,omitempty"`
+	// The total quantity of the asset held, as reported by the financial institution. If the security is an option, `quantity` will reflect the total number of options (typically the number of contracts multiplied by 100), not the number of contracts.
+	Quantity float64 `json:"quantity" url:"quantity"`
+	// The ISO-4217 currency code of the holding. Always `null` if `unofficial_currency_code` is non-`null`.
+	IsoCurrencyCode *string `json:"iso_currency_code,omitempty" url:"iso_currency_code,omitempty"`
+	// The unofficial currency code associated with the holding. Always `null` if `iso_currency_code` is non-`null`. Unofficial currency codes are used for currencies that do not have official ISO currency codes, such as cryptocurrencies and the currencies of certain countries.
+	//
+	// See the [currency code schema](https://plaid.com/docs/api/accounts#currency-code-schema) for a full listing of supported `unofficial_currency_code`s.
+	UnofficialCurrencyCode *string `json:"unofficial_currency_code,omitempty" url:"unofficial_currency_code,omitempty"`
+	// Per-lot acquisition data for this holding. This field is absent when lot-level data is not available for the holding — either the institution does not provide it, or the report was generated before lot-level data was supported. Refresh the report if you expect lots.
+	TaxLots []*HoldingTaxLot `json:"tax_lots,omitempty" url:"tax_lots,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (b *BaseReportInvestmentHolding) GetAccountID() string {
+	if b == nil {
+		return ""
+	}
+	return b.AccountID
+}
+
+func (b *BaseReportInvestmentHolding) GetSecurityID() string {
+	if b == nil {
+		return ""
+	}
+	return b.SecurityID
+}
+
+func (b *BaseReportInvestmentHolding) GetInstitutionPrice() float64 {
+	if b == nil {
+		return 0
+	}
+	return b.InstitutionPrice
+}
+
+func (b *BaseReportInvestmentHolding) GetInstitutionPriceAsOf() *time.Time {
+	if b == nil {
+		return nil
+	}
+	return b.InstitutionPriceAsOf
+}
+
+func (b *BaseReportInvestmentHolding) GetInstitutionValue() float64 {
+	if b == nil {
+		return 0
+	}
+	return b.InstitutionValue
+}
+
+func (b *BaseReportInvestmentHolding) GetCostBasis() *float64 {
+	if b == nil {
+		return nil
+	}
+	return b.CostBasis
+}
+
+func (b *BaseReportInvestmentHolding) GetQuantity() float64 {
+	if b == nil {
+		return 0
+	}
+	return b.Quantity
+}
+
+func (b *BaseReportInvestmentHolding) GetIsoCurrencyCode() *string {
+	if b == nil {
+		return nil
+	}
+	return b.IsoCurrencyCode
+}
+
+func (b *BaseReportInvestmentHolding) GetUnofficialCurrencyCode() *string {
+	if b == nil {
+		return nil
+	}
+	return b.UnofficialCurrencyCode
+}
+
+func (b *BaseReportInvestmentHolding) GetTaxLots() []*HoldingTaxLot {
+	if b == nil {
+		return nil
+	}
+	return b.TaxLots
+}
+
+func (b *BaseReportInvestmentHolding) GetExtraProperties() map[string]interface{} {
+	if b == nil {
+		return nil
+	}
+	return b.ExtraProperties
+}
+
+func (b *BaseReportInvestmentHolding) require(field *big.Int) {
+	next := new(big.Int)
+	if b.explicitFields != nil {
+		next.Set(b.explicitFields)
+	}
+	next.Or(next, field)
+	b.explicitFields = next
+}
+
+// SetAccountID sets the AccountID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestmentHolding) SetAccountID(accountID string) {
+	b.AccountID = accountID
+	b.require(baseReportInvestmentHoldingFieldAccountID)
+}
+
+// SetSecurityID sets the SecurityID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestmentHolding) SetSecurityID(securityID string) {
+	b.SecurityID = securityID
+	b.require(baseReportInvestmentHoldingFieldSecurityID)
+}
+
+// SetInstitutionPrice sets the InstitutionPrice field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestmentHolding) SetInstitutionPrice(institutionPrice float64) {
+	b.InstitutionPrice = institutionPrice
+	b.require(baseReportInvestmentHoldingFieldInstitutionPrice)
+}
+
+// SetInstitutionPriceAsOf sets the InstitutionPriceAsOf field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestmentHolding) SetInstitutionPriceAsOf(institutionPriceAsOf *time.Time) {
+	b.InstitutionPriceAsOf = institutionPriceAsOf
+	b.require(baseReportInvestmentHoldingFieldInstitutionPriceAsOf)
+}
+
+// SetInstitutionValue sets the InstitutionValue field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestmentHolding) SetInstitutionValue(institutionValue float64) {
+	b.InstitutionValue = institutionValue
+	b.require(baseReportInvestmentHoldingFieldInstitutionValue)
+}
+
+// SetCostBasis sets the CostBasis field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestmentHolding) SetCostBasis(costBasis *float64) {
+	b.CostBasis = costBasis
+	b.require(baseReportInvestmentHoldingFieldCostBasis)
+}
+
+// SetQuantity sets the Quantity field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestmentHolding) SetQuantity(quantity float64) {
+	b.Quantity = quantity
+	b.require(baseReportInvestmentHoldingFieldQuantity)
+}
+
+// SetIsoCurrencyCode sets the IsoCurrencyCode field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestmentHolding) SetIsoCurrencyCode(isoCurrencyCode *string) {
+	b.IsoCurrencyCode = isoCurrencyCode
+	b.require(baseReportInvestmentHoldingFieldIsoCurrencyCode)
+}
+
+// SetUnofficialCurrencyCode sets the UnofficialCurrencyCode field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestmentHolding) SetUnofficialCurrencyCode(unofficialCurrencyCode *string) {
+	b.UnofficialCurrencyCode = unofficialCurrencyCode
+	b.require(baseReportInvestmentHoldingFieldUnofficialCurrencyCode)
+}
+
+// SetTaxLots sets the TaxLots field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestmentHolding) SetTaxLots(taxLots []*HoldingTaxLot) {
+	b.TaxLots = taxLots
+	b.require(baseReportInvestmentHoldingFieldTaxLots)
+}
+
+func (b *BaseReportInvestmentHolding) UnmarshalJSON(data []byte) error {
+	type embed BaseReportInvestmentHolding
+	var unmarshaler = struct {
+		embed
+		InstitutionPriceAsOf *internal.Date `json:"institution_price_as_of,omitempty"`
+	}{
+		embed: embed(*b),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*b = BaseReportInvestmentHolding(unmarshaler.embed)
+	b.InstitutionPriceAsOf = unmarshaler.InstitutionPriceAsOf.TimePtr()
+	extraProperties, err := internal.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, baseReportInvestmentHoldingNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		b.require(presentFields)
+	}
+	b.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (b *BaseReportInvestmentHolding) MarshalJSON() ([]byte, error) {
+	type embed BaseReportInvestmentHolding
+	var marshaler = struct {
+		embed
+		InstitutionPriceAsOf *internal.Date `json:"institution_price_as_of,omitempty"`
+	}{
+		embed:                embed(*b),
+		InstitutionPriceAsOf: internal.NewOptionalDate(b.InstitutionPriceAsOf),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, b.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, b.ExtraProperties)
+}
+
+func (b *BaseReportInvestmentHolding) String() string {
+	if b == nil {
+		return "<nil>"
+	}
+	if len(b.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(b.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
+var (
+	baseReportInvestmentSecurityFieldSecurityID            = big.NewInt(1 << 0)
+	baseReportInvestmentSecurityFieldName                  = big.NewInt(1 << 1)
+	baseReportInvestmentSecurityFieldIsin                  = big.NewInt(1 << 2)
+	baseReportInvestmentSecurityFieldCusip                 = big.NewInt(1 << 3)
+	baseReportInvestmentSecurityFieldInstitutionSecurityID = big.NewInt(1 << 4)
+	baseReportInvestmentSecurityFieldInstitutionID         = big.NewInt(1 << 5)
+	baseReportInvestmentSecurityFieldTickerSymbol          = big.NewInt(1 << 6)
+	baseReportInvestmentSecurityFieldType                  = big.NewInt(1 << 7)
+)
+
+// baseReportInvestmentSecurityNullableFields maps the wire names of BaseReportInvestmentSecurity's nullable fields (required or optional) to their field bits.
+var baseReportInvestmentSecurityNullableFields = map[string]*big.Int{
+	"name":                    baseReportInvestmentSecurityFieldName,
+	"isin":                    baseReportInvestmentSecurityFieldIsin,
+	"cusip":                   baseReportInvestmentSecurityFieldCusip,
+	"institution_security_id": baseReportInvestmentSecurityFieldInstitutionSecurityID,
+	"institution_id":          baseReportInvestmentSecurityFieldInstitutionID,
+	"ticker_symbol":           baseReportInvestmentSecurityFieldTickerSymbol,
+	"type":                    baseReportInvestmentSecurityFieldType,
+}
+
+// Investment security associated with the account.
+type BaseReportInvestmentSecurity struct {
+	// A unique, Plaid-specific identifier for the security, used to associate securities with holdings. Like all Plaid identifiers, the `security_id` is case sensitive. The `security_id` may change if inherent details of the security change due to a corporate action, for example, in the event of a ticker symbol change or CUSIP change.
+	SecurityID string `json:"security_id" url:"security_id"`
+	// A descriptive name for the security, suitable for display.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// 12-character ISIN, a globally unique securities identifier. A verified CUSIP Global Services license is required to receive this data. This field will be null by default for new customers, and null for existing customers starting March 12, 2024. If you would like access to this field, please start the verification process [here](https://docs.google.com/forms/d/e/1FAIpQLSd9asHEYEfmf8fxJTHZTAfAzW4dugsnSu-HS2J51f1mxwd6Sw/viewform).
+	Isin *string `json:"isin,omitempty" url:"isin,omitempty"`
+	// 9-character CUSIP, an identifier assigned to North American securities. A verified CUSIP Global Services license is required to receive this data. This field will be null by default for new customers, and null for existing customers starting March 12, 2024. If you would like access to this field, please start the verification process [here](https://docs.google.com/forms/d/e/1FAIpQLSd9asHEYEfmf8fxJTHZTAfAzW4dugsnSu-HS2J51f1mxwd6Sw/viewform).
+	Cusip *string `json:"cusip,omitempty" url:"cusip,omitempty"`
+	// An identifier given to the security by the institution.
+	InstitutionSecurityID *string `json:"institution_security_id,omitempty" url:"institution_security_id,omitempty"`
+	// If `institution_security_id` is present, this field indicates the Plaid `institution_id` of the institution to whom the identifier belongs.
+	InstitutionID *string `json:"institution_id,omitempty" url:"institution_id,omitempty"`
+	// The security's trading symbol for publicly traded securities, and otherwise a short identifier if available.
+	TickerSymbol *string `json:"ticker_symbol,omitempty" url:"ticker_symbol,omitempty"`
+	// The security type of the holding. Valid security types are:
+	//
+	// `cash`: Cash, currency, and money market funds
+	//
+	// `cryptocurrency`: Digital or virtual currencies
+	//
+	// `derivative`: Options, warrants, and other derivative instruments
+	//
+	// `equity`: Domestic and foreign equities
+	//
+	// `etf`: Multi-asset exchange-traded investment funds
+	//
+	// `fixed income`: Bonds and certificates of deposit (CDs)
+	//
+	// `loan`: Loans and loan receivables
+	//
+	// `mutual fund`: Open- and closed-end vehicles pooling funds of multiple investors
+	//
+	// `other`: Unknown or other investment types
+	Type *string `json:"type,omitempty" url:"type,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (b *BaseReportInvestmentSecurity) GetSecurityID() string {
+	if b == nil {
+		return ""
+	}
+	return b.SecurityID
+}
+
+func (b *BaseReportInvestmentSecurity) GetName() *string {
+	if b == nil {
+		return nil
+	}
+	return b.Name
+}
+
+func (b *BaseReportInvestmentSecurity) GetIsin() *string {
+	if b == nil {
+		return nil
+	}
+	return b.Isin
+}
+
+func (b *BaseReportInvestmentSecurity) GetCusip() *string {
+	if b == nil {
+		return nil
+	}
+	return b.Cusip
+}
+
+func (b *BaseReportInvestmentSecurity) GetInstitutionSecurityID() *string {
+	if b == nil {
+		return nil
+	}
+	return b.InstitutionSecurityID
+}
+
+func (b *BaseReportInvestmentSecurity) GetInstitutionID() *string {
+	if b == nil {
+		return nil
+	}
+	return b.InstitutionID
+}
+
+func (b *BaseReportInvestmentSecurity) GetTickerSymbol() *string {
+	if b == nil {
+		return nil
+	}
+	return b.TickerSymbol
+}
+
+func (b *BaseReportInvestmentSecurity) GetType() *string {
+	if b == nil {
+		return nil
+	}
+	return b.Type
+}
+
+func (b *BaseReportInvestmentSecurity) GetExtraProperties() map[string]interface{} {
+	if b == nil {
+		return nil
+	}
+	return b.ExtraProperties
+}
+
+func (b *BaseReportInvestmentSecurity) require(field *big.Int) {
+	next := new(big.Int)
+	if b.explicitFields != nil {
+		next.Set(b.explicitFields)
+	}
+	next.Or(next, field)
+	b.explicitFields = next
+}
+
+// SetSecurityID sets the SecurityID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestmentSecurity) SetSecurityID(securityID string) {
+	b.SecurityID = securityID
+	b.require(baseReportInvestmentSecurityFieldSecurityID)
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestmentSecurity) SetName(name *string) {
+	b.Name = name
+	b.require(baseReportInvestmentSecurityFieldName)
+}
+
+// SetIsin sets the Isin field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestmentSecurity) SetIsin(isin *string) {
+	b.Isin = isin
+	b.require(baseReportInvestmentSecurityFieldIsin)
+}
+
+// SetCusip sets the Cusip field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestmentSecurity) SetCusip(cusip *string) {
+	b.Cusip = cusip
+	b.require(baseReportInvestmentSecurityFieldCusip)
+}
+
+// SetInstitutionSecurityID sets the InstitutionSecurityID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestmentSecurity) SetInstitutionSecurityID(institutionSecurityID *string) {
+	b.InstitutionSecurityID = institutionSecurityID
+	b.require(baseReportInvestmentSecurityFieldInstitutionSecurityID)
+}
+
+// SetInstitutionID sets the InstitutionID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestmentSecurity) SetInstitutionID(institutionID *string) {
+	b.InstitutionID = institutionID
+	b.require(baseReportInvestmentSecurityFieldInstitutionID)
+}
+
+// SetTickerSymbol sets the TickerSymbol field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestmentSecurity) SetTickerSymbol(tickerSymbol *string) {
+	b.TickerSymbol = tickerSymbol
+	b.require(baseReportInvestmentSecurityFieldTickerSymbol)
+}
+
+// SetType sets the Type field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestmentSecurity) SetType(type_ *string) {
+	b.Type = type_
+	b.require(baseReportInvestmentSecurityFieldType)
+}
+
+func (b *BaseReportInvestmentSecurity) UnmarshalJSON(data []byte) error {
+	type embed BaseReportInvestmentSecurity
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*b = BaseReportInvestmentSecurity(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, baseReportInvestmentSecurityNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		b.require(presentFields)
+	}
+	b.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (b *BaseReportInvestmentSecurity) MarshalJSON() ([]byte, error) {
+	type embed BaseReportInvestmentSecurity
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, b.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, b.ExtraProperties)
+}
+
+func (b *BaseReportInvestmentSecurity) String() string {
+	if b == nil {
+		return "<nil>"
+	}
+	if len(b.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(b.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
+var (
+	baseReportInvestmentTransactionFieldInvestmentTransactionID = big.NewInt(1 << 0)
+	baseReportInvestmentTransactionFieldAccountID               = big.NewInt(1 << 1)
+	baseReportInvestmentTransactionFieldSecurityID              = big.NewInt(1 << 2)
+	baseReportInvestmentTransactionFieldDate                    = big.NewInt(1 << 3)
+	baseReportInvestmentTransactionFieldName                    = big.NewInt(1 << 4)
+	baseReportInvestmentTransactionFieldQuantity                = big.NewInt(1 << 5)
+	baseReportInvestmentTransactionFieldAmount                  = big.NewInt(1 << 6)
+	baseReportInvestmentTransactionFieldPrice                   = big.NewInt(1 << 7)
+	baseReportInvestmentTransactionFieldFees                    = big.NewInt(1 << 8)
+	baseReportInvestmentTransactionFieldType                    = big.NewInt(1 << 9)
+	baseReportInvestmentTransactionFieldSubtype                 = big.NewInt(1 << 10)
+	baseReportInvestmentTransactionFieldIsoCurrencyCode         = big.NewInt(1 << 11)
+	baseReportInvestmentTransactionFieldUnofficialCurrencyCode  = big.NewInt(1 << 12)
+)
+
+// baseReportInvestmentTransactionNullableFields maps the wire names of BaseReportInvestmentTransaction's nullable fields (required or optional) to their field bits.
+var baseReportInvestmentTransactionNullableFields = map[string]*big.Int{
+	"security_id":              baseReportInvestmentTransactionFieldSecurityID,
+	"fees":                     baseReportInvestmentTransactionFieldFees,
+	"iso_currency_code":        baseReportInvestmentTransactionFieldIsoCurrencyCode,
+	"unofficial_currency_code": baseReportInvestmentTransactionFieldUnofficialCurrencyCode,
+}
+
+// A transaction within an investment account.
+type BaseReportInvestmentTransaction struct {
+	// The ID of the Investment transaction, unique across all Plaid transactions. Like all Plaid identifiers, the `investment_transaction_id` is case sensitive.
+	InvestmentTransactionID string `json:"investment_transaction_id" url:"investment_transaction_id"`
+	// The `account_id` of the account against which this transaction posted.
+	AccountID string `json:"account_id" url:"account_id"`
+	// The `security_id` to which this transaction is related.
+	SecurityID *string `json:"security_id,omitempty" url:"security_id,omitempty"`
+	// The [ISO 8601](https://wikipedia.org/wiki/ISO_8601) posting date for the transaction.
+	Date time.Time `json:"date" url:"date" format:"date"`
+	// The institution's description of the transaction.
+	Name string `json:"name" url:"name"`
+	// The number of units of the security involved in this transaction. Positive for buy transactions; negative for sell transactions.
+	Quantity float64 `json:"quantity" url:"quantity"`
+	// The complete value of the transaction. Positive values when cash is debited, e.g. purchases of stock; negative values when cash is credited, e.g. sales of stock. Treatment remains the same for cash-only movements unassociated with securities. For transactions representing a simultaneous cash contribution and purchase of a security, the portion of the transaction representing the purchase takes precedence, and the `amount` is represented as positive.
+	Amount float64 `json:"amount" url:"amount"`
+	// The price of the security at which this transaction occurred.
+	Price float64 `json:"price" url:"price"`
+	// The combined value of all fees applied to this transaction
+	Fees    *float64                     `json:"fees,omitempty" url:"fees,omitempty"`
+	Type    InvestmentTransactionType    `json:"type" url:"type"`
+	Subtype InvestmentTransactionSubtype `json:"subtype" url:"subtype"`
+	// The ISO-4217 currency code of the transaction. Always `null` if `unofficial_currency_code` is non-`null`.
+	IsoCurrencyCode *string `json:"iso_currency_code,omitempty" url:"iso_currency_code,omitempty"`
+	// The unofficial currency code associated with the transaction. Always `null` if `iso_currency_code` is non-`null`. Unofficial currency codes are used for currencies that do not have official ISO currency codes, such as cryptocurrencies and the currencies of certain countries.
+	//
+	// See the [currency code schema](https://plaid.com/docs/api/accounts#currency-code-schema) for a full listing of supported `unofficial_currency_code`s.
+	UnofficialCurrencyCode *string `json:"unofficial_currency_code,omitempty" url:"unofficial_currency_code,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (b *BaseReportInvestmentTransaction) GetInvestmentTransactionID() string {
+	if b == nil {
+		return ""
+	}
+	return b.InvestmentTransactionID
+}
+
+func (b *BaseReportInvestmentTransaction) GetAccountID() string {
+	if b == nil {
+		return ""
+	}
+	return b.AccountID
+}
+
+func (b *BaseReportInvestmentTransaction) GetSecurityID() *string {
+	if b == nil {
+		return nil
+	}
+	return b.SecurityID
+}
+
+func (b *BaseReportInvestmentTransaction) GetDate() time.Time {
+	if b == nil {
+		return time.Time{}
+	}
+	return b.Date
+}
+
+func (b *BaseReportInvestmentTransaction) GetName() string {
+	if b == nil {
+		return ""
+	}
+	return b.Name
+}
+
+func (b *BaseReportInvestmentTransaction) GetQuantity() float64 {
+	if b == nil {
+		return 0
+	}
+	return b.Quantity
+}
+
+func (b *BaseReportInvestmentTransaction) GetAmount() float64 {
+	if b == nil {
+		return 0
+	}
+	return b.Amount
+}
+
+func (b *BaseReportInvestmentTransaction) GetPrice() float64 {
+	if b == nil {
+		return 0
+	}
+	return b.Price
+}
+
+func (b *BaseReportInvestmentTransaction) GetFees() *float64 {
+	if b == nil {
+		return nil
+	}
+	return b.Fees
+}
+
+func (b *BaseReportInvestmentTransaction) GetType() InvestmentTransactionType {
+	if b == nil {
+		return ""
+	}
+	return b.Type
+}
+
+func (b *BaseReportInvestmentTransaction) GetSubtype() InvestmentTransactionSubtype {
+	if b == nil {
+		return ""
+	}
+	return b.Subtype
+}
+
+func (b *BaseReportInvestmentTransaction) GetIsoCurrencyCode() *string {
+	if b == nil {
+		return nil
+	}
+	return b.IsoCurrencyCode
+}
+
+func (b *BaseReportInvestmentTransaction) GetUnofficialCurrencyCode() *string {
+	if b == nil {
+		return nil
+	}
+	return b.UnofficialCurrencyCode
+}
+
+func (b *BaseReportInvestmentTransaction) GetExtraProperties() map[string]interface{} {
+	if b == nil {
+		return nil
+	}
+	return b.ExtraProperties
+}
+
+func (b *BaseReportInvestmentTransaction) require(field *big.Int) {
+	next := new(big.Int)
+	if b.explicitFields != nil {
+		next.Set(b.explicitFields)
+	}
+	next.Or(next, field)
+	b.explicitFields = next
+}
+
+// SetInvestmentTransactionID sets the InvestmentTransactionID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestmentTransaction) SetInvestmentTransactionID(investmentTransactionID string) {
+	b.InvestmentTransactionID = investmentTransactionID
+	b.require(baseReportInvestmentTransactionFieldInvestmentTransactionID)
+}
+
+// SetAccountID sets the AccountID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestmentTransaction) SetAccountID(accountID string) {
+	b.AccountID = accountID
+	b.require(baseReportInvestmentTransactionFieldAccountID)
+}
+
+// SetSecurityID sets the SecurityID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestmentTransaction) SetSecurityID(securityID *string) {
+	b.SecurityID = securityID
+	b.require(baseReportInvestmentTransactionFieldSecurityID)
+}
+
+// SetDate sets the Date field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestmentTransaction) SetDate(date time.Time) {
+	b.Date = date
+	b.require(baseReportInvestmentTransactionFieldDate)
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestmentTransaction) SetName(name string) {
+	b.Name = name
+	b.require(baseReportInvestmentTransactionFieldName)
+}
+
+// SetQuantity sets the Quantity field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestmentTransaction) SetQuantity(quantity float64) {
+	b.Quantity = quantity
+	b.require(baseReportInvestmentTransactionFieldQuantity)
+}
+
+// SetAmount sets the Amount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestmentTransaction) SetAmount(amount float64) {
+	b.Amount = amount
+	b.require(baseReportInvestmentTransactionFieldAmount)
+}
+
+// SetPrice sets the Price field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestmentTransaction) SetPrice(price float64) {
+	b.Price = price
+	b.require(baseReportInvestmentTransactionFieldPrice)
+}
+
+// SetFees sets the Fees field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestmentTransaction) SetFees(fees *float64) {
+	b.Fees = fees
+	b.require(baseReportInvestmentTransactionFieldFees)
+}
+
+// SetType sets the Type field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestmentTransaction) SetType(type_ InvestmentTransactionType) {
+	b.Type = type_
+	b.require(baseReportInvestmentTransactionFieldType)
+}
+
+// SetSubtype sets the Subtype field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestmentTransaction) SetSubtype(subtype InvestmentTransactionSubtype) {
+	b.Subtype = subtype
+	b.require(baseReportInvestmentTransactionFieldSubtype)
+}
+
+// SetIsoCurrencyCode sets the IsoCurrencyCode field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestmentTransaction) SetIsoCurrencyCode(isoCurrencyCode *string) {
+	b.IsoCurrencyCode = isoCurrencyCode
+	b.require(baseReportInvestmentTransactionFieldIsoCurrencyCode)
+}
+
+// SetUnofficialCurrencyCode sets the UnofficialCurrencyCode field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestmentTransaction) SetUnofficialCurrencyCode(unofficialCurrencyCode *string) {
+	b.UnofficialCurrencyCode = unofficialCurrencyCode
+	b.require(baseReportInvestmentTransactionFieldUnofficialCurrencyCode)
+}
+
+func (b *BaseReportInvestmentTransaction) UnmarshalJSON(data []byte) error {
+	type embed BaseReportInvestmentTransaction
+	var unmarshaler = struct {
+		embed
+		Date *internal.Date `json:"date"`
+	}{
+		embed: embed(*b),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*b = BaseReportInvestmentTransaction(unmarshaler.embed)
+	b.Date = unmarshaler.Date.Time()
+	extraProperties, err := internal.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, baseReportInvestmentTransactionNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		b.require(presentFields)
+	}
+	b.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (b *BaseReportInvestmentTransaction) MarshalJSON() ([]byte, error) {
+	type embed BaseReportInvestmentTransaction
+	var marshaler = struct {
+		embed
+		Date *internal.Date `json:"date"`
+	}{
+		embed: embed(*b),
+		Date:  internal.NewDate(b.Date),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, b.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, b.ExtraProperties)
+}
+
+func (b *BaseReportInvestmentTransaction) String() string {
+	if b == nil {
+		return "<nil>"
+	}
+	if len(b.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(b.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
+var (
+	baseReportInvestmentsFieldHoldings               = big.NewInt(1 << 0)
+	baseReportInvestmentsFieldSecurities             = big.NewInt(1 << 1)
+	baseReportInvestmentsFieldInvestmentTransactions = big.NewInt(1 << 2)
+)
+
+// A set of fields describing the investments data on an account. Its arrays may be empty.
+type BaseReportInvestments struct {
+	// Quantities and values of securities held in the investment account. Map to the `securities` array for security details.
+	Holdings []*BaseReportInvestmentHolding `json:"holdings" url:"holdings"`
+	// Details of specific securities held in the investment account.
+	Securities []*BaseReportInvestmentSecurity `json:"securities" url:"securities"`
+	// Transaction history on the investment account.
+	InvestmentTransactions []*BaseReportInvestmentTransaction `json:"investment_transactions" url:"investment_transactions"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (b *BaseReportInvestments) GetHoldings() []*BaseReportInvestmentHolding {
+	if b == nil {
+		return nil
+	}
+	return b.Holdings
+}
+
+func (b *BaseReportInvestments) GetSecurities() []*BaseReportInvestmentSecurity {
+	if b == nil {
+		return nil
+	}
+	return b.Securities
+}
+
+func (b *BaseReportInvestments) GetInvestmentTransactions() []*BaseReportInvestmentTransaction {
+	if b == nil {
+		return nil
+	}
+	return b.InvestmentTransactions
+}
+
+func (b *BaseReportInvestments) GetExtraProperties() map[string]interface{} {
+	if b == nil {
+		return nil
+	}
+	return b.ExtraProperties
+}
+
+func (b *BaseReportInvestments) require(field *big.Int) {
+	next := new(big.Int)
+	if b.explicitFields != nil {
+		next.Set(b.explicitFields)
+	}
+	next.Or(next, field)
+	b.explicitFields = next
+}
+
+// SetHoldings sets the Holdings field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestments) SetHoldings(holdings []*BaseReportInvestmentHolding) {
+	b.Holdings = holdings
+	b.require(baseReportInvestmentsFieldHoldings)
+}
+
+// SetSecurities sets the Securities field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestments) SetSecurities(securities []*BaseReportInvestmentSecurity) {
+	b.Securities = securities
+	b.require(baseReportInvestmentsFieldSecurities)
+}
+
+// SetInvestmentTransactions sets the InvestmentTransactions field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (b *BaseReportInvestments) SetInvestmentTransactions(investmentTransactions []*BaseReportInvestmentTransaction) {
+	b.InvestmentTransactions = investmentTransactions
+	b.require(baseReportInvestmentsFieldInvestmentTransactions)
+}
+
+func (b *BaseReportInvestments) UnmarshalJSON(data []byte) error {
+	type embed BaseReportInvestments
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*b = BaseReportInvestments(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.ExtraProperties = extraProperties
+	b.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (b *BaseReportInvestments) MarshalJSON() ([]byte, error) {
+	type embed BaseReportInvestments
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*b),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, b.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, b.ExtraProperties)
+}
+
+func (b *BaseReportInvestments) String() string {
+	if b == nil {
+		return "<nil>"
+	}
+	if len(b.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(b.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
+var (
 	baseReportLongestGapInsightsFieldStartDate = big.NewInt(1 << 0)
 	baseReportLongestGapInsightsFieldEndDate   = big.NewInt(1 << 1)
 	baseReportLongestGapInsightsFieldDays      = big.NewInt(1 << 2)
@@ -13766,6 +14808,7 @@ var baseReportTransactionNullableFields = map[string]*big.Int{
 	"credit_category":           baseReportTransactionFieldCreditCategory,
 	"check_number":              baseReportTransactionFieldCheckNumber,
 	"date_transacted":           baseReportTransactionFieldDateTransacted,
+	"location":                  baseReportTransactionFieldLocation,
 	"merchant_name":             baseReportTransactionFieldMerchantName,
 	"account_owner":             baseReportTransactionFieldAccountOwner,
 	"transaction_type":          baseReportTransactionFieldTransactionType,
@@ -14194,6 +15237,29 @@ func NewBaseReportTransactionTypeFromString(s string) (BaseReportTransactionType
 }
 
 func (b BaseReportTransactionType) Ptr() *BaseReportTransactionType {
+	return &b
+}
+
+// The version of the Base Report to use. `V1` and `V2` are supported. Defaults to `V1`.
+type BaseReportVersion string
+
+const (
+	BaseReportVersionV1 BaseReportVersion = "V1"
+	BaseReportVersionV2 BaseReportVersion = "V2"
+)
+
+func NewBaseReportVersionFromString(s string) (BaseReportVersion, error) {
+	switch s {
+	case "V1":
+		return BaseReportVersionV1, nil
+	case "V2":
+		return BaseReportVersionV2, nil
+	}
+	var t BaseReportVersion
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (b BaseReportVersion) Ptr() *BaseReportVersion {
 	return &b
 }
 
@@ -18034,7 +19100,7 @@ type Cause struct {
 	ErrorType PlaidErrorType `json:"error_type" url:"error_type"`
 	// The particular error code. Safe for programmatic use.
 	ErrorCode string `json:"error_code" url:"error_code"`
-	// The specific reason for the error code. Currently, reasons are only supported for OAuth-based item errors; the field is omitted otherwise. Safe for programmatic use.
+	// The specific reason for the error code. Currently, reasons are only supported for OAuth-based item errors and expired Sandbox Items; the field is omitted otherwise. Safe for programmatic use.
 	//
 	// Possible values:
 	//
@@ -18043,6 +19109,8 @@ type Cause struct {
 	// `OAUTH_CONSENT_EXPIRED`: The user's access consent for this OAuth connection to this institution has expired.
 	//
 	// `OAUTH_USER_REVOKED`: The user's OAuth connection to this institution is invalid because the user revoked their connection.
+	//
+	// `SANDBOX_ITEM_EXPIRED`: The Sandbox Item reached the end of its 30-day lifetime. Sandbox only.
 	ErrorCodeReason *string `json:"error_code_reason,omitempty" url:"error_code_reason,omitempty"`
 	// A developer-friendly representation of the error code. This may change over time and is not safe for programmatic use.
 	ErrorMessage string `json:"error_message" url:"error_message"`
@@ -18773,6 +19841,197 @@ type ClientUserID = string
 type ClientUserIDNullable = *string
 
 var (
+	consentUpdatedWebhookFieldWebhookType           = big.NewInt(1 << 0)
+	consentUpdatedWebhookFieldWebhookCode           = big.NewInt(1 << 1)
+	consentUpdatedWebhookFieldItemID                = big.NewInt(1 << 2)
+	consentUpdatedWebhookFieldUserID                = big.NewInt(1 << 3)
+	consentUpdatedWebhookFieldConsentExpirationTime = big.NewInt(1 << 4)
+	consentUpdatedWebhookFieldEnvironment           = big.NewInt(1 << 5)
+)
+
+// consentUpdatedWebhookNullableFields maps the wire names of ConsentUpdatedWebhook's nullable fields (required or optional) to their field bits.
+var consentUpdatedWebhookNullableFields = map[string]*big.Int{
+	"consent_expiration_time": consentUpdatedWebhookFieldConsentExpirationTime,
+}
+
+// Fired when the user changes the consent duration at their institution, and the change updates the Item's `consent_expiration_time`. The payload carries the new `consent_expiration_time` value. The `consent_expiration_time` can still be sourced from `/item/get`. `PENDING_DISCONNECT` will still be fired 7 days before the Item is scheduled to disconnect. This webhook is in beta. Currently, it is fired only for Chase items.
+type ConsentUpdatedWebhook struct {
+	// `ITEM`
+	WebhookType string `json:"webhook_type" url:"webhook_type"`
+	// `CONSENT_UPDATED`
+	WebhookCode string  `json:"webhook_code" url:"webhook_code"`
+	ItemID      ItemID  `json:"item_id" url:"item_id"`
+	UserID      *UserID `json:"user_id,omitempty" url:"user_id,omitempty"`
+	// The date and time at which the Item's access consent will expire, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format. `null` if the Item's consent no longer expires.
+	ConsentExpirationTime *time.Time               `json:"consent_expiration_time,omitempty" url:"consent_expiration_time,omitempty"`
+	Environment           WebhookEnvironmentValues `json:"environment" url:"environment"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *ConsentUpdatedWebhook) GetWebhookType() string {
+	if c == nil {
+		return ""
+	}
+	return c.WebhookType
+}
+
+func (c *ConsentUpdatedWebhook) GetWebhookCode() string {
+	if c == nil {
+		return ""
+	}
+	return c.WebhookCode
+}
+
+func (c *ConsentUpdatedWebhook) GetItemID() ItemID {
+	if c == nil {
+		return ""
+	}
+	return c.ItemID
+}
+
+func (c *ConsentUpdatedWebhook) GetUserID() *UserID {
+	if c == nil {
+		return nil
+	}
+	return c.UserID
+}
+
+func (c *ConsentUpdatedWebhook) GetConsentExpirationTime() *time.Time {
+	if c == nil {
+		return nil
+	}
+	return c.ConsentExpirationTime
+}
+
+func (c *ConsentUpdatedWebhook) GetEnvironment() WebhookEnvironmentValues {
+	if c == nil {
+		return ""
+	}
+	return c.Environment
+}
+
+func (c *ConsentUpdatedWebhook) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *ConsentUpdatedWebhook) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetWebhookType sets the WebhookType field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ConsentUpdatedWebhook) SetWebhookType(webhookType string) {
+	c.WebhookType = webhookType
+	c.require(consentUpdatedWebhookFieldWebhookType)
+}
+
+// SetWebhookCode sets the WebhookCode field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ConsentUpdatedWebhook) SetWebhookCode(webhookCode string) {
+	c.WebhookCode = webhookCode
+	c.require(consentUpdatedWebhookFieldWebhookCode)
+}
+
+// SetItemID sets the ItemID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ConsentUpdatedWebhook) SetItemID(itemID ItemID) {
+	c.ItemID = itemID
+	c.require(consentUpdatedWebhookFieldItemID)
+}
+
+// SetUserID sets the UserID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ConsentUpdatedWebhook) SetUserID(userID *UserID) {
+	c.UserID = userID
+	c.require(consentUpdatedWebhookFieldUserID)
+}
+
+// SetConsentExpirationTime sets the ConsentExpirationTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ConsentUpdatedWebhook) SetConsentExpirationTime(consentExpirationTime *time.Time) {
+	c.ConsentExpirationTime = consentExpirationTime
+	c.require(consentUpdatedWebhookFieldConsentExpirationTime)
+}
+
+// SetEnvironment sets the Environment field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *ConsentUpdatedWebhook) SetEnvironment(environment WebhookEnvironmentValues) {
+	c.Environment = environment
+	c.require(consentUpdatedWebhookFieldEnvironment)
+}
+
+func (c *ConsentUpdatedWebhook) UnmarshalJSON(data []byte) error {
+	type embed ConsentUpdatedWebhook
+	var unmarshaler = struct {
+		embed
+		ConsentExpirationTime *internal.DateTime `json:"consent_expiration_time,omitempty"`
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = ConsentUpdatedWebhook(unmarshaler.embed)
+	c.ConsentExpirationTime = unmarshaler.ConsentExpirationTime.TimePtr()
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, consentUpdatedWebhookNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *ConsentUpdatedWebhook) MarshalJSON() ([]byte, error) {
+	type embed ConsentUpdatedWebhook
+	var marshaler = struct {
+		embed
+		ConsentExpirationTime *internal.DateTime `json:"consent_expiration_time,omitempty"`
+	}{
+		embed:                 embed(*c),
+		ConsentExpirationTime: internal.NewOptionalDateTime(c.ConsentExpirationTime),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *ConsentUpdatedWebhook) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
 	consumerDisputeFieldConsumerDisputeID      = big.NewInt(1 << 0)
 	consumerDisputeFieldDisputeFieldCreateDate = big.NewInt(1 << 1)
 	consumerDisputeFieldCategory               = big.NewInt(1 << 2)
@@ -18955,7 +20214,7 @@ type ConsumerReportPdfGetResponse = string
 //
 // `ACCOUNT_REVIEW_CREDIT`: In connection with a consumer credit transaction for the review or collection of an account pursuant to FCRA Section 604(a)(3)(A).
 //
-// `ACCOUNT_REVIEW_NON_CREDIT`: For a legitimate business need of the information to review a non-credit account provided primarily for personal, family, or household purposes to determine whether the consumer continues to meet the terms of the account pursuant to FCRA Section 604(a)(3)(F)(2).
+// `ACCOUNT_REVIEW_NON_CREDIT`: For a legitimate business need of the information to review a non-credit account provided primarily for personal, family, or household purposes to determine whether the consumer continues to meet the terms of the account pursuant to FCRA Section 604(a)(3)(F)(ii).
 //
 // `EXTENSION_OF_CREDIT`: In connection with a credit transaction initiated by and involving the consumer pursuant to FCRA Section 604(a)(3)(A).
 //
@@ -22298,6 +23557,32 @@ func (c *CraCurrentModeledIncome) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", c)
+}
+
+// The Home Lending VOA report format.
+//
+// `VOA`: A Verification of Assets report that includes balances, historical balances, owners, transaction history, and report-level attributes.
+// `EMPLOYMENT_REFRESH`: An Employment Refresh report that contains only deposit transactions and basic account information.
+type CraHomeLendingVoaReportFormat string
+
+const (
+	CraHomeLendingVoaReportFormatVoa               CraHomeLendingVoaReportFormat = "VOA"
+	CraHomeLendingVoaReportFormatEmploymentRefresh CraHomeLendingVoaReportFormat = "EMPLOYMENT_REFRESH"
+)
+
+func NewCraHomeLendingVoaReportFormatFromString(s string) (CraHomeLendingVoaReportFormat, error) {
+	switch s {
+	case "VOA":
+		return CraHomeLendingVoaReportFormatVoa, nil
+	case "EMPLOYMENT_REFRESH":
+		return CraHomeLendingVoaReportFormatEmploymentRefresh, nil
+	}
+	var t CraHomeLendingVoaReportFormat
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (c CraHomeLendingVoaReportFormat) Ptr() *CraHomeLendingVoaReportFormat {
+	return &c
 }
 
 var (
@@ -26685,18 +27970,22 @@ func (c *CraQualifyProductConfig) String() string {
 }
 
 var (
-	craReportCreateBaseReportOptionsFieldRequireIdentity = big.NewInt(1 << 0)
+	craReportCreateBaseReportOptionsFieldRequireIdentity     = big.NewInt(1 << 0)
+	craReportCreateBaseReportOptionsFieldExcludeTransactions = big.NewInt(1 << 1)
 )
 
 // craReportCreateBaseReportOptionsNullableFields maps the wire names of CraReportCreateBaseReportOptions's nullable fields (required or optional) to their field bits.
 var craReportCreateBaseReportOptionsNullableFields = map[string]*big.Int{
-	"require_identity": craReportCreateBaseReportOptionsFieldRequireIdentity,
+	"require_identity":     craReportCreateBaseReportOptionsFieldRequireIdentity,
+	"exclude_transactions": craReportCreateBaseReportOptionsFieldExcludeTransactions,
 }
 
 // Configures how the Base Report product is generated.
 type CraReportCreateBaseReportOptions struct {
 	// Require the report to include identity information. If identity information is not available, report generation fails.
 	RequireIdentity *bool `json:"require_identity,omitempty" url:"require_identity,omitempty"`
+	// Exclude transactions from the Base Report. Each account's `transactions` field is returned as an empty array. Insights and other products in the report are not affected.
+	ExcludeTransactions *bool `json:"exclude_transactions,omitempty" url:"exclude_transactions,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -26710,6 +27999,13 @@ func (c *CraReportCreateBaseReportOptions) GetRequireIdentity() *bool {
 		return nil
 	}
 	return c.RequireIdentity
+}
+
+func (c *CraReportCreateBaseReportOptions) GetExcludeTransactions() *bool {
+	if c == nil {
+		return nil
+	}
+	return c.ExcludeTransactions
 }
 
 func (c *CraReportCreateBaseReportOptions) GetExtraProperties() map[string]interface{} {
@@ -26733,6 +28029,13 @@ func (c *CraReportCreateBaseReportOptions) require(field *big.Int) {
 func (c *CraReportCreateBaseReportOptions) SetRequireIdentity(requireIdentity *bool) {
 	c.RequireIdentity = requireIdentity
 	c.require(craReportCreateBaseReportOptionsFieldRequireIdentity)
+}
+
+// SetExcludeTransactions sets the ExcludeTransactions field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportCreateBaseReportOptions) SetExcludeTransactions(excludeTransactions *bool) {
+	c.ExcludeTransactions = excludeTransactions
+	c.require(craReportCreateBaseReportOptionsFieldExcludeTransactions)
 }
 
 func (c *CraReportCreateBaseReportOptions) UnmarshalJSON(data []byte) error {
@@ -27074,6 +28377,214 @@ func (c *CraReportCreateHomeLendingProductConfig) MarshalJSON() ([]byte, error) 
 }
 
 func (c *CraReportCreateHomeLendingProductConfig) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportCreateHomeLendingVoaOptionsFieldReportFormat = big.NewInt(1 << 0)
+)
+
+// Configures how the Home Lending VOA product is generated.
+type CraReportCreateHomeLendingVoaOptions struct {
+	// The requested report format. Defaults to `VOA` when omitted.
+	ReportFormat *CraHomeLendingVoaReportFormat `json:"report_format,omitempty" url:"report_format,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (c *CraReportCreateHomeLendingVoaOptions) GetReportFormat() *CraHomeLendingVoaReportFormat {
+	if c == nil {
+		return nil
+	}
+	return c.ReportFormat
+}
+
+func (c *CraReportCreateHomeLendingVoaOptions) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.extraProperties
+}
+
+func (c *CraReportCreateHomeLendingVoaOptions) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetReportFormat sets the ReportFormat field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportCreateHomeLendingVoaOptions) SetReportFormat(reportFormat *CraHomeLendingVoaReportFormat) {
+	c.ReportFormat = reportFormat
+	c.require(craReportCreateHomeLendingVoaOptionsFieldReportFormat)
+}
+
+func (c *CraReportCreateHomeLendingVoaOptions) UnmarshalJSON(data []byte) error {
+	type unmarshaler CraReportCreateHomeLendingVoaOptions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CraReportCreateHomeLendingVoaOptions(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportCreateHomeLendingVoaOptions) MarshalJSON() ([]byte, error) {
+	type embed CraReportCreateHomeLendingVoaOptions
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (c *CraReportCreateHomeLendingVoaOptions) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportCreateHomeLendingVoaProductConfigFieldVersion = big.NewInt(1 << 0)
+	craReportCreateHomeLendingVoaProductConfigFieldOptions = big.NewInt(1 << 1)
+)
+
+// craReportCreateHomeLendingVoaProductConfigNullableFields maps the wire names of CraReportCreateHomeLendingVoaProductConfig's nullable fields (required or optional) to their field bits.
+var craReportCreateHomeLendingVoaProductConfigNullableFields = map[string]*big.Int{
+	"options": craReportCreateHomeLendingVoaProductConfigFieldOptions,
+}
+
+// Requests the given version of the Home Lending VOA product, optionally configuring how it is generated.
+type CraReportCreateHomeLendingVoaProductConfig struct {
+	Version CraProductVersion                     `json:"version" url:"version"`
+	Options *CraReportCreateHomeLendingVoaOptions `json:"options,omitempty" url:"options,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportCreateHomeLendingVoaProductConfig) GetVersion() CraProductVersion {
+	if c == nil {
+		return ""
+	}
+	return c.Version
+}
+
+func (c *CraReportCreateHomeLendingVoaProductConfig) GetOptions() *CraReportCreateHomeLendingVoaOptions {
+	if c == nil {
+		return nil
+	}
+	return c.Options
+}
+
+func (c *CraReportCreateHomeLendingVoaProductConfig) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportCreateHomeLendingVoaProductConfig) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetVersion sets the Version field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportCreateHomeLendingVoaProductConfig) SetVersion(version CraProductVersion) {
+	c.Version = version
+	c.require(craReportCreateHomeLendingVoaProductConfigFieldVersion)
+}
+
+// SetOptions sets the Options field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportCreateHomeLendingVoaProductConfig) SetOptions(options *CraReportCreateHomeLendingVoaOptions) {
+	c.Options = options
+	c.require(craReportCreateHomeLendingVoaProductConfigFieldOptions)
+}
+
+func (c *CraReportCreateHomeLendingVoaProductConfig) UnmarshalJSON(data []byte) error {
+	type embed CraReportCreateHomeLendingVoaProductConfig
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportCreateHomeLendingVoaProductConfig(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportCreateHomeLendingVoaProductConfigNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportCreateHomeLendingVoaProductConfig) MarshalJSON() ([]byte, error) {
+	type embed CraReportCreateHomeLendingVoaProductConfig
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportCreateHomeLendingVoaProductConfig) String() string {
 	if c == nil {
 		return "<nil>"
 	}
@@ -28034,6 +29545,362 @@ func (c *CraReportCreateNetworkInsightsProductConfig) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+// The version of Prism CashScore to evaluate. Omit to not evaluate CashScore.
+type CraReportCreatePrismCashScoreVersion string
+
+const (
+	CraReportCreatePrismCashScoreVersionFour1 CraReportCreatePrismCashScoreVersion = "4.1"
+	CraReportCreatePrismCashScoreVersionFour  CraReportCreatePrismCashScoreVersion = "4"
+	CraReportCreatePrismCashScoreVersionThree CraReportCreatePrismCashScoreVersion = "3"
+)
+
+func NewCraReportCreatePrismCashScoreVersionFromString(s string) (CraReportCreatePrismCashScoreVersion, error) {
+	switch s {
+	case "4.1":
+		return CraReportCreatePrismCashScoreVersionFour1, nil
+	case "4":
+		return CraReportCreatePrismCashScoreVersionFour, nil
+	case "3":
+		return CraReportCreatePrismCashScoreVersionThree, nil
+	}
+	var t CraReportCreatePrismCashScoreVersion
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (c CraReportCreatePrismCashScoreVersion) Ptr() *CraReportCreatePrismCashScoreVersion {
+	return &c
+}
+
+// The version of Prism Detect to evaluate. Omit to not evaluate Detect.
+type CraReportCreatePrismDetectVersion string
+
+const (
+	CraReportCreatePrismDetectVersionFour1 CraReportCreatePrismDetectVersion = "4.1"
+	CraReportCreatePrismDetectVersionFour  CraReportCreatePrismDetectVersion = "4"
+)
+
+func NewCraReportCreatePrismDetectVersionFromString(s string) (CraReportCreatePrismDetectVersion, error) {
+	switch s {
+	case "4.1":
+		return CraReportCreatePrismDetectVersionFour1, nil
+	case "4":
+		return CraReportCreatePrismDetectVersionFour, nil
+	}
+	var t CraReportCreatePrismDetectVersion
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (c CraReportCreatePrismDetectVersion) Ptr() *CraReportCreatePrismDetectVersion {
+	return &c
+}
+
+// The version of Prism Extend to evaluate. Omit to not evaluate Extend.
+type CraReportCreatePrismExtendVersion string
+
+const (
+	CraReportCreatePrismExtendVersionFour1 CraReportCreatePrismExtendVersion = "4.1"
+	CraReportCreatePrismExtendVersionFour  CraReportCreatePrismExtendVersion = "4"
+)
+
+func NewCraReportCreatePrismExtendVersionFromString(s string) (CraReportCreatePrismExtendVersion, error) {
+	switch s {
+	case "4.1":
+		return CraReportCreatePrismExtendVersionFour1, nil
+	case "4":
+		return CraReportCreatePrismExtendVersionFour, nil
+	}
+	var t CraReportCreatePrismExtendVersion
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (c CraReportCreatePrismExtendVersion) Ptr() *CraReportCreatePrismExtendVersion {
+	return &c
+}
+
+// The version of Prism Insights to evaluate. Omit to not evaluate Insights.
+type CraReportCreatePrismInsightsVersion string
+
+const (
+	CraReportCreatePrismInsightsVersionFour1 CraReportCreatePrismInsightsVersion = "4.1"
+	CraReportCreatePrismInsightsVersionFour  CraReportCreatePrismInsightsVersion = "4"
+	CraReportCreatePrismInsightsVersionThree CraReportCreatePrismInsightsVersion = "3"
+)
+
+func NewCraReportCreatePrismInsightsVersionFromString(s string) (CraReportCreatePrismInsightsVersion, error) {
+	switch s {
+	case "4.1":
+		return CraReportCreatePrismInsightsVersionFour1, nil
+	case "4":
+		return CraReportCreatePrismInsightsVersionFour, nil
+	case "3":
+		return CraReportCreatePrismInsightsVersionThree, nil
+	}
+	var t CraReportCreatePrismInsightsVersion
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (c CraReportCreatePrismInsightsVersion) Ptr() *CraReportCreatePrismInsightsVersion {
+	return &c
+}
+
+var (
+	craReportCreatePrismOptionsFieldCashscore = big.NewInt(1 << 0)
+	craReportCreatePrismOptionsFieldInsights  = big.NewInt(1 << 1)
+	craReportCreatePrismOptionsFieldDetect    = big.NewInt(1 << 2)
+	craReportCreatePrismOptionsFieldExtend    = big.NewInt(1 << 3)
+)
+
+// craReportCreatePrismOptionsNullableFields maps the wire names of CraReportCreatePrismOptions's nullable fields (required or optional) to their field bits.
+var craReportCreatePrismOptionsNullableFields = map[string]*big.Int{
+	"cashscore": craReportCreatePrismOptionsFieldCashscore,
+	"insights":  craReportCreatePrismOptionsFieldInsights,
+	"detect":    craReportCreatePrismOptionsFieldDetect,
+	"extend":    craReportCreatePrismOptionsFieldExtend,
+}
+
+// Selects which Prism products to evaluate and at which version. A product whose version is omitted is not evaluated, so at least one version must be set.
+type CraReportCreatePrismOptions struct {
+	Cashscore *CraReportCreatePrismCashScoreVersion `json:"cashscore,omitempty" url:"cashscore,omitempty"`
+	Insights  *CraReportCreatePrismInsightsVersion  `json:"insights,omitempty" url:"insights,omitempty"`
+	Detect    *CraReportCreatePrismDetectVersion    `json:"detect,omitempty" url:"detect,omitempty"`
+	Extend    *CraReportCreatePrismExtendVersion    `json:"extend,omitempty" url:"extend,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (c *CraReportCreatePrismOptions) GetCashscore() *CraReportCreatePrismCashScoreVersion {
+	if c == nil {
+		return nil
+	}
+	return c.Cashscore
+}
+
+func (c *CraReportCreatePrismOptions) GetInsights() *CraReportCreatePrismInsightsVersion {
+	if c == nil {
+		return nil
+	}
+	return c.Insights
+}
+
+func (c *CraReportCreatePrismOptions) GetDetect() *CraReportCreatePrismDetectVersion {
+	if c == nil {
+		return nil
+	}
+	return c.Detect
+}
+
+func (c *CraReportCreatePrismOptions) GetExtend() *CraReportCreatePrismExtendVersion {
+	if c == nil {
+		return nil
+	}
+	return c.Extend
+}
+
+func (c *CraReportCreatePrismOptions) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.extraProperties
+}
+
+func (c *CraReportCreatePrismOptions) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetCashscore sets the Cashscore field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportCreatePrismOptions) SetCashscore(cashscore *CraReportCreatePrismCashScoreVersion) {
+	c.Cashscore = cashscore
+	c.require(craReportCreatePrismOptionsFieldCashscore)
+}
+
+// SetInsights sets the Insights field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportCreatePrismOptions) SetInsights(insights *CraReportCreatePrismInsightsVersion) {
+	c.Insights = insights
+	c.require(craReportCreatePrismOptionsFieldInsights)
+}
+
+// SetDetect sets the Detect field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportCreatePrismOptions) SetDetect(detect *CraReportCreatePrismDetectVersion) {
+	c.Detect = detect
+	c.require(craReportCreatePrismOptionsFieldDetect)
+}
+
+// SetExtend sets the Extend field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportCreatePrismOptions) SetExtend(extend *CraReportCreatePrismExtendVersion) {
+	c.Extend = extend
+	c.require(craReportCreatePrismOptionsFieldExtend)
+}
+
+func (c *CraReportCreatePrismOptions) UnmarshalJSON(data []byte) error {
+	type unmarshaler CraReportCreatePrismOptions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CraReportCreatePrismOptions(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportCreatePrismOptionsNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportCreatePrismOptions) MarshalJSON() ([]byte, error) {
+	type embed CraReportCreatePrismOptions
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (c *CraReportCreatePrismOptions) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportCreatePrismProductConfigFieldVersion = big.NewInt(1 << 0)
+	craReportCreatePrismProductConfigFieldOptions = big.NewInt(1 << 1)
+)
+
+// Requests the given version of the Prism product and selects which Prism products to evaluate.
+type CraReportCreatePrismProductConfig struct {
+	Version CraProductVersion            `json:"version" url:"version"`
+	Options *CraReportCreatePrismOptions `json:"options" url:"options"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportCreatePrismProductConfig) GetVersion() CraProductVersion {
+	if c == nil {
+		return ""
+	}
+	return c.Version
+}
+
+func (c *CraReportCreatePrismProductConfig) GetOptions() *CraReportCreatePrismOptions {
+	if c == nil {
+		return nil
+	}
+	return c.Options
+}
+
+func (c *CraReportCreatePrismProductConfig) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportCreatePrismProductConfig) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetVersion sets the Version field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportCreatePrismProductConfig) SetVersion(version CraProductVersion) {
+	c.Version = version
+	c.require(craReportCreatePrismProductConfigFieldVersion)
+}
+
+// SetOptions sets the Options field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportCreatePrismProductConfig) SetOptions(options *CraReportCreatePrismOptions) {
+	c.Options = options
+	c.require(craReportCreatePrismProductConfigFieldOptions)
+}
+
+func (c *CraReportCreatePrismProductConfig) UnmarshalJSON(data []byte) error {
+	type embed CraReportCreatePrismProductConfig
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportCreatePrismProductConfig(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportCreatePrismProductConfig) MarshalJSON() ([]byte, error) {
+	type embed CraReportCreatePrismProductConfig
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportCreatePrismProductConfig) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
 var (
 	craReportCreateQualifyProductConfigFieldVersion = big.NewInt(1 << 0)
 )
@@ -28126,6 +29993,554 @@ func (c *CraReportCreateQualifyProductConfig) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+var (
+	craReportCreateUltraFicoBaseFicoScoreFieldBureau                           = big.NewInt(1 << 0)
+	craReportCreateUltraFicoBaseFicoScoreFieldScore                            = big.NewInt(1 << 1)
+	craReportCreateUltraFicoBaseFicoScoreFieldReasonCodes                      = big.NewInt(1 << 2)
+	craReportCreateUltraFicoBaseFicoScoreFieldDidInquiriesAdverselyAffectScore = big.NewInt(1 << 3)
+	craReportCreateUltraFicoBaseFicoScoreFieldBaseFicoScoreVersion             = big.NewInt(1 << 4)
+)
+
+// craReportCreateUltraFicoBaseFicoScoreNullableFields maps the wire names of CraReportCreateUltraFicoBaseFicoScore's nullable fields (required or optional) to their field bits.
+var craReportCreateUltraFicoBaseFicoScoreNullableFields = map[string]*big.Int{
+	"did_inquiries_adversely_affect_score": craReportCreateUltraFicoBaseFicoScoreFieldDidInquiriesAdverselyAffectScore,
+}
+
+// The base FICO score used for an UltraFICO scoring request.
+type CraReportCreateUltraFicoBaseFicoScore struct {
+	Bureau CraUltraFicoBureau `json:"bureau" url:"bureau"`
+	// The numeric base FICO score.
+	Score int `json:"score" url:"score"`
+	// The reason codes associated with the score, in priority order.
+	ReasonCodes []string `json:"reason_codes" url:"reason_codes"`
+	// Whether inquiries adversely affected the score but were not represented in the reason codes. Sometimes referred to as the FACTA Flag.
+	DidInquiriesAdverselyAffectScore *bool                            `json:"did_inquiries_adversely_affect_score,omitempty" url:"did_inquiries_adversely_affect_score,omitempty"`
+	BaseFicoScoreVersion             CraUltraFicoBaseFicoScoreVersion `json:"base_fico_score_version" url:"base_fico_score_version"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportCreateUltraFicoBaseFicoScore) GetBureau() CraUltraFicoBureau {
+	if c == nil {
+		return ""
+	}
+	return c.Bureau
+}
+
+func (c *CraReportCreateUltraFicoBaseFicoScore) GetScore() int {
+	if c == nil {
+		return 0
+	}
+	return c.Score
+}
+
+func (c *CraReportCreateUltraFicoBaseFicoScore) GetReasonCodes() []string {
+	if c == nil {
+		return nil
+	}
+	return c.ReasonCodes
+}
+
+func (c *CraReportCreateUltraFicoBaseFicoScore) GetDidInquiriesAdverselyAffectScore() *bool {
+	if c == nil {
+		return nil
+	}
+	return c.DidInquiriesAdverselyAffectScore
+}
+
+func (c *CraReportCreateUltraFicoBaseFicoScore) GetBaseFicoScoreVersion() CraUltraFicoBaseFicoScoreVersion {
+	if c == nil {
+		return ""
+	}
+	return c.BaseFicoScoreVersion
+}
+
+func (c *CraReportCreateUltraFicoBaseFicoScore) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportCreateUltraFicoBaseFicoScore) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetBureau sets the Bureau field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportCreateUltraFicoBaseFicoScore) SetBureau(bureau CraUltraFicoBureau) {
+	c.Bureau = bureau
+	c.require(craReportCreateUltraFicoBaseFicoScoreFieldBureau)
+}
+
+// SetScore sets the Score field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportCreateUltraFicoBaseFicoScore) SetScore(score int) {
+	c.Score = score
+	c.require(craReportCreateUltraFicoBaseFicoScoreFieldScore)
+}
+
+// SetReasonCodes sets the ReasonCodes field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportCreateUltraFicoBaseFicoScore) SetReasonCodes(reasonCodes []string) {
+	c.ReasonCodes = reasonCodes
+	c.require(craReportCreateUltraFicoBaseFicoScoreFieldReasonCodes)
+}
+
+// SetDidInquiriesAdverselyAffectScore sets the DidInquiriesAdverselyAffectScore field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportCreateUltraFicoBaseFicoScore) SetDidInquiriesAdverselyAffectScore(didInquiriesAdverselyAffectScore *bool) {
+	c.DidInquiriesAdverselyAffectScore = didInquiriesAdverselyAffectScore
+	c.require(craReportCreateUltraFicoBaseFicoScoreFieldDidInquiriesAdverselyAffectScore)
+}
+
+// SetBaseFicoScoreVersion sets the BaseFicoScoreVersion field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportCreateUltraFicoBaseFicoScore) SetBaseFicoScoreVersion(baseFicoScoreVersion CraUltraFicoBaseFicoScoreVersion) {
+	c.BaseFicoScoreVersion = baseFicoScoreVersion
+	c.require(craReportCreateUltraFicoBaseFicoScoreFieldBaseFicoScoreVersion)
+}
+
+func (c *CraReportCreateUltraFicoBaseFicoScore) UnmarshalJSON(data []byte) error {
+	type embed CraReportCreateUltraFicoBaseFicoScore
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportCreateUltraFicoBaseFicoScore(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportCreateUltraFicoBaseFicoScoreNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportCreateUltraFicoBaseFicoScore) MarshalJSON() ([]byte, error) {
+	type embed CraReportCreateUltraFicoBaseFicoScore
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportCreateUltraFicoBaseFicoScore) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportCreateUltraFicoOptionsFieldFicoLenderID           = big.NewInt(1 << 0)
+	craReportCreateUltraFicoOptionsFieldLenderApplicationID    = big.NewInt(1 << 1)
+	craReportCreateUltraFicoOptionsFieldUltraficoScoreRequests = big.NewInt(1 << 2)
+)
+
+// Configures the UltraFICO scores to generate.
+type CraReportCreateUltraFicoOptions struct {
+	// The FICO-provided identifier for the lender, sometimes called the Lender Org ID.
+	FicoLenderID string `json:"fico_lender_id" url:"fico_lender_id"`
+	// Client-generated identifier for the application across FICO systems.
+	LenderApplicationID string `json:"lender_application_id" url:"lender_application_id"`
+	// The UltraFICO scoring requests to evaluate.
+	UltraficoScoreRequests []*CraReportCreateUltraFicoScoreRequest `json:"ultrafico_score_requests" url:"ultrafico_score_requests"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportCreateUltraFicoOptions) GetFicoLenderID() string {
+	if c == nil {
+		return ""
+	}
+	return c.FicoLenderID
+}
+
+func (c *CraReportCreateUltraFicoOptions) GetLenderApplicationID() string {
+	if c == nil {
+		return ""
+	}
+	return c.LenderApplicationID
+}
+
+func (c *CraReportCreateUltraFicoOptions) GetUltraficoScoreRequests() []*CraReportCreateUltraFicoScoreRequest {
+	if c == nil {
+		return nil
+	}
+	return c.UltraficoScoreRequests
+}
+
+func (c *CraReportCreateUltraFicoOptions) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportCreateUltraFicoOptions) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetFicoLenderID sets the FicoLenderID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportCreateUltraFicoOptions) SetFicoLenderID(ficoLenderID string) {
+	c.FicoLenderID = ficoLenderID
+	c.require(craReportCreateUltraFicoOptionsFieldFicoLenderID)
+}
+
+// SetLenderApplicationID sets the LenderApplicationID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportCreateUltraFicoOptions) SetLenderApplicationID(lenderApplicationID string) {
+	c.LenderApplicationID = lenderApplicationID
+	c.require(craReportCreateUltraFicoOptionsFieldLenderApplicationID)
+}
+
+// SetUltraficoScoreRequests sets the UltraficoScoreRequests field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportCreateUltraFicoOptions) SetUltraficoScoreRequests(ultraficoScoreRequests []*CraReportCreateUltraFicoScoreRequest) {
+	c.UltraficoScoreRequests = ultraficoScoreRequests
+	c.require(craReportCreateUltraFicoOptionsFieldUltraficoScoreRequests)
+}
+
+func (c *CraReportCreateUltraFicoOptions) UnmarshalJSON(data []byte) error {
+	type embed CraReportCreateUltraFicoOptions
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportCreateUltraFicoOptions(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportCreateUltraFicoOptions) MarshalJSON() ([]byte, error) {
+	type embed CraReportCreateUltraFicoOptions
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportCreateUltraFicoOptions) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportCreateUltraFicoProductConfigFieldVersion = big.NewInt(1 << 0)
+	craReportCreateUltraFicoProductConfigFieldOptions = big.NewInt(1 << 1)
+)
+
+// Requests the given version of the UltraFICO product and configures the scores to generate.
+type CraReportCreateUltraFicoProductConfig struct {
+	Version CraProductVersion                `json:"version" url:"version"`
+	Options *CraReportCreateUltraFicoOptions `json:"options" url:"options"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportCreateUltraFicoProductConfig) GetVersion() CraProductVersion {
+	if c == nil {
+		return ""
+	}
+	return c.Version
+}
+
+func (c *CraReportCreateUltraFicoProductConfig) GetOptions() *CraReportCreateUltraFicoOptions {
+	if c == nil {
+		return nil
+	}
+	return c.Options
+}
+
+func (c *CraReportCreateUltraFicoProductConfig) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportCreateUltraFicoProductConfig) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetVersion sets the Version field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportCreateUltraFicoProductConfig) SetVersion(version CraProductVersion) {
+	c.Version = version
+	c.require(craReportCreateUltraFicoProductConfigFieldVersion)
+}
+
+// SetOptions sets the Options field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportCreateUltraFicoProductConfig) SetOptions(options *CraReportCreateUltraFicoOptions) {
+	c.Options = options
+	c.require(craReportCreateUltraFicoProductConfigFieldOptions)
+}
+
+func (c *CraReportCreateUltraFicoProductConfig) UnmarshalJSON(data []byte) error {
+	type embed CraReportCreateUltraFicoProductConfig
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportCreateUltraFicoProductConfig(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportCreateUltraFicoProductConfig) MarshalJSON() ([]byte, error) {
+	type embed CraReportCreateUltraFicoProductConfig
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportCreateUltraFicoProductConfig) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportCreateUltraFicoScoreRequestFieldUltraficoScoreVersion = big.NewInt(1 << 0)
+	craReportCreateUltraFicoScoreRequestFieldRequestCorrelationID  = big.NewInt(1 << 1)
+	craReportCreateUltraFicoScoreRequestFieldFicoScoringRequestID  = big.NewInt(1 << 2)
+	craReportCreateUltraFicoScoreRequestFieldBaseFicoScore         = big.NewInt(1 << 3)
+)
+
+// Configuration for one UltraFICO scoring request.
+type CraReportCreateUltraFicoScoreRequest struct {
+	UltraficoScoreVersion CraUltraFicoScoreVersion `json:"ultrafico_score_version" url:"ultrafico_score_version"`
+	// Client-generated identifier used to correlate a scoring request with its result.
+	RequestCorrelationID *string `json:"request_correlation_id,omitempty" url:"request_correlation_id,omitempty"`
+	// FICO-provided identifier for a scoring request. Only provide this for a FICO-led flow.
+	FicoScoringRequestID *string                                `json:"fico_scoring_request_id,omitempty" url:"fico_scoring_request_id,omitempty"`
+	BaseFicoScore        *CraReportCreateUltraFicoBaseFicoScore `json:"base_fico_score" url:"base_fico_score"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportCreateUltraFicoScoreRequest) GetUltraficoScoreVersion() CraUltraFicoScoreVersion {
+	if c == nil {
+		return ""
+	}
+	return c.UltraficoScoreVersion
+}
+
+func (c *CraReportCreateUltraFicoScoreRequest) GetRequestCorrelationID() *string {
+	if c == nil {
+		return nil
+	}
+	return c.RequestCorrelationID
+}
+
+func (c *CraReportCreateUltraFicoScoreRequest) GetFicoScoringRequestID() *string {
+	if c == nil {
+		return nil
+	}
+	return c.FicoScoringRequestID
+}
+
+func (c *CraReportCreateUltraFicoScoreRequest) GetBaseFicoScore() *CraReportCreateUltraFicoBaseFicoScore {
+	if c == nil {
+		return nil
+	}
+	return c.BaseFicoScore
+}
+
+func (c *CraReportCreateUltraFicoScoreRequest) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportCreateUltraFicoScoreRequest) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetUltraficoScoreVersion sets the UltraficoScoreVersion field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportCreateUltraFicoScoreRequest) SetUltraficoScoreVersion(ultraficoScoreVersion CraUltraFicoScoreVersion) {
+	c.UltraficoScoreVersion = ultraficoScoreVersion
+	c.require(craReportCreateUltraFicoScoreRequestFieldUltraficoScoreVersion)
+}
+
+// SetRequestCorrelationID sets the RequestCorrelationID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportCreateUltraFicoScoreRequest) SetRequestCorrelationID(requestCorrelationID *string) {
+	c.RequestCorrelationID = requestCorrelationID
+	c.require(craReportCreateUltraFicoScoreRequestFieldRequestCorrelationID)
+}
+
+// SetFicoScoringRequestID sets the FicoScoringRequestID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportCreateUltraFicoScoreRequest) SetFicoScoringRequestID(ficoScoringRequestID *string) {
+	c.FicoScoringRequestID = ficoScoringRequestID
+	c.require(craReportCreateUltraFicoScoreRequestFieldFicoScoringRequestID)
+}
+
+// SetBaseFicoScore sets the BaseFicoScore field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportCreateUltraFicoScoreRequest) SetBaseFicoScore(baseFicoScore *CraReportCreateUltraFicoBaseFicoScore) {
+	c.BaseFicoScore = baseFicoScore
+	c.require(craReportCreateUltraFicoScoreRequestFieldBaseFicoScore)
+}
+
+func (c *CraReportCreateUltraFicoScoreRequest) UnmarshalJSON(data []byte) error {
+	type embed CraReportCreateUltraFicoScoreRequest
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportCreateUltraFicoScoreRequest(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportCreateUltraFicoScoreRequest) MarshalJSON() ([]byte, error) {
+	type embed CraReportCreateUltraFicoScoreRequest
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportCreateUltraFicoScoreRequest) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
 // The stage in the credit or other eligibility decisioning lifecycle for which a given report will be utilized.
 //
 // Allowable permissible purposes for `PREQUALIFICATION`:
@@ -28203,9 +30618,12 @@ type CraReportProduct struct {
 	CraBaseReport        *CraReportCreateBaseReportProductConfig
 	CraCashflowInsights  *CraReportCreateCashflowInsightsProductConfig
 	CraHomeLending       *CraReportCreateHomeLendingProductConfig
+	CraHomeLendingVoa    *CraReportCreateHomeLendingVoaProductConfig
 	CraIncomeInsights    *CraReportCreateIncomeInsightsProductConfig
 	CraLendScore         *CraReportCreateLendScoreProductConfig
 	CraNetworkInsights   *CraReportCreateNetworkInsightsProductConfig
+	CraPrism             *CraReportCreatePrismProductConfig
+	CraUltrafico         *CraReportCreateUltraFicoProductConfig
 	CraQualify           *CraReportCreateQualifyProductConfig
 	CraLendScoreComplete *CraReportCreateLendScoreCompleteBundleProductConfig
 	CraIncomeComplete    *CraReportCreateIncomeCompleteBundleProductConfig
@@ -28241,6 +30659,13 @@ func (c *CraReportProduct) GetCraHomeLending() *CraReportCreateHomeLendingProduc
 	return c.CraHomeLending
 }
 
+func (c *CraReportProduct) GetCraHomeLendingVoa() *CraReportCreateHomeLendingVoaProductConfig {
+	if c == nil {
+		return nil
+	}
+	return c.CraHomeLendingVoa
+}
+
 func (c *CraReportProduct) GetCraIncomeInsights() *CraReportCreateIncomeInsightsProductConfig {
 	if c == nil {
 		return nil
@@ -28260,6 +30685,20 @@ func (c *CraReportProduct) GetCraNetworkInsights() *CraReportCreateNetworkInsigh
 		return nil
 	}
 	return c.CraNetworkInsights
+}
+
+func (c *CraReportProduct) GetCraPrism() *CraReportCreatePrismProductConfig {
+	if c == nil {
+		return nil
+	}
+	return c.CraPrism
+}
+
+func (c *CraReportProduct) GetCraUltrafico() *CraReportCreateUltraFicoProductConfig {
+	if c == nil {
+		return nil
+	}
+	return c.CraUltrafico
 }
 
 func (c *CraReportProduct) GetCraQualify() *CraReportCreateQualifyProductConfig {
@@ -28313,6 +30752,12 @@ func (c *CraReportProduct) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		c.CraHomeLending = value
+	case "cra_home_lending_voa":
+		value := new(CraReportCreateHomeLendingVoaProductConfig)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.CraHomeLendingVoa = value
 	case "cra_income_insights":
 		value := new(CraReportCreateIncomeInsightsProductConfig)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -28331,6 +30776,18 @@ func (c *CraReportProduct) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		c.CraNetworkInsights = value
+	case "cra_prism":
+		value := new(CraReportCreatePrismProductConfig)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.CraPrism = value
+	case "cra_ultrafico":
+		value := new(CraReportCreateUltraFicoProductConfig)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.CraUltrafico = value
 	case "cra_qualify":
 		value := new(CraReportCreateQualifyProductConfig)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -28367,6 +30824,9 @@ func (c CraReportProduct) MarshalJSON() ([]byte, error) {
 	if c.CraHomeLending != nil {
 		return internal.MarshalJSONWithExtraProperty(c.CraHomeLending, "product", "cra_home_lending")
 	}
+	if c.CraHomeLendingVoa != nil {
+		return internal.MarshalJSONWithExtraProperty(c.CraHomeLendingVoa, "product", "cra_home_lending_voa")
+	}
 	if c.CraIncomeInsights != nil {
 		return internal.MarshalJSONWithExtraProperty(c.CraIncomeInsights, "product", "cra_income_insights")
 	}
@@ -28375,6 +30835,12 @@ func (c CraReportProduct) MarshalJSON() ([]byte, error) {
 	}
 	if c.CraNetworkInsights != nil {
 		return internal.MarshalJSONWithExtraProperty(c.CraNetworkInsights, "product", "cra_network_insights")
+	}
+	if c.CraPrism != nil {
+		return internal.MarshalJSONWithExtraProperty(c.CraPrism, "product", "cra_prism")
+	}
+	if c.CraUltrafico != nil {
+		return internal.MarshalJSONWithExtraProperty(c.CraUltrafico, "product", "cra_ultrafico")
 	}
 	if c.CraQualify != nil {
 		return internal.MarshalJSONWithExtraProperty(c.CraQualify, "product", "cra_qualify")
@@ -28395,9 +30861,12 @@ type CraReportProductVisitor interface {
 	VisitCraBaseReport(*CraReportCreateBaseReportProductConfig) error
 	VisitCraCashflowInsights(*CraReportCreateCashflowInsightsProductConfig) error
 	VisitCraHomeLending(*CraReportCreateHomeLendingProductConfig) error
+	VisitCraHomeLendingVoa(*CraReportCreateHomeLendingVoaProductConfig) error
 	VisitCraIncomeInsights(*CraReportCreateIncomeInsightsProductConfig) error
 	VisitCraLendScore(*CraReportCreateLendScoreProductConfig) error
 	VisitCraNetworkInsights(*CraReportCreateNetworkInsightsProductConfig) error
+	VisitCraPrism(*CraReportCreatePrismProductConfig) error
+	VisitCraUltrafico(*CraReportCreateUltraFicoProductConfig) error
 	VisitCraQualify(*CraReportCreateQualifyProductConfig) error
 	VisitCraLendScoreComplete(*CraReportCreateLendScoreCompleteBundleProductConfig) error
 	VisitCraIncomeComplete(*CraReportCreateIncomeCompleteBundleProductConfig) error
@@ -28413,6 +30882,9 @@ func (c *CraReportProduct) Accept(visitor CraReportProductVisitor) error {
 	if c.CraHomeLending != nil {
 		return visitor.VisitCraHomeLending(c.CraHomeLending)
 	}
+	if c.CraHomeLendingVoa != nil {
+		return visitor.VisitCraHomeLendingVoa(c.CraHomeLendingVoa)
+	}
 	if c.CraIncomeInsights != nil {
 		return visitor.VisitCraIncomeInsights(c.CraIncomeInsights)
 	}
@@ -28421,6 +30893,12 @@ func (c *CraReportProduct) Accept(visitor CraReportProductVisitor) error {
 	}
 	if c.CraNetworkInsights != nil {
 		return visitor.VisitCraNetworkInsights(c.CraNetworkInsights)
+	}
+	if c.CraPrism != nil {
+		return visitor.VisitCraPrism(c.CraPrism)
+	}
+	if c.CraUltrafico != nil {
+		return visitor.VisitCraUltrafico(c.CraUltrafico)
 	}
 	if c.CraQualify != nil {
 		return visitor.VisitCraQualify(c.CraQualify)
@@ -28448,6 +30926,9 @@ func (c *CraReportProduct) validate() error {
 	if c.CraHomeLending != nil {
 		fields = append(fields, "cra_home_lending")
 	}
+	if c.CraHomeLendingVoa != nil {
+		fields = append(fields, "cra_home_lending_voa")
+	}
 	if c.CraIncomeInsights != nil {
 		fields = append(fields, "cra_income_insights")
 	}
@@ -28456,6 +30937,12 @@ func (c *CraReportProduct) validate() error {
 	}
 	if c.CraNetworkInsights != nil {
 		fields = append(fields, "cra_network_insights")
+	}
+	if c.CraPrism != nil {
+		fields = append(fields, "cra_prism")
+	}
+	if c.CraUltrafico != nil {
+		fields = append(fields, "cra_ultrafico")
 	}
 	if c.CraQualify != nil {
 		fields = append(fields, "cra_qualify")
@@ -30014,6 +32501,81 @@ func (c *CraSubscriptionProductConfig) validate() error {
 		}
 	}
 	return nil
+}
+
+// The version of the base FICO score model.
+type CraUltraFicoBaseFicoScoreVersion string
+
+const (
+	CraUltraFicoBaseFicoScoreVersionEight CraUltraFicoBaseFicoScoreVersion = "8"
+	CraUltraFicoBaseFicoScoreVersionNine  CraUltraFicoBaseFicoScoreVersion = "9"
+	CraUltraFicoBaseFicoScoreVersionTen   CraUltraFicoBaseFicoScoreVersion = "10"
+	CraUltraFicoBaseFicoScoreVersionTenT  CraUltraFicoBaseFicoScoreVersion = "10T"
+)
+
+func NewCraUltraFicoBaseFicoScoreVersionFromString(s string) (CraUltraFicoBaseFicoScoreVersion, error) {
+	switch s {
+	case "8":
+		return CraUltraFicoBaseFicoScoreVersionEight, nil
+	case "9":
+		return CraUltraFicoBaseFicoScoreVersionNine, nil
+	case "10":
+		return CraUltraFicoBaseFicoScoreVersionTen, nil
+	case "10T":
+		return CraUltraFicoBaseFicoScoreVersionTenT, nil
+	}
+	var t CraUltraFicoBaseFicoScoreVersion
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (c CraUltraFicoBaseFicoScoreVersion) Ptr() *CraUltraFicoBaseFicoScoreVersion {
+	return &c
+}
+
+// The credit bureau that provided the base FICO score.
+type CraUltraFicoBureau string
+
+const (
+	CraUltraFicoBureauEquifax    CraUltraFicoBureau = "EQUIFAX"
+	CraUltraFicoBureauExperian   CraUltraFicoBureau = "EXPERIAN"
+	CraUltraFicoBureauTransunion CraUltraFicoBureau = "TRANSUNION"
+)
+
+func NewCraUltraFicoBureauFromString(s string) (CraUltraFicoBureau, error) {
+	switch s {
+	case "EQUIFAX":
+		return CraUltraFicoBureauEquifax, nil
+	case "EXPERIAN":
+		return CraUltraFicoBureauExperian, nil
+	case "TRANSUNION":
+		return CraUltraFicoBureauTransunion, nil
+	}
+	var t CraUltraFicoBureau
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (c CraUltraFicoBureau) Ptr() *CraUltraFicoBureau {
+	return &c
+}
+
+// The version of the UltraFICO score.
+type CraUltraFicoScoreVersion string
+
+const (
+	CraUltraFicoScoreVersionOne0 CraUltraFicoScoreVersion = "1.0"
+)
+
+func NewCraUltraFicoScoreVersionFromString(s string) (CraUltraFicoScoreVersion, error) {
+	switch s {
+	case "1.0":
+		return CraUltraFicoScoreVersionOne0, nil
+	}
+	var t CraUltraFicoScoreVersion
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (c CraUltraFicoScoreVersion) Ptr() *CraUltraFicoScoreVersion {
+	return &c
 }
 
 var (
@@ -33667,7 +36229,7 @@ var (
 	expenditureInsightsFieldTotalExpenditure        = big.NewInt(1 << 1)
 	expenditureInsightsFieldEssentialExpenditure    = big.NewInt(1 << 2)
 	expenditureInsightsFieldNonEssentialExpenditure = big.NewInt(1 << 3)
-	expenditureInsightsFieldOther                   = big.NewInt(1 << 4)
+	expenditureInsightsFieldOtherExpenditure        = big.NewInt(1 << 4)
 	expenditureInsightsFieldTransfersOut            = big.NewInt(1 << 5)
 	expenditureInsightsFieldOutlierTransactions     = big.NewInt(1 << 6)
 )
@@ -33678,7 +36240,7 @@ var expenditureInsightsNullableFields = map[string]*big.Int{
 	"total_expenditure":         expenditureInsightsFieldTotalExpenditure,
 	"essential_expenditure":     expenditureInsightsFieldEssentialExpenditure,
 	"non_essential_expenditure": expenditureInsightsFieldNonEssentialExpenditure,
-	"other":                     expenditureInsightsFieldOther,
+	"other_expenditure":         expenditureInsightsFieldOtherExpenditure,
 	"transfers_out":             expenditureInsightsFieldTransfersOut,
 	"outlier_transactions":      expenditureInsightsFieldOutlierTransactions,
 }
@@ -33690,7 +36252,7 @@ type ExpenditureInsights struct {
 	TotalExpenditure        *ExpenditureSummary                   `json:"total_expenditure,omitempty" url:"total_expenditure,omitempty"`
 	EssentialExpenditure    *ExpenditureSummary                   `json:"essential_expenditure,omitempty" url:"essential_expenditure,omitempty"`
 	NonEssentialExpenditure *ExpenditureSummary                   `json:"non_essential_expenditure,omitempty" url:"non_essential_expenditure,omitempty"`
-	Other                   *ExpenditureSummary                   `json:"other,omitempty" url:"other,omitempty"`
+	OtherExpenditure        *ExpenditureSummary                   `json:"other_expenditure,omitempty" url:"other_expenditure,omitempty"`
 	TransfersOut            *ExpenditureSummary                   `json:"transfers_out,omitempty" url:"transfers_out,omitempty"`
 	OutlierTransactions     *OutlierTransactionsInsights          `json:"outlier_transactions,omitempty" url:"outlier_transactions,omitempty"`
 
@@ -33730,11 +36292,11 @@ func (e *ExpenditureInsights) GetNonEssentialExpenditure() *ExpenditureSummary {
 	return e.NonEssentialExpenditure
 }
 
-func (e *ExpenditureInsights) GetOther() *ExpenditureSummary {
+func (e *ExpenditureInsights) GetOtherExpenditure() *ExpenditureSummary {
 	if e == nil {
 		return nil
 	}
-	return e.Other
+	return e.OtherExpenditure
 }
 
 func (e *ExpenditureInsights) GetTransfersOut() *ExpenditureSummary {
@@ -33795,11 +36357,11 @@ func (e *ExpenditureInsights) SetNonEssentialExpenditure(nonEssentialExpenditure
 	e.require(expenditureInsightsFieldNonEssentialExpenditure)
 }
 
-// SetOther sets the Other field and marks it as non-optional;
+// SetOtherExpenditure sets the OtherExpenditure field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (e *ExpenditureInsights) SetOther(other *ExpenditureSummary) {
-	e.Other = other
-	e.require(expenditureInsightsFieldOther)
+func (e *ExpenditureInsights) SetOtherExpenditure(otherExpenditure *ExpenditureSummary) {
+	e.OtherExpenditure = otherExpenditure
+	e.require(expenditureInsightsFieldOtherExpenditure)
 }
 
 // SetTransfersOut sets the TransfersOut field and marks it as non-optional;
@@ -33877,6 +36439,7 @@ var (
 	expenditureSummaryFieldTransactionsCount      = big.NewInt(1 << 4)
 	expenditureSummaryFieldPercentageOfIncome     = big.NewInt(1 << 5)
 	expenditureSummaryFieldTopCategories          = big.NewInt(1 << 6)
+	expenditureSummaryFieldMonthlySummaries       = big.NewInt(1 << 7)
 )
 
 // expenditureSummaryNullableFields maps the wire names of ExpenditureSummary's nullable fields (required or optional) to their field bits.
@@ -33910,7 +36473,9 @@ type ExpenditureSummary struct {
 	//
 	// The categories are sorted in descending order by the total value spent.
 	// See the [category taxonomy](https://plaid.com/documents/credit-category-taxonomy.csv) for a full listing of category IDs.
-	TopCategories []*CategoryExpenses `json:"top_categories,omitempty" url:"top_categories,omitempty"`
+	TopCategories []*CategoryExpenses `json:"top_categories" url:"top_categories"`
+	// The monthly summaries of transactions in this expenditure group.
+	MonthlySummaries []*MonthlySummary `json:"monthly_summaries" url:"monthly_summaries"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -33967,6 +36532,13 @@ func (e *ExpenditureSummary) GetTopCategories() []*CategoryExpenses {
 		return nil
 	}
 	return e.TopCategories
+}
+
+func (e *ExpenditureSummary) GetMonthlySummaries() []*MonthlySummary {
+	if e == nil {
+		return nil
+	}
+	return e.MonthlySummaries
 }
 
 func (e *ExpenditureSummary) GetExtraProperties() map[string]interface{} {
@@ -34032,6 +36604,13 @@ func (e *ExpenditureSummary) SetPercentageOfIncome(percentageOfIncome *float64) 
 func (e *ExpenditureSummary) SetTopCategories(topCategories []*CategoryExpenses) {
 	e.TopCategories = topCategories
 	e.require(expenditureSummaryFieldTopCategories)
+}
+
+// SetMonthlySummaries sets the MonthlySummaries field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (e *ExpenditureSummary) SetMonthlySummaries(monthlySummaries []*MonthlySummary) {
+	e.MonthlySummaries = monthlySummaries
+	e.require(expenditureSummaryFieldMonthlySummaries)
 }
 
 func (e *ExpenditureSummary) UnmarshalJSON(data []byte) error {
@@ -35603,11 +38182,11 @@ type GamblingIndicators struct {
 	// Up to 3 top merchants that the user had the most transactions for in the given time window, in descending order of total spend.
 	//
 	// If the user has not spent money on any merchants in the given time window, this list will be empty.
-	TopMerchants []string `json:"top_merchants,omitempty" url:"top_merchants,omitempty"`
+	TopMerchants []string `json:"top_merchants" url:"top_merchants"`
 	// The total number of transactions that fall into the `GAMBLING` credit category, across all the accounts in the report.
 	TransactionsCount *int `json:"transactions_count,omitempty" url:"transactions_count,omitempty"`
 	// The monthly summaries of the transactions that fall into the `GAMBLING` category within the given time window, across all the accounts in the report.
-	MonthlySummaries []*MonthlySummary `json:"monthly_summaries,omitempty" url:"monthly_summaries,omitempty"`
+	MonthlySummaries []*MonthlySummary `json:"monthly_summaries" url:"monthly_summaries"`
 	// The number of days since the last transaction that falls into the `GAMBLING` category, across all the accounts in the report.
 	DaysSinceLastOccurrence *int `json:"days_since_last_occurrence,omitempty" url:"days_since_last_occurrence,omitempty"`
 	// The percentage of the user's monthly inflows that was spent on transactions that fall into the `GAMBLING` category within the given time window, across all the accounts in the report. For example, a value of 100 indicates that 100% of the inflows were spent on transactions that fall into the `GAMBLING` credit category.
@@ -36371,9 +38950,12 @@ var (
 
 // holdingNullableFields maps the wire names of Holding's nullable fields (required or optional) to their field bits.
 var holdingNullableFields = map[string]*big.Int{
+	"institution_price":          holdingFieldInstitutionPrice,
 	"institution_price_as_of":    holdingFieldInstitutionPriceAsOf,
 	"institution_price_datetime": holdingFieldInstitutionPriceDatetime,
+	"institution_value":          holdingFieldInstitutionValue,
 	"cost_basis":                 holdingFieldCostBasis,
+	"quantity":                   holdingFieldQuantity,
 	"iso_currency_code":          holdingFieldIsoCurrencyCode,
 	"unofficial_currency_code":   holdingFieldUnofficialCurrencyCode,
 	"vested_quantity":            holdingFieldVestedQuantity,
@@ -36387,7 +38969,7 @@ type Holding struct {
 	// The Plaid `security_id` associated with the holding. Security data is not specific to a user's account; any user who held the same security at the same financial institution at the same time would have identical security data. The `security_id` for the same security will typically be the same across different institutions, but this is not guaranteed. The `security_id` does not typically change, but may change if inherent details of the security change due to a corporate action, for example, in the event of a ticker symbol change or CUSIP change.
 	SecurityID string `json:"security_id" url:"security_id"`
 	// The last price given by the institution for this security.
-	InstitutionPrice float64 `json:"institution_price" url:"institution_price"`
+	InstitutionPrice *float64 `json:"institution_price,omitempty" url:"institution_price,omitempty"`
 	// The date at which `institution_price` was current.
 	InstitutionPriceAsOf *time.Time `json:"institution_price_as_of,omitempty" url:"institution_price_as_of,omitempty" format:"date"`
 	// Date and time at which `institution_price` was current, in ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ).
@@ -36395,11 +38977,11 @@ type Holding struct {
 	// This field is returned for select financial institutions and comes as provided by the institution. It may contain default time values (such as 00:00:00).
 	InstitutionPriceDatetime *time.Time `json:"institution_price_datetime,omitempty" url:"institution_price_datetime,omitempty"`
 	// The value of the holding, as reported by the institution.
-	InstitutionValue float64 `json:"institution_value" url:"institution_value"`
+	InstitutionValue *float64 `json:"institution_value,omitempty" url:"institution_value,omitempty"`
 	// The total cost basis of the holding (e.g., the total amount spent to acquire all assets currently in the holding).
 	CostBasis *float64 `json:"cost_basis,omitempty" url:"cost_basis,omitempty"`
 	// The total quantity of the asset held, as reported by the financial institution. If the security is an option, `quantity` will reflect the total number of options (typically the number of contracts multiplied by 100), not the number of contracts.
-	Quantity float64 `json:"quantity" url:"quantity"`
+	Quantity *float64 `json:"quantity,omitempty" url:"quantity,omitempty"`
 	// The ISO-4217 currency code of the holding. Always `null` if `unofficial_currency_code` is non-`null`.
 	IsoCurrencyCode *string `json:"iso_currency_code,omitempty" url:"iso_currency_code,omitempty"`
 	// The unofficial currency code associated with the holding. Always `null` if `iso_currency_code` is non-`null`. Unofficial currency codes are used for currencies that do not have official ISO currency codes, such as cryptocurrencies and the currencies of certain countries.
@@ -36410,8 +38992,8 @@ type Holding struct {
 	VestedQuantity *float64 `json:"vested_quantity,omitempty" url:"vested_quantity,omitempty"`
 	// The value of the vested holdings as reported by the institution.
 	VestedValue *float64 `json:"vested_value,omitempty" url:"vested_value,omitempty"`
-	// Per-lot acquisition data for this holding. An empty array indicates the institution does not provide lot-level data.
-	TaxLots []*HoldingTaxLot `json:"tax_lots,omitempty" url:"tax_lots,omitempty"`
+	// Per-lot acquisition data for this holding. An empty array indicates that lot-level data is unavailable for this response.
+	TaxLots []*HoldingTaxLot `json:"tax_lots" url:"tax_lots"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -36435,9 +39017,9 @@ func (h *Holding) GetSecurityID() string {
 	return h.SecurityID
 }
 
-func (h *Holding) GetInstitutionPrice() float64 {
+func (h *Holding) GetInstitutionPrice() *float64 {
 	if h == nil {
-		return 0
+		return nil
 	}
 	return h.InstitutionPrice
 }
@@ -36456,9 +39038,9 @@ func (h *Holding) GetInstitutionPriceDatetime() *time.Time {
 	return h.InstitutionPriceDatetime
 }
 
-func (h *Holding) GetInstitutionValue() float64 {
+func (h *Holding) GetInstitutionValue() *float64 {
 	if h == nil {
-		return 0
+		return nil
 	}
 	return h.InstitutionValue
 }
@@ -36470,9 +39052,9 @@ func (h *Holding) GetCostBasis() *float64 {
 	return h.CostBasis
 }
 
-func (h *Holding) GetQuantity() float64 {
+func (h *Holding) GetQuantity() *float64 {
 	if h == nil {
-		return 0
+		return nil
 	}
 	return h.Quantity
 }
@@ -36544,7 +39126,7 @@ func (h *Holding) SetSecurityID(securityID string) {
 
 // SetInstitutionPrice sets the InstitutionPrice field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (h *Holding) SetInstitutionPrice(institutionPrice float64) {
+func (h *Holding) SetInstitutionPrice(institutionPrice *float64) {
 	h.InstitutionPrice = institutionPrice
 	h.require(holdingFieldInstitutionPrice)
 }
@@ -36565,7 +39147,7 @@ func (h *Holding) SetInstitutionPriceDatetime(institutionPriceDatetime *time.Tim
 
 // SetInstitutionValue sets the InstitutionValue field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (h *Holding) SetInstitutionValue(institutionValue float64) {
+func (h *Holding) SetInstitutionValue(institutionValue *float64) {
 	h.InstitutionValue = institutionValue
 	h.require(holdingFieldInstitutionValue)
 }
@@ -36579,7 +39161,7 @@ func (h *Holding) SetCostBasis(costBasis *float64) {
 
 // SetQuantity sets the Quantity field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (h *Holding) SetQuantity(quantity float64) {
+func (h *Holding) SetQuantity(quantity *float64) {
 	h.Quantity = quantity
 	h.require(holdingFieldQuantity)
 }
@@ -36705,7 +39287,7 @@ var holdingTaxLotNullableFields = map[string]*big.Int{
 type HoldingTaxLot struct {
 	// The financial institution's identifier for this lot. Null if the institution does not provide a lot identifier.
 	InstitutionLotID *string `json:"institution_lot_id,omitempty" url:"institution_lot_id,omitempty"`
-	// The date and time this lot was acquired, in ISO 8601 format. Null if the institution does not provide acquisition datetime data.
+	// The date and time this lot was acquired, in ISO 8601 format. Null if the institution does not provide acquisition datetime data. When the institution only provides a date, the time defaults to `T00:00:00Z`; this does not mean the lot was acquired at midnight UTC.
 	OriginalPurchaseDatetime *time.Time `json:"original_purchase_datetime,omitempty" url:"original_purchase_datetime,omitempty"`
 	// The number of units of the security in this lot.
 	Quantity *float64 `json:"quantity,omitempty" url:"quantity,omitempty"`
@@ -43482,8 +46064,8 @@ var incomeInsightsNullableFields = map[string]*big.Int{
 
 // Comprehensive income analysis including total income, income excluding transfers, and inbound transfer amounts.
 type IncomeInsights struct {
-	// The total amount of all income transactions in the given time period.
-	TotalIncome *AmountWithCurrency `json:"total_income,omitempty" url:"total_income,omitempty"`
+	// The total amount of all income transactions in the given time period, including a monthly average.
+	TotalIncome *AmountWithCurrencyWithMonthlyAverage `json:"total_income,omitempty" url:"total_income,omitempty"`
 	// Income excluding account transfer transactions for the period, including a monthly average.
 	IncomeExcludingTransfers *AmountWithCurrencyWithMonthlyAverage `json:"income_excluding_transfers,omitempty" url:"income_excluding_transfers,omitempty"`
 	// Sum of inbound transfer transactions for the period, including a monthly average.
@@ -43497,7 +46079,7 @@ type IncomeInsights struct {
 	rawJSON json.RawMessage
 }
 
-func (i *IncomeInsights) GetTotalIncome() *AmountWithCurrency {
+func (i *IncomeInsights) GetTotalIncome() *AmountWithCurrencyWithMonthlyAverage {
 	if i == nil {
 		return nil
 	}
@@ -43536,7 +46118,7 @@ func (i *IncomeInsights) require(field *big.Int) {
 
 // SetTotalIncome sets the TotalIncome field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (i *IncomeInsights) SetTotalIncome(totalIncome *AmountWithCurrency) {
+func (i *IncomeInsights) SetTotalIncome(totalIncome *AmountWithCurrencyWithMonthlyAverage) {
 	i.TotalIncome = totalIncome
 	i.require(incomeInsightsFieldTotalIncome)
 }
@@ -43725,7 +46307,7 @@ func (i *IncomeInsightsFilter) String() string {
 	return fmt.Sprintf("%#v", i)
 }
 
-// The version of Income Insights to use. Set this to `II2`. The value applies only to the request it is sent with; a version set in an earlier call, such as `/link/token/create` or `/cra/check_report/create`, is not reused.
+// The version of Income Insights to generate. `II2` is the only value you can set. If your integration has a default Income Insights version configured (integrations that started on Income Insights V1 keep V1 by default), omit this field to keep receiving that version, and set `II2` only when you are ready to migrate. If no default version is configured for your integration, this field is required and must be `II2`. The version is fixed when Income Insights is generated: if Income Insights is generated from `/link/token/create` or `/cra/check_report/create`, `/cra/check_report/income_insights/get` returns it at the version used in that call.
 type IncomeInsightsVersion string
 
 const (
@@ -46422,12 +49004,13 @@ var (
 
 // investmentAccountNullableFields maps the wire names of InvestmentAccount's nullable fields (required or optional) to their field bits.
 var investmentAccountNullableFields = map[string]*big.Int{
-	"mask":              investmentAccountFieldMask,
-	"official_name":     investmentAccountFieldOfficialName,
-	"subtype":           investmentAccountFieldSubtype,
-	"apy":               investmentAccountFieldApy,
-	"holder_category":   investmentAccountFieldHolderCategory,
-	"paired_account_id": investmentAccountFieldPairedAccountID,
+	"mask":                  investmentAccountFieldMask,
+	"official_name":         investmentAccountFieldOfficialName,
+	"subtype":               investmentAccountFieldSubtype,
+	"verification_insights": investmentAccountFieldVerificationInsights,
+	"apy":                   investmentAccountFieldApy,
+	"holder_category":       investmentAccountFieldHolderCategory,
+	"paired_account_id":     investmentAccountFieldPairedAccountID,
 }
 
 // A single account at a financial institution, with additional investment-specific balance information.
@@ -46791,7 +49374,7 @@ type InvestmentAccountBalance struct {
 	//
 	// Available balance may be cached and is not guaranteed to be up-to-date in real-time unless the value was returned by `/accounts/balance/get`, or by `/signal/evaluate` with a Balance-only ruleset.
 	//
-	// If `current` is `null` this field is guaranteed not to be `null`, unless you have opted into enabling [limited-purpose checking accounts](https://plaid.com/docs/auth/#enabling-limited-purpose-checking-accounts-for-rent-or-mortgage), which always have `null` values for both `available` and `current` balance.
+	// If `current` is `null` this field is guaranteed not to be `null`, unless you have opted into enabling [limited-purpose checking accounts](https://plaid.com/docs/auth/#enabling-limited-purpose-checking-accounts), which always have `null` values for both `available` and `current` balance.
 	Available *float64 `json:"available,omitempty" url:"available,omitempty"`
 	// The total amount of funds in or owed by the account.
 	//
@@ -46803,7 +49386,7 @@ type InvestmentAccountBalance struct {
 	//
 	// Note that balance information may be cached unless the value was returned by `/accounts/balance/get` or by `/signal/evaluate` with a Balance-only ruleset; if the Item is enabled for Transactions, the balance will be at least as recent as the most recent Transaction update. If you require real-time balance information, use the `available` balance as provided by `/accounts/balance/get` or `/signal/evaluate` called with a Balance-only `ruleset_key`.
 	//
-	// When returned by `/accounts/balance/get`, this field may be `null`. When this happens, `available` is guaranteed not to be `null`, unless you have opted into enabling [limited-purpose checking accounts](https://plaid.com/docs/auth/#enabling-limited-purpose-checking-accounts-for-rent-or-mortgage), which always have `null` values for both `available` and `current` balance.
+	// When returned by `/accounts/balance/get`, this field may be `null`. When this happens, `available` is guaranteed not to be `null`, unless you have opted into enabling [limited-purpose checking accounts](https://plaid.com/docs/auth/#enabling-limited-purpose-checking-accounts), which always have `null` values for both `available` and `current` balance.
 	Current *float64 `json:"current,omitempty" url:"current,omitempty"`
 	// For `credit`-type accounts, this represents the credit limit.
 	//
@@ -47030,7 +49613,13 @@ var investmentTransactionNullableFields = map[string]*big.Int{
 	"cancel_transaction_id":    investmentTransactionFieldCancelTransactionID,
 	"security_id":              investmentTransactionFieldSecurityID,
 	"transaction_datetime":     investmentTransactionFieldTransactionDatetime,
+	"name":                     investmentTransactionFieldName,
+	"quantity":                 investmentTransactionFieldQuantity,
+	"amount":                   investmentTransactionFieldAmount,
+	"price":                    investmentTransactionFieldPrice,
 	"fees":                     investmentTransactionFieldFees,
+	"type":                     investmentTransactionFieldType,
+	"subtype":                  investmentTransactionFieldSubtype,
 	"iso_currency_code":        investmentTransactionFieldIsoCurrencyCode,
 	"unofficial_currency_code": investmentTransactionFieldUnofficialCurrencyCode,
 }
@@ -47049,18 +49638,36 @@ type InvestmentTransaction struct {
 	Date time.Time `json:"date" url:"date" format:"date"`
 	// Timestamp in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format (`YYYY-MM-DDTHH:mm:ssZ`) representing when the order was initiated. This field is returned for select financial institutions and reflects the value provided by the institution. When the institution only provides a date without time-of-day information, this field will reflect the date that the order was initiated with a time component that defaults to `T00:00:00Z`. This does not indicate that the order was initiated at midnight UTC.
 	TransactionDatetime *time.Time `json:"transaction_datetime,omitempty" url:"transaction_datetime,omitempty"`
-	// The institution's description of the transaction.
-	Name string `json:"name" url:"name"`
-	// The number of units of the security involved in this transaction. Positive for buy transactions; negative for sell transactions.
-	Quantity float64 `json:"quantity" url:"quantity"`
-	// The complete value of the transaction. Positive values when cash is debited, e.g. purchases of stock; negative values when cash is credited, e.g. sales of stock. Treatment remains the same for cash-only movements unassociated with securities. For transactions representing a simultaneous cash contribution and purchase of a security, the portion of the transaction representing the purchase takes precedence, and the `amount` is represented as positive.
-	Amount float64 `json:"amount" url:"amount"`
-	// The price of the security at which this transaction occurred.
-	Price float64 `json:"price" url:"price"`
+	// The institution's description of the transaction. `null` if the institution does not provide a description.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// The number of units of the security involved in this transaction. Positive for buy transactions; negative for sell transactions. `null` if the institution does not provide the quantity.
+	Quantity *float64 `json:"quantity,omitempty" url:"quantity,omitempty"`
+	// The complete value of the transaction. Positive values when cash is debited, e.g. purchases of stock; negative values when cash is credited, e.g. sales of stock. Treatment remains the same for cash-only movements unassociated with securities. For transactions representing a simultaneous cash contribution and purchase of a security, the portion of the transaction representing the purchase takes precedence, and the `amount` is represented as positive. `null` if the institution does not provide the amount.
+	Amount *float64 `json:"amount,omitempty" url:"amount,omitempty"`
+	// The price of the security at which this transaction occurred. `null` if the institution does not provide the price.
+	Price *float64 `json:"price,omitempty" url:"price,omitempty"`
 	// The combined value of all fees applied to this transaction
-	Fees    *float64                     `json:"fees,omitempty" url:"fees,omitempty"`
-	Type    InvestmentTransactionType    `json:"type" url:"type"`
-	Subtype InvestmentTransactionSubtype `json:"subtype" url:"subtype"`
+	Fees *float64 `json:"fees,omitempty" url:"fees,omitempty"`
+	// Value is one of the following:
+	//
+	// `buy`: Buying an investment
+	//
+	// `sell`: Selling an investment
+	//
+	// `cancel`: A cancellation of a pending transaction
+	//
+	// `cash`: Activity that modifies a cash position
+	//
+	// `fee`: A fee on the account
+	//
+	// `transfer`: Activity which modifies a position, but not through buy/sell activity e.g. options exercise, portfolio transfer
+	//
+	// For descriptions of possible transaction types and subtypes, see the [Investment transaction types schema](https://plaid.com/docs/api/accounts/#investment-transaction-types-schema).
+	//
+	// `null` if the institution does not provide the transaction type.
+	Type *InvestmentTransactionType `json:"type,omitempty" url:"type,omitempty"`
+	// For descriptions of possible transaction types and subtypes, see the [Investment transaction types schema](https://plaid.com/docs/api/accounts/#investment-transaction-types-schema). `null` if the institution does not provide the transaction subtype.
+	Subtype *InvestmentTransactionSubtype `json:"subtype,omitempty" url:"subtype,omitempty"`
 	// The ISO-4217 currency code of the transaction. Always `null` if `unofficial_currency_code` is non-`null`.
 	IsoCurrencyCode *string `json:"iso_currency_code,omitempty" url:"iso_currency_code,omitempty"`
 	// The unofficial currency code associated with the transaction. Always `null` if `iso_currency_code` is non-`null`. Unofficial currency codes are used for currencies that do not have official ISO currency codes, such as cryptocurrencies and the currencies of certain countries.
@@ -47118,30 +49725,30 @@ func (i *InvestmentTransaction) GetTransactionDatetime() *time.Time {
 	return i.TransactionDatetime
 }
 
-func (i *InvestmentTransaction) GetName() string {
+func (i *InvestmentTransaction) GetName() *string {
 	if i == nil {
-		return ""
+		return nil
 	}
 	return i.Name
 }
 
-func (i *InvestmentTransaction) GetQuantity() float64 {
+func (i *InvestmentTransaction) GetQuantity() *float64 {
 	if i == nil {
-		return 0
+		return nil
 	}
 	return i.Quantity
 }
 
-func (i *InvestmentTransaction) GetAmount() float64 {
+func (i *InvestmentTransaction) GetAmount() *float64 {
 	if i == nil {
-		return 0
+		return nil
 	}
 	return i.Amount
 }
 
-func (i *InvestmentTransaction) GetPrice() float64 {
+func (i *InvestmentTransaction) GetPrice() *float64 {
 	if i == nil {
-		return 0
+		return nil
 	}
 	return i.Price
 }
@@ -47153,16 +49760,16 @@ func (i *InvestmentTransaction) GetFees() *float64 {
 	return i.Fees
 }
 
-func (i *InvestmentTransaction) GetType() InvestmentTransactionType {
+func (i *InvestmentTransaction) GetType() *InvestmentTransactionType {
 	if i == nil {
-		return ""
+		return nil
 	}
 	return i.Type
 }
 
-func (i *InvestmentTransaction) GetSubtype() InvestmentTransactionSubtype {
+func (i *InvestmentTransaction) GetSubtype() *InvestmentTransactionSubtype {
 	if i == nil {
-		return ""
+		return nil
 	}
 	return i.Subtype
 }
@@ -47241,28 +49848,28 @@ func (i *InvestmentTransaction) SetTransactionDatetime(transactionDatetime *time
 
 // SetName sets the Name field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (i *InvestmentTransaction) SetName(name string) {
+func (i *InvestmentTransaction) SetName(name *string) {
 	i.Name = name
 	i.require(investmentTransactionFieldName)
 }
 
 // SetQuantity sets the Quantity field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (i *InvestmentTransaction) SetQuantity(quantity float64) {
+func (i *InvestmentTransaction) SetQuantity(quantity *float64) {
 	i.Quantity = quantity
 	i.require(investmentTransactionFieldQuantity)
 }
 
 // SetAmount sets the Amount field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (i *InvestmentTransaction) SetAmount(amount float64) {
+func (i *InvestmentTransaction) SetAmount(amount *float64) {
 	i.Amount = amount
 	i.require(investmentTransactionFieldAmount)
 }
 
 // SetPrice sets the Price field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (i *InvestmentTransaction) SetPrice(price float64) {
+func (i *InvestmentTransaction) SetPrice(price *float64) {
 	i.Price = price
 	i.require(investmentTransactionFieldPrice)
 }
@@ -47276,14 +49883,14 @@ func (i *InvestmentTransaction) SetFees(fees *float64) {
 
 // SetType sets the Type field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (i *InvestmentTransaction) SetType(type_ InvestmentTransactionType) {
+func (i *InvestmentTransaction) SetType(type_ *InvestmentTransactionType) {
 	i.Type = type_
 	i.require(investmentTransactionFieldType)
 }
 
 // SetSubtype sets the Subtype field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (i *InvestmentTransaction) SetSubtype(subtype InvestmentTransactionSubtype) {
+func (i *InvestmentTransaction) SetSubtype(subtype *InvestmentTransactionSubtype) {
 	i.Subtype = subtype
 	i.require(investmentTransactionFieldSubtype)
 }
@@ -49434,7 +52041,7 @@ type Item struct {
 	// A list of products that have been billed for the Item. The contents of this array will be mutually exclusive with `available_products`. Note - `billed_products` is populated in all environments but only requests in Production are billed. Also note that products that are billed on a pay-per-call basis rather than a pay-per-Item basis, such as `balance`, will not appear here.
 	BilledProducts []Products `json:"billed_products" url:"billed_products"`
 	// A list of products added to the Item. In almost all cases, this will be the same as the `billed_products` field. For some products, it is possible for the product to be added to an Item but not yet billed (e.g. Assets, before `/asset_report/create` has been called, or Auth or Identity when added as Optional Products but before their endpoints have been called), in which case the product may appear in `products` but not in `billed_products`.
-	Products []Products `json:"products,omitempty" url:"products,omitempty"`
+	Products []Products `json:"products" url:"products"`
 	// A list of products that the user has consented to for the Item via [Data Transparency Messaging](https://plaid.com/docs/link/data-transparency-messaging-migration-guide). This will consist of all products where both of the following are true: the user has consented to the required data scopes for that product and you have Production access for that product.
 	ConsentedProducts []Products `json:"consented_products,omitempty" url:"consented_products,omitempty"`
 	// The date and time at which the Item's access consent will expire, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format. If the Item does not have consent expiration scheduled, this field will be `null`. Currently, only institutions in Europe and a small number of institutions in the US have expiring consent. For a list of US institutions that currently expire consent, see the [OAuth Guide](https://plaid.com/docs/link/oauth/#refreshing-item-consent).
@@ -49445,7 +52052,7 @@ type Item struct {
 	//
 	// `user_present_required` - Item requires user interaction to be updated
 	UpdateType ItemUpdateType `json:"update_type" url:"update_type"`
-	// The `item_id` of the Item that was created alongside this one when a single Link session used both Plaid Inc and Plaid Check products (see [Using Plaid Check products alongside Plaid products](https://plaid.com/docs/check/add-to-app/#using-plaid-check-products-alongside-plaid-products)). For a Plaid Inc Item, this is the paired Plaid Check Item, and the reverse for a Plaid Check Item. The field is omitted for Items that have no paired Item. It is also omitted if Plaid cannot look up the paired Item at request time, so do not treat its absence as proof that an Item is unpaired.
+	// The `item_id` of the Item paired with this one. This is either the Item created alongside it when a single Link session used both Plaid Inc and Plaid Check products, or the Plaid Check Item created when Plaid Check products were added to an existing Plaid Inc Item through update mode (see [Using Plaid Check products alongside Plaid products](https://plaid.com/docs/check/add-to-app/#using-plaid-check-products-alongside-plaid-products)). For a Plaid Inc Item, this is the paired Plaid Check Item, and the reverse for a Plaid Check Item. The field is omitted for Items that have no paired Item. It is also omitted if Plaid cannot look up the paired Item at request time, so do not treat its absence as proof that an Item is unpaired.
 	PairedItemID *string `json:"paired_item_id,omitempty" url:"paired_item_id,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
@@ -50022,6 +52629,8 @@ func (i *ItemApplicationListUserAuth) String() string {
 //
 // `DATABASE_INSIGHTS`: The Item's Auth data was provided via the Database Insights flow.
 //
+// `DATABASE_INSIGHTS_API`: The Item's Auth data was provided via [`/auth/verify`](https://plaid.com/docs/api/products/auth/#authverify).
+//
 // `TRANSFER_MIGRATED`: The Item's Auth data was provided via [`/transfer/migrate_account`](https://plaid.com/docs/api/products/transfer/account-linking/#migrate-account-into-transfers).
 //
 // `INVESTMENTS_FALLBACK`: The Item's Auth data for Investments Move was provided via a [fallback flow](https://plaid.com/docs/investments-move/#fallback-flows).
@@ -50037,6 +52646,7 @@ const (
 	ItemAuthMethodDatabaseInsights       ItemAuthMethod = "DATABASE_INSIGHTS"
 	ItemAuthMethodTransferMigrated       ItemAuthMethod = "TRANSFER_MIGRATED"
 	ItemAuthMethodInvestmentsFallback    ItemAuthMethod = "INVESTMENTS_FALLBACK"
+	ItemAuthMethodDatabaseInsightsAPI    ItemAuthMethod = "DATABASE_INSIGHTS_API"
 )
 
 func NewItemAuthMethodFromString(s string) (ItemAuthMethod, error) {
@@ -50059,6 +52669,8 @@ func NewItemAuthMethodFromString(s string) (ItemAuthMethod, error) {
 		return ItemAuthMethodTransferMigrated, nil
 	case "INVESTMENTS_FALLBACK":
 		return ItemAuthMethodInvestmentsFallback, nil
+	case "DATABASE_INSIGHTS_API":
+		return ItemAuthMethodDatabaseInsightsAPI, nil
 	}
 	var t ItemAuthMethod
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
@@ -56572,16 +59184,16 @@ type LoanDisbursementsIndicators struct {
 	// See the [currency code schema](https://plaid.com/docs/api/accounts#currency-code-schema) for a full listing of supported `unofficial_currency_code`s.
 	UnofficialCurrencyCode *string `json:"unofficial_currency_code,omitempty" url:"unofficial_currency_code,omitempty"`
 	// Detailed categories view of all the transactions that fall into the `LOAN_DISBURSEMENTS` credit category within the given time window, across all the accounts in the report.
-	CategoryDetails []*CategoryExpenses `json:"category_details,omitempty" url:"category_details,omitempty"`
+	CategoryDetails []*CategoryExpenses `json:"category_details" url:"category_details"`
 	MonthlyAverage  *MonthlyAverage     `json:"monthly_average,omitempty" url:"monthly_average,omitempty"`
 	// Up to 3 top service providers that the user had the most transactions for in the given time window, in descending order of total spend.
 	//
 	// If the user has not received money from any provider in the given time window, this list will be empty.
-	TopProviders []string `json:"top_providers,omitempty" url:"top_providers,omitempty"`
+	TopProviders []string `json:"top_providers" url:"top_providers"`
 	// The total number of transactions that fall into the `LOAN_DISBURSEMENTS` credit category, across all the accounts in the report.
 	TransactionsCount *int `json:"transactions_count,omitempty" url:"transactions_count,omitempty"`
 	// The monthly summaries of the transactions that fall into the `LOAN_DISBURSEMENTS` category within the given time window, across all the accounts in the report.
-	MonthlySummaries []*MonthlySummary `json:"monthly_summaries,omitempty" url:"monthly_summaries,omitempty"`
+	MonthlySummaries []*MonthlySummary `json:"monthly_summaries" url:"monthly_summaries"`
 	// The number of days since the last transaction that falls into the `LOAN_DISBURSEMENTS` credit category, across all the accounts in the report.
 	DaysSinceLastOccurrence *int `json:"days_since_last_occurrence,omitempty" url:"days_since_last_occurrence,omitempty"`
 	// The percentage of the user's monthly inflows that was received on transactions that fall into the `LOAN_DISBURSEMENTS` credit category within the given time window, across all the accounts in the report. For example, a value of 100 indicates that 100% of the inflows were spent on transactions that fall into the `LOAN_DISBURSEMENTS` credit category.
@@ -57429,15 +60041,15 @@ type LoanPaymentsIndicators struct {
 	UnofficialCurrencyCode *string         `json:"unofficial_currency_code,omitempty" url:"unofficial_currency_code,omitempty"`
 	MonthlyAverage         *MonthlyAverage `json:"monthly_average,omitempty" url:"monthly_average,omitempty"`
 	// Detailed categories view of all the transactions that fall into the `LOAN_PAYMENTS` credit category within the given time window, across all the accounts in the report.
-	CategoryDetails []*CategoryExpenses `json:"category_details,omitempty" url:"category_details,omitempty"`
+	CategoryDetails []*CategoryExpenses `json:"category_details" url:"category_details"`
 	// Up to 3 top service providers that the user had the most transactions for in the given time window, in descending order of total spend.
 	//
 	// If the user has not spent money on any provider in the given time window, this list will be empty.
-	TopProviders []string `json:"top_providers,omitempty" url:"top_providers,omitempty"`
+	TopProviders []string `json:"top_providers" url:"top_providers"`
 	// The total number of transactions that fall into the `LOAN_PAYMENTS` credit category, across all the accounts in the report.
 	TransactionsCount *int `json:"transactions_count,omitempty" url:"transactions_count,omitempty"`
 	// The monthly summaries of the transactions that fall into the `LOAN_PAYMENTS` credit category within the given time window, across all the accounts in the report.
-	MonthlySummaries []*MonthlySummary `json:"monthly_summaries,omitempty" url:"monthly_summaries,omitempty"`
+	MonthlySummaries []*MonthlySummary `json:"monthly_summaries" url:"monthly_summaries"`
 	// The number of days since the last transaction that falls into the `LOAN_PAYMENTS` credit category, across all the accounts in the report.
 	DaysSinceLastOccurrence *int `json:"days_since_last_occurrence,omitempty" url:"days_since_last_occurrence,omitempty"`
 	// The percentage of the user's monthly inflows that was spent on transactions that fall into the `LOAN_PAYMENTS` credit category within the given time window, across all the accounts in the report. For example, a value of 100 indicates that 100% of the inflows were spent on transactions that fall into the `LOAN_PAYMENTS` credit category.
@@ -60238,6 +62850,7 @@ var (
 	numbersFieldInternationalBic  = big.NewInt(1 << 5)
 	numbersFieldInternationalIban = big.NewInt(1 << 6)
 	numbersFieldBacsSortCode      = big.NewInt(1 << 7)
+	numbersFieldAcatsDtcNumber    = big.NewInt(1 << 8)
 )
 
 // Account and bank identifier number data used to configure the test account. All values are optional.
@@ -60258,6 +62871,8 @@ type Numbers struct {
 	InternationalIban *string `json:"international_iban,omitempty" url:"international_iban,omitempty"`
 	// Bacs sort code
 	BacsSortCode *string `json:"bacs_sort_code,omitempty" url:"bacs_sort_code,omitempty"`
+	// 4-digit DTC participant number returned in `numbers.acats[].dtc_numbers` for a brokerage account. If not specified, Sandbox generates one from the `seed`.
+	AcatsDtcNumber *string `json:"acats_dtc_number,omitempty" url:"acats_dtc_number,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -60321,6 +62936,13 @@ func (n *Numbers) GetBacsSortCode() *string {
 		return nil
 	}
 	return n.BacsSortCode
+}
+
+func (n *Numbers) GetAcatsDtcNumber() *string {
+	if n == nil {
+		return nil
+	}
+	return n.AcatsDtcNumber
 }
 
 func (n *Numbers) GetExtraProperties() map[string]interface{} {
@@ -60393,6 +63015,13 @@ func (n *Numbers) SetInternationalIban(internationalIban *string) {
 func (n *Numbers) SetBacsSortCode(bacsSortCode *string) {
 	n.BacsSortCode = bacsSortCode
 	n.require(numbersFieldBacsSortCode)
+}
+
+// SetAcatsDtcNumber sets the AcatsDtcNumber field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (n *Numbers) SetAcatsDtcNumber(acatsDtcNumber *string) {
+	n.AcatsDtcNumber = acatsDtcNumber
+	n.require(numbersFieldAcatsDtcNumber)
 }
 
 func (n *Numbers) UnmarshalJSON(data []byte) error {
@@ -60580,6 +63209,8 @@ var (
 
 // numbersAchNullableFields maps the wire names of NumbersAch's nullable fields (required or optional) to their field bits.
 var numbersAchNullableFields = map[string]*big.Int{
+	"account":          numbersAchFieldAccount,
+	"routing":          numbersAchFieldRouting,
 	"wire_routing":     numbersAchFieldWireRouting,
 	"can_transfer_in":  numbersAchFieldCanTransferIn,
 	"can_transfer_out": numbersAchFieldCanTransferOut,
@@ -60589,14 +63220,14 @@ var numbersAchNullableFields = map[string]*big.Int{
 type NumbersAch struct {
 	// The Plaid account ID associated with the account numbers
 	AccountID string `json:"account_id" url:"account_id"`
-	// The ACH account number for the account.
+	// The ACH account number for the account. May be `null` for some non-depository accounts, but is never `null` for depository accounts.
 	//
 	// At certain institutions, including Chase, PNC, and US Bank, you will receive a "tokenized" account number, which is not the user's actual account number. For important details on how this may impact your integration and on how to avoid fraud, user confusion, and ACH returns, see [Tokenized account numbers](https://plaid.com/docs/auth/#tokenized-account-numbers).
-	Account string `json:"account" url:"account"`
+	Account *string `json:"account,omitempty" url:"account,omitempty"`
 	// Indicates whether the account number is tokenized by the institution. For important details on how tokenized account numbers may impact your integration, see [Tokenized account numbers](https://plaid.com/docs/auth/#tokenized-account-numbers).
-	IsTokenizedAccountNumber *bool `json:"is_tokenized_account_number,omitempty" url:"is_tokenized_account_number,omitempty"`
-	// The ACH routing number for the account. For more information, see [Tokenized account numbers](https://plaid.com/docs/auth/#tokenized-account-numbers).
-	Routing string `json:"routing" url:"routing"`
+	IsTokenizedAccountNumber bool `json:"is_tokenized_account_number" url:"is_tokenized_account_number"`
+	// The ACH routing number for the account. May be `null` for some non-depository accounts, but is never `null` for depository accounts. For more information, see [Tokenized account numbers](https://plaid.com/docs/auth/#tokenized-account-numbers).
+	Routing *string `json:"routing,omitempty" url:"routing,omitempty"`
 	// The wire transfer routing number for the account. This field is only populated if the institution is known to use a separate wire transfer routing number. Many institutions do not have a separate wire routing number and use the ACH routing number for wires instead. It is recommended to have the end user manually confirm their wire routing number before sending any wires to their account, especially if this field is `null`.
 	WireRouting *string `json:"wire_routing,omitempty" url:"wire_routing,omitempty"`
 	// Whether the account supports ACH transfers into the account
@@ -60619,23 +63250,23 @@ func (n *NumbersAch) GetAccountID() string {
 	return n.AccountID
 }
 
-func (n *NumbersAch) GetAccount() string {
+func (n *NumbersAch) GetAccount() *string {
 	if n == nil {
-		return ""
+		return nil
 	}
 	return n.Account
 }
 
-func (n *NumbersAch) GetIsTokenizedAccountNumber() *bool {
+func (n *NumbersAch) GetIsTokenizedAccountNumber() bool {
 	if n == nil {
-		return nil
+		return false
 	}
 	return n.IsTokenizedAccountNumber
 }
 
-func (n *NumbersAch) GetRouting() string {
+func (n *NumbersAch) GetRouting() *string {
 	if n == nil {
-		return ""
+		return nil
 	}
 	return n.Routing
 }
@@ -60686,21 +63317,21 @@ func (n *NumbersAch) SetAccountID(accountID string) {
 
 // SetAccount sets the Account field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (n *NumbersAch) SetAccount(account string) {
+func (n *NumbersAch) SetAccount(account *string) {
 	n.Account = account
 	n.require(numbersAchFieldAccount)
 }
 
 // SetIsTokenizedAccountNumber sets the IsTokenizedAccountNumber field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (n *NumbersAch) SetIsTokenizedAccountNumber(isTokenizedAccountNumber *bool) {
+func (n *NumbersAch) SetIsTokenizedAccountNumber(isTokenizedAccountNumber bool) {
 	n.IsTokenizedAccountNumber = isTokenizedAccountNumber
 	n.require(numbersAchFieldIsTokenizedAccountNumber)
 }
 
 // SetRouting sets the Routing field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (n *NumbersAch) SetRouting(routing string) {
+func (n *NumbersAch) SetRouting(routing *string) {
 	n.Routing = routing
 	n.require(numbersAchFieldRouting)
 }
@@ -61023,12 +63654,17 @@ var (
 	numbersEftFieldBranch      = big.NewInt(1 << 3)
 )
 
+// numbersEftNullableFields maps the wire names of NumbersEft's nullable fields (required or optional) to their field bits.
+var numbersEftNullableFields = map[string]*big.Int{
+	"account": numbersEftFieldAccount,
+}
+
 // Identifying information for transferring money to or from a Canadian bank account via EFT.
 type NumbersEft struct {
 	// The Plaid account ID associated with the account numbers
 	AccountID string `json:"account_id" url:"account_id"`
-	// The EFT account number for the account
-	Account string `json:"account" url:"account"`
+	// The EFT account number for the account. May be `null` for some non-depository accounts, but is never `null` for depository accounts.
+	Account *string `json:"account,omitempty" url:"account,omitempty"`
 	// The EFT institution number for the account
 	Institution string `json:"institution" url:"institution"`
 	// The EFT branch number for the account
@@ -61049,9 +63685,9 @@ func (n *NumbersEft) GetAccountID() string {
 	return n.AccountID
 }
 
-func (n *NumbersEft) GetAccount() string {
+func (n *NumbersEft) GetAccount() *string {
 	if n == nil {
-		return ""
+		return nil
 	}
 	return n.Account
 }
@@ -61095,7 +63731,7 @@ func (n *NumbersEft) SetAccountID(accountID string) {
 
 // SetAccount sets the Account field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (n *NumbersEft) SetAccount(account string) {
+func (n *NumbersEft) SetAccount(account *string) {
 	n.Account = account
 	n.require(numbersEftFieldAccount)
 }
@@ -61130,6 +63766,13 @@ func (n *NumbersEft) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	n.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, numbersEftNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		n.require(presentFields)
+	}
 	n.rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -61169,14 +63812,20 @@ var (
 	numbersInternationalFieldBic       = big.NewInt(1 << 2)
 )
 
+// numbersInternationalNullableFields maps the wire names of NumbersInternational's nullable fields (required or optional) to their field bits.
+var numbersInternationalNullableFields = map[string]*big.Int{
+	"iban": numbersInternationalFieldIban,
+	"bic":  numbersInternationalFieldBic,
+}
+
 // Identifying information for transferring money to or from an international bank account via wire transfer.
 type NumbersInternational struct {
 	// The Plaid account ID associated with the account numbers
 	AccountID string `json:"account_id" url:"account_id"`
-	// The International Bank Account Number (IBAN) for the account
-	Iban string `json:"iban" url:"iban"`
-	// The Business Identifier Code (BIC) for the account
-	Bic string `json:"bic" url:"bic"`
+	// The International Bank Account Number (IBAN) for the account. May be `null` if only the BIC is available.
+	Iban *string `json:"iban,omitempty" url:"iban,omitempty"`
+	// The Business Identifier Code (BIC) for the account. May be `null` if only the IBAN is available.
+	Bic *string `json:"bic,omitempty" url:"bic,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -61193,16 +63842,16 @@ func (n *NumbersInternational) GetAccountID() string {
 	return n.AccountID
 }
 
-func (n *NumbersInternational) GetIban() string {
+func (n *NumbersInternational) GetIban() *string {
 	if n == nil {
-		return ""
+		return nil
 	}
 	return n.Iban
 }
 
-func (n *NumbersInternational) GetBic() string {
+func (n *NumbersInternational) GetBic() *string {
 	if n == nil {
-		return ""
+		return nil
 	}
 	return n.Bic
 }
@@ -61232,14 +63881,14 @@ func (n *NumbersInternational) SetAccountID(accountID string) {
 
 // SetIban sets the Iban field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (n *NumbersInternational) SetIban(iban string) {
+func (n *NumbersInternational) SetIban(iban *string) {
 	n.Iban = iban
 	n.require(numbersInternationalFieldIban)
 }
 
 // SetBic sets the Bic field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (n *NumbersInternational) SetBic(bic string) {
+func (n *NumbersInternational) SetBic(bic *string) {
 	n.Bic = bic
 	n.require(numbersInternationalFieldBic)
 }
@@ -61260,6 +63909,13 @@ func (n *NumbersInternational) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	n.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, numbersInternationalNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		n.require(presentFields)
+	}
 	n.rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -61931,7 +64587,7 @@ type OutlierTransactionsInsights struct {
 	TransactionsCount *int                `json:"transactions_count,omitempty" url:"transactions_count,omitempty"`
 	TotalAmount       *AmountWithCurrency `json:"total_amount,omitempty" url:"total_amount,omitempty"`
 	// Up to 3 top categories of expenses in this group.
-	TopCategories []*CategoryExpenses `json:"top_categories,omitempty" url:"top_categories,omitempty"`
+	TopCategories []*CategoryExpenses `json:"top_categories" url:"top_categories"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -68165,7 +70821,7 @@ type PlaidError struct {
 	ErrorType PlaidErrorType `json:"error_type" url:"error_type"`
 	// The particular error code. Safe for programmatic use.
 	ErrorCode string `json:"error_code" url:"error_code"`
-	// The specific reason for the error code. Currently, reasons are only supported for OAuth-based item errors; the field is omitted otherwise. Safe for programmatic use.
+	// The specific reason for the error code. Currently, reasons are only supported for OAuth-based item errors and expired Sandbox Items; the field is omitted otherwise. Safe for programmatic use.
 	//
 	// Possible values:
 	//
@@ -68174,6 +70830,8 @@ type PlaidError struct {
 	// `OAUTH_CONSENT_EXPIRED`: The user's access consent for this OAuth connection to this institution has expired.
 	//
 	// `OAUTH_USER_REVOKED`: The user's OAuth connection to this institution is invalid because the user revoked their connection.
+	//
+	// `SANDBOX_ITEM_EXPIRED`: The Sandbox Item reached the end of its 30-day lifetime. Sandbox only.
 	ErrorCodeReason *string `json:"error_code_reason,omitempty" url:"error_code_reason,omitempty"`
 	// A developer-friendly representation of the error code. This may change over time and is not safe for programmatic use.
 	ErrorMessage string `json:"error_message" url:"error_message"`
@@ -72128,6 +74786,7 @@ const (
 	ProductsCraHomeLending        Products = "cra_home_lending"
 	ProductsCraLendScoreComplete  Products = "cra_lend_score_complete"
 	ProductsCraIncomeComplete     Products = "cra_income_complete"
+	ProductsCraHomeLendingVoa     Products = "cra_home_lending_voa"
 	ProductsLayer                 Products = "layer"
 	ProductsPayByBank             Products = "pay_by_bank"
 	ProductsProtectLinkedBank     Products = "protect_linked_bank"
@@ -72212,6 +74871,8 @@ func NewProductsFromString(s string) (Products, error) {
 		return ProductsCraLendScoreComplete, nil
 	case "cra_income_complete":
 		return ProductsCraIncomeComplete, nil
+	case "cra_home_lending_voa":
+		return ProductsCraHomeLendingVoa, nil
 	case "layer":
 		return ProductsLayer, nil
 	case "pay_by_bank":
@@ -73303,6 +75964,116 @@ func (r *RecipientBacs) MarshalJSON() ([]byte, error) {
 }
 
 func (r *RecipientBacs) String() string {
+	if r == nil {
+		return "<nil>"
+	}
+	if len(r.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(r.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
+}
+
+var (
+	recipientBacsInResponseFieldAccount  = big.NewInt(1 << 0)
+	recipientBacsInResponseFieldSortCode = big.NewInt(1 << 1)
+)
+
+// An object containing a Bacs account number and sort code. If either value isn't available, it's returned as an empty string.
+type RecipientBacsInResponse struct {
+	// The account number of the account. Maximum of 10 characters.
+	Account string `json:"account" url:"account"`
+	// The 6-character sort code of the account.
+	SortCode string `json:"sort_code" url:"sort_code"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (r *RecipientBacsInResponse) GetAccount() string {
+	if r == nil {
+		return ""
+	}
+	return r.Account
+}
+
+func (r *RecipientBacsInResponse) GetSortCode() string {
+	if r == nil {
+		return ""
+	}
+	return r.SortCode
+}
+
+func (r *RecipientBacsInResponse) GetExtraProperties() map[string]interface{} {
+	if r == nil {
+		return nil
+	}
+	return r.ExtraProperties
+}
+
+func (r *RecipientBacsInResponse) require(field *big.Int) {
+	next := new(big.Int)
+	if r.explicitFields != nil {
+		next.Set(r.explicitFields)
+	}
+	next.Or(next, field)
+	r.explicitFields = next
+}
+
+// SetAccount sets the Account field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (r *RecipientBacsInResponse) SetAccount(account string) {
+	r.Account = account
+	r.require(recipientBacsInResponseFieldAccount)
+}
+
+// SetSortCode sets the SortCode field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (r *RecipientBacsInResponse) SetSortCode(sortCode string) {
+	r.SortCode = sortCode
+	r.require(recipientBacsInResponseFieldSortCode)
+}
+
+func (r *RecipientBacsInResponse) UnmarshalJSON(data []byte) error {
+	type embed RecipientBacsInResponse
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*r),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*r = RecipientBacsInResponse(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.ExtraProperties = extraProperties
+	r.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *RecipientBacsInResponse) MarshalJSON() ([]byte, error) {
+	type embed RecipientBacsInResponse
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*r),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, r.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, r.ExtraProperties)
+}
+
+func (r *RecipientBacsInResponse) String() string {
 	if r == nil {
 		return "<nil>"
 	}
@@ -78307,7 +81078,7 @@ type Security struct {
 	//
 	// In rare instances, a null value is returned when institutional data is insufficient to determine the security subtype.
 	//
-	// Possible values: `asset backed security`, `bill`, `bond`, `bond with warrants`, `cash`, `cash management bill`, `common stock`, `convertible bond`, `convertible equity`, `cryptocurrency`, `depositary receipt`, `depositary receipt on debt`, `etf`, `float rating note`, `fund of funds`, `hedge fund`, `limited partnership unit`, `medium term note`, `money market debt`, `mortgage backed security`, `municipal bond`, `mutual fund`, `note`, `option`, `other`, `preferred convertible`, `preferred equity`, `private equity fund`, `real estate investment trust`, `structured equity product`, `treasury inflation protected securities`, `unit`, `warrant`.
+	// Possible values: `asset backed security`, `bill`, `bond`, `bond with warrants`, `cash`, `cash management bill`, `common stock`, `convertible bond`, `convertible equity`, `cryptocurrency`, `depositary receipt`, `depositary receipt on debt`, `etf`, `float rating note`, `fund of funds`, `hedge fund`, `limited partnership unit`, `medium term note`, `money market debt`, `money market fund`, `mortgage backed security`, `municipal bond`, `mutual fund`, `note`, `option`, `other`, `preferred convertible`, `preferred equity`, `private equity fund`, `real estate investment trust`, `structured equity product`, `treasury inflation protected securities`, `unit`, `warrant`.
 	Subtype *string `json:"subtype,omitempty" url:"subtype,omitempty"`
 	// Price of the security at the close of the previous trading session. Null for non-public securities.
 	//
@@ -95597,7 +98368,7 @@ func (t *TransferEventSyncResponse) String() string {
 //
 // `client_return_recovered`: The client reported recovering the loss on a returned transfer, and Plaid debited the recovered amount from the client's ledger. The `event_amount` is the recovered amount.
 //
-// `plaid_return_recovered`: Plaid recovered the loss on a returned transfer by successfully reinitiating it. The `event_amount` is the recovered amount. Client should stop their return recovery effort.
+// `plaid_return_recovered`: Plaid recovered the loss on a returned transfer by successfully reinitiating it. The `event_amount` is the original transfer amount. Plaid credits the client's ledger with the total of the recoveries the client had reported. Client should stop their return recovery effort.
 //
 // `swept`: The transfer was swept to / from the sweep account.
 //
@@ -96238,7 +99009,7 @@ func (t *TransferFundingAccountWithDisplayName) String() string {
 //
 // `PARTIAL_INSTANT_ONLY`: A partial amount is guaranteed and available instantly; the remainder is not guaranteed.
 //
-// `PARTIAL_INSTANT_WITH_OBSERVATION_WINDOW`: A partial amount is guaranteed instantly; an additional amount is conditionally guaranteed subject to an observation window.
+// `PARTIAL_INSTANT_WITH_OBSERVATION_WINDOW`: None of the amount is guaranteed instantly. The full amount becomes guaranteed after an observation window if the transfer has not returned before the window expires.
 //
 // `NOT_GUARANTEED`: Plaid did not provide a guarantee for this transfer.
 type TransferGuaranteeOutcome string

@@ -5,7 +5,7 @@ package plaid
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/plaid/plaid-go/v50/internal"
+	internal "github.com/plaid/plaid-go/v51/internal"
 	big "math/big"
 	time "time"
 )
@@ -202,7 +202,7 @@ type CraReportGetRequest struct {
 	//
 	// `INSURANCE_UNDERWRITING`: In connection with the underwriting of insurance involving the consumer pursuant to FCRA Section 604(a)(3)(C).
 	ConsumerReportPermissiblePurpose CraReportGetRequestConsumerReportPermissiblePurpose `json:"consumer_report_permissible_purpose" url:"-"`
-	// A unique ID identifying a Consumer Report. Like all Plaid identifiers, this ID is case sensitive. When provided, that specific report is returned; when omitted, the most recent report matching the request is returned. Omit this field when retrieving a report without a prior `/cra/report/create` or `/link/token/create` request.
+	// A unique ID identifying a Consumer Report. Like all Plaid identifiers, this ID is case sensitive. Required when `scope` is `CLIENT_USER`. When provided, that specific report is returned. Otherwise, the most recent report matching the request is returned. Omit this field when retrieving a report without a prior `/cra/report/create` or `/link/token/create` request.
 	ReportID *string `json:"report_id,omitempty" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
@@ -543,6 +543,126 @@ func (c *CraHomeLendingProduct) MarshalJSON() ([]byte, error) {
 }
 
 func (c *CraHomeLendingProduct) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craHomeLendingVoaProductFieldVersion = big.NewInt(1 << 0)
+	craHomeLendingVoaProductFieldOptions = big.NewInt(1 << 1)
+)
+
+// craHomeLendingVoaProductNullableFields maps the wire names of CraHomeLendingVoaProduct's nullable fields (required or optional) to their field bits.
+var craHomeLendingVoaProductNullableFields = map[string]*big.Int{
+	"options": craHomeLendingVoaProductFieldOptions,
+}
+
+// Names the Home Lending VOA product at a given version, with options for selecting the report format.
+type CraHomeLendingVoaProduct struct {
+	Version CraProductVersion                  `json:"version" url:"version"`
+	Options *CraReportGetHomeLendingVoaOptions `json:"options,omitempty" url:"options,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraHomeLendingVoaProduct) GetVersion() CraProductVersion {
+	if c == nil {
+		return ""
+	}
+	return c.Version
+}
+
+func (c *CraHomeLendingVoaProduct) GetOptions() *CraReportGetHomeLendingVoaOptions {
+	if c == nil {
+		return nil
+	}
+	return c.Options
+}
+
+func (c *CraHomeLendingVoaProduct) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraHomeLendingVoaProduct) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetVersion sets the Version field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraHomeLendingVoaProduct) SetVersion(version CraProductVersion) {
+	c.Version = version
+	c.require(craHomeLendingVoaProductFieldVersion)
+}
+
+// SetOptions sets the Options field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraHomeLendingVoaProduct) SetOptions(options *CraReportGetHomeLendingVoaOptions) {
+	c.Options = options
+	c.require(craHomeLendingVoaProductFieldOptions)
+}
+
+func (c *CraHomeLendingVoaProduct) UnmarshalJSON(data []byte) error {
+	type embed CraHomeLendingVoaProduct
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraHomeLendingVoaProduct(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, craHomeLendingVoaProductNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraHomeLendingVoaProduct) MarshalJSON() ([]byte, error) {
+	type embed CraHomeLendingVoaProduct
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraHomeLendingVoaProduct) String() string {
 	if c == nil {
 		return "<nil>"
 	}
@@ -1074,6 +1194,98 @@ func (c *CraNetworkInsightsProduct) String() string {
 }
 
 var (
+	craPrismProductFieldVersion = big.NewInt(1 << 0)
+)
+
+// Names the Prism product at a given version.
+type CraPrismProduct struct {
+	Version CraProductVersion `json:"version" url:"version"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraPrismProduct) GetVersion() CraProductVersion {
+	if c == nil {
+		return ""
+	}
+	return c.Version
+}
+
+func (c *CraPrismProduct) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraPrismProduct) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetVersion sets the Version field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraPrismProduct) SetVersion(version CraProductVersion) {
+	c.Version = version
+	c.require(craPrismProductFieldVersion)
+}
+
+func (c *CraPrismProduct) UnmarshalJSON(data []byte) error {
+	type embed CraPrismProduct
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraPrismProduct(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraPrismProduct) MarshalJSON() ([]byte, error) {
+	type embed CraPrismProduct
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraPrismProduct) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
 	craQualifyProductFieldVersion = big.NewInt(1 << 0)
 )
 
@@ -1525,362 +1737,6 @@ func (c *CraReportGetAccountPrimaryAccount) String() string {
 }
 
 var (
-	craReportGetBaseAccountFieldAccountID    = big.NewInt(1 << 0)
-	craReportGetBaseAccountFieldName         = big.NewInt(1 << 1)
-	craReportGetBaseAccountFieldOfficialName = big.NewInt(1 << 2)
-	craReportGetBaseAccountFieldMask         = big.NewInt(1 << 3)
-	craReportGetBaseAccountFieldType         = big.NewInt(1 << 4)
-	craReportGetBaseAccountFieldSubtype      = big.NewInt(1 << 5)
-)
-
-// craReportGetBaseAccountNullableFields maps the wire names of CraReportGetBaseAccount's nullable fields (required or optional) to their field bits.
-var craReportGetBaseAccountNullableFields = map[string]*big.Int{
-	"official_name": craReportGetBaseAccountFieldOfficialName,
-	"mask":          craReportGetBaseAccountFieldMask,
-	"subtype":       craReportGetBaseAccountFieldSubtype,
-}
-
-// An account used to generate a `/cra/report/get` product.
-type CraReportGetBaseAccount struct {
-	// Plaid's unique identifier for the account. This value will not change unless Plaid can't reconcile the account with the data returned by the financial institution. If this happens a new `account_id` will be assigned to the account.
-	//
-	// Like all Plaid identifiers, the `account_id` is case sensitive.
-	AccountID string `json:"account_id" url:"account_id"`
-	// The name of the account, either assigned by the user or by the financial institution itself.
-	Name string `json:"name" url:"name"`
-	// The official name of the account as given by the financial institution.
-	OfficialName *string `json:"official_name,omitempty" url:"official_name,omitempty"`
-	// The last 2-4 alphanumeric characters of an account's official account number. Note that the mask may be non-unique between an Item's accounts, and it may also not match the mask that the bank displays to the user.
-	Mask    *string         `json:"mask,omitempty" url:"mask,omitempty"`
-	Type    AccountType     `json:"type" url:"type"`
-	Subtype *AccountSubtype `json:"subtype,omitempty" url:"subtype,omitempty"`
-
-	// Private bitmask of fields set to an explicit value and therefore not to be omitted
-	explicitFields *big.Int `json:"-" url:"-"`
-
-	ExtraProperties map[string]interface{} `json:"-" url:"-"`
-
-	rawJSON json.RawMessage
-}
-
-func (c *CraReportGetBaseAccount) GetAccountID() string {
-	if c == nil {
-		return ""
-	}
-	return c.AccountID
-}
-
-func (c *CraReportGetBaseAccount) GetName() string {
-	if c == nil {
-		return ""
-	}
-	return c.Name
-}
-
-func (c *CraReportGetBaseAccount) GetOfficialName() *string {
-	if c == nil {
-		return nil
-	}
-	return c.OfficialName
-}
-
-func (c *CraReportGetBaseAccount) GetMask() *string {
-	if c == nil {
-		return nil
-	}
-	return c.Mask
-}
-
-func (c *CraReportGetBaseAccount) GetType() AccountType {
-	if c == nil {
-		return ""
-	}
-	return c.Type
-}
-
-func (c *CraReportGetBaseAccount) GetSubtype() *AccountSubtype {
-	if c == nil {
-		return nil
-	}
-	return c.Subtype
-}
-
-func (c *CraReportGetBaseAccount) GetExtraProperties() map[string]interface{} {
-	if c == nil {
-		return nil
-	}
-	return c.ExtraProperties
-}
-
-func (c *CraReportGetBaseAccount) require(field *big.Int) {
-	next := new(big.Int)
-	if c.explicitFields != nil {
-		next.Set(c.explicitFields)
-	}
-	next.Or(next, field)
-	c.explicitFields = next
-}
-
-// SetAccountID sets the AccountID field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraReportGetBaseAccount) SetAccountID(accountID string) {
-	c.AccountID = accountID
-	c.require(craReportGetBaseAccountFieldAccountID)
-}
-
-// SetName sets the Name field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraReportGetBaseAccount) SetName(name string) {
-	c.Name = name
-	c.require(craReportGetBaseAccountFieldName)
-}
-
-// SetOfficialName sets the OfficialName field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraReportGetBaseAccount) SetOfficialName(officialName *string) {
-	c.OfficialName = officialName
-	c.require(craReportGetBaseAccountFieldOfficialName)
-}
-
-// SetMask sets the Mask field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraReportGetBaseAccount) SetMask(mask *string) {
-	c.Mask = mask
-	c.require(craReportGetBaseAccountFieldMask)
-}
-
-// SetType sets the Type field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraReportGetBaseAccount) SetType(type_ AccountType) {
-	c.Type = type_
-	c.require(craReportGetBaseAccountFieldType)
-}
-
-// SetSubtype sets the Subtype field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraReportGetBaseAccount) SetSubtype(subtype *AccountSubtype) {
-	c.Subtype = subtype
-	c.require(craReportGetBaseAccountFieldSubtype)
-}
-
-func (c *CraReportGetBaseAccount) UnmarshalJSON(data []byte) error {
-	type embed CraReportGetBaseAccount
-	var unmarshaler = struct {
-		embed
-	}{
-		embed: embed(*c),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*c = CraReportGetBaseAccount(unmarshaler.embed)
-	extraProperties, err := internal.ExtractExtraProperties(data, *c)
-	if err != nil {
-		return err
-	}
-	c.ExtraProperties = extraProperties
-	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportGetBaseAccountNullableFields)
-	if err != nil {
-		return err
-	}
-	if presentFields != nil {
-		c.require(presentFields)
-	}
-	c.rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (c *CraReportGetBaseAccount) MarshalJSON() ([]byte, error) {
-	type embed CraReportGetBaseAccount
-	var marshaler = struct {
-		embed
-	}{
-		embed: embed(*c),
-	}
-	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
-	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
-}
-
-func (c *CraReportGetBaseAccount) String() string {
-	if c == nil {
-		return "<nil>"
-	}
-	if len(c.rawJSON) > 0 {
-		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := internal.StringifyJSON(c); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", c)
-}
-
-var (
-	craReportGetBaseItemFieldInstitutionID   = big.NewInt(1 << 0)
-	craReportGetBaseItemFieldInstitutionName = big.NewInt(1 << 1)
-	craReportGetBaseItemFieldItemID          = big.NewInt(1 << 2)
-	craReportGetBaseItemFieldLastUpdatedTime = big.NewInt(1 << 3)
-	craReportGetBaseItemFieldAccounts        = big.NewInt(1 << 4)
-)
-
-// An Item used to generate a `/cra/report/get` product.
-type CraReportGetBaseItem struct {
-	// The ID of the financial institution associated with the Item.
-	InstitutionID string `json:"institution_id" url:"institution_id"`
-	// The full financial institution name associated with the Item.
-	InstitutionName string `json:"institution_name" url:"institution_name"`
-	ItemID          ItemID `json:"item_id" url:"item_id"`
-	// The time when this Item's data was last retrieved from the financial institution prior to report generation.
-	LastUpdatedTime time.Time `json:"last_updated_time" url:"last_updated_time"`
-	// The accounts on the Item used to generate the product.
-	Accounts []*CraReportGetBaseAccount `json:"accounts" url:"accounts"`
-
-	// Private bitmask of fields set to an explicit value and therefore not to be omitted
-	explicitFields *big.Int `json:"-" url:"-"`
-
-	ExtraProperties map[string]interface{} `json:"-" url:"-"`
-
-	rawJSON json.RawMessage
-}
-
-func (c *CraReportGetBaseItem) GetInstitutionID() string {
-	if c == nil {
-		return ""
-	}
-	return c.InstitutionID
-}
-
-func (c *CraReportGetBaseItem) GetInstitutionName() string {
-	if c == nil {
-		return ""
-	}
-	return c.InstitutionName
-}
-
-func (c *CraReportGetBaseItem) GetItemID() ItemID {
-	if c == nil {
-		return ""
-	}
-	return c.ItemID
-}
-
-func (c *CraReportGetBaseItem) GetLastUpdatedTime() time.Time {
-	if c == nil {
-		return time.Time{}
-	}
-	return c.LastUpdatedTime
-}
-
-func (c *CraReportGetBaseItem) GetAccounts() []*CraReportGetBaseAccount {
-	if c == nil {
-		return nil
-	}
-	return c.Accounts
-}
-
-func (c *CraReportGetBaseItem) GetExtraProperties() map[string]interface{} {
-	if c == nil {
-		return nil
-	}
-	return c.ExtraProperties
-}
-
-func (c *CraReportGetBaseItem) require(field *big.Int) {
-	next := new(big.Int)
-	if c.explicitFields != nil {
-		next.Set(c.explicitFields)
-	}
-	next.Or(next, field)
-	c.explicitFields = next
-}
-
-// SetInstitutionID sets the InstitutionID field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraReportGetBaseItem) SetInstitutionID(institutionID string) {
-	c.InstitutionID = institutionID
-	c.require(craReportGetBaseItemFieldInstitutionID)
-}
-
-// SetInstitutionName sets the InstitutionName field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraReportGetBaseItem) SetInstitutionName(institutionName string) {
-	c.InstitutionName = institutionName
-	c.require(craReportGetBaseItemFieldInstitutionName)
-}
-
-// SetItemID sets the ItemID field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraReportGetBaseItem) SetItemID(itemID ItemID) {
-	c.ItemID = itemID
-	c.require(craReportGetBaseItemFieldItemID)
-}
-
-// SetLastUpdatedTime sets the LastUpdatedTime field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraReportGetBaseItem) SetLastUpdatedTime(lastUpdatedTime time.Time) {
-	c.LastUpdatedTime = lastUpdatedTime
-	c.require(craReportGetBaseItemFieldLastUpdatedTime)
-}
-
-// SetAccounts sets the Accounts field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraReportGetBaseItem) SetAccounts(accounts []*CraReportGetBaseAccount) {
-	c.Accounts = accounts
-	c.require(craReportGetBaseItemFieldAccounts)
-}
-
-func (c *CraReportGetBaseItem) UnmarshalJSON(data []byte) error {
-	type embed CraReportGetBaseItem
-	var unmarshaler = struct {
-		embed
-		LastUpdatedTime *internal.DateTime `json:"last_updated_time"`
-	}{
-		embed: embed(*c),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*c = CraReportGetBaseItem(unmarshaler.embed)
-	c.LastUpdatedTime = unmarshaler.LastUpdatedTime.Time()
-	extraProperties, err := internal.ExtractExtraProperties(data, *c)
-	if err != nil {
-		return err
-	}
-	c.ExtraProperties = extraProperties
-	c.rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (c *CraReportGetBaseItem) MarshalJSON() ([]byte, error) {
-	type embed CraReportGetBaseItem
-	var marshaler = struct {
-		embed
-		LastUpdatedTime *internal.DateTime `json:"last_updated_time"`
-	}{
-		embed:           embed(*c),
-		LastUpdatedTime: internal.NewDateTime(c.LastUpdatedTime),
-	}
-	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
-	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
-}
-
-func (c *CraReportGetBaseItem) String() string {
-	if c == nil {
-		return "<nil>"
-	}
-	if len(c.rawJSON) > 0 {
-		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := internal.StringifyJSON(c); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", c)
-}
-
-var (
 	craReportGetBaseReportAccountFieldAccountID          = big.NewInt(1 << 0)
 	craReportGetBaseReportAccountFieldName               = big.NewInt(1 << 1)
 	craReportGetBaseReportAccountFieldOfficialName       = big.NewInt(1 << 2)
@@ -1898,6 +1754,8 @@ var (
 	craReportGetBaseReportAccountFieldAccountInsights    = big.NewInt(1 << 14)
 	craReportGetBaseReportAccountFieldAttributes         = big.NewInt(1 << 15)
 	craReportGetBaseReportAccountFieldIdentityMatch      = big.NewInt(1 << 16)
+	craReportGetBaseReportAccountFieldHolderCategory     = big.NewInt(1 << 17)
+	craReportGetBaseReportAccountFieldInvestments        = big.NewInt(1 << 18)
 )
 
 // craReportGetBaseReportAccountNullableFields maps the wire names of CraReportGetBaseReportAccount's nullable fields (required or optional) to their field bits.
@@ -1909,6 +1767,8 @@ var craReportGetBaseReportAccountNullableFields = map[string]*big.Int{
 	"account_insights": craReportGetBaseReportAccountFieldAccountInsights,
 	"attributes":       craReportGetBaseReportAccountFieldAttributes,
 	"identity_match":   craReportGetBaseReportAccountFieldIdentityMatch,
+	"holder_category":  craReportGetBaseReportAccountFieldHolderCategory,
+	"investments":      craReportGetBaseReportAccountFieldInvestments,
 }
 
 // An account included in a Base Report returned by `/cra/report/get`.
@@ -1941,6 +1801,10 @@ type CraReportGetBaseReportAccount struct {
 	AccountInsights    *CraReportGetBaseReportAccountInsights      `json:"account_insights,omitempty" url:"account_insights,omitempty"`
 	Attributes         *CraReportGetBaseReportAccountAttributes    `json:"attributes,omitempty" url:"attributes,omitempty"`
 	IdentityMatch      *CraReportGetBaseReportAccountIdentityMatch `json:"identity_match,omitempty" url:"identity_match,omitempty"`
+	// This field contains the account holder category extracted from the financial institution. The value is `personal`, `business`, or `unrecognized`. The field is null when the extracted category is unavailable.
+	HolderCategory *CraReportGetBaseReportAccountHolderCategory `json:"holder_category,omitempty" url:"holder_category,omitempty"`
+	// This field contains investment data only for investment accounts when `include_investments` in `/cra/report/create` or `cra_report_parameter.include_investments` in `/link/token/create` is set to `true`. This field may be omitted if recent investment data was unavailable at report generation. The account remains in the report when this field is omitted.
+	Investments *BaseReportInvestments `json:"investments,omitempty" url:"investments,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -2067,6 +1931,20 @@ func (c *CraReportGetBaseReportAccount) GetIdentityMatch() *CraReportGetBaseRepo
 		return nil
 	}
 	return c.IdentityMatch
+}
+
+func (c *CraReportGetBaseReportAccount) GetHolderCategory() *CraReportGetBaseReportAccountHolderCategory {
+	if c == nil {
+		return nil
+	}
+	return c.HolderCategory
+}
+
+func (c *CraReportGetBaseReportAccount) GetInvestments() *BaseReportInvestments {
+	if c == nil {
+		return nil
+	}
+	return c.Investments
 }
 
 func (c *CraReportGetBaseReportAccount) GetExtraProperties() map[string]interface{} {
@@ -2202,6 +2080,20 @@ func (c *CraReportGetBaseReportAccount) SetAttributes(attributes *CraReportGetBa
 func (c *CraReportGetBaseReportAccount) SetIdentityMatch(identityMatch *CraReportGetBaseReportAccountIdentityMatch) {
 	c.IdentityMatch = identityMatch
 	c.require(craReportGetBaseReportAccountFieldIdentityMatch)
+}
+
+// SetHolderCategory sets the HolderCategory field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetBaseReportAccount) SetHolderCategory(holderCategory *CraReportGetBaseReportAccountHolderCategory) {
+	c.HolderCategory = holderCategory
+	c.require(craReportGetBaseReportAccountFieldHolderCategory)
+}
+
+// SetInvestments sets the Investments field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetBaseReportAccount) SetInvestments(investments *BaseReportInvestments) {
+	c.Investments = investments
+	c.require(craReportGetBaseReportAccountFieldInvestments)
 }
 
 func (c *CraReportGetBaseReportAccount) UnmarshalJSON(data []byte) error {
@@ -2834,6 +2726,32 @@ func (c *CraReportGetBaseReportAccountBalances) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", c)
+}
+
+// This field contains the account holder category extracted from the financial institution. The value is `personal`, `business`, or `unrecognized`. The field is null when the extracted category is unavailable.
+type CraReportGetBaseReportAccountHolderCategory string
+
+const (
+	CraReportGetBaseReportAccountHolderCategoryBusiness     CraReportGetBaseReportAccountHolderCategory = "business"
+	CraReportGetBaseReportAccountHolderCategoryPersonal     CraReportGetBaseReportAccountHolderCategory = "personal"
+	CraReportGetBaseReportAccountHolderCategoryUnrecognized CraReportGetBaseReportAccountHolderCategory = "unrecognized"
+)
+
+func NewCraReportGetBaseReportAccountHolderCategoryFromString(s string) (CraReportGetBaseReportAccountHolderCategory, error) {
+	switch s {
+	case "business":
+		return CraReportGetBaseReportAccountHolderCategoryBusiness, nil
+	case "personal":
+		return CraReportGetBaseReportAccountHolderCategoryPersonal, nil
+	case "unrecognized":
+		return CraReportGetBaseReportAccountHolderCategoryUnrecognized, nil
+	}
+	var t CraReportGetBaseReportAccountHolderCategory
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (c CraReportGetBaseReportAccountHolderCategory) Ptr() *CraReportGetBaseReportAccountHolderCategory {
+	return &c
 }
 
 var (
@@ -5334,28 +5252,28 @@ func (c *CraReportGetCashflowInsightsResponseProduct) String() string {
 }
 
 var (
-	craReportGetEnrichedAccountFieldAccountID      = big.NewInt(1 << 0)
-	craReportGetEnrichedAccountFieldName           = big.NewInt(1 << 1)
-	craReportGetEnrichedAccountFieldOfficialName   = big.NewInt(1 << 2)
-	craReportGetEnrichedAccountFieldMask           = big.NewInt(1 << 3)
-	craReportGetEnrichedAccountFieldType           = big.NewInt(1 << 4)
-	craReportGetEnrichedAccountFieldSubtype        = big.NewInt(1 << 5)
-	craReportGetEnrichedAccountFieldPrimaryAccount = big.NewInt(1 << 6)
-	craReportGetEnrichedAccountFieldIdentityMatch  = big.NewInt(1 << 7)
-	craReportGetEnrichedAccountFieldOwners         = big.NewInt(1 << 8)
+	craReportGetHomeLendingAccountFieldAccountID      = big.NewInt(1 << 0)
+	craReportGetHomeLendingAccountFieldName           = big.NewInt(1 << 1)
+	craReportGetHomeLendingAccountFieldOfficialName   = big.NewInt(1 << 2)
+	craReportGetHomeLendingAccountFieldMask           = big.NewInt(1 << 3)
+	craReportGetHomeLendingAccountFieldType           = big.NewInt(1 << 4)
+	craReportGetHomeLendingAccountFieldSubtype        = big.NewInt(1 << 5)
+	craReportGetHomeLendingAccountFieldPrimaryAccount = big.NewInt(1 << 6)
+	craReportGetHomeLendingAccountFieldIdentityMatch  = big.NewInt(1 << 7)
+	craReportGetHomeLendingAccountFieldOwners         = big.NewInt(1 << 8)
 )
 
-// craReportGetEnrichedAccountNullableFields maps the wire names of CraReportGetEnrichedAccount's nullable fields (required or optional) to their field bits.
-var craReportGetEnrichedAccountNullableFields = map[string]*big.Int{
-	"official_name":   craReportGetEnrichedAccountFieldOfficialName,
-	"mask":            craReportGetEnrichedAccountFieldMask,
-	"subtype":         craReportGetEnrichedAccountFieldSubtype,
-	"primary_account": craReportGetEnrichedAccountFieldPrimaryAccount,
-	"identity_match":  craReportGetEnrichedAccountFieldIdentityMatch,
+// craReportGetHomeLendingAccountNullableFields maps the wire names of CraReportGetHomeLendingAccount's nullable fields (required or optional) to their field bits.
+var craReportGetHomeLendingAccountNullableFields = map[string]*big.Int{
+	"official_name":   craReportGetHomeLendingAccountFieldOfficialName,
+	"mask":            craReportGetHomeLendingAccountFieldMask,
+	"subtype":         craReportGetHomeLendingAccountFieldSubtype,
+	"primary_account": craReportGetHomeLendingAccountFieldPrimaryAccount,
+	"identity_match":  craReportGetHomeLendingAccountFieldIdentityMatch,
 }
 
-// An account used to generate a `/cra/report/get` product, with its owners, identity match scores, and primary account prediction.
-type CraReportGetEnrichedAccount struct {
+// An account used to generate `cra_home_lending`, with its owners, identity match scores, and primary account prediction.
+type CraReportGetHomeLendingAccount struct {
 	// Plaid's unique identifier for the account. This value will not change unless Plaid can't reconcile the account with the data returned by the financial institution. If this happens a new `account_id` will be assigned to the account.
 	//
 	// Like all Plaid identifiers, the `account_id` is case sensitive.
@@ -5381,77 +5299,77 @@ type CraReportGetEnrichedAccount struct {
 	rawJSON json.RawMessage
 }
 
-func (c *CraReportGetEnrichedAccount) GetAccountID() string {
+func (c *CraReportGetHomeLendingAccount) GetAccountID() string {
 	if c == nil {
 		return ""
 	}
 	return c.AccountID
 }
 
-func (c *CraReportGetEnrichedAccount) GetName() string {
+func (c *CraReportGetHomeLendingAccount) GetName() string {
 	if c == nil {
 		return ""
 	}
 	return c.Name
 }
 
-func (c *CraReportGetEnrichedAccount) GetOfficialName() *string {
+func (c *CraReportGetHomeLendingAccount) GetOfficialName() *string {
 	if c == nil {
 		return nil
 	}
 	return c.OfficialName
 }
 
-func (c *CraReportGetEnrichedAccount) GetMask() *string {
+func (c *CraReportGetHomeLendingAccount) GetMask() *string {
 	if c == nil {
 		return nil
 	}
 	return c.Mask
 }
 
-func (c *CraReportGetEnrichedAccount) GetType() AccountType {
+func (c *CraReportGetHomeLendingAccount) GetType() AccountType {
 	if c == nil {
 		return ""
 	}
 	return c.Type
 }
 
-func (c *CraReportGetEnrichedAccount) GetSubtype() *AccountSubtype {
+func (c *CraReportGetHomeLendingAccount) GetSubtype() *AccountSubtype {
 	if c == nil {
 		return nil
 	}
 	return c.Subtype
 }
 
-func (c *CraReportGetEnrichedAccount) GetPrimaryAccount() *CraReportGetAccountPrimaryAccount {
+func (c *CraReportGetHomeLendingAccount) GetPrimaryAccount() *CraReportGetAccountPrimaryAccount {
 	if c == nil {
 		return nil
 	}
 	return c.PrimaryAccount
 }
 
-func (c *CraReportGetEnrichedAccount) GetIdentityMatch() *CraReportGetAccountIdentityMatch {
+func (c *CraReportGetHomeLendingAccount) GetIdentityMatch() *CraReportGetAccountIdentityMatch {
 	if c == nil {
 		return nil
 	}
 	return c.IdentityMatch
 }
 
-func (c *CraReportGetEnrichedAccount) GetOwners() []*Owner {
+func (c *CraReportGetHomeLendingAccount) GetOwners() []*Owner {
 	if c == nil {
 		return nil
 	}
 	return c.Owners
 }
 
-func (c *CraReportGetEnrichedAccount) GetExtraProperties() map[string]interface{} {
+func (c *CraReportGetHomeLendingAccount) GetExtraProperties() map[string]interface{} {
 	if c == nil {
 		return nil
 	}
 	return c.ExtraProperties
 }
 
-func (c *CraReportGetEnrichedAccount) require(field *big.Int) {
+func (c *CraReportGetHomeLendingAccount) require(field *big.Int) {
 	next := new(big.Int)
 	if c.explicitFields != nil {
 		next.Set(c.explicitFields)
@@ -5462,69 +5380,69 @@ func (c *CraReportGetEnrichedAccount) require(field *big.Int) {
 
 // SetAccountID sets the AccountID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraReportGetEnrichedAccount) SetAccountID(accountID string) {
+func (c *CraReportGetHomeLendingAccount) SetAccountID(accountID string) {
 	c.AccountID = accountID
-	c.require(craReportGetEnrichedAccountFieldAccountID)
+	c.require(craReportGetHomeLendingAccountFieldAccountID)
 }
 
 // SetName sets the Name field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraReportGetEnrichedAccount) SetName(name string) {
+func (c *CraReportGetHomeLendingAccount) SetName(name string) {
 	c.Name = name
-	c.require(craReportGetEnrichedAccountFieldName)
+	c.require(craReportGetHomeLendingAccountFieldName)
 }
 
 // SetOfficialName sets the OfficialName field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraReportGetEnrichedAccount) SetOfficialName(officialName *string) {
+func (c *CraReportGetHomeLendingAccount) SetOfficialName(officialName *string) {
 	c.OfficialName = officialName
-	c.require(craReportGetEnrichedAccountFieldOfficialName)
+	c.require(craReportGetHomeLendingAccountFieldOfficialName)
 }
 
 // SetMask sets the Mask field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraReportGetEnrichedAccount) SetMask(mask *string) {
+func (c *CraReportGetHomeLendingAccount) SetMask(mask *string) {
 	c.Mask = mask
-	c.require(craReportGetEnrichedAccountFieldMask)
+	c.require(craReportGetHomeLendingAccountFieldMask)
 }
 
 // SetType sets the Type field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraReportGetEnrichedAccount) SetType(type_ AccountType) {
+func (c *CraReportGetHomeLendingAccount) SetType(type_ AccountType) {
 	c.Type = type_
-	c.require(craReportGetEnrichedAccountFieldType)
+	c.require(craReportGetHomeLendingAccountFieldType)
 }
 
 // SetSubtype sets the Subtype field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraReportGetEnrichedAccount) SetSubtype(subtype *AccountSubtype) {
+func (c *CraReportGetHomeLendingAccount) SetSubtype(subtype *AccountSubtype) {
 	c.Subtype = subtype
-	c.require(craReportGetEnrichedAccountFieldSubtype)
+	c.require(craReportGetHomeLendingAccountFieldSubtype)
 }
 
 // SetPrimaryAccount sets the PrimaryAccount field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraReportGetEnrichedAccount) SetPrimaryAccount(primaryAccount *CraReportGetAccountPrimaryAccount) {
+func (c *CraReportGetHomeLendingAccount) SetPrimaryAccount(primaryAccount *CraReportGetAccountPrimaryAccount) {
 	c.PrimaryAccount = primaryAccount
-	c.require(craReportGetEnrichedAccountFieldPrimaryAccount)
+	c.require(craReportGetHomeLendingAccountFieldPrimaryAccount)
 }
 
 // SetIdentityMatch sets the IdentityMatch field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraReportGetEnrichedAccount) SetIdentityMatch(identityMatch *CraReportGetAccountIdentityMatch) {
+func (c *CraReportGetHomeLendingAccount) SetIdentityMatch(identityMatch *CraReportGetAccountIdentityMatch) {
 	c.IdentityMatch = identityMatch
-	c.require(craReportGetEnrichedAccountFieldIdentityMatch)
+	c.require(craReportGetHomeLendingAccountFieldIdentityMatch)
 }
 
 // SetOwners sets the Owners field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraReportGetEnrichedAccount) SetOwners(owners []*Owner) {
+func (c *CraReportGetHomeLendingAccount) SetOwners(owners []*Owner) {
 	c.Owners = owners
-	c.require(craReportGetEnrichedAccountFieldOwners)
+	c.require(craReportGetHomeLendingAccountFieldOwners)
 }
 
-func (c *CraReportGetEnrichedAccount) UnmarshalJSON(data []byte) error {
-	type embed CraReportGetEnrichedAccount
+func (c *CraReportGetHomeLendingAccount) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetHomeLendingAccount
 	var unmarshaler = struct {
 		embed
 	}{
@@ -5533,13 +5451,13 @@ func (c *CraReportGetEnrichedAccount) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &unmarshaler); err != nil {
 		return err
 	}
-	*c = CraReportGetEnrichedAccount(unmarshaler.embed)
+	*c = CraReportGetHomeLendingAccount(unmarshaler.embed)
 	extraProperties, err := internal.ExtractExtraProperties(data, *c)
 	if err != nil {
 		return err
 	}
 	c.ExtraProperties = extraProperties
-	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportGetEnrichedAccountNullableFields)
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportGetHomeLendingAccountNullableFields)
 	if err != nil {
 		return err
 	}
@@ -5550,8 +5468,8 @@ func (c *CraReportGetEnrichedAccount) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (c *CraReportGetEnrichedAccount) MarshalJSON() ([]byte, error) {
-	type embed CraReportGetEnrichedAccount
+func (c *CraReportGetHomeLendingAccount) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetHomeLendingAccount
 	var marshaler = struct {
 		embed
 	}{
@@ -5561,171 +5479,7 @@ func (c *CraReportGetEnrichedAccount) MarshalJSON() ([]byte, error) {
 	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
 }
 
-func (c *CraReportGetEnrichedAccount) String() string {
-	if c == nil {
-		return "<nil>"
-	}
-	if len(c.rawJSON) > 0 {
-		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := internal.StringifyJSON(c); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", c)
-}
-
-var (
-	craReportGetEnrichedItemFieldAccounts        = big.NewInt(1 << 0)
-	craReportGetEnrichedItemFieldInstitutionID   = big.NewInt(1 << 1)
-	craReportGetEnrichedItemFieldInstitutionName = big.NewInt(1 << 2)
-	craReportGetEnrichedItemFieldItemID          = big.NewInt(1 << 3)
-	craReportGetEnrichedItemFieldLastUpdatedTime = big.NewInt(1 << 4)
-)
-
-// An Item used to generate a `/cra/report/get` product, with each account's owners, identity match scores, and primary account prediction.
-type CraReportGetEnrichedItem struct {
-	// The accounts on the Item used to generate the product.
-	Accounts []*CraReportGetEnrichedAccount `json:"accounts" url:"accounts"`
-	// The ID of the financial institution associated with the Item.
-	InstitutionID string `json:"institution_id" url:"institution_id"`
-	// The full financial institution name associated with the Item.
-	InstitutionName string `json:"institution_name" url:"institution_name"`
-	ItemID          ItemID `json:"item_id" url:"item_id"`
-	// The time when this Item's data was last retrieved from the financial institution prior to report generation.
-	LastUpdatedTime time.Time `json:"last_updated_time" url:"last_updated_time"`
-
-	// Private bitmask of fields set to an explicit value and therefore not to be omitted
-	explicitFields *big.Int `json:"-" url:"-"`
-
-	ExtraProperties map[string]interface{} `json:"-" url:"-"`
-
-	rawJSON json.RawMessage
-}
-
-func (c *CraReportGetEnrichedItem) GetAccounts() []*CraReportGetEnrichedAccount {
-	if c == nil {
-		return nil
-	}
-	return c.Accounts
-}
-
-func (c *CraReportGetEnrichedItem) GetInstitutionID() string {
-	if c == nil {
-		return ""
-	}
-	return c.InstitutionID
-}
-
-func (c *CraReportGetEnrichedItem) GetInstitutionName() string {
-	if c == nil {
-		return ""
-	}
-	return c.InstitutionName
-}
-
-func (c *CraReportGetEnrichedItem) GetItemID() ItemID {
-	if c == nil {
-		return ""
-	}
-	return c.ItemID
-}
-
-func (c *CraReportGetEnrichedItem) GetLastUpdatedTime() time.Time {
-	if c == nil {
-		return time.Time{}
-	}
-	return c.LastUpdatedTime
-}
-
-func (c *CraReportGetEnrichedItem) GetExtraProperties() map[string]interface{} {
-	if c == nil {
-		return nil
-	}
-	return c.ExtraProperties
-}
-
-func (c *CraReportGetEnrichedItem) require(field *big.Int) {
-	next := new(big.Int)
-	if c.explicitFields != nil {
-		next.Set(c.explicitFields)
-	}
-	next.Or(next, field)
-	c.explicitFields = next
-}
-
-// SetAccounts sets the Accounts field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraReportGetEnrichedItem) SetAccounts(accounts []*CraReportGetEnrichedAccount) {
-	c.Accounts = accounts
-	c.require(craReportGetEnrichedItemFieldAccounts)
-}
-
-// SetInstitutionID sets the InstitutionID field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraReportGetEnrichedItem) SetInstitutionID(institutionID string) {
-	c.InstitutionID = institutionID
-	c.require(craReportGetEnrichedItemFieldInstitutionID)
-}
-
-// SetInstitutionName sets the InstitutionName field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraReportGetEnrichedItem) SetInstitutionName(institutionName string) {
-	c.InstitutionName = institutionName
-	c.require(craReportGetEnrichedItemFieldInstitutionName)
-}
-
-// SetItemID sets the ItemID field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraReportGetEnrichedItem) SetItemID(itemID ItemID) {
-	c.ItemID = itemID
-	c.require(craReportGetEnrichedItemFieldItemID)
-}
-
-// SetLastUpdatedTime sets the LastUpdatedTime field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraReportGetEnrichedItem) SetLastUpdatedTime(lastUpdatedTime time.Time) {
-	c.LastUpdatedTime = lastUpdatedTime
-	c.require(craReportGetEnrichedItemFieldLastUpdatedTime)
-}
-
-func (c *CraReportGetEnrichedItem) UnmarshalJSON(data []byte) error {
-	type embed CraReportGetEnrichedItem
-	var unmarshaler = struct {
-		embed
-		LastUpdatedTime *internal.DateTime `json:"last_updated_time"`
-	}{
-		embed: embed(*c),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*c = CraReportGetEnrichedItem(unmarshaler.embed)
-	c.LastUpdatedTime = unmarshaler.LastUpdatedTime.Time()
-	extraProperties, err := internal.ExtractExtraProperties(data, *c)
-	if err != nil {
-		return err
-	}
-	c.ExtraProperties = extraProperties
-	c.rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (c *CraReportGetEnrichedItem) MarshalJSON() ([]byte, error) {
-	type embed CraReportGetEnrichedItem
-	var marshaler = struct {
-		embed
-		LastUpdatedTime *internal.DateTime `json:"last_updated_time"`
-	}{
-		embed:           embed(*c),
-		LastUpdatedTime: internal.NewDateTime(c.LastUpdatedTime),
-	}
-	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
-	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
-}
-
-func (c *CraReportGetEnrichedItem) String() string {
+func (c *CraReportGetHomeLendingAccount) String() string {
 	if c == nil {
 		return "<nil>"
 	}
@@ -6436,6 +6190,170 @@ func (c *CraReportGetHomeLendingIncomeSources) String() string {
 }
 
 var (
+	craReportGetHomeLendingItemFieldInstitutionID   = big.NewInt(1 << 0)
+	craReportGetHomeLendingItemFieldInstitutionName = big.NewInt(1 << 1)
+	craReportGetHomeLendingItemFieldItemID          = big.NewInt(1 << 2)
+	craReportGetHomeLendingItemFieldLastUpdatedTime = big.NewInt(1 << 3)
+	craReportGetHomeLendingItemFieldAccounts        = big.NewInt(1 << 4)
+)
+
+// An Item used to generate `cra_home_lending`, with each account's owners, identity match scores, and primary account prediction.
+type CraReportGetHomeLendingItem struct {
+	// The ID of the financial institution associated with the Item.
+	InstitutionID string `json:"institution_id" url:"institution_id"`
+	// The full financial institution name associated with the Item.
+	InstitutionName string `json:"institution_name" url:"institution_name"`
+	ItemID          ItemID `json:"item_id" url:"item_id"`
+	// The time when this Item's data was last retrieved from the financial institution prior to report generation.
+	LastUpdatedTime time.Time `json:"last_updated_time" url:"last_updated_time"`
+	// The accounts on the Item used to generate the product.
+	Accounts []*CraReportGetHomeLendingAccount `json:"accounts" url:"accounts"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetHomeLendingItem) GetInstitutionID() string {
+	if c == nil {
+		return ""
+	}
+	return c.InstitutionID
+}
+
+func (c *CraReportGetHomeLendingItem) GetInstitutionName() string {
+	if c == nil {
+		return ""
+	}
+	return c.InstitutionName
+}
+
+func (c *CraReportGetHomeLendingItem) GetItemID() ItemID {
+	if c == nil {
+		return ""
+	}
+	return c.ItemID
+}
+
+func (c *CraReportGetHomeLendingItem) GetLastUpdatedTime() time.Time {
+	if c == nil {
+		return time.Time{}
+	}
+	return c.LastUpdatedTime
+}
+
+func (c *CraReportGetHomeLendingItem) GetAccounts() []*CraReportGetHomeLendingAccount {
+	if c == nil {
+		return nil
+	}
+	return c.Accounts
+}
+
+func (c *CraReportGetHomeLendingItem) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetHomeLendingItem) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetInstitutionID sets the InstitutionID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingItem) SetInstitutionID(institutionID string) {
+	c.InstitutionID = institutionID
+	c.require(craReportGetHomeLendingItemFieldInstitutionID)
+}
+
+// SetInstitutionName sets the InstitutionName field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingItem) SetInstitutionName(institutionName string) {
+	c.InstitutionName = institutionName
+	c.require(craReportGetHomeLendingItemFieldInstitutionName)
+}
+
+// SetItemID sets the ItemID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingItem) SetItemID(itemID ItemID) {
+	c.ItemID = itemID
+	c.require(craReportGetHomeLendingItemFieldItemID)
+}
+
+// SetLastUpdatedTime sets the LastUpdatedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingItem) SetLastUpdatedTime(lastUpdatedTime time.Time) {
+	c.LastUpdatedTime = lastUpdatedTime
+	c.require(craReportGetHomeLendingItemFieldLastUpdatedTime)
+}
+
+// SetAccounts sets the Accounts field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingItem) SetAccounts(accounts []*CraReportGetHomeLendingAccount) {
+	c.Accounts = accounts
+	c.require(craReportGetHomeLendingItemFieldAccounts)
+}
+
+func (c *CraReportGetHomeLendingItem) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetHomeLendingItem
+	var unmarshaler = struct {
+		embed
+		LastUpdatedTime *internal.DateTime `json:"last_updated_time"`
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetHomeLendingItem(unmarshaler.embed)
+	c.LastUpdatedTime = unmarshaler.LastUpdatedTime.Time()
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetHomeLendingItem) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetHomeLendingItem
+	var marshaler = struct {
+		embed
+		LastUpdatedTime *internal.DateTime `json:"last_updated_time"`
+	}{
+		embed:           embed(*c),
+		LastUpdatedTime: internal.NewDateTime(c.LastUpdatedTime),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetHomeLendingItem) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
 	craReportGetHomeLendingMetadataFieldGeneratedTime  = big.NewInt(1 << 0)
 	craReportGetHomeLendingMetadataFieldItemCount      = big.NewInt(1 << 1)
 	craReportGetHomeLendingMetadataFieldAccountCount   = big.NewInt(1 << 2)
@@ -6615,7 +6533,7 @@ type CraReportGetHomeLendingResponseProduct struct {
 	Metadata   *CraReportGetHomeLendingMetadata   `json:"metadata,omitempty" url:"metadata,omitempty"`
 	Attributes *CraReportGetHomeLendingAttributes `json:"attributes,omitempty" url:"attributes,omitempty"`
 	// The Items, and their accounts, used to generate this product. Always empty when `scope` is `PLAID_NETWORK`, or if this product failed to generate.
-	Items []*CraReportGetEnrichedItem `json:"items" url:"items"`
+	Items []*CraReportGetHomeLendingItem `json:"items" url:"items"`
 	// Product-level errors. Non-empty when this product failed to generate; empty on success.
 	Errors []*PlaidError `json:"errors" url:"errors"`
 
@@ -6648,7 +6566,7 @@ func (c *CraReportGetHomeLendingResponseProduct) GetAttributes() *CraReportGetHo
 	return c.Attributes
 }
 
-func (c *CraReportGetHomeLendingResponseProduct) GetItems() []*CraReportGetEnrichedItem {
+func (c *CraReportGetHomeLendingResponseProduct) GetItems() []*CraReportGetHomeLendingItem {
 	if c == nil {
 		return nil
 	}
@@ -6701,7 +6619,7 @@ func (c *CraReportGetHomeLendingResponseProduct) SetAttributes(attributes *CraRe
 
 // SetItems sets the Items field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraReportGetHomeLendingResponseProduct) SetItems(items []*CraReportGetEnrichedItem) {
+func (c *CraReportGetHomeLendingResponseProduct) SetItems(items []*CraReportGetHomeLendingItem) {
 	c.Items = items
 	c.require(craReportGetHomeLendingResponseProductFieldItems)
 }
@@ -6752,6 +6670,2462 @@ func (c *CraReportGetHomeLendingResponseProduct) MarshalJSON() ([]byte, error) {
 }
 
 func (c *CraReportGetHomeLendingResponseProduct) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportGetHomeLendingVoaAccountFieldAccountID          = big.NewInt(1 << 0)
+	craReportGetHomeLendingVoaAccountFieldName               = big.NewInt(1 << 1)
+	craReportGetHomeLendingVoaAccountFieldOfficialName       = big.NewInt(1 << 2)
+	craReportGetHomeLendingVoaAccountFieldType               = big.NewInt(1 << 3)
+	craReportGetHomeLendingVoaAccountFieldSubtype            = big.NewInt(1 << 4)
+	craReportGetHomeLendingVoaAccountFieldBalances           = big.NewInt(1 << 5)
+	craReportGetHomeLendingVoaAccountFieldMask               = big.NewInt(1 << 6)
+	craReportGetHomeLendingVoaAccountFieldDaysAvailable      = big.NewInt(1 << 7)
+	craReportGetHomeLendingVoaAccountFieldMetadata           = big.NewInt(1 << 8)
+	craReportGetHomeLendingVoaAccountFieldOwners             = big.NewInt(1 << 9)
+	craReportGetHomeLendingVoaAccountFieldAttributes         = big.NewInt(1 << 10)
+	craReportGetHomeLendingVoaAccountFieldIdentityMatch      = big.NewInt(1 << 11)
+	craReportGetHomeLendingVoaAccountFieldOwnershipType      = big.NewInt(1 << 12)
+	craReportGetHomeLendingVoaAccountFieldHistoricalBalances = big.NewInt(1 << 13)
+	craReportGetHomeLendingVoaAccountFieldTransactions       = big.NewInt(1 << 14)
+)
+
+// craReportGetHomeLendingVoaAccountNullableFields maps the wire names of CraReportGetHomeLendingVoaAccount's nullable fields (required or optional) to their field bits.
+var craReportGetHomeLendingVoaAccountNullableFields = map[string]*big.Int{
+	"official_name":  craReportGetHomeLendingVoaAccountFieldOfficialName,
+	"subtype":        craReportGetHomeLendingVoaAccountFieldSubtype,
+	"balances":       craReportGetHomeLendingVoaAccountFieldBalances,
+	"mask":           craReportGetHomeLendingVoaAccountFieldMask,
+	"days_available": craReportGetHomeLendingVoaAccountFieldDaysAvailable,
+	"metadata":       craReportGetHomeLendingVoaAccountFieldMetadata,
+	"attributes":     craReportGetHomeLendingVoaAccountFieldAttributes,
+	"identity_match": craReportGetHomeLendingVoaAccountFieldIdentityMatch,
+	"ownership_type": craReportGetHomeLendingVoaAccountFieldOwnershipType,
+}
+
+// Account data included in a Home Lending VOA report. Fields not supported by the selected report format are omitted.
+type CraReportGetHomeLendingVoaAccount struct {
+	// Plaid's unique identifier for the account. This value will not change unless Plaid can't reconcile the account with the data returned by the financial institution. This may occur, for example, when the name of the account changes. If this happens a new `account_id` will be assigned to the account.
+	//
+	// Like all Plaid identifiers, the `account_id` is case sensitive.
+	AccountID string `json:"account_id" url:"account_id"`
+	// The name of the account, either assigned by the user or by the financial institution itself.
+	Name string `json:"name" url:"name"`
+	// The official name of the account as given by the financial institution.
+	OfficialName *string                                    `json:"official_name,omitempty" url:"official_name,omitempty"`
+	Type         AccountType                                `json:"type" url:"type"`
+	Subtype      *AccountSubtype                            `json:"subtype,omitempty" url:"subtype,omitempty"`
+	Balances     *CraReportGetHomeLendingVoaAccountBalances `json:"balances,omitempty" url:"balances,omitempty"`
+	// The last 2-4 alphanumeric characters of an account's official account number. The mask may be non-unique between an Item's accounts and may not match the mask displayed by the financial institution. Omitted in the Employment Refresh format and `null` in the VOA format if unavailable.
+	Mask *string `json:"mask,omitempty" url:"mask,omitempty"`
+	// The number of days of transaction history available for the account, typically the time since the date of its earliest transaction. `null` in the VOA format if unavailable and omitted in the Employment Refresh format.
+	DaysAvailable *int                                       `json:"days_available,omitempty" url:"days_available,omitempty"`
+	Metadata      *CraReportGetHomeLendingVoaAccountMetadata `json:"metadata,omitempty" url:"metadata,omitempty"`
+	// Data returned by the financial institution about the account owner or owners. Multiple owners on a single account are represented in the same `owner` object, not in multiple owner objects within the array. Empty in the Employment Refresh format and when the VOA format has no owner data.
+	Owners     []*Owner                                     `json:"owners" url:"owners"`
+	Attributes *CraReportGetHomeLendingVoaAccountAttributes `json:"attributes,omitempty" url:"attributes,omitempty"`
+	// Identity match scores for the account. Omitted in the Employment Refresh format, when identity matching was not requested, or when the account could not be scored.
+	IdentityMatch *CraReportGetAccountIdentityMatch `json:"identity_match,omitempty" url:"identity_match,omitempty"`
+	OwnershipType *OwnershipType                    `json:"ownership_type,omitempty" url:"ownership_type,omitempty"`
+	// Calculated daily historical balances for the account. Empty in the Employment Refresh format and when the VOA format has no historical balances.
+	HistoricalBalances []*CraReportGetHomeLendingVoaAccountHistoricalBalance `json:"historical_balances" url:"historical_balances"`
+	// The transaction history of the account. Some transactions may have their details masked in accordance with the FCRA; these have a `credit_category` of `MASKED_TRANSACTION_CATEGORY`. Employment Refresh contains only deposits and omits VOA-only fields.
+	Transactions []*CraReportGetHomeLendingVoaTransaction `json:"transactions" url:"transactions"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetHomeLendingVoaAccount) GetAccountID() string {
+	if c == nil {
+		return ""
+	}
+	return c.AccountID
+}
+
+func (c *CraReportGetHomeLendingVoaAccount) GetName() string {
+	if c == nil {
+		return ""
+	}
+	return c.Name
+}
+
+func (c *CraReportGetHomeLendingVoaAccount) GetOfficialName() *string {
+	if c == nil {
+		return nil
+	}
+	return c.OfficialName
+}
+
+func (c *CraReportGetHomeLendingVoaAccount) GetType() AccountType {
+	if c == nil {
+		return ""
+	}
+	return c.Type
+}
+
+func (c *CraReportGetHomeLendingVoaAccount) GetSubtype() *AccountSubtype {
+	if c == nil {
+		return nil
+	}
+	return c.Subtype
+}
+
+func (c *CraReportGetHomeLendingVoaAccount) GetBalances() *CraReportGetHomeLendingVoaAccountBalances {
+	if c == nil {
+		return nil
+	}
+	return c.Balances
+}
+
+func (c *CraReportGetHomeLendingVoaAccount) GetMask() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Mask
+}
+
+func (c *CraReportGetHomeLendingVoaAccount) GetDaysAvailable() *int {
+	if c == nil {
+		return nil
+	}
+	return c.DaysAvailable
+}
+
+func (c *CraReportGetHomeLendingVoaAccount) GetMetadata() *CraReportGetHomeLendingVoaAccountMetadata {
+	if c == nil {
+		return nil
+	}
+	return c.Metadata
+}
+
+func (c *CraReportGetHomeLendingVoaAccount) GetOwners() []*Owner {
+	if c == nil {
+		return nil
+	}
+	return c.Owners
+}
+
+func (c *CraReportGetHomeLendingVoaAccount) GetAttributes() *CraReportGetHomeLendingVoaAccountAttributes {
+	if c == nil {
+		return nil
+	}
+	return c.Attributes
+}
+
+func (c *CraReportGetHomeLendingVoaAccount) GetIdentityMatch() *CraReportGetAccountIdentityMatch {
+	if c == nil {
+		return nil
+	}
+	return c.IdentityMatch
+}
+
+func (c *CraReportGetHomeLendingVoaAccount) GetOwnershipType() *OwnershipType {
+	if c == nil {
+		return nil
+	}
+	return c.OwnershipType
+}
+
+func (c *CraReportGetHomeLendingVoaAccount) GetHistoricalBalances() []*CraReportGetHomeLendingVoaAccountHistoricalBalance {
+	if c == nil {
+		return nil
+	}
+	return c.HistoricalBalances
+}
+
+func (c *CraReportGetHomeLendingVoaAccount) GetTransactions() []*CraReportGetHomeLendingVoaTransaction {
+	if c == nil {
+		return nil
+	}
+	return c.Transactions
+}
+
+func (c *CraReportGetHomeLendingVoaAccount) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetHomeLendingVoaAccount) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetAccountID sets the AccountID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaAccount) SetAccountID(accountID string) {
+	c.AccountID = accountID
+	c.require(craReportGetHomeLendingVoaAccountFieldAccountID)
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaAccount) SetName(name string) {
+	c.Name = name
+	c.require(craReportGetHomeLendingVoaAccountFieldName)
+}
+
+// SetOfficialName sets the OfficialName field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaAccount) SetOfficialName(officialName *string) {
+	c.OfficialName = officialName
+	c.require(craReportGetHomeLendingVoaAccountFieldOfficialName)
+}
+
+// SetType sets the Type field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaAccount) SetType(type_ AccountType) {
+	c.Type = type_
+	c.require(craReportGetHomeLendingVoaAccountFieldType)
+}
+
+// SetSubtype sets the Subtype field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaAccount) SetSubtype(subtype *AccountSubtype) {
+	c.Subtype = subtype
+	c.require(craReportGetHomeLendingVoaAccountFieldSubtype)
+}
+
+// SetBalances sets the Balances field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaAccount) SetBalances(balances *CraReportGetHomeLendingVoaAccountBalances) {
+	c.Balances = balances
+	c.require(craReportGetHomeLendingVoaAccountFieldBalances)
+}
+
+// SetMask sets the Mask field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaAccount) SetMask(mask *string) {
+	c.Mask = mask
+	c.require(craReportGetHomeLendingVoaAccountFieldMask)
+}
+
+// SetDaysAvailable sets the DaysAvailable field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaAccount) SetDaysAvailable(daysAvailable *int) {
+	c.DaysAvailable = daysAvailable
+	c.require(craReportGetHomeLendingVoaAccountFieldDaysAvailable)
+}
+
+// SetMetadata sets the Metadata field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaAccount) SetMetadata(metadata *CraReportGetHomeLendingVoaAccountMetadata) {
+	c.Metadata = metadata
+	c.require(craReportGetHomeLendingVoaAccountFieldMetadata)
+}
+
+// SetOwners sets the Owners field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaAccount) SetOwners(owners []*Owner) {
+	c.Owners = owners
+	c.require(craReportGetHomeLendingVoaAccountFieldOwners)
+}
+
+// SetAttributes sets the Attributes field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaAccount) SetAttributes(attributes *CraReportGetHomeLendingVoaAccountAttributes) {
+	c.Attributes = attributes
+	c.require(craReportGetHomeLendingVoaAccountFieldAttributes)
+}
+
+// SetIdentityMatch sets the IdentityMatch field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaAccount) SetIdentityMatch(identityMatch *CraReportGetAccountIdentityMatch) {
+	c.IdentityMatch = identityMatch
+	c.require(craReportGetHomeLendingVoaAccountFieldIdentityMatch)
+}
+
+// SetOwnershipType sets the OwnershipType field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaAccount) SetOwnershipType(ownershipType *OwnershipType) {
+	c.OwnershipType = ownershipType
+	c.require(craReportGetHomeLendingVoaAccountFieldOwnershipType)
+}
+
+// SetHistoricalBalances sets the HistoricalBalances field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaAccount) SetHistoricalBalances(historicalBalances []*CraReportGetHomeLendingVoaAccountHistoricalBalance) {
+	c.HistoricalBalances = historicalBalances
+	c.require(craReportGetHomeLendingVoaAccountFieldHistoricalBalances)
+}
+
+// SetTransactions sets the Transactions field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaAccount) SetTransactions(transactions []*CraReportGetHomeLendingVoaTransaction) {
+	c.Transactions = transactions
+	c.require(craReportGetHomeLendingVoaAccountFieldTransactions)
+}
+
+func (c *CraReportGetHomeLendingVoaAccount) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetHomeLendingVoaAccount
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetHomeLendingVoaAccount(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportGetHomeLendingVoaAccountNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetHomeLendingVoaAccount) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetHomeLendingVoaAccount
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetHomeLendingVoaAccount) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportGetHomeLendingVoaAccountAttributesFieldIsPrimaryAccount    = big.NewInt(1 << 0)
+	craReportGetHomeLendingVoaAccountAttributesFieldPrimaryAccountScore = big.NewInt(1 << 1)
+)
+
+// craReportGetHomeLendingVoaAccountAttributesNullableFields maps the wire names of CraReportGetHomeLendingVoaAccountAttributes's nullable fields (required or optional) to their field bits.
+var craReportGetHomeLendingVoaAccountAttributesNullableFields = map[string]*big.Int{
+	"is_primary_account":    craReportGetHomeLendingVoaAccountAttributesFieldIsPrimaryAccount,
+	"primary_account_score": craReportGetHomeLendingVoaAccountAttributesFieldPrimaryAccountScore,
+}
+
+// Attributes derived for an account. May be `null` if attributes were not available.
+type CraReportGetHomeLendingVoaAccountAttributes struct {
+	// Whether the account is predicted to be the user's primary account, based on an Item-level view of the user's transaction history. At most one account per account type across the user's Items is `true`. `null` if the prediction could not be computed.
+	IsPrimaryAccount *bool `json:"is_primary_account,omitempty" url:"is_primary_account,omitempty"`
+	// A value from 0 to 1 expressing confidence that the account is the user's primary account; higher is more confident. `null` if the score could not be computed.
+	PrimaryAccountScore *float64 `json:"primary_account_score,omitempty" url:"primary_account_score,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetHomeLendingVoaAccountAttributes) GetIsPrimaryAccount() *bool {
+	if c == nil {
+		return nil
+	}
+	return c.IsPrimaryAccount
+}
+
+func (c *CraReportGetHomeLendingVoaAccountAttributes) GetPrimaryAccountScore() *float64 {
+	if c == nil {
+		return nil
+	}
+	return c.PrimaryAccountScore
+}
+
+func (c *CraReportGetHomeLendingVoaAccountAttributes) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetHomeLendingVoaAccountAttributes) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetIsPrimaryAccount sets the IsPrimaryAccount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaAccountAttributes) SetIsPrimaryAccount(isPrimaryAccount *bool) {
+	c.IsPrimaryAccount = isPrimaryAccount
+	c.require(craReportGetHomeLendingVoaAccountAttributesFieldIsPrimaryAccount)
+}
+
+// SetPrimaryAccountScore sets the PrimaryAccountScore field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaAccountAttributes) SetPrimaryAccountScore(primaryAccountScore *float64) {
+	c.PrimaryAccountScore = primaryAccountScore
+	c.require(craReportGetHomeLendingVoaAccountAttributesFieldPrimaryAccountScore)
+}
+
+func (c *CraReportGetHomeLendingVoaAccountAttributes) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetHomeLendingVoaAccountAttributes
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetHomeLendingVoaAccountAttributes(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportGetHomeLendingVoaAccountAttributesNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetHomeLendingVoaAccountAttributes) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetHomeLendingVoaAccountAttributes
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetHomeLendingVoaAccountAttributes) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportGetHomeLendingVoaAccountBalancesFieldAvailable                         = big.NewInt(1 << 0)
+	craReportGetHomeLendingVoaAccountBalancesFieldCurrent                           = big.NewInt(1 << 1)
+	craReportGetHomeLendingVoaAccountBalancesFieldIsoCurrencyCode                   = big.NewInt(1 << 2)
+	craReportGetHomeLendingVoaAccountBalancesFieldUnofficialCurrencyCode            = big.NewInt(1 << 3)
+	craReportGetHomeLendingVoaAccountBalancesFieldMostRecentThirtyDayAverageBalance = big.NewInt(1 << 4)
+	craReportGetHomeLendingVoaAccountBalancesFieldMostRecentSixtyDayAverageBalance  = big.NewInt(1 << 5)
+)
+
+// craReportGetHomeLendingVoaAccountBalancesNullableFields maps the wire names of CraReportGetHomeLendingVoaAccountBalances's nullable fields (required or optional) to their field bits.
+var craReportGetHomeLendingVoaAccountBalancesNullableFields = map[string]*big.Int{
+	"available":                              craReportGetHomeLendingVoaAccountBalancesFieldAvailable,
+	"current":                                craReportGetHomeLendingVoaAccountBalancesFieldCurrent,
+	"iso_currency_code":                      craReportGetHomeLendingVoaAccountBalancesFieldIsoCurrencyCode,
+	"unofficial_currency_code":               craReportGetHomeLendingVoaAccountBalancesFieldUnofficialCurrencyCode,
+	"most_recent_thirty_day_average_balance": craReportGetHomeLendingVoaAccountBalancesFieldMostRecentThirtyDayAverageBalance,
+	"most_recent_sixty_day_average_balance":  craReportGetHomeLendingVoaAccountBalancesFieldMostRecentSixtyDayAverageBalance,
+}
+
+// Balance data for an account in a Home Lending VOA report. Omitted in the Employment Refresh format.
+type CraReportGetHomeLendingVoaAccountBalances struct {
+	// The amount of funds available to be withdrawn from the account, as determined by the financial institution. `null` if the institution does not provide an `available` balance. If `current` is `null`, this field is guaranteed not to be `null`.
+	Available *float64 `json:"available,omitempty" url:"available,omitempty"`
+	// The total amount of funds in or owed by the account. If `available` is `null`, this field is guaranteed not to be `null`.
+	Current                *float64                     `json:"current,omitempty" url:"current,omitempty"`
+	IsoCurrencyCode        CreditIsoCurrencyCode        `json:"iso_currency_code,omitempty" url:"iso_currency_code,omitempty"`
+	UnofficialCurrencyCode CreditUnofficialCurrencyCode `json:"unofficial_currency_code,omitempty" url:"unofficial_currency_code,omitempty"`
+	// The average historical balance over the most recent 30 days. `null` if it could not be computed.
+	MostRecentThirtyDayAverageBalance *float64 `json:"most_recent_thirty_day_average_balance,omitempty" url:"most_recent_thirty_day_average_balance,omitempty"`
+	// The average historical balance over the most recent 60 days. `null` if it could not be computed.
+	MostRecentSixtyDayAverageBalance *float64 `json:"most_recent_sixty_day_average_balance,omitempty" url:"most_recent_sixty_day_average_balance,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetHomeLendingVoaAccountBalances) GetAvailable() *float64 {
+	if c == nil {
+		return nil
+	}
+	return c.Available
+}
+
+func (c *CraReportGetHomeLendingVoaAccountBalances) GetCurrent() *float64 {
+	if c == nil {
+		return nil
+	}
+	return c.Current
+}
+
+func (c *CraReportGetHomeLendingVoaAccountBalances) GetIsoCurrencyCode() CreditIsoCurrencyCode {
+	if c == nil {
+		return nil
+	}
+	return c.IsoCurrencyCode
+}
+
+func (c *CraReportGetHomeLendingVoaAccountBalances) GetUnofficialCurrencyCode() CreditUnofficialCurrencyCode {
+	if c == nil {
+		return nil
+	}
+	return c.UnofficialCurrencyCode
+}
+
+func (c *CraReportGetHomeLendingVoaAccountBalances) GetMostRecentThirtyDayAverageBalance() *float64 {
+	if c == nil {
+		return nil
+	}
+	return c.MostRecentThirtyDayAverageBalance
+}
+
+func (c *CraReportGetHomeLendingVoaAccountBalances) GetMostRecentSixtyDayAverageBalance() *float64 {
+	if c == nil {
+		return nil
+	}
+	return c.MostRecentSixtyDayAverageBalance
+}
+
+func (c *CraReportGetHomeLendingVoaAccountBalances) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetHomeLendingVoaAccountBalances) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetAvailable sets the Available field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaAccountBalances) SetAvailable(available *float64) {
+	c.Available = available
+	c.require(craReportGetHomeLendingVoaAccountBalancesFieldAvailable)
+}
+
+// SetCurrent sets the Current field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaAccountBalances) SetCurrent(current *float64) {
+	c.Current = current
+	c.require(craReportGetHomeLendingVoaAccountBalancesFieldCurrent)
+}
+
+// SetIsoCurrencyCode sets the IsoCurrencyCode field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaAccountBalances) SetIsoCurrencyCode(isoCurrencyCode CreditIsoCurrencyCode) {
+	c.IsoCurrencyCode = isoCurrencyCode
+	c.require(craReportGetHomeLendingVoaAccountBalancesFieldIsoCurrencyCode)
+}
+
+// SetUnofficialCurrencyCode sets the UnofficialCurrencyCode field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaAccountBalances) SetUnofficialCurrencyCode(unofficialCurrencyCode CreditUnofficialCurrencyCode) {
+	c.UnofficialCurrencyCode = unofficialCurrencyCode
+	c.require(craReportGetHomeLendingVoaAccountBalancesFieldUnofficialCurrencyCode)
+}
+
+// SetMostRecentThirtyDayAverageBalance sets the MostRecentThirtyDayAverageBalance field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaAccountBalances) SetMostRecentThirtyDayAverageBalance(mostRecentThirtyDayAverageBalance *float64) {
+	c.MostRecentThirtyDayAverageBalance = mostRecentThirtyDayAverageBalance
+	c.require(craReportGetHomeLendingVoaAccountBalancesFieldMostRecentThirtyDayAverageBalance)
+}
+
+// SetMostRecentSixtyDayAverageBalance sets the MostRecentSixtyDayAverageBalance field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaAccountBalances) SetMostRecentSixtyDayAverageBalance(mostRecentSixtyDayAverageBalance *float64) {
+	c.MostRecentSixtyDayAverageBalance = mostRecentSixtyDayAverageBalance
+	c.require(craReportGetHomeLendingVoaAccountBalancesFieldMostRecentSixtyDayAverageBalance)
+}
+
+func (c *CraReportGetHomeLendingVoaAccountBalances) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetHomeLendingVoaAccountBalances
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetHomeLendingVoaAccountBalances(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportGetHomeLendingVoaAccountBalancesNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetHomeLendingVoaAccountBalances) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetHomeLendingVoaAccountBalances
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetHomeLendingVoaAccountBalances) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportGetHomeLendingVoaAccountHistoricalBalanceFieldCurrent                = big.NewInt(1 << 0)
+	craReportGetHomeLendingVoaAccountHistoricalBalanceFieldDate                   = big.NewInt(1 << 1)
+	craReportGetHomeLendingVoaAccountHistoricalBalanceFieldIsoCurrencyCode        = big.NewInt(1 << 2)
+	craReportGetHomeLendingVoaAccountHistoricalBalanceFieldUnofficialCurrencyCode = big.NewInt(1 << 3)
+)
+
+// craReportGetHomeLendingVoaAccountHistoricalBalanceNullableFields maps the wire names of CraReportGetHomeLendingVoaAccountHistoricalBalance's nullable fields (required or optional) to their field bits.
+var craReportGetHomeLendingVoaAccountHistoricalBalanceNullableFields = map[string]*big.Int{
+	"iso_currency_code":        craReportGetHomeLendingVoaAccountHistoricalBalanceFieldIsoCurrencyCode,
+	"unofficial_currency_code": craReportGetHomeLendingVoaAccountHistoricalBalanceFieldUnofficialCurrencyCode,
+}
+
+// A calculated historical balance for an account in a Home Lending VOA report.
+type CraReportGetHomeLendingVoaAccountHistoricalBalance struct {
+	// The total amount of funds in the account, calculated from the `current` balance in the `balances` object by subtracting inflows and adding back outflows according to the posted date of each transaction.
+	//
+	// If the account has any pending transactions, historical balance amounts on or before the date of the earliest pending transaction may differ if retrieved in subsequent reports as a result of those pending transactions posting.
+	Current float64 `json:"current" url:"current"`
+	// The date of the calculated historical balance, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format (YYYY-MM-DD).
+	Date                   time.Time                    `json:"date" url:"date" format:"date"`
+	IsoCurrencyCode        CreditIsoCurrencyCode        `json:"iso_currency_code,omitempty" url:"iso_currency_code,omitempty"`
+	UnofficialCurrencyCode CreditUnofficialCurrencyCode `json:"unofficial_currency_code,omitempty" url:"unofficial_currency_code,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetHomeLendingVoaAccountHistoricalBalance) GetCurrent() float64 {
+	if c == nil {
+		return 0
+	}
+	return c.Current
+}
+
+func (c *CraReportGetHomeLendingVoaAccountHistoricalBalance) GetDate() time.Time {
+	if c == nil {
+		return time.Time{}
+	}
+	return c.Date
+}
+
+func (c *CraReportGetHomeLendingVoaAccountHistoricalBalance) GetIsoCurrencyCode() CreditIsoCurrencyCode {
+	if c == nil {
+		return nil
+	}
+	return c.IsoCurrencyCode
+}
+
+func (c *CraReportGetHomeLendingVoaAccountHistoricalBalance) GetUnofficialCurrencyCode() CreditUnofficialCurrencyCode {
+	if c == nil {
+		return nil
+	}
+	return c.UnofficialCurrencyCode
+}
+
+func (c *CraReportGetHomeLendingVoaAccountHistoricalBalance) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetHomeLendingVoaAccountHistoricalBalance) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetCurrent sets the Current field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaAccountHistoricalBalance) SetCurrent(current float64) {
+	c.Current = current
+	c.require(craReportGetHomeLendingVoaAccountHistoricalBalanceFieldCurrent)
+}
+
+// SetDate sets the Date field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaAccountHistoricalBalance) SetDate(date time.Time) {
+	c.Date = date
+	c.require(craReportGetHomeLendingVoaAccountHistoricalBalanceFieldDate)
+}
+
+// SetIsoCurrencyCode sets the IsoCurrencyCode field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaAccountHistoricalBalance) SetIsoCurrencyCode(isoCurrencyCode CreditIsoCurrencyCode) {
+	c.IsoCurrencyCode = isoCurrencyCode
+	c.require(craReportGetHomeLendingVoaAccountHistoricalBalanceFieldIsoCurrencyCode)
+}
+
+// SetUnofficialCurrencyCode sets the UnofficialCurrencyCode field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaAccountHistoricalBalance) SetUnofficialCurrencyCode(unofficialCurrencyCode CreditUnofficialCurrencyCode) {
+	c.UnofficialCurrencyCode = unofficialCurrencyCode
+	c.require(craReportGetHomeLendingVoaAccountHistoricalBalanceFieldUnofficialCurrencyCode)
+}
+
+func (c *CraReportGetHomeLendingVoaAccountHistoricalBalance) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetHomeLendingVoaAccountHistoricalBalance
+	var unmarshaler = struct {
+		embed
+		Date *internal.Date `json:"date"`
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetHomeLendingVoaAccountHistoricalBalance(unmarshaler.embed)
+	c.Date = unmarshaler.Date.Time()
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportGetHomeLendingVoaAccountHistoricalBalanceNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetHomeLendingVoaAccountHistoricalBalance) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetHomeLendingVoaAccountHistoricalBalance
+	var marshaler = struct {
+		embed
+		Date *internal.Date `json:"date"`
+	}{
+		embed: embed(*c),
+		Date:  internal.NewDate(c.Date),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetHomeLendingVoaAccountHistoricalBalance) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportGetHomeLendingVoaAccountMetadataFieldStartDate = big.NewInt(1 << 0)
+	craReportGetHomeLendingVoaAccountMetadataFieldEndDate   = big.NewInt(1 << 1)
+)
+
+// craReportGetHomeLendingVoaAccountMetadataNullableFields maps the wire names of CraReportGetHomeLendingVoaAccountMetadata's nullable fields (required or optional) to their field bits.
+var craReportGetHomeLendingVoaAccountMetadataNullableFields = map[string]*big.Int{
+	"start_date": craReportGetHomeLendingVoaAccountMetadataFieldStartDate,
+	"end_date":   craReportGetHomeLendingVoaAccountMetadataFieldEndDate,
+}
+
+// Metadata about the financial institution data available for an account in a Home Lending VOA report. Omitted in the Employment Refresh format.
+type CraReportGetHomeLendingVoaAccountMetadata struct {
+	// The beginning of the range of financial institution-provided data for the account, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format (YYYY-MM-DD).
+	StartDate *time.Time `json:"start_date,omitempty" url:"start_date,omitempty" format:"date"`
+	// The end of the range of financial institution-provided data for the account, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format (YYYY-MM-DD).
+	EndDate *time.Time `json:"end_date,omitempty" url:"end_date,omitempty" format:"date"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetHomeLendingVoaAccountMetadata) GetStartDate() *time.Time {
+	if c == nil {
+		return nil
+	}
+	return c.StartDate
+}
+
+func (c *CraReportGetHomeLendingVoaAccountMetadata) GetEndDate() *time.Time {
+	if c == nil {
+		return nil
+	}
+	return c.EndDate
+}
+
+func (c *CraReportGetHomeLendingVoaAccountMetadata) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetHomeLendingVoaAccountMetadata) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetStartDate sets the StartDate field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaAccountMetadata) SetStartDate(startDate *time.Time) {
+	c.StartDate = startDate
+	c.require(craReportGetHomeLendingVoaAccountMetadataFieldStartDate)
+}
+
+// SetEndDate sets the EndDate field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaAccountMetadata) SetEndDate(endDate *time.Time) {
+	c.EndDate = endDate
+	c.require(craReportGetHomeLendingVoaAccountMetadataFieldEndDate)
+}
+
+func (c *CraReportGetHomeLendingVoaAccountMetadata) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetHomeLendingVoaAccountMetadata
+	var unmarshaler = struct {
+		embed
+		StartDate *internal.Date `json:"start_date,omitempty"`
+		EndDate   *internal.Date `json:"end_date,omitempty"`
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetHomeLendingVoaAccountMetadata(unmarshaler.embed)
+	c.StartDate = unmarshaler.StartDate.TimePtr()
+	c.EndDate = unmarshaler.EndDate.TimePtr()
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportGetHomeLendingVoaAccountMetadataNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetHomeLendingVoaAccountMetadata) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetHomeLendingVoaAccountMetadata
+	var marshaler = struct {
+		embed
+		StartDate *internal.Date `json:"start_date,omitempty"`
+		EndDate   *internal.Date `json:"end_date,omitempty"`
+	}{
+		embed:     embed(*c),
+		StartDate: internal.NewOptionalDate(c.StartDate),
+		EndDate:   internal.NewOptionalDate(c.EndDate),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetHomeLendingVoaAccountMetadata) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportGetHomeLendingVoaAttributesFieldTotalInflowAmount  = big.NewInt(1 << 0)
+	craReportGetHomeLendingVoaAttributesFieldTotalOutflowAmount = big.NewInt(1 << 1)
+)
+
+// craReportGetHomeLendingVoaAttributesNullableFields maps the wire names of CraReportGetHomeLendingVoaAttributes's nullable fields (required or optional) to their field bits.
+var craReportGetHomeLendingVoaAttributesNullableFields = map[string]*big.Int{
+	"total_inflow_amount":  craReportGetHomeLendingVoaAttributesFieldTotalInflowAmount,
+	"total_outflow_amount": craReportGetHomeLendingVoaAttributesFieldTotalOutflowAmount,
+}
+
+// Attributes derived from transaction-level data, aggregated across all accounts in the report. Returned for successfully generated VOA reports; omitted when `metadata.report_format` is `EMPLOYMENT_REFRESH` or if the product failed to generate.
+type CraReportGetHomeLendingVoaAttributes struct {
+	TotalInflowAmount  *TotalReportInflowAmount  `json:"total_inflow_amount,omitempty" url:"total_inflow_amount,omitempty"`
+	TotalOutflowAmount *TotalReportOutflowAmount `json:"total_outflow_amount,omitempty" url:"total_outflow_amount,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetHomeLendingVoaAttributes) GetTotalInflowAmount() *TotalReportInflowAmount {
+	if c == nil {
+		return nil
+	}
+	return c.TotalInflowAmount
+}
+
+func (c *CraReportGetHomeLendingVoaAttributes) GetTotalOutflowAmount() *TotalReportOutflowAmount {
+	if c == nil {
+		return nil
+	}
+	return c.TotalOutflowAmount
+}
+
+func (c *CraReportGetHomeLendingVoaAttributes) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetHomeLendingVoaAttributes) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetTotalInflowAmount sets the TotalInflowAmount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaAttributes) SetTotalInflowAmount(totalInflowAmount *TotalReportInflowAmount) {
+	c.TotalInflowAmount = totalInflowAmount
+	c.require(craReportGetHomeLendingVoaAttributesFieldTotalInflowAmount)
+}
+
+// SetTotalOutflowAmount sets the TotalOutflowAmount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaAttributes) SetTotalOutflowAmount(totalOutflowAmount *TotalReportOutflowAmount) {
+	c.TotalOutflowAmount = totalOutflowAmount
+	c.require(craReportGetHomeLendingVoaAttributesFieldTotalOutflowAmount)
+}
+
+func (c *CraReportGetHomeLendingVoaAttributes) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetHomeLendingVoaAttributes
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetHomeLendingVoaAttributes(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportGetHomeLendingVoaAttributesNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetHomeLendingVoaAttributes) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetHomeLendingVoaAttributes
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetHomeLendingVoaAttributes) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportGetHomeLendingVoaItemFieldAccounts        = big.NewInt(1 << 0)
+	craReportGetHomeLendingVoaItemFieldInstitutionName = big.NewInt(1 << 1)
+	craReportGetHomeLendingVoaItemFieldInstitutionID   = big.NewInt(1 << 2)
+	craReportGetHomeLendingVoaItemFieldItemID          = big.NewInt(1 << 3)
+	craReportGetHomeLendingVoaItemFieldDateLastUpdated = big.NewInt(1 << 4)
+)
+
+// An Item included in a Home Lending VOA report returned by `/cra/report/get`.
+type CraReportGetHomeLendingVoaItem struct {
+	// The accounts on the Item included in the Home Lending VOA report.
+	Accounts []*CraReportGetHomeLendingVoaAccount `json:"accounts" url:"accounts"`
+	// The full financial institution name associated with the Item.
+	InstitutionName string `json:"institution_name" url:"institution_name"`
+	// The ID of the financial institution associated with the Item.
+	InstitutionID string `json:"institution_id" url:"institution_id"`
+	ItemID        ItemID `json:"item_id" url:"item_id"`
+	// The date and time when this Item's data was last retrieved from the financial institution, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format.
+	DateLastUpdated time.Time `json:"date_last_updated" url:"date_last_updated"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetHomeLendingVoaItem) GetAccounts() []*CraReportGetHomeLendingVoaAccount {
+	if c == nil {
+		return nil
+	}
+	return c.Accounts
+}
+
+func (c *CraReportGetHomeLendingVoaItem) GetInstitutionName() string {
+	if c == nil {
+		return ""
+	}
+	return c.InstitutionName
+}
+
+func (c *CraReportGetHomeLendingVoaItem) GetInstitutionID() string {
+	if c == nil {
+		return ""
+	}
+	return c.InstitutionID
+}
+
+func (c *CraReportGetHomeLendingVoaItem) GetItemID() ItemID {
+	if c == nil {
+		return ""
+	}
+	return c.ItemID
+}
+
+func (c *CraReportGetHomeLendingVoaItem) GetDateLastUpdated() time.Time {
+	if c == nil {
+		return time.Time{}
+	}
+	return c.DateLastUpdated
+}
+
+func (c *CraReportGetHomeLendingVoaItem) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetHomeLendingVoaItem) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetAccounts sets the Accounts field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaItem) SetAccounts(accounts []*CraReportGetHomeLendingVoaAccount) {
+	c.Accounts = accounts
+	c.require(craReportGetHomeLendingVoaItemFieldAccounts)
+}
+
+// SetInstitutionName sets the InstitutionName field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaItem) SetInstitutionName(institutionName string) {
+	c.InstitutionName = institutionName
+	c.require(craReportGetHomeLendingVoaItemFieldInstitutionName)
+}
+
+// SetInstitutionID sets the InstitutionID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaItem) SetInstitutionID(institutionID string) {
+	c.InstitutionID = institutionID
+	c.require(craReportGetHomeLendingVoaItemFieldInstitutionID)
+}
+
+// SetItemID sets the ItemID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaItem) SetItemID(itemID ItemID) {
+	c.ItemID = itemID
+	c.require(craReportGetHomeLendingVoaItemFieldItemID)
+}
+
+// SetDateLastUpdated sets the DateLastUpdated field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaItem) SetDateLastUpdated(dateLastUpdated time.Time) {
+	c.DateLastUpdated = dateLastUpdated
+	c.require(craReportGetHomeLendingVoaItemFieldDateLastUpdated)
+}
+
+func (c *CraReportGetHomeLendingVoaItem) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetHomeLendingVoaItem
+	var unmarshaler = struct {
+		embed
+		DateLastUpdated *internal.DateTime `json:"date_last_updated"`
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetHomeLendingVoaItem(unmarshaler.embed)
+	c.DateLastUpdated = unmarshaler.DateLastUpdated.Time()
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetHomeLendingVoaItem) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetHomeLendingVoaItem
+	var marshaler = struct {
+		embed
+		DateLastUpdated *internal.DateTime `json:"date_last_updated"`
+	}{
+		embed:           embed(*c),
+		DateLastUpdated: internal.NewDateTime(c.DateLastUpdated),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetHomeLendingVoaItem) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportGetHomeLendingVoaMetadataFieldGeneratedTime              = big.NewInt(1 << 0)
+	craReportGetHomeLendingVoaMetadataFieldItemCount                  = big.NewInt(1 << 1)
+	craReportGetHomeLendingVoaMetadataFieldAccountCount               = big.NewInt(1 << 2)
+	craReportGetHomeLendingVoaMetadataFieldInstitutionIDs             = big.NewInt(1 << 3)
+	craReportGetHomeLendingVoaMetadataFieldReportFormat               = big.NewInt(1 << 4)
+	craReportGetHomeLendingVoaMetadataFieldDaysRequested              = big.NewInt(1 << 5)
+	craReportGetHomeLendingVoaMetadataFieldPrimaryAccountCount        = big.NewInt(1 << 6)
+	craReportGetHomeLendingVoaMetadataFieldDepositoryAccountTypeCount = big.NewInt(1 << 7)
+	craReportGetHomeLendingVoaMetadataFieldCreditAccountTypeCount     = big.NewInt(1 << 8)
+	craReportGetHomeLendingVoaMetadataFieldInvestmentAccountTypeCount = big.NewInt(1 << 9)
+	craReportGetHomeLendingVoaMetadataFieldOtherAccountTypeCount      = big.NewInt(1 << 10)
+	craReportGetHomeLendingVoaMetadataFieldMultipleOwnerAccountCount  = big.NewInt(1 << 11)
+	craReportGetHomeLendingVoaMetadataFieldOldestTransactionDate      = big.NewInt(1 << 12)
+	craReportGetHomeLendingVoaMetadataFieldMostRecentTransactionDate  = big.NewInt(1 << 13)
+)
+
+// craReportGetHomeLendingVoaMetadataNullableFields maps the wire names of CraReportGetHomeLendingVoaMetadata's nullable fields (required or optional) to their field bits.
+var craReportGetHomeLendingVoaMetadataNullableFields = map[string]*big.Int{
+	"generated_time":               craReportGetHomeLendingVoaMetadataFieldGeneratedTime,
+	"oldest_transaction_date":      craReportGetHomeLendingVoaMetadataFieldOldestTransactionDate,
+	"most_recent_transaction_date": craReportGetHomeLendingVoaMetadataFieldMostRecentTransactionDate,
+}
+
+// Home Lending VOA report metadata returned by `/cra/report/get`. `null` when the product failed to generate.
+type CraReportGetHomeLendingVoaMetadata struct {
+	// The time the report was generated. May be `null` if unavailable.
+	GeneratedTime *time.Time `json:"generated_time,omitempty" url:"generated_time,omitempty"`
+	// The number of Items used to generate the report.
+	ItemCount int `json:"item_count" url:"item_count"`
+	// The number of accounts used to generate the report.
+	AccountCount int `json:"account_count" url:"account_count"`
+	// The institution IDs of the Items used to generate the report.
+	InstitutionIDs []string                      `json:"institution_ids" url:"institution_ids"`
+	ReportFormat   CraHomeLendingVoaReportFormat `json:"report_format" url:"report_format"`
+	// The number of days of transaction history requested.
+	DaysRequested int `json:"days_requested" url:"days_requested"`
+	// The number of accounts carrying Plaid's primary account indicator, based on a report-level view of the user's transaction history.
+	PrimaryAccountCount int `json:"primary_account_count" url:"primary_account_count"`
+	// The number of depository accounts used to generate the report.
+	DepositoryAccountTypeCount int `json:"depository_account_type_count" url:"depository_account_type_count"`
+	// The number of credit accounts used to generate the report.
+	CreditAccountTypeCount int `json:"credit_account_type_count" url:"credit_account_type_count"`
+	// The number of investment accounts used to generate the report.
+	InvestmentAccountTypeCount int `json:"investment_account_type_count" url:"investment_account_type_count"`
+	// The number of accounts that are neither depository, credit, nor investment.
+	OtherAccountTypeCount int `json:"other_account_type_count" url:"other_account_type_count"`
+	// The number of accounts with multiple owners.
+	MultipleOwnerAccountCount int `json:"multiple_owner_account_count" url:"multiple_owner_account_count"`
+	// The earliest date among transactions included in the report. `null` if the report includes no transactions.
+	OldestTransactionDate *time.Time `json:"oldest_transaction_date,omitempty" url:"oldest_transaction_date,omitempty" format:"date"`
+	// The latest date among transactions included in the report. `null` if the report includes no transactions.
+	MostRecentTransactionDate *time.Time `json:"most_recent_transaction_date,omitempty" url:"most_recent_transaction_date,omitempty" format:"date"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetHomeLendingVoaMetadata) GetGeneratedTime() *time.Time {
+	if c == nil {
+		return nil
+	}
+	return c.GeneratedTime
+}
+
+func (c *CraReportGetHomeLendingVoaMetadata) GetItemCount() int {
+	if c == nil {
+		return 0
+	}
+	return c.ItemCount
+}
+
+func (c *CraReportGetHomeLendingVoaMetadata) GetAccountCount() int {
+	if c == nil {
+		return 0
+	}
+	return c.AccountCount
+}
+
+func (c *CraReportGetHomeLendingVoaMetadata) GetInstitutionIDs() []string {
+	if c == nil {
+		return nil
+	}
+	return c.InstitutionIDs
+}
+
+func (c *CraReportGetHomeLendingVoaMetadata) GetReportFormat() CraHomeLendingVoaReportFormat {
+	if c == nil {
+		return ""
+	}
+	return c.ReportFormat
+}
+
+func (c *CraReportGetHomeLendingVoaMetadata) GetDaysRequested() int {
+	if c == nil {
+		return 0
+	}
+	return c.DaysRequested
+}
+
+func (c *CraReportGetHomeLendingVoaMetadata) GetPrimaryAccountCount() int {
+	if c == nil {
+		return 0
+	}
+	return c.PrimaryAccountCount
+}
+
+func (c *CraReportGetHomeLendingVoaMetadata) GetDepositoryAccountTypeCount() int {
+	if c == nil {
+		return 0
+	}
+	return c.DepositoryAccountTypeCount
+}
+
+func (c *CraReportGetHomeLendingVoaMetadata) GetCreditAccountTypeCount() int {
+	if c == nil {
+		return 0
+	}
+	return c.CreditAccountTypeCount
+}
+
+func (c *CraReportGetHomeLendingVoaMetadata) GetInvestmentAccountTypeCount() int {
+	if c == nil {
+		return 0
+	}
+	return c.InvestmentAccountTypeCount
+}
+
+func (c *CraReportGetHomeLendingVoaMetadata) GetOtherAccountTypeCount() int {
+	if c == nil {
+		return 0
+	}
+	return c.OtherAccountTypeCount
+}
+
+func (c *CraReportGetHomeLendingVoaMetadata) GetMultipleOwnerAccountCount() int {
+	if c == nil {
+		return 0
+	}
+	return c.MultipleOwnerAccountCount
+}
+
+func (c *CraReportGetHomeLendingVoaMetadata) GetOldestTransactionDate() *time.Time {
+	if c == nil {
+		return nil
+	}
+	return c.OldestTransactionDate
+}
+
+func (c *CraReportGetHomeLendingVoaMetadata) GetMostRecentTransactionDate() *time.Time {
+	if c == nil {
+		return nil
+	}
+	return c.MostRecentTransactionDate
+}
+
+func (c *CraReportGetHomeLendingVoaMetadata) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetHomeLendingVoaMetadata) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetGeneratedTime sets the GeneratedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaMetadata) SetGeneratedTime(generatedTime *time.Time) {
+	c.GeneratedTime = generatedTime
+	c.require(craReportGetHomeLendingVoaMetadataFieldGeneratedTime)
+}
+
+// SetItemCount sets the ItemCount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaMetadata) SetItemCount(itemCount int) {
+	c.ItemCount = itemCount
+	c.require(craReportGetHomeLendingVoaMetadataFieldItemCount)
+}
+
+// SetAccountCount sets the AccountCount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaMetadata) SetAccountCount(accountCount int) {
+	c.AccountCount = accountCount
+	c.require(craReportGetHomeLendingVoaMetadataFieldAccountCount)
+}
+
+// SetInstitutionIDs sets the InstitutionIDs field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaMetadata) SetInstitutionIDs(institutionIDs []string) {
+	c.InstitutionIDs = institutionIDs
+	c.require(craReportGetHomeLendingVoaMetadataFieldInstitutionIDs)
+}
+
+// SetReportFormat sets the ReportFormat field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaMetadata) SetReportFormat(reportFormat CraHomeLendingVoaReportFormat) {
+	c.ReportFormat = reportFormat
+	c.require(craReportGetHomeLendingVoaMetadataFieldReportFormat)
+}
+
+// SetDaysRequested sets the DaysRequested field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaMetadata) SetDaysRequested(daysRequested int) {
+	c.DaysRequested = daysRequested
+	c.require(craReportGetHomeLendingVoaMetadataFieldDaysRequested)
+}
+
+// SetPrimaryAccountCount sets the PrimaryAccountCount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaMetadata) SetPrimaryAccountCount(primaryAccountCount int) {
+	c.PrimaryAccountCount = primaryAccountCount
+	c.require(craReportGetHomeLendingVoaMetadataFieldPrimaryAccountCount)
+}
+
+// SetDepositoryAccountTypeCount sets the DepositoryAccountTypeCount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaMetadata) SetDepositoryAccountTypeCount(depositoryAccountTypeCount int) {
+	c.DepositoryAccountTypeCount = depositoryAccountTypeCount
+	c.require(craReportGetHomeLendingVoaMetadataFieldDepositoryAccountTypeCount)
+}
+
+// SetCreditAccountTypeCount sets the CreditAccountTypeCount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaMetadata) SetCreditAccountTypeCount(creditAccountTypeCount int) {
+	c.CreditAccountTypeCount = creditAccountTypeCount
+	c.require(craReportGetHomeLendingVoaMetadataFieldCreditAccountTypeCount)
+}
+
+// SetInvestmentAccountTypeCount sets the InvestmentAccountTypeCount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaMetadata) SetInvestmentAccountTypeCount(investmentAccountTypeCount int) {
+	c.InvestmentAccountTypeCount = investmentAccountTypeCount
+	c.require(craReportGetHomeLendingVoaMetadataFieldInvestmentAccountTypeCount)
+}
+
+// SetOtherAccountTypeCount sets the OtherAccountTypeCount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaMetadata) SetOtherAccountTypeCount(otherAccountTypeCount int) {
+	c.OtherAccountTypeCount = otherAccountTypeCount
+	c.require(craReportGetHomeLendingVoaMetadataFieldOtherAccountTypeCount)
+}
+
+// SetMultipleOwnerAccountCount sets the MultipleOwnerAccountCount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaMetadata) SetMultipleOwnerAccountCount(multipleOwnerAccountCount int) {
+	c.MultipleOwnerAccountCount = multipleOwnerAccountCount
+	c.require(craReportGetHomeLendingVoaMetadataFieldMultipleOwnerAccountCount)
+}
+
+// SetOldestTransactionDate sets the OldestTransactionDate field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaMetadata) SetOldestTransactionDate(oldestTransactionDate *time.Time) {
+	c.OldestTransactionDate = oldestTransactionDate
+	c.require(craReportGetHomeLendingVoaMetadataFieldOldestTransactionDate)
+}
+
+// SetMostRecentTransactionDate sets the MostRecentTransactionDate field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaMetadata) SetMostRecentTransactionDate(mostRecentTransactionDate *time.Time) {
+	c.MostRecentTransactionDate = mostRecentTransactionDate
+	c.require(craReportGetHomeLendingVoaMetadataFieldMostRecentTransactionDate)
+}
+
+func (c *CraReportGetHomeLendingVoaMetadata) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetHomeLendingVoaMetadata
+	var unmarshaler = struct {
+		embed
+		GeneratedTime             *internal.DateTime `json:"generated_time,omitempty"`
+		OldestTransactionDate     *internal.Date     `json:"oldest_transaction_date,omitempty"`
+		MostRecentTransactionDate *internal.Date     `json:"most_recent_transaction_date,omitempty"`
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetHomeLendingVoaMetadata(unmarshaler.embed)
+	c.GeneratedTime = unmarshaler.GeneratedTime.TimePtr()
+	c.OldestTransactionDate = unmarshaler.OldestTransactionDate.TimePtr()
+	c.MostRecentTransactionDate = unmarshaler.MostRecentTransactionDate.TimePtr()
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportGetHomeLendingVoaMetadataNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetHomeLendingVoaMetadata) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetHomeLendingVoaMetadata
+	var marshaler = struct {
+		embed
+		GeneratedTime             *internal.DateTime `json:"generated_time,omitempty"`
+		OldestTransactionDate     *internal.Date     `json:"oldest_transaction_date,omitempty"`
+		MostRecentTransactionDate *internal.Date     `json:"most_recent_transaction_date,omitempty"`
+	}{
+		embed:                     embed(*c),
+		GeneratedTime:             internal.NewOptionalDateTime(c.GeneratedTime),
+		OldestTransactionDate:     internal.NewOptionalDate(c.OldestTransactionDate),
+		MostRecentTransactionDate: internal.NewOptionalDate(c.MostRecentTransactionDate),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetHomeLendingVoaMetadata) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportGetHomeLendingVoaOptionsFieldReportFormat = big.NewInt(1 << 0)
+)
+
+// Configures which Home Lending VOA report format is retrieved. Omit when retrieving a report generated by `/cra/report/create` or `/link/token/create`; the report is returned with the options it was generated with.
+type CraReportGetHomeLendingVoaOptions struct {
+	// The requested report format. Defaults to `VOA` when omitted.
+	ReportFormat *CraHomeLendingVoaReportFormat `json:"report_format,omitempty" url:"report_format,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (c *CraReportGetHomeLendingVoaOptions) GetReportFormat() *CraHomeLendingVoaReportFormat {
+	if c == nil {
+		return nil
+	}
+	return c.ReportFormat
+}
+
+func (c *CraReportGetHomeLendingVoaOptions) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.extraProperties
+}
+
+func (c *CraReportGetHomeLendingVoaOptions) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetReportFormat sets the ReportFormat field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaOptions) SetReportFormat(reportFormat *CraHomeLendingVoaReportFormat) {
+	c.ReportFormat = reportFormat
+	c.require(craReportGetHomeLendingVoaOptionsFieldReportFormat)
+}
+
+func (c *CraReportGetHomeLendingVoaOptions) UnmarshalJSON(data []byte) error {
+	type unmarshaler CraReportGetHomeLendingVoaOptions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CraReportGetHomeLendingVoaOptions(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetHomeLendingVoaOptions) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetHomeLendingVoaOptions
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (c *CraReportGetHomeLendingVoaOptions) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportGetHomeLendingVoaResponseProductFieldVersion        = big.NewInt(1 << 0)
+	craReportGetHomeLendingVoaResponseProductFieldMetadata       = big.NewInt(1 << 1)
+	craReportGetHomeLendingVoaResponseProductFieldGseReferenceID = big.NewInt(1 << 2)
+	craReportGetHomeLendingVoaResponseProductFieldItems          = big.NewInt(1 << 3)
+	craReportGetHomeLendingVoaResponseProductFieldAttributes     = big.NewInt(1 << 4)
+	craReportGetHomeLendingVoaResponseProductFieldErrors         = big.NewInt(1 << 5)
+)
+
+// craReportGetHomeLendingVoaResponseProductNullableFields maps the wire names of CraReportGetHomeLendingVoaResponseProduct's nullable fields (required or optional) to their field bits.
+var craReportGetHomeLendingVoaResponseProductNullableFields = map[string]*big.Int{
+	"metadata":         craReportGetHomeLendingVoaResponseProductFieldMetadata,
+	"gse_reference_id": craReportGetHomeLendingVoaResponseProductFieldGseReferenceID,
+	"attributes":       craReportGetHomeLendingVoaResponseProductFieldAttributes,
+}
+
+// Home Lending VOA data returned by `/cra/report/get`.
+type CraReportGetHomeLendingVoaResponseProduct struct {
+	Version  CraProductVersion                   `json:"version" url:"version"`
+	Metadata *CraReportGetHomeLendingVoaMetadata `json:"metadata,omitempty" url:"metadata,omitempty"`
+	// A unique token that can be shared with government-sponsored enterprises to provide access to this product's report. Automatically created when the report's `decision_stage` is `DECISIONING`; `null` for other stages or if the product failed to generate.
+	GseReferenceID *string `json:"gse_reference_id,omitempty" url:"gse_reference_id,omitempty"`
+	// The Items included in the Home Lending VOA report.
+	Items      []*CraReportGetHomeLendingVoaItem     `json:"items" url:"items"`
+	Attributes *CraReportGetHomeLendingVoaAttributes `json:"attributes,omitempty" url:"attributes,omitempty"`
+	// Product-level errors. Non-empty when this product failed to generate; empty on success.
+	Errors []*PlaidError `json:"errors" url:"errors"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetHomeLendingVoaResponseProduct) GetVersion() CraProductVersion {
+	if c == nil {
+		return ""
+	}
+	return c.Version
+}
+
+func (c *CraReportGetHomeLendingVoaResponseProduct) GetMetadata() *CraReportGetHomeLendingVoaMetadata {
+	if c == nil {
+		return nil
+	}
+	return c.Metadata
+}
+
+func (c *CraReportGetHomeLendingVoaResponseProduct) GetGseReferenceID() *string {
+	if c == nil {
+		return nil
+	}
+	return c.GseReferenceID
+}
+
+func (c *CraReportGetHomeLendingVoaResponseProduct) GetItems() []*CraReportGetHomeLendingVoaItem {
+	if c == nil {
+		return nil
+	}
+	return c.Items
+}
+
+func (c *CraReportGetHomeLendingVoaResponseProduct) GetAttributes() *CraReportGetHomeLendingVoaAttributes {
+	if c == nil {
+		return nil
+	}
+	return c.Attributes
+}
+
+func (c *CraReportGetHomeLendingVoaResponseProduct) GetErrors() []*PlaidError {
+	if c == nil {
+		return nil
+	}
+	return c.Errors
+}
+
+func (c *CraReportGetHomeLendingVoaResponseProduct) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetHomeLendingVoaResponseProduct) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetVersion sets the Version field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaResponseProduct) SetVersion(version CraProductVersion) {
+	c.Version = version
+	c.require(craReportGetHomeLendingVoaResponseProductFieldVersion)
+}
+
+// SetMetadata sets the Metadata field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaResponseProduct) SetMetadata(metadata *CraReportGetHomeLendingVoaMetadata) {
+	c.Metadata = metadata
+	c.require(craReportGetHomeLendingVoaResponseProductFieldMetadata)
+}
+
+// SetGseReferenceID sets the GseReferenceID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaResponseProduct) SetGseReferenceID(gseReferenceID *string) {
+	c.GseReferenceID = gseReferenceID
+	c.require(craReportGetHomeLendingVoaResponseProductFieldGseReferenceID)
+}
+
+// SetItems sets the Items field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaResponseProduct) SetItems(items []*CraReportGetHomeLendingVoaItem) {
+	c.Items = items
+	c.require(craReportGetHomeLendingVoaResponseProductFieldItems)
+}
+
+// SetAttributes sets the Attributes field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaResponseProduct) SetAttributes(attributes *CraReportGetHomeLendingVoaAttributes) {
+	c.Attributes = attributes
+	c.require(craReportGetHomeLendingVoaResponseProductFieldAttributes)
+}
+
+// SetErrors sets the Errors field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaResponseProduct) SetErrors(errors []*PlaidError) {
+	c.Errors = errors
+	c.require(craReportGetHomeLendingVoaResponseProductFieldErrors)
+}
+
+func (c *CraReportGetHomeLendingVoaResponseProduct) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetHomeLendingVoaResponseProduct
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetHomeLendingVoaResponseProduct(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportGetHomeLendingVoaResponseProductNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetHomeLendingVoaResponseProduct) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetHomeLendingVoaResponseProduct
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetHomeLendingVoaResponseProduct) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportGetHomeLendingVoaTransactionFieldTransactionID          = big.NewInt(1 << 0)
+	craReportGetHomeLendingVoaTransactionFieldAccountID              = big.NewInt(1 << 1)
+	craReportGetHomeLendingVoaTransactionFieldAmount                 = big.NewInt(1 << 2)
+	craReportGetHomeLendingVoaTransactionFieldIsoCurrencyCode        = big.NewInt(1 << 3)
+	craReportGetHomeLendingVoaTransactionFieldUnofficialCurrencyCode = big.NewInt(1 << 4)
+	craReportGetHomeLendingVoaTransactionFieldOriginalDescription    = big.NewInt(1 << 5)
+	craReportGetHomeLendingVoaTransactionFieldMerchantName           = big.NewInt(1 << 6)
+	craReportGetHomeLendingVoaTransactionFieldCreditCategory         = big.NewInt(1 << 7)
+	craReportGetHomeLendingVoaTransactionFieldCheckNumber            = big.NewInt(1 << 8)
+	craReportGetHomeLendingVoaTransactionFieldDate                   = big.NewInt(1 << 9)
+	craReportGetHomeLendingVoaTransactionFieldDateTransacted         = big.NewInt(1 << 10)
+	craReportGetHomeLendingVoaTransactionFieldPending                = big.NewInt(1 << 11)
+	craReportGetHomeLendingVoaTransactionFieldAccountOwner           = big.NewInt(1 << 12)
+	craReportGetHomeLendingVoaTransactionFieldLocation               = big.NewInt(1 << 13)
+)
+
+// craReportGetHomeLendingVoaTransactionNullableFields maps the wire names of CraReportGetHomeLendingVoaTransaction's nullable fields (required or optional) to their field bits.
+var craReportGetHomeLendingVoaTransactionNullableFields = map[string]*big.Int{
+	"amount":                   craReportGetHomeLendingVoaTransactionFieldAmount,
+	"iso_currency_code":        craReportGetHomeLendingVoaTransactionFieldIsoCurrencyCode,
+	"unofficial_currency_code": craReportGetHomeLendingVoaTransactionFieldUnofficialCurrencyCode,
+	"original_description":     craReportGetHomeLendingVoaTransactionFieldOriginalDescription,
+	"merchant_name":            craReportGetHomeLendingVoaTransactionFieldMerchantName,
+	"credit_category":          craReportGetHomeLendingVoaTransactionFieldCreditCategory,
+	"check_number":             craReportGetHomeLendingVoaTransactionFieldCheckNumber,
+	"date_transacted":          craReportGetHomeLendingVoaTransactionFieldDateTransacted,
+	"account_owner":            craReportGetHomeLendingVoaTransactionFieldAccountOwner,
+	"location":                 craReportGetHomeLendingVoaTransactionFieldLocation,
+}
+
+// A transaction in a Home Lending VOA report returned by `/cra/report/get`. Employment Refresh contains only deposits and omits VOA-only fields.
+type CraReportGetHomeLendingVoaTransaction struct {
+	// The unique ID of the transaction. Like all Plaid identifiers, the `transaction_id` is case sensitive.
+	TransactionID string `json:"transaction_id" url:"transaction_id"`
+	// The ID of the account in which this transaction occurred.
+	AccountID string `json:"account_id" url:"account_id"`
+	// The settled value of the transaction, denominated in the transaction's currency, as stated in `iso_currency_code` or `unofficial_currency_code`. Positive values when money moves out of the account; negative values when money moves in. For example, debit card purchases are positive; credit card payments, direct deposits, and refunds are negative. Omitted in the Employment Refresh format.
+	Amount                 *float64                     `json:"amount,omitempty" url:"amount,omitempty"`
+	IsoCurrencyCode        CreditIsoCurrencyCode        `json:"iso_currency_code,omitempty" url:"iso_currency_code,omitempty"`
+	UnofficialCurrencyCode CreditUnofficialCurrencyCode `json:"unofficial_currency_code,omitempty" url:"unofficial_currency_code,omitempty"`
+	// The string returned by the financial institution to describe the transaction.
+	OriginalDescription *string `json:"original_description,omitempty" url:"original_description,omitempty"`
+	// The merchant name, as enriched by Plaid. `null` for transactions with no meaningful merchant, such as checks or account transfers.
+	MerchantName   *string         `json:"merchant_name,omitempty" url:"merchant_name,omitempty"`
+	CreditCategory *CreditCategory `json:"credit_category,omitempty" url:"credit_category,omitempty"`
+	// The check number of the transaction. Only populated for check transactions.
+	CheckNumber *string `json:"check_number,omitempty" url:"check_number,omitempty"`
+	// For pending transactions, the date that the transaction occurred; for posted transactions, the date that the transaction posted. Returned in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format (YYYY-MM-DD).
+	Date time.Time `json:"date" url:"date" format:"date"`
+	// The date on which the transaction took place, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format (YYYY-MM-DD). `null` if the financial institution did not provide it.
+	DateTransacted *time.Time `json:"date_transacted,omitempty" url:"date_transacted,omitempty" format:"date"`
+	// When `true`, identifies the transaction as pending or unsettled. Pending transaction details (`amount`, `merchant_name`, `credit_category`) may change before they are settled.
+	Pending bool `json:"pending" url:"pending"`
+	// The name of the account owner. This field is not typically populated and only relevant when dealing with sub-accounts.
+	AccountOwner *string `json:"account_owner,omitempty" url:"account_owner,omitempty"`
+	// A representation of where the transaction took place. Omitted in the Employment Refresh format and when location data is unavailable.
+	Location *Location `json:"location,omitempty" url:"location,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetHomeLendingVoaTransaction) GetTransactionID() string {
+	if c == nil {
+		return ""
+	}
+	return c.TransactionID
+}
+
+func (c *CraReportGetHomeLendingVoaTransaction) GetAccountID() string {
+	if c == nil {
+		return ""
+	}
+	return c.AccountID
+}
+
+func (c *CraReportGetHomeLendingVoaTransaction) GetAmount() *float64 {
+	if c == nil {
+		return nil
+	}
+	return c.Amount
+}
+
+func (c *CraReportGetHomeLendingVoaTransaction) GetIsoCurrencyCode() CreditIsoCurrencyCode {
+	if c == nil {
+		return nil
+	}
+	return c.IsoCurrencyCode
+}
+
+func (c *CraReportGetHomeLendingVoaTransaction) GetUnofficialCurrencyCode() CreditUnofficialCurrencyCode {
+	if c == nil {
+		return nil
+	}
+	return c.UnofficialCurrencyCode
+}
+
+func (c *CraReportGetHomeLendingVoaTransaction) GetOriginalDescription() *string {
+	if c == nil {
+		return nil
+	}
+	return c.OriginalDescription
+}
+
+func (c *CraReportGetHomeLendingVoaTransaction) GetMerchantName() *string {
+	if c == nil {
+		return nil
+	}
+	return c.MerchantName
+}
+
+func (c *CraReportGetHomeLendingVoaTransaction) GetCreditCategory() *CreditCategory {
+	if c == nil {
+		return nil
+	}
+	return c.CreditCategory
+}
+
+func (c *CraReportGetHomeLendingVoaTransaction) GetCheckNumber() *string {
+	if c == nil {
+		return nil
+	}
+	return c.CheckNumber
+}
+
+func (c *CraReportGetHomeLendingVoaTransaction) GetDate() time.Time {
+	if c == nil {
+		return time.Time{}
+	}
+	return c.Date
+}
+
+func (c *CraReportGetHomeLendingVoaTransaction) GetDateTransacted() *time.Time {
+	if c == nil {
+		return nil
+	}
+	return c.DateTransacted
+}
+
+func (c *CraReportGetHomeLendingVoaTransaction) GetPending() bool {
+	if c == nil {
+		return false
+	}
+	return c.Pending
+}
+
+func (c *CraReportGetHomeLendingVoaTransaction) GetAccountOwner() *string {
+	if c == nil {
+		return nil
+	}
+	return c.AccountOwner
+}
+
+func (c *CraReportGetHomeLendingVoaTransaction) GetLocation() *Location {
+	if c == nil {
+		return nil
+	}
+	return c.Location
+}
+
+func (c *CraReportGetHomeLendingVoaTransaction) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetHomeLendingVoaTransaction) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetTransactionID sets the TransactionID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaTransaction) SetTransactionID(transactionID string) {
+	c.TransactionID = transactionID
+	c.require(craReportGetHomeLendingVoaTransactionFieldTransactionID)
+}
+
+// SetAccountID sets the AccountID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaTransaction) SetAccountID(accountID string) {
+	c.AccountID = accountID
+	c.require(craReportGetHomeLendingVoaTransactionFieldAccountID)
+}
+
+// SetAmount sets the Amount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaTransaction) SetAmount(amount *float64) {
+	c.Amount = amount
+	c.require(craReportGetHomeLendingVoaTransactionFieldAmount)
+}
+
+// SetIsoCurrencyCode sets the IsoCurrencyCode field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaTransaction) SetIsoCurrencyCode(isoCurrencyCode CreditIsoCurrencyCode) {
+	c.IsoCurrencyCode = isoCurrencyCode
+	c.require(craReportGetHomeLendingVoaTransactionFieldIsoCurrencyCode)
+}
+
+// SetUnofficialCurrencyCode sets the UnofficialCurrencyCode field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaTransaction) SetUnofficialCurrencyCode(unofficialCurrencyCode CreditUnofficialCurrencyCode) {
+	c.UnofficialCurrencyCode = unofficialCurrencyCode
+	c.require(craReportGetHomeLendingVoaTransactionFieldUnofficialCurrencyCode)
+}
+
+// SetOriginalDescription sets the OriginalDescription field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaTransaction) SetOriginalDescription(originalDescription *string) {
+	c.OriginalDescription = originalDescription
+	c.require(craReportGetHomeLendingVoaTransactionFieldOriginalDescription)
+}
+
+// SetMerchantName sets the MerchantName field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaTransaction) SetMerchantName(merchantName *string) {
+	c.MerchantName = merchantName
+	c.require(craReportGetHomeLendingVoaTransactionFieldMerchantName)
+}
+
+// SetCreditCategory sets the CreditCategory field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaTransaction) SetCreditCategory(creditCategory *CreditCategory) {
+	c.CreditCategory = creditCategory
+	c.require(craReportGetHomeLendingVoaTransactionFieldCreditCategory)
+}
+
+// SetCheckNumber sets the CheckNumber field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaTransaction) SetCheckNumber(checkNumber *string) {
+	c.CheckNumber = checkNumber
+	c.require(craReportGetHomeLendingVoaTransactionFieldCheckNumber)
+}
+
+// SetDate sets the Date field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaTransaction) SetDate(date time.Time) {
+	c.Date = date
+	c.require(craReportGetHomeLendingVoaTransactionFieldDate)
+}
+
+// SetDateTransacted sets the DateTransacted field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaTransaction) SetDateTransacted(dateTransacted *time.Time) {
+	c.DateTransacted = dateTransacted
+	c.require(craReportGetHomeLendingVoaTransactionFieldDateTransacted)
+}
+
+// SetPending sets the Pending field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaTransaction) SetPending(pending bool) {
+	c.Pending = pending
+	c.require(craReportGetHomeLendingVoaTransactionFieldPending)
+}
+
+// SetAccountOwner sets the AccountOwner field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaTransaction) SetAccountOwner(accountOwner *string) {
+	c.AccountOwner = accountOwner
+	c.require(craReportGetHomeLendingVoaTransactionFieldAccountOwner)
+}
+
+// SetLocation sets the Location field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetHomeLendingVoaTransaction) SetLocation(location *Location) {
+	c.Location = location
+	c.require(craReportGetHomeLendingVoaTransactionFieldLocation)
+}
+
+func (c *CraReportGetHomeLendingVoaTransaction) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetHomeLendingVoaTransaction
+	var unmarshaler = struct {
+		embed
+		Date           *internal.Date `json:"date"`
+		DateTransacted *internal.Date `json:"date_transacted,omitempty"`
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetHomeLendingVoaTransaction(unmarshaler.embed)
+	c.Date = unmarshaler.Date.Time()
+	c.DateTransacted = unmarshaler.DateTransacted.TimePtr()
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportGetHomeLendingVoaTransactionNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetHomeLendingVoaTransaction) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetHomeLendingVoaTransaction
+	var marshaler = struct {
+		embed
+		Date           *internal.Date `json:"date"`
+		DateTransacted *internal.Date `json:"date_transacted,omitempty"`
+	}{
+		embed:          embed(*c),
+		Date:           internal.NewDate(c.Date),
+		DateTransacted: internal.NewOptionalDate(c.DateTransacted),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetHomeLendingVoaTransaction) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportGetIncomeCompleteAccountFieldAccountID        = big.NewInt(1 << 0)
+	craReportGetIncomeCompleteAccountFieldName             = big.NewInt(1 << 1)
+	craReportGetIncomeCompleteAccountFieldOfficialName     = big.NewInt(1 << 2)
+	craReportGetIncomeCompleteAccountFieldMask             = big.NewInt(1 << 3)
+	craReportGetIncomeCompleteAccountFieldType             = big.NewInt(1 << 4)
+	craReportGetIncomeCompleteAccountFieldSubtype          = big.NewInt(1 << 5)
+	craReportGetIncomeCompleteAccountFieldPrimaryAccount   = big.NewInt(1 << 6)
+	craReportGetIncomeCompleteAccountFieldIdentityMatch    = big.NewInt(1 << 7)
+	craReportGetIncomeCompleteAccountFieldOwners           = big.NewInt(1 << 8)
+	craReportGetIncomeCompleteAccountFieldConsumerDisputes = big.NewInt(1 << 9)
+)
+
+// craReportGetIncomeCompleteAccountNullableFields maps the wire names of CraReportGetIncomeCompleteAccount's nullable fields (required or optional) to their field bits.
+var craReportGetIncomeCompleteAccountNullableFields = map[string]*big.Int{
+	"official_name":   craReportGetIncomeCompleteAccountFieldOfficialName,
+	"mask":            craReportGetIncomeCompleteAccountFieldMask,
+	"subtype":         craReportGetIncomeCompleteAccountFieldSubtype,
+	"primary_account": craReportGetIncomeCompleteAccountFieldPrimaryAccount,
+	"identity_match":  craReportGetIncomeCompleteAccountFieldIdentityMatch,
+}
+
+// An account used to generate `cra_income_complete`, with its owners, identity match scores, primary account prediction, and the consumer's dispute statements for it.
+type CraReportGetIncomeCompleteAccount struct {
+	// Plaid's unique identifier for the account. This value will not change unless Plaid can't reconcile the account with the data returned by the financial institution. If this happens a new `account_id` will be assigned to the account.
+	//
+	// Like all Plaid identifiers, the `account_id` is case sensitive.
+	AccountID string `json:"account_id" url:"account_id"`
+	// The name of the account, either assigned by the user or by the financial institution itself.
+	Name string `json:"name" url:"name"`
+	// The official name of the account as given by the financial institution.
+	OfficialName *string `json:"official_name,omitempty" url:"official_name,omitempty"`
+	// The last 2-4 alphanumeric characters of an account's official account number. Note that the mask may be non-unique between an Item's accounts, and it may also not match the mask that the bank displays to the user.
+	Mask           *string                            `json:"mask,omitempty" url:"mask,omitempty"`
+	Type           AccountType                        `json:"type" url:"type"`
+	Subtype        *AccountSubtype                    `json:"subtype,omitempty" url:"subtype,omitempty"`
+	PrimaryAccount *CraReportGetAccountPrimaryAccount `json:"primary_account,omitempty" url:"primary_account,omitempty"`
+	IdentityMatch  *CraReportGetAccountIdentityMatch  `json:"identity_match,omitempty" url:"identity_match,omitempty"`
+	// Data returned by the financial institution about the account owner or owners. Multiple owners on a single account will be represented in the same `owner` object, not in multiple owner objects within the array. Empty if no owners are found, or if data is not supported by the product and/or scope.
+	Owners []*Owner `json:"owners" url:"owners"`
+	// The valid dispute statements previously submitted by the consumer for this account.
+	ConsumerDisputes []*ConsumerDispute `json:"consumer_disputes" url:"consumer_disputes"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetIncomeCompleteAccount) GetAccountID() string {
+	if c == nil {
+		return ""
+	}
+	return c.AccountID
+}
+
+func (c *CraReportGetIncomeCompleteAccount) GetName() string {
+	if c == nil {
+		return ""
+	}
+	return c.Name
+}
+
+func (c *CraReportGetIncomeCompleteAccount) GetOfficialName() *string {
+	if c == nil {
+		return nil
+	}
+	return c.OfficialName
+}
+
+func (c *CraReportGetIncomeCompleteAccount) GetMask() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Mask
+}
+
+func (c *CraReportGetIncomeCompleteAccount) GetType() AccountType {
+	if c == nil {
+		return ""
+	}
+	return c.Type
+}
+
+func (c *CraReportGetIncomeCompleteAccount) GetSubtype() *AccountSubtype {
+	if c == nil {
+		return nil
+	}
+	return c.Subtype
+}
+
+func (c *CraReportGetIncomeCompleteAccount) GetPrimaryAccount() *CraReportGetAccountPrimaryAccount {
+	if c == nil {
+		return nil
+	}
+	return c.PrimaryAccount
+}
+
+func (c *CraReportGetIncomeCompleteAccount) GetIdentityMatch() *CraReportGetAccountIdentityMatch {
+	if c == nil {
+		return nil
+	}
+	return c.IdentityMatch
+}
+
+func (c *CraReportGetIncomeCompleteAccount) GetOwners() []*Owner {
+	if c == nil {
+		return nil
+	}
+	return c.Owners
+}
+
+func (c *CraReportGetIncomeCompleteAccount) GetConsumerDisputes() []*ConsumerDispute {
+	if c == nil {
+		return nil
+	}
+	return c.ConsumerDisputes
+}
+
+func (c *CraReportGetIncomeCompleteAccount) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetIncomeCompleteAccount) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetAccountID sets the AccountID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetIncomeCompleteAccount) SetAccountID(accountID string) {
+	c.AccountID = accountID
+	c.require(craReportGetIncomeCompleteAccountFieldAccountID)
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetIncomeCompleteAccount) SetName(name string) {
+	c.Name = name
+	c.require(craReportGetIncomeCompleteAccountFieldName)
+}
+
+// SetOfficialName sets the OfficialName field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetIncomeCompleteAccount) SetOfficialName(officialName *string) {
+	c.OfficialName = officialName
+	c.require(craReportGetIncomeCompleteAccountFieldOfficialName)
+}
+
+// SetMask sets the Mask field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetIncomeCompleteAccount) SetMask(mask *string) {
+	c.Mask = mask
+	c.require(craReportGetIncomeCompleteAccountFieldMask)
+}
+
+// SetType sets the Type field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetIncomeCompleteAccount) SetType(type_ AccountType) {
+	c.Type = type_
+	c.require(craReportGetIncomeCompleteAccountFieldType)
+}
+
+// SetSubtype sets the Subtype field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetIncomeCompleteAccount) SetSubtype(subtype *AccountSubtype) {
+	c.Subtype = subtype
+	c.require(craReportGetIncomeCompleteAccountFieldSubtype)
+}
+
+// SetPrimaryAccount sets the PrimaryAccount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetIncomeCompleteAccount) SetPrimaryAccount(primaryAccount *CraReportGetAccountPrimaryAccount) {
+	c.PrimaryAccount = primaryAccount
+	c.require(craReportGetIncomeCompleteAccountFieldPrimaryAccount)
+}
+
+// SetIdentityMatch sets the IdentityMatch field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetIncomeCompleteAccount) SetIdentityMatch(identityMatch *CraReportGetAccountIdentityMatch) {
+	c.IdentityMatch = identityMatch
+	c.require(craReportGetIncomeCompleteAccountFieldIdentityMatch)
+}
+
+// SetOwners sets the Owners field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetIncomeCompleteAccount) SetOwners(owners []*Owner) {
+	c.Owners = owners
+	c.require(craReportGetIncomeCompleteAccountFieldOwners)
+}
+
+// SetConsumerDisputes sets the ConsumerDisputes field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetIncomeCompleteAccount) SetConsumerDisputes(consumerDisputes []*ConsumerDispute) {
+	c.ConsumerDisputes = consumerDisputes
+	c.require(craReportGetIncomeCompleteAccountFieldConsumerDisputes)
+}
+
+func (c *CraReportGetIncomeCompleteAccount) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetIncomeCompleteAccount
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetIncomeCompleteAccount(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportGetIncomeCompleteAccountNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetIncomeCompleteAccount) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetIncomeCompleteAccount
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetIncomeCompleteAccount) String() string {
 	if c == nil {
 		return "<nil>"
 	}
@@ -6856,6 +9230,170 @@ func (c *CraReportGetIncomeCompleteAttributes) MarshalJSON() ([]byte, error) {
 }
 
 func (c *CraReportGetIncomeCompleteAttributes) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportGetIncomeCompleteItemFieldInstitutionID   = big.NewInt(1 << 0)
+	craReportGetIncomeCompleteItemFieldInstitutionName = big.NewInt(1 << 1)
+	craReportGetIncomeCompleteItemFieldItemID          = big.NewInt(1 << 2)
+	craReportGetIncomeCompleteItemFieldLastUpdatedTime = big.NewInt(1 << 3)
+	craReportGetIncomeCompleteItemFieldAccounts        = big.NewInt(1 << 4)
+)
+
+// An Item used to generate `cra_income_complete`, with each account's owners, identity match scores, primary account prediction, and the consumer's dispute statements.
+type CraReportGetIncomeCompleteItem struct {
+	// The ID of the financial institution associated with the Item.
+	InstitutionID string `json:"institution_id" url:"institution_id"`
+	// The full financial institution name associated with the Item.
+	InstitutionName string `json:"institution_name" url:"institution_name"`
+	ItemID          ItemID `json:"item_id" url:"item_id"`
+	// The time when this Item's data was last retrieved from the financial institution prior to report generation.
+	LastUpdatedTime time.Time `json:"last_updated_time" url:"last_updated_time"`
+	// The accounts on the Item used to generate the product.
+	Accounts []*CraReportGetIncomeCompleteAccount `json:"accounts" url:"accounts"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetIncomeCompleteItem) GetInstitutionID() string {
+	if c == nil {
+		return ""
+	}
+	return c.InstitutionID
+}
+
+func (c *CraReportGetIncomeCompleteItem) GetInstitutionName() string {
+	if c == nil {
+		return ""
+	}
+	return c.InstitutionName
+}
+
+func (c *CraReportGetIncomeCompleteItem) GetItemID() ItemID {
+	if c == nil {
+		return ""
+	}
+	return c.ItemID
+}
+
+func (c *CraReportGetIncomeCompleteItem) GetLastUpdatedTime() time.Time {
+	if c == nil {
+		return time.Time{}
+	}
+	return c.LastUpdatedTime
+}
+
+func (c *CraReportGetIncomeCompleteItem) GetAccounts() []*CraReportGetIncomeCompleteAccount {
+	if c == nil {
+		return nil
+	}
+	return c.Accounts
+}
+
+func (c *CraReportGetIncomeCompleteItem) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetIncomeCompleteItem) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetInstitutionID sets the InstitutionID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetIncomeCompleteItem) SetInstitutionID(institutionID string) {
+	c.InstitutionID = institutionID
+	c.require(craReportGetIncomeCompleteItemFieldInstitutionID)
+}
+
+// SetInstitutionName sets the InstitutionName field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetIncomeCompleteItem) SetInstitutionName(institutionName string) {
+	c.InstitutionName = institutionName
+	c.require(craReportGetIncomeCompleteItemFieldInstitutionName)
+}
+
+// SetItemID sets the ItemID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetIncomeCompleteItem) SetItemID(itemID ItemID) {
+	c.ItemID = itemID
+	c.require(craReportGetIncomeCompleteItemFieldItemID)
+}
+
+// SetLastUpdatedTime sets the LastUpdatedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetIncomeCompleteItem) SetLastUpdatedTime(lastUpdatedTime time.Time) {
+	c.LastUpdatedTime = lastUpdatedTime
+	c.require(craReportGetIncomeCompleteItemFieldLastUpdatedTime)
+}
+
+// SetAccounts sets the Accounts field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetIncomeCompleteItem) SetAccounts(accounts []*CraReportGetIncomeCompleteAccount) {
+	c.Accounts = accounts
+	c.require(craReportGetIncomeCompleteItemFieldAccounts)
+}
+
+func (c *CraReportGetIncomeCompleteItem) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetIncomeCompleteItem
+	var unmarshaler = struct {
+		embed
+		LastUpdatedTime *internal.DateTime `json:"last_updated_time"`
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetIncomeCompleteItem(unmarshaler.embed)
+	c.LastUpdatedTime = unmarshaler.LastUpdatedTime.Time()
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetIncomeCompleteItem) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetIncomeCompleteItem
+	var marshaler = struct {
+		embed
+		LastUpdatedTime *internal.DateTime `json:"last_updated_time"`
+	}{
+		embed:           embed(*c),
+		LastUpdatedTime: internal.NewDateTime(c.LastUpdatedTime),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetIncomeCompleteItem) String() string {
 	if c == nil {
 		return "<nil>"
 	}
@@ -7196,7 +9734,7 @@ type CraReportGetIncomeCompleteResponseProduct struct {
 	Metadata   *CraReportGetIncomeCompleteMetadata   `json:"metadata,omitempty" url:"metadata,omitempty"`
 	Attributes *CraReportGetIncomeCompleteAttributes `json:"attributes,omitempty" url:"attributes,omitempty"`
 	// The Items, and their accounts, used to generate this product. Always empty when `scope` is `PLAID_NETWORK`, or if this product failed to generate.
-	Items []*CraReportGetEnrichedItem `json:"items" url:"items"`
+	Items []*CraReportGetIncomeCompleteItem `json:"items" url:"items"`
 	// Product-level errors. Non-empty when this product failed to generate; empty on success.
 	Errors []*PlaidError `json:"errors" url:"errors"`
 
@@ -7229,7 +9767,7 @@ func (c *CraReportGetIncomeCompleteResponseProduct) GetAttributes() *CraReportGe
 	return c.Attributes
 }
 
-func (c *CraReportGetIncomeCompleteResponseProduct) GetItems() []*CraReportGetEnrichedItem {
+func (c *CraReportGetIncomeCompleteResponseProduct) GetItems() []*CraReportGetIncomeCompleteItem {
 	if c == nil {
 		return nil
 	}
@@ -7282,7 +9820,7 @@ func (c *CraReportGetIncomeCompleteResponseProduct) SetAttributes(attributes *Cr
 
 // SetItems sets the Items field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraReportGetIncomeCompleteResponseProduct) SetItems(items []*CraReportGetEnrichedItem) {
+func (c *CraReportGetIncomeCompleteResponseProduct) SetItems(items []*CraReportGetIncomeCompleteItem) {
 	c.Items = items
 	c.require(craReportGetIncomeCompleteResponseProductFieldItems)
 }
@@ -7333,6 +9871,215 @@ func (c *CraReportGetIncomeCompleteResponseProduct) MarshalJSON() ([]byte, error
 }
 
 func (c *CraReportGetIncomeCompleteResponseProduct) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportGetIncomeInsightsAccountFieldAccountID        = big.NewInt(1 << 0)
+	craReportGetIncomeInsightsAccountFieldName             = big.NewInt(1 << 1)
+	craReportGetIncomeInsightsAccountFieldOfficialName     = big.NewInt(1 << 2)
+	craReportGetIncomeInsightsAccountFieldMask             = big.NewInt(1 << 3)
+	craReportGetIncomeInsightsAccountFieldType             = big.NewInt(1 << 4)
+	craReportGetIncomeInsightsAccountFieldSubtype          = big.NewInt(1 << 5)
+	craReportGetIncomeInsightsAccountFieldConsumerDisputes = big.NewInt(1 << 6)
+)
+
+// craReportGetIncomeInsightsAccountNullableFields maps the wire names of CraReportGetIncomeInsightsAccount's nullable fields (required or optional) to their field bits.
+var craReportGetIncomeInsightsAccountNullableFields = map[string]*big.Int{
+	"official_name": craReportGetIncomeInsightsAccountFieldOfficialName,
+	"mask":          craReportGetIncomeInsightsAccountFieldMask,
+	"subtype":       craReportGetIncomeInsightsAccountFieldSubtype,
+}
+
+// An account used to generate `cra_income_insights`, with the consumer's dispute statements for it.
+type CraReportGetIncomeInsightsAccount struct {
+	// Plaid's unique identifier for the account. This value will not change unless Plaid can't reconcile the account with the data returned by the financial institution. If this happens a new `account_id` will be assigned to the account.
+	//
+	// Like all Plaid identifiers, the `account_id` is case sensitive.
+	AccountID string `json:"account_id" url:"account_id"`
+	// The name of the account, either assigned by the user or by the financial institution itself.
+	Name string `json:"name" url:"name"`
+	// The official name of the account as given by the financial institution.
+	OfficialName *string `json:"official_name,omitempty" url:"official_name,omitempty"`
+	// The last 2-4 alphanumeric characters of an account's official account number. Note that the mask may be non-unique between an Item's accounts, and it may also not match the mask that the bank displays to the user.
+	Mask    *string         `json:"mask,omitempty" url:"mask,omitempty"`
+	Type    AccountType     `json:"type" url:"type"`
+	Subtype *AccountSubtype `json:"subtype,omitempty" url:"subtype,omitempty"`
+	// The valid dispute statements previously submitted by the consumer for this account.
+	ConsumerDisputes []*ConsumerDispute `json:"consumer_disputes" url:"consumer_disputes"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetIncomeInsightsAccount) GetAccountID() string {
+	if c == nil {
+		return ""
+	}
+	return c.AccountID
+}
+
+func (c *CraReportGetIncomeInsightsAccount) GetName() string {
+	if c == nil {
+		return ""
+	}
+	return c.Name
+}
+
+func (c *CraReportGetIncomeInsightsAccount) GetOfficialName() *string {
+	if c == nil {
+		return nil
+	}
+	return c.OfficialName
+}
+
+func (c *CraReportGetIncomeInsightsAccount) GetMask() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Mask
+}
+
+func (c *CraReportGetIncomeInsightsAccount) GetType() AccountType {
+	if c == nil {
+		return ""
+	}
+	return c.Type
+}
+
+func (c *CraReportGetIncomeInsightsAccount) GetSubtype() *AccountSubtype {
+	if c == nil {
+		return nil
+	}
+	return c.Subtype
+}
+
+func (c *CraReportGetIncomeInsightsAccount) GetConsumerDisputes() []*ConsumerDispute {
+	if c == nil {
+		return nil
+	}
+	return c.ConsumerDisputes
+}
+
+func (c *CraReportGetIncomeInsightsAccount) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetIncomeInsightsAccount) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetAccountID sets the AccountID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetIncomeInsightsAccount) SetAccountID(accountID string) {
+	c.AccountID = accountID
+	c.require(craReportGetIncomeInsightsAccountFieldAccountID)
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetIncomeInsightsAccount) SetName(name string) {
+	c.Name = name
+	c.require(craReportGetIncomeInsightsAccountFieldName)
+}
+
+// SetOfficialName sets the OfficialName field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetIncomeInsightsAccount) SetOfficialName(officialName *string) {
+	c.OfficialName = officialName
+	c.require(craReportGetIncomeInsightsAccountFieldOfficialName)
+}
+
+// SetMask sets the Mask field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetIncomeInsightsAccount) SetMask(mask *string) {
+	c.Mask = mask
+	c.require(craReportGetIncomeInsightsAccountFieldMask)
+}
+
+// SetType sets the Type field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetIncomeInsightsAccount) SetType(type_ AccountType) {
+	c.Type = type_
+	c.require(craReportGetIncomeInsightsAccountFieldType)
+}
+
+// SetSubtype sets the Subtype field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetIncomeInsightsAccount) SetSubtype(subtype *AccountSubtype) {
+	c.Subtype = subtype
+	c.require(craReportGetIncomeInsightsAccountFieldSubtype)
+}
+
+// SetConsumerDisputes sets the ConsumerDisputes field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetIncomeInsightsAccount) SetConsumerDisputes(consumerDisputes []*ConsumerDispute) {
+	c.ConsumerDisputes = consumerDisputes
+	c.require(craReportGetIncomeInsightsAccountFieldConsumerDisputes)
+}
+
+func (c *CraReportGetIncomeInsightsAccount) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetIncomeInsightsAccount
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetIncomeInsightsAccount(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportGetIncomeInsightsAccountNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetIncomeInsightsAccount) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetIncomeInsightsAccount
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetIncomeInsightsAccount) String() string {
 	if c == nil {
 		return "<nil>"
 	}
@@ -7454,6 +10201,170 @@ func (c *CraReportGetIncomeInsightsAttributes) MarshalJSON() ([]byte, error) {
 }
 
 func (c *CraReportGetIncomeInsightsAttributes) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportGetIncomeInsightsItemFieldInstitutionID   = big.NewInt(1 << 0)
+	craReportGetIncomeInsightsItemFieldInstitutionName = big.NewInt(1 << 1)
+	craReportGetIncomeInsightsItemFieldItemID          = big.NewInt(1 << 2)
+	craReportGetIncomeInsightsItemFieldLastUpdatedTime = big.NewInt(1 << 3)
+	craReportGetIncomeInsightsItemFieldAccounts        = big.NewInt(1 << 4)
+)
+
+// An Item used to generate `cra_income_insights`, with the consumer's dispute statements on each account.
+type CraReportGetIncomeInsightsItem struct {
+	// The ID of the financial institution associated with the Item.
+	InstitutionID string `json:"institution_id" url:"institution_id"`
+	// The full financial institution name associated with the Item.
+	InstitutionName string `json:"institution_name" url:"institution_name"`
+	ItemID          ItemID `json:"item_id" url:"item_id"`
+	// The time when this Item's data was last retrieved from the financial institution prior to report generation.
+	LastUpdatedTime time.Time `json:"last_updated_time" url:"last_updated_time"`
+	// The accounts on the Item used to generate the product.
+	Accounts []*CraReportGetIncomeInsightsAccount `json:"accounts" url:"accounts"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetIncomeInsightsItem) GetInstitutionID() string {
+	if c == nil {
+		return ""
+	}
+	return c.InstitutionID
+}
+
+func (c *CraReportGetIncomeInsightsItem) GetInstitutionName() string {
+	if c == nil {
+		return ""
+	}
+	return c.InstitutionName
+}
+
+func (c *CraReportGetIncomeInsightsItem) GetItemID() ItemID {
+	if c == nil {
+		return ""
+	}
+	return c.ItemID
+}
+
+func (c *CraReportGetIncomeInsightsItem) GetLastUpdatedTime() time.Time {
+	if c == nil {
+		return time.Time{}
+	}
+	return c.LastUpdatedTime
+}
+
+func (c *CraReportGetIncomeInsightsItem) GetAccounts() []*CraReportGetIncomeInsightsAccount {
+	if c == nil {
+		return nil
+	}
+	return c.Accounts
+}
+
+func (c *CraReportGetIncomeInsightsItem) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetIncomeInsightsItem) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetInstitutionID sets the InstitutionID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetIncomeInsightsItem) SetInstitutionID(institutionID string) {
+	c.InstitutionID = institutionID
+	c.require(craReportGetIncomeInsightsItemFieldInstitutionID)
+}
+
+// SetInstitutionName sets the InstitutionName field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetIncomeInsightsItem) SetInstitutionName(institutionName string) {
+	c.InstitutionName = institutionName
+	c.require(craReportGetIncomeInsightsItemFieldInstitutionName)
+}
+
+// SetItemID sets the ItemID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetIncomeInsightsItem) SetItemID(itemID ItemID) {
+	c.ItemID = itemID
+	c.require(craReportGetIncomeInsightsItemFieldItemID)
+}
+
+// SetLastUpdatedTime sets the LastUpdatedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetIncomeInsightsItem) SetLastUpdatedTime(lastUpdatedTime time.Time) {
+	c.LastUpdatedTime = lastUpdatedTime
+	c.require(craReportGetIncomeInsightsItemFieldLastUpdatedTime)
+}
+
+// SetAccounts sets the Accounts field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetIncomeInsightsItem) SetAccounts(accounts []*CraReportGetIncomeInsightsAccount) {
+	c.Accounts = accounts
+	c.require(craReportGetIncomeInsightsItemFieldAccounts)
+}
+
+func (c *CraReportGetIncomeInsightsItem) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetIncomeInsightsItem
+	var unmarshaler = struct {
+		embed
+		LastUpdatedTime *internal.DateTime `json:"last_updated_time"`
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetIncomeInsightsItem(unmarshaler.embed)
+	c.LastUpdatedTime = unmarshaler.LastUpdatedTime.Time()
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetIncomeInsightsItem) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetIncomeInsightsItem
+	var marshaler = struct {
+		embed
+		LastUpdatedTime *internal.DateTime `json:"last_updated_time"`
+	}{
+		embed:           embed(*c),
+		LastUpdatedTime: internal.NewDateTime(c.LastUpdatedTime),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetIncomeInsightsItem) String() string {
 	if c == nil {
 		return "<nil>"
 	}
@@ -7794,7 +10705,7 @@ type CraReportGetIncomeInsightsResponseProduct struct {
 	Metadata   *CraReportGetIncomeInsightsMetadata   `json:"metadata,omitempty" url:"metadata,omitempty"`
 	Attributes *CraReportGetIncomeInsightsAttributes `json:"attributes,omitempty" url:"attributes,omitempty"`
 	// The Items, and their accounts, used to generate this product. Always empty when `scope` is `PLAID_NETWORK`, or if this product failed to generate.
-	Items []*CraReportGetBaseItem `json:"items" url:"items"`
+	Items []*CraReportGetIncomeInsightsItem `json:"items" url:"items"`
 	// Product-level errors. Non-empty when this product failed to generate; empty on success.
 	Errors []*PlaidError `json:"errors" url:"errors"`
 
@@ -7827,7 +10738,7 @@ func (c *CraReportGetIncomeInsightsResponseProduct) GetAttributes() *CraReportGe
 	return c.Attributes
 }
 
-func (c *CraReportGetIncomeInsightsResponseProduct) GetItems() []*CraReportGetBaseItem {
+func (c *CraReportGetIncomeInsightsResponseProduct) GetItems() []*CraReportGetIncomeInsightsItem {
 	if c == nil {
 		return nil
 	}
@@ -7880,7 +10791,7 @@ func (c *CraReportGetIncomeInsightsResponseProduct) SetAttributes(attributes *Cr
 
 // SetItems sets the Items field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraReportGetIncomeInsightsResponseProduct) SetItems(items []*CraReportGetBaseItem) {
+func (c *CraReportGetIncomeInsightsResponseProduct) SetItems(items []*CraReportGetIncomeInsightsItem) {
 	c.Items = items
 	c.require(craReportGetIncomeInsightsResponseProductFieldItems)
 }
@@ -8161,6 +11072,249 @@ func (c *CraReportGetIncomeInsightsStream) String() string {
 }
 
 var (
+	craReportGetLendScoreCompleteAccountFieldAccountID      = big.NewInt(1 << 0)
+	craReportGetLendScoreCompleteAccountFieldName           = big.NewInt(1 << 1)
+	craReportGetLendScoreCompleteAccountFieldOfficialName   = big.NewInt(1 << 2)
+	craReportGetLendScoreCompleteAccountFieldMask           = big.NewInt(1 << 3)
+	craReportGetLendScoreCompleteAccountFieldType           = big.NewInt(1 << 4)
+	craReportGetLendScoreCompleteAccountFieldSubtype        = big.NewInt(1 << 5)
+	craReportGetLendScoreCompleteAccountFieldPrimaryAccount = big.NewInt(1 << 6)
+	craReportGetLendScoreCompleteAccountFieldIdentityMatch  = big.NewInt(1 << 7)
+	craReportGetLendScoreCompleteAccountFieldOwners         = big.NewInt(1 << 8)
+)
+
+// craReportGetLendScoreCompleteAccountNullableFields maps the wire names of CraReportGetLendScoreCompleteAccount's nullable fields (required or optional) to their field bits.
+var craReportGetLendScoreCompleteAccountNullableFields = map[string]*big.Int{
+	"official_name":   craReportGetLendScoreCompleteAccountFieldOfficialName,
+	"mask":            craReportGetLendScoreCompleteAccountFieldMask,
+	"subtype":         craReportGetLendScoreCompleteAccountFieldSubtype,
+	"primary_account": craReportGetLendScoreCompleteAccountFieldPrimaryAccount,
+	"identity_match":  craReportGetLendScoreCompleteAccountFieldIdentityMatch,
+}
+
+// An account used to generate `cra_lend_score_complete`, with its owners, identity match scores, and primary account prediction.
+type CraReportGetLendScoreCompleteAccount struct {
+	// Plaid's unique identifier for the account. This value will not change unless Plaid can't reconcile the account with the data returned by the financial institution. If this happens a new `account_id` will be assigned to the account.
+	//
+	// Like all Plaid identifiers, the `account_id` is case sensitive.
+	AccountID string `json:"account_id" url:"account_id"`
+	// The name of the account, either assigned by the user or by the financial institution itself.
+	Name string `json:"name" url:"name"`
+	// The official name of the account as given by the financial institution.
+	OfficialName *string `json:"official_name,omitempty" url:"official_name,omitempty"`
+	// The last 2-4 alphanumeric characters of an account's official account number. Note that the mask may be non-unique between an Item's accounts, and it may also not match the mask that the bank displays to the user.
+	Mask           *string                            `json:"mask,omitempty" url:"mask,omitempty"`
+	Type           AccountType                        `json:"type" url:"type"`
+	Subtype        *AccountSubtype                    `json:"subtype,omitempty" url:"subtype,omitempty"`
+	PrimaryAccount *CraReportGetAccountPrimaryAccount `json:"primary_account,omitempty" url:"primary_account,omitempty"`
+	IdentityMatch  *CraReportGetAccountIdentityMatch  `json:"identity_match,omitempty" url:"identity_match,omitempty"`
+	// Data returned by the financial institution about the account owner or owners. Multiple owners on a single account will be represented in the same `owner` object, not in multiple owner objects within the array. Empty if no owners are found, or if data is not supported by the product and/or scope.
+	Owners []*Owner `json:"owners" url:"owners"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetLendScoreCompleteAccount) GetAccountID() string {
+	if c == nil {
+		return ""
+	}
+	return c.AccountID
+}
+
+func (c *CraReportGetLendScoreCompleteAccount) GetName() string {
+	if c == nil {
+		return ""
+	}
+	return c.Name
+}
+
+func (c *CraReportGetLendScoreCompleteAccount) GetOfficialName() *string {
+	if c == nil {
+		return nil
+	}
+	return c.OfficialName
+}
+
+func (c *CraReportGetLendScoreCompleteAccount) GetMask() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Mask
+}
+
+func (c *CraReportGetLendScoreCompleteAccount) GetType() AccountType {
+	if c == nil {
+		return ""
+	}
+	return c.Type
+}
+
+func (c *CraReportGetLendScoreCompleteAccount) GetSubtype() *AccountSubtype {
+	if c == nil {
+		return nil
+	}
+	return c.Subtype
+}
+
+func (c *CraReportGetLendScoreCompleteAccount) GetPrimaryAccount() *CraReportGetAccountPrimaryAccount {
+	if c == nil {
+		return nil
+	}
+	return c.PrimaryAccount
+}
+
+func (c *CraReportGetLendScoreCompleteAccount) GetIdentityMatch() *CraReportGetAccountIdentityMatch {
+	if c == nil {
+		return nil
+	}
+	return c.IdentityMatch
+}
+
+func (c *CraReportGetLendScoreCompleteAccount) GetOwners() []*Owner {
+	if c == nil {
+		return nil
+	}
+	return c.Owners
+}
+
+func (c *CraReportGetLendScoreCompleteAccount) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetLendScoreCompleteAccount) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetAccountID sets the AccountID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetLendScoreCompleteAccount) SetAccountID(accountID string) {
+	c.AccountID = accountID
+	c.require(craReportGetLendScoreCompleteAccountFieldAccountID)
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetLendScoreCompleteAccount) SetName(name string) {
+	c.Name = name
+	c.require(craReportGetLendScoreCompleteAccountFieldName)
+}
+
+// SetOfficialName sets the OfficialName field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetLendScoreCompleteAccount) SetOfficialName(officialName *string) {
+	c.OfficialName = officialName
+	c.require(craReportGetLendScoreCompleteAccountFieldOfficialName)
+}
+
+// SetMask sets the Mask field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetLendScoreCompleteAccount) SetMask(mask *string) {
+	c.Mask = mask
+	c.require(craReportGetLendScoreCompleteAccountFieldMask)
+}
+
+// SetType sets the Type field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetLendScoreCompleteAccount) SetType(type_ AccountType) {
+	c.Type = type_
+	c.require(craReportGetLendScoreCompleteAccountFieldType)
+}
+
+// SetSubtype sets the Subtype field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetLendScoreCompleteAccount) SetSubtype(subtype *AccountSubtype) {
+	c.Subtype = subtype
+	c.require(craReportGetLendScoreCompleteAccountFieldSubtype)
+}
+
+// SetPrimaryAccount sets the PrimaryAccount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetLendScoreCompleteAccount) SetPrimaryAccount(primaryAccount *CraReportGetAccountPrimaryAccount) {
+	c.PrimaryAccount = primaryAccount
+	c.require(craReportGetLendScoreCompleteAccountFieldPrimaryAccount)
+}
+
+// SetIdentityMatch sets the IdentityMatch field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetLendScoreCompleteAccount) SetIdentityMatch(identityMatch *CraReportGetAccountIdentityMatch) {
+	c.IdentityMatch = identityMatch
+	c.require(craReportGetLendScoreCompleteAccountFieldIdentityMatch)
+}
+
+// SetOwners sets the Owners field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetLendScoreCompleteAccount) SetOwners(owners []*Owner) {
+	c.Owners = owners
+	c.require(craReportGetLendScoreCompleteAccountFieldOwners)
+}
+
+func (c *CraReportGetLendScoreCompleteAccount) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetLendScoreCompleteAccount
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetLendScoreCompleteAccount(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportGetLendScoreCompleteAccountNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetLendScoreCompleteAccount) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetLendScoreCompleteAccount
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetLendScoreCompleteAccount) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
 	craReportGetLendScoreCompleteAttributesFieldLendScores       = big.NewInt(1 << 0)
 	craReportGetLendScoreCompleteAttributesFieldCashflowInsights = big.NewInt(1 << 1)
 	craReportGetLendScoreCompleteAttributesFieldNetworkInsights  = big.NewInt(1 << 2)
@@ -8284,6 +11438,170 @@ func (c *CraReportGetLendScoreCompleteAttributes) MarshalJSON() ([]byte, error) 
 }
 
 func (c *CraReportGetLendScoreCompleteAttributes) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportGetLendScoreCompleteItemFieldInstitutionID   = big.NewInt(1 << 0)
+	craReportGetLendScoreCompleteItemFieldInstitutionName = big.NewInt(1 << 1)
+	craReportGetLendScoreCompleteItemFieldItemID          = big.NewInt(1 << 2)
+	craReportGetLendScoreCompleteItemFieldLastUpdatedTime = big.NewInt(1 << 3)
+	craReportGetLendScoreCompleteItemFieldAccounts        = big.NewInt(1 << 4)
+)
+
+// An Item used to generate `cra_lend_score_complete`, with each account's owners, identity match scores, and primary account prediction.
+type CraReportGetLendScoreCompleteItem struct {
+	// The ID of the financial institution associated with the Item.
+	InstitutionID string `json:"institution_id" url:"institution_id"`
+	// The full financial institution name associated with the Item.
+	InstitutionName string `json:"institution_name" url:"institution_name"`
+	ItemID          ItemID `json:"item_id" url:"item_id"`
+	// The time when this Item's data was last retrieved from the financial institution prior to report generation.
+	LastUpdatedTime time.Time `json:"last_updated_time" url:"last_updated_time"`
+	// The accounts on the Item used to generate the product.
+	Accounts []*CraReportGetLendScoreCompleteAccount `json:"accounts" url:"accounts"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetLendScoreCompleteItem) GetInstitutionID() string {
+	if c == nil {
+		return ""
+	}
+	return c.InstitutionID
+}
+
+func (c *CraReportGetLendScoreCompleteItem) GetInstitutionName() string {
+	if c == nil {
+		return ""
+	}
+	return c.InstitutionName
+}
+
+func (c *CraReportGetLendScoreCompleteItem) GetItemID() ItemID {
+	if c == nil {
+		return ""
+	}
+	return c.ItemID
+}
+
+func (c *CraReportGetLendScoreCompleteItem) GetLastUpdatedTime() time.Time {
+	if c == nil {
+		return time.Time{}
+	}
+	return c.LastUpdatedTime
+}
+
+func (c *CraReportGetLendScoreCompleteItem) GetAccounts() []*CraReportGetLendScoreCompleteAccount {
+	if c == nil {
+		return nil
+	}
+	return c.Accounts
+}
+
+func (c *CraReportGetLendScoreCompleteItem) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetLendScoreCompleteItem) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetInstitutionID sets the InstitutionID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetLendScoreCompleteItem) SetInstitutionID(institutionID string) {
+	c.InstitutionID = institutionID
+	c.require(craReportGetLendScoreCompleteItemFieldInstitutionID)
+}
+
+// SetInstitutionName sets the InstitutionName field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetLendScoreCompleteItem) SetInstitutionName(institutionName string) {
+	c.InstitutionName = institutionName
+	c.require(craReportGetLendScoreCompleteItemFieldInstitutionName)
+}
+
+// SetItemID sets the ItemID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetLendScoreCompleteItem) SetItemID(itemID ItemID) {
+	c.ItemID = itemID
+	c.require(craReportGetLendScoreCompleteItemFieldItemID)
+}
+
+// SetLastUpdatedTime sets the LastUpdatedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetLendScoreCompleteItem) SetLastUpdatedTime(lastUpdatedTime time.Time) {
+	c.LastUpdatedTime = lastUpdatedTime
+	c.require(craReportGetLendScoreCompleteItemFieldLastUpdatedTime)
+}
+
+// SetAccounts sets the Accounts field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetLendScoreCompleteItem) SetAccounts(accounts []*CraReportGetLendScoreCompleteAccount) {
+	c.Accounts = accounts
+	c.require(craReportGetLendScoreCompleteItemFieldAccounts)
+}
+
+func (c *CraReportGetLendScoreCompleteItem) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetLendScoreCompleteItem
+	var unmarshaler = struct {
+		embed
+		LastUpdatedTime *internal.DateTime `json:"last_updated_time"`
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetLendScoreCompleteItem(unmarshaler.embed)
+	c.LastUpdatedTime = unmarshaler.LastUpdatedTime.Time()
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetLendScoreCompleteItem) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetLendScoreCompleteItem
+	var marshaler = struct {
+		embed
+		LastUpdatedTime *internal.DateTime `json:"last_updated_time"`
+	}{
+		embed:           embed(*c),
+		LastUpdatedTime: internal.NewDateTime(c.LastUpdatedTime),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetLendScoreCompleteItem) String() string {
 	if c == nil {
 		return "<nil>"
 	}
@@ -8712,7 +12030,7 @@ type CraReportGetLendScoreCompleteResponseProduct struct {
 	Metadata   *CraReportGetLendScoreCompleteMetadata   `json:"metadata,omitempty" url:"metadata,omitempty"`
 	Attributes *CraReportGetLendScoreCompleteAttributes `json:"attributes,omitempty" url:"attributes,omitempty"`
 	// The Items, and their accounts, used to generate this product. Always empty when `scope` is `PLAID_NETWORK`, or if this product failed to generate.
-	Items []*CraReportGetEnrichedItem `json:"items" url:"items"`
+	Items []*CraReportGetLendScoreCompleteItem `json:"items" url:"items"`
 	// Product-level errors. Non-empty when this product failed to generate; empty on success.
 	Errors []*PlaidError `json:"errors" url:"errors"`
 
@@ -8745,7 +12063,7 @@ func (c *CraReportGetLendScoreCompleteResponseProduct) GetAttributes() *CraRepor
 	return c.Attributes
 }
 
-func (c *CraReportGetLendScoreCompleteResponseProduct) GetItems() []*CraReportGetEnrichedItem {
+func (c *CraReportGetLendScoreCompleteResponseProduct) GetItems() []*CraReportGetLendScoreCompleteItem {
 	if c == nil {
 		return nil
 	}
@@ -8798,7 +12116,7 @@ func (c *CraReportGetLendScoreCompleteResponseProduct) SetAttributes(attributes 
 
 // SetItems sets the Items field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraReportGetLendScoreCompleteResponseProduct) SetItems(items []*CraReportGetEnrichedItem) {
+func (c *CraReportGetLendScoreCompleteResponseProduct) SetItems(items []*CraReportGetLendScoreCompleteItem) {
 	c.Items = items
 	c.require(craReportGetLendScoreCompleteResponseProductFieldItems)
 }
@@ -10046,6 +13364,1673 @@ func (c *CraReportGetNetworkInsightsResponseProduct) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+var (
+	craReportGetPrismFieldInsights  = big.NewInt(1 << 0)
+	craReportGetPrismFieldCashscore = big.NewInt(1 << 1)
+	craReportGetPrismFieldDetect    = big.NewInt(1 << 2)
+	craReportGetPrismFieldExtend    = big.NewInt(1 << 3)
+	craReportGetPrismFieldStatus    = big.NewInt(1 << 4)
+)
+
+// craReportGetPrismNullableFields maps the wire names of CraReportGetPrism's nullable fields (required or optional) to their field bits.
+var craReportGetPrismNullableFields = map[string]*big.Int{
+	"insights":  craReportGetPrismFieldInsights,
+	"cashscore": craReportGetPrismFieldCashscore,
+	"detect":    craReportGetPrismFieldDetect,
+	"extend":    craReportGetPrismFieldExtend,
+}
+
+// The Prism Data scores and insights for the user. Each field is present only when the corresponding version was requested.
+type CraReportGetPrism struct {
+	Insights  *CraReportGetPrismInsights  `json:"insights,omitempty" url:"insights,omitempty"`
+	Cashscore *CraReportGetPrismCashScore `json:"cashscore,omitempty" url:"cashscore,omitempty"`
+	Detect    *CraReportGetPrismDetect    `json:"detect,omitempty" url:"detect,omitempty"`
+	Extend    *CraReportGetPrismExtend    `json:"extend,omitempty" url:"extend,omitempty"`
+	Status    CraReportGetPrismStatus     `json:"status" url:"status"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetPrism) GetInsights() *CraReportGetPrismInsights {
+	if c == nil {
+		return nil
+	}
+	return c.Insights
+}
+
+func (c *CraReportGetPrism) GetCashscore() *CraReportGetPrismCashScore {
+	if c == nil {
+		return nil
+	}
+	return c.Cashscore
+}
+
+func (c *CraReportGetPrism) GetDetect() *CraReportGetPrismDetect {
+	if c == nil {
+		return nil
+	}
+	return c.Detect
+}
+
+func (c *CraReportGetPrism) GetExtend() *CraReportGetPrismExtend {
+	if c == nil {
+		return nil
+	}
+	return c.Extend
+}
+
+func (c *CraReportGetPrism) GetStatus() CraReportGetPrismStatus {
+	if c == nil {
+		return ""
+	}
+	return c.Status
+}
+
+func (c *CraReportGetPrism) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetPrism) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetInsights sets the Insights field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrism) SetInsights(insights *CraReportGetPrismInsights) {
+	c.Insights = insights
+	c.require(craReportGetPrismFieldInsights)
+}
+
+// SetCashscore sets the Cashscore field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrism) SetCashscore(cashscore *CraReportGetPrismCashScore) {
+	c.Cashscore = cashscore
+	c.require(craReportGetPrismFieldCashscore)
+}
+
+// SetDetect sets the Detect field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrism) SetDetect(detect *CraReportGetPrismDetect) {
+	c.Detect = detect
+	c.require(craReportGetPrismFieldDetect)
+}
+
+// SetExtend sets the Extend field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrism) SetExtend(extend *CraReportGetPrismExtend) {
+	c.Extend = extend
+	c.require(craReportGetPrismFieldExtend)
+}
+
+// SetStatus sets the Status field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrism) SetStatus(status CraReportGetPrismStatus) {
+	c.Status = status
+	c.require(craReportGetPrismFieldStatus)
+}
+
+func (c *CraReportGetPrism) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetPrism
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetPrism(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportGetPrismNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetPrism) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetPrism
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetPrism) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportGetPrismAccountFieldAccountID    = big.NewInt(1 << 0)
+	craReportGetPrismAccountFieldName         = big.NewInt(1 << 1)
+	craReportGetPrismAccountFieldOfficialName = big.NewInt(1 << 2)
+	craReportGetPrismAccountFieldMask         = big.NewInt(1 << 3)
+	craReportGetPrismAccountFieldType         = big.NewInt(1 << 4)
+	craReportGetPrismAccountFieldSubtype      = big.NewInt(1 << 5)
+)
+
+// craReportGetPrismAccountNullableFields maps the wire names of CraReportGetPrismAccount's nullable fields (required or optional) to their field bits.
+var craReportGetPrismAccountNullableFields = map[string]*big.Int{
+	"official_name": craReportGetPrismAccountFieldOfficialName,
+	"mask":          craReportGetPrismAccountFieldMask,
+	"subtype":       craReportGetPrismAccountFieldSubtype,
+}
+
+// An account used to generate `cra_prism`.
+type CraReportGetPrismAccount struct {
+	// Plaid's unique identifier for the account. This value will not change unless Plaid can't reconcile the account with the data returned by the financial institution. If this happens a new `account_id` will be assigned to the account.
+	//
+	// Like all Plaid identifiers, the `account_id` is case sensitive.
+	AccountID string `json:"account_id" url:"account_id"`
+	// The name of the account, either assigned by the user or by the financial institution itself.
+	Name string `json:"name" url:"name"`
+	// The official name of the account as given by the financial institution.
+	OfficialName *string `json:"official_name,omitempty" url:"official_name,omitempty"`
+	// The last 2-4 alphanumeric characters of an account's official account number. Note that the mask may be non-unique between an Item's accounts, and it may also not match the mask that the bank displays to the user.
+	Mask    *string         `json:"mask,omitempty" url:"mask,omitempty"`
+	Type    AccountType     `json:"type" url:"type"`
+	Subtype *AccountSubtype `json:"subtype,omitempty" url:"subtype,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetPrismAccount) GetAccountID() string {
+	if c == nil {
+		return ""
+	}
+	return c.AccountID
+}
+
+func (c *CraReportGetPrismAccount) GetName() string {
+	if c == nil {
+		return ""
+	}
+	return c.Name
+}
+
+func (c *CraReportGetPrismAccount) GetOfficialName() *string {
+	if c == nil {
+		return nil
+	}
+	return c.OfficialName
+}
+
+func (c *CraReportGetPrismAccount) GetMask() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Mask
+}
+
+func (c *CraReportGetPrismAccount) GetType() AccountType {
+	if c == nil {
+		return ""
+	}
+	return c.Type
+}
+
+func (c *CraReportGetPrismAccount) GetSubtype() *AccountSubtype {
+	if c == nil {
+		return nil
+	}
+	return c.Subtype
+}
+
+func (c *CraReportGetPrismAccount) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetPrismAccount) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetAccountID sets the AccountID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismAccount) SetAccountID(accountID string) {
+	c.AccountID = accountID
+	c.require(craReportGetPrismAccountFieldAccountID)
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismAccount) SetName(name string) {
+	c.Name = name
+	c.require(craReportGetPrismAccountFieldName)
+}
+
+// SetOfficialName sets the OfficialName field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismAccount) SetOfficialName(officialName *string) {
+	c.OfficialName = officialName
+	c.require(craReportGetPrismAccountFieldOfficialName)
+}
+
+// SetMask sets the Mask field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismAccount) SetMask(mask *string) {
+	c.Mask = mask
+	c.require(craReportGetPrismAccountFieldMask)
+}
+
+// SetType sets the Type field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismAccount) SetType(type_ AccountType) {
+	c.Type = type_
+	c.require(craReportGetPrismAccountFieldType)
+}
+
+// SetSubtype sets the Subtype field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismAccount) SetSubtype(subtype *AccountSubtype) {
+	c.Subtype = subtype
+	c.require(craReportGetPrismAccountFieldSubtype)
+}
+
+func (c *CraReportGetPrismAccount) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetPrismAccount
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetPrismAccount(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportGetPrismAccountNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetPrismAccount) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetPrismAccount
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetPrismAccount) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportGetPrismCashScoreFieldModelVersion = big.NewInt(1 << 0)
+	craReportGetPrismCashScoreFieldScore        = big.NewInt(1 << 1)
+	craReportGetPrismCashScoreFieldReasonCodes  = big.NewInt(1 << 2)
+	craReportGetPrismCashScoreFieldMetadata     = big.NewInt(1 << 3)
+	craReportGetPrismCashScoreFieldErrorReason  = big.NewInt(1 << 4)
+)
+
+// craReportGetPrismCashScoreNullableFields maps the wire names of CraReportGetPrismCashScore's nullable fields (required or optional) to their field bits.
+var craReportGetPrismCashScoreNullableFields = map[string]*big.Int{
+	"score": craReportGetPrismCashScoreFieldScore,
+}
+
+// The data from the CashScore® product returned by Prism Data.
+type CraReportGetPrismCashScore struct {
+	// The version of Prism Data's cash score model used.
+	ModelVersion string `json:"model_version" url:"model_version"`
+	// The score returned by Prism Data. Ranges from 1-999, with higher score indicating lower risk.
+	Score *int `json:"score,omitempty" url:"score,omitempty"`
+	// The reasons for an individual having risk according to the cash score.
+	ReasonCodes []string                `json:"reason_codes,omitempty" url:"reason_codes,omitempty"`
+	Metadata    *PrismCashScoreMetadata `json:"metadata,omitempty" url:"metadata,omitempty"`
+	ErrorReason *PrismErrorReason       `json:"error_reason,omitempty" url:"error_reason,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetPrismCashScore) GetModelVersion() string {
+	if c == nil {
+		return ""
+	}
+	return c.ModelVersion
+}
+
+func (c *CraReportGetPrismCashScore) GetScore() *int {
+	if c == nil {
+		return nil
+	}
+	return c.Score
+}
+
+func (c *CraReportGetPrismCashScore) GetReasonCodes() []string {
+	if c == nil {
+		return nil
+	}
+	return c.ReasonCodes
+}
+
+func (c *CraReportGetPrismCashScore) GetMetadata() *PrismCashScoreMetadata {
+	if c == nil {
+		return nil
+	}
+	return c.Metadata
+}
+
+func (c *CraReportGetPrismCashScore) GetErrorReason() *PrismErrorReason {
+	if c == nil {
+		return nil
+	}
+	return c.ErrorReason
+}
+
+func (c *CraReportGetPrismCashScore) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetPrismCashScore) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetModelVersion sets the ModelVersion field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismCashScore) SetModelVersion(modelVersion string) {
+	c.ModelVersion = modelVersion
+	c.require(craReportGetPrismCashScoreFieldModelVersion)
+}
+
+// SetScore sets the Score field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismCashScore) SetScore(score *int) {
+	c.Score = score
+	c.require(craReportGetPrismCashScoreFieldScore)
+}
+
+// SetReasonCodes sets the ReasonCodes field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismCashScore) SetReasonCodes(reasonCodes []string) {
+	c.ReasonCodes = reasonCodes
+	c.require(craReportGetPrismCashScoreFieldReasonCodes)
+}
+
+// SetMetadata sets the Metadata field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismCashScore) SetMetadata(metadata *PrismCashScoreMetadata) {
+	c.Metadata = metadata
+	c.require(craReportGetPrismCashScoreFieldMetadata)
+}
+
+// SetErrorReason sets the ErrorReason field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismCashScore) SetErrorReason(errorReason *PrismErrorReason) {
+	c.ErrorReason = errorReason
+	c.require(craReportGetPrismCashScoreFieldErrorReason)
+}
+
+func (c *CraReportGetPrismCashScore) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetPrismCashScore
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetPrismCashScore(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportGetPrismCashScoreNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetPrismCashScore) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetPrismCashScore
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetPrismCashScore) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportGetPrismDetectFieldModelVersion = big.NewInt(1 << 0)
+	craReportGetPrismDetectFieldScore        = big.NewInt(1 << 1)
+	craReportGetPrismDetectFieldReasonCodes  = big.NewInt(1 << 2)
+	craReportGetPrismDetectFieldMetadata     = big.NewInt(1 << 3)
+	craReportGetPrismDetectFieldErrorReason  = big.NewInt(1 << 4)
+)
+
+// craReportGetPrismDetectNullableFields maps the wire names of CraReportGetPrismDetect's nullable fields (required or optional) to their field bits.
+var craReportGetPrismDetectNullableFields = map[string]*big.Int{
+	"score": craReportGetPrismDetectFieldScore,
+}
+
+// The data from the CashScore® Detect product returned by Prism Data.
+type CraReportGetPrismDetect struct {
+	// The version of Prism Data's CashScore® Detect model used.
+	ModelVersion string `json:"model_version" url:"model_version"`
+	// The score returned by Prism Data. Ranges from 1-999, with higher score indicating lower risk.
+	Score *int `json:"score,omitempty" url:"score,omitempty"`
+	// The reasons for an individual having risk according to the CashScore® Detect score.
+	ReasonCodes []string                `json:"reason_codes,omitempty" url:"reason_codes,omitempty"`
+	Metadata    *PrismCashScoreMetadata `json:"metadata,omitempty" url:"metadata,omitempty"`
+	ErrorReason *PrismErrorReason       `json:"error_reason,omitempty" url:"error_reason,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetPrismDetect) GetModelVersion() string {
+	if c == nil {
+		return ""
+	}
+	return c.ModelVersion
+}
+
+func (c *CraReportGetPrismDetect) GetScore() *int {
+	if c == nil {
+		return nil
+	}
+	return c.Score
+}
+
+func (c *CraReportGetPrismDetect) GetReasonCodes() []string {
+	if c == nil {
+		return nil
+	}
+	return c.ReasonCodes
+}
+
+func (c *CraReportGetPrismDetect) GetMetadata() *PrismCashScoreMetadata {
+	if c == nil {
+		return nil
+	}
+	return c.Metadata
+}
+
+func (c *CraReportGetPrismDetect) GetErrorReason() *PrismErrorReason {
+	if c == nil {
+		return nil
+	}
+	return c.ErrorReason
+}
+
+func (c *CraReportGetPrismDetect) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetPrismDetect) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetModelVersion sets the ModelVersion field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismDetect) SetModelVersion(modelVersion string) {
+	c.ModelVersion = modelVersion
+	c.require(craReportGetPrismDetectFieldModelVersion)
+}
+
+// SetScore sets the Score field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismDetect) SetScore(score *int) {
+	c.Score = score
+	c.require(craReportGetPrismDetectFieldScore)
+}
+
+// SetReasonCodes sets the ReasonCodes field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismDetect) SetReasonCodes(reasonCodes []string) {
+	c.ReasonCodes = reasonCodes
+	c.require(craReportGetPrismDetectFieldReasonCodes)
+}
+
+// SetMetadata sets the Metadata field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismDetect) SetMetadata(metadata *PrismCashScoreMetadata) {
+	c.Metadata = metadata
+	c.require(craReportGetPrismDetectFieldMetadata)
+}
+
+// SetErrorReason sets the ErrorReason field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismDetect) SetErrorReason(errorReason *PrismErrorReason) {
+	c.ErrorReason = errorReason
+	c.require(craReportGetPrismDetectFieldErrorReason)
+}
+
+func (c *CraReportGetPrismDetect) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetPrismDetect
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetPrismDetect(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportGetPrismDetectNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetPrismDetect) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetPrismDetect
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetPrismDetect) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportGetPrismExtendFieldModelVersion = big.NewInt(1 << 0)
+	craReportGetPrismExtendFieldScore        = big.NewInt(1 << 1)
+	craReportGetPrismExtendFieldReasonCodes  = big.NewInt(1 << 2)
+	craReportGetPrismExtendFieldMetadata     = big.NewInt(1 << 3)
+	craReportGetPrismExtendFieldErrorReason  = big.NewInt(1 << 4)
+)
+
+// craReportGetPrismExtendNullableFields maps the wire names of CraReportGetPrismExtend's nullable fields (required or optional) to their field bits.
+var craReportGetPrismExtendNullableFields = map[string]*big.Int{
+	"score": craReportGetPrismExtendFieldScore,
+}
+
+// The data from the CashScore® Extend product returned by Prism Data.
+type CraReportGetPrismExtend struct {
+	// The version of Prism Data's CashScore® Extend model used.
+	ModelVersion string `json:"model_version" url:"model_version"`
+	// The score returned by Prism Data. Ranges from 1-999, with higher score indicating lower risk.
+	Score *int `json:"score,omitempty" url:"score,omitempty"`
+	// The reasons for an individual having risk according to the CashScore® Extend score.
+	ReasonCodes []string                `json:"reason_codes,omitempty" url:"reason_codes,omitempty"`
+	Metadata    *PrismCashScoreMetadata `json:"metadata,omitempty" url:"metadata,omitempty"`
+	ErrorReason *PrismErrorReason       `json:"error_reason,omitempty" url:"error_reason,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetPrismExtend) GetModelVersion() string {
+	if c == nil {
+		return ""
+	}
+	return c.ModelVersion
+}
+
+func (c *CraReportGetPrismExtend) GetScore() *int {
+	if c == nil {
+		return nil
+	}
+	return c.Score
+}
+
+func (c *CraReportGetPrismExtend) GetReasonCodes() []string {
+	if c == nil {
+		return nil
+	}
+	return c.ReasonCodes
+}
+
+func (c *CraReportGetPrismExtend) GetMetadata() *PrismCashScoreMetadata {
+	if c == nil {
+		return nil
+	}
+	return c.Metadata
+}
+
+func (c *CraReportGetPrismExtend) GetErrorReason() *PrismErrorReason {
+	if c == nil {
+		return nil
+	}
+	return c.ErrorReason
+}
+
+func (c *CraReportGetPrismExtend) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetPrismExtend) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetModelVersion sets the ModelVersion field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismExtend) SetModelVersion(modelVersion string) {
+	c.ModelVersion = modelVersion
+	c.require(craReportGetPrismExtendFieldModelVersion)
+}
+
+// SetScore sets the Score field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismExtend) SetScore(score *int) {
+	c.Score = score
+	c.require(craReportGetPrismExtendFieldScore)
+}
+
+// SetReasonCodes sets the ReasonCodes field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismExtend) SetReasonCodes(reasonCodes []string) {
+	c.ReasonCodes = reasonCodes
+	c.require(craReportGetPrismExtendFieldReasonCodes)
+}
+
+// SetMetadata sets the Metadata field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismExtend) SetMetadata(metadata *PrismCashScoreMetadata) {
+	c.Metadata = metadata
+	c.require(craReportGetPrismExtendFieldMetadata)
+}
+
+// SetErrorReason sets the ErrorReason field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismExtend) SetErrorReason(errorReason *PrismErrorReason) {
+	c.ErrorReason = errorReason
+	c.require(craReportGetPrismExtendFieldErrorReason)
+}
+
+func (c *CraReportGetPrismExtend) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetPrismExtend
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetPrismExtend(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportGetPrismExtendNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetPrismExtend) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetPrismExtend
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetPrismExtend) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportGetPrismInsightsFieldModelVersion = big.NewInt(1 << 0)
+	craReportGetPrismInsightsFieldResult       = big.NewInt(1 << 1)
+	craReportGetPrismInsightsFieldErrorReason  = big.NewInt(1 << 2)
+)
+
+// The data from the Insights product returned by Prism Data.
+type CraReportGetPrismInsights struct {
+	// The version of Prism Data's insights model used.
+	ModelVersion string               `json:"model_version" url:"model_version"`
+	Result       *PrismInsightsResult `json:"result,omitempty" url:"result,omitempty"`
+	ErrorReason  *PrismErrorReason    `json:"error_reason,omitempty" url:"error_reason,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetPrismInsights) GetModelVersion() string {
+	if c == nil {
+		return ""
+	}
+	return c.ModelVersion
+}
+
+func (c *CraReportGetPrismInsights) GetResult() *PrismInsightsResult {
+	if c == nil {
+		return nil
+	}
+	return c.Result
+}
+
+func (c *CraReportGetPrismInsights) GetErrorReason() *PrismErrorReason {
+	if c == nil {
+		return nil
+	}
+	return c.ErrorReason
+}
+
+func (c *CraReportGetPrismInsights) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetPrismInsights) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetModelVersion sets the ModelVersion field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismInsights) SetModelVersion(modelVersion string) {
+	c.ModelVersion = modelVersion
+	c.require(craReportGetPrismInsightsFieldModelVersion)
+}
+
+// SetResult sets the Result field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismInsights) SetResult(result *PrismInsightsResult) {
+	c.Result = result
+	c.require(craReportGetPrismInsightsFieldResult)
+}
+
+// SetErrorReason sets the ErrorReason field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismInsights) SetErrorReason(errorReason *PrismErrorReason) {
+	c.ErrorReason = errorReason
+	c.require(craReportGetPrismInsightsFieldErrorReason)
+}
+
+func (c *CraReportGetPrismInsights) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetPrismInsights
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetPrismInsights(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetPrismInsights) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetPrismInsights
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetPrismInsights) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportGetPrismItemFieldInstitutionID   = big.NewInt(1 << 0)
+	craReportGetPrismItemFieldInstitutionName = big.NewInt(1 << 1)
+	craReportGetPrismItemFieldItemID          = big.NewInt(1 << 2)
+	craReportGetPrismItemFieldLastUpdatedTime = big.NewInt(1 << 3)
+	craReportGetPrismItemFieldAccounts        = big.NewInt(1 << 4)
+)
+
+// An Item used to generate `cra_prism`.
+type CraReportGetPrismItem struct {
+	// The ID of the financial institution associated with the Item.
+	InstitutionID string `json:"institution_id" url:"institution_id"`
+	// The full financial institution name associated with the Item.
+	InstitutionName string `json:"institution_name" url:"institution_name"`
+	ItemID          ItemID `json:"item_id" url:"item_id"`
+	// The time when this Item's data was last retrieved from the financial institution prior to report generation.
+	LastUpdatedTime time.Time `json:"last_updated_time" url:"last_updated_time"`
+	// The accounts on the Item used to generate the product.
+	Accounts []*CraReportGetPrismAccount `json:"accounts" url:"accounts"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetPrismItem) GetInstitutionID() string {
+	if c == nil {
+		return ""
+	}
+	return c.InstitutionID
+}
+
+func (c *CraReportGetPrismItem) GetInstitutionName() string {
+	if c == nil {
+		return ""
+	}
+	return c.InstitutionName
+}
+
+func (c *CraReportGetPrismItem) GetItemID() ItemID {
+	if c == nil {
+		return ""
+	}
+	return c.ItemID
+}
+
+func (c *CraReportGetPrismItem) GetLastUpdatedTime() time.Time {
+	if c == nil {
+		return time.Time{}
+	}
+	return c.LastUpdatedTime
+}
+
+func (c *CraReportGetPrismItem) GetAccounts() []*CraReportGetPrismAccount {
+	if c == nil {
+		return nil
+	}
+	return c.Accounts
+}
+
+func (c *CraReportGetPrismItem) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetPrismItem) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetInstitutionID sets the InstitutionID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismItem) SetInstitutionID(institutionID string) {
+	c.InstitutionID = institutionID
+	c.require(craReportGetPrismItemFieldInstitutionID)
+}
+
+// SetInstitutionName sets the InstitutionName field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismItem) SetInstitutionName(institutionName string) {
+	c.InstitutionName = institutionName
+	c.require(craReportGetPrismItemFieldInstitutionName)
+}
+
+// SetItemID sets the ItemID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismItem) SetItemID(itemID ItemID) {
+	c.ItemID = itemID
+	c.require(craReportGetPrismItemFieldItemID)
+}
+
+// SetLastUpdatedTime sets the LastUpdatedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismItem) SetLastUpdatedTime(lastUpdatedTime time.Time) {
+	c.LastUpdatedTime = lastUpdatedTime
+	c.require(craReportGetPrismItemFieldLastUpdatedTime)
+}
+
+// SetAccounts sets the Accounts field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismItem) SetAccounts(accounts []*CraReportGetPrismAccount) {
+	c.Accounts = accounts
+	c.require(craReportGetPrismItemFieldAccounts)
+}
+
+func (c *CraReportGetPrismItem) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetPrismItem
+	var unmarshaler = struct {
+		embed
+		LastUpdatedTime *internal.DateTime `json:"last_updated_time"`
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetPrismItem(unmarshaler.embed)
+	c.LastUpdatedTime = unmarshaler.LastUpdatedTime.Time()
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetPrismItem) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetPrismItem
+	var marshaler = struct {
+		embed
+		LastUpdatedTime *internal.DateTime `json:"last_updated_time"`
+	}{
+		embed:           embed(*c),
+		LastUpdatedTime: internal.NewDateTime(c.LastUpdatedTime),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetPrismItem) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportGetPrismMetadataFieldGeneratedTime              = big.NewInt(1 << 0)
+	craReportGetPrismMetadataFieldItemCount                  = big.NewInt(1 << 1)
+	craReportGetPrismMetadataFieldAccountCount               = big.NewInt(1 << 2)
+	craReportGetPrismMetadataFieldInstitutionIDs             = big.NewInt(1 << 3)
+	craReportGetPrismMetadataFieldPrimaryAccountCount        = big.NewInt(1 << 4)
+	craReportGetPrismMetadataFieldDepositoryAccountTypeCount = big.NewInt(1 << 5)
+	craReportGetPrismMetadataFieldCreditAccountTypeCount     = big.NewInt(1 << 6)
+	craReportGetPrismMetadataFieldInvestmentAccountTypeCount = big.NewInt(1 << 7)
+	craReportGetPrismMetadataFieldOtherAccountTypeCount      = big.NewInt(1 << 8)
+	craReportGetPrismMetadataFieldMultipleOwnerAccountCount  = big.NewInt(1 << 9)
+	craReportGetPrismMetadataFieldOldestTransactionDate      = big.NewInt(1 << 10)
+	craReportGetPrismMetadataFieldMostRecentTransactionDate  = big.NewInt(1 << 11)
+)
+
+// craReportGetPrismMetadataNullableFields maps the wire names of CraReportGetPrismMetadata's nullable fields (required or optional) to their field bits.
+var craReportGetPrismMetadataNullableFields = map[string]*big.Int{
+	"generated_time":               craReportGetPrismMetadataFieldGeneratedTime,
+	"oldest_transaction_date":      craReportGetPrismMetadataFieldOldestTransactionDate,
+	"most_recent_transaction_date": craReportGetPrismMetadataFieldMostRecentTransactionDate,
+}
+
+// Prism report metadata returned by `/cra/report/get`.
+type CraReportGetPrismMetadata struct {
+	// The time the report was generated. May be `null` if unavailable.
+	GeneratedTime *time.Time `json:"generated_time,omitempty" url:"generated_time,omitempty"`
+	// The number of Items used to generate the report.
+	ItemCount int `json:"item_count" url:"item_count"`
+	// The number of accounts used to generate the report.
+	AccountCount int `json:"account_count" url:"account_count"`
+	// The institution IDs of the Items used to generate the report.
+	InstitutionIDs []string `json:"institution_ids" url:"institution_ids"`
+	// The number of accounts carrying Plaid's primary account indicator.
+	PrimaryAccountCount int `json:"primary_account_count" url:"primary_account_count"`
+	// The number of depository accounts used to generate the report.
+	DepositoryAccountTypeCount int `json:"depository_account_type_count" url:"depository_account_type_count"`
+	// The number of credit accounts used to generate the report.
+	CreditAccountTypeCount int `json:"credit_account_type_count" url:"credit_account_type_count"`
+	// The number of investment accounts used to generate the report.
+	InvestmentAccountTypeCount int `json:"investment_account_type_count" url:"investment_account_type_count"`
+	// The number of accounts that are neither depository, credit, nor investment.
+	OtherAccountTypeCount int `json:"other_account_type_count" url:"other_account_type_count"`
+	// The number of accounts with multiple owners.
+	MultipleOwnerAccountCount int `json:"multiple_owner_account_count" url:"multiple_owner_account_count"`
+	// The earliest transaction date across the accounts the report was generated from. May be `null` if the producer could not compute a transaction range.
+	OldestTransactionDate *time.Time `json:"oldest_transaction_date,omitempty" url:"oldest_transaction_date,omitempty" format:"date"`
+	// The latest transaction date across the accounts the report was generated from. May be `null` if the producer could not compute a transaction range.
+	MostRecentTransactionDate *time.Time `json:"most_recent_transaction_date,omitempty" url:"most_recent_transaction_date,omitempty" format:"date"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetPrismMetadata) GetGeneratedTime() *time.Time {
+	if c == nil {
+		return nil
+	}
+	return c.GeneratedTime
+}
+
+func (c *CraReportGetPrismMetadata) GetItemCount() int {
+	if c == nil {
+		return 0
+	}
+	return c.ItemCount
+}
+
+func (c *CraReportGetPrismMetadata) GetAccountCount() int {
+	if c == nil {
+		return 0
+	}
+	return c.AccountCount
+}
+
+func (c *CraReportGetPrismMetadata) GetInstitutionIDs() []string {
+	if c == nil {
+		return nil
+	}
+	return c.InstitutionIDs
+}
+
+func (c *CraReportGetPrismMetadata) GetPrimaryAccountCount() int {
+	if c == nil {
+		return 0
+	}
+	return c.PrimaryAccountCount
+}
+
+func (c *CraReportGetPrismMetadata) GetDepositoryAccountTypeCount() int {
+	if c == nil {
+		return 0
+	}
+	return c.DepositoryAccountTypeCount
+}
+
+func (c *CraReportGetPrismMetadata) GetCreditAccountTypeCount() int {
+	if c == nil {
+		return 0
+	}
+	return c.CreditAccountTypeCount
+}
+
+func (c *CraReportGetPrismMetadata) GetInvestmentAccountTypeCount() int {
+	if c == nil {
+		return 0
+	}
+	return c.InvestmentAccountTypeCount
+}
+
+func (c *CraReportGetPrismMetadata) GetOtherAccountTypeCount() int {
+	if c == nil {
+		return 0
+	}
+	return c.OtherAccountTypeCount
+}
+
+func (c *CraReportGetPrismMetadata) GetMultipleOwnerAccountCount() int {
+	if c == nil {
+		return 0
+	}
+	return c.MultipleOwnerAccountCount
+}
+
+func (c *CraReportGetPrismMetadata) GetOldestTransactionDate() *time.Time {
+	if c == nil {
+		return nil
+	}
+	return c.OldestTransactionDate
+}
+
+func (c *CraReportGetPrismMetadata) GetMostRecentTransactionDate() *time.Time {
+	if c == nil {
+		return nil
+	}
+	return c.MostRecentTransactionDate
+}
+
+func (c *CraReportGetPrismMetadata) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetPrismMetadata) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetGeneratedTime sets the GeneratedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismMetadata) SetGeneratedTime(generatedTime *time.Time) {
+	c.GeneratedTime = generatedTime
+	c.require(craReportGetPrismMetadataFieldGeneratedTime)
+}
+
+// SetItemCount sets the ItemCount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismMetadata) SetItemCount(itemCount int) {
+	c.ItemCount = itemCount
+	c.require(craReportGetPrismMetadataFieldItemCount)
+}
+
+// SetAccountCount sets the AccountCount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismMetadata) SetAccountCount(accountCount int) {
+	c.AccountCount = accountCount
+	c.require(craReportGetPrismMetadataFieldAccountCount)
+}
+
+// SetInstitutionIDs sets the InstitutionIDs field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismMetadata) SetInstitutionIDs(institutionIDs []string) {
+	c.InstitutionIDs = institutionIDs
+	c.require(craReportGetPrismMetadataFieldInstitutionIDs)
+}
+
+// SetPrimaryAccountCount sets the PrimaryAccountCount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismMetadata) SetPrimaryAccountCount(primaryAccountCount int) {
+	c.PrimaryAccountCount = primaryAccountCount
+	c.require(craReportGetPrismMetadataFieldPrimaryAccountCount)
+}
+
+// SetDepositoryAccountTypeCount sets the DepositoryAccountTypeCount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismMetadata) SetDepositoryAccountTypeCount(depositoryAccountTypeCount int) {
+	c.DepositoryAccountTypeCount = depositoryAccountTypeCount
+	c.require(craReportGetPrismMetadataFieldDepositoryAccountTypeCount)
+}
+
+// SetCreditAccountTypeCount sets the CreditAccountTypeCount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismMetadata) SetCreditAccountTypeCount(creditAccountTypeCount int) {
+	c.CreditAccountTypeCount = creditAccountTypeCount
+	c.require(craReportGetPrismMetadataFieldCreditAccountTypeCount)
+}
+
+// SetInvestmentAccountTypeCount sets the InvestmentAccountTypeCount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismMetadata) SetInvestmentAccountTypeCount(investmentAccountTypeCount int) {
+	c.InvestmentAccountTypeCount = investmentAccountTypeCount
+	c.require(craReportGetPrismMetadataFieldInvestmentAccountTypeCount)
+}
+
+// SetOtherAccountTypeCount sets the OtherAccountTypeCount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismMetadata) SetOtherAccountTypeCount(otherAccountTypeCount int) {
+	c.OtherAccountTypeCount = otherAccountTypeCount
+	c.require(craReportGetPrismMetadataFieldOtherAccountTypeCount)
+}
+
+// SetMultipleOwnerAccountCount sets the MultipleOwnerAccountCount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismMetadata) SetMultipleOwnerAccountCount(multipleOwnerAccountCount int) {
+	c.MultipleOwnerAccountCount = multipleOwnerAccountCount
+	c.require(craReportGetPrismMetadataFieldMultipleOwnerAccountCount)
+}
+
+// SetOldestTransactionDate sets the OldestTransactionDate field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismMetadata) SetOldestTransactionDate(oldestTransactionDate *time.Time) {
+	c.OldestTransactionDate = oldestTransactionDate
+	c.require(craReportGetPrismMetadataFieldOldestTransactionDate)
+}
+
+// SetMostRecentTransactionDate sets the MostRecentTransactionDate field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismMetadata) SetMostRecentTransactionDate(mostRecentTransactionDate *time.Time) {
+	c.MostRecentTransactionDate = mostRecentTransactionDate
+	c.require(craReportGetPrismMetadataFieldMostRecentTransactionDate)
+}
+
+func (c *CraReportGetPrismMetadata) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetPrismMetadata
+	var unmarshaler = struct {
+		embed
+		GeneratedTime             *internal.DateTime `json:"generated_time,omitempty"`
+		OldestTransactionDate     *internal.Date     `json:"oldest_transaction_date,omitempty"`
+		MostRecentTransactionDate *internal.Date     `json:"most_recent_transaction_date,omitempty"`
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetPrismMetadata(unmarshaler.embed)
+	c.GeneratedTime = unmarshaler.GeneratedTime.TimePtr()
+	c.OldestTransactionDate = unmarshaler.OldestTransactionDate.TimePtr()
+	c.MostRecentTransactionDate = unmarshaler.MostRecentTransactionDate.TimePtr()
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportGetPrismMetadataNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetPrismMetadata) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetPrismMetadata
+	var marshaler = struct {
+		embed
+		GeneratedTime             *internal.DateTime `json:"generated_time,omitempty"`
+		OldestTransactionDate     *internal.Date     `json:"oldest_transaction_date,omitempty"`
+		MostRecentTransactionDate *internal.Date     `json:"most_recent_transaction_date,omitempty"`
+	}{
+		embed:                     embed(*c),
+		GeneratedTime:             internal.NewOptionalDateTime(c.GeneratedTime),
+		OldestTransactionDate:     internal.NewOptionalDate(c.OldestTransactionDate),
+		MostRecentTransactionDate: internal.NewOptionalDate(c.MostRecentTransactionDate),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetPrismMetadata) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportGetPrismResponseProductFieldVersion  = big.NewInt(1 << 0)
+	craReportGetPrismResponseProductFieldMetadata = big.NewInt(1 << 1)
+	craReportGetPrismResponseProductFieldPrism    = big.NewInt(1 << 2)
+	craReportGetPrismResponseProductFieldItems    = big.NewInt(1 << 3)
+	craReportGetPrismResponseProductFieldErrors   = big.NewInt(1 << 4)
+)
+
+// craReportGetPrismResponseProductNullableFields maps the wire names of CraReportGetPrismResponseProduct's nullable fields (required or optional) to their field bits.
+var craReportGetPrismResponseProductNullableFields = map[string]*big.Int{
+	"metadata": craReportGetPrismResponseProductFieldMetadata,
+}
+
+// Prism data returned by `/cra/report/get`.
+type CraReportGetPrismResponseProduct struct {
+	Version  CraProductVersion          `json:"version" url:"version"`
+	Metadata *CraReportGetPrismMetadata `json:"metadata,omitempty" url:"metadata,omitempty"`
+	Prism    *CraReportGetPrism         `json:"prism" url:"prism"`
+	// The Items, and their accounts, used to generate this product. Empty if this product failed to generate.
+	Items []*CraReportGetPrismItem `json:"items" url:"items"`
+	// Product-level errors. Non-empty when this product failed to generate; empty on success.
+	Errors []*PlaidError `json:"errors" url:"errors"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetPrismResponseProduct) GetVersion() CraProductVersion {
+	if c == nil {
+		return ""
+	}
+	return c.Version
+}
+
+func (c *CraReportGetPrismResponseProduct) GetMetadata() *CraReportGetPrismMetadata {
+	if c == nil {
+		return nil
+	}
+	return c.Metadata
+}
+
+func (c *CraReportGetPrismResponseProduct) GetPrism() *CraReportGetPrism {
+	if c == nil {
+		return nil
+	}
+	return c.Prism
+}
+
+func (c *CraReportGetPrismResponseProduct) GetItems() []*CraReportGetPrismItem {
+	if c == nil {
+		return nil
+	}
+	return c.Items
+}
+
+func (c *CraReportGetPrismResponseProduct) GetErrors() []*PlaidError {
+	if c == nil {
+		return nil
+	}
+	return c.Errors
+}
+
+func (c *CraReportGetPrismResponseProduct) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetPrismResponseProduct) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetVersion sets the Version field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismResponseProduct) SetVersion(version CraProductVersion) {
+	c.Version = version
+	c.require(craReportGetPrismResponseProductFieldVersion)
+}
+
+// SetMetadata sets the Metadata field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismResponseProduct) SetMetadata(metadata *CraReportGetPrismMetadata) {
+	c.Metadata = metadata
+	c.require(craReportGetPrismResponseProductFieldMetadata)
+}
+
+// SetPrism sets the Prism field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismResponseProduct) SetPrism(prism *CraReportGetPrism) {
+	c.Prism = prism
+	c.require(craReportGetPrismResponseProductFieldPrism)
+}
+
+// SetItems sets the Items field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismResponseProduct) SetItems(items []*CraReportGetPrismItem) {
+	c.Items = items
+	c.require(craReportGetPrismResponseProductFieldItems)
+}
+
+// SetErrors sets the Errors field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetPrismResponseProduct) SetErrors(errors []*PlaidError) {
+	c.Errors = errors
+	c.require(craReportGetPrismResponseProductFieldErrors)
+}
+
+func (c *CraReportGetPrismResponseProduct) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetPrismResponseProduct
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetPrismResponseProduct(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportGetPrismResponseProductNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetPrismResponseProduct) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetPrismResponseProduct
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetPrismResponseProduct) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+// Whether every requested Prism product was generated. `PARTIAL_SUCCESS` means at least one succeeded and at least one did not; the ones that did not carry their own `error_reason`.
+type CraReportGetPrismStatus string
+
+const (
+	CraReportGetPrismStatusSuccess        CraReportGetPrismStatus = "SUCCESS"
+	CraReportGetPrismStatusPartialSuccess CraReportGetPrismStatus = "PARTIAL_SUCCESS"
+	CraReportGetPrismStatusError          CraReportGetPrismStatus = "ERROR"
+)
+
+func NewCraReportGetPrismStatusFromString(s string) (CraReportGetPrismStatus, error) {
+	switch s {
+	case "SUCCESS":
+		return CraReportGetPrismStatusSuccess, nil
+	case "PARTIAL_SUCCESS":
+		return CraReportGetPrismStatusPartialSuccess, nil
+	case "ERROR":
+		return CraReportGetPrismStatusError, nil
+	}
+	var t CraReportGetPrismStatus
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (c CraReportGetPrismStatus) Ptr() *CraReportGetPrismStatus {
+	return &c
+}
+
 // A map of product attributes, where the key is a string and the value can be any JSON value. The specific list of attributes depends on the product and version. For a full list, see the data dictionary. May be `null` if attributes were not available.
 type CraReportGetProductAttributes = map[string]any
 
@@ -10657,12 +15642,15 @@ type CraReportGetRequestProduct struct {
 	CraQualify           *CraQualifyProduct
 	CraIncomeInsights    *CraIncomeInsightsProduct
 	CraHomeLending       *CraHomeLendingProduct
+	CraHomeLendingVoa    *CraHomeLendingVoaProduct
 	CraBaseReport        *CraBaseReportProduct
 	CraLendScore         *CraLendScoreProduct
 	CraCashflowInsights  *CraCashflowInsightsProduct
 	CraNetworkInsights   *CraNetworkInsightsProduct
 	CraLendScoreComplete *CraLendScoreCompleteBundleProduct
 	CraIncomeComplete    *CraIncomeCompleteBundleProduct
+	CraPrism             *CraPrismProduct
+	CraUltrafico         *CraUltraFicoProduct
 
 	rawJSON json.RawMessage
 }
@@ -10693,6 +15681,13 @@ func (c *CraReportGetRequestProduct) GetCraHomeLending() *CraHomeLendingProduct 
 		return nil
 	}
 	return c.CraHomeLending
+}
+
+func (c *CraReportGetRequestProduct) GetCraHomeLendingVoa() *CraHomeLendingVoaProduct {
+	if c == nil {
+		return nil
+	}
+	return c.CraHomeLendingVoa
 }
 
 func (c *CraReportGetRequestProduct) GetCraBaseReport() *CraBaseReportProduct {
@@ -10737,6 +15732,20 @@ func (c *CraReportGetRequestProduct) GetCraIncomeComplete() *CraIncomeCompleteBu
 	return c.CraIncomeComplete
 }
 
+func (c *CraReportGetRequestProduct) GetCraPrism() *CraPrismProduct {
+	if c == nil {
+		return nil
+	}
+	return c.CraPrism
+}
+
+func (c *CraReportGetRequestProduct) GetCraUltrafico() *CraUltraFicoProduct {
+	if c == nil {
+		return nil
+	}
+	return c.CraUltrafico
+}
+
 func (c *CraReportGetRequestProduct) UnmarshalJSON(data []byte) error {
 	var unmarshaler struct {
 		Product string `json:"product"`
@@ -10767,6 +15776,12 @@ func (c *CraReportGetRequestProduct) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		c.CraHomeLending = value
+	case "cra_home_lending_voa":
+		value := new(CraHomeLendingVoaProduct)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.CraHomeLendingVoa = value
 	case "cra_base_report":
 		value := new(CraBaseReportProduct)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -10803,6 +15818,18 @@ func (c *CraReportGetRequestProduct) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		c.CraIncomeComplete = value
+	case "cra_prism":
+		value := new(CraPrismProduct)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.CraPrism = value
+	case "cra_ultrafico":
+		value := new(CraUltraFicoProduct)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.CraUltrafico = value
 	}
 	c.rawJSON = json.RawMessage(data)
 	return nil
@@ -10820,6 +15847,9 @@ func (c CraReportGetRequestProduct) MarshalJSON() ([]byte, error) {
 	}
 	if c.CraHomeLending != nil {
 		return internal.MarshalJSONWithExtraProperty(c.CraHomeLending, "product", "cra_home_lending")
+	}
+	if c.CraHomeLendingVoa != nil {
+		return internal.MarshalJSONWithExtraProperty(c.CraHomeLendingVoa, "product", "cra_home_lending_voa")
 	}
 	if c.CraBaseReport != nil {
 		return internal.MarshalJSONWithExtraProperty(c.CraBaseReport, "product", "cra_base_report")
@@ -10839,6 +15869,12 @@ func (c CraReportGetRequestProduct) MarshalJSON() ([]byte, error) {
 	if c.CraIncomeComplete != nil {
 		return internal.MarshalJSONWithExtraProperty(c.CraIncomeComplete, "product", "cra_income_complete")
 	}
+	if c.CraPrism != nil {
+		return internal.MarshalJSONWithExtraProperty(c.CraPrism, "product", "cra_prism")
+	}
+	if c.CraUltrafico != nil {
+		return internal.MarshalJSONWithExtraProperty(c.CraUltrafico, "product", "cra_ultrafico")
+	}
 	if len(c.rawJSON) > 0 {
 		return c.rawJSON, nil
 	}
@@ -10849,12 +15885,15 @@ type CraReportGetRequestProductVisitor interface {
 	VisitCraQualify(*CraQualifyProduct) error
 	VisitCraIncomeInsights(*CraIncomeInsightsProduct) error
 	VisitCraHomeLending(*CraHomeLendingProduct) error
+	VisitCraHomeLendingVoa(*CraHomeLendingVoaProduct) error
 	VisitCraBaseReport(*CraBaseReportProduct) error
 	VisitCraLendScore(*CraLendScoreProduct) error
 	VisitCraCashflowInsights(*CraCashflowInsightsProduct) error
 	VisitCraNetworkInsights(*CraNetworkInsightsProduct) error
 	VisitCraLendScoreComplete(*CraLendScoreCompleteBundleProduct) error
 	VisitCraIncomeComplete(*CraIncomeCompleteBundleProduct) error
+	VisitCraPrism(*CraPrismProduct) error
+	VisitCraUltrafico(*CraUltraFicoProduct) error
 }
 
 func (c *CraReportGetRequestProduct) Accept(visitor CraReportGetRequestProductVisitor) error {
@@ -10866,6 +15905,9 @@ func (c *CraReportGetRequestProduct) Accept(visitor CraReportGetRequestProductVi
 	}
 	if c.CraHomeLending != nil {
 		return visitor.VisitCraHomeLending(c.CraHomeLending)
+	}
+	if c.CraHomeLendingVoa != nil {
+		return visitor.VisitCraHomeLendingVoa(c.CraHomeLendingVoa)
 	}
 	if c.CraBaseReport != nil {
 		return visitor.VisitCraBaseReport(c.CraBaseReport)
@@ -10885,6 +15927,12 @@ func (c *CraReportGetRequestProduct) Accept(visitor CraReportGetRequestProductVi
 	if c.CraIncomeComplete != nil {
 		return visitor.VisitCraIncomeComplete(c.CraIncomeComplete)
 	}
+	if c.CraPrism != nil {
+		return visitor.VisitCraPrism(c.CraPrism)
+	}
+	if c.CraUltrafico != nil {
+		return visitor.VisitCraUltrafico(c.CraUltrafico)
+	}
 	return fmt.Errorf("type %T does not define a non-empty union type", c)
 }
 
@@ -10901,6 +15949,9 @@ func (c *CraReportGetRequestProduct) validate() error {
 	}
 	if c.CraHomeLending != nil {
 		fields = append(fields, "cra_home_lending")
+	}
+	if c.CraHomeLendingVoa != nil {
+		fields = append(fields, "cra_home_lending_voa")
 	}
 	if c.CraBaseReport != nil {
 		fields = append(fields, "cra_base_report")
@@ -10919,6 +15970,12 @@ func (c *CraReportGetRequestProduct) validate() error {
 	}
 	if c.CraIncomeComplete != nil {
 		fields = append(fields, "cra_income_complete")
+	}
+	if c.CraPrism != nil {
+		fields = append(fields, "cra_prism")
+	}
+	if c.CraUltrafico != nil {
+		fields = append(fields, "cra_ultrafico")
 	}
 	if len(fields) == 0 {
 		if c.Product != "" {
@@ -11122,12 +16179,15 @@ type CraReportGetResponseProduct struct {
 	CraQualify           *CraReportGetQualifyResponseProduct
 	CraIncomeInsights    *CraReportGetIncomeInsightsResponseProduct
 	CraHomeLending       *CraReportGetHomeLendingResponseProduct
+	CraHomeLendingVoa    *CraReportGetHomeLendingVoaResponseProduct
 	CraCashflowInsights  *CraReportGetCashflowInsightsResponseProduct
 	CraNetworkInsights   *CraReportGetNetworkInsightsResponseProduct
 	CraLendScore         *CraReportGetLendScoreResponseProduct
 	CraBaseReport        *CraReportGetBaseReportResponseProduct
 	CraLendScoreComplete *CraReportGetLendScoreCompleteResponseProduct
 	CraIncomeComplete    *CraReportGetIncomeCompleteResponseProduct
+	CraPrism             *CraReportGetPrismResponseProduct
+	CraUltrafico         *CraReportGetUltraFicoResponseProduct
 
 	rawJSON json.RawMessage
 }
@@ -11158,6 +16218,13 @@ func (c *CraReportGetResponseProduct) GetCraHomeLending() *CraReportGetHomeLendi
 		return nil
 	}
 	return c.CraHomeLending
+}
+
+func (c *CraReportGetResponseProduct) GetCraHomeLendingVoa() *CraReportGetHomeLendingVoaResponseProduct {
+	if c == nil {
+		return nil
+	}
+	return c.CraHomeLendingVoa
 }
 
 func (c *CraReportGetResponseProduct) GetCraCashflowInsights() *CraReportGetCashflowInsightsResponseProduct {
@@ -11202,6 +16269,20 @@ func (c *CraReportGetResponseProduct) GetCraIncomeComplete() *CraReportGetIncome
 	return c.CraIncomeComplete
 }
 
+func (c *CraReportGetResponseProduct) GetCraPrism() *CraReportGetPrismResponseProduct {
+	if c == nil {
+		return nil
+	}
+	return c.CraPrism
+}
+
+func (c *CraReportGetResponseProduct) GetCraUltrafico() *CraReportGetUltraFicoResponseProduct {
+	if c == nil {
+		return nil
+	}
+	return c.CraUltrafico
+}
+
 func (c *CraReportGetResponseProduct) UnmarshalJSON(data []byte) error {
 	var unmarshaler struct {
 		Product string `json:"product"`
@@ -11232,6 +16313,12 @@ func (c *CraReportGetResponseProduct) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		c.CraHomeLending = value
+	case "cra_home_lending_voa":
+		value := new(CraReportGetHomeLendingVoaResponseProduct)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.CraHomeLendingVoa = value
 	case "cra_cashflow_insights":
 		value := new(CraReportGetCashflowInsightsResponseProduct)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -11268,6 +16355,18 @@ func (c *CraReportGetResponseProduct) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		c.CraIncomeComplete = value
+	case "cra_prism":
+		value := new(CraReportGetPrismResponseProduct)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.CraPrism = value
+	case "cra_ultrafico":
+		value := new(CraReportGetUltraFicoResponseProduct)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		c.CraUltrafico = value
 	}
 	c.rawJSON = json.RawMessage(data)
 	return nil
@@ -11285,6 +16384,9 @@ func (c CraReportGetResponseProduct) MarshalJSON() ([]byte, error) {
 	}
 	if c.CraHomeLending != nil {
 		return internal.MarshalJSONWithExtraProperty(c.CraHomeLending, "product", "cra_home_lending")
+	}
+	if c.CraHomeLendingVoa != nil {
+		return internal.MarshalJSONWithExtraProperty(c.CraHomeLendingVoa, "product", "cra_home_lending_voa")
 	}
 	if c.CraCashflowInsights != nil {
 		return internal.MarshalJSONWithExtraProperty(c.CraCashflowInsights, "product", "cra_cashflow_insights")
@@ -11304,6 +16406,12 @@ func (c CraReportGetResponseProduct) MarshalJSON() ([]byte, error) {
 	if c.CraIncomeComplete != nil {
 		return internal.MarshalJSONWithExtraProperty(c.CraIncomeComplete, "product", "cra_income_complete")
 	}
+	if c.CraPrism != nil {
+		return internal.MarshalJSONWithExtraProperty(c.CraPrism, "product", "cra_prism")
+	}
+	if c.CraUltrafico != nil {
+		return internal.MarshalJSONWithExtraProperty(c.CraUltrafico, "product", "cra_ultrafico")
+	}
 	if len(c.rawJSON) > 0 {
 		return c.rawJSON, nil
 	}
@@ -11314,12 +16422,15 @@ type CraReportGetResponseProductVisitor interface {
 	VisitCraQualify(*CraReportGetQualifyResponseProduct) error
 	VisitCraIncomeInsights(*CraReportGetIncomeInsightsResponseProduct) error
 	VisitCraHomeLending(*CraReportGetHomeLendingResponseProduct) error
+	VisitCraHomeLendingVoa(*CraReportGetHomeLendingVoaResponseProduct) error
 	VisitCraCashflowInsights(*CraReportGetCashflowInsightsResponseProduct) error
 	VisitCraNetworkInsights(*CraReportGetNetworkInsightsResponseProduct) error
 	VisitCraLendScore(*CraReportGetLendScoreResponseProduct) error
 	VisitCraBaseReport(*CraReportGetBaseReportResponseProduct) error
 	VisitCraLendScoreComplete(*CraReportGetLendScoreCompleteResponseProduct) error
 	VisitCraIncomeComplete(*CraReportGetIncomeCompleteResponseProduct) error
+	VisitCraPrism(*CraReportGetPrismResponseProduct) error
+	VisitCraUltrafico(*CraReportGetUltraFicoResponseProduct) error
 }
 
 func (c *CraReportGetResponseProduct) Accept(visitor CraReportGetResponseProductVisitor) error {
@@ -11331,6 +16442,9 @@ func (c *CraReportGetResponseProduct) Accept(visitor CraReportGetResponseProduct
 	}
 	if c.CraHomeLending != nil {
 		return visitor.VisitCraHomeLending(c.CraHomeLending)
+	}
+	if c.CraHomeLendingVoa != nil {
+		return visitor.VisitCraHomeLendingVoa(c.CraHomeLendingVoa)
 	}
 	if c.CraCashflowInsights != nil {
 		return visitor.VisitCraCashflowInsights(c.CraCashflowInsights)
@@ -11350,6 +16464,12 @@ func (c *CraReportGetResponseProduct) Accept(visitor CraReportGetResponseProduct
 	if c.CraIncomeComplete != nil {
 		return visitor.VisitCraIncomeComplete(c.CraIncomeComplete)
 	}
+	if c.CraPrism != nil {
+		return visitor.VisitCraPrism(c.CraPrism)
+	}
+	if c.CraUltrafico != nil {
+		return visitor.VisitCraUltrafico(c.CraUltrafico)
+	}
 	return fmt.Errorf("type %T does not define a non-empty union type", c)
 }
 
@@ -11366,6 +16486,9 @@ func (c *CraReportGetResponseProduct) validate() error {
 	}
 	if c.CraHomeLending != nil {
 		fields = append(fields, "cra_home_lending")
+	}
+	if c.CraHomeLendingVoa != nil {
+		fields = append(fields, "cra_home_lending_voa")
 	}
 	if c.CraCashflowInsights != nil {
 		fields = append(fields, "cra_cashflow_insights")
@@ -11384,6 +16507,12 @@ func (c *CraReportGetResponseProduct) validate() error {
 	}
 	if c.CraIncomeComplete != nil {
 		fields = append(fields, "cra_income_complete")
+	}
+	if c.CraPrism != nil {
+		fields = append(fields, "cra_prism")
+	}
+	if c.CraUltrafico != nil {
+		fields = append(fields, "cra_ultrafico")
 	}
 	if len(fields) == 0 {
 		if c.Product != "" {
@@ -11409,6 +16538,1933 @@ func (c *CraReportGetResponseProduct) validate() error {
 		}
 	}
 	return nil
+}
+
+var (
+	craReportGetUltraFicoFieldLenderApplicationID   = big.NewInt(1 << 0)
+	craReportGetUltraFicoFieldUltraficoScoreResults = big.NewInt(1 << 1)
+	craReportGetUltraFicoFieldReportCharacteristics = big.NewInt(1 << 2)
+)
+
+// craReportGetUltraFicoNullableFields maps the wire names of CraReportGetUltraFico's nullable fields (required or optional) to their field bits.
+var craReportGetUltraFicoNullableFields = map[string]*big.Int{
+	"report_characteristics": craReportGetUltraFicoFieldReportCharacteristics,
+}
+
+// The UltraFICO scores generated for the user. `null` when the product failed to generate.
+type CraReportGetUltraFico struct {
+	// Client-generated identifier for the application across FICO systems.
+	LenderApplicationID string `json:"lender_application_id" url:"lender_application_id"`
+	// The UltraFICO scoring results, one per requested score.
+	UltraficoScoreResults []*CraReportGetUltraFicoScoreResult         `json:"ultrafico_score_results" url:"ultrafico_score_results"`
+	ReportCharacteristics *CraReportGetUltraFicoReportCharacteristics `json:"report_characteristics,omitempty" url:"report_characteristics,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetUltraFico) GetLenderApplicationID() string {
+	if c == nil {
+		return ""
+	}
+	return c.LenderApplicationID
+}
+
+func (c *CraReportGetUltraFico) GetUltraficoScoreResults() []*CraReportGetUltraFicoScoreResult {
+	if c == nil {
+		return nil
+	}
+	return c.UltraficoScoreResults
+}
+
+func (c *CraReportGetUltraFico) GetReportCharacteristics() *CraReportGetUltraFicoReportCharacteristics {
+	if c == nil {
+		return nil
+	}
+	return c.ReportCharacteristics
+}
+
+func (c *CraReportGetUltraFico) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetUltraFico) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetLenderApplicationID sets the LenderApplicationID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFico) SetLenderApplicationID(lenderApplicationID string) {
+	c.LenderApplicationID = lenderApplicationID
+	c.require(craReportGetUltraFicoFieldLenderApplicationID)
+}
+
+// SetUltraficoScoreResults sets the UltraficoScoreResults field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFico) SetUltraficoScoreResults(ultraficoScoreResults []*CraReportGetUltraFicoScoreResult) {
+	c.UltraficoScoreResults = ultraficoScoreResults
+	c.require(craReportGetUltraFicoFieldUltraficoScoreResults)
+}
+
+// SetReportCharacteristics sets the ReportCharacteristics field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFico) SetReportCharacteristics(reportCharacteristics *CraReportGetUltraFicoReportCharacteristics) {
+	c.ReportCharacteristics = reportCharacteristics
+	c.require(craReportGetUltraFicoFieldReportCharacteristics)
+}
+
+func (c *CraReportGetUltraFico) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetUltraFico
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetUltraFico(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportGetUltraFicoNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetUltraFico) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetUltraFico
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetUltraFico) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportGetUltraFicoAccountFieldAccountID      = big.NewInt(1 << 0)
+	craReportGetUltraFicoAccountFieldName           = big.NewInt(1 << 1)
+	craReportGetUltraFicoAccountFieldOfficialName   = big.NewInt(1 << 2)
+	craReportGetUltraFicoAccountFieldMask           = big.NewInt(1 << 3)
+	craReportGetUltraFicoAccountFieldType           = big.NewInt(1 << 4)
+	craReportGetUltraFicoAccountFieldSubtype        = big.NewInt(1 << 5)
+	craReportGetUltraFicoAccountFieldPrimaryAccount = big.NewInt(1 << 6)
+	craReportGetUltraFicoAccountFieldIdentityMatch  = big.NewInt(1 << 7)
+	craReportGetUltraFicoAccountFieldOwners         = big.NewInt(1 << 8)
+)
+
+// craReportGetUltraFicoAccountNullableFields maps the wire names of CraReportGetUltraFicoAccount's nullable fields (required or optional) to their field bits.
+var craReportGetUltraFicoAccountNullableFields = map[string]*big.Int{
+	"official_name":   craReportGetUltraFicoAccountFieldOfficialName,
+	"mask":            craReportGetUltraFicoAccountFieldMask,
+	"subtype":         craReportGetUltraFicoAccountFieldSubtype,
+	"primary_account": craReportGetUltraFicoAccountFieldPrimaryAccount,
+	"identity_match":  craReportGetUltraFicoAccountFieldIdentityMatch,
+}
+
+// A checking, savings, or money market account used to generate `cra_ultrafico`, with its owners, identity match scores, and primary account prediction.
+type CraReportGetUltraFicoAccount struct {
+	// Plaid's unique identifier for the account. This value will not change unless Plaid can't reconcile the account with the data returned by the financial institution. If this happens a new `account_id` will be assigned to the account.
+	//
+	// Like all Plaid identifiers, the `account_id` is case sensitive.
+	AccountID string `json:"account_id" url:"account_id"`
+	// The name of the account, either assigned by the user or by the financial institution itself.
+	Name string `json:"name" url:"name"`
+	// The official name of the account as given by the financial institution.
+	OfficialName *string `json:"official_name,omitempty" url:"official_name,omitempty"`
+	// The last 2-4 alphanumeric characters of an account's official account number. Note that the mask may be non-unique between an Item's accounts, and it may also not match the mask that the bank displays to the user.
+	Mask           *string                            `json:"mask,omitempty" url:"mask,omitempty"`
+	Type           AccountType                        `json:"type" url:"type"`
+	Subtype        *AccountSubtype                    `json:"subtype,omitempty" url:"subtype,omitempty"`
+	PrimaryAccount *CraReportGetAccountPrimaryAccount `json:"primary_account,omitempty" url:"primary_account,omitempty"`
+	IdentityMatch  *CraReportGetAccountIdentityMatch  `json:"identity_match,omitempty" url:"identity_match,omitempty"`
+	// Data returned by the financial institution about the account owner or owners. Multiple owners on a single account will be represented in the same `owner` object, not in multiple owner objects within the array. Empty if no owners are found.
+	Owners []*Owner `json:"owners" url:"owners"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetUltraFicoAccount) GetAccountID() string {
+	if c == nil {
+		return ""
+	}
+	return c.AccountID
+}
+
+func (c *CraReportGetUltraFicoAccount) GetName() string {
+	if c == nil {
+		return ""
+	}
+	return c.Name
+}
+
+func (c *CraReportGetUltraFicoAccount) GetOfficialName() *string {
+	if c == nil {
+		return nil
+	}
+	return c.OfficialName
+}
+
+func (c *CraReportGetUltraFicoAccount) GetMask() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Mask
+}
+
+func (c *CraReportGetUltraFicoAccount) GetType() AccountType {
+	if c == nil {
+		return ""
+	}
+	return c.Type
+}
+
+func (c *CraReportGetUltraFicoAccount) GetSubtype() *AccountSubtype {
+	if c == nil {
+		return nil
+	}
+	return c.Subtype
+}
+
+func (c *CraReportGetUltraFicoAccount) GetPrimaryAccount() *CraReportGetAccountPrimaryAccount {
+	if c == nil {
+		return nil
+	}
+	return c.PrimaryAccount
+}
+
+func (c *CraReportGetUltraFicoAccount) GetIdentityMatch() *CraReportGetAccountIdentityMatch {
+	if c == nil {
+		return nil
+	}
+	return c.IdentityMatch
+}
+
+func (c *CraReportGetUltraFicoAccount) GetOwners() []*Owner {
+	if c == nil {
+		return nil
+	}
+	return c.Owners
+}
+
+func (c *CraReportGetUltraFicoAccount) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetUltraFicoAccount) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetAccountID sets the AccountID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoAccount) SetAccountID(accountID string) {
+	c.AccountID = accountID
+	c.require(craReportGetUltraFicoAccountFieldAccountID)
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoAccount) SetName(name string) {
+	c.Name = name
+	c.require(craReportGetUltraFicoAccountFieldName)
+}
+
+// SetOfficialName sets the OfficialName field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoAccount) SetOfficialName(officialName *string) {
+	c.OfficialName = officialName
+	c.require(craReportGetUltraFicoAccountFieldOfficialName)
+}
+
+// SetMask sets the Mask field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoAccount) SetMask(mask *string) {
+	c.Mask = mask
+	c.require(craReportGetUltraFicoAccountFieldMask)
+}
+
+// SetType sets the Type field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoAccount) SetType(type_ AccountType) {
+	c.Type = type_
+	c.require(craReportGetUltraFicoAccountFieldType)
+}
+
+// SetSubtype sets the Subtype field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoAccount) SetSubtype(subtype *AccountSubtype) {
+	c.Subtype = subtype
+	c.require(craReportGetUltraFicoAccountFieldSubtype)
+}
+
+// SetPrimaryAccount sets the PrimaryAccount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoAccount) SetPrimaryAccount(primaryAccount *CraReportGetAccountPrimaryAccount) {
+	c.PrimaryAccount = primaryAccount
+	c.require(craReportGetUltraFicoAccountFieldPrimaryAccount)
+}
+
+// SetIdentityMatch sets the IdentityMatch field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoAccount) SetIdentityMatch(identityMatch *CraReportGetAccountIdentityMatch) {
+	c.IdentityMatch = identityMatch
+	c.require(craReportGetUltraFicoAccountFieldIdentityMatch)
+}
+
+// SetOwners sets the Owners field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoAccount) SetOwners(owners []*Owner) {
+	c.Owners = owners
+	c.require(craReportGetUltraFicoAccountFieldOwners)
+}
+
+func (c *CraReportGetUltraFicoAccount) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetUltraFicoAccount
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetUltraFicoAccount(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportGetUltraFicoAccountNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetUltraFicoAccount) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetUltraFicoAccount
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetUltraFicoAccount) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportGetUltraFicoItemFieldInstitutionID   = big.NewInt(1 << 0)
+	craReportGetUltraFicoItemFieldInstitutionName = big.NewInt(1 << 1)
+	craReportGetUltraFicoItemFieldItemID          = big.NewInt(1 << 2)
+	craReportGetUltraFicoItemFieldLastUpdatedTime = big.NewInt(1 << 3)
+	craReportGetUltraFicoItemFieldAccounts        = big.NewInt(1 << 4)
+)
+
+// An Item used to generate `cra_ultrafico`, with each eligible account's owners, identity match scores, and primary account prediction.
+type CraReportGetUltraFicoItem struct {
+	// The ID of the financial institution associated with the Item.
+	InstitutionID string `json:"institution_id" url:"institution_id"`
+	// The full financial institution name associated with the Item.
+	InstitutionName string `json:"institution_name" url:"institution_name"`
+	ItemID          ItemID `json:"item_id" url:"item_id"`
+	// The time when this Item's data was last retrieved from the financial institution prior to report generation.
+	LastUpdatedTime time.Time `json:"last_updated_time" url:"last_updated_time"`
+	// The checking, savings, and money market accounts on the Item used to generate UltraFICO.
+	Accounts []*CraReportGetUltraFicoAccount `json:"accounts" url:"accounts"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetUltraFicoItem) GetInstitutionID() string {
+	if c == nil {
+		return ""
+	}
+	return c.InstitutionID
+}
+
+func (c *CraReportGetUltraFicoItem) GetInstitutionName() string {
+	if c == nil {
+		return ""
+	}
+	return c.InstitutionName
+}
+
+func (c *CraReportGetUltraFicoItem) GetItemID() ItemID {
+	if c == nil {
+		return ""
+	}
+	return c.ItemID
+}
+
+func (c *CraReportGetUltraFicoItem) GetLastUpdatedTime() time.Time {
+	if c == nil {
+		return time.Time{}
+	}
+	return c.LastUpdatedTime
+}
+
+func (c *CraReportGetUltraFicoItem) GetAccounts() []*CraReportGetUltraFicoAccount {
+	if c == nil {
+		return nil
+	}
+	return c.Accounts
+}
+
+func (c *CraReportGetUltraFicoItem) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetUltraFicoItem) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetInstitutionID sets the InstitutionID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoItem) SetInstitutionID(institutionID string) {
+	c.InstitutionID = institutionID
+	c.require(craReportGetUltraFicoItemFieldInstitutionID)
+}
+
+// SetInstitutionName sets the InstitutionName field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoItem) SetInstitutionName(institutionName string) {
+	c.InstitutionName = institutionName
+	c.require(craReportGetUltraFicoItemFieldInstitutionName)
+}
+
+// SetItemID sets the ItemID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoItem) SetItemID(itemID ItemID) {
+	c.ItemID = itemID
+	c.require(craReportGetUltraFicoItemFieldItemID)
+}
+
+// SetLastUpdatedTime sets the LastUpdatedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoItem) SetLastUpdatedTime(lastUpdatedTime time.Time) {
+	c.LastUpdatedTime = lastUpdatedTime
+	c.require(craReportGetUltraFicoItemFieldLastUpdatedTime)
+}
+
+// SetAccounts sets the Accounts field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoItem) SetAccounts(accounts []*CraReportGetUltraFicoAccount) {
+	c.Accounts = accounts
+	c.require(craReportGetUltraFicoItemFieldAccounts)
+}
+
+func (c *CraReportGetUltraFicoItem) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetUltraFicoItem
+	var unmarshaler = struct {
+		embed
+		LastUpdatedTime *internal.DateTime `json:"last_updated_time"`
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetUltraFicoItem(unmarshaler.embed)
+	c.LastUpdatedTime = unmarshaler.LastUpdatedTime.Time()
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetUltraFicoItem) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetUltraFicoItem
+	var marshaler = struct {
+		embed
+		LastUpdatedTime *internal.DateTime `json:"last_updated_time"`
+	}{
+		embed:           embed(*c),
+		LastUpdatedTime: internal.NewDateTime(c.LastUpdatedTime),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetUltraFicoItem) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportGetUltraFicoMetadataFieldGeneratedTime              = big.NewInt(1 << 0)
+	craReportGetUltraFicoMetadataFieldItemCount                  = big.NewInt(1 << 1)
+	craReportGetUltraFicoMetadataFieldAccountCount               = big.NewInt(1 << 2)
+	craReportGetUltraFicoMetadataFieldInstitutionIDs             = big.NewInt(1 << 3)
+	craReportGetUltraFicoMetadataFieldPrimaryAccountCount        = big.NewInt(1 << 4)
+	craReportGetUltraFicoMetadataFieldDepositoryAccountTypeCount = big.NewInt(1 << 5)
+	craReportGetUltraFicoMetadataFieldCreditAccountTypeCount     = big.NewInt(1 << 6)
+	craReportGetUltraFicoMetadataFieldInvestmentAccountTypeCount = big.NewInt(1 << 7)
+	craReportGetUltraFicoMetadataFieldOtherAccountTypeCount      = big.NewInt(1 << 8)
+	craReportGetUltraFicoMetadataFieldMultipleOwnerAccountCount  = big.NewInt(1 << 9)
+	craReportGetUltraFicoMetadataFieldOldestTransactionDate      = big.NewInt(1 << 10)
+	craReportGetUltraFicoMetadataFieldMostRecentTransactionDate  = big.NewInt(1 << 11)
+)
+
+// craReportGetUltraFicoMetadataNullableFields maps the wire names of CraReportGetUltraFicoMetadata's nullable fields (required or optional) to their field bits.
+var craReportGetUltraFicoMetadataNullableFields = map[string]*big.Int{
+	"generated_time":               craReportGetUltraFicoMetadataFieldGeneratedTime,
+	"oldest_transaction_date":      craReportGetUltraFicoMetadataFieldOldestTransactionDate,
+	"most_recent_transaction_date": craReportGetUltraFicoMetadataFieldMostRecentTransactionDate,
+}
+
+// UltraFICO report metadata returned by `/cra/report/get`. `null` when the product failed to generate.
+type CraReportGetUltraFicoMetadata struct {
+	// The time the report was generated. May be `null` if unavailable.
+	GeneratedTime *time.Time `json:"generated_time,omitempty" url:"generated_time,omitempty"`
+	// The number of Items used to generate the report.
+	ItemCount int `json:"item_count" url:"item_count"`
+	// The number of accounts used to generate the report.
+	AccountCount int `json:"account_count" url:"account_count"`
+	// The institution IDs of the Items used to generate the report.
+	InstitutionIDs []string `json:"institution_ids" url:"institution_ids"`
+	// The number of accounts carrying Plaid's primary account indicator.
+	PrimaryAccountCount int `json:"primary_account_count" url:"primary_account_count"`
+	// The number of depository accounts used to generate the report.
+	DepositoryAccountTypeCount int `json:"depository_account_type_count" url:"depository_account_type_count"`
+	// The number of credit accounts used to generate the report.
+	CreditAccountTypeCount int `json:"credit_account_type_count" url:"credit_account_type_count"`
+	// The number of investment accounts used to generate the report.
+	InvestmentAccountTypeCount int `json:"investment_account_type_count" url:"investment_account_type_count"`
+	// The number of accounts that are neither depository, credit, nor investment.
+	OtherAccountTypeCount int `json:"other_account_type_count" url:"other_account_type_count"`
+	// The number of accounts with multiple owners.
+	MultipleOwnerAccountCount int `json:"multiple_owner_account_count" url:"multiple_owner_account_count"`
+	// The earliest transaction date across the accounts used to generate the report. `null` if none have posted transactions.
+	OldestTransactionDate *time.Time `json:"oldest_transaction_date,omitempty" url:"oldest_transaction_date,omitempty" format:"date"`
+	// The latest transaction date across the accounts used to generate the report. `null` if none have posted transactions.
+	MostRecentTransactionDate *time.Time `json:"most_recent_transaction_date,omitempty" url:"most_recent_transaction_date,omitempty" format:"date"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetUltraFicoMetadata) GetGeneratedTime() *time.Time {
+	if c == nil {
+		return nil
+	}
+	return c.GeneratedTime
+}
+
+func (c *CraReportGetUltraFicoMetadata) GetItemCount() int {
+	if c == nil {
+		return 0
+	}
+	return c.ItemCount
+}
+
+func (c *CraReportGetUltraFicoMetadata) GetAccountCount() int {
+	if c == nil {
+		return 0
+	}
+	return c.AccountCount
+}
+
+func (c *CraReportGetUltraFicoMetadata) GetInstitutionIDs() []string {
+	if c == nil {
+		return nil
+	}
+	return c.InstitutionIDs
+}
+
+func (c *CraReportGetUltraFicoMetadata) GetPrimaryAccountCount() int {
+	if c == nil {
+		return 0
+	}
+	return c.PrimaryAccountCount
+}
+
+func (c *CraReportGetUltraFicoMetadata) GetDepositoryAccountTypeCount() int {
+	if c == nil {
+		return 0
+	}
+	return c.DepositoryAccountTypeCount
+}
+
+func (c *CraReportGetUltraFicoMetadata) GetCreditAccountTypeCount() int {
+	if c == nil {
+		return 0
+	}
+	return c.CreditAccountTypeCount
+}
+
+func (c *CraReportGetUltraFicoMetadata) GetInvestmentAccountTypeCount() int {
+	if c == nil {
+		return 0
+	}
+	return c.InvestmentAccountTypeCount
+}
+
+func (c *CraReportGetUltraFicoMetadata) GetOtherAccountTypeCount() int {
+	if c == nil {
+		return 0
+	}
+	return c.OtherAccountTypeCount
+}
+
+func (c *CraReportGetUltraFicoMetadata) GetMultipleOwnerAccountCount() int {
+	if c == nil {
+		return 0
+	}
+	return c.MultipleOwnerAccountCount
+}
+
+func (c *CraReportGetUltraFicoMetadata) GetOldestTransactionDate() *time.Time {
+	if c == nil {
+		return nil
+	}
+	return c.OldestTransactionDate
+}
+
+func (c *CraReportGetUltraFicoMetadata) GetMostRecentTransactionDate() *time.Time {
+	if c == nil {
+		return nil
+	}
+	return c.MostRecentTransactionDate
+}
+
+func (c *CraReportGetUltraFicoMetadata) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetUltraFicoMetadata) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetGeneratedTime sets the GeneratedTime field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoMetadata) SetGeneratedTime(generatedTime *time.Time) {
+	c.GeneratedTime = generatedTime
+	c.require(craReportGetUltraFicoMetadataFieldGeneratedTime)
+}
+
+// SetItemCount sets the ItemCount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoMetadata) SetItemCount(itemCount int) {
+	c.ItemCount = itemCount
+	c.require(craReportGetUltraFicoMetadataFieldItemCount)
+}
+
+// SetAccountCount sets the AccountCount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoMetadata) SetAccountCount(accountCount int) {
+	c.AccountCount = accountCount
+	c.require(craReportGetUltraFicoMetadataFieldAccountCount)
+}
+
+// SetInstitutionIDs sets the InstitutionIDs field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoMetadata) SetInstitutionIDs(institutionIDs []string) {
+	c.InstitutionIDs = institutionIDs
+	c.require(craReportGetUltraFicoMetadataFieldInstitutionIDs)
+}
+
+// SetPrimaryAccountCount sets the PrimaryAccountCount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoMetadata) SetPrimaryAccountCount(primaryAccountCount int) {
+	c.PrimaryAccountCount = primaryAccountCount
+	c.require(craReportGetUltraFicoMetadataFieldPrimaryAccountCount)
+}
+
+// SetDepositoryAccountTypeCount sets the DepositoryAccountTypeCount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoMetadata) SetDepositoryAccountTypeCount(depositoryAccountTypeCount int) {
+	c.DepositoryAccountTypeCount = depositoryAccountTypeCount
+	c.require(craReportGetUltraFicoMetadataFieldDepositoryAccountTypeCount)
+}
+
+// SetCreditAccountTypeCount sets the CreditAccountTypeCount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoMetadata) SetCreditAccountTypeCount(creditAccountTypeCount int) {
+	c.CreditAccountTypeCount = creditAccountTypeCount
+	c.require(craReportGetUltraFicoMetadataFieldCreditAccountTypeCount)
+}
+
+// SetInvestmentAccountTypeCount sets the InvestmentAccountTypeCount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoMetadata) SetInvestmentAccountTypeCount(investmentAccountTypeCount int) {
+	c.InvestmentAccountTypeCount = investmentAccountTypeCount
+	c.require(craReportGetUltraFicoMetadataFieldInvestmentAccountTypeCount)
+}
+
+// SetOtherAccountTypeCount sets the OtherAccountTypeCount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoMetadata) SetOtherAccountTypeCount(otherAccountTypeCount int) {
+	c.OtherAccountTypeCount = otherAccountTypeCount
+	c.require(craReportGetUltraFicoMetadataFieldOtherAccountTypeCount)
+}
+
+// SetMultipleOwnerAccountCount sets the MultipleOwnerAccountCount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoMetadata) SetMultipleOwnerAccountCount(multipleOwnerAccountCount int) {
+	c.MultipleOwnerAccountCount = multipleOwnerAccountCount
+	c.require(craReportGetUltraFicoMetadataFieldMultipleOwnerAccountCount)
+}
+
+// SetOldestTransactionDate sets the OldestTransactionDate field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoMetadata) SetOldestTransactionDate(oldestTransactionDate *time.Time) {
+	c.OldestTransactionDate = oldestTransactionDate
+	c.require(craReportGetUltraFicoMetadataFieldOldestTransactionDate)
+}
+
+// SetMostRecentTransactionDate sets the MostRecentTransactionDate field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoMetadata) SetMostRecentTransactionDate(mostRecentTransactionDate *time.Time) {
+	c.MostRecentTransactionDate = mostRecentTransactionDate
+	c.require(craReportGetUltraFicoMetadataFieldMostRecentTransactionDate)
+}
+
+func (c *CraReportGetUltraFicoMetadata) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetUltraFicoMetadata
+	var unmarshaler = struct {
+		embed
+		GeneratedTime             *internal.DateTime `json:"generated_time,omitempty"`
+		OldestTransactionDate     *internal.Date     `json:"oldest_transaction_date,omitempty"`
+		MostRecentTransactionDate *internal.Date     `json:"most_recent_transaction_date,omitempty"`
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetUltraFicoMetadata(unmarshaler.embed)
+	c.GeneratedTime = unmarshaler.GeneratedTime.TimePtr()
+	c.OldestTransactionDate = unmarshaler.OldestTransactionDate.TimePtr()
+	c.MostRecentTransactionDate = unmarshaler.MostRecentTransactionDate.TimePtr()
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportGetUltraFicoMetadataNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetUltraFicoMetadata) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetUltraFicoMetadata
+	var marshaler = struct {
+		embed
+		GeneratedTime             *internal.DateTime `json:"generated_time,omitempty"`
+		OldestTransactionDate     *internal.Date     `json:"oldest_transaction_date,omitempty"`
+		MostRecentTransactionDate *internal.Date     `json:"most_recent_transaction_date,omitempty"`
+	}{
+		embed:                     embed(*c),
+		GeneratedTime:             internal.NewOptionalDateTime(c.GeneratedTime),
+		OldestTransactionDate:     internal.NewOptionalDate(c.OldestTransactionDate),
+		MostRecentTransactionDate: internal.NewOptionalDate(c.MostRecentTransactionDate),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetUltraFicoMetadata) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportGetUltraFicoReportCharacteristicsFieldNumAccounts                                    = big.NewInt(1 << 0)
+	craReportGetUltraFicoReportCharacteristicsFieldAvgDailyBalanceOver1Month                      = big.NewInt(1 << 1)
+	craReportGetUltraFicoReportCharacteristicsFieldAvgDailyBalanceOver3Months                     = big.NewInt(1 << 2)
+	craReportGetUltraFicoReportCharacteristicsFieldAvgDailyBalanceOver6Months                     = big.NewInt(1 << 3)
+	craReportGetUltraFicoReportCharacteristicsFieldAvgDailyBalanceOver12Months                    = big.NewInt(1 << 4)
+	craReportGetUltraFicoReportCharacteristicsFieldDaysSinceEarliestTx                            = big.NewInt(1 << 5)
+	craReportGetUltraFicoReportCharacteristicsFieldDaysSinceMostRecentNegativeEndingBalance       = big.NewInt(1 << 6)
+	craReportGetUltraFicoReportCharacteristicsFieldDaysSinceMostRecentInsufficientFundsFeeDebitTx = big.NewInt(1 << 7)
+	craReportGetUltraFicoReportCharacteristicsFieldTotNumberDaysWithNegativeBalanceOver1Month     = big.NewInt(1 << 8)
+	craReportGetUltraFicoReportCharacteristicsFieldTotNumberDaysWithNegativeBalanceOver3Months    = big.NewInt(1 << 9)
+	craReportGetUltraFicoReportCharacteristicsFieldTotNumberDaysWithNegativeBalanceOver6Months    = big.NewInt(1 << 10)
+	craReportGetUltraFicoReportCharacteristicsFieldTotNumberDaysWithNegativeBalanceOver12Months   = big.NewInt(1 << 11)
+	craReportGetUltraFicoReportCharacteristicsFieldDaysSinceMostRecentTx                          = big.NewInt(1 << 12)
+	craReportGetUltraFicoReportCharacteristicsFieldDaysWithTxOver1Month                           = big.NewInt(1 << 13)
+	craReportGetUltraFicoReportCharacteristicsFieldDaysWithTxOver3Months                          = big.NewInt(1 << 14)
+	craReportGetUltraFicoReportCharacteristicsFieldDaysWithTxOver6Months                          = big.NewInt(1 << 15)
+	craReportGetUltraFicoReportCharacteristicsFieldDaysWithTxOver12Months                         = big.NewInt(1 << 16)
+	craReportGetUltraFicoReportCharacteristicsFieldTotCurrentBalances                             = big.NewInt(1 << 17)
+	craReportGetUltraFicoReportCharacteristicsFieldNumCheckingAccounts                            = big.NewInt(1 << 18)
+	craReportGetUltraFicoReportCharacteristicsFieldNumMoneyMarketAccounts                         = big.NewInt(1 << 19)
+	craReportGetUltraFicoReportCharacteristicsFieldNumSavingsAccounts                             = big.NewInt(1 << 20)
+)
+
+// craReportGetUltraFicoReportCharacteristicsNullableFields maps the wire names of CraReportGetUltraFicoReportCharacteristics's nullable fields (required or optional) to their field bits.
+var craReportGetUltraFicoReportCharacteristicsNullableFields = map[string]*big.Int{
+	"num_accounts":                                           craReportGetUltraFicoReportCharacteristicsFieldNumAccounts,
+	"avg_daily_balance_over_1_month":                         craReportGetUltraFicoReportCharacteristicsFieldAvgDailyBalanceOver1Month,
+	"avg_daily_balance_over_3_months":                        craReportGetUltraFicoReportCharacteristicsFieldAvgDailyBalanceOver3Months,
+	"avg_daily_balance_over_6_months":                        craReportGetUltraFicoReportCharacteristicsFieldAvgDailyBalanceOver6Months,
+	"avg_daily_balance_over_12_months":                       craReportGetUltraFicoReportCharacteristicsFieldAvgDailyBalanceOver12Months,
+	"days_since_earliest_tx":                                 craReportGetUltraFicoReportCharacteristicsFieldDaysSinceEarliestTx,
+	"days_since_most_recent_negative_ending_balance":         craReportGetUltraFicoReportCharacteristicsFieldDaysSinceMostRecentNegativeEndingBalance,
+	"days_since_most_recent_insufficient_funds_fee_debit_tx": craReportGetUltraFicoReportCharacteristicsFieldDaysSinceMostRecentInsufficientFundsFeeDebitTx,
+	"tot_number_days_with_negative_balance_over_1_month":     craReportGetUltraFicoReportCharacteristicsFieldTotNumberDaysWithNegativeBalanceOver1Month,
+	"tot_number_days_with_negative_balance_over_3_months":    craReportGetUltraFicoReportCharacteristicsFieldTotNumberDaysWithNegativeBalanceOver3Months,
+	"tot_number_days_with_negative_balance_over_6_months":    craReportGetUltraFicoReportCharacteristicsFieldTotNumberDaysWithNegativeBalanceOver6Months,
+	"tot_number_days_with_negative_balance_over_12_months":   craReportGetUltraFicoReportCharacteristicsFieldTotNumberDaysWithNegativeBalanceOver12Months,
+	"days_since_most_recent_tx":                              craReportGetUltraFicoReportCharacteristicsFieldDaysSinceMostRecentTx,
+	"days_with_tx_over_1_month":                              craReportGetUltraFicoReportCharacteristicsFieldDaysWithTxOver1Month,
+	"days_with_tx_over_3_months":                             craReportGetUltraFicoReportCharacteristicsFieldDaysWithTxOver3Months,
+	"days_with_tx_over_6_months":                             craReportGetUltraFicoReportCharacteristicsFieldDaysWithTxOver6Months,
+	"days_with_tx_over_12_months":                            craReportGetUltraFicoReportCharacteristicsFieldDaysWithTxOver12Months,
+	"tot_current_balances":                                   craReportGetUltraFicoReportCharacteristicsFieldTotCurrentBalances,
+	"num_checking_accounts":                                  craReportGetUltraFicoReportCharacteristicsFieldNumCheckingAccounts,
+	"num_money_market_accounts":                              craReportGetUltraFicoReportCharacteristicsFieldNumMoneyMarketAccounts,
+	"num_savings_accounts":                                   craReportGetUltraFicoReportCharacteristicsFieldNumSavingsAccounts,
+}
+
+// Characteristics of the banking data used to generate the UltraFICO scores.
+type CraReportGetUltraFicoReportCharacteristics struct {
+	// The number of checking, savings, and money market accounts included in the report.
+	NumAccounts *int `json:"num_accounts,omitempty" url:"num_accounts,omitempty"`
+	// Average daily balance over the past 1 month.
+	AvgDailyBalanceOver1Month *float64 `json:"avg_daily_balance_over_1_month,omitempty" url:"avg_daily_balance_over_1_month,omitempty"`
+	// Average daily balance over the past 3 months.
+	AvgDailyBalanceOver3Months *float64 `json:"avg_daily_balance_over_3_months,omitempty" url:"avg_daily_balance_over_3_months,omitempty"`
+	// Average daily balance over the past 6 months.
+	AvgDailyBalanceOver6Months *float64 `json:"avg_daily_balance_over_6_months,omitempty" url:"avg_daily_balance_over_6_months,omitempty"`
+	// Average daily balance over the past 12 months.
+	AvgDailyBalanceOver12Months *float64 `json:"avg_daily_balance_over_12_months,omitempty" url:"avg_daily_balance_over_12_months,omitempty"`
+	// Number of days since the earliest transaction in the report.
+	DaysSinceEarliestTx *int `json:"days_since_earliest_tx,omitempty" url:"days_since_earliest_tx,omitempty"`
+	// Number of days since the most recent day with a negative ending balance.
+	DaysSinceMostRecentNegativeEndingBalance *int `json:"days_since_most_recent_negative_ending_balance,omitempty" url:"days_since_most_recent_negative_ending_balance,omitempty"`
+	// Number of days since the most recent insufficient funds fee debit transaction.
+	DaysSinceMostRecentInsufficientFundsFeeDebitTx *int `json:"days_since_most_recent_insufficient_funds_fee_debit_tx,omitempty" url:"days_since_most_recent_insufficient_funds_fee_debit_tx,omitempty"`
+	// Total number of days with a negative balance over the past 1 month.
+	TotNumberDaysWithNegativeBalanceOver1Month *int `json:"tot_number_days_with_negative_balance_over_1_month,omitempty" url:"tot_number_days_with_negative_balance_over_1_month,omitempty"`
+	// Total number of days with a negative balance over the past 3 months.
+	TotNumberDaysWithNegativeBalanceOver3Months *int `json:"tot_number_days_with_negative_balance_over_3_months,omitempty" url:"tot_number_days_with_negative_balance_over_3_months,omitempty"`
+	// Total number of days with a negative balance over the past 6 months.
+	TotNumberDaysWithNegativeBalanceOver6Months *int `json:"tot_number_days_with_negative_balance_over_6_months,omitempty" url:"tot_number_days_with_negative_balance_over_6_months,omitempty"`
+	// Total number of days with a negative balance over the past 12 months.
+	TotNumberDaysWithNegativeBalanceOver12Months *int `json:"tot_number_days_with_negative_balance_over_12_months,omitempty" url:"tot_number_days_with_negative_balance_over_12_months,omitempty"`
+	// Number of days since the most recent transaction.
+	DaysSinceMostRecentTx *int `json:"days_since_most_recent_tx,omitempty" url:"days_since_most_recent_tx,omitempty"`
+	// Number of days with at least one transaction over the past 1 month.
+	DaysWithTxOver1Month *int `json:"days_with_tx_over_1_month,omitempty" url:"days_with_tx_over_1_month,omitempty"`
+	// Number of days with at least one transaction over the past 3 months.
+	DaysWithTxOver3Months *int `json:"days_with_tx_over_3_months,omitempty" url:"days_with_tx_over_3_months,omitempty"`
+	// Number of days with at least one transaction over the past 6 months.
+	DaysWithTxOver6Months *int `json:"days_with_tx_over_6_months,omitempty" url:"days_with_tx_over_6_months,omitempty"`
+	// Number of days with at least one transaction over the past 12 months.
+	DaysWithTxOver12Months *int `json:"days_with_tx_over_12_months,omitempty" url:"days_with_tx_over_12_months,omitempty"`
+	// Sum of current balances across all accounts in the report.
+	TotCurrentBalances *float64 `json:"tot_current_balances,omitempty" url:"tot_current_balances,omitempty"`
+	// Number of checking accounts included in the report.
+	NumCheckingAccounts *int `json:"num_checking_accounts,omitempty" url:"num_checking_accounts,omitempty"`
+	// Number of money market accounts included in the report.
+	NumMoneyMarketAccounts *int `json:"num_money_market_accounts,omitempty" url:"num_money_market_accounts,omitempty"`
+	// Number of savings accounts included in the report.
+	NumSavingsAccounts *int `json:"num_savings_accounts,omitempty" url:"num_savings_accounts,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetUltraFicoReportCharacteristics) GetNumAccounts() *int {
+	if c == nil {
+		return nil
+	}
+	return c.NumAccounts
+}
+
+func (c *CraReportGetUltraFicoReportCharacteristics) GetAvgDailyBalanceOver1Month() *float64 {
+	if c == nil {
+		return nil
+	}
+	return c.AvgDailyBalanceOver1Month
+}
+
+func (c *CraReportGetUltraFicoReportCharacteristics) GetAvgDailyBalanceOver3Months() *float64 {
+	if c == nil {
+		return nil
+	}
+	return c.AvgDailyBalanceOver3Months
+}
+
+func (c *CraReportGetUltraFicoReportCharacteristics) GetAvgDailyBalanceOver6Months() *float64 {
+	if c == nil {
+		return nil
+	}
+	return c.AvgDailyBalanceOver6Months
+}
+
+func (c *CraReportGetUltraFicoReportCharacteristics) GetAvgDailyBalanceOver12Months() *float64 {
+	if c == nil {
+		return nil
+	}
+	return c.AvgDailyBalanceOver12Months
+}
+
+func (c *CraReportGetUltraFicoReportCharacteristics) GetDaysSinceEarliestTx() *int {
+	if c == nil {
+		return nil
+	}
+	return c.DaysSinceEarliestTx
+}
+
+func (c *CraReportGetUltraFicoReportCharacteristics) GetDaysSinceMostRecentNegativeEndingBalance() *int {
+	if c == nil {
+		return nil
+	}
+	return c.DaysSinceMostRecentNegativeEndingBalance
+}
+
+func (c *CraReportGetUltraFicoReportCharacteristics) GetDaysSinceMostRecentInsufficientFundsFeeDebitTx() *int {
+	if c == nil {
+		return nil
+	}
+	return c.DaysSinceMostRecentInsufficientFundsFeeDebitTx
+}
+
+func (c *CraReportGetUltraFicoReportCharacteristics) GetTotNumberDaysWithNegativeBalanceOver1Month() *int {
+	if c == nil {
+		return nil
+	}
+	return c.TotNumberDaysWithNegativeBalanceOver1Month
+}
+
+func (c *CraReportGetUltraFicoReportCharacteristics) GetTotNumberDaysWithNegativeBalanceOver3Months() *int {
+	if c == nil {
+		return nil
+	}
+	return c.TotNumberDaysWithNegativeBalanceOver3Months
+}
+
+func (c *CraReportGetUltraFicoReportCharacteristics) GetTotNumberDaysWithNegativeBalanceOver6Months() *int {
+	if c == nil {
+		return nil
+	}
+	return c.TotNumberDaysWithNegativeBalanceOver6Months
+}
+
+func (c *CraReportGetUltraFicoReportCharacteristics) GetTotNumberDaysWithNegativeBalanceOver12Months() *int {
+	if c == nil {
+		return nil
+	}
+	return c.TotNumberDaysWithNegativeBalanceOver12Months
+}
+
+func (c *CraReportGetUltraFicoReportCharacteristics) GetDaysSinceMostRecentTx() *int {
+	if c == nil {
+		return nil
+	}
+	return c.DaysSinceMostRecentTx
+}
+
+func (c *CraReportGetUltraFicoReportCharacteristics) GetDaysWithTxOver1Month() *int {
+	if c == nil {
+		return nil
+	}
+	return c.DaysWithTxOver1Month
+}
+
+func (c *CraReportGetUltraFicoReportCharacteristics) GetDaysWithTxOver3Months() *int {
+	if c == nil {
+		return nil
+	}
+	return c.DaysWithTxOver3Months
+}
+
+func (c *CraReportGetUltraFicoReportCharacteristics) GetDaysWithTxOver6Months() *int {
+	if c == nil {
+		return nil
+	}
+	return c.DaysWithTxOver6Months
+}
+
+func (c *CraReportGetUltraFicoReportCharacteristics) GetDaysWithTxOver12Months() *int {
+	if c == nil {
+		return nil
+	}
+	return c.DaysWithTxOver12Months
+}
+
+func (c *CraReportGetUltraFicoReportCharacteristics) GetTotCurrentBalances() *float64 {
+	if c == nil {
+		return nil
+	}
+	return c.TotCurrentBalances
+}
+
+func (c *CraReportGetUltraFicoReportCharacteristics) GetNumCheckingAccounts() *int {
+	if c == nil {
+		return nil
+	}
+	return c.NumCheckingAccounts
+}
+
+func (c *CraReportGetUltraFicoReportCharacteristics) GetNumMoneyMarketAccounts() *int {
+	if c == nil {
+		return nil
+	}
+	return c.NumMoneyMarketAccounts
+}
+
+func (c *CraReportGetUltraFicoReportCharacteristics) GetNumSavingsAccounts() *int {
+	if c == nil {
+		return nil
+	}
+	return c.NumSavingsAccounts
+}
+
+func (c *CraReportGetUltraFicoReportCharacteristics) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetUltraFicoReportCharacteristics) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetNumAccounts sets the NumAccounts field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoReportCharacteristics) SetNumAccounts(numAccounts *int) {
+	c.NumAccounts = numAccounts
+	c.require(craReportGetUltraFicoReportCharacteristicsFieldNumAccounts)
+}
+
+// SetAvgDailyBalanceOver1Month sets the AvgDailyBalanceOver1Month field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoReportCharacteristics) SetAvgDailyBalanceOver1Month(avgDailyBalanceOver1Month *float64) {
+	c.AvgDailyBalanceOver1Month = avgDailyBalanceOver1Month
+	c.require(craReportGetUltraFicoReportCharacteristicsFieldAvgDailyBalanceOver1Month)
+}
+
+// SetAvgDailyBalanceOver3Months sets the AvgDailyBalanceOver3Months field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoReportCharacteristics) SetAvgDailyBalanceOver3Months(avgDailyBalanceOver3Months *float64) {
+	c.AvgDailyBalanceOver3Months = avgDailyBalanceOver3Months
+	c.require(craReportGetUltraFicoReportCharacteristicsFieldAvgDailyBalanceOver3Months)
+}
+
+// SetAvgDailyBalanceOver6Months sets the AvgDailyBalanceOver6Months field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoReportCharacteristics) SetAvgDailyBalanceOver6Months(avgDailyBalanceOver6Months *float64) {
+	c.AvgDailyBalanceOver6Months = avgDailyBalanceOver6Months
+	c.require(craReportGetUltraFicoReportCharacteristicsFieldAvgDailyBalanceOver6Months)
+}
+
+// SetAvgDailyBalanceOver12Months sets the AvgDailyBalanceOver12Months field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoReportCharacteristics) SetAvgDailyBalanceOver12Months(avgDailyBalanceOver12Months *float64) {
+	c.AvgDailyBalanceOver12Months = avgDailyBalanceOver12Months
+	c.require(craReportGetUltraFicoReportCharacteristicsFieldAvgDailyBalanceOver12Months)
+}
+
+// SetDaysSinceEarliestTx sets the DaysSinceEarliestTx field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoReportCharacteristics) SetDaysSinceEarliestTx(daysSinceEarliestTx *int) {
+	c.DaysSinceEarliestTx = daysSinceEarliestTx
+	c.require(craReportGetUltraFicoReportCharacteristicsFieldDaysSinceEarliestTx)
+}
+
+// SetDaysSinceMostRecentNegativeEndingBalance sets the DaysSinceMostRecentNegativeEndingBalance field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoReportCharacteristics) SetDaysSinceMostRecentNegativeEndingBalance(daysSinceMostRecentNegativeEndingBalance *int) {
+	c.DaysSinceMostRecentNegativeEndingBalance = daysSinceMostRecentNegativeEndingBalance
+	c.require(craReportGetUltraFicoReportCharacteristicsFieldDaysSinceMostRecentNegativeEndingBalance)
+}
+
+// SetDaysSinceMostRecentInsufficientFundsFeeDebitTx sets the DaysSinceMostRecentInsufficientFundsFeeDebitTx field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoReportCharacteristics) SetDaysSinceMostRecentInsufficientFundsFeeDebitTx(daysSinceMostRecentInsufficientFundsFeeDebitTx *int) {
+	c.DaysSinceMostRecentInsufficientFundsFeeDebitTx = daysSinceMostRecentInsufficientFundsFeeDebitTx
+	c.require(craReportGetUltraFicoReportCharacteristicsFieldDaysSinceMostRecentInsufficientFundsFeeDebitTx)
+}
+
+// SetTotNumberDaysWithNegativeBalanceOver1Month sets the TotNumberDaysWithNegativeBalanceOver1Month field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoReportCharacteristics) SetTotNumberDaysWithNegativeBalanceOver1Month(totNumberDaysWithNegativeBalanceOver1Month *int) {
+	c.TotNumberDaysWithNegativeBalanceOver1Month = totNumberDaysWithNegativeBalanceOver1Month
+	c.require(craReportGetUltraFicoReportCharacteristicsFieldTotNumberDaysWithNegativeBalanceOver1Month)
+}
+
+// SetTotNumberDaysWithNegativeBalanceOver3Months sets the TotNumberDaysWithNegativeBalanceOver3Months field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoReportCharacteristics) SetTotNumberDaysWithNegativeBalanceOver3Months(totNumberDaysWithNegativeBalanceOver3Months *int) {
+	c.TotNumberDaysWithNegativeBalanceOver3Months = totNumberDaysWithNegativeBalanceOver3Months
+	c.require(craReportGetUltraFicoReportCharacteristicsFieldTotNumberDaysWithNegativeBalanceOver3Months)
+}
+
+// SetTotNumberDaysWithNegativeBalanceOver6Months sets the TotNumberDaysWithNegativeBalanceOver6Months field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoReportCharacteristics) SetTotNumberDaysWithNegativeBalanceOver6Months(totNumberDaysWithNegativeBalanceOver6Months *int) {
+	c.TotNumberDaysWithNegativeBalanceOver6Months = totNumberDaysWithNegativeBalanceOver6Months
+	c.require(craReportGetUltraFicoReportCharacteristicsFieldTotNumberDaysWithNegativeBalanceOver6Months)
+}
+
+// SetTotNumberDaysWithNegativeBalanceOver12Months sets the TotNumberDaysWithNegativeBalanceOver12Months field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoReportCharacteristics) SetTotNumberDaysWithNegativeBalanceOver12Months(totNumberDaysWithNegativeBalanceOver12Months *int) {
+	c.TotNumberDaysWithNegativeBalanceOver12Months = totNumberDaysWithNegativeBalanceOver12Months
+	c.require(craReportGetUltraFicoReportCharacteristicsFieldTotNumberDaysWithNegativeBalanceOver12Months)
+}
+
+// SetDaysSinceMostRecentTx sets the DaysSinceMostRecentTx field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoReportCharacteristics) SetDaysSinceMostRecentTx(daysSinceMostRecentTx *int) {
+	c.DaysSinceMostRecentTx = daysSinceMostRecentTx
+	c.require(craReportGetUltraFicoReportCharacteristicsFieldDaysSinceMostRecentTx)
+}
+
+// SetDaysWithTxOver1Month sets the DaysWithTxOver1Month field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoReportCharacteristics) SetDaysWithTxOver1Month(daysWithTxOver1Month *int) {
+	c.DaysWithTxOver1Month = daysWithTxOver1Month
+	c.require(craReportGetUltraFicoReportCharacteristicsFieldDaysWithTxOver1Month)
+}
+
+// SetDaysWithTxOver3Months sets the DaysWithTxOver3Months field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoReportCharacteristics) SetDaysWithTxOver3Months(daysWithTxOver3Months *int) {
+	c.DaysWithTxOver3Months = daysWithTxOver3Months
+	c.require(craReportGetUltraFicoReportCharacteristicsFieldDaysWithTxOver3Months)
+}
+
+// SetDaysWithTxOver6Months sets the DaysWithTxOver6Months field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoReportCharacteristics) SetDaysWithTxOver6Months(daysWithTxOver6Months *int) {
+	c.DaysWithTxOver6Months = daysWithTxOver6Months
+	c.require(craReportGetUltraFicoReportCharacteristicsFieldDaysWithTxOver6Months)
+}
+
+// SetDaysWithTxOver12Months sets the DaysWithTxOver12Months field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoReportCharacteristics) SetDaysWithTxOver12Months(daysWithTxOver12Months *int) {
+	c.DaysWithTxOver12Months = daysWithTxOver12Months
+	c.require(craReportGetUltraFicoReportCharacteristicsFieldDaysWithTxOver12Months)
+}
+
+// SetTotCurrentBalances sets the TotCurrentBalances field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoReportCharacteristics) SetTotCurrentBalances(totCurrentBalances *float64) {
+	c.TotCurrentBalances = totCurrentBalances
+	c.require(craReportGetUltraFicoReportCharacteristicsFieldTotCurrentBalances)
+}
+
+// SetNumCheckingAccounts sets the NumCheckingAccounts field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoReportCharacteristics) SetNumCheckingAccounts(numCheckingAccounts *int) {
+	c.NumCheckingAccounts = numCheckingAccounts
+	c.require(craReportGetUltraFicoReportCharacteristicsFieldNumCheckingAccounts)
+}
+
+// SetNumMoneyMarketAccounts sets the NumMoneyMarketAccounts field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoReportCharacteristics) SetNumMoneyMarketAccounts(numMoneyMarketAccounts *int) {
+	c.NumMoneyMarketAccounts = numMoneyMarketAccounts
+	c.require(craReportGetUltraFicoReportCharacteristicsFieldNumMoneyMarketAccounts)
+}
+
+// SetNumSavingsAccounts sets the NumSavingsAccounts field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoReportCharacteristics) SetNumSavingsAccounts(numSavingsAccounts *int) {
+	c.NumSavingsAccounts = numSavingsAccounts
+	c.require(craReportGetUltraFicoReportCharacteristicsFieldNumSavingsAccounts)
+}
+
+func (c *CraReportGetUltraFicoReportCharacteristics) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetUltraFicoReportCharacteristics
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetUltraFicoReportCharacteristics(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportGetUltraFicoReportCharacteristicsNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetUltraFicoReportCharacteristics) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetUltraFicoReportCharacteristics
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetUltraFicoReportCharacteristics) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportGetUltraFicoResponseProductFieldVersion   = big.NewInt(1 << 0)
+	craReportGetUltraFicoResponseProductFieldMetadata  = big.NewInt(1 << 1)
+	craReportGetUltraFicoResponseProductFieldUltrafico = big.NewInt(1 << 2)
+	craReportGetUltraFicoResponseProductFieldItems     = big.NewInt(1 << 3)
+	craReportGetUltraFicoResponseProductFieldErrors    = big.NewInt(1 << 4)
+)
+
+// craReportGetUltraFicoResponseProductNullableFields maps the wire names of CraReportGetUltraFicoResponseProduct's nullable fields (required or optional) to their field bits.
+var craReportGetUltraFicoResponseProductNullableFields = map[string]*big.Int{
+	"metadata":  craReportGetUltraFicoResponseProductFieldMetadata,
+	"ultrafico": craReportGetUltraFicoResponseProductFieldUltrafico,
+}
+
+// UltraFICO data returned by `/cra/report/get`.
+type CraReportGetUltraFicoResponseProduct struct {
+	Version   CraProductVersion              `json:"version" url:"version"`
+	Metadata  *CraReportGetUltraFicoMetadata `json:"metadata,omitempty" url:"metadata,omitempty"`
+	Ultrafico *CraReportGetUltraFico         `json:"ultrafico,omitempty" url:"ultrafico,omitempty"`
+	// The Items and eligible checking, savings, and money market accounts used to generate this product. Empty if the product failed to generate.
+	Items []*CraReportGetUltraFicoItem `json:"items" url:"items"`
+	// Product-level errors. Non-empty when this product failed to generate; empty on success.
+	Errors []*PlaidError `json:"errors" url:"errors"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetUltraFicoResponseProduct) GetVersion() CraProductVersion {
+	if c == nil {
+		return ""
+	}
+	return c.Version
+}
+
+func (c *CraReportGetUltraFicoResponseProduct) GetMetadata() *CraReportGetUltraFicoMetadata {
+	if c == nil {
+		return nil
+	}
+	return c.Metadata
+}
+
+func (c *CraReportGetUltraFicoResponseProduct) GetUltrafico() *CraReportGetUltraFico {
+	if c == nil {
+		return nil
+	}
+	return c.Ultrafico
+}
+
+func (c *CraReportGetUltraFicoResponseProduct) GetItems() []*CraReportGetUltraFicoItem {
+	if c == nil {
+		return nil
+	}
+	return c.Items
+}
+
+func (c *CraReportGetUltraFicoResponseProduct) GetErrors() []*PlaidError {
+	if c == nil {
+		return nil
+	}
+	return c.Errors
+}
+
+func (c *CraReportGetUltraFicoResponseProduct) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetUltraFicoResponseProduct) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetVersion sets the Version field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoResponseProduct) SetVersion(version CraProductVersion) {
+	c.Version = version
+	c.require(craReportGetUltraFicoResponseProductFieldVersion)
+}
+
+// SetMetadata sets the Metadata field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoResponseProduct) SetMetadata(metadata *CraReportGetUltraFicoMetadata) {
+	c.Metadata = metadata
+	c.require(craReportGetUltraFicoResponseProductFieldMetadata)
+}
+
+// SetUltrafico sets the Ultrafico field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoResponseProduct) SetUltrafico(ultrafico *CraReportGetUltraFico) {
+	c.Ultrafico = ultrafico
+	c.require(craReportGetUltraFicoResponseProductFieldUltrafico)
+}
+
+// SetItems sets the Items field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoResponseProduct) SetItems(items []*CraReportGetUltraFicoItem) {
+	c.Items = items
+	c.require(craReportGetUltraFicoResponseProductFieldItems)
+}
+
+// SetErrors sets the Errors field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoResponseProduct) SetErrors(errors []*PlaidError) {
+	c.Errors = errors
+	c.require(craReportGetUltraFicoResponseProductFieldErrors)
+}
+
+func (c *CraReportGetUltraFicoResponseProduct) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetUltraFicoResponseProduct
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetUltraFicoResponseProduct(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportGetUltraFicoResponseProductNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetUltraFicoResponseProduct) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetUltraFicoResponseProduct
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetUltraFicoResponseProduct) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportGetUltraFicoScoreFieldUltraficoScoreVersion            = big.NewInt(1 << 0)
+	craReportGetUltraFicoScoreFieldScore                            = big.NewInt(1 << 1)
+	craReportGetUltraFicoScoreFieldNegativeReasonCodes              = big.NewInt(1 << 2)
+	craReportGetUltraFicoScoreFieldPositiveReasonCodes              = big.NewInt(1 << 3)
+	craReportGetUltraFicoScoreFieldDidInquiriesAdverselyAffectScore = big.NewInt(1 << 4)
+)
+
+// craReportGetUltraFicoScoreNullableFields maps the wire names of CraReportGetUltraFicoScore's nullable fields (required or optional) to their field bits.
+var craReportGetUltraFicoScoreNullableFields = map[string]*big.Int{
+	"did_inquiries_adversely_affect_score": craReportGetUltraFicoScoreFieldDidInquiriesAdverselyAffectScore,
+}
+
+// A calculated UltraFICO score. `null` when the individual scoring request did not produce a score.
+type CraReportGetUltraFicoScore struct {
+	UltraficoScoreVersion CraUltraFicoScoreVersion `json:"ultrafico_score_version" url:"ultrafico_score_version"`
+	// The numeric UltraFICO score.
+	Score int `json:"score" url:"score"`
+	// Reasons the score moved downward, in priority order.
+	NegativeReasonCodes []string `json:"negative_reason_codes" url:"negative_reason_codes"`
+	// Reasons the score moved upward, in priority order.
+	PositiveReasonCodes []string `json:"positive_reason_codes" url:"positive_reason_codes"`
+	// Whether inquiries adversely affected the score but were not represented in the reason codes. Sometimes referred to as the FACTA Flag.
+	DidInquiriesAdverselyAffectScore *bool `json:"did_inquiries_adversely_affect_score,omitempty" url:"did_inquiries_adversely_affect_score,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetUltraFicoScore) GetUltraficoScoreVersion() CraUltraFicoScoreVersion {
+	if c == nil {
+		return ""
+	}
+	return c.UltraficoScoreVersion
+}
+
+func (c *CraReportGetUltraFicoScore) GetScore() int {
+	if c == nil {
+		return 0
+	}
+	return c.Score
+}
+
+func (c *CraReportGetUltraFicoScore) GetNegativeReasonCodes() []string {
+	if c == nil {
+		return nil
+	}
+	return c.NegativeReasonCodes
+}
+
+func (c *CraReportGetUltraFicoScore) GetPositiveReasonCodes() []string {
+	if c == nil {
+		return nil
+	}
+	return c.PositiveReasonCodes
+}
+
+func (c *CraReportGetUltraFicoScore) GetDidInquiriesAdverselyAffectScore() *bool {
+	if c == nil {
+		return nil
+	}
+	return c.DidInquiriesAdverselyAffectScore
+}
+
+func (c *CraReportGetUltraFicoScore) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetUltraFicoScore) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetUltraficoScoreVersion sets the UltraficoScoreVersion field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoScore) SetUltraficoScoreVersion(ultraficoScoreVersion CraUltraFicoScoreVersion) {
+	c.UltraficoScoreVersion = ultraficoScoreVersion
+	c.require(craReportGetUltraFicoScoreFieldUltraficoScoreVersion)
+}
+
+// SetScore sets the Score field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoScore) SetScore(score int) {
+	c.Score = score
+	c.require(craReportGetUltraFicoScoreFieldScore)
+}
+
+// SetNegativeReasonCodes sets the NegativeReasonCodes field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoScore) SetNegativeReasonCodes(negativeReasonCodes []string) {
+	c.NegativeReasonCodes = negativeReasonCodes
+	c.require(craReportGetUltraFicoScoreFieldNegativeReasonCodes)
+}
+
+// SetPositiveReasonCodes sets the PositiveReasonCodes field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoScore) SetPositiveReasonCodes(positiveReasonCodes []string) {
+	c.PositiveReasonCodes = positiveReasonCodes
+	c.require(craReportGetUltraFicoScoreFieldPositiveReasonCodes)
+}
+
+// SetDidInquiriesAdverselyAffectScore sets the DidInquiriesAdverselyAffectScore field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoScore) SetDidInquiriesAdverselyAffectScore(didInquiriesAdverselyAffectScore *bool) {
+	c.DidInquiriesAdverselyAffectScore = didInquiriesAdverselyAffectScore
+	c.require(craReportGetUltraFicoScoreFieldDidInquiriesAdverselyAffectScore)
+}
+
+func (c *CraReportGetUltraFicoScore) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetUltraFicoScore
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetUltraFicoScore(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportGetUltraFicoScoreNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetUltraFicoScore) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetUltraFicoScore
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetUltraFicoScore) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craReportGetUltraFicoScoreResultFieldRequestCorrelationID = big.NewInt(1 << 0)
+	craReportGetUltraFicoScoreResultFieldFicoScoringRequestID = big.NewInt(1 << 1)
+	craReportGetUltraFicoScoreResultFieldUltraficoScore       = big.NewInt(1 << 2)
+	craReportGetUltraFicoScoreResultFieldErrorReason          = big.NewInt(1 << 3)
+	craReportGetUltraFicoScoreResultFieldExclusionCode        = big.NewInt(1 << 4)
+)
+
+// craReportGetUltraFicoScoreResultNullableFields maps the wire names of CraReportGetUltraFicoScoreResult's nullable fields (required or optional) to their field bits.
+var craReportGetUltraFicoScoreResultNullableFields = map[string]*big.Int{
+	"request_correlation_id":  craReportGetUltraFicoScoreResultFieldRequestCorrelationID,
+	"fico_scoring_request_id": craReportGetUltraFicoScoreResultFieldFicoScoringRequestID,
+	"ultrafico_score":         craReportGetUltraFicoScoreResultFieldUltraficoScore,
+	"error_reason":            craReportGetUltraFicoScoreResultFieldErrorReason,
+	"exclusion_code":          craReportGetUltraFicoScoreResultFieldExclusionCode,
+}
+
+// The result of one UltraFICO scoring request.
+type CraReportGetUltraFicoScoreResult struct {
+	// The client-generated identifier supplied with the scoring request. `null` if none was supplied.
+	RequestCorrelationID *string `json:"request_correlation_id,omitempty" url:"request_correlation_id,omitempty"`
+	// The FICO-provided identifier for the scoring request.
+	FicoScoringRequestID *string                     `json:"fico_scoring_request_id,omitempty" url:"fico_scoring_request_id,omitempty"`
+	UltraficoScore       *CraReportGetUltraFicoScore `json:"ultrafico_score,omitempty" url:"ultrafico_score,omitempty"`
+	// Why the UltraFICO score could not be computed. `null` when a score was produced.
+	ErrorReason *string `json:"error_reason,omitempty" url:"error_reason,omitempty"`
+	// FICO exclusion code indicating why the score could not be computed from the consumer's data. `null` when unset and `"0"` when a score was produced.
+	ExclusionCode *string `json:"exclusion_code,omitempty" url:"exclusion_code,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraReportGetUltraFicoScoreResult) GetRequestCorrelationID() *string {
+	if c == nil {
+		return nil
+	}
+	return c.RequestCorrelationID
+}
+
+func (c *CraReportGetUltraFicoScoreResult) GetFicoScoringRequestID() *string {
+	if c == nil {
+		return nil
+	}
+	return c.FicoScoringRequestID
+}
+
+func (c *CraReportGetUltraFicoScoreResult) GetUltraficoScore() *CraReportGetUltraFicoScore {
+	if c == nil {
+		return nil
+	}
+	return c.UltraficoScore
+}
+
+func (c *CraReportGetUltraFicoScoreResult) GetErrorReason() *string {
+	if c == nil {
+		return nil
+	}
+	return c.ErrorReason
+}
+
+func (c *CraReportGetUltraFicoScoreResult) GetExclusionCode() *string {
+	if c == nil {
+		return nil
+	}
+	return c.ExclusionCode
+}
+
+func (c *CraReportGetUltraFicoScoreResult) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraReportGetUltraFicoScoreResult) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetRequestCorrelationID sets the RequestCorrelationID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoScoreResult) SetRequestCorrelationID(requestCorrelationID *string) {
+	c.RequestCorrelationID = requestCorrelationID
+	c.require(craReportGetUltraFicoScoreResultFieldRequestCorrelationID)
+}
+
+// SetFicoScoringRequestID sets the FicoScoringRequestID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoScoreResult) SetFicoScoringRequestID(ficoScoringRequestID *string) {
+	c.FicoScoringRequestID = ficoScoringRequestID
+	c.require(craReportGetUltraFicoScoreResultFieldFicoScoringRequestID)
+}
+
+// SetUltraficoScore sets the UltraficoScore field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoScoreResult) SetUltraficoScore(ultraficoScore *CraReportGetUltraFicoScore) {
+	c.UltraficoScore = ultraficoScore
+	c.require(craReportGetUltraFicoScoreResultFieldUltraficoScore)
+}
+
+// SetErrorReason sets the ErrorReason field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoScoreResult) SetErrorReason(errorReason *string) {
+	c.ErrorReason = errorReason
+	c.require(craReportGetUltraFicoScoreResultFieldErrorReason)
+}
+
+// SetExclusionCode sets the ExclusionCode field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraReportGetUltraFicoScoreResult) SetExclusionCode(exclusionCode *string) {
+	c.ExclusionCode = exclusionCode
+	c.require(craReportGetUltraFicoScoreResultFieldExclusionCode)
+}
+
+func (c *CraReportGetUltraFicoScoreResult) UnmarshalJSON(data []byte) error {
+	type embed CraReportGetUltraFicoScoreResult
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraReportGetUltraFicoScoreResult(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, craReportGetUltraFicoScoreResultNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		c.require(presentFields)
+	}
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraReportGetUltraFicoScoreResult) MarshalJSON() ([]byte, error) {
+	type embed CraReportGetUltraFicoScoreResult
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraReportGetUltraFicoScoreResult) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+var (
+	craUltraFicoProductFieldVersion = big.NewInt(1 << 0)
+)
+
+// Names the UltraFICO product at a given version.
+type CraUltraFicoProduct struct {
+	Version CraProductVersion `json:"version" url:"version"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (c *CraUltraFicoProduct) GetVersion() CraProductVersion {
+	if c == nil {
+		return ""
+	}
+	return c.Version
+}
+
+func (c *CraUltraFicoProduct) GetExtraProperties() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.ExtraProperties
+}
+
+func (c *CraUltraFicoProduct) require(field *big.Int) {
+	next := new(big.Int)
+	if c.explicitFields != nil {
+		next.Set(c.explicitFields)
+	}
+	next.Or(next, field)
+	c.explicitFields = next
+}
+
+// SetVersion sets the Version field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CraUltraFicoProduct) SetVersion(version CraProductVersion) {
+	c.Version = version
+	c.require(craUltraFicoProductFieldVersion)
+}
+
+func (c *CraUltraFicoProduct) UnmarshalJSON(data []byte) error {
+	type embed CraUltraFicoProduct
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CraUltraFicoProduct(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.ExtraProperties = extraProperties
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CraUltraFicoProduct) MarshalJSON() ([]byte, error) {
+	type embed CraUltraFicoProduct
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*c),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, c.ExtraProperties)
+}
+
+func (c *CraUltraFicoProduct) String() string {
+	if c == nil {
+		return "<nil>"
+	}
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 // Describes the reason you are generating a Consumer Report for this user. The purpose must be one of the allowable permissible purposes for the `decision_stage`.

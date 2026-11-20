@@ -10053,6 +10053,92 @@ func TestRequiredNullableRoundTripApplicationLastDataAccessTimes(t *testing.T) {
 	})
 }
 
+func TestRequiredNullableRoundTripItemStatus(t *testing.T) {
+	requiredNullableKeys := []string{
+		"last_webhook",
+	}
+	marshalToMap := func(t *testing.T, obj *ItemStatus) map[string]json.RawMessage {
+		data, err := json.Marshal(obj)
+		require.NoError(t, err, "marshaling should succeed")
+		var result map[string]json.RawMessage
+		require.NoError(t, json.Unmarshal(data, &result), "marshaled data should be a JSON object")
+		return result
+	}
+
+	t.Run("NullPreserved", func(t *testing.T) {
+		t.Parallel()
+		var obj ItemStatus
+		require.NoError(t, json.Unmarshal([]byte(`{"last_webhook":null}`), &obj))
+		result := marshalToMap(t, &obj)
+		for _, key := range requiredNullableKeys {
+			value, ok := result[key]
+			require.True(t, ok, "required nullable field %q received as null should be present in the output", key)
+			assert.Equal(t, "null", string(value), "required nullable field %q received as null should be null in the output", key)
+		}
+	})
+
+	t.Run("AbsentStaysAbsent", func(t *testing.T) {
+		t.Parallel()
+		var obj ItemStatus
+		require.NoError(t, json.Unmarshal([]byte(`{}`), &obj))
+		result := marshalToMap(t, &obj)
+		for _, key := range requiredNullableKeys {
+			assert.NotContains(t, result, key, "required nullable field %q absent from the input should be absent from the output", key)
+		}
+	})
+
+	t.Run("FreshValueOmits", func(t *testing.T) {
+		t.Parallel()
+		result := marshalToMap(t, &ItemStatus{})
+		for _, key := range requiredNullableKeys {
+			assert.NotContains(t, result, key, "required nullable field %q should be omitted from a freshly constructed value", key)
+		}
+	})
+}
+
+func TestRequiredNullableRoundTripItemStatusNullable(t *testing.T) {
+	requiredNullableKeys := []string{
+		"last_webhook",
+	}
+	marshalToMap := func(t *testing.T, obj *ItemStatusNullable) map[string]json.RawMessage {
+		data, err := json.Marshal(obj)
+		require.NoError(t, err, "marshaling should succeed")
+		var result map[string]json.RawMessage
+		require.NoError(t, json.Unmarshal(data, &result), "marshaled data should be a JSON object")
+		return result
+	}
+
+	t.Run("NullPreserved", func(t *testing.T) {
+		t.Parallel()
+		var obj ItemStatusNullable
+		require.NoError(t, json.Unmarshal([]byte(`{"last_webhook":null}`), &obj))
+		result := marshalToMap(t, &obj)
+		for _, key := range requiredNullableKeys {
+			value, ok := result[key]
+			require.True(t, ok, "required nullable field %q received as null should be present in the output", key)
+			assert.Equal(t, "null", string(value), "required nullable field %q received as null should be null in the output", key)
+		}
+	})
+
+	t.Run("AbsentStaysAbsent", func(t *testing.T) {
+		t.Parallel()
+		var obj ItemStatusNullable
+		require.NoError(t, json.Unmarshal([]byte(`{}`), &obj))
+		result := marshalToMap(t, &obj)
+		for _, key := range requiredNullableKeys {
+			assert.NotContains(t, result, key, "required nullable field %q absent from the input should be absent from the output", key)
+		}
+	})
+
+	t.Run("FreshValueOmits", func(t *testing.T) {
+		t.Parallel()
+		result := marshalToMap(t, &ItemStatusNullable{})
+		for _, key := range requiredNullableKeys {
+			assert.NotContains(t, result, key, "required nullable field %q should be omitted from a freshly constructed value", key)
+		}
+	})
+}
+
 func TestRequiredNullableRoundTripItemWithConsentFields(t *testing.T) {
 	requiredNullableKeys := []string{
 		"webhook",
@@ -10415,7 +10501,6 @@ func TestOptionalNullableRoundTripItemStatus(t *testing.T) {
 	optionalNullableKeys := []string{
 		"investments",
 		"transactions",
-		"last_webhook",
 	}
 	marshalToMap := func(t *testing.T, obj *ItemStatus) map[string]json.RawMessage {
 		data, err := json.Marshal(obj)
@@ -10428,7 +10513,7 @@ func TestOptionalNullableRoundTripItemStatus(t *testing.T) {
 	t.Run("NullPreserved", func(t *testing.T) {
 		t.Parallel()
 		var obj ItemStatus
-		require.NoError(t, json.Unmarshal([]byte(`{"investments":null,"transactions":null,"last_webhook":null}`), &obj))
+		require.NoError(t, json.Unmarshal([]byte(`{"investments":null,"transactions":null}`), &obj))
 		result := marshalToMap(t, &obj)
 		for _, key := range optionalNullableKeys {
 			value, ok := result[key]
@@ -10547,7 +10632,6 @@ func TestOptionalNullableRoundTripItemStatusNullable(t *testing.T) {
 	optionalNullableKeys := []string{
 		"investments",
 		"transactions",
-		"last_webhook",
 	}
 	marshalToMap := func(t *testing.T, obj *ItemStatusNullable) map[string]json.RawMessage {
 		data, err := json.Marshal(obj)
@@ -10560,7 +10644,7 @@ func TestOptionalNullableRoundTripItemStatusNullable(t *testing.T) {
 	t.Run("NullPreserved", func(t *testing.T) {
 		t.Parallel()
 		var obj ItemStatusNullable
-		require.NoError(t, json.Unmarshal([]byte(`{"investments":null,"transactions":null,"last_webhook":null}`), &obj))
+		require.NoError(t, json.Unmarshal([]byte(`{"investments":null,"transactions":null}`), &obj))
 		result := marshalToMap(t, &obj)
 		for _, key := range optionalNullableKeys {
 			value, ok := result[key]
@@ -10638,6 +10722,7 @@ func TestOptionalNullableRoundTripItemWithConsentFields(t *testing.T) {
 		"institution_name",
 		"auth_method",
 		"paired_item_id",
+		"created_at",
 	}
 	marshalToMap := func(t *testing.T, obj *ItemWithConsentFields) map[string]json.RawMessage {
 		data, err := json.Marshal(obj)
@@ -10650,7 +10735,7 @@ func TestOptionalNullableRoundTripItemWithConsentFields(t *testing.T) {
 	t.Run("NullPreserved", func(t *testing.T) {
 		t.Parallel()
 		var obj ItemWithConsentFields
-		require.NoError(t, json.Unmarshal([]byte(`{"institution_id":null,"institution_name":null,"auth_method":null,"paired_item_id":null}`), &obj))
+		require.NoError(t, json.Unmarshal([]byte(`{"institution_id":null,"institution_name":null,"auth_method":null,"paired_item_id":null,"created_at":null}`), &obj))
 		result := marshalToMap(t, &obj)
 		for _, key := range optionalNullableKeys {
 			value, ok := result[key]

@@ -10668,6 +10668,7 @@ func TestRequiredNullableRoundTripCashflowReportTransaction(t *testing.T) {
 
 func TestOptionalNullableRoundTripBusinessAccount(t *testing.T) {
 	optionalNullableKeys := []string{
+		"verification_insights",
 		"apy",
 		"holder_category",
 		"paired_account_id",
@@ -10683,7 +10684,7 @@ func TestOptionalNullableRoundTripBusinessAccount(t *testing.T) {
 	t.Run("NullPreserved", func(t *testing.T) {
 		t.Parallel()
 		var obj BusinessAccount
-		require.NoError(t, json.Unmarshal([]byte(`{"apy":null,"holder_category":null,"paired_account_id":null}`), &obj))
+		require.NoError(t, json.Unmarshal([]byte(`{"verification_insights":null,"apy":null,"holder_category":null,"paired_account_id":null}`), &obj))
 		result := marshalToMap(t, &obj)
 		for _, key := range optionalNullableKeys {
 			value, ok := result[key]
