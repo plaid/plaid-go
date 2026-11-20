@@ -4,8 +4,8 @@ package transfer
 
 import (
 	json "encoding/json"
-	v50 "github.com/plaid/plaid-go/v50"
-	internal "github.com/plaid/plaid-go/v50/internal"
+	v51 "github.com/plaid/plaid-go/v51"
+	internal "github.com/plaid/plaid-go/v51/internal"
 	big "math/big"
 )
 
@@ -27,17 +27,17 @@ var (
 type TransferIntentCreateRequest struct {
 	// The Plaid `account_id` corresponding to the end-user account that will be debited or credited.
 	AccountID        *string                                     `json:"account_id,omitempty" url:"-"`
-	FundingAccountID v50.TransferMigratedFundingAccountIDRequest `json:"funding_account_id,omitempty" url:"-"`
-	Mode             v50.TransferIntentCreateMode                `json:"mode" url:"-"`
-	Network          *v50.TransferIntentCreateNetwork            `json:"network,omitempty" url:"-"`
-	Amount           v50.TransferAmount                          `json:"amount" url:"-"`
+	FundingAccountID v51.TransferMigratedFundingAccountIDRequest `json:"funding_account_id,omitempty" url:"-"`
+	Mode             v51.TransferIntentCreateMode                `json:"mode" url:"-"`
+	Network          *v51.TransferIntentCreateNetwork            `json:"network,omitempty" url:"-"`
+	Amount           v51.TransferAmount                          `json:"amount" url:"-"`
 	// A description for the underlying transfer. Maximum of 15 characters.
 	Description string        `json:"description" url:"-"`
-	AchClass    *v50.AchClass `json:"ach_class,omitempty" url:"-"`
+	AchClass    *v51.AchClass `json:"ach_class,omitempty" url:"-"`
 	// Plaid's unique identifier for the origination account for the intent. If not provided, the default account will be used.
 	OriginationAccountID *string                    `json:"origination_account_id,omitempty" url:"-"`
-	User                 *v50.TransferUserInRequest `json:"user" url:"-"`
-	Metadata             *v50.TransferMetadata      `json:"metadata,omitempty" url:"-"`
+	User                 *v51.TransferUserInRequest `json:"user" url:"-"`
+	Metadata             *v51.TransferMetadata      `json:"metadata,omitempty" url:"-"`
 	// The currency of the transfer amount, e.g. "USD"
 	IsoCurrencyCode *string `json:"iso_currency_code,omitempty" url:"-"`
 	// When `true`, the transfer requires a `GUARANTEED` decision by Plaid to proceed (Guarantee customers only).
@@ -65,28 +65,28 @@ func (t *TransferIntentCreateRequest) SetAccountID(accountID *string) {
 
 // SetFundingAccountID sets the FundingAccountID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferIntentCreateRequest) SetFundingAccountID(fundingAccountID v50.TransferMigratedFundingAccountIDRequest) {
+func (t *TransferIntentCreateRequest) SetFundingAccountID(fundingAccountID v51.TransferMigratedFundingAccountIDRequest) {
 	t.FundingAccountID = fundingAccountID
 	t.require(transferIntentCreateRequestFieldFundingAccountID)
 }
 
 // SetMode sets the Mode field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferIntentCreateRequest) SetMode(mode v50.TransferIntentCreateMode) {
+func (t *TransferIntentCreateRequest) SetMode(mode v51.TransferIntentCreateMode) {
 	t.Mode = mode
 	t.require(transferIntentCreateRequestFieldMode)
 }
 
 // SetNetwork sets the Network field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferIntentCreateRequest) SetNetwork(network *v50.TransferIntentCreateNetwork) {
+func (t *TransferIntentCreateRequest) SetNetwork(network *v51.TransferIntentCreateNetwork) {
 	t.Network = network
 	t.require(transferIntentCreateRequestFieldNetwork)
 }
 
 // SetAmount sets the Amount field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferIntentCreateRequest) SetAmount(amount v50.TransferAmount) {
+func (t *TransferIntentCreateRequest) SetAmount(amount v51.TransferAmount) {
 	t.Amount = amount
 	t.require(transferIntentCreateRequestFieldAmount)
 }
@@ -100,7 +100,7 @@ func (t *TransferIntentCreateRequest) SetDescription(description string) {
 
 // SetAchClass sets the AchClass field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferIntentCreateRequest) SetAchClass(achClass *v50.AchClass) {
+func (t *TransferIntentCreateRequest) SetAchClass(achClass *v51.AchClass) {
 	t.AchClass = achClass
 	t.require(transferIntentCreateRequestFieldAchClass)
 }
@@ -114,14 +114,14 @@ func (t *TransferIntentCreateRequest) SetOriginationAccountID(originationAccount
 
 // SetUser sets the User field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferIntentCreateRequest) SetUser(user *v50.TransferUserInRequest) {
+func (t *TransferIntentCreateRequest) SetUser(user *v51.TransferUserInRequest) {
 	t.User = user
 	t.require(transferIntentCreateRequestFieldUser)
 }
 
 // SetMetadata sets the Metadata field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferIntentCreateRequest) SetMetadata(metadata *v50.TransferMetadata) {
+func (t *TransferIntentCreateRequest) SetMetadata(metadata *v51.TransferMetadata) {
 	t.Metadata = metadata
 	t.require(transferIntentCreateRequestFieldMetadata)
 }

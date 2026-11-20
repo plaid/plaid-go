@@ -5,7 +5,7 @@ package plaid
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/plaid/plaid-go/v50/internal"
+	internal "github.com/plaid/plaid-go/v51/internal"
 	big "math/big"
 )
 
@@ -207,9 +207,9 @@ type AssetReportGetRequest struct {
 	AssetReportToken *AssetReportTokenNullable `json:"asset_report_token,omitempty" url:"-"`
 	// The user token associated with the User for which to create an asset report for. The latest asset report associated with the User will be returned
 	UserToken *string `json:"user_token,omitempty" url:"-"`
-	// `true` if you would like to retrieve the Asset Report with Insights, `false` otherwise. This field defaults to `false` if omitted.
+	// If `true`, retrieves the Asset Report with Insights.
 	IncludeInsights *bool `json:"include_insights,omitempty" url:"-"`
-	// `true` to fetch "fast" version of asset report. Defaults to false if omitted. Can only be used if `/asset_report/create` was called with `options.add_ons` set to `["fast_assets"]`.
+	// If `true`, retrieves the Fast Asset Report. If `false`, retrieves the Full Asset Report. To set this field to `true`, you must call `/asset_report/create` with `options.add_ons` set to `["fast_assets"]`.
 	FastReport *bool                         `json:"fast_report,omitempty" url:"-"`
 	Options    *AssetReportGetRequestOptions `json:"options,omitempty" url:"-"`
 

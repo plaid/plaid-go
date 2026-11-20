@@ -4,8 +4,8 @@ package transfer
 
 import (
 	json "encoding/json"
-	v50 "github.com/plaid/plaid-go/v50"
-	internal "github.com/plaid/plaid-go/v50/internal"
+	v51 "github.com/plaid/plaid-go/v51"
+	internal "github.com/plaid/plaid-go/v51/internal"
 	big "math/big"
 )
 
@@ -14,7 +14,7 @@ var (
 )
 
 type TransferAuthorizationCancelRequest struct {
-	AuthorizationID v50.TransferAuthorizationID `json:"authorization_id" url:"-"`
+	AuthorizationID v51.TransferAuthorizationID `json:"authorization_id" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -31,7 +31,7 @@ func (t *TransferAuthorizationCancelRequest) require(field *big.Int) {
 
 // SetAuthorizationID sets the AuthorizationID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferAuthorizationCancelRequest) SetAuthorizationID(authorizationID v50.TransferAuthorizationID) {
+func (t *TransferAuthorizationCancelRequest) SetAuthorizationID(authorizationID v51.TransferAuthorizationID) {
 	t.AuthorizationID = authorizationID
 	t.require(transferAuthorizationCancelRequestFieldAuthorizationID)
 }
@@ -87,26 +87,26 @@ var (
 )
 
 type TransferAuthorizationCreateRequest struct {
-	AccessToken      v50.TransferAccessToken                     `json:"access_token" url:"-"`
-	AccountID        v50.TransferAccountID                       `json:"account_id" url:"-"`
-	FundingAccountID v50.TransferMigratedFundingAccountIDRequest `json:"funding_account_id,omitempty" url:"-"`
+	AccessToken      v51.TransferAccessToken                     `json:"access_token" url:"-"`
+	AccountID        v51.TransferAccountID                       `json:"account_id" url:"-"`
+	FundingAccountID v51.TransferMigratedFundingAccountIDRequest `json:"funding_account_id,omitempty" url:"-"`
 	// Specify which ledger balance should be used to fund the transfer. You can find a list of `ledger_id`s in the Accounts page of your Plaid Dashboard. If this field is left blank, this will default to the id of the default ledger balance.
 	LedgerID            *string                                 `json:"ledger_id,omitempty" url:"-"`
-	PaymentProfileToken *v50.TransferPaymentProfileToken        `json:"payment_profile_token,omitempty" url:"-"`
-	Type                v50.TransferType                        `json:"type" url:"-"`
-	Network             v50.TransferNetwork                     `json:"network" url:"-"`
-	Amount              v50.TransferAmount                      `json:"amount" url:"-"`
-	AchClass            *v50.AchClass                           `json:"ach_class,omitempty" url:"-"`
-	WireDetails         *v50.TransferWireDetails                `json:"wire_details,omitempty" url:"-"`
-	User                *v50.TransferAuthorizationUserInRequest `json:"user" url:"-"`
+	PaymentProfileToken *v51.TransferPaymentProfileToken        `json:"payment_profile_token,omitempty" url:"-"`
+	Type                v51.TransferType                        `json:"type" url:"-"`
+	Network             v51.TransferNetwork                     `json:"network" url:"-"`
+	Amount              v51.TransferAmount                      `json:"amount" url:"-"`
+	AchClass            *v51.AchClass                           `json:"ach_class,omitempty" url:"-"`
+	WireDetails         *v51.TransferWireDetails                `json:"wire_details,omitempty" url:"-"`
+	User                *v51.TransferAuthorizationUserInRequest `json:"user" url:"-"`
 	// The Plaid-generated user ID returned by `/user/create` for the end user associated with this transfer's Item. This identifier is separate from the account-holder details in `user`. Omit or set to `null` if unavailable; otherwise, provide a non-empty string. This field does not currently affect authorization decisions.
-	UserID v50.NewUserIDNullable            `json:"user_id,omitempty" url:"-"`
-	Device *v50.TransferAuthorizationDevice `json:"device,omitempty" url:"-"`
+	UserID v51.NewUserIDNullable            `json:"user_id,omitempty" url:"-"`
+	Device *v51.TransferAuthorizationDevice `json:"device,omitempty" url:"-"`
 	// Plaid's unique identifier for the origination account for this authorization. If not specified, the default account will be used.
 	OriginationAccountID *string `json:"origination_account_id,omitempty" url:"-"`
 	// The currency of the transfer amount. The default value is "USD".
 	IsoCurrencyCode *string                                 `json:"iso_currency_code,omitempty" url:"-"`
-	IdempotencyKey  v50.TransferAuthorizationIdempotencyKey `json:"idempotency_key,omitempty" url:"-"`
+	IdempotencyKey  v51.TransferAuthorizationIdempotencyKey `json:"idempotency_key,omitempty" url:"-"`
 	// If the end user is initiating the specific transfer themselves via an interactive UI, this should be `true`; for automatic recurring payments where the end user is not actually initiating each individual transfer, it should be `false`. This field is not currently used and is present to support planned future functionality.
 	UserPresent *bool `json:"user_present,omitempty" url:"-"`
 	// If set to `false`, Plaid will not offer a `guarantee_decision` for this request (Guarantee customers only). This field is deprecated in favor of `guarantee`.
@@ -117,13 +117,13 @@ type TransferAuthorizationCreateRequest struct {
 	BeaconSessionID *string `json:"beacon_session_id,omitempty" url:"-"`
 	// The Plaid client ID that is the originator of this transfer. Only needed if creating transfers on behalf of another client as a [Platform customer](https://plaid.com/docs/transfer/application/#originators-vs-platforms).
 	OriginatorClientID *string                        `json:"originator_client_id,omitempty" url:"-"`
-	CreditFundsSource  *v50.TransferCreditFundsSource `json:"credit_funds_source,omitempty" url:"-"`
+	CreditFundsSource  *v51.TransferCreditFundsSource `json:"credit_funds_source,omitempty" url:"-"`
 	// Plaid's unique identifier for a test clock. This field may only be used when using `sandbox` environment. If provided, the `authorization` is created at the `virtual_time` on the provided test clock.
 	TestClockID *string `json:"test_clock_id,omitempty" url:"-"`
 	// The key of the Ruleset for the transaction. If not provided, Signal will use the `default` ruleset.
 	RulesetKey       *string                                    `json:"ruleset_key,omitempty" url:"-"`
-	CustomAttributes *v50.TransferAuthorizationCustomAttributes `json:"custom_attributes,omitempty" url:"-"`
-	UserAttributes   *v50.TransferAuthorizationUserAttributes   `json:"user_attributes,omitempty" url:"-"`
+	CustomAttributes *v51.TransferAuthorizationCustomAttributes `json:"custom_attributes,omitempty" url:"-"`
+	UserAttributes   *v51.TransferAuthorizationUserAttributes   `json:"user_attributes,omitempty" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -140,21 +140,21 @@ func (t *TransferAuthorizationCreateRequest) require(field *big.Int) {
 
 // SetAccessToken sets the AccessToken field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferAuthorizationCreateRequest) SetAccessToken(accessToken v50.TransferAccessToken) {
+func (t *TransferAuthorizationCreateRequest) SetAccessToken(accessToken v51.TransferAccessToken) {
 	t.AccessToken = accessToken
 	t.require(transferAuthorizationCreateRequestFieldAccessToken)
 }
 
 // SetAccountID sets the AccountID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferAuthorizationCreateRequest) SetAccountID(accountID v50.TransferAccountID) {
+func (t *TransferAuthorizationCreateRequest) SetAccountID(accountID v51.TransferAccountID) {
 	t.AccountID = accountID
 	t.require(transferAuthorizationCreateRequestFieldAccountID)
 }
 
 // SetFundingAccountID sets the FundingAccountID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferAuthorizationCreateRequest) SetFundingAccountID(fundingAccountID v50.TransferMigratedFundingAccountIDRequest) {
+func (t *TransferAuthorizationCreateRequest) SetFundingAccountID(fundingAccountID v51.TransferMigratedFundingAccountIDRequest) {
 	t.FundingAccountID = fundingAccountID
 	t.require(transferAuthorizationCreateRequestFieldFundingAccountID)
 }
@@ -168,63 +168,63 @@ func (t *TransferAuthorizationCreateRequest) SetLedgerID(ledgerID *string) {
 
 // SetPaymentProfileToken sets the PaymentProfileToken field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferAuthorizationCreateRequest) SetPaymentProfileToken(paymentProfileToken *v50.TransferPaymentProfileToken) {
+func (t *TransferAuthorizationCreateRequest) SetPaymentProfileToken(paymentProfileToken *v51.TransferPaymentProfileToken) {
 	t.PaymentProfileToken = paymentProfileToken
 	t.require(transferAuthorizationCreateRequestFieldPaymentProfileToken)
 }
 
 // SetType sets the Type field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferAuthorizationCreateRequest) SetType(type_ v50.TransferType) {
+func (t *TransferAuthorizationCreateRequest) SetType(type_ v51.TransferType) {
 	t.Type = type_
 	t.require(transferAuthorizationCreateRequestFieldType)
 }
 
 // SetNetwork sets the Network field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferAuthorizationCreateRequest) SetNetwork(network v50.TransferNetwork) {
+func (t *TransferAuthorizationCreateRequest) SetNetwork(network v51.TransferNetwork) {
 	t.Network = network
 	t.require(transferAuthorizationCreateRequestFieldNetwork)
 }
 
 // SetAmount sets the Amount field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferAuthorizationCreateRequest) SetAmount(amount v50.TransferAmount) {
+func (t *TransferAuthorizationCreateRequest) SetAmount(amount v51.TransferAmount) {
 	t.Amount = amount
 	t.require(transferAuthorizationCreateRequestFieldAmount)
 }
 
 // SetAchClass sets the AchClass field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferAuthorizationCreateRequest) SetAchClass(achClass *v50.AchClass) {
+func (t *TransferAuthorizationCreateRequest) SetAchClass(achClass *v51.AchClass) {
 	t.AchClass = achClass
 	t.require(transferAuthorizationCreateRequestFieldAchClass)
 }
 
 // SetWireDetails sets the WireDetails field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferAuthorizationCreateRequest) SetWireDetails(wireDetails *v50.TransferWireDetails) {
+func (t *TransferAuthorizationCreateRequest) SetWireDetails(wireDetails *v51.TransferWireDetails) {
 	t.WireDetails = wireDetails
 	t.require(transferAuthorizationCreateRequestFieldWireDetails)
 }
 
 // SetUser sets the User field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferAuthorizationCreateRequest) SetUser(user *v50.TransferAuthorizationUserInRequest) {
+func (t *TransferAuthorizationCreateRequest) SetUser(user *v51.TransferAuthorizationUserInRequest) {
 	t.User = user
 	t.require(transferAuthorizationCreateRequestFieldUser)
 }
 
 // SetUserID sets the UserID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferAuthorizationCreateRequest) SetUserID(userID v50.NewUserIDNullable) {
+func (t *TransferAuthorizationCreateRequest) SetUserID(userID v51.NewUserIDNullable) {
 	t.UserID = userID
 	t.require(transferAuthorizationCreateRequestFieldUserID)
 }
 
 // SetDevice sets the Device field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferAuthorizationCreateRequest) SetDevice(device *v50.TransferAuthorizationDevice) {
+func (t *TransferAuthorizationCreateRequest) SetDevice(device *v51.TransferAuthorizationDevice) {
 	t.Device = device
 	t.require(transferAuthorizationCreateRequestFieldDevice)
 }
@@ -245,7 +245,7 @@ func (t *TransferAuthorizationCreateRequest) SetIsoCurrencyCode(isoCurrencyCode 
 
 // SetIdempotencyKey sets the IdempotencyKey field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferAuthorizationCreateRequest) SetIdempotencyKey(idempotencyKey v50.TransferAuthorizationIdempotencyKey) {
+func (t *TransferAuthorizationCreateRequest) SetIdempotencyKey(idempotencyKey v51.TransferAuthorizationIdempotencyKey) {
 	t.IdempotencyKey = idempotencyKey
 	t.require(transferAuthorizationCreateRequestFieldIdempotencyKey)
 }
@@ -287,7 +287,7 @@ func (t *TransferAuthorizationCreateRequest) SetOriginatorClientID(originatorCli
 
 // SetCreditFundsSource sets the CreditFundsSource field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferAuthorizationCreateRequest) SetCreditFundsSource(creditFundsSource *v50.TransferCreditFundsSource) {
+func (t *TransferAuthorizationCreateRequest) SetCreditFundsSource(creditFundsSource *v51.TransferCreditFundsSource) {
 	t.CreditFundsSource = creditFundsSource
 	t.require(transferAuthorizationCreateRequestFieldCreditFundsSource)
 }
@@ -308,14 +308,14 @@ func (t *TransferAuthorizationCreateRequest) SetRulesetKey(rulesetKey *string) {
 
 // SetCustomAttributes sets the CustomAttributes field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferAuthorizationCreateRequest) SetCustomAttributes(customAttributes *v50.TransferAuthorizationCustomAttributes) {
+func (t *TransferAuthorizationCreateRequest) SetCustomAttributes(customAttributes *v51.TransferAuthorizationCustomAttributes) {
 	t.CustomAttributes = customAttributes
 	t.require(transferAuthorizationCreateRequestFieldCustomAttributes)
 }
 
 // SetUserAttributes sets the UserAttributes field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (t *TransferAuthorizationCreateRequest) SetUserAttributes(userAttributes *v50.TransferAuthorizationUserAttributes) {
+func (t *TransferAuthorizationCreateRequest) SetUserAttributes(userAttributes *v51.TransferAuthorizationUserAttributes) {
 	t.UserAttributes = userAttributes
 	t.require(transferAuthorizationCreateRequestFieldUserAttributes)
 }

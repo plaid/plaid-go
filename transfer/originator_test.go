@@ -4,7 +4,7 @@ package transfer
 
 import (
 	json "encoding/json"
-	v50 "github.com/plaid/plaid-go/v50"
+	v51 "github.com/plaid/plaid-go/v51"
 	assert "github.com/stretchr/testify/assert"
 	require "github.com/stretchr/testify/require"
 	testing "testing"
@@ -66,7 +66,7 @@ func TestSettersTransferOriginatorFundingAccountCreateRequest(t *testing.T) {
 
 	t.Run("SetFundingAccount", func(t *testing.T) {
 		obj := &TransferOriginatorFundingAccountCreateRequest{}
-		var fernTestValueFundingAccount *v50.TransferFundingAccountWithDisplayName
+		var fernTestValueFundingAccount *v51.TransferFundingAccountWithDisplayName
 		obj.SetFundingAccount(fernTestValueFundingAccount)
 		assert.Equal(t, fernTestValueFundingAccount, obj.FundingAccount)
 		assert.NotNil(t, obj.explicitFields)
@@ -110,7 +110,7 @@ func TestSettersMarkExplicitTransferOriginatorFundingAccountCreateRequest(t *tes
 		t.Parallel()
 		// Arrange
 		obj := &TransferOriginatorFundingAccountCreateRequest{}
-		var fernTestValueFundingAccount *v50.TransferFundingAccountWithDisplayName
+		var fernTestValueFundingAccount *v51.TransferFundingAccountWithDisplayName
 
 		// Act
 		obj.SetFundingAccount(fernTestValueFundingAccount)
@@ -279,7 +279,7 @@ func TestSettersTransferOriginatorFundingAccountUpdateRequest(t *testing.T) {
 
 	t.Run("SetFundingAccount", func(t *testing.T) {
 		obj := &TransferOriginatorFundingAccountUpdateRequest{}
-		var fernTestValueFundingAccount *v50.TransferFundingAccount
+		var fernTestValueFundingAccount *v51.TransferFundingAccount
 		obj.SetFundingAccount(fernTestValueFundingAccount)
 		assert.Equal(t, fernTestValueFundingAccount, obj.FundingAccount)
 		assert.NotNil(t, obj.explicitFields)
@@ -323,7 +323,7 @@ func TestSettersMarkExplicitTransferOriginatorFundingAccountUpdateRequest(t *tes
 		t.Parallel()
 		// Arrange
 		obj := &TransferOriginatorFundingAccountUpdateRequest{}
-		var fernTestValueFundingAccount *v50.TransferFundingAccount
+		var fernTestValueFundingAccount *v51.TransferFundingAccount
 
 		// Act
 		obj.SetFundingAccount(fernTestValueFundingAccount)

@@ -5,7 +5,7 @@ package plaid
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/plaid/plaid-go/v50/internal"
+	internal "github.com/plaid/plaid-go/v51/internal"
 	big "math/big"
 	time "time"
 )
@@ -1197,8 +1197,8 @@ type ExternalPaymentRefundDetails struct {
 	// The name of the account holder.
 	Name string `json:"name" url:"name"`
 	// The International Bank Account Number (IBAN) for the account.
-	Iban *string                `json:"iban,omitempty" url:"iban,omitempty"`
-	Bacs *RecipientBacsNullable `json:"bacs,omitempty" url:"bacs,omitempty"`
+	Iban *string                          `json:"iban,omitempty" url:"iban,omitempty"`
+	Bacs *RecipientBacsNullableInResponse `json:"bacs,omitempty" url:"bacs,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -1221,7 +1221,7 @@ func (e *ExternalPaymentRefundDetails) GetIban() *string {
 	return e.Iban
 }
 
-func (e *ExternalPaymentRefundDetails) GetBacs() *RecipientBacsNullable {
+func (e *ExternalPaymentRefundDetails) GetBacs() *RecipientBacsNullableInResponse {
 	if e == nil {
 		return nil
 	}
@@ -1260,7 +1260,7 @@ func (e *ExternalPaymentRefundDetails) SetIban(iban *string) {
 
 // SetBacs sets the Bacs field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (e *ExternalPaymentRefundDetails) SetBacs(bacs *RecipientBacsNullable) {
+func (e *ExternalPaymentRefundDetails) SetBacs(bacs *RecipientBacsNullableInResponse) {
 	e.Bacs = bacs
 	e.require(externalPaymentRefundDetailsFieldBacs)
 }
@@ -5485,8 +5485,8 @@ type PaymentInitiationRecipient struct {
 	Name    string                    `json:"name" url:"name"`
 	Address *PaymentInitiationAddress `json:"address,omitempty" url:"address,omitempty"`
 	// The International Bank Account Number (IBAN) for the recipient.
-	Iban *string                `json:"iban,omitempty" url:"iban,omitempty"`
-	Bacs *RecipientBacsNullable `json:"bacs,omitempty" url:"bacs,omitempty"`
+	Iban *string                          `json:"iban,omitempty" url:"iban,omitempty"`
+	Bacs *RecipientBacsNullableInResponse `json:"bacs,omitempty" url:"bacs,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -5524,7 +5524,7 @@ func (p *PaymentInitiationRecipient) GetIban() *string {
 	return p.Iban
 }
 
-func (p *PaymentInitiationRecipient) GetBacs() *RecipientBacsNullable {
+func (p *PaymentInitiationRecipient) GetBacs() *RecipientBacsNullableInResponse {
 	if p == nil {
 		return nil
 	}
@@ -5577,7 +5577,7 @@ func (p *PaymentInitiationRecipient) SetIban(iban *string) {
 
 // SetBacs sets the Bacs field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (p *PaymentInitiationRecipient) SetBacs(bacs *RecipientBacsNullable) {
+func (p *PaymentInitiationRecipient) SetBacs(bacs *RecipientBacsNullableInResponse) {
 	p.Bacs = bacs
 	p.require(paymentInitiationRecipientFieldBacs)
 }
@@ -5768,9 +5768,9 @@ type PaymentInitiationRecipientGetResponse struct {
 	Name    string                    `json:"name" url:"name"`
 	Address *PaymentInitiationAddress `json:"address,omitempty" url:"address,omitempty"`
 	// The International Bank Account Number (IBAN) for the recipient.
-	Iban      *string                `json:"iban,omitempty" url:"iban,omitempty"`
-	Bacs      *RecipientBacsNullable `json:"bacs,omitempty" url:"bacs,omitempty"`
-	RequestID RequestID              `json:"request_id" url:"request_id"`
+	Iban      *string                          `json:"iban,omitempty" url:"iban,omitempty"`
+	Bacs      *RecipientBacsNullableInResponse `json:"bacs,omitempty" url:"bacs,omitempty"`
+	RequestID RequestID                        `json:"request_id" url:"request_id"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -5808,7 +5808,7 @@ func (p *PaymentInitiationRecipientGetResponse) GetIban() *string {
 	return p.Iban
 }
 
-func (p *PaymentInitiationRecipientGetResponse) GetBacs() *RecipientBacsNullable {
+func (p *PaymentInitiationRecipientGetResponse) GetBacs() *RecipientBacsNullableInResponse {
 	if p == nil {
 		return nil
 	}
@@ -5868,7 +5868,7 @@ func (p *PaymentInitiationRecipientGetResponse) SetIban(iban *string) {
 
 // SetBacs sets the Bacs field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (p *PaymentInitiationRecipientGetResponse) SetBacs(bacs *RecipientBacsNullable) {
+func (p *PaymentInitiationRecipientGetResponse) SetBacs(bacs *RecipientBacsNullableInResponse) {
 	p.Bacs = bacs
 	p.require(paymentInitiationRecipientGetResponseFieldBacs)
 }
@@ -6202,16 +6202,16 @@ func (r *RecipientBacsNullable) String() string {
 }
 
 var (
-	senderBacsNullableFieldAccount  = big.NewInt(1 << 0)
-	senderBacsNullableFieldSortCode = big.NewInt(1 << 1)
+	recipientBacsNullableInResponseFieldAccount  = big.NewInt(1 << 0)
+	recipientBacsNullableInResponseFieldSortCode = big.NewInt(1 << 1)
 )
 
-// An object containing a Bacs account number and sort code. If an IBAN is not provided or if this recipient needs to accept domestic GBP-denominated payments, Bacs data is required.
-type SenderBacsNullable struct {
+// An object containing a Bacs account number and sort code. If either value isn't available, it's returned as an empty string.
+type RecipientBacsNullableInResponse struct {
 	// The account number of the account. Maximum of 10 characters.
-	Account *string `json:"account,omitempty" url:"account,omitempty"`
+	Account string `json:"account" url:"account"`
 	// The 6-character sort code of the account.
-	SortCode *string `json:"sort_code,omitempty" url:"sort_code,omitempty"`
+	SortCode string `json:"sort_code" url:"sort_code"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -6220,16 +6220,121 @@ type SenderBacsNullable struct {
 	rawJSON         json.RawMessage
 }
 
-func (s *SenderBacsNullable) GetAccount() *string {
-	if s == nil {
+func (r *RecipientBacsNullableInResponse) GetAccount() string {
+	if r == nil {
+		return ""
+	}
+	return r.Account
+}
+
+func (r *RecipientBacsNullableInResponse) GetSortCode() string {
+	if r == nil {
+		return ""
+	}
+	return r.SortCode
+}
+
+func (r *RecipientBacsNullableInResponse) GetExtraProperties() map[string]interface{} {
+	if r == nil {
 		return nil
+	}
+	return r.extraProperties
+}
+
+func (r *RecipientBacsNullableInResponse) require(field *big.Int) {
+	next := new(big.Int)
+	if r.explicitFields != nil {
+		next.Set(r.explicitFields)
+	}
+	next.Or(next, field)
+	r.explicitFields = next
+}
+
+// SetAccount sets the Account field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (r *RecipientBacsNullableInResponse) SetAccount(account string) {
+	r.Account = account
+	r.require(recipientBacsNullableInResponseFieldAccount)
+}
+
+// SetSortCode sets the SortCode field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (r *RecipientBacsNullableInResponse) SetSortCode(sortCode string) {
+	r.SortCode = sortCode
+	r.require(recipientBacsNullableInResponseFieldSortCode)
+}
+
+func (r *RecipientBacsNullableInResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler RecipientBacsNullableInResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = RecipientBacsNullableInResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+	r.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *RecipientBacsNullableInResponse) MarshalJSON() ([]byte, error) {
+	type embed RecipientBacsNullableInResponse
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*r),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, r.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (r *RecipientBacsNullableInResponse) String() string {
+	if r == nil {
+		return "<nil>"
+	}
+	if len(r.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(r.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
+}
+
+var (
+	senderBacsNullableFieldAccount  = big.NewInt(1 << 0)
+	senderBacsNullableFieldSortCode = big.NewInt(1 << 1)
+)
+
+// An object containing a Bacs account number and sort code. If an IBAN is not provided or if this recipient needs to accept domestic GBP-denominated payments, Bacs data is required.
+type SenderBacsNullable struct {
+	// The account number of the account. Maximum of 10 characters.
+	Account string `json:"account" url:"account"`
+	// The 6-character sort code of the account.
+	SortCode string `json:"sort_code" url:"sort_code"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (s *SenderBacsNullable) GetAccount() string {
+	if s == nil {
+		return ""
 	}
 	return s.Account
 }
 
-func (s *SenderBacsNullable) GetSortCode() *string {
+func (s *SenderBacsNullable) GetSortCode() string {
 	if s == nil {
-		return nil
+		return ""
 	}
 	return s.SortCode
 }
@@ -6252,14 +6357,14 @@ func (s *SenderBacsNullable) require(field *big.Int) {
 
 // SetAccount sets the Account field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (s *SenderBacsNullable) SetAccount(account *string) {
+func (s *SenderBacsNullable) SetAccount(account string) {
 	s.Account = account
 	s.require(senderBacsNullableFieldAccount)
 }
 
 // SetSortCode sets the SortCode field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (s *SenderBacsNullable) SetSortCode(sortCode *string) {
+func (s *SenderBacsNullable) SetSortCode(sortCode string) {
 	s.SortCode = sortCode
 	s.require(senderBacsNullableFieldSortCode)
 }

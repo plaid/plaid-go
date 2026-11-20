@@ -5,7 +5,7 @@ package plaid
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/plaid/plaid-go/v50/internal"
+	internal "github.com/plaid/plaid-go/v51/internal"
 	big "math/big"
 	time "time"
 )
@@ -300,12 +300,13 @@ var (
 
 // businessAccountNullableFields maps the wire names of BusinessAccount's nullable fields (required or optional) to their field bits.
 var businessAccountNullableFields = map[string]*big.Int{
-	"mask":              businessAccountFieldMask,
-	"official_name":     businessAccountFieldOfficialName,
-	"subtype":           businessAccountFieldSubtype,
-	"apy":               businessAccountFieldApy,
-	"holder_category":   businessAccountFieldHolderCategory,
-	"paired_account_id": businessAccountFieldPairedAccountID,
+	"mask":                  businessAccountFieldMask,
+	"official_name":         businessAccountFieldOfficialName,
+	"subtype":               businessAccountFieldSubtype,
+	"verification_insights": businessAccountFieldVerificationInsights,
+	"apy":                   businessAccountFieldApy,
+	"holder_category":       businessAccountFieldHolderCategory,
+	"paired_account_id":     businessAccountFieldPairedAccountID,
 }
 
 // Business identity information about an account

@@ -7,10 +7,10 @@ import (
 	http "net/http"
 	os "os"
 
-	plaid "github.com/plaid/plaid-go/v50"
-	core "github.com/plaid/plaid-go/v50/core"
-	internal "github.com/plaid/plaid-go/v50/internal"
-	option "github.com/plaid/plaid-go/v50/option"
+	plaid "github.com/plaid/plaid-go/v51"
+	core "github.com/plaid/plaid-go/v51/core"
+	internal "github.com/plaid/plaid-go/v51/internal"
+	option "github.com/plaid/plaid-go/v51/option"
 )
 
 type Client struct {

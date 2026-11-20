@@ -3,7 +3,7 @@ package internal
 import (
 	"context"
 
-	"github.com/plaid/plaid-go/v50/core"
+	"github.com/plaid/plaid-go/v51/core"
 )
 
 // PagerMode represents the different types of pagination modes.

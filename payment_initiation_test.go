@@ -2183,7 +2183,7 @@ func TestSettersExternalPaymentRefundDetails(t *testing.T) {
 
 	t.Run("SetBacs", func(t *testing.T) {
 		obj := &ExternalPaymentRefundDetails{}
-		var fernTestValueBacs *RecipientBacsNullable
+		var fernTestValueBacs *RecipientBacsNullableInResponse
 		obj.SetBacs(fernTestValueBacs)
 		assert.Equal(t, fernTestValueBacs, obj.Bacs)
 		assert.NotNil(t, obj.explicitFields)
@@ -2252,7 +2252,7 @@ func TestGettersExternalPaymentRefundDetails(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &ExternalPaymentRefundDetails{}
-		var expected *RecipientBacsNullable
+		var expected *RecipientBacsNullableInResponse
 		obj.Bacs = expected
 
 		// Act & Assert
@@ -2350,7 +2350,7 @@ func TestSettersMarkExplicitExternalPaymentRefundDetails(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &ExternalPaymentRefundDetails{}
-		var fernTestValueBacs *RecipientBacsNullable
+		var fernTestValueBacs *RecipientBacsNullableInResponse
 
 		// Act
 		obj.SetBacs(fernTestValueBacs)
@@ -10465,7 +10465,7 @@ func TestSettersPaymentInitiationRecipient(t *testing.T) {
 
 	t.Run("SetBacs", func(t *testing.T) {
 		obj := &PaymentInitiationRecipient{}
-		var fernTestValueBacs *RecipientBacsNullable
+		var fernTestValueBacs *RecipientBacsNullableInResponse
 		obj.SetBacs(fernTestValueBacs)
 		assert.Equal(t, fernTestValueBacs, obj.Bacs)
 		assert.NotNil(t, obj.explicitFields)
@@ -10590,7 +10590,7 @@ func TestGettersPaymentInitiationRecipient(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &PaymentInitiationRecipient{}
-		var expected *RecipientBacsNullable
+		var expected *RecipientBacsNullableInResponse
 		obj.Bacs = expected
 
 		// Act & Assert
@@ -10750,7 +10750,7 @@ func TestSettersMarkExplicitPaymentInitiationRecipient(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &PaymentInitiationRecipient{}
-		var fernTestValueBacs *RecipientBacsNullable
+		var fernTestValueBacs *RecipientBacsNullableInResponse
 
 		// Act
 		obj.SetBacs(fernTestValueBacs)
@@ -10947,7 +10947,7 @@ func TestSettersPaymentInitiationRecipientGetResponse(t *testing.T) {
 
 	t.Run("SetBacs", func(t *testing.T) {
 		obj := &PaymentInitiationRecipientGetResponse{}
-		var fernTestValueBacs *RecipientBacsNullable
+		var fernTestValueBacs *RecipientBacsNullableInResponse
 		obj.SetBacs(fernTestValueBacs)
 		assert.Equal(t, fernTestValueBacs, obj.Bacs)
 		assert.NotNil(t, obj.explicitFields)
@@ -11080,7 +11080,7 @@ func TestGettersPaymentInitiationRecipientGetResponse(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &PaymentInitiationRecipientGetResponse{}
-		var expected *RecipientBacsNullable
+		var expected *RecipientBacsNullableInResponse
 		obj.Bacs = expected
 
 		// Act & Assert
@@ -11263,7 +11263,7 @@ func TestSettersMarkExplicitPaymentInitiationRecipientGetResponse(t *testing.T) 
 		t.Parallel()
 		// Arrange
 		obj := &PaymentInitiationRecipientGetResponse{}
-		var fernTestValueBacs *RecipientBacsNullable
+		var fernTestValueBacs *RecipientBacsNullableInResponse
 
 		// Act
 		obj.SetBacs(fernTestValueBacs)
@@ -11691,10 +11691,143 @@ func TestSettersMarkExplicitRecipientBacsNullable(t *testing.T) {
 
 }
 
+func TestSettersRecipientBacsNullableInResponse(t *testing.T) {
+	t.Run("SetAccount", func(t *testing.T) {
+		obj := &RecipientBacsNullableInResponse{}
+		var fernTestValueAccount string
+		obj.SetAccount(fernTestValueAccount)
+		assert.Equal(t, fernTestValueAccount, obj.Account)
+		assert.NotNil(t, obj.explicitFields)
+	})
+
+	t.Run("SetSortCode", func(t *testing.T) {
+		obj := &RecipientBacsNullableInResponse{}
+		var fernTestValueSortCode string
+		obj.SetSortCode(fernTestValueSortCode)
+		assert.Equal(t, fernTestValueSortCode, obj.SortCode)
+		assert.NotNil(t, obj.explicitFields)
+	})
+
+}
+
+func TestGettersRecipientBacsNullableInResponse(t *testing.T) {
+	t.Run("GetAccount", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		obj := &RecipientBacsNullableInResponse{}
+		var expected string
+		obj.Account = expected
+
+		// Act & Assert
+		assert.Equal(t, expected, obj.GetAccount(), "getter should return the property value")
+	})
+
+	t.Run("GetAccount_NilReceiver", func(t *testing.T) {
+		t.Parallel()
+		var obj *RecipientBacsNullableInResponse
+		// Should not panic - getters should handle nil receiver gracefully
+		defer func() {
+			if r := recover(); r != nil {
+				t.Errorf("Getter panicked on nil receiver: %v", r)
+			}
+		}()
+		_ = obj.GetAccount() // Should return zero value
+	})
+
+	t.Run("GetSortCode", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		obj := &RecipientBacsNullableInResponse{}
+		var expected string
+		obj.SortCode = expected
+
+		// Act & Assert
+		assert.Equal(t, expected, obj.GetSortCode(), "getter should return the property value")
+	})
+
+	t.Run("GetSortCode_NilReceiver", func(t *testing.T) {
+		t.Parallel()
+		var obj *RecipientBacsNullableInResponse
+		// Should not panic - getters should handle nil receiver gracefully
+		defer func() {
+			if r := recover(); r != nil {
+				t.Errorf("Getter panicked on nil receiver: %v", r)
+			}
+		}()
+		_ = obj.GetSortCode() // Should return zero value
+	})
+
+}
+
+func TestSettersMarkExplicitRecipientBacsNullableInResponse(t *testing.T) {
+	t.Run("SetAccount_MarksExplicit", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		obj := &RecipientBacsNullableInResponse{}
+		var fernTestValueAccount string
+
+		// Act
+		obj.SetAccount(fernTestValueAccount)
+
+		// Assert - object with explicitly set field can be marshaled/unmarshaled
+		bytes, err := json.Marshal(obj)
+		require.NoError(t, err, "marshaling should succeed for test setup")
+
+		// This test ensures JSON marshaling and unmarshaling succeed when the field has a zero/nil value
+		// Detect if marshaled JSON is an object or primitive to use correct unmarshal target
+		if len(bytes) > 0 && bytes[0] == '{' {
+			// JSON object - unmarshal into map
+			var unmarshaled map[string]interface{}
+			err = json.Unmarshal(bytes, &unmarshaled)
+			require.NoError(t, err, "unmarshaling should succeed for test verification")
+		} else {
+			// JSON primitive (string, number, boolean, null) - unmarshal into interface{}
+			var unmarshaled interface{}
+			err = json.Unmarshal(bytes, &unmarshaled)
+			require.NoError(t, err, "unmarshaling should succeed for test verification")
+		}
+
+		// Note: This does not explicitly assert the presence of a specific JSON field
+		// It verifies that setting a field via setter allows successful JSON round-trip
+	})
+
+	t.Run("SetSortCode_MarksExplicit", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		obj := &RecipientBacsNullableInResponse{}
+		var fernTestValueSortCode string
+
+		// Act
+		obj.SetSortCode(fernTestValueSortCode)
+
+		// Assert - object with explicitly set field can be marshaled/unmarshaled
+		bytes, err := json.Marshal(obj)
+		require.NoError(t, err, "marshaling should succeed for test setup")
+
+		// This test ensures JSON marshaling and unmarshaling succeed when the field has a zero/nil value
+		// Detect if marshaled JSON is an object or primitive to use correct unmarshal target
+		if len(bytes) > 0 && bytes[0] == '{' {
+			// JSON object - unmarshal into map
+			var unmarshaled map[string]interface{}
+			err = json.Unmarshal(bytes, &unmarshaled)
+			require.NoError(t, err, "unmarshaling should succeed for test verification")
+		} else {
+			// JSON primitive (string, number, boolean, null) - unmarshal into interface{}
+			var unmarshaled interface{}
+			err = json.Unmarshal(bytes, &unmarshaled)
+			require.NoError(t, err, "unmarshaling should succeed for test verification")
+		}
+
+		// Note: This does not explicitly assert the presence of a specific JSON field
+		// It verifies that setting a field via setter allows successful JSON round-trip
+	})
+
+}
+
 func TestSettersSenderBacsNullable(t *testing.T) {
 	t.Run("SetAccount", func(t *testing.T) {
 		obj := &SenderBacsNullable{}
-		var fernTestValueAccount *string
+		var fernTestValueAccount string
 		obj.SetAccount(fernTestValueAccount)
 		assert.Equal(t, fernTestValueAccount, obj.Account)
 		assert.NotNil(t, obj.explicitFields)
@@ -11702,7 +11835,7 @@ func TestSettersSenderBacsNullable(t *testing.T) {
 
 	t.Run("SetSortCode", func(t *testing.T) {
 		obj := &SenderBacsNullable{}
-		var fernTestValueSortCode *string
+		var fernTestValueSortCode string
 		obj.SetSortCode(fernTestValueSortCode)
 		assert.Equal(t, fernTestValueSortCode, obj.SortCode)
 		assert.NotNil(t, obj.explicitFields)
@@ -11715,21 +11848,11 @@ func TestGettersSenderBacsNullable(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &SenderBacsNullable{}
-		var expected *string
+		var expected string
 		obj.Account = expected
 
 		// Act & Assert
 		assert.Equal(t, expected, obj.GetAccount(), "getter should return the property value")
-	})
-
-	t.Run("GetAccount_NilValue", func(t *testing.T) {
-		t.Parallel()
-		// Arrange
-		obj := &SenderBacsNullable{}
-		obj.Account = nil
-
-		// Act & Assert
-		assert.Nil(t, obj.GetAccount(), "getter should return nil when property is nil")
 	})
 
 	t.Run("GetAccount_NilReceiver", func(t *testing.T) {
@@ -11748,21 +11871,11 @@ func TestGettersSenderBacsNullable(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &SenderBacsNullable{}
-		var expected *string
+		var expected string
 		obj.SortCode = expected
 
 		// Act & Assert
 		assert.Equal(t, expected, obj.GetSortCode(), "getter should return the property value")
-	})
-
-	t.Run("GetSortCode_NilValue", func(t *testing.T) {
-		t.Parallel()
-		// Arrange
-		obj := &SenderBacsNullable{}
-		obj.SortCode = nil
-
-		// Act & Assert
-		assert.Nil(t, obj.GetSortCode(), "getter should return nil when property is nil")
 	})
 
 	t.Run("GetSortCode_NilReceiver", func(t *testing.T) {
@@ -11784,7 +11897,7 @@ func TestSettersMarkExplicitSenderBacsNullable(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &SenderBacsNullable{}
-		var fernTestValueAccount *string
+		var fernTestValueAccount string
 
 		// Act
 		obj.SetAccount(fernTestValueAccount)
@@ -11815,7 +11928,7 @@ func TestSettersMarkExplicitSenderBacsNullable(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &SenderBacsNullable{}
-		var fernTestValueSortCode *string
+		var fernTestValueSortCode string
 
 		// Act
 		obj.SetSortCode(fernTestValueSortCode)
@@ -12862,6 +12975,39 @@ func TestJSONMarshalingRecipientBacsNullable(t *testing.T) {
 	t.Run("UnmarshalEmptyObject", func(t *testing.T) {
 		t.Parallel()
 		var obj RecipientBacsNullable
+		err := json.Unmarshal([]byte(`{}`), &obj)
+		assert.NoError(t, err, "unmarshaling empty object should succeed")
+	})
+}
+
+func TestJSONMarshalingRecipientBacsNullableInResponse(t *testing.T) {
+	t.Run("MarshalUnmarshal", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		obj := &RecipientBacsNullableInResponse{}
+
+		// Act - Marshal to JSON
+		data, err := json.Marshal(obj)
+		require.NoError(t, err, "marshaling should succeed")
+		assert.NotNil(t, data, "marshaled data should not be nil")
+		assert.NotEmpty(t, data, "marshaled data should not be empty")
+
+		// Unmarshal back and verify round-trip
+		var unmarshaled RecipientBacsNullableInResponse
+		err = json.Unmarshal(data, &unmarshaled)
+		assert.NoError(t, err, "round-trip unmarshal should succeed")
+	})
+
+	t.Run("UnmarshalInvalidJSON", func(t *testing.T) {
+		t.Parallel()
+		var obj RecipientBacsNullableInResponse
+		err := json.Unmarshal([]byte(`{invalid json}`), &obj)
+		assert.Error(t, err, "unmarshaling invalid JSON should return an error")
+	})
+
+	t.Run("UnmarshalEmptyObject", func(t *testing.T) {
+		t.Parallel()
+		var obj RecipientBacsNullableInResponse
 		err := json.Unmarshal([]byte(`{}`), &obj)
 		assert.NoError(t, err, "unmarshaling empty object should succeed")
 	})
@@ -14251,6 +14397,22 @@ func TestStringRecipientBacsNullable(t *testing.T) {
 	})
 }
 
+func TestStringRecipientBacsNullableInResponse(t *testing.T) {
+	t.Run("StringMethod", func(t *testing.T) {
+		t.Parallel()
+		obj := &RecipientBacsNullableInResponse{}
+		result := obj.String()
+		assert.NotEmpty(t, result, "String() should return a non-empty representation")
+	})
+
+	t.Run("StringMethod_NilReceiver", func(t *testing.T) {
+		t.Parallel()
+		var obj *RecipientBacsNullableInResponse
+		result := obj.String()
+		assert.Equal(t, "<nil>", result, "String() should return <nil> for nil receiver")
+	})
+}
+
 func TestStringSenderBacsNullable(t *testing.T) {
 	t.Run("StringMethod", func(t *testing.T) {
 		t.Parallel()
@@ -15335,6 +15497,29 @@ func TestExtraPropertiesRecipientBacsNullable(t *testing.T) {
 	t.Run("GetExtraProperties_NilReceiver", func(t *testing.T) {
 		t.Parallel()
 		var obj *RecipientBacsNullable
+		extraProps := obj.GetExtraProperties()
+		assert.Nil(t, extraProps, "nil receiver should return nil without panicking")
+	})
+}
+
+func TestExtraPropertiesRecipientBacsNullableInResponse(t *testing.T) {
+	t.Run("GetExtraProperties", func(t *testing.T) {
+		t.Parallel()
+		obj := &RecipientBacsNullableInResponse{}
+		// Should not panic when calling GetExtraProperties()
+		defer func() {
+			if r := recover(); r != nil {
+				t.Errorf("GetExtraProperties() panicked: %v", r)
+			}
+		}()
+		extraProps := obj.GetExtraProperties()
+		// Result can be nil or an empty/non-empty map
+		_ = extraProps
+	})
+
+	t.Run("GetExtraProperties_NilReceiver", func(t *testing.T) {
+		t.Parallel()
+		var obj *RecipientBacsNullableInResponse
 		extraProps := obj.GetExtraProperties()
 		assert.Nil(t, extraProps, "nil receiver should return nil without panicking")
 	})

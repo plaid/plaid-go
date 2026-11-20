@@ -2955,7 +2955,7 @@ func TestSettersNumbersAchNullable(t *testing.T) {
 
 	t.Run("SetAccount", func(t *testing.T) {
 		obj := &NumbersAchNullable{}
-		var fernTestValueAccount string
+		var fernTestValueAccount *string
 		obj.SetAccount(fernTestValueAccount)
 		assert.Equal(t, fernTestValueAccount, obj.Account)
 		assert.NotNil(t, obj.explicitFields)
@@ -2963,7 +2963,7 @@ func TestSettersNumbersAchNullable(t *testing.T) {
 
 	t.Run("SetIsTokenizedAccountNumber", func(t *testing.T) {
 		obj := &NumbersAchNullable{}
-		var fernTestValueIsTokenizedAccountNumber *bool
+		var fernTestValueIsTokenizedAccountNumber bool
 		obj.SetIsTokenizedAccountNumber(fernTestValueIsTokenizedAccountNumber)
 		assert.Equal(t, fernTestValueIsTokenizedAccountNumber, obj.IsTokenizedAccountNumber)
 		assert.NotNil(t, obj.explicitFields)
@@ -2971,7 +2971,7 @@ func TestSettersNumbersAchNullable(t *testing.T) {
 
 	t.Run("SetRouting", func(t *testing.T) {
 		obj := &NumbersAchNullable{}
-		var fernTestValueRouting string
+		var fernTestValueRouting *string
 		obj.SetRouting(fernTestValueRouting)
 		assert.Equal(t, fernTestValueRouting, obj.Routing)
 		assert.NotNil(t, obj.explicitFields)
@@ -3031,11 +3031,21 @@ func TestGettersNumbersAchNullable(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &NumbersAchNullable{}
-		var expected string
+		var expected *string
 		obj.Account = expected
 
 		// Act & Assert
 		assert.Equal(t, expected, obj.GetAccount(), "getter should return the property value")
+	})
+
+	t.Run("GetAccount_NilValue", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		obj := &NumbersAchNullable{}
+		obj.Account = nil
+
+		// Act & Assert
+		assert.Nil(t, obj.GetAccount(), "getter should return nil when property is nil")
 	})
 
 	t.Run("GetAccount_NilReceiver", func(t *testing.T) {
@@ -3054,21 +3064,11 @@ func TestGettersNumbersAchNullable(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &NumbersAchNullable{}
-		var expected *bool
+		var expected bool
 		obj.IsTokenizedAccountNumber = expected
 
 		// Act & Assert
 		assert.Equal(t, expected, obj.GetIsTokenizedAccountNumber(), "getter should return the property value")
-	})
-
-	t.Run("GetIsTokenizedAccountNumber_NilValue", func(t *testing.T) {
-		t.Parallel()
-		// Arrange
-		obj := &NumbersAchNullable{}
-		obj.IsTokenizedAccountNumber = nil
-
-		// Act & Assert
-		assert.Nil(t, obj.GetIsTokenizedAccountNumber(), "getter should return nil when property is nil")
 	})
 
 	t.Run("GetIsTokenizedAccountNumber_NilReceiver", func(t *testing.T) {
@@ -3087,11 +3087,21 @@ func TestGettersNumbersAchNullable(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &NumbersAchNullable{}
-		var expected string
+		var expected *string
 		obj.Routing = expected
 
 		// Act & Assert
 		assert.Equal(t, expected, obj.GetRouting(), "getter should return the property value")
+	})
+
+	t.Run("GetRouting_NilValue", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		obj := &NumbersAchNullable{}
+		obj.Routing = nil
+
+		// Act & Assert
+		assert.Nil(t, obj.GetRouting(), "getter should return nil when property is nil")
 	})
 
 	t.Run("GetRouting_NilReceiver", func(t *testing.T) {
@@ -3243,7 +3253,7 @@ func TestSettersMarkExplicitNumbersAchNullable(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &NumbersAchNullable{}
-		var fernTestValueAccount string
+		var fernTestValueAccount *string
 
 		// Act
 		obj.SetAccount(fernTestValueAccount)
@@ -3274,7 +3284,7 @@ func TestSettersMarkExplicitNumbersAchNullable(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &NumbersAchNullable{}
-		var fernTestValueIsTokenizedAccountNumber *bool
+		var fernTestValueIsTokenizedAccountNumber bool
 
 		// Act
 		obj.SetIsTokenizedAccountNumber(fernTestValueIsTokenizedAccountNumber)
@@ -3305,7 +3315,7 @@ func TestSettersMarkExplicitNumbersAchNullable(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &NumbersAchNullable{}
-		var fernTestValueRouting string
+		var fernTestValueRouting *string
 
 		// Act
 		obj.SetRouting(fernTestValueRouting)
@@ -3633,7 +3643,7 @@ func TestSettersNumbersEftNullable(t *testing.T) {
 
 	t.Run("SetAccount", func(t *testing.T) {
 		obj := &NumbersEftNullable{}
-		var fernTestValueAccount string
+		var fernTestValueAccount *string
 		obj.SetAccount(fernTestValueAccount)
 		assert.Equal(t, fernTestValueAccount, obj.Account)
 		assert.NotNil(t, obj.explicitFields)
@@ -3685,11 +3695,21 @@ func TestGettersNumbersEftNullable(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &NumbersEftNullable{}
-		var expected string
+		var expected *string
 		obj.Account = expected
 
 		// Act & Assert
 		assert.Equal(t, expected, obj.GetAccount(), "getter should return the property value")
+	})
+
+	t.Run("GetAccount_NilValue", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		obj := &NumbersEftNullable{}
+		obj.Account = nil
+
+		// Act & Assert
+		assert.Nil(t, obj.GetAccount(), "getter should return nil when property is nil")
 	})
 
 	t.Run("GetAccount_NilReceiver", func(t *testing.T) {
@@ -3788,7 +3808,7 @@ func TestSettersMarkExplicitNumbersEftNullable(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &NumbersEftNullable{}
-		var fernTestValueAccount string
+		var fernTestValueAccount *string
 
 		// Act
 		obj.SetAccount(fernTestValueAccount)
@@ -3890,7 +3910,7 @@ func TestSettersNumbersInternationalNullable(t *testing.T) {
 
 	t.Run("SetIban", func(t *testing.T) {
 		obj := &NumbersInternationalNullable{}
-		var fernTestValueIban string
+		var fernTestValueIban *string
 		obj.SetIban(fernTestValueIban)
 		assert.Equal(t, fernTestValueIban, obj.Iban)
 		assert.NotNil(t, obj.explicitFields)
@@ -3898,7 +3918,7 @@ func TestSettersNumbersInternationalNullable(t *testing.T) {
 
 	t.Run("SetBic", func(t *testing.T) {
 		obj := &NumbersInternationalNullable{}
-		var fernTestValueBic string
+		var fernTestValueBic *string
 		obj.SetBic(fernTestValueBic)
 		assert.Equal(t, fernTestValueBic, obj.Bic)
 		assert.NotNil(t, obj.explicitFields)
@@ -3934,11 +3954,21 @@ func TestGettersNumbersInternationalNullable(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &NumbersInternationalNullable{}
-		var expected string
+		var expected *string
 		obj.Iban = expected
 
 		// Act & Assert
 		assert.Equal(t, expected, obj.GetIban(), "getter should return the property value")
+	})
+
+	t.Run("GetIban_NilValue", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		obj := &NumbersInternationalNullable{}
+		obj.Iban = nil
+
+		// Act & Assert
+		assert.Nil(t, obj.GetIban(), "getter should return nil when property is nil")
 	})
 
 	t.Run("GetIban_NilReceiver", func(t *testing.T) {
@@ -3957,11 +3987,21 @@ func TestGettersNumbersInternationalNullable(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &NumbersInternationalNullable{}
-		var expected string
+		var expected *string
 		obj.Bic = expected
 
 		// Act & Assert
 		assert.Equal(t, expected, obj.GetBic(), "getter should return the property value")
+	})
+
+	t.Run("GetBic_NilValue", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		obj := &NumbersInternationalNullable{}
+		obj.Bic = nil
+
+		// Act & Assert
+		assert.Nil(t, obj.GetBic(), "getter should return nil when property is nil")
 	})
 
 	t.Run("GetBic_NilReceiver", func(t *testing.T) {
@@ -4014,7 +4054,7 @@ func TestSettersMarkExplicitNumbersInternationalNullable(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &NumbersInternationalNullable{}
-		var fernTestValueIban string
+		var fernTestValueIban *string
 
 		// Act
 		obj.SetIban(fernTestValueIban)
@@ -4045,7 +4085,7 @@ func TestSettersMarkExplicitNumbersInternationalNullable(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &NumbersInternationalNullable{}
-		var fernTestValueBic string
+		var fernTestValueBic *string
 
 		// Act
 		obj.SetBic(fernTestValueBic)
@@ -10352,6 +10392,8 @@ func TestRequiredNullableRoundTripAccountBaseNullable(t *testing.T) {
 
 func TestRequiredNullableRoundTripNumbersAchNullable(t *testing.T) {
 	requiredNullableKeys := []string{
+		"account",
+		"routing",
 		"wire_routing",
 	}
 	marshalToMap := func(t *testing.T, obj *NumbersAchNullable) map[string]json.RawMessage {
@@ -10365,7 +10407,7 @@ func TestRequiredNullableRoundTripNumbersAchNullable(t *testing.T) {
 	t.Run("NullPreserved", func(t *testing.T) {
 		t.Parallel()
 		var obj NumbersAchNullable
-		require.NoError(t, json.Unmarshal([]byte(`{"wire_routing":null}`), &obj))
+		require.NoError(t, json.Unmarshal([]byte(`{"account":null,"routing":null,"wire_routing":null}`), &obj))
 		result := marshalToMap(t, &obj)
 		for _, key := range requiredNullableKeys {
 			value, ok := result[key]
@@ -10387,6 +10429,139 @@ func TestRequiredNullableRoundTripNumbersAchNullable(t *testing.T) {
 	t.Run("FreshValueOmits", func(t *testing.T) {
 		t.Parallel()
 		result := marshalToMap(t, &NumbersAchNullable{})
+		for _, key := range requiredNullableKeys {
+			assert.NotContains(t, result, key, "required nullable field %q should be omitted from a freshly constructed value", key)
+		}
+	})
+}
+
+func TestRequiredNullableRoundTripNumbersEftNullable(t *testing.T) {
+	requiredNullableKeys := []string{
+		"account",
+	}
+	marshalToMap := func(t *testing.T, obj *NumbersEftNullable) map[string]json.RawMessage {
+		data, err := json.Marshal(obj)
+		require.NoError(t, err, "marshaling should succeed")
+		var result map[string]json.RawMessage
+		require.NoError(t, json.Unmarshal(data, &result), "marshaled data should be a JSON object")
+		return result
+	}
+
+	t.Run("NullPreserved", func(t *testing.T) {
+		t.Parallel()
+		var obj NumbersEftNullable
+		require.NoError(t, json.Unmarshal([]byte(`{"account":null}`), &obj))
+		result := marshalToMap(t, &obj)
+		for _, key := range requiredNullableKeys {
+			value, ok := result[key]
+			require.True(t, ok, "required nullable field %q received as null should be present in the output", key)
+			assert.Equal(t, "null", string(value), "required nullable field %q received as null should be null in the output", key)
+		}
+	})
+
+	t.Run("AbsentStaysAbsent", func(t *testing.T) {
+		t.Parallel()
+		var obj NumbersEftNullable
+		require.NoError(t, json.Unmarshal([]byte(`{}`), &obj))
+		result := marshalToMap(t, &obj)
+		for _, key := range requiredNullableKeys {
+			assert.NotContains(t, result, key, "required nullable field %q absent from the input should be absent from the output", key)
+		}
+	})
+
+	t.Run("FreshValueOmits", func(t *testing.T) {
+		t.Parallel()
+		result := marshalToMap(t, &NumbersEftNullable{})
+		for _, key := range requiredNullableKeys {
+			assert.NotContains(t, result, key, "required nullable field %q should be omitted from a freshly constructed value", key)
+		}
+	})
+}
+
+func TestRequiredNullableRoundTripNumbersInternationalNullable(t *testing.T) {
+	requiredNullableKeys := []string{
+		"iban",
+		"bic",
+	}
+	marshalToMap := func(t *testing.T, obj *NumbersInternationalNullable) map[string]json.RawMessage {
+		data, err := json.Marshal(obj)
+		require.NoError(t, err, "marshaling should succeed")
+		var result map[string]json.RawMessage
+		require.NoError(t, json.Unmarshal(data, &result), "marshaled data should be a JSON object")
+		return result
+	}
+
+	t.Run("NullPreserved", func(t *testing.T) {
+		t.Parallel()
+		var obj NumbersInternationalNullable
+		require.NoError(t, json.Unmarshal([]byte(`{"iban":null,"bic":null}`), &obj))
+		result := marshalToMap(t, &obj)
+		for _, key := range requiredNullableKeys {
+			value, ok := result[key]
+			require.True(t, ok, "required nullable field %q received as null should be present in the output", key)
+			assert.Equal(t, "null", string(value), "required nullable field %q received as null should be null in the output", key)
+		}
+	})
+
+	t.Run("AbsentStaysAbsent", func(t *testing.T) {
+		t.Parallel()
+		var obj NumbersInternationalNullable
+		require.NoError(t, json.Unmarshal([]byte(`{}`), &obj))
+		result := marshalToMap(t, &obj)
+		for _, key := range requiredNullableKeys {
+			assert.NotContains(t, result, key, "required nullable field %q absent from the input should be absent from the output", key)
+		}
+	})
+
+	t.Run("FreshValueOmits", func(t *testing.T) {
+		t.Parallel()
+		result := marshalToMap(t, &NumbersInternationalNullable{})
+		for _, key := range requiredNullableKeys {
+			assert.NotContains(t, result, key, "required nullable field %q should be omitted from a freshly constructed value", key)
+		}
+	})
+}
+
+func TestRequiredNullableRoundTripProcessorNumber(t *testing.T) {
+	requiredNullableKeys := []string{
+		"ach",
+		"eft",
+		"international",
+		"bacs",
+	}
+	marshalToMap := func(t *testing.T, obj *ProcessorNumber) map[string]json.RawMessage {
+		data, err := json.Marshal(obj)
+		require.NoError(t, err, "marshaling should succeed")
+		var result map[string]json.RawMessage
+		require.NoError(t, json.Unmarshal(data, &result), "marshaled data should be a JSON object")
+		return result
+	}
+
+	t.Run("NullPreserved", func(t *testing.T) {
+		t.Parallel()
+		var obj ProcessorNumber
+		require.NoError(t, json.Unmarshal([]byte(`{"ach":null,"eft":null,"international":null,"bacs":null}`), &obj))
+		result := marshalToMap(t, &obj)
+		for _, key := range requiredNullableKeys {
+			value, ok := result[key]
+			require.True(t, ok, "required nullable field %q received as null should be present in the output", key)
+			assert.Equal(t, "null", string(value), "required nullable field %q received as null should be null in the output", key)
+		}
+	})
+
+	t.Run("AbsentStaysAbsent", func(t *testing.T) {
+		t.Parallel()
+		var obj ProcessorNumber
+		require.NoError(t, json.Unmarshal([]byte(`{}`), &obj))
+		result := marshalToMap(t, &obj)
+		for _, key := range requiredNullableKeys {
+			assert.NotContains(t, result, key, "required nullable field %q absent from the input should be absent from the output", key)
+		}
+	})
+
+	t.Run("FreshValueOmits", func(t *testing.T) {
+		t.Parallel()
+		result := marshalToMap(t, &ProcessorNumber{})
 		for _, key := range requiredNullableKeys {
 			assert.NotContains(t, result, key, "required nullable field %q should be omitted from a freshly constructed value", key)
 		}
@@ -10438,6 +10613,7 @@ func TestRequiredNullableRoundTripProcessorTransactionsSyncResponse(t *testing.T
 
 func TestOptionalNullableRoundTripAccountBaseNullable(t *testing.T) {
 	optionalNullableKeys := []string{
+		"verification_insights",
 		"apy",
 		"holder_category",
 		"paired_account_id",
@@ -10453,7 +10629,7 @@ func TestOptionalNullableRoundTripAccountBaseNullable(t *testing.T) {
 	t.Run("NullPreserved", func(t *testing.T) {
 		t.Parallel()
 		var obj AccountBaseNullable
-		require.NoError(t, json.Unmarshal([]byte(`{"apy":null,"holder_category":null,"paired_account_id":null}`), &obj))
+		require.NoError(t, json.Unmarshal([]byte(`{"verification_insights":null,"apy":null,"holder_category":null,"paired_account_id":null}`), &obj))
 		result := marshalToMap(t, &obj)
 		for _, key := range optionalNullableKeys {
 			value, ok := result[key]
@@ -10519,52 +10695,6 @@ func TestOptionalNullableRoundTripNumbersAchNullable(t *testing.T) {
 	t.Run("FreshValueOmits", func(t *testing.T) {
 		t.Parallel()
 		result := marshalToMap(t, &NumbersAchNullable{})
-		for _, key := range optionalNullableKeys {
-			assert.NotContains(t, result, key, "optional nullable field %q should be omitted from a freshly constructed value", key)
-		}
-	})
-}
-
-func TestOptionalNullableRoundTripProcessorNumber(t *testing.T) {
-	optionalNullableKeys := []string{
-		"ach",
-		"eft",
-		"international",
-		"bacs",
-	}
-	marshalToMap := func(t *testing.T, obj *ProcessorNumber) map[string]json.RawMessage {
-		data, err := json.Marshal(obj)
-		require.NoError(t, err, "marshaling should succeed")
-		var result map[string]json.RawMessage
-		require.NoError(t, json.Unmarshal(data, &result), "marshaled data should be a JSON object")
-		return result
-	}
-
-	t.Run("NullPreserved", func(t *testing.T) {
-		t.Parallel()
-		var obj ProcessorNumber
-		require.NoError(t, json.Unmarshal([]byte(`{"ach":null,"eft":null,"international":null,"bacs":null}`), &obj))
-		result := marshalToMap(t, &obj)
-		for _, key := range optionalNullableKeys {
-			value, ok := result[key]
-			require.True(t, ok, "optional nullable field %q received as null should be present in the output", key)
-			assert.Equal(t, "null", string(value), "optional nullable field %q received as null should be null in the output", key)
-		}
-	})
-
-	t.Run("AbsentStaysAbsent", func(t *testing.T) {
-		t.Parallel()
-		var obj ProcessorNumber
-		require.NoError(t, json.Unmarshal([]byte(`{}`), &obj))
-		result := marshalToMap(t, &obj)
-		for _, key := range optionalNullableKeys {
-			assert.NotContains(t, result, key, "optional nullable field %q absent from the input should be absent from the output", key)
-		}
-	})
-
-	t.Run("FreshValueOmits", func(t *testing.T) {
-		t.Parallel()
-		result := marshalToMap(t, &ProcessorNumber{})
 		for _, key := range optionalNullableKeys {
 			assert.NotContains(t, result, key, "optional nullable field %q should be omitted from a freshly constructed value", key)
 		}
@@ -11668,6 +11798,20 @@ func TestEnumProcessorTokenCreateRequestProcessor(t *testing.T) {
 		val, err := NewProcessorTokenCreateRequestProcessorFromString("anchorage")
 		assert.NoError(t, err, "valid enum value should not return error")
 		assert.Equal(t, ProcessorTokenCreateRequestProcessor("anchorage"), val, "enum value should match expected wire value")
+	})
+
+	t.Run("NewFromString_affina", func(t *testing.T) {
+		t.Parallel()
+		val, err := NewProcessorTokenCreateRequestProcessorFromString("affina")
+		assert.NoError(t, err, "valid enum value should not return error")
+		assert.Equal(t, ProcessorTokenCreateRequestProcessor("affina"), val, "enum value should match expected wire value")
+	})
+
+	t.Run("NewFromString_whop", func(t *testing.T) {
+		t.Parallel()
+		val, err := NewProcessorTokenCreateRequestProcessorFromString("whop")
+		assert.NoError(t, err, "valid enum value should not return error")
+		assert.Equal(t, ProcessorTokenCreateRequestProcessor("whop"), val, "enum value should match expected wire value")
 	})
 
 	t.Run("NewFromString_Invalid", func(t *testing.T) {

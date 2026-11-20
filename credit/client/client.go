@@ -7,11 +7,11 @@ import (
 	io "io"
 	os "os"
 
-	plaid "github.com/plaid/plaid-go/v50"
-	core "github.com/plaid/plaid-go/v50/core"
-	profile "github.com/plaid/plaid-go/v50/credit/profile"
-	internal "github.com/plaid/plaid-go/v50/internal"
-	option "github.com/plaid/plaid-go/v50/option"
+	plaid "github.com/plaid/plaid-go/v51"
+	core "github.com/plaid/plaid-go/v51/core"
+	profile "github.com/plaid/plaid-go/v51/credit/profile"
+	internal "github.com/plaid/plaid-go/v51/internal"
+	option "github.com/plaid/plaid-go/v51/option"
 )
 
 type Client struct {

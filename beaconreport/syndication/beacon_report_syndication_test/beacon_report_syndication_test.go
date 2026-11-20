@@ -10,9 +10,9 @@ import (
 	os "os"
 	testing "testing"
 
-	beaconreport "github.com/plaid/plaid-go/v50/beaconreport"
-	client "github.com/plaid/plaid-go/v50/client"
-	option "github.com/plaid/plaid-go/v50/option"
+	beaconreport "github.com/plaid/plaid-go/v51/beaconreport"
+	client "github.com/plaid/plaid-go/v51/client"
+	option "github.com/plaid/plaid-go/v51/option"
 	require "github.com/stretchr/testify/require"
 )
 

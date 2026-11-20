@@ -4,8 +4,8 @@ package banktransfer
 
 import (
 	json "encoding/json"
-	v50 "github.com/plaid/plaid-go/v50"
-	internal "github.com/plaid/plaid-go/v50/internal"
+	v51 "github.com/plaid/plaid-go/v51"
+	internal "github.com/plaid/plaid-go/v51/internal"
 	big "math/big"
 	time "time"
 )
@@ -32,16 +32,16 @@ type BankTransferEventListRequest struct {
 	BankTransferID *string `json:"bank_transfer_id,omitempty" url:"-"`
 	// The account ID to get events for all transactions to/from an account.
 	AccountID        *string                                    `json:"account_id,omitempty" url:"-"`
-	BankTransferType *v50.BankTransferEventListBankTransferType `json:"bank_transfer_type,omitempty" url:"-"`
+	BankTransferType *v51.BankTransferEventListBankTransferType `json:"bank_transfer_type,omitempty" url:"-"`
 	// Filter events by event type.
-	EventTypes []v50.BankTransferEventType `json:"event_types,omitempty" url:"-"`
+	EventTypes []v51.BankTransferEventType `json:"event_types,omitempty" url:"-"`
 	// The maximum number of bank transfer events to return. If the number of events matching the above parameters is greater than `count`, the most recent events will be returned.
 	Count *int `json:"count,omitempty" url:"-"`
 	// The offset into the list of bank transfer events. When `count`=25 and `offset`=0, the first 25 events will be returned. When `count`=25 and `offset`=25, the next 25 bank transfer events will be returned.
 	Offset *int `json:"offset,omitempty" url:"-"`
 	// The origination account ID to get events for transfers from a specific origination account.
 	OriginationAccountID *string                             `json:"origination_account_id,omitempty" url:"-"`
-	Direction            *v50.BankTransferEventListDirection `json:"direction,omitempty" url:"-"`
+	Direction            *v51.BankTransferEventListDirection `json:"direction,omitempty" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -86,14 +86,14 @@ func (b *BankTransferEventListRequest) SetAccountID(accountID *string) {
 
 // SetBankTransferType sets the BankTransferType field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (b *BankTransferEventListRequest) SetBankTransferType(bankTransferType *v50.BankTransferEventListBankTransferType) {
+func (b *BankTransferEventListRequest) SetBankTransferType(bankTransferType *v51.BankTransferEventListBankTransferType) {
 	b.BankTransferType = bankTransferType
 	b.require(bankTransferEventListRequestFieldBankTransferType)
 }
 
 // SetEventTypes sets the EventTypes field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (b *BankTransferEventListRequest) SetEventTypes(eventTypes []v50.BankTransferEventType) {
+func (b *BankTransferEventListRequest) SetEventTypes(eventTypes []v51.BankTransferEventType) {
 	b.EventTypes = eventTypes
 	b.require(bankTransferEventListRequestFieldEventTypes)
 }
@@ -121,7 +121,7 @@ func (b *BankTransferEventListRequest) SetOriginationAccountID(originationAccoun
 
 // SetDirection sets the Direction field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (b *BankTransferEventListRequest) SetDirection(direction *v50.BankTransferEventListDirection) {
+func (b *BankTransferEventListRequest) SetDirection(direction *v51.BankTransferEventListDirection) {
 	b.Direction = direction
 	b.require(bankTransferEventListRequestFieldDirection)
 }

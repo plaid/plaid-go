@@ -1,3 +1,7 @@
+## [v51.0.0]
+
+Regenerate the new client and legacy package from OpenAPI `2020-09-14_1.822.2` using Fern Go `1.70.3` for the new client.
+
 ## [v50.0.0]
 
 - Regenerate both clients from OpenAPI `2020-09-14_1.799.0`, using Fern Go `1.70.3` for the new client. Add `/user/transfer/limits/get` and the optional `/transfer/authorization/create.user_id`.

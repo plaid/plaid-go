@@ -5,7 +5,7 @@ package plaid
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/plaid/plaid-go/v50/internal"
+	internal "github.com/plaid/plaid-go/v51/internal"
 	big "math/big"
 	time "time"
 )
@@ -1234,12 +1234,13 @@ var (
 
 // accountBaseNullableNullableFields maps the wire names of AccountBaseNullable's nullable fields (required or optional) to their field bits.
 var accountBaseNullableNullableFields = map[string]*big.Int{
-	"mask":              accountBaseNullableFieldMask,
-	"official_name":     accountBaseNullableFieldOfficialName,
-	"subtype":           accountBaseNullableFieldSubtype,
-	"apy":               accountBaseNullableFieldApy,
-	"holder_category":   accountBaseNullableFieldHolderCategory,
-	"paired_account_id": accountBaseNullableFieldPairedAccountID,
+	"mask":                  accountBaseNullableFieldMask,
+	"official_name":         accountBaseNullableFieldOfficialName,
+	"subtype":               accountBaseNullableFieldSubtype,
+	"verification_insights": accountBaseNullableFieldVerificationInsights,
+	"apy":                   accountBaseNullableFieldApy,
+	"holder_category":       accountBaseNullableFieldHolderCategory,
+	"paired_account_id":     accountBaseNullableFieldPairedAccountID,
 }
 
 // A single account at a financial institution.
@@ -1585,6 +1586,8 @@ var (
 
 // numbersAchNullableNullableFields maps the wire names of NumbersAchNullable's nullable fields (required or optional) to their field bits.
 var numbersAchNullableNullableFields = map[string]*big.Int{
+	"account":          numbersAchNullableFieldAccount,
+	"routing":          numbersAchNullableFieldRouting,
 	"wire_routing":     numbersAchNullableFieldWireRouting,
 	"can_transfer_in":  numbersAchNullableFieldCanTransferIn,
 	"can_transfer_out": numbersAchNullableFieldCanTransferOut,
@@ -1594,14 +1597,14 @@ var numbersAchNullableNullableFields = map[string]*big.Int{
 type NumbersAchNullable struct {
 	// The Plaid account ID associated with the account numbers
 	AccountID string `json:"account_id" url:"account_id"`
-	// The ACH account number for the account.
+	// The ACH account number for the account. May be `null` for some non-depository accounts, but is never `null` for depository accounts.
 	//
 	// At certain institutions, including Chase, PNC, and US Bank, you will receive a "tokenized" account number, which is not the user's actual account number. For important details on how this may impact your integration and on how to avoid fraud, user confusion, and ACH returns, see [Tokenized account numbers](https://plaid.com/docs/auth/#tokenized-account-numbers).
-	Account string `json:"account" url:"account"`
+	Account *string `json:"account,omitempty" url:"account,omitempty"`
 	// Indicates whether the account number is tokenized by the institution. For important details on how tokenized account numbers may impact your integration, see [Tokenized account numbers](https://plaid.com/docs/auth/#tokenized-account-numbers).
-	IsTokenizedAccountNumber *bool `json:"is_tokenized_account_number,omitempty" url:"is_tokenized_account_number,omitempty"`
-	// The ACH routing number for the account. For more information, see [Tokenized account numbers](https://plaid.com/docs/auth/#tokenized-account-numbers).
-	Routing string `json:"routing" url:"routing"`
+	IsTokenizedAccountNumber bool `json:"is_tokenized_account_number" url:"is_tokenized_account_number"`
+	// The ACH routing number for the account. May be `null` for some non-depository accounts, but is never `null` for depository accounts. For more information, see [Tokenized account numbers](https://plaid.com/docs/auth/#tokenized-account-numbers).
+	Routing *string `json:"routing,omitempty" url:"routing,omitempty"`
 	// The wire transfer routing number for the account. This field is only populated if the institution is known to use a separate wire transfer routing number. Many institutions do not have a separate wire routing number and use the ACH routing number for wires instead. It is recommended to have the end user manually confirm their wire routing number before sending any wires to their account, especially if this field is `null`.
 	WireRouting *string `json:"wire_routing,omitempty" url:"wire_routing,omitempty"`
 	// Whether the account supports ACH transfers into the account
@@ -1623,23 +1626,23 @@ func (n *NumbersAchNullable) GetAccountID() string {
 	return n.AccountID
 }
 
-func (n *NumbersAchNullable) GetAccount() string {
+func (n *NumbersAchNullable) GetAccount() *string {
 	if n == nil {
-		return ""
+		return nil
 	}
 	return n.Account
 }
 
-func (n *NumbersAchNullable) GetIsTokenizedAccountNumber() *bool {
+func (n *NumbersAchNullable) GetIsTokenizedAccountNumber() bool {
 	if n == nil {
-		return nil
+		return false
 	}
 	return n.IsTokenizedAccountNumber
 }
 
-func (n *NumbersAchNullable) GetRouting() string {
+func (n *NumbersAchNullable) GetRouting() *string {
 	if n == nil {
-		return ""
+		return nil
 	}
 	return n.Routing
 }
@@ -1690,21 +1693,21 @@ func (n *NumbersAchNullable) SetAccountID(accountID string) {
 
 // SetAccount sets the Account field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (n *NumbersAchNullable) SetAccount(account string) {
+func (n *NumbersAchNullable) SetAccount(account *string) {
 	n.Account = account
 	n.require(numbersAchNullableFieldAccount)
 }
 
 // SetIsTokenizedAccountNumber sets the IsTokenizedAccountNumber field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (n *NumbersAchNullable) SetIsTokenizedAccountNumber(isTokenizedAccountNumber *bool) {
+func (n *NumbersAchNullable) SetIsTokenizedAccountNumber(isTokenizedAccountNumber bool) {
 	n.IsTokenizedAccountNumber = isTokenizedAccountNumber
 	n.require(numbersAchNullableFieldIsTokenizedAccountNumber)
 }
 
 // SetRouting sets the Routing field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (n *NumbersAchNullable) SetRouting(routing string) {
+func (n *NumbersAchNullable) SetRouting(routing *string) {
 	n.Routing = routing
 	n.require(numbersAchNullableFieldRouting)
 }
@@ -1908,12 +1911,17 @@ var (
 	numbersEftNullableFieldBranch      = big.NewInt(1 << 3)
 )
 
+// numbersEftNullableNullableFields maps the wire names of NumbersEftNullable's nullable fields (required or optional) to their field bits.
+var numbersEftNullableNullableFields = map[string]*big.Int{
+	"account": numbersEftNullableFieldAccount,
+}
+
 // Identifying information for transferring money to or from a Canadian bank account via EFT.
 type NumbersEftNullable struct {
 	// The Plaid account ID associated with the account numbers
 	AccountID string `json:"account_id" url:"account_id"`
-	// The EFT account number for the account
-	Account string `json:"account" url:"account"`
+	// The EFT account number for the account. May be `null` for some non-depository accounts, but is never `null` for depository accounts.
+	Account *string `json:"account,omitempty" url:"account,omitempty"`
 	// The EFT institution number for the account
 	Institution string `json:"institution" url:"institution"`
 	// The EFT branch number for the account
@@ -1933,9 +1941,9 @@ func (n *NumbersEftNullable) GetAccountID() string {
 	return n.AccountID
 }
 
-func (n *NumbersEftNullable) GetAccount() string {
+func (n *NumbersEftNullable) GetAccount() *string {
 	if n == nil {
-		return ""
+		return nil
 	}
 	return n.Account
 }
@@ -1979,7 +1987,7 @@ func (n *NumbersEftNullable) SetAccountID(accountID string) {
 
 // SetAccount sets the Account field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (n *NumbersEftNullable) SetAccount(account string) {
+func (n *NumbersEftNullable) SetAccount(account *string) {
 	n.Account = account
 	n.require(numbersEftNullableFieldAccount)
 }
@@ -2010,6 +2018,13 @@ func (n *NumbersEftNullable) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	n.extraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, numbersEftNullableNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		n.require(presentFields)
+	}
 	n.rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -2046,14 +2061,20 @@ var (
 	numbersInternationalNullableFieldBic       = big.NewInt(1 << 2)
 )
 
+// numbersInternationalNullableNullableFields maps the wire names of NumbersInternationalNullable's nullable fields (required or optional) to their field bits.
+var numbersInternationalNullableNullableFields = map[string]*big.Int{
+	"iban": numbersInternationalNullableFieldIban,
+	"bic":  numbersInternationalNullableFieldBic,
+}
+
 // Identifying information for transferring money to or from an international bank account via wire transfer.
 type NumbersInternationalNullable struct {
 	// The Plaid account ID associated with the account numbers
 	AccountID string `json:"account_id" url:"account_id"`
-	// The International Bank Account Number (IBAN) for the account
-	Iban string `json:"iban" url:"iban"`
-	// The Business Identifier Code (BIC) for the account
-	Bic string `json:"bic" url:"bic"`
+	// The International Bank Account Number (IBAN) for the account. May be `null` if only the BIC is available.
+	Iban *string `json:"iban,omitempty" url:"iban,omitempty"`
+	// The Business Identifier Code (BIC) for the account. May be `null` if only the IBAN is available.
+	Bic *string `json:"bic,omitempty" url:"bic,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -2069,16 +2090,16 @@ func (n *NumbersInternationalNullable) GetAccountID() string {
 	return n.AccountID
 }
 
-func (n *NumbersInternationalNullable) GetIban() string {
+func (n *NumbersInternationalNullable) GetIban() *string {
 	if n == nil {
-		return ""
+		return nil
 	}
 	return n.Iban
 }
 
-func (n *NumbersInternationalNullable) GetBic() string {
+func (n *NumbersInternationalNullable) GetBic() *string {
 	if n == nil {
-		return ""
+		return nil
 	}
 	return n.Bic
 }
@@ -2108,14 +2129,14 @@ func (n *NumbersInternationalNullable) SetAccountID(accountID string) {
 
 // SetIban sets the Iban field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (n *NumbersInternationalNullable) SetIban(iban string) {
+func (n *NumbersInternationalNullable) SetIban(iban *string) {
 	n.Iban = iban
 	n.require(numbersInternationalNullableFieldIban)
 }
 
 // SetBic sets the Bic field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (n *NumbersInternationalNullable) SetBic(bic string) {
+func (n *NumbersInternationalNullable) SetBic(bic *string) {
 	n.Bic = bic
 	n.require(numbersInternationalNullableFieldBic)
 }
@@ -2132,6 +2153,13 @@ func (n *NumbersInternationalNullable) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	n.extraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, numbersInternationalNullableNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		n.require(presentFields)
+	}
 	n.rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -5184,6 +5212,8 @@ const (
 	ProcessorTokenCreateRequestProcessorAdyenCa          ProcessorTokenCreateRequestProcessor = "adyen_ca"
 	ProcessorTokenCreateRequestProcessorBitgo            ProcessorTokenCreateRequestProcessor = "bitgo"
 	ProcessorTokenCreateRequestProcessorAnchorage        ProcessorTokenCreateRequestProcessor = "anchorage"
+	ProcessorTokenCreateRequestProcessorAffina           ProcessorTokenCreateRequestProcessor = "affina"
+	ProcessorTokenCreateRequestProcessorWhop             ProcessorTokenCreateRequestProcessor = "whop"
 )
 
 func NewProcessorTokenCreateRequestProcessorFromString(s string) (ProcessorTokenCreateRequestProcessor, error) {
@@ -5366,6 +5396,10 @@ func NewProcessorTokenCreateRequestProcessorFromString(s string) (ProcessorToken
 		return ProcessorTokenCreateRequestProcessorBitgo, nil
 	case "anchorage":
 		return ProcessorTokenCreateRequestProcessorAnchorage, nil
+	case "affina":
+		return ProcessorTokenCreateRequestProcessorAffina, nil
+	case "whop":
+		return ProcessorTokenCreateRequestProcessorWhop, nil
 	}
 	var t ProcessorTokenCreateRequestProcessor
 	return "", fmt.Errorf("%s is not a valid %T", s, t)

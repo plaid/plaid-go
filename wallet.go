@@ -5,7 +5,7 @@ package plaid
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/plaid/plaid-go/v50/internal"
+	internal "github.com/plaid/plaid-go/v51/internal"
 	big "math/big"
 	time "time"
 )
@@ -1465,7 +1465,7 @@ var walletNumbersNullableFields = map[string]*big.Int{
 
 // An object representing the e-wallet account numbers
 type WalletNumbers struct {
-	Bacs          *RecipientBacs            `json:"bacs,omitempty" url:"bacs,omitempty"`
+	Bacs          *RecipientBacsInResponse  `json:"bacs,omitempty" url:"bacs,omitempty"`
 	International *NumbersInternationalIban `json:"international,omitempty" url:"international,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
@@ -1476,7 +1476,7 @@ type WalletNumbers struct {
 	rawJSON json.RawMessage
 }
 
-func (w *WalletNumbers) GetBacs() *RecipientBacs {
+func (w *WalletNumbers) GetBacs() *RecipientBacsInResponse {
 	if w == nil {
 		return nil
 	}
@@ -1508,7 +1508,7 @@ func (w *WalletNumbers) require(field *big.Int) {
 
 // SetBacs sets the Bacs field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (w *WalletNumbers) SetBacs(bacs *RecipientBacs) {
+func (w *WalletNumbers) SetBacs(bacs *RecipientBacsInResponse) {
 	w.Bacs = bacs
 	w.require(walletNumbersFieldBacs)
 }
@@ -1697,11 +1697,11 @@ type WalletTransaction struct {
 	// `AUTO_REFUND`: an outgoing refund automatically initiated by Plaid in response to an unexpected `BANK_TRANSFER`.
 	//
 	// `TRANSFER_OUT`: a transaction that debits an e-wallet and cannot be classified under another category, typically initiated by a non-Plaid flow due to technical errors, FPS timeouts, or other payment-related issues.
-	Type         WalletTransactionType          `json:"type" url:"type"`
-	Scheme       *WalletPaymentScheme           `json:"scheme,omitempty" url:"scheme,omitempty"`
-	Amount       *WalletTransactionAmount       `json:"amount" url:"amount"`
-	Counterparty *WalletTransactionCounterparty `json:"counterparty" url:"counterparty"`
-	Status       WalletTransactionStatus        `json:"status" url:"status"`
+	Type         WalletTransactionType                    `json:"type" url:"type"`
+	Scheme       *WalletPaymentScheme                     `json:"scheme,omitempty" url:"scheme,omitempty"`
+	Amount       *WalletTransactionAmount                 `json:"amount" url:"amount"`
+	Counterparty *WalletTransactionCounterpartyInResponse `json:"counterparty" url:"counterparty"`
+	Status       WalletTransactionStatus                  `json:"status" url:"status"`
 	// Timestamp when the transaction was created, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format.
 	CreatedAt time.Time `json:"created_at" url:"created_at"`
 	// The date and time of the last time the `status` was updated, in ISO 8601 format
@@ -1764,7 +1764,7 @@ func (w *WalletTransaction) GetAmount() *WalletTransactionAmount {
 	return w.Amount
 }
 
-func (w *WalletTransaction) GetCounterparty() *WalletTransactionCounterparty {
+func (w *WalletTransaction) GetCounterparty() *WalletTransactionCounterpartyInResponse {
 	if w == nil {
 		return nil
 	}
@@ -1887,7 +1887,7 @@ func (w *WalletTransaction) SetAmount(amount *WalletTransactionAmount) {
 
 // SetCounterparty sets the Counterparty field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (w *WalletTransaction) SetCounterparty(counterparty *WalletTransactionCounterparty) {
+func (w *WalletTransaction) SetCounterparty(counterparty *WalletTransactionCounterpartyInResponse) {
 	w.Counterparty = counterparty
 	w.require(walletTransactionFieldCounterparty)
 }
@@ -2419,6 +2419,111 @@ func (w *WalletTransactionCounterpartyBacs) String() string {
 	return fmt.Sprintf("%#v", w)
 }
 
+var (
+	walletTransactionCounterpartyBacsInResponseFieldAccount  = big.NewInt(1 << 0)
+	walletTransactionCounterpartyBacsInResponseFieldSortCode = big.NewInt(1 << 1)
+)
+
+// The account number and sort code of the counterparty's account.
+type WalletTransactionCounterpartyBacsInResponse struct {
+	// The account number of the account. Maximum of 10 characters.
+	Account string `json:"account" url:"account"`
+	// The 6-character sort code of the account.
+	SortCode string `json:"sort_code" url:"sort_code"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (w *WalletTransactionCounterpartyBacsInResponse) GetAccount() string {
+	if w == nil {
+		return ""
+	}
+	return w.Account
+}
+
+func (w *WalletTransactionCounterpartyBacsInResponse) GetSortCode() string {
+	if w == nil {
+		return ""
+	}
+	return w.SortCode
+}
+
+func (w *WalletTransactionCounterpartyBacsInResponse) GetExtraProperties() map[string]interface{} {
+	if w == nil {
+		return nil
+	}
+	return w.extraProperties
+}
+
+func (w *WalletTransactionCounterpartyBacsInResponse) require(field *big.Int) {
+	next := new(big.Int)
+	if w.explicitFields != nil {
+		next.Set(w.explicitFields)
+	}
+	next.Or(next, field)
+	w.explicitFields = next
+}
+
+// SetAccount sets the Account field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (w *WalletTransactionCounterpartyBacsInResponse) SetAccount(account string) {
+	w.Account = account
+	w.require(walletTransactionCounterpartyBacsInResponseFieldAccount)
+}
+
+// SetSortCode sets the SortCode field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (w *WalletTransactionCounterpartyBacsInResponse) SetSortCode(sortCode string) {
+	w.SortCode = sortCode
+	w.require(walletTransactionCounterpartyBacsInResponseFieldSortCode)
+}
+
+func (w *WalletTransactionCounterpartyBacsInResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler WalletTransactionCounterpartyBacsInResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*w = WalletTransactionCounterpartyBacsInResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *w)
+	if err != nil {
+		return err
+	}
+	w.extraProperties = extraProperties
+	w.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (w *WalletTransactionCounterpartyBacsInResponse) MarshalJSON() ([]byte, error) {
+	type embed WalletTransactionCounterpartyBacsInResponse
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*w),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, w.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (w *WalletTransactionCounterpartyBacsInResponse) String() string {
+	if w == nil {
+		return "<nil>"
+	}
+	if len(w.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(w.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(w); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", w)
+}
+
 // Whether the counterparty is a personal or a business account holder. Payee verification schemes match a different set of identifiers for a natural person and a legal entity.
 //
 // `personal`: the counterparty is an individual.
@@ -2446,6 +2551,165 @@ func NewWalletTransactionCounterpartyHolderCategoryFromString(s string) (WalletT
 
 func (w WalletTransactionCounterpartyHolderCategory) Ptr() *WalletTransactionCounterpartyHolderCategory {
 	return &w
+}
+
+var (
+	walletTransactionCounterpartyInResponseFieldName        = big.NewInt(1 << 0)
+	walletTransactionCounterpartyInResponseFieldNumbers     = big.NewInt(1 << 1)
+	walletTransactionCounterpartyInResponseFieldAddress     = big.NewInt(1 << 2)
+	walletTransactionCounterpartyInResponseFieldDateOfBirth = big.NewInt(1 << 3)
+)
+
+// walletTransactionCounterpartyInResponseNullableFields maps the wire names of WalletTransactionCounterpartyInResponse's nullable fields (required or optional) to their field bits.
+var walletTransactionCounterpartyInResponseNullableFields = map[string]*big.Int{
+	"address":       walletTransactionCounterpartyInResponseFieldAddress,
+	"date_of_birth": walletTransactionCounterpartyInResponseFieldDateOfBirth,
+}
+
+// An object representing the e-wallet transaction's counterparty
+type WalletTransactionCounterpartyInResponse struct {
+	// The name of the counterparty
+	Name    string                                          `json:"name" url:"name"`
+	Numbers *WalletTransactionCounterpartyNumbersInResponse `json:"numbers" url:"numbers"`
+	Address *PaymentInitiationAddress                       `json:"address,omitempty" url:"address,omitempty"`
+	// The counterparty's birthdate, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) (YYYY-MM-DD) format.
+	DateOfBirth *time.Time `json:"date_of_birth,omitempty" url:"date_of_birth,omitempty" format:"date"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (w *WalletTransactionCounterpartyInResponse) GetName() string {
+	if w == nil {
+		return ""
+	}
+	return w.Name
+}
+
+func (w *WalletTransactionCounterpartyInResponse) GetNumbers() *WalletTransactionCounterpartyNumbersInResponse {
+	if w == nil {
+		return nil
+	}
+	return w.Numbers
+}
+
+func (w *WalletTransactionCounterpartyInResponse) GetAddress() *PaymentInitiationAddress {
+	if w == nil {
+		return nil
+	}
+	return w.Address
+}
+
+func (w *WalletTransactionCounterpartyInResponse) GetDateOfBirth() *time.Time {
+	if w == nil {
+		return nil
+	}
+	return w.DateOfBirth
+}
+
+func (w *WalletTransactionCounterpartyInResponse) GetExtraProperties() map[string]interface{} {
+	if w == nil {
+		return nil
+	}
+	return w.ExtraProperties
+}
+
+func (w *WalletTransactionCounterpartyInResponse) require(field *big.Int) {
+	next := new(big.Int)
+	if w.explicitFields != nil {
+		next.Set(w.explicitFields)
+	}
+	next.Or(next, field)
+	w.explicitFields = next
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (w *WalletTransactionCounterpartyInResponse) SetName(name string) {
+	w.Name = name
+	w.require(walletTransactionCounterpartyInResponseFieldName)
+}
+
+// SetNumbers sets the Numbers field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (w *WalletTransactionCounterpartyInResponse) SetNumbers(numbers *WalletTransactionCounterpartyNumbersInResponse) {
+	w.Numbers = numbers
+	w.require(walletTransactionCounterpartyInResponseFieldNumbers)
+}
+
+// SetAddress sets the Address field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (w *WalletTransactionCounterpartyInResponse) SetAddress(address *PaymentInitiationAddress) {
+	w.Address = address
+	w.require(walletTransactionCounterpartyInResponseFieldAddress)
+}
+
+// SetDateOfBirth sets the DateOfBirth field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (w *WalletTransactionCounterpartyInResponse) SetDateOfBirth(dateOfBirth *time.Time) {
+	w.DateOfBirth = dateOfBirth
+	w.require(walletTransactionCounterpartyInResponseFieldDateOfBirth)
+}
+
+func (w *WalletTransactionCounterpartyInResponse) UnmarshalJSON(data []byte) error {
+	type embed WalletTransactionCounterpartyInResponse
+	var unmarshaler = struct {
+		embed
+		DateOfBirth *internal.Date `json:"date_of_birth,omitempty"`
+	}{
+		embed: embed(*w),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*w = WalletTransactionCounterpartyInResponse(unmarshaler.embed)
+	w.DateOfBirth = unmarshaler.DateOfBirth.TimePtr()
+	extraProperties, err := internal.ExtractExtraProperties(data, *w)
+	if err != nil {
+		return err
+	}
+	w.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, walletTransactionCounterpartyInResponseNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		w.require(presentFields)
+	}
+	w.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (w *WalletTransactionCounterpartyInResponse) MarshalJSON() ([]byte, error) {
+	type embed WalletTransactionCounterpartyInResponse
+	var marshaler = struct {
+		embed
+		DateOfBirth *internal.Date `json:"date_of_birth,omitempty"`
+	}{
+		embed:       embed(*w),
+		DateOfBirth: internal.NewOptionalDate(w.DateOfBirth),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, w.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, w.ExtraProperties)
+}
+
+func (w *WalletTransactionCounterpartyInResponse) String() string {
+	if w == nil {
+		return "<nil>"
+	}
+	if len(w.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(w.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(w); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", w)
 }
 
 var (
@@ -2646,6 +2910,126 @@ func (w *WalletTransactionCounterpartyNumbers) MarshalJSON() ([]byte, error) {
 }
 
 func (w *WalletTransactionCounterpartyNumbers) String() string {
+	if w == nil {
+		return "<nil>"
+	}
+	if len(w.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(w.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(w); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", w)
+}
+
+var (
+	walletTransactionCounterpartyNumbersInResponseFieldBacs          = big.NewInt(1 << 0)
+	walletTransactionCounterpartyNumbersInResponseFieldInternational = big.NewInt(1 << 1)
+)
+
+// walletTransactionCounterpartyNumbersInResponseNullableFields maps the wire names of WalletTransactionCounterpartyNumbersInResponse's nullable fields (required or optional) to their field bits.
+var walletTransactionCounterpartyNumbersInResponseNullableFields = map[string]*big.Int{
+	"international": walletTransactionCounterpartyNumbersInResponseFieldInternational,
+}
+
+// The counterparty's bank account numbers.
+type WalletTransactionCounterpartyNumbersInResponse struct {
+	Bacs          *WalletTransactionCounterpartyBacsInResponse `json:"bacs,omitempty" url:"bacs,omitempty"`
+	International *WalletTransactionCounterpartyInternational  `json:"international,omitempty" url:"international,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (w *WalletTransactionCounterpartyNumbersInResponse) GetBacs() *WalletTransactionCounterpartyBacsInResponse {
+	if w == nil {
+		return nil
+	}
+	return w.Bacs
+}
+
+func (w *WalletTransactionCounterpartyNumbersInResponse) GetInternational() *WalletTransactionCounterpartyInternational {
+	if w == nil {
+		return nil
+	}
+	return w.International
+}
+
+func (w *WalletTransactionCounterpartyNumbersInResponse) GetExtraProperties() map[string]interface{} {
+	if w == nil {
+		return nil
+	}
+	return w.ExtraProperties
+}
+
+func (w *WalletTransactionCounterpartyNumbersInResponse) require(field *big.Int) {
+	next := new(big.Int)
+	if w.explicitFields != nil {
+		next.Set(w.explicitFields)
+	}
+	next.Or(next, field)
+	w.explicitFields = next
+}
+
+// SetBacs sets the Bacs field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (w *WalletTransactionCounterpartyNumbersInResponse) SetBacs(bacs *WalletTransactionCounterpartyBacsInResponse) {
+	w.Bacs = bacs
+	w.require(walletTransactionCounterpartyNumbersInResponseFieldBacs)
+}
+
+// SetInternational sets the International field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (w *WalletTransactionCounterpartyNumbersInResponse) SetInternational(international *WalletTransactionCounterpartyInternational) {
+	w.International = international
+	w.require(walletTransactionCounterpartyNumbersInResponseFieldInternational)
+}
+
+func (w *WalletTransactionCounterpartyNumbersInResponse) UnmarshalJSON(data []byte) error {
+	type embed WalletTransactionCounterpartyNumbersInResponse
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*w),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*w = WalletTransactionCounterpartyNumbersInResponse(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *w)
+	if err != nil {
+		return err
+	}
+	w.ExtraProperties = extraProperties
+	presentFields, err := internal.ExplicitFieldsFromJSON(data, walletTransactionCounterpartyNumbersInResponseNullableFields)
+	if err != nil {
+		return err
+	}
+	if presentFields != nil {
+		w.require(presentFields)
+	}
+	w.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (w *WalletTransactionCounterpartyNumbersInResponse) MarshalJSON() ([]byte, error) {
+	type embed WalletTransactionCounterpartyNumbersInResponse
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*w),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, w.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, w.ExtraProperties)
+}
+
+func (w *WalletTransactionCounterpartyNumbersInResponse) String() string {
 	if w == nil {
 		return "<nil>"
 	}
@@ -2893,11 +3277,11 @@ type WalletTransactionGetResponse struct {
 	// `AUTO_REFUND`: an outgoing refund automatically initiated by Plaid in response to an unexpected `BANK_TRANSFER`.
 	//
 	// `TRANSFER_OUT`: a transaction that debits an e-wallet and cannot be classified under another category, typically initiated by a non-Plaid flow due to technical errors, FPS timeouts, or other payment-related issues.
-	Type         WalletTransactionType          `json:"type" url:"type"`
-	Scheme       *WalletPaymentScheme           `json:"scheme,omitempty" url:"scheme,omitempty"`
-	Amount       *WalletTransactionAmount       `json:"amount" url:"amount"`
-	Counterparty *WalletTransactionCounterparty `json:"counterparty" url:"counterparty"`
-	Status       WalletTransactionStatus        `json:"status" url:"status"`
+	Type         WalletTransactionType                    `json:"type" url:"type"`
+	Scheme       *WalletPaymentScheme                     `json:"scheme,omitempty" url:"scheme,omitempty"`
+	Amount       *WalletTransactionAmount                 `json:"amount" url:"amount"`
+	Counterparty *WalletTransactionCounterpartyInResponse `json:"counterparty" url:"counterparty"`
+	Status       WalletTransactionStatus                  `json:"status" url:"status"`
 	// Timestamp when the transaction was created, in [ISO 8601](https://wikipedia.org/wiki/ISO_8601) format.
 	CreatedAt time.Time `json:"created_at" url:"created_at"`
 	// The date and time of the last time the `status` was updated, in ISO 8601 format
@@ -2961,7 +3345,7 @@ func (w *WalletTransactionGetResponse) GetAmount() *WalletTransactionAmount {
 	return w.Amount
 }
 
-func (w *WalletTransactionGetResponse) GetCounterparty() *WalletTransactionCounterparty {
+func (w *WalletTransactionGetResponse) GetCounterparty() *WalletTransactionCounterpartyInResponse {
 	if w == nil {
 		return nil
 	}
@@ -3091,7 +3475,7 @@ func (w *WalletTransactionGetResponse) SetAmount(amount *WalletTransactionAmount
 
 // SetCounterparty sets the Counterparty field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (w *WalletTransactionGetResponse) SetCounterparty(counterparty *WalletTransactionCounterparty) {
+func (w *WalletTransactionGetResponse) SetCounterparty(counterparty *WalletTransactionCounterpartyInResponse) {
 	w.Counterparty = counterparty
 	w.require(walletTransactionGetResponseFieldCounterparty)
 }

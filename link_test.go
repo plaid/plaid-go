@@ -10525,6 +10525,14 @@ func TestSettersLinkTokenCreateRequestCraOptionsBaseReport(t *testing.T) {
 		assert.NotNil(t, obj.explicitFields)
 	})
 
+	t.Run("SetBaseReportVersion", func(t *testing.T) {
+		obj := &LinkTokenCreateRequestCraOptionsBaseReport{}
+		var fernTestValueBaseReportVersion *BaseReportVersion
+		obj.SetBaseReportVersion(fernTestValueBaseReportVersion)
+		assert.Equal(t, fernTestValueBaseReportVersion, obj.BaseReportVersion)
+		assert.NotNil(t, obj.explicitFields)
+	})
+
 }
 
 func TestGettersLinkTokenCreateRequestCraOptionsBaseReport(t *testing.T) {
@@ -10693,6 +10701,39 @@ func TestGettersLinkTokenCreateRequestCraOptionsBaseReport(t *testing.T) {
 		_ = obj.GetExcludeTransactions() // Should return zero value
 	})
 
+	t.Run("GetBaseReportVersion", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		obj := &LinkTokenCreateRequestCraOptionsBaseReport{}
+		var expected *BaseReportVersion
+		obj.BaseReportVersion = expected
+
+		// Act & Assert
+		assert.Equal(t, expected, obj.GetBaseReportVersion(), "getter should return the property value")
+	})
+
+	t.Run("GetBaseReportVersion_NilValue", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		obj := &LinkTokenCreateRequestCraOptionsBaseReport{}
+		obj.BaseReportVersion = nil
+
+		// Act & Assert
+		assert.Nil(t, obj.GetBaseReportVersion(), "getter should return nil when property is nil")
+	})
+
+	t.Run("GetBaseReportVersion_NilReceiver", func(t *testing.T) {
+		t.Parallel()
+		var obj *LinkTokenCreateRequestCraOptionsBaseReport
+		// Should not panic - getters should handle nil receiver gracefully
+		defer func() {
+			if r := recover(); r != nil {
+				t.Errorf("Getter panicked on nil receiver: %v", r)
+			}
+		}()
+		_ = obj.GetBaseReportVersion() // Should return zero value
+	})
+
 }
 
 func TestSettersMarkExplicitLinkTokenCreateRequestCraOptionsBaseReport(t *testing.T) {
@@ -10828,6 +10869,37 @@ func TestSettersMarkExplicitLinkTokenCreateRequestCraOptionsBaseReport(t *testin
 
 		// Act
 		obj.SetExcludeTransactions(fernTestValueExcludeTransactions)
+
+		// Assert - object with explicitly set field can be marshaled/unmarshaled
+		bytes, err := json.Marshal(obj)
+		require.NoError(t, err, "marshaling should succeed for test setup")
+
+		// This test ensures JSON marshaling and unmarshaling succeed when the field has a zero/nil value
+		// Detect if marshaled JSON is an object or primitive to use correct unmarshal target
+		if len(bytes) > 0 && bytes[0] == '{' {
+			// JSON object - unmarshal into map
+			var unmarshaled map[string]interface{}
+			err = json.Unmarshal(bytes, &unmarshaled)
+			require.NoError(t, err, "unmarshaling should succeed for test verification")
+		} else {
+			// JSON primitive (string, number, boolean, null) - unmarshal into interface{}
+			var unmarshaled interface{}
+			err = json.Unmarshal(bytes, &unmarshaled)
+			require.NoError(t, err, "unmarshaling should succeed for test verification")
+		}
+
+		// Note: This does not explicitly assert the presence of a specific JSON field
+		// It verifies that setting a field via setter allows successful JSON round-trip
+	})
+
+	t.Run("SetBaseReportVersion_MarksExplicit", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		obj := &LinkTokenCreateRequestCraOptionsBaseReport{}
+		var fernTestValueBaseReportVersion *BaseReportVersion
+
+		// Act
+		obj.SetBaseReportVersion(fernTestValueBaseReportVersion)
 
 		// Assert - object with explicitly set field can be marshaled/unmarshaled
 		bytes, err := json.Marshal(obj)
@@ -22261,6 +22333,7 @@ func TestOptionalNullableRoundTripLinkTokenCreateRequestCraOptionsBaseReport(t *
 		"require_identity",
 		"home_lending_report_options",
 		"exclude_transactions",
+		"base_report_version",
 	}
 	marshalToMap := func(t *testing.T, obj *LinkTokenCreateRequestCraOptionsBaseReport) map[string]json.RawMessage {
 		data, err := json.Marshal(obj)
@@ -22273,7 +22346,7 @@ func TestOptionalNullableRoundTripLinkTokenCreateRequestCraOptionsBaseReport(t *
 	t.Run("NullPreserved", func(t *testing.T) {
 		t.Parallel()
 		var obj LinkTokenCreateRequestCraOptionsBaseReport
-		require.NoError(t, json.Unmarshal([]byte(`{"client_report_id":null,"gse_options":null,"require_identity":null,"home_lending_report_options":null,"exclude_transactions":null}`), &obj))
+		require.NoError(t, json.Unmarshal([]byte(`{"client_report_id":null,"gse_options":null,"require_identity":null,"home_lending_report_options":null,"exclude_transactions":null,"base_report_version":null}`), &obj))
 		result := marshalToMap(t, &obj)
 		for _, key := range optionalNullableKeys {
 			value, ok := result[key]
@@ -24216,6 +24289,13 @@ func TestEnumInvestmentAccountSubtype(t *testing.T) {
 		assert.Equal(t, InvestmentAccountSubtype("529"), val, "enum value should match expected wire value")
 	})
 
+	t.Run("NewFromString_530a", func(t *testing.T) {
+		t.Parallel()
+		val, err := NewInvestmentAccountSubtypeFromString("530a")
+		assert.NoError(t, err, "valid enum value should not return error")
+		assert.Equal(t, InvestmentAccountSubtype("530a"), val, "enum value should match expected wire value")
+	})
+
 	t.Run("NewFromString_401a", func(t *testing.T) {
 		t.Parallel()
 		val, err := NewInvestmentAccountSubtypeFromString("401a")
@@ -24642,6 +24722,20 @@ func TestEnumLimitedPurposeType(t *testing.T) {
 		val, err := NewLimitedPurposeTypeFromString("RENT_MORTGAGE")
 		assert.NoError(t, err, "valid enum value should not return error")
 		assert.Equal(t, LimitedPurposeType("RENT_MORTGAGE"), val, "enum value should match expected wire value")
+	})
+
+	t.Run("NewFromString_AUTO_LOAN", func(t *testing.T) {
+		t.Parallel()
+		val, err := NewLimitedPurposeTypeFromString("AUTO_LOAN")
+		assert.NoError(t, err, "valid enum value should not return error")
+		assert.Equal(t, LimitedPurposeType("AUTO_LOAN"), val, "enum value should match expected wire value")
+	})
+
+	t.Run("NewFromString_GENERAL_PURPOSE", func(t *testing.T) {
+		t.Parallel()
+		val, err := NewLimitedPurposeTypeFromString("GENERAL_PURPOSE")
+		assert.NoError(t, err, "valid enum value should not return error")
+		assert.Equal(t, LimitedPurposeType("GENERAL_PURPOSE"), val, "enum value should match expected wire value")
 	})
 
 	t.Run("NewFromString_Invalid", func(t *testing.T) {

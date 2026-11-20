@@ -4,7 +4,7 @@ package banktransfer
 
 import (
 	json "encoding/json"
-	v50 "github.com/plaid/plaid-go/v50"
+	v51 "github.com/plaid/plaid-go/v51"
 	assert "github.com/stretchr/testify/assert"
 	require "github.com/stretchr/testify/require"
 	testing "testing"
@@ -46,7 +46,7 @@ func TestSettersBankTransferEventListRequest(t *testing.T) {
 
 	t.Run("SetBankTransferType", func(t *testing.T) {
 		obj := &BankTransferEventListRequest{}
-		var fernTestValueBankTransferType *v50.BankTransferEventListBankTransferType
+		var fernTestValueBankTransferType *v51.BankTransferEventListBankTransferType
 		obj.SetBankTransferType(fernTestValueBankTransferType)
 		assert.Equal(t, fernTestValueBankTransferType, obj.BankTransferType)
 		assert.NotNil(t, obj.explicitFields)
@@ -54,7 +54,7 @@ func TestSettersBankTransferEventListRequest(t *testing.T) {
 
 	t.Run("SetEventTypes", func(t *testing.T) {
 		obj := &BankTransferEventListRequest{}
-		var fernTestValueEventTypes []v50.BankTransferEventType
+		var fernTestValueEventTypes []v51.BankTransferEventType
 		obj.SetEventTypes(fernTestValueEventTypes)
 		assert.Equal(t, fernTestValueEventTypes, obj.EventTypes)
 		assert.NotNil(t, obj.explicitFields)
@@ -86,7 +86,7 @@ func TestSettersBankTransferEventListRequest(t *testing.T) {
 
 	t.Run("SetDirection", func(t *testing.T) {
 		obj := &BankTransferEventListRequest{}
-		var fernTestValueDirection *v50.BankTransferEventListDirection
+		var fernTestValueDirection *v51.BankTransferEventListDirection
 		obj.SetDirection(fernTestValueDirection)
 		assert.Equal(t, fernTestValueDirection, obj.Direction)
 		assert.NotNil(t, obj.explicitFields)
@@ -223,7 +223,7 @@ func TestSettersMarkExplicitBankTransferEventListRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &BankTransferEventListRequest{}
-		var fernTestValueBankTransferType *v50.BankTransferEventListBankTransferType
+		var fernTestValueBankTransferType *v51.BankTransferEventListBankTransferType
 
 		// Act
 		obj.SetBankTransferType(fernTestValueBankTransferType)
@@ -254,7 +254,7 @@ func TestSettersMarkExplicitBankTransferEventListRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &BankTransferEventListRequest{}
-		var fernTestValueEventTypes []v50.BankTransferEventType
+		var fernTestValueEventTypes []v51.BankTransferEventType
 
 		// Act
 		obj.SetEventTypes(fernTestValueEventTypes)
@@ -378,7 +378,7 @@ func TestSettersMarkExplicitBankTransferEventListRequest(t *testing.T) {
 		t.Parallel()
 		// Arrange
 		obj := &BankTransferEventListRequest{}
-		var fernTestValueDirection *v50.BankTransferEventListDirection
+		var fernTestValueDirection *v51.BankTransferEventListDirection
 
 		// Act
 		obj.SetDirection(fernTestValueDirection)

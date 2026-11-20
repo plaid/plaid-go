@@ -4,8 +4,8 @@ package beaconreport
 
 import (
 	json "encoding/json"
-	v50 "github.com/plaid/plaid-go/v50"
-	internal "github.com/plaid/plaid-go/v50/internal"
+	v51 "github.com/plaid/plaid-go/v51"
+	internal "github.com/plaid/plaid-go/v51/internal"
 	big "math/big"
 )
 
@@ -14,7 +14,7 @@ var (
 )
 
 type BeaconReportSyndicationGetRequest struct {
-	BeaconReportSyndicationID v50.BeaconReportSyndicationID `json:"beacon_report_syndication_id" url:"-"`
+	BeaconReportSyndicationID v51.BeaconReportSyndicationID `json:"beacon_report_syndication_id" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -31,7 +31,7 @@ func (b *BeaconReportSyndicationGetRequest) require(field *big.Int) {
 
 // SetBeaconReportSyndicationID sets the BeaconReportSyndicationID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (b *BeaconReportSyndicationGetRequest) SetBeaconReportSyndicationID(beaconReportSyndicationID v50.BeaconReportSyndicationID) {
+func (b *BeaconReportSyndicationGetRequest) SetBeaconReportSyndicationID(beaconReportSyndicationID v51.BeaconReportSyndicationID) {
 	b.BeaconReportSyndicationID = beaconReportSyndicationID
 	b.require(beaconReportSyndicationGetRequestFieldBeaconReportSyndicationID)
 }
@@ -63,8 +63,8 @@ var (
 )
 
 type BeaconReportSyndicationListRequest struct {
-	BeaconUserID v50.BeaconUserID `json:"beacon_user_id" url:"-"`
-	Cursor       v50.Cursor       `json:"cursor,omitempty" url:"-"`
+	BeaconUserID v51.BeaconUserID `json:"beacon_user_id" url:"-"`
+	Cursor       v51.Cursor       `json:"cursor,omitempty" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -81,14 +81,14 @@ func (b *BeaconReportSyndicationListRequest) require(field *big.Int) {
 
 // SetBeaconUserID sets the BeaconUserID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (b *BeaconReportSyndicationListRequest) SetBeaconUserID(beaconUserID v50.BeaconUserID) {
+func (b *BeaconReportSyndicationListRequest) SetBeaconUserID(beaconUserID v51.BeaconUserID) {
 	b.BeaconUserID = beaconUserID
 	b.require(beaconReportSyndicationListRequestFieldBeaconUserID)
 }
 
 // SetCursor sets the Cursor field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (b *BeaconReportSyndicationListRequest) SetCursor(cursor v50.Cursor) {
+func (b *BeaconReportSyndicationListRequest) SetCursor(cursor v51.Cursor) {
 	b.Cursor = cursor
 	b.require(beaconReportSyndicationListRequestFieldCursor)
 }

@@ -4,8 +4,8 @@ package user
 
 import (
 	json "encoding/json"
-	v50 "github.com/plaid/plaid-go/v50"
-	internal "github.com/plaid/plaid-go/v50/internal"
+	v51 "github.com/plaid/plaid-go/v51"
+	internal "github.com/plaid/plaid-go/v51/internal"
 	big "math/big"
 )
 
@@ -69,7 +69,7 @@ type UserAccountSessionEventSendRequest struct {
 	CohortID *string `json:"cohort_id,omitempty" url:"-"`
 	// The Link session identifier.
 	LinkSessionID string                       `json:"link_session_id" url:"-"`
-	Event         *v50.UserAccountSessionEvent `json:"event" url:"-"`
+	Event         *v51.UserAccountSessionEvent `json:"event" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -100,7 +100,7 @@ func (u *UserAccountSessionEventSendRequest) SetLinkSessionID(linkSessionID stri
 
 // SetEvent sets the Event field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (u *UserAccountSessionEventSendRequest) SetEvent(event *v50.UserAccountSessionEvent) {
+func (u *UserAccountSessionEventSendRequest) SetEvent(event *v51.UserAccountSessionEvent) {
 	u.Event = event
 	u.require(userAccountSessionEventSendRequestFieldEvent)
 }

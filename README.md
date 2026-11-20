@@ -31,10 +31,10 @@ Library versions follow Semantic Versioning ("SemVer") and are formatted as `v1.
 
 As of `v1.0.0`, we've moved to support `GOMODULES`.
 
-Edit your go.mod to include `github.com/plaid/plaid-go/v50 {VERSION}`
+Edit your go.mod to include `github.com/plaid/plaid-go/v51 {VERSION}`
 
 ```console
-$ go get github.com/plaid/plaid-go/v50@{VERSION}
+$ go get github.com/plaid/plaid-go/v51@{VERSION}
 ```
 
 All users are strongly recommended to use a recent version of the library, as older versions do not contain support for new endpoints and fields. For more details, see the [Migration Guide](#migration-guide).
@@ -46,7 +46,7 @@ All users are strongly recommended to use a recent version of the library, as ol
 The examples in Getting Started and Examples use the bundled legacy client. Import it as `plaid`:
 
 ```go
-import plaid "github.com/plaid/plaid-go/v50/legacy"
+import plaid "github.com/plaid/plaid-go/v51/legacy"
 ```
 
 For the new client, see the [migration guide](MIGRATION.md).
@@ -207,7 +207,7 @@ import (
     "context"
     "os"
 
-    plaid "github.com/plaid/plaid-go/v50/legacy"
+    plaid "github.com/plaid/plaid-go/v51/legacy"
 )
 
 configuration := plaid.NewConfiguration()

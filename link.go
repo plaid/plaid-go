@@ -5,7 +5,7 @@ package plaid
 import (
 	json "encoding/json"
 	fmt "fmt"
-	internal "github.com/plaid/plaid-go/v50/internal"
+	internal "github.com/plaid/plaid-go/v51/internal"
 	big "math/big"
 	time "time"
 )
@@ -1112,6 +1112,7 @@ type InvestmentAccountSubtype string
 
 const (
 	InvestmentAccountSubtypeFiveHundredTwentyNine          InvestmentAccountSubtype = "529"
+	InvestmentAccountSubtypeFiveHundredThirtyA             InvestmentAccountSubtype = "530a"
 	InvestmentAccountSubtypeFourHundredOneA                InvestmentAccountSubtype = "401a"
 	InvestmentAccountSubtypeFourHundredOneK                InvestmentAccountSubtype = "401k"
 	InvestmentAccountSubtypeFourHundredThreeB              InvestmentAccountSubtype = "403B"
@@ -1176,6 +1177,8 @@ func NewInvestmentAccountSubtypeFromString(s string) (InvestmentAccountSubtype, 
 	switch s {
 	case "529":
 		return InvestmentAccountSubtypeFiveHundredTwentyNine, nil
+	case "530a":
+		return InvestmentAccountSubtypeFiveHundredThirtyA, nil
 	case "401a":
 		return InvestmentAccountSubtypeFourHundredOneA, nil
 	case "401k":
@@ -1396,17 +1399,23 @@ func (i *InvestmentFilter) String() string {
 	return fmt.Sprintf("%#v", i)
 }
 
-// A specific use case for a limited purpose checking account. Limited purpose checking accounts will reject or return ACH transactions that aren't for eligible use cases. For example, a `RENT_MORTGAGE` limited purpose checking account will reject ACH transactions that are not specifically rent or mortgage payments.
+// A specific use case for a limited purpose checking account. Limited purpose checking accounts will reject or return ACH transactions that aren't for eligible use cases. For example, a `RENT_MORTGAGE` limited purpose checking account will reject ACH transactions that are not specifically rent or mortgage payments, and an `AUTO_LOAN` account will reject ACH transactions that are not auto loan payments. A `GENERAL_PURPOSE` limited purpose checking account accepts any ACH transaction within the limit the institution allows for the account.
 type LimitedPurposeType string
 
 const (
-	LimitedPurposeTypeRentMortgage LimitedPurposeType = "RENT_MORTGAGE"
+	LimitedPurposeTypeRentMortgage   LimitedPurposeType = "RENT_MORTGAGE"
+	LimitedPurposeTypeAutoLoan       LimitedPurposeType = "AUTO_LOAN"
+	LimitedPurposeTypeGeneralPurpose LimitedPurposeType = "GENERAL_PURPOSE"
 )
 
 func NewLimitedPurposeTypeFromString(s string) (LimitedPurposeType, error) {
 	switch s {
 	case "RENT_MORTGAGE":
 		return LimitedPurposeTypeRentMortgage, nil
+	case "AUTO_LOAN":
+		return LimitedPurposeTypeAutoLoan, nil
+	case "GENERAL_PURPOSE":
+		return LimitedPurposeTypeGeneralPurpose, nil
 	}
 	var t LimitedPurposeType
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
@@ -1416,7 +1425,7 @@ func (l LimitedPurposeType) Ptr() *LimitedPurposeType {
 	return &l
 }
 
-// An array of limited purpose types. Restricts which kinds of limited purpose checking accounts may be connected in Link to prevent users from connecting them for unsupported use cases. Required when 'limited purpose checking' is in the subtypes filter.
+// An array of limited purpose types. Restricts which kinds of limited purpose checking accounts may be connected in Link to prevent users from connecting them for unsupported use cases. Only allowed when `limited purpose checking` is in `account_subtypes`. If omitted or empty while `limited purpose checking` is in `account_subtypes`, only `GENERAL_PURPOSE` limited purpose checking accounts may be connected. `GENERAL_PURPOSE` accounts may be connected with any `limited_purpose_types` value.
 type LimitedPurposeTypes = []LimitedPurposeType
 
 var (
@@ -2143,7 +2152,7 @@ var (
 	linkSessionCraDocumentUploadResultFieldNumBankStatementsUploaded = big.NewInt(1 << 0)
 )
 
-// The details of a document upload CRA session in Link
+// Deprecated. The details of a document upload CRA session in Link. The CRA document upload flow was never released, so this field is always `null`.
 type LinkSessionCraDocumentUploadResult struct {
 	// The number of bank statements uploaded by the user.
 	NumBankStatementsUploaded int `json:"num_bank_statements_uploaded" url:"num_bank_statements_uploaded"`
@@ -5633,6 +5642,7 @@ var (
 	linkTokenCreateRequestCraOptionsBaseReportFieldRequireIdentity          = big.NewInt(1 << 2)
 	linkTokenCreateRequestCraOptionsBaseReportFieldHomeLendingReportOptions = big.NewInt(1 << 3)
 	linkTokenCreateRequestCraOptionsBaseReportFieldExcludeTransactions      = big.NewInt(1 << 4)
+	linkTokenCreateRequestCraOptionsBaseReportFieldBaseReportVersion        = big.NewInt(1 << 5)
 )
 
 // linkTokenCreateRequestCraOptionsBaseReportNullableFields maps the wire names of LinkTokenCreateRequestCraOptionsBaseReport's nullable fields (required or optional) to their field bits.
@@ -5642,6 +5652,7 @@ var linkTokenCreateRequestCraOptionsBaseReportNullableFields = map[string]*big.I
 	"require_identity":            linkTokenCreateRequestCraOptionsBaseReportFieldRequireIdentity,
 	"home_lending_report_options": linkTokenCreateRequestCraOptionsBaseReportFieldHomeLendingReportOptions,
 	"exclude_transactions":        linkTokenCreateRequestCraOptionsBaseReportFieldExcludeTransactions,
+	"base_report_version":         linkTokenCreateRequestCraOptionsBaseReportFieldBaseReportVersion,
 }
 
 // Specifies options for initializing Link for use with the Base Report product, specifically the `client_report_id`.
@@ -5657,7 +5668,8 @@ type LinkTokenCreateRequestCraOptionsBaseReport struct {
 	// Omitting this option or setting it to `null` or `false` preserves existing behavior. These values do not override any client configuration that excludes transactions.
 	//
 	// Requests with `exclude_transactions` set to `true` are rejected with an `INVALID_FIELD` error if they also request GSE or Home Lending reports. A Base Report created with this option set to `true` cannot be used to generate those reports later.
-	ExcludeTransactions *bool `json:"exclude_transactions,omitempty" url:"exclude_transactions,omitempty"`
+	ExcludeTransactions *bool              `json:"exclude_transactions,omitempty" url:"exclude_transactions,omitempty"`
+	BaseReportVersion   *BaseReportVersion `json:"base_report_version,omitempty" url:"base_report_version,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -5699,6 +5711,13 @@ func (l *LinkTokenCreateRequestCraOptionsBaseReport) GetExcludeTransactions() *b
 		return nil
 	}
 	return l.ExcludeTransactions
+}
+
+func (l *LinkTokenCreateRequestCraOptionsBaseReport) GetBaseReportVersion() *BaseReportVersion {
+	if l == nil {
+		return nil
+	}
+	return l.BaseReportVersion
 }
 
 func (l *LinkTokenCreateRequestCraOptionsBaseReport) GetExtraProperties() map[string]interface{} {
@@ -5750,6 +5769,13 @@ func (l *LinkTokenCreateRequestCraOptionsBaseReport) SetHomeLendingReportOptions
 func (l *LinkTokenCreateRequestCraOptionsBaseReport) SetExcludeTransactions(excludeTransactions *bool) {
 	l.ExcludeTransactions = excludeTransactions
 	l.require(linkTokenCreateRequestCraOptionsBaseReportFieldExcludeTransactions)
+}
+
+// SetBaseReportVersion sets the BaseReportVersion field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (l *LinkTokenCreateRequestCraOptionsBaseReport) SetBaseReportVersion(baseReportVersion *BaseReportVersion) {
+	l.BaseReportVersion = baseReportVersion
+	l.require(linkTokenCreateRequestCraOptionsBaseReportFieldBaseReportVersion)
 }
 
 func (l *LinkTokenCreateRequestCraOptionsBaseReport) UnmarshalJSON(data []byte) error {

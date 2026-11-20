@@ -12033,6 +12033,13 @@ func TestEnumSandboxItemFireWebhookRequestWebhookCode(t *testing.T) {
 		assert.Equal(t, SandboxItemFireWebhookRequestWebhookCode("PENDING_DISCONNECT"), val, "enum value should match expected wire value")
 	})
 
+	t.Run("NewFromString_CONSENT_UPDATED", func(t *testing.T) {
+		t.Parallel()
+		val, err := NewSandboxItemFireWebhookRequestWebhookCodeFromString("CONSENT_UPDATED")
+		assert.NoError(t, err, "valid enum value should not return error")
+		assert.Equal(t, SandboxItemFireWebhookRequestWebhookCode("CONSENT_UPDATED"), val, "enum value should match expected wire value")
+	})
+
 	t.Run("NewFromString_RECURRING_TRANSACTIONS_UPDATE", func(t *testing.T) {
 		t.Parallel()
 		val, err := NewSandboxItemFireWebhookRequestWebhookCodeFromString("RECURRING_TRANSACTIONS_UPDATE")

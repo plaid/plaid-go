@@ -6,11 +6,11 @@ import (
 	context "context"
 	http "net/http"
 
-	plaid "github.com/plaid/plaid-go/v50"
-	core "github.com/plaid/plaid-go/v50/core"
-	internal "github.com/plaid/plaid-go/v50/internal"
-	option "github.com/plaid/plaid-go/v50/option"
-	transfer "github.com/plaid/plaid-go/v50/transfer"
+	plaid "github.com/plaid/plaid-go/v51"
+	core "github.com/plaid/plaid-go/v51/core"
+	internal "github.com/plaid/plaid-go/v51/internal"
+	option "github.com/plaid/plaid-go/v51/option"
+	transfer "github.com/plaid/plaid-go/v51/transfer"
 )
 
 type RawClient struct {

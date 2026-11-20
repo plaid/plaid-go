@@ -4,8 +4,8 @@ package partner
 
 import (
 	json "encoding/json"
-	v50 "github.com/plaid/plaid-go/v50"
-	internal "github.com/plaid/plaid-go/v50/internal"
+	v51 "github.com/plaid/plaid-go/v51"
+	internal "github.com/plaid/plaid-go/v51/internal"
 	big "math/big"
 )
 
@@ -15,8 +15,8 @@ var (
 )
 
 type CraPartnerInsightsGetRequest struct {
-	UserToken v50.UserToken    `json:"user_token" url:"-"`
-	UserTier  *v50.CraUserTier `json:"user_tier,omitempty" url:"-"`
+	UserToken v51.UserToken    `json:"user_token" url:"-"`
+	UserTier  *v51.CraUserTier `json:"user_tier,omitempty" url:"-"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -33,14 +33,14 @@ func (c *CraPartnerInsightsGetRequest) require(field *big.Int) {
 
 // SetUserToken sets the UserToken field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraPartnerInsightsGetRequest) SetUserToken(userToken v50.UserToken) {
+func (c *CraPartnerInsightsGetRequest) SetUserToken(userToken v51.UserToken) {
 	c.UserToken = userToken
 	c.require(craPartnerInsightsGetRequestFieldUserToken)
 }
 
 // SetUserTier sets the UserTier field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CraPartnerInsightsGetRequest) SetUserTier(userTier *v50.CraUserTier) {
+func (c *CraPartnerInsightsGetRequest) SetUserTier(userTier *v51.CraUserTier) {
 	c.UserTier = userTier
 	c.require(craPartnerInsightsGetRequestFieldUserTier)
 }
