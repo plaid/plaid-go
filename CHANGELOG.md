@@ -179,6 +179,7 @@ This library is generated from an OpenAPI schema (OAS). See full changelog [here
 
 # 50.0.0
 - Updating to OAS 2020-09-14_1.799.0
+- Breaking changes: move the module and subpackage imports to `/v50`; update nullable fields, required constructor arguments, Business Verification names, arbitrary JSON maps, and the supported LendScore versions. These changes also affect the legacy client. See the [v49-to-v50 migration notes](MIGRATION.md#version-49-to-version-50).
 
 ## OpenAPI Schema Changes
 ### 2020-09-14_1.799.0
