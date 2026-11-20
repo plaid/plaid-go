@@ -1,31 +1,6 @@
 # Go SDK Migration Guide
 
-Upgrade from version 50 to version 51, or from version 49 to version 50, below. The remaining sections preserve the version 48-to-49 migration walkthrough.
-
-## Version 50 to version 51
-
-Version 51 includes both the new client and the `legacy` client, generated from OpenAPI `2020-09-14_1.822.2`. Most changes correct the spec to match what the API already returns, so API responses don't change, but the Go types do. Go 1.21 remains supported.
-
-Install the new major version and change every `github.com/plaid/plaid-go/v50` import prefix to `github.com/plaid/plaid-go/v51`, including subpackages such as `/client`, `/option`, and `/legacy`:
-
-```sh
-go get github.com/plaid/plaid-go/v51@v51.0.0
-```
-
-Both clients have model changes. Recompile and test your integration after updating imports; the compiler identifies affected code. In the new client, a field that becomes nullable becomes a pointer, and a field that becomes required becomes a value. In the legacy client, the same changes appear in accessors, constructors and nullable wrappers, and `Has*`, `Set*Nil` and `Unset*` methods are removed from fields that are now required.
-
-| Affected models | Upgrade action |
-| --- | --- |
-| Investments `Holding` and `InvestmentTransaction` | `institution_price`, `institution_value` and `quantity` on holdings, and `name`, `quantity`, `amount`, `price`, `type` and `subtype` on transactions, are now nullable. Check for null before reading them. `Holding.tax_lots` is now required and returned as `[]` when empty. |
-| Asset Report investments, transactions and insights | The matching Asset Report holding and transaction fields are nullable, as are `investments`, `location`, `payment_meta` and `transaction_type`. `holdings`, `securities` and `transactions` in `AssetReportInvestments`, and the account insights summary arrays, are required and returned as `[]` when empty. `ExpenditureInsights.other` is replaced by `other_expenditure`, which the API actually returns, and `IncomeInsights.total_income` is now `AmountWithCurrencyWithMonthlyAverage`. |
-| Auth account numbers | The ACH, EFT, international and Bacs number types now match API behavior. For example, `account` and `routing` on ACH numbers are pointers, and `is_tokenized_account_number` is a value. `AccountVerificationInsights.network_status` is optional and nullable, and `AccountBase.verification_insights` is nullable. |
-| Items | `Item.products` is required and returned as `[]` when empty. `ItemStatus.last_webhook` is required and is `null` when no webhook has been sent. `ItemWithConsentFields.created_at` is optional. |
-| Wallet and Payment Initiation Bacs | Responses use new response-only types such as `RecipientBacsInResponse` and `WalletTransactionCounterpartyInResponse` in `/wallet/create`, `/wallet/get` and the wallet transaction endpoints. `account` and `sort_code` are always returned with `bacs`, as `""` when the value isn't available. `PaymentInitiationMetadata.standing_order_metadata` is optional. |
-| Business Verification | Read the single industry prediction from `business_verification.business_details.industry.classification`; `risk_check.industry_prediction` and `match_details` are removed, and `address` is now a `BusinessAddressMatch`. Website analysis and industry classification are opt-in for new verifications: set `options.include_website_analysis` and `options.include_industry_classification` to `true` in `/business_verification/create` to keep receiving them. |
-| `/cra/report/get` | Each product now returns its own Item and account types, such as `CraReportGetIncomeCompleteItem`, `CraReportGetLendScoreCompleteItem` and `CraReportGetHomeLendingItem`, instead of the shared enriched types. `holder_category` on CRA Base Report accounts is required and nullable, and the NSF/overdraft count attributes are nullable. |
-| Income verification documents | `name`, `doc_id` and `doc_type` in `DocumentMetadata` are required and are now values instead of pointers. |
-
-For the complete API input changes, see the [OpenAPI changelog](https://github.com/plaid/plaid-openapi/blob/master/CHANGELOG.md), versions `1.800.0` through `1.822.2`.
+Upgrade from version 49 to version 50 below. The remaining sections preserve the version 48-to-49 migration walkthrough.
 
 ## Version 49 to version 50
 

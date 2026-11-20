@@ -1,7 +1,7 @@
 ## [v51.0.0]
 
 - Regenerate both clients from OpenAPI `2020-09-14_1.822.2`, using Fern Go `1.70.3` for the new client. Most changes correct the spec to match what the API already returns; Business Verification website analysis and industry classification are now opt-in for new verifications.
-- Breaking changes: move the module and subpackage imports to `/v51`; update nullable and required fields across Investments, Asset Reports, Auth numbers, Items, Income documents and CRA reports; use the new response-only Bacs types for Wallet and Payment Initiation; replace Business Verification's `risk_check.industry_prediction` and `match_details`; and use the per-product Item types in `/cra/report/get`. These changes also affect the legacy client. See the [v50-to-v51 migration notes](MIGRATION.md#version-50-to-version-51).
+- Breaking changes: move the module and subpackage imports to `/v51`; update nullable and required fields across Investments, Asset Reports, Auth numbers, Items, Income documents and CRA reports; use the new response-only Bacs types for Wallet and Payment Initiation; replace Business Verification's `risk_check.industry_prediction` and `match_details`; and use the per-product Item types in `/cra/report/get`. These changes also affect the legacy client. See the [OpenAPI changelog](https://github.com/plaid/plaid-openapi/blob/master/CHANGELOG.md), versions `1.800.0` through `1.822.2`, for details.
 
 ## [v50.0.0]
 
