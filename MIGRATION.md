@@ -52,7 +52,7 @@ The examples below intentionally keep their v49 import paths to document the ori
 
 Version 49 of `plaid-go` introduces a new SDK. Plaid can release updates to the new SDK more frequently, so new API features will be available in the SDK sooner after they launch.
 
-The new SDK also requires less code for common tasks. You can make a call in a single statement, iterate over paginated results without writing your own loop, handle errors by type without converting them first, and enable retries for rate-limited requests and server errors.
+Version 49 also includes the previous SDK as a `legacy` package, and each version 49 release updates it with the same API changes as the new SDK. Plaid has not set a date to remove the `legacy` package, so you can migrate at your own pace.
 
 ### Summary of updates
 
@@ -66,18 +66,7 @@ The new SDK also requires less code for common tasks. You can make a call in a s
 
 ## Migration walkthrough
 
-Version 49 also includes the previous SDK as a separate `legacy` package in the same module. This allows you to upgrade to version 49 without changing any calls, then migrate to the new SDK one endpoint at a time.
-
-The overall process for migrating is:
-
-1. [Install version 49](#install-version-49).
-2. [Switch your imports to the legacy package](#switch-your-imports-to-the-legacy-package).
-3. [Create a client with the new SDK](#create-a-client-with-the-new-sdk).
-4. [Migrate calls one endpoint at a time](#migrate-calls-one-endpoint-at-a-time).
-5. [Update pagination logic](#update-pagination-logic).
-6. [Update error handling](#update-error-handling).
-7. [Test your integration](#test-your-integration).
-8. [Remove the legacy package](#remove-the-legacy-package).
+You can upgrade to version 49 without changing any calls, then migrate to the new SDK one endpoint at a time.
 
 ## Install version 49
 
@@ -86,7 +75,7 @@ go get github.com/plaid/plaid-go/v49
 ```
 
 > [!NOTE]
-> Version 49 requires Go 1.21 or later. Version 48 supported Go 1.13 or later.
+> Version 49 supports Go 1.21 and later.
 
 ## Switch your imports to the legacy package
 
@@ -110,7 +99,7 @@ To update all version 48 imports in your project on macOS or Linux, run the foll
 gofmt -w -r '"github.com/plaid/plaid-go/v48/plaid" -> "github.com/plaid/plaid-go/v49/legacy"' . && go mod tidy
 ```
 
-This command also reformats your Go files, and it will update files in `vendor/` if that directory is present (run `go mod vendor` afterward). After updating, run your project's tests.
+This command also reformats your Go files, and it will update files in `vendor/` if that directory is present (run `go mod vendor` afterward).
 
 The `legacy` package is still named `plaid`, so existing `plaid.*` references do not need to change.
 
@@ -157,15 +146,15 @@ Note that `option.WithClientID` takes a `*string`, while `option.WithSecret` tak
 > [!WARNING]
 > Always set a non-empty base URL. As in version 48, a client initialized without an environment sends requests to Production. However, in the new SDK, `option.WithBaseURL("")` also sends requests to Production, whereas in version 48, `UseEnvironment("")` caused all requests to fail. If you read the base URL from configuration, return an error for unrecognized values rather than passing an empty string.
 
-If your integration uses a dedicated Plaid endpoint or a proxy you control and trust to receive your Plaid credentials, configure it with `option.WithCustomEndpoint(baseURL, httpClient)`. This explicitly authorizes that destination. Use the standard Production or Sandbox configuration otherwise.
+`option.WithBaseURL` accepts only `https://production.plaid.com` and `https://sandbox.plaid.com`. If you pass it any other host, every call returns an error without sending the request. To send requests to another host, such as a dedicated endpoint Plaid has set up for you or a proxy you control and trust to receive your Plaid credentials, use `option.WithCustomEndpoint(baseURL, httpClient)` instead. Pass `nil` as `httpClient` to use `http.DefaultClient`.
 
 ### Retries
 
-Like the previous SDK, the new SDK does not retry failed requests by default. To enable retries for HTTP 408, 429, and 5xx responses, use `option.WithMaxAttempts(n)`. This limit includes the initial request: `WithMaxAttempts(2)` allows one retry.
+Like the previous SDK, the new SDK does not retry failed requests by default. To enable retries for HTTP 408, 429, and 5xx responses, use `option.WithMaxAttempts(n)`. This limit includes the initial request: `WithMaxAttempts(2)` allows one retry. If your code also retries failed requests, account for both when you set the limit.
 
 ## Migrate calls one endpoint at a time
 
-Replace each call to the previous SDK with the equivalent call to the new SDK. The following table summarizes the differences between the two SDKs. The compiler will flag most of these changes; for changes that it will not flag, see [Test your integration](#test-your-integration).
+Replace each call to the previous SDK with the equivalent call to the new SDK. The following table summarizes the differences between the two SDKs. The compiler flags most of these changes. It does not flag an [empty base URL](#create-a-client-with-the-new-sdk) or the changes described in [Nullable fields and empty arrays](#nullable-fields-and-empty-arrays).
 
 | Change                  | Previous SDK                                                         | New SDK                                                         |
 | ----------------------- | -------------------------------------------------------------------- | --------------------------------------------------------------- |
@@ -279,9 +268,7 @@ An empty slice set in a struct literal, such as `AccountIDs: []string{}`, is omi
 
 ### Default values
 
-Many constructors in the previous SDK filled in default values for optional fields and sent them with the request. For example, `NewTransactionsSyncRequest()` sent `count: 100`, and `NewTransactionsGetRequestOptions()` sent `count: 100`, `offset: 0`, and `days_requested: 90`. These values are the defaults listed for each field in the [API reference](https://plaid.com/docs/api/). The new SDK has no constructors, so it sends only the fields you set, and Plaid applies its server-side defaults to the fields you omit.
-
-Server-side defaults are not guaranteed to match the values that the previous SDK sent, so omitting a field can change your integration's behavior. If your integration depends on one of these values, set it explicitly.
+Many constructors in the previous SDK filled in default values for optional fields and sent them with the request. For example, `NewTransactionsSyncRequest()` sent `count: 100`, and `NewTransactionsGetRequestOptions()` sent `count: 100`, `offset: 0`, and `days_requested: 90`. These values are the defaults listed for each field in the [API reference](https://plaid.com/docs/api/), which Plaid also applies when a field is omitted. The new SDK has no constructors and sends only the fields you set, so you do not need to set these values yourself.
 
 ### Downloads
 
@@ -367,7 +354,6 @@ The following endpoints do not provide an iterator, so continue to use your exis
 
 - `/transactions/sync` and `/processor/transactions/sync`, which return three arrays (`added`, `modified`, and `removed`) rather than a single list
 - `/transfer/event/sync` and `/bank_transfer/event/sync`, which paginate by event ID (`after_id`)
-- `/cashflow_report/get` and `/cashflow_report/transactions/get`
 
 To determine whether an endpoint provides an iterator, check its return type. Endpoints that return `*core.Page[...]` provide an iterator.
 
@@ -476,16 +462,6 @@ if errors.As(err, &plaidErr) && plaidErr.GetBody() != nil {
 ```
 
 If the response body is empty or is not a Plaid error (for example, if it is an HTML page returned by a proxy), the SDK returns a `*core.APIError` that contains the status code but no parsed Plaid error.
-
-## Test your integration
-
-After migrating each endpoint, run your project's tests. Some changes do not cause compile errors, so confirm the following:
-
-- Every call to `option.WithBaseURL` receives a valid environment URL, including when the URL is read from configuration. An [empty base URL](#create-a-client-with-the-new-sdk) sends requests to Production.
-- Code reading [nullable fields](#nullable-fields-and-empty-arrays), including through getter methods such as `GetMask()`, checks for `nil` and dereferences the pointer.
-- If your integration sends an explicit `null` or an empty array to mean something different from omitting the field, the request body still includes it. The new SDK sends these values only when you set them with a [setter method](#nullable-fields-and-empty-arrays). This is uncommon; fields that you do not use can be left unset.
-- If your integration depends on a [default value](#default-values) that a previous SDK constructor filled in, such as `count` or `days_requested`, the request now sets that value explicitly.
-- If you enable SDK [retries](#retries), confirm the total number of attempts is what you intend, especially if your code also retries failed requests.
 
 ## Remove the legacy package
 
