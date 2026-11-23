@@ -24,7 +24,7 @@ class IntegrationTests(unittest.TestCase):
             "GIT_CONFIG_GLOBAL": "/dev/null", "GIT_CONFIG_NOSYSTEM": "1",
             "GIT_AUTHOR_NAME": "Fixture", "GIT_COMMITTER_NAME": "Fixture",
             "GIT_AUTHOR_EMAIL": "fixture@example.com", "GIT_COMMITTER_EMAIL": "fixture@example.com",
-            "SDK_AUTOMERGE_ENABLED": "true", "SDK_PR_APP_BOT_ID": "123", "SDK_CIRCLECI_STATUS_ACTOR_ID": "456",
+            "SDK_AUTOMERGE_ENABLED": "true", "SDK_PR_APP_BOT_ID": "123",
             "SDK_INTEGRATION_APP_BOT_ID": "789", "SDK_REVIEW_RULESET_ID": "12345",
             "GITHUB_REPOSITORY": policy.SDK_REPO, "GITHUB_REF": "refs/heads/master", "GITHUB_REF_PROTECTED": "true",
             "GITHUB_WORKFLOW_REF": f"{policy.SDK_REPO}/{integrate.WORKFLOW}@refs/heads/master", "GITHUB_EVENT_NAME": "schedule",
@@ -74,6 +74,7 @@ class IntegrationTests(unittest.TestCase):
         self.reviews = []
         self.api_calls = []
         self.checks = []
+        self.circleci = self.enterContext(patch.object(integrate.circleci, "verify_build"))
         self.patches = [patch.object(integrate, "api", side_effect=self.api),
                         patch.object(integrate, "fetch_objects"),
                         patch.object(integrate, "verify_generation", side_effect=self.verified_generation),
@@ -468,9 +469,23 @@ class IntegrationTests(unittest.TestCase):
         self.assertEqual(kwargs["env"]["GH_TOKEN"], "write-fixture")
         self.assertEqual(os.environ["GH_TOKEN"], "read-only-fixture")
 
-    def test_pending_failed_stale_or_wrong_author_ci_cannot_merge(self):
+    def test_github_status_author_and_url_do_not_determine_build_provenance(self):
+        self.statuses[0]["creator"] = {"id": 999}
+        self.statuses[0]["target_url"] = "https://app.circleci.com/workflow/example/job/example"
+        self.check()
+        self.circleci.assert_called_once_with(self.pull["head"]["ref"], self.head)
+        self.circleci.side_effect = policy.ReleaseError("CircleCI build failed")
+        with self.assertRaisesRegex(policy.ReleaseError, "CircleCI build failed"):
+            self.check()
+
+    def test_fork_build_is_looked_up_under_upstream_pull_ref(self):
+        self.pull["head"]["repo"] = {"full_name": "contributor/plaid-go"}
+        integrate.ci_and_reviews(42, self.pull)
+        self.circleci.assert_called_once_with("pull/42", self.head)
+
+    def test_pending_failed_or_stale_ci_cannot_merge(self):
         original = copy.deepcopy(self.statuses[0])
-        for change in ({"state": "pending"}, {"state": "failure"}, {"creator": {"id": 999}}, {"target_url": "https://attacker.example/success"}):
+        for change in ({"state": "pending"}, {"state": "failure"}):
             self.statuses.insert(0, {**original, **change})
             with self.subTest(change=change), self.assertRaises(policy.ReleaseError):
                 self.check()
@@ -487,7 +502,7 @@ class IntegrationTests(unittest.TestCase):
     def test_disabled_or_untrusted_workflow_cannot_integrate(self):
         for change in ({"SDK_AUTOMERGE_ENABLED": "false"}, {"GITHUB_EVENT_NAME": "pull_request_target"},
                        {"GITHUB_REF_PROTECTED": "false"}, {"GITHUB_REPOSITORY": "attacker/plaid-go"},
-                       {"SDK_PR_APP_BOT_ID": ""}, {"SDK_CIRCLECI_STATUS_ACTOR_ID": ""}):
+                       {"SDK_PR_APP_BOT_ID": ""}):
             with self.subTest(change=change), patch.dict(os.environ, change), self.assertRaises(policy.ReleaseError):
                 self.check()
 

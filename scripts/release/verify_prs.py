@@ -103,7 +103,7 @@ def verify_one(control, control_commit, number):
                 require(git(repo, "show", f"{os.environ['GITHUB_SHA']}:{integrate.WORKFLOW}") == expected
                         and git(repo, "show", f"{pull['base']['sha']}:{integrate.WORKFLOW}") == expected,
                         "Verification workflow differs from pinned controls")
-                integrate.ci_and_reviews(number, head)
+                integrate.ci_and_reviews(number, pull)
                 human_approval(pull)
         latest = api(f"repos/{SDK_REPO}/pulls/{number}")
         open_pull(latest)
