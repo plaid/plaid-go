@@ -12,6 +12,7 @@ import re
 import sys
 import tempfile
 
+import circleci
 import policy
 from policy import (SDK_REPO, PUBLIC_REMOTE, ReleaseError, api, canonical, decimal,
                     git, hex_value, parse_json, require, run, sha256, tree_files,
@@ -79,7 +80,6 @@ def context(control, control_commit, *, status_only=False):
     hex_value(control_commit, 40, "control commit")
     hex_value(os.environ.get("GITHUB_SHA"), 40, "workflow commit")
     integration_identity()
-    decimal(os.environ.get("SDK_CIRCLECI_STATUS_ACTOR_ID"), "CircleCI status actor ID")
     decimal(os.environ.get("SDK_REVIEW_RULESET_ID"), "SDK review ruleset ID")
     require(git(control, "rev-parse", "HEAD").decode().strip() == control_commit, "Wrong trusted control checkout")
 
@@ -167,7 +167,8 @@ def discover():
     return candidates[0] if candidates else None
 
 
-def ci_and_reviews(number, head, require_verified=False):
+def ci_and_reviews(number, pull, require_verified=False):
+    head = pull["head"]["sha"]
     combined = api(f"repos/{SDK_REPO}/commits/{head}/status")
     require(combined.get("sha") == head, "CI status is for another head")
     statuses = api(f"repos/{SDK_REPO}/commits/{head}/statuses?per_page=100", paginate=True)
@@ -178,8 +179,9 @@ def ci_and_reviews(number, head, require_verified=False):
         raise NotReady("Waiting for CircleCI on the exact generated head")
     status = matching[0]
     require(status.get("state") == "success", "CircleCI failed on the generated head")
-    require(str(status.get("creator", {}).get("id")) == os.environ["SDK_CIRCLECI_STATUS_ACTOR_ID"], "CircleCI status has an untrusted author")
-    require(re.fullmatch(r"https://(?:circleci\.com/gh/plaid/plaid-go/[1-9][0-9]*|app\.circleci\.com/pipelines/github/plaid/plaid-go/[1-9][0-9]*(?:/workflows/[0-9a-f-]+)?)", status.get("target_url", "")), "Unexpected CircleCI build URL")
+    source = pull["head"]
+    branch = source["ref"] if (source.get("repo") or {}).get("full_name") == SDK_REPO else f"pull/{number}"
+    circleci.verify_build(branch, head)
     # The verifier posts pending before evaluating this head. Exclude only its own
     # context to avoid a circular dependency, keeping every other latest status.
     latest_statuses = {}
@@ -268,7 +270,7 @@ def check(repo, control, control_commit, number, expected_base=None, expected_he
     identity = sha256(canonical([manifest["sdk"]["version"], manifest["source"]["sha256"], manifest["config"]["sha256"], base]))[:20]
     require(pull["head"]["ref"] == f"sdk-generation/go-v{manifest['sdk']['version'].split('.')[0]}-{identity}", "Generated branch identity does not match signed inputs")
     preserved_content(tree_files(repo, base), files, manifest)
-    ci_and_reviews(number, head)
+    ci_and_reviews(number, pull)
     return {"number": number, "base": base, "head": head, "version": manifest["sdk"]["version"],
             "tree": git(repo, "rev-parse", f"{head}^{{tree}}").decode().strip()}
 
@@ -282,7 +284,7 @@ def merge(verified):
     require_identity(pull)
     require(pull["head"]["sha"] == head and pull["base"]["sha"] == base and current_base() == base, "PR changed immediately before merge")
     strict_status_protection()
-    ci_and_reviews(number, head, require_verified=True)
+    ci_and_reviews(number, pull, require_verified=True)
     token = os.environ.get("SDK_INTEGRATION_TOKEN", "")
     require(token, "Missing scoped integration App token")
     approval_ruleset(token=token)

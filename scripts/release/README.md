@@ -135,6 +135,13 @@ to the GitHub Actions App (integration ID `15368`), alongside CircleCI. This is 
 server-enforced condition: the merger App has no status-write permission and
 cannot satisfy it by calling the merge API directly.
 
+In addition to requiring GitHub's CircleCI status, the verifier reads the
+public CircleCI project for the PR branch and checks that its build passed for
+the exact PR head. This works without a CircleCI token or a GitHub user ID.
+The SDK currently has one workflow with one build job. Verification requires
+a successful GitHub-triggered branch build. A missing build, a manual run
+without that provenance, or an unavailable CircleCI API blocks verification.
+
 Only the trusted integration check job receives `statuses: write`. It reports a
 status only when the verified outcome changes, avoiding GitHub's per-commit status
 limit. Success requires complete signed-generation and
@@ -210,7 +217,6 @@ Repository variables:
 | `SDK_INTEGRATION_APP_BOT_ID` | Numeric GitHub bot user ID of the separate integration App |
 | `SDK_INTEGRATION_APP_CLIENT_ID` | Integration App client ID |
 | `SDK_REVIEW_RULESET_ID` | Active repository approval ruleset with merger PR-only bypass |
-| `SDK_CIRCLECI_STATUS_ACTOR_ID` | Verified numeric identity publishing the required CircleCI status |
 | `SDK_RELEASE_ENABLED` | `true` only after the hosted rehearsal succeeds; otherwise absent or `false` |
 | `SDK_RELEASE_CONTROL_COMMIT` | Full commit SHA containing the reviewed release workflow and scripts |
 | `SDK_RELEASE_SIGNING_PUBLIC_KEY` | Dedicated Ed25519 public signing key |
